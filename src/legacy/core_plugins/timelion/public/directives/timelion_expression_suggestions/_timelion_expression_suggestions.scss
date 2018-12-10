@@ -1,0 +1,35 @@
+.timSuggestions {
+  background-color: $euiColorLightestShade;
+  color: $euiTextColor;
+  border: $euiBorderThin;
+  border-radius: 0px 0px $euiBorderRadius $euiBorderRadius !important;
+  z-index: $euiZLevel9;
+  max-height: $euiSizeXL * 10;
+  overflow-y: auto;
+  @include euiBottomShadowMedium;
+
+  &.timSuggestions-isPopover {
+    position: absolute;
+    top: 100%;
+  }
+}
+
+.timSuggestions__item {
+  border-bottom: $euiBorderThin;
+  padding: $euiSizeXS $euiSizeL;
+
+  &:hover,
+  &.active {
+    background-color: $euiColorLightShade;
+  }
+}
+
+.timSuggestions__details {
+  background-color: $euiColorLightestShade;
+  padding: $euiSizeM;
+  border-radius: $euiBorderRadius;
+
+  > table {
+    margin-bottom: 0px;
+  }
+}

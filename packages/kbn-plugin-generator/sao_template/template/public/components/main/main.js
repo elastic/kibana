@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   EuiPage,
   EuiPageHeader,
@@ -8,7 +8,7 @@ import {
   EuiPageContentHeader,
   EuiPageContentBody,
   EuiText
-} from "@elastic/eui";
+} from '@elastic/eui';
 
 export class Main extends React.Component {
   constructor(props) {
@@ -17,25 +17,25 @@ export class Main extends React.Component {
   }
 
   componentDidMount() {
-    /* 
+    /*
        FOR EXAMPLE PURPOSES ONLY.  There are much better ways to
        manage state and update your UI than this.
     */
     const { httpClient } = this.props;
-    httpClient.get("../api/<%= name %>/example").then((resp) => {
+    httpClient.get('../api/<%= name %>/example').then((resp) => {
       this.setState({ time: resp.data.time });
-    });  
+    });
   }
   render() {
     const { title } = this.props;
     return (
       <EuiPage>
-        <EuiPageHeader>
-          <EuiTitle size="l">
-            <h1>{title} Hello World!</h1>
-          </EuiTitle>
-        </EuiPageHeader>
         <EuiPageBody>
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>{title} Hello World!</h1>
+            </EuiTitle>
+          </EuiPageHeader>
           <EuiPageContent>
             <EuiPageContentHeader>
               <EuiTitle>
@@ -44,8 +44,8 @@ export class Main extends React.Component {
             </EuiPageContentHeader>
             <EuiPageContentBody>
               <EuiText>
-                <h3>You've successfully created your first Kibana Plugin!</h3>
-                <p>The server time (via API call) is {this.state.time || "NO API CALL YET"}</p>
+                <h3>You have successfully created your first Kibana Plugin!</h3>
+                <p>The server time (via API call) is {this.state.time || 'NO API CALL YET'}</p>
               </EuiText>
             </EuiPageContentBody>
           </EuiPageContent>
@@ -53,5 +53,4 @@ export class Main extends React.Component {
       </EuiPage>
     );
   }
-  
-};
+}

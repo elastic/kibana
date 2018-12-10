@@ -18,15 +18,18 @@
  */
 
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
 import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
-import otherBucketTemplate from 'ui/agg_types/controls/other_bucket.html';
+import otherBucketTemplate from '../controls/other_bucket.html';
+import { i18n } from '@kbn/i18n';
+
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
-import { toastNotifications } from '../../notify';
 
 const aggFilter = [
   '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -38,7 +41,9 @@ const orderAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'orderAgg',
-    title: 'Order Agg',
+    title: i18n.translate('common.ui.aggTypes.buckets.terms.orderAggTitle', {
+      defaultMessage: 'Order Agg',
+    }),
     hideCustomLabel: true,
     aggFilter: aggFilter
   }
@@ -68,17 +73,54 @@ const migrateIncludeExcludeFormat = {
 
 export const termsBucketAgg = new BucketAggType({
   name: 'terms',
-  title: 'Terms',
+  title: i18n.translate('common.ui.aggTypes.buckets.termsTitle', {
+    defaultMessage: 'Terms',
+  }),
   makeLabel: function (agg) {
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.display;
   },
+  getFormat: function (bucket) {
+    return {
+      getConverterFor: (type) => {
+        return (val) => {
+          if (val === '__other__') {
+            return bucket.params.otherBucketLabel;
+          }
+          if (val === '__missing__') {
+            return bucket.params.missingBucketLabel;
+          }
+          const parsedUrl = {
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            basePath: chrome.getBasePath(),
+          };
+          const converter = bucket.params.field.format.getConverterFor(type);
+          return converter(val, undefined, undefined, parsedUrl);
+        };
+      }
+    };
+  },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, nestedSearchSource) => {
+  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters) => {
+    const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-      nestedSearchSource.set('aggs', filterAgg);
-      const response = await nestedSearchSource.fetchAsRejectablePromise();
+      nestedSearchSource.setField('aggs', filterAgg);
+
+      const request = inspectorAdapters.requests.start('Other bucket', {
+        description: `This request counts the number of documents that fall
+          outside the criterion of the data buckets.`
+      });
+      nestedSearchSource.getSearchRequestBody().then(body => {
+        request.json(body);
+      });
+      request.stats(getRequestInspectorStats(nestedSearchSource));
+
+      const response = await nestedSearchSource.fetch();
+      request
+        .stats(getResponseInspectorStats(nestedSearchSource, response))
+        .ok({ json: response });
       resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
     }
     if (aggConfig.params.missingBucket) {
@@ -89,6 +131,7 @@ export const termsBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
     },
     {
@@ -109,7 +152,7 @@ export const termsBucketAgg = new BucketAggType({
       makeOrderAgg: function (termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
-        const orderAgg = new AggConfig(termsAgg.vis, state);
+        const orderAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
         orderAgg.id = termsAgg.id + '-orderAgg';
         return orderAgg;
       },
@@ -174,12 +217,11 @@ export const termsBucketAgg = new BucketAggType({
           params.orderAgg = params.orderAgg || paramDef.makeOrderAgg(agg);
         }
       },
-      write: function (agg, output) {
-        const vis = agg.vis;
+      write: function (agg, output, aggs) {
         const dir = agg.params.order.val;
         const order = output.params.order = {};
 
-        let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
+        let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
 
         // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
         // thus causing issues with filtering. This probably causes other issues since float might not
@@ -198,16 +240,13 @@ export const termsBucketAgg = new BucketAggType({
         }
 
         if (orderAgg.type.name === 'count') {
-          if (dir === 'asc') {
-            toastNotifications.addWarning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
-          }
           order._count = dir;
           return;
         }
 
         const orderAggId = orderAgg.id;
         if (orderAgg.parentId) {
-          orderAgg = vis.aggs.byId[orderAgg.parentId];
+          orderAgg = aggs.byId[orderAgg.parentId];
         }
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);
@@ -220,8 +259,18 @@ export const termsBucketAgg = new BucketAggType({
       default: 'desc',
       editor: orderAndSizeTemplate,
       options: [
-        { display: 'Descending', val: 'desc' },
-        { display: 'Ascending', val: 'asc' }
+        {
+          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
+            defaultMessage: 'Descending',
+          }),
+          val: 'desc'
+        },
+        {
+          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
+            defaultMessage: 'Ascending',
+          }),
+          val: 'asc'
+        }
       ],
       write: _.noop // prevent default write, it's handled by orderAgg
     },
@@ -236,7 +285,9 @@ export const termsBucketAgg = new BucketAggType({
       write: _.noop
     }, {
       name: 'otherBucketLabel',
-      default: 'Other',
+      default: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketLabel', {
+        defaultMessage: 'Other',
+      }),
       write: _.noop
     }, {
       name: 'missingBucket',
@@ -244,7 +295,9 @@ export const termsBucketAgg = new BucketAggType({
       write: _.noop
     }, {
       name: 'missingBucketLabel',
-      default: 'Missing',
+      default: i18n.translate('common.ui.aggTypes.buckets.terms.missingBucketLabel', {
+        defaultMessage: 'Missing',
+      }),
       write: _.noop
     },
     {

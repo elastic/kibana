@@ -17,15 +17,14 @@ import { get } from 'lodash';
 
 export async function getErrorGroups({
   serviceName,
-  q,
-  sortBy,
-  sortOrder = 'desc',
+  sortField,
+  sortDirection = 'desc',
   setup
 }) {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.errorIndices'),
     body: {
       size: 0,
       query: {
@@ -50,7 +49,7 @@ export async function getErrorGroups({
           terms: {
             field: ERROR_GROUP_ID,
             size: 500,
-            order: { _count: sortOrder }
+            order: { _count: sortDirection }
           },
           aggs: {
             sample: {
@@ -78,31 +77,14 @@ export async function getErrorGroups({
   }
 
   // sort buckets by last occurence of error
-  if (sortBy === 'latestOccurrenceAt') {
+  if (sortField === 'latestOccurrenceAt') {
     params.body.aggs.error_groups.terms.order = {
-      max_timestamp: sortOrder
+      max_timestamp: sortDirection
     };
 
     params.body.aggs.error_groups.aggs.max_timestamp = {
       max: { field: '@timestamp' }
     };
-  }
-
-  // match query against error fields
-  if (q) {
-    params.body.query.bool.must = [
-      {
-        simple_query_string: {
-          fields: [
-            ERROR_EXC_MESSAGE,
-            ERROR_LOG_MESSAGE,
-            ERROR_CULPRIT,
-            ERROR_GROUP_ID
-          ],
-          query: q
-        }
-      }
-    ];
   }
 
   const resp = await client('search', params);

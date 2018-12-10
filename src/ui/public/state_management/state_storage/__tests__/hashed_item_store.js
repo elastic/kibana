@@ -231,7 +231,7 @@ describe('hashedItemStore', () => {
           expect(retrievedItem).to.be('a');
         });
 
-        it('prevents the item from being first to be removed when freeing up storage spage', () => {
+        it('prevents the item from being first to be removed when freeing up storage space', () => {
           // Do this a little later so that this item is newer.
           setItemLater('2', 'b');
 

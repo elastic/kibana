@@ -22,6 +22,7 @@ export class MonitoringMainController {
     this.inKibana = false;
     this.inLogstash = false;
     this.inBeats = false;
+    this.inApm = false;
   }
 
   // kick things off from the directive link function
@@ -38,6 +39,7 @@ export class MonitoringMainController {
       this.inKibana = this.product === 'kibana';
       this.inLogstash = this.product === 'logstash';
       this.inBeats = this.product === 'beats';
+      this.inApm = this.product === 'apm';
     } else {
       this.inOverview = this.name === 'overview';
       this.inAlerts = this.name === 'alerts';
@@ -69,7 +71,7 @@ export class MonitoringMainController {
 }
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
-uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl) => {
+uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
   return {
     restrict: 'E',
     transclude: true,
@@ -78,6 +80,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl) => {
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
 
       controller.setup({
         licenseService: license,

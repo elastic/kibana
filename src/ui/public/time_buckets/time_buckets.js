@@ -21,8 +21,11 @@ import _ from 'lodash';
 import moment from 'moment';
 import chrome from '../chrome';
 import { parseInterval } from '../utils/parse_interval';
-import { calcAutoInterval } from './calc_auto_interval';
-import { calcEsInterval } from './calc_es_interval';
+import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
+import {
+  convertDurationToNormalizedEsInterval,
+  convertIntervalToEsInterval,
+} from './calc_es_interval';
 import { fieldFormats } from '../registry/field_formats';
 
 const config = chrome.getUiSettingsClient();
@@ -35,7 +38,7 @@ function isValidMoment(m) {
 
 /**
  * Helper class for wrapping the concept of an "Interval",
- * which describes a timespan that will seperate moments.
+ * which describes a timespan that will separate moments.
  *
  * @param {state} object - one of ""
  * @param {[type]} display [description]
@@ -152,6 +155,10 @@ TimeBuckets.prototype.getDuration = function () {
  * @param {object|string|moment.duration} input - see desc
  */
 TimeBuckets.prototype.setInterval = function (input) {
+  // Preserve the original units because they're lost when the interval is converted to a
+  // moment duration object.
+  this.originalInterval = input;
+
   let interval = input;
 
   // selection object -> val
@@ -203,9 +210,9 @@ TimeBuckets.prototype.setInterval = function (input) {
  *   expression it will be forced into one.
  *
  * interval.scaled: the interval was adjusted to
- *   accomidate the maxBars setting.
+ *   accommodate the maxBars setting.
  *
- * interval.scale: the numer that y-values should be
+ * interval.scale: the number that y-values should be
  *   multiplied by
  *
  * interval.scaleDescription: a description that reflects
@@ -215,16 +222,22 @@ TimeBuckets.prototype.setInterval = function (input) {
  *
  * @return {[type]} [description]
  */
-TimeBuckets.prototype.getInterval = function () {
+TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
   const self = this;
   const duration = self.getDuration();
-  return decorateInterval(maybeScaleInterval(readInterval()));
+  const parsedInterval = readInterval();
+
+  if(useNormalizedEsInterval) {
+    return decorateInterval(maybeScaleInterval(parsedInterval));
+  } else {
+    return decorateInterval(parsedInterval);
+  }
 
   // either pull the interval from state or calculate the auto-interval
   function readInterval() {
     const interval = self._i;
     if (moment.isDuration(interval)) return interval;
-    return calcAutoInterval.near(config.get('histogram:barTarget'), duration);
+    return calcAutoIntervalNear(config.get('histogram:barTarget'), Number(duration));
   }
 
   // check to see if the interval should be scaled, and scale it if so
@@ -236,7 +249,7 @@ TimeBuckets.prototype.getInterval = function () {
     let scaled;
 
     if (approxLen > maxLength) {
-      scaled = calcAutoInterval.lessThan(maxLength, duration);
+      scaled = calcAutoIntervalLessThan(maxLength, Number(duration));
     } else {
       return interval;
     }
@@ -253,7 +266,9 @@ TimeBuckets.prototype.getInterval = function () {
 
   // append some TimeBuckets specific props to the interval
   function decorateInterval(interval) {
-    const esInterval = calcEsInterval(interval);
+    const esInterval = useNormalizedEsInterval
+      ? convertDurationToNormalizedEsInterval(interval)
+      : convertIntervalToEsInterval(self.originalInterval);
     interval.esValue = esInterval.value;
     interval.esUnit = esInterval.unit;
     interval.expression = esInterval.expression;
@@ -341,12 +356,12 @@ TimeBuckets.__cached__ = function (self) {
 
   function cachedGetter(prop) {
     return {
-      value: function cachedGetter() {
+      value: function cachedGetter(...rest) {
         if (cache.hasOwnProperty(prop)) {
           return cache[prop];
         }
 
-        return cache[prop] = self[prop]();
+        return cache[prop] = self[prop](...rest);
       }
     };
   }

@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddRoleAlert component renders expected component 1`] = `
+<p>
+  <strong>
+    <FormattedMessage
+      defaultMessage="Grant additional privileges."
+      id="xpack.logstash.addRoleAlert.grantAdditionalPrivilegesTitle"
+      values={Object {}}
+    />
+  </strong>
+  <FormattedMessage
+    defaultMessage="In Kibana Management, assign the {role} role to your Kibana user."
+    id="xpack.logstash.addRoleAlert.grantAdditionalPrivilegesDescription"
+    values={
+      Object {
+        "role": <EuiCode>
+          monitoring_user
+        </EuiCode>,
+      }
+    }
+  />
+</p>
+`;

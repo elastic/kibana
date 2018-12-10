@@ -7,26 +7,25 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
   const pipelineList = getService('pipelineList');
   const pipelineEditor = getService('pipelineEditor');
   const PageObjects = getPageObjects(['logstash']);
-  const testSubjects = getService('testSubjects');
 
   describe('pipeline create new', () => {
     let originalWindowSize;
 
     before(async () => {
-      originalWindowSize = await remote.getWindowSize();
-      await remote.setWindowSize(1600, 1000);
+      originalWindowSize = await browser.getWindowSize();
+      await browser.setWindowSize(1600, 1000);
       await esArchiver.load('logstash/empty');
     });
 
     after(async () => {
       await esArchiver.unload('logstash/empty');
-      await remote.setWindowSize(originalWindowSize.width, originalWindowSize.height);
+      await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 
     it('starts with the default values', async () => {
@@ -92,19 +91,6 @@ export default function ({ getService, getPageObjects }) {
       it('is not visible', async () => {
         await PageObjects.logstash.gotoNewPipelineEditor();
         await pipelineEditor.assertNoDeleteButton();
-      });
-    });
-
-    describe('breadcrumbs navigation', () => {
-      it('prompts the user about unsaved changes', async () => {
-        await PageObjects.logstash.gotoNewPipelineEditor();
-
-        const description = random.text();
-        await pipelineEditor.setDescription(description);
-
-        await pipelineEditor.clickManagementBreadcrumb();
-        await pipelineEditor.assertUnsavedChangesModal();
-        await testSubjects.click('confirmModalConfirmButton');
       });
     });
   });

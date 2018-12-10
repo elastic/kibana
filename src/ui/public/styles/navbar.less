@@ -7,7 +7,7 @@ navbar {
 
   max-height: @navbar-collapse-max-height;
   margin-bottom: @navbar-margin-bottom;
-  // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
+  // top and bottom padding are normally calculated and stored in @navbar-padding-vertical, but flexbox
   padding: 0 @navbar-padding-horizontal 6px @navbar-padding-horizontal;
   color: @navbar-default-color;
   background-color: @navbar-default-bg;
@@ -96,5 +96,26 @@ navbar {
     > .name {
       max-width: 100%;
     }
+  }
+}
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  navbar {
+    color: @white;
+    background-color: #454545;
+    border-color: darken(#454545, 10%);
+    button {
+      color: @white;
+      background-color: transparent;
+    }
+  }
+}
+
+.navbar__popover {
+  height: 100%;
+
+  .euiPopover__anchor {
+    height: 100%;
   }
 }

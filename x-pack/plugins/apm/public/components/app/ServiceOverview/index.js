@@ -5,20 +5,19 @@
  */
 
 import { connect } from 'react-redux';
-import ServiceOverview from './view';
+import { ServiceOverview as View } from './view';
 import { getServiceList } from '../../../store/reactReduxRequest/serviceList';
 import { getUrlParams } from '../../../store/urlParams';
-import sorting, { changeServiceSorting } from '../../../store/sorting';
 
 function mapStateToProps(state = {}) {
   return {
     serviceList: getServiceList(state),
-    urlParams: getUrlParams(state),
-    serviceSorting: sorting(state, 'service').sorting.service
+    urlParams: getUrlParams(state)
   };
 }
 
-const mapDispatchToProps = {
-  changeServiceSorting
-};
-export default connect(mapStateToProps, mapDispatchToProps)(ServiceOverview);
+const mapDispatchToProps = {};
+export const ServiceOverview = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(View);

@@ -20,7 +20,9 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
+  const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
   describe('visual builder', function describeIndexTests() {
@@ -38,12 +40,14 @@ export default function ({ getService, getPageObjects }) {
       it('should show the correct count in the legend with 2h offset', async function () {
         await PageObjects.visualBuilder.clickSeriesOption();
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('293');
       });
 
       it('should show the correct count in the legend with -2h offset', async function () {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('53');
       });
@@ -65,18 +69,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
       });
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '157';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${JSON.stringify(value)}`);
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });
@@ -87,18 +90,16 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.clickMetric();
       });
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });
@@ -111,11 +112,13 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on Gauge');
       });
 
-      it('should verfiy gauge label and count display', async function () {
-        const labelString = await PageObjects.visualBuilder.getGaugeLabel();
-        expect(labelString).to.be('Count');
-        const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-        expect(gaugeCount).to.be('156');
+      it('should verify gauge label and count display', async function () {
+        await retry.try(async () => {
+          const labelString = await PageObjects.visualBuilder.getGaugeLabel();
+          expect(labelString).to.be('Count');
+          const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
+          expect(gaugeCount).to.be('156');
+        });
       });
     });
 
@@ -127,7 +130,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on TopN');
       });
 
-      it('should verfiy topN label and count display', async function () {
+      it('should verify topN label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
@@ -151,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('1442901600000');
       });
 
-      it.skip('should allow printing raw value of data', async () => {
+      it('should allow printing raw value of data', async () => {
         await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('6');
@@ -166,6 +169,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow positive time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('2h');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
@@ -174,6 +178,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow negative time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('-2h');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
@@ -194,6 +199,7 @@ export default function ({ getService, getPageObjects }) {
       it('should be able to set values for group by field and column name', async () => {
         await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
         await PageObjects.visualBuilder.setLabelValue('OS');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         log.debug('finished setting field and column name');
       });
 
@@ -203,11 +209,34 @@ export default function ({ getService, getPageObjects }) {
         const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
         expect(tableData).to.be(expectedData);
       });
-
-
-
     });
 
-
+    describe.skip('switch index patterns', () => {
+      before(async function () {
+        log.debug('Load kibana_sample_data_flights data');
+        await esArchiver.loadIfNeeded('kibana_sample_data_flights');
+        await PageObjects.visualBuilder.resetPage('2015-09-19 06:31:44.000', '2018-10-31 00:0:00.000');
+        await PageObjects.visualBuilder.clickMetric();
+      });
+      after(async function () {
+        await esArchiver.unload('kibana_sample_data_flights');
+      });
+      it('should be able to switch between index patterns', async () => {
+        const expectedMetricValue =  '156';
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
+        await PageObjects.visualBuilder.clickMetricPanelOptions();
+        const fromTime = '2018-10-22 00:00:00.000';
+        const toTime = '2018-10-28 23:59:59.999';
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
+        await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${newValue}`);
+        expect(newValue).to.eql('10');
+      });
+    });
   });
 }

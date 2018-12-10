@@ -17,4 +17,5 @@
  * under the License.
  */
 
-import './directives/share';
+export { showShareContextMenu } from './show_share_context_menu';
+export { ShareContextMenuExtensionsRegistryProvider } from './share_action_registry';

@@ -7,65 +7,113 @@
 
 
 /*
-* AngularJS directive for rendering a select element with threshold levels.
-*/
-
+ * React component for rendering a select element with threshold levels.
+ */
+import PropTypes from 'prop-types';
 import _ from 'lodash';
+import React, { Component, Fragment } from 'react';
 
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import {
+  EuiHealth,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 
-import template from './select_severity.html';
-import 'plugins/ml/components/controls/controls_select';
+import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+const OPTIONS = [
+  { val: 0, display: 'warning', color: getSeverityColor(0) },
+  { val: 25, display: 'minor', color: getSeverityColor(25) },
+  { val: 50, display: 'major', color: getSeverityColor(50) },
+  { val: 75, display: 'critical', color: getSeverityColor(75) },
+];
 
-module
-  .service('mlSelectSeverityService', function (Private) {
-    const stateFactory = Private(stateFactoryProvider);
-    this.state = stateFactory('mlSelectSeverity', {
-      threshold: { display: 'warning', val: 0 }
-    });
-  })
-  .directive('mlSelectSeverity', function (mlSelectSeverityService) {
-    return {
-      restrict: 'E',
-      template,
-      link: function (scope, element) {
-        scope.thresholdOptions = [
-          { display: 'critical', val: 75 },
-          { display: 'major', val: 50 },
-          { display: 'minor', val: 25 },
-          { display: 'warning', val: 0 }
-        ];
+const optionsMap = {
+  'warning': 0,
+  'minor': 25,
+  'major': 50,
+  'critical': 75,
+};
 
-        const thresholdState = mlSelectSeverityService.state.get('threshold');
-        const thresholdValue = _.get(thresholdState, 'val', 0);
-        let thresholdOption = scope.thresholdOptions.find(d => d.val === thresholdValue);
-        if (thresholdOption === undefined) {
-          // Attempt to set value in URL which doesn't map to one of the options.
-          thresholdOption = scope.thresholdOptions.find(d => d.val === 0);
-        }
-        scope.threshold = thresholdOption;
-        mlSelectSeverityService.state.set('threshold', scope.threshold);
+function optionValueToThreshold(value) {
+  // Get corresponding threshold object with required display and val properties from the specified value.
+  let threshold = OPTIONS.find(opt => (opt.val === value));
 
-        scope.setThreshold = function (threshold) {
-          if(!_.isEqual(scope.threshold, threshold)) {
-            scope.threshold = threshold;
-            mlSelectSeverityService.state.set('threshold', scope.threshold).changed();
-          }
-        };
+  // Default to warning if supplied value doesn't map to one of the options.
+  if (threshold === undefined) {
+    threshold = OPTIONS[0];
+  }
 
-        function setThreshold() {
-          scope.setThreshold(mlSelectSeverityService.state.get('threshold'));
-        }
+  return threshold;
+}
 
-        mlSelectSeverityService.state.watch(setThreshold);
+class SelectSeverity extends Component {
+  constructor(props) {
+    super(props);
 
-        element.on('$destroy', () => {
-          mlSelectSeverityService.state.unwatch(setThreshold);
-          scope.$destroy();
-        });
-      }
+    // Restore the threshold from the state, or default to warning.
+    this.mlSelectSeverityService = this.props.mlSelectSeverityService;
+    const thresholdState = this.mlSelectSeverityService.state.get('threshold');
+    const thresholdValue = _.get(thresholdState, 'val', 0);
+    const threshold = optionValueToThreshold(thresholdValue);
+    // set initial selected option equal to threshold value
+    const selectedOption = OPTIONS.find(opt => (opt.val === threshold.val));
+    this.mlSelectSeverityService.state.set('threshold', threshold);
+
+    this.state = {
+      valueDisplay: selectedOption.display,
     };
-  });
+  }
+
+  onChange = (valueDisplay) => {
+    this.setState({
+      valueDisplay: valueDisplay,
+    });
+    const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
+    this.mlSelectSeverityService.state.set('threshold', threshold).changed();
+  }
+
+  getOptions = () =>
+    OPTIONS.map(({ color, display, val }) => ({
+      value: display,
+      inputDisplay: (
+        <Fragment>
+          <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+            {display}
+          </EuiHealth>
+        </Fragment>
+      ),
+      dropdownDisplay: (
+        <Fragment>
+          <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+            {display}
+          </EuiHealth>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            <p className="euiTextColor--subdued">{`score ${val} and above`}</p>
+          </EuiText>
+        </Fragment>
+      ),
+    }));
+
+  render() {
+    const { valueDisplay } = this.state;
+    const options = this.getOptions();
+
+    return (
+      <EuiSuperSelect
+        hasDividers
+        options={options}
+        valueOfSelected={valueDisplay}
+        onChange={this.onChange}
+      />
+    );
+  }
+}
+
+SelectSeverity.propTypes = {
+  mlSelectSeverityService: PropTypes.object.isRequired,
+};
+
+export { SelectSeverity };

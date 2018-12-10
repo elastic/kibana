@@ -37,7 +37,7 @@ export function esIndexRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req) => {
       try {
         const config = server.config();
         const ccs = req.payload.ccs;
@@ -62,7 +62,6 @@ export function esIndexRoute(server) {
           const shardFilter = { term: { 'shard.index': indexUuid } };
           const stateUuid = get(cluster, 'cluster_state.state_uuid');
           const allocationOptions = {
-            nodeResolver: config.get('xpack.monitoring.node_resolver'),
             shardFilter,
             stateUuid,
             showSystemIndices,
@@ -77,14 +76,14 @@ export function esIndexRoute(server) {
           };
         }
 
-        reply({
+        return {
           indexSummary,
           metrics,
           ...shardAllocation,
-        });
+        };
 
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

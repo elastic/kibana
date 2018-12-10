@@ -78,12 +78,12 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
 
         $el
           .attr('title', name)
-          .toggleClass('no-results', results)
+          .toggleClass('dscField--noResults', results)
           .toggleClass('scripted', scripted)
           .prepend(typeIcon(type))
           .append($('<span>')
             .text(displayName)
-            .addClass('discover-field-name')
+            .addClass('dscFieldName')
           );
       });
     }

@@ -27,7 +27,7 @@ export class TimeseriesVisualization extends React.Component {
     this.state = {
       values: {},
       seriesToShow: _.keys(values),
-      ignoreVisabilityUpdates: false
+      ignoreVisibilityUpdates: false
     };
   }
 
@@ -42,13 +42,13 @@ export class TimeseriesVisualization extends React.Component {
 
     if (notAllShown && isCurrentlyShown) {
       this.setState({
-        ignoreVisabilityUpdates: false,
+        ignoreVisibilityUpdates: false,
         seriesToShow: Object.keys(this.state.values)
       });
     } else {
       seriesToShow.push(id);
       this.setState({
-        ignoreVisabilityUpdates: true,
+        ignoreVisibilityUpdates: true,
         seriesToShow: [id]
       });
     }
@@ -108,7 +108,7 @@ export class TimeseriesVisualization extends React.Component {
     const diff = _.difference(keys, currentKeys);
     const nextState = { values: values };
 
-    if (diff.length && !this.state.ignoreVisabilityUpdates) {
+    if (diff.length && !this.state.ignoreVisibilityUpdates) {
       nextState.seriesToShow = keys;
     }
 
@@ -116,7 +116,7 @@ export class TimeseriesVisualization extends React.Component {
   }
 
   render() {
-    const className = 'rhythm_chart';
+    const className = 'monRhythmChart';
     const style = {
       flexDirection: 'column' // for legend position = bottom
     };
@@ -134,8 +134,8 @@ export class TimeseriesVisualization extends React.Component {
 
     return (
       <div className={className}>
-        <div style={style} className="rhythm_chart__content">
-          <div className="rhythm_chart__visualization">
+        <div style={style} className="monRhythmChart__content">
+          <div className="monRhythmChart__visualization">
             <TimeseriesContainer
               seriesToShow={this.state.seriesToShow}
               updateLegend={this.debouncedUpdateLegend}

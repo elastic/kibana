@@ -8,7 +8,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { BucketSpanEstimator } from './bucket_span_estimator_view';
-import { getQueryFromSavedSearch } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
@@ -57,7 +56,7 @@ module.directive('mlBucketSpanEstimator', function () {
           fields: [],
           filters: $scope.formConfig.filters,
           index: $scope.formConfig.indexPattern.title,
-          query: getQueryFromSavedSearch($scope.formConfig),
+          query: $scope.formConfig.combinedQuery,
           splitField: $scope.formConfig.splitField && $scope.formConfig.splitField.name,
           timeField: $scope.formConfig.timeField
         };
@@ -66,14 +65,14 @@ module.directive('mlBucketSpanEstimator', function () {
           // single metric config
           const fieldName = ($scope.formConfig.field === null) ? null : $scope.formConfig.field.name;
           data.fields.push(fieldName);
-          data.aggTypes.push($scope.formConfig.agg.type.name);
+          data.aggTypes.push($scope.formConfig.agg.type.dslName);
         } else {
           // multi metric config
           Object.keys($scope.formConfig.fields).map((id) => {
             const field = $scope.formConfig.fields[id];
             const fieldName = (field.id === EVENT_RATE_COUNT_FIELD) ? null : field.name;
             data.fields.push(fieldName);
-            data.aggTypes.push(field.agg.type.name);
+            data.aggTypes.push(field.agg.type.dslName);
           });
         }
 

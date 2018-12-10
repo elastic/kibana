@@ -1,0 +1,18 @@
+{
+  "fields": {
+    "_source": {
+      "_source": {
+        "type": "_source",
+        "searchable": false,
+        "aggregatable": false
+      }
+    },
+    "airline": {
+      "keyword": {
+        "type": "keyword",
+        "searchable": false,
+        "aggregatable": true
+      }
+    }
+  }
+}

@@ -28,12 +28,13 @@ import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
 import { IndexPatternsGetProvider } from './_get';
 import { IndexPatternsIntervalsProvider } from './_intervals';
-import { IndexPatternsFieldListProvider } from './_field_list';
+import { FieldList } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../saved_objects';
+import { i18n } from '@kbn/i18n';
 
 export function getRoutes() {
   return {
@@ -53,7 +54,6 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
-  const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
@@ -79,7 +79,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       _deserialize(map = '{}') {
         return _.mapValues(angular.fromJson(map), deserializeFieldFormatMap);
       }
-    }
+    },
+    type: 'keyword',
+    typeMeta: 'json',
   });
 
   function serializeFieldFormatMap(flat, format, field) {
@@ -95,12 +97,10 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
   function updateFromElasticSearch(indexPattern, response, forceFieldRefresh = false) {
     if (!response.found) {
-      const markdownSaveId = indexPattern.id.replace('*', '%2A');
-
       throw new SavedObjectNotFound(
         type,
         indexPattern.id,
-        kbnUrl.eval('#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
+        '#/management/kibana/index',
       );
     }
 
@@ -120,13 +120,22 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
-        const warning = (
-          'Support for time-intervals has been removed. ' +
-          `View the ["${indexPattern.title}" index pattern in management](` +
-          kbnUrl.getRouteHref(indexPattern, 'edit') +
-          ') for more information.'
-        );
-        notify.warning(warning, { lifetime: Infinity });
+        const warningTitle = i18n.translate('common.ui.indexPattern.warningTitle', {
+          defaultMessage: 'Support for time intervals was removed',
+        });
+
+        const warningText = i18n.translate('common.ui.indexPattern.warningText', {
+          defaultMessage: 'For more information, view the ["{title}" index pattern in management]({link})',
+          values: {
+            title: indexPattern.title,
+            link: kbnUrl.getRouteHref(indexPattern, 'edit'),
+          },
+        });
+
+        toastNotifications.addWarning({
+          title: warningTitle,
+          text: warningText,
+        });
       }
     }
 
@@ -291,8 +300,12 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         name: name,
         scripted: true
       });
-      this.fields.splice(fieldIndex, 1);
-      this.save();
+
+      if(fieldIndex > -1) {
+        this.fields.splice(fieldIndex, 1);
+        delete this.fieldFormatMap[name];
+        return this.save();
+      }
     }
 
     popularizeField(fieldName, unit = 1) {
@@ -404,14 +417,15 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       };
 
       const potentialDuplicateByTitle = await findObjectByTitle(savedObjectsClient, type, this.title);
-      // If there is potentialy duplicate title, just create it
+      // If there is potentially duplicate title, just create it
       if (!potentialDuplicateByTitle) {
         return await _create();
       }
 
       // We found a duplicate but we aren't allowing override, show the warn modal
       if (!allowOverride) {
-        const confirmMessage = `An index pattern with the title '${this.title}' already exists.`;
+        const confirmMessage = i18n.translate('common.ui.indexPattern.titleExistsLabel', { values: { title: this.title },
+          defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
         try {
           await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
           return kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: potentialDuplicateByTitle.id });
@@ -427,7 +441,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
       // We can override and we want to prompt for confirmation
       try {
-        await confirmModalPromise(`Are you sure you want to overwrite ${this.title}?`, { confirmButtonText: 'Overwrite' });
+        await confirmModalPromise(
+          i18n.translate('common.ui.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
+            defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
+          { confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' })
+          });
       } catch (err) {
         // They changed their mind
         return false;
@@ -447,7 +465,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           setVersion(this, _version);
         })
         .catch(err => {
-          if (err.statusCode === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+          if (_.get(err, 'res.status') === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
             const samePattern = new IndexPattern(this.id);
             return samePattern.init()
               .then(() => {
@@ -473,7 +491,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                 }
 
                 if (unresolvedCollision) {
-                  toastNotifications.addDanger('Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.'); // eslint-disable-line max-len
+                  const message = i18n.translate(
+                    'common.ui.indexPattern.unableWriteLabel',
+                    { defaultMessage: 'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.' } // eslint-disable-line max-len
+                  );
+                  toastNotifications.addDanger(message);
                   throw err;
                 }
 

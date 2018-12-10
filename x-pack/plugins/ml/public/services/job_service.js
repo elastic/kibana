@@ -11,12 +11,11 @@ import angular from 'angular';
 import moment from 'moment';
 
 import { parseInterval } from 'ui/utils/parse_interval';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from './ml_api_service';
 
-import { labelDuplicateDetectorDescriptions } from 'plugins/ml/../common/util/anomaly_utils';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { isWebUrl } from 'plugins/ml/util/string_utils';
-import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
+import { mlMessageBarService } from '../components/messagebar/messagebar_service';
+import { isWebUrl } from '../util/string_utils';
+import { ML_DATA_PREVIEW_COUNT } from '../../common/util/job_utils';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -28,7 +27,7 @@ class JobService {
     this.jobs = [];
 
     // Provide ready access to widely used basic job properties.
-    // Note these get populated on a call to either loadJobs or getBasicJobInfo.
+    // Note these get populated on a call to loadJobs.
     this.basicJobs = {};
     this.jobDescriptions = {};
     this.detectorsByJob = {};
@@ -69,13 +68,13 @@ class JobService {
       jobs = [];
       datafeedIds = {};
 
-      ml.jobs()
+      ml.getJobs()
         .then((resp) => {
           // make deep copy of jobs
           angular.copy(resp.jobs, jobs);
 
           // load jobs stats
-          ml.jobStats()
+          ml.getJobStats()
             .then((statsResp) => {
               // merge jobs stats into jobs
               for (let i = 0; i < jobs.length; i++) {
@@ -137,15 +136,14 @@ class JobService {
 
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
-      ml.jobs({ jobId })
+      ml.getJobs({ jobId })
         .then((resp) => {
-          console.log('refreshJob query response:', resp);
           const newJob = {};
           if (resp.jobs && resp.jobs.length) {
             angular.copy(resp.jobs[0], newJob);
 
             // load jobs stats
-            ml.jobStats({ jobId })
+            ml.getJobStats({ jobId })
               .then((statsResp) => {
                 // merge jobs stats into jobs
                 for (let j = 0; j < statsResp.jobs.length; j++) {
@@ -214,7 +212,7 @@ class JobService {
       const datafeeds = [];
       const sId = (datafeedId !== undefined) ? { datafeed_id: datafeedId } : undefined;
 
-      ml.datafeeds(sId)
+      ml.getDatafeeds(sId)
         .then((resp) => {
           // console.log('loadDatafeeds query response:', resp);
 
@@ -222,7 +220,7 @@ class JobService {
           angular.copy(resp.datafeeds, datafeeds);
 
           // load datafeeds stats
-          ml.datafeedStats()
+          ml.getDatafeedStats()
             .then((statsResp) => {
               // merge datafeeds stats into datafeeds
               for (let i = 0; i < datafeeds.length; i++) {
@@ -251,182 +249,12 @@ class JobService {
     });
   }
 
-  updateSingleJobCounts(jobId) {
-    return new Promise((resolve, reject) => {
-      console.log('jobService: update job counts and state for ' + jobId);
-      ml.jobStats({ jobId })
-        .then((resp) => {
-          console.log('updateSingleJobCounts controller query response:', resp);
-          if (resp.jobs && resp.jobs.length) {
-            const newJob = {};
-            angular.copy(resp.jobs[0], newJob);
-
-            // replace the job in the jobs array
-            for (let i = 0; i < jobs.length; i++) {
-              if (jobs[i].job_id === jobId) {
-                const job = jobs[i];
-                job.state = newJob.state;
-                job.data_counts = newJob.data_counts;
-                if (newJob.model_size_stats) {
-                  job.model_size_stats = newJob.model_size_stats;
-                }
-                if (newJob.node) {
-                  job.node = newJob.node;
-                }
-                if (newJob.open_time) {
-                  job.open_time = newJob.open_time;
-                }
-              }
-            }
-
-            const datafeedId = this.getDatafeedId(jobId);
-
-            this.loadDatafeeds(datafeedId)
-              .then((datafeedsResp) => {
-                for (let i = 0; i < jobs.length; i++) {
-                  for (let j = 0; j < datafeedsResp.datafeeds.length; j++) {
-                    if (jobs[i].job_id === datafeedsResp.datafeeds[j].job_id) {
-                      jobs[i].datafeed_config = datafeedsResp.datafeeds[j];
-
-                      datafeedIds[jobs[i].job_id] = datafeedsResp.datafeeds[j].datafeed_id;
-                    }
-                  }
-                }
-                createJobStats(this.jobs, this.jobStats);
-                createJobUrls(this.jobs, this.jobUrls);
-                resolve({ jobs: this.jobs });
-              })
-              .catch((err) => {
-                error(err);
-              });
-          } else {
-            resolve({ jobs: this.jobs });
-          }
-
-        }).catch((err) => {
-          error(err);
-        });
-
-      function error(err) {
-        console.log('updateSingleJobCounts error getting job details:', err);
-        msgs.error('Job details could not be retrieved for ' + jobId);
-        msgs.error('', err);
-        reject({ jobs, err });
-      }
-
-    });
-  }
-
-  updateAllJobStats() {
-    return new Promise((resolve, reject) => {
-      console.log('jobService: update all jobs counts and state');
-      ml.jobStats().then((resp) => {
-        console.log('updateAllJobStats controller query response:', resp);
-        let newJobsAdded = false;
-        for (let d = 0; d < resp.jobs.length; d++) {
-          const newJobStats = {};
-          let jobExists = false;
-          angular.copy(resp.jobs[d], newJobStats);
-
-          // update parts of the job
-          for (let i = 0; i < jobs.length; i++) {
-            const job = jobs[i];
-            if (job.job_id === newJobStats.job_id) {
-              jobExists = true;
-              job.state = newJobStats.state;
-              job.data_counts = newJobStats.data_counts;
-              if (newJobStats.model_size_stats) {
-                job.model_size_stats = newJobStats.model_size_stats;
-              }
-              if (newJobStats.node) {
-                job.node = newJobStats.node;
-              }
-              if (newJobStats.open_time) {
-                job.open_time = newJobStats.open_time;
-              }
-            }
-          }
-
-          // a new job has been added, add it to the list
-          if (!jobExists) {
-            // add it to the same index position as it's found in jobs.
-            jobs.splice(d, 0, newJobStats);
-            newJobsAdded = true;
-          }
-        }
-
-        // load datafeeds stats
-        ml.datafeedStats()
-          .then((datafeedsResp) => {
-            for (let i = 0; i < jobs.length; i++) {
-              const datafeed = jobs[i].datafeed_config;
-              if (datafeed) {
-                for (let j = 0; j < datafeedsResp.datafeeds.length; j++) {
-                  const newDatafeedStats = {};
-                  angular.copy(datafeedsResp.datafeeds[j], newDatafeedStats);
-
-                  if (datafeed.datafeed_id === newDatafeedStats.datafeed_id) {
-                    datafeed.state = newDatafeedStats.state;
-                    if (newDatafeedStats.node) {
-                      datafeed.node = newDatafeedStats.node;
-                    }
-                  }
-                }
-              }
-            }
-            this.jobs = jobs;
-
-            // if after adding missing jobs, the retrieved number of jobs still differs from
-            // the local copy, reload the whole list from scratch. some non-running jobs may have
-            // been deleted by a different user.
-            if (newJobsAdded || resp.jobs.length !== jobs.length) {
-              console.log('updateAllJobStats: number of jobs differs. reloading all jobs');
-              this.loadJobs().then(() => {
-                resolve({ jobs: this.jobs, listChanged: true });
-              })
-                .catch((err) => {
-                  error(err);
-                });
-            } else {
-              createJobStats(this.jobs, this.jobStats);
-              createJobUrls(this.jobs, this.jobUrls);
-              resolve({ jobs: this.jobs, listChanged: false });
-            }
-          })
-          .catch((err) => {
-            error(err);
-          });
-      })
-        .catch((err) => {
-          error(err);
-        });
-
-      function error(err) {
-        console.log('updateAllJobStats error getting list job details:', err);
-        msgs.error('Job details could not be retrieved');
-        msgs.error('', err);
-        reject({ jobs, err });
-      }
-
-    });
-  }
-
-  getRunningJobs() {
-    const runningJobs = [];
-    _.each(jobs, (job) => {
-      if (job.datafeed_config && job.datafeed_config.state === 'started') {
-        runningJobs.push(job);
-      }
-    });
-    return runningJobs;
-  }
-
   updateSingleJobDatafeedState(jobId) {
     return new Promise((resolve, reject) => {
 
       const datafeedId = this.getDatafeedId(jobId);
 
-      ml.datafeedStats({ datafeedId })
+      ml.getDatafeedStats({ datafeedId })
         .then((resp) => {
         // console.log('updateSingleJobCounts controller query response:', resp);
           const datafeeds = resp.datafeeds;
@@ -456,51 +284,6 @@ class JobService {
       .then(func).catch(func);
   }
 
-  deleteJob(job, statusIn) {
-    return new Promise((resolve, reject) => {
-      const status = statusIn || { deleteDatafeed: 0, deleteJob: 0, errorMessage: '' };
-
-      // chain of endpoint calls to delete a job.
-      // if job is datafeed, stop and delete datafeed first
-      if (job.datafeed_config && Object.keys(job.datafeed_config).length) {
-        const datafeedId = this.getDatafeedId(job.job_id);
-        // stop datafeed
-        ml.forceDeleteDatafeed({ datafeedId: datafeedId })
-          .then(() => {
-            status.deleteDatafeed = 1;
-            deleteJob();
-          })
-          .catch((resp) => {
-            status.deleteDatafeed = -1;
-            status.deleteJob = -1;
-            deleteFailed(resp, 'Delete datafeed');
-          });
-      } else {
-        deleteJob();
-      }
-
-      function deleteJob() {
-        ml.forceDeleteJob({ jobId: job.job_id })
-          .then(() => {
-            status.deleteJob = 1;
-            resolve({ success: true });
-          })
-          .catch((resp) => {
-            status.deleteJob = -1;
-            deleteFailed(resp, 'Delete job');
-          });
-      }
-
-      function deleteFailed(resp, txt) {
-        if (resp.statusCode === 500) {
-          status.errorMessage = txt;
-        }
-        reject({ success: false });
-      }
-
-    });
-  }
-
   cloneJob(job) {
     // create a deep copy of a job object
     // also remove items from the job which are set by the server and not needed
@@ -521,6 +304,7 @@ class JobService {
     delete tempJob.model_snapshot_id;
     delete tempJob.open_time;
     delete tempJob.established_model_memory;
+    delete tempJob.calendars;
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 
@@ -547,6 +331,12 @@ class JobService {
           }
         }
       }
+    }
+
+    // when jumping from a wizard to the advanced job creation,
+    // the wizard's created_by information should be stripped.
+    if (tempJob.custom_settings && tempJob.custom_settings.created_by) {
+      delete tempJob.custom_settings.created_by;
     }
 
     return tempJob;
@@ -591,91 +381,6 @@ class JobService {
     });
 
     return job;
-  }
-
-  // use elasticsearch to load basic information on jobs, as used by various result
-  // dashboards in the Ml plugin. Returned response contains a jobs property,
-  // which is an array of objects containing id, description, bucketSpanSeconds, detectors
-  // and detectorDescriptions properties, plus a customUrls key if custom URLs
-  // have been configured for the job.
-  getBasicJobInfo() {
-    return new Promise((resolve, reject) => {
-      const obj = { success: true, jobs: [] };
-
-      ml.jobs()
-        .then((resp) => {
-          if (resp.jobs && resp.jobs.length > 0) {
-            obj.jobs = processBasicJobInfo(this, resp.jobs);
-          }
-          resolve(obj);
-        })
-        .catch((resp) => {
-          console.log('getBasicJobInfo error getting list of jobs:', resp);
-          reject(resp);
-        });
-
-    });
-  }
-
-  // Obtains the list of fields by which record level results may be viewed for all
-  // the jobs that have been created. Essentially this is the list of unique 'by',
-  // 'over' and 'partition' fields that have been defined across all the detectors for
-  // a job, although for detectors with both 'by' and 'over' fields, the 'by' field name
-  // is not returned since this field is not added to the top-level record fields.
-  // Returned response contains a fieldsByJob property, with job ID keys
-  // against an array of the field names by which record type results may be viewed
-  // for that job.
-  // Contains an addition '*' key which holds an array of the
-  // unique fields across all jobs.
-  getJobViewByFields() {
-    return new Promise((resolve, reject) => {
-      const obj = { success: true, fieldsByJob: { '*': [] } };
-
-      ml.jobs()
-        .then(function (resp) {
-          if (resp.jobs && resp.jobs.length > 0) {
-            _.each(resp.jobs, (jobObj) => {
-              // Add the list of distinct by, over and partition fields for each job.
-              const fieldsForJob = [];
-
-              const analysisConfig = jobObj.analysis_config;
-              const detectors = analysisConfig.detectors || [];
-              _.each(detectors, (detector) => {
-                if (_.has(detector, 'partition_field_name')) {
-                  fieldsForJob.push(detector.partition_field_name);
-                }
-                if (_.has(detector, 'over_field_name')) {
-                  fieldsForJob.push(detector.over_field_name);
-                }
-                // For jobs with by and over fields, don't add the 'by' field as this
-                // field will only be added to the top-level fields for record type results
-                // if it also an influencer over the bucket.
-                if (_.has(detector, 'by_field_name') && !(_.has(detector, 'over_field_name'))) {
-                  fieldsForJob.push(detector.by_field_name);
-                }
-              });
-
-              obj.fieldsByJob[jobObj.job_id] = _.uniq(fieldsForJob);
-              obj.fieldsByJob['*'] = _.union(obj.fieldsByJob['*'], obj.fieldsByJob[jobObj.job_id]);
-            });
-
-            // Sort fields alphabetically.
-            _.each(obj.fieldsByJob, (fields, jobId)=> {
-              obj.fieldsByJob[jobId] = _.sortBy(fields, (field) => {
-                return field.toLowerCase();
-              });
-            });
-          }
-
-          resolve(obj);
-
-        })
-        .catch((resp) => {
-          console.log('getJobViewByFields error getting list of viewBy fields:', resp);
-          reject(resp);
-        });
-
-    });
   }
 
   searchPreview(job) {
@@ -834,11 +539,6 @@ class JobService {
     return ml.closeJob({ jobId });
   }
 
-  forceCloseJob(jobId) {
-    return ml.forceCloseJob({ jobId });
-  }
-
-
   saveNewDatafeed(datafeedConfig, jobId) {
     const datafeedId = `datafeed-${jobId}`;
     datafeedConfig.job_id = jobId;
@@ -860,10 +560,6 @@ class JobService {
         console.log('update datafeed', err);
         return { success: false, message: err.message };
       });
-  }
-
-  deleteDatafeed() {
-
   }
 
   // start the datafeed for a given job
@@ -916,6 +612,22 @@ class JobService {
     });
   }
 
+  forceStartDatafeeds(dIds, start, end) {
+    return ml.jobs.forceStartDatafeeds(dIds, start, end);
+  }
+
+  stopDatafeeds(dIds) {
+    return ml.jobs.stopDatafeeds(dIds);
+  }
+
+  deleteJobs(jIds) {
+    return ml.jobs.deleteJobs(jIds);
+  }
+
+  closeJobs(jIds) {
+    return ml.jobs.closeJobs(jIds);
+  }
+
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
@@ -965,6 +677,10 @@ class JobService {
     });
     return groups;
   }
+
+  createResultsUrl(jobIds, from, to, resultsPage) {
+    return createResultsUrl(jobIds, from, to, resultsPage);
+  }
 }
 
 // private function used to check the job saving response
@@ -989,12 +705,11 @@ function checkSaveResponse(resp, origJob) {
 
 function processBasicJobInfo(localJobService, jobsList) {
   // Process the list of job data obtained from the jobs endpoint to return
-  // an array of objects containing the basic information (id, description, bucketSpan, detectors
-  // and detectorDescriptions properties, plus a customUrls key if custom URLs
+  // an array of objects containing the basic information (id, description, bucketSpan,
+  // and detectors properties, plus a customUrls key if custom URLs
   // have been configured for the job) used by various result dashboards in the ml plugin.
   // The key information is stored in the jobService object for quick access.
   const processedJobsList = [];
-  let detectorDescriptionsByJob = {};
   const detectorsByJob = {};
   const customUrlsByJob = {};
 
@@ -1017,15 +732,8 @@ function processBasicJobInfo(localJobService, jobsList) {
       job.description = jobObj.job_id;
     }
 
-    job.detectorDescriptions = [];
-    job.detectors = [];
-    const detectors = _.get(analysisConfig, 'detectors', []);
-    _.each(detectors, (detector)=> {
-      if (_.has(detector, 'detector_description')) {
-        job.detectorDescriptions.push(detector.detector_description);
-        job.detectors.push(detector);
-      }
-    });
+    job.detectors = _.get(analysisConfig, 'detectors', []);
+    detectorsByJob[job.id] = job.detectors;
 
 
     if (_.has(jobObj, 'custom_settings.custom_urls')) {
@@ -1043,18 +751,10 @@ function processBasicJobInfo(localJobService, jobsList) {
     }
 
     localJobService.jobDescriptions[job.id] = job.description;
-    detectorDescriptionsByJob[job.id] = job.detectorDescriptions;
-    detectorsByJob[job.id] = job.detectors;
     localJobService.basicJobs[job.id] = job;
     processedJobsList.push(job);
   });
 
-  detectorDescriptionsByJob = labelDuplicateDetectorDescriptions(detectorDescriptionsByJob);
-  _.each(detectorsByJob, (dtrs, jobId) => {
-    _.each(dtrs, (dtr, i) => {
-      dtr.detector_description = detectorDescriptionsByJob[jobId][i];
-    });
-  });
   localJobService.detectorsByJob = detectorsByJob;
   localJobService.customUrlsByJob = customUrlsByJob;
 
@@ -1112,10 +812,7 @@ function createJobUrls(jobsList, jobUrls) {
     if (job.data_counts) {
       const from = moment(job.data_counts.earliest_record_timestamp).toISOString();
       const to = moment(job.data_counts.latest_record_timestamp).toISOString();
-      let path = `?_g=(ml:(jobIds:!('${job.job_id}'))`;
-      path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
-      path += `,mode:absolute,to:'${to}'`;
-      path += '))&_a=(filters:!(),query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
+      const path = createResultsUrl([job.job_id], to, from);
 
       if (jobUrls[job.job_id]) {
         jobUrls[job.job_id].url = path;
@@ -1124,6 +821,25 @@ function createJobUrls(jobsList, jobUrls) {
       }
     }
   });
+}
+
+function createResultsUrl(jobIds, start, end, resultsPage) {
+  const idString = jobIds.map(j => `'${j}'`).join(',');
+  const from = moment(start).toISOString();
+  const to = moment(end).toISOString();
+  let path = '';
+
+  if (resultsPage !== undefined) {
+    path += 'ml#/';
+    path += resultsPage;
+  }
+
+  path += `?_g=(ml:(jobIds:!(${idString}))`;
+  path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
+  path += `,mode:absolute,to:'${to}'`;
+  path += '))&_a=(filters:!(),query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
+
+  return path;
 }
 
 export const mlJobService = new JobService();

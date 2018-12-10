@@ -47,9 +47,12 @@ const typeColors = {
   debug: 'gray',
   server: 'gray',
   optmzr: 'white',
-  managr: 'green',
+  manager: 'green',
   optimize: 'magentaBright',
-  listening: 'magentaBright'
+  'optimize:dynamic_dll_plugin': 'magentaBright',
+  'optimize:watch_cache': 'magentaBright',
+  listening: 'magentaBright',
+  scss: 'magentaBright',
 };
 
 const color = _.memoize(function (name) {

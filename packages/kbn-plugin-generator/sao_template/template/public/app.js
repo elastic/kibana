@@ -7,7 +7,7 @@ import 'ui/autoload/styles';
 import './less/main.less';
 import { Main } from './components/main';
 
-const app = uiModules.get("apps/<%= camelCase(name) %>");
+const app = uiModules.get('apps/<%= camelCase(name) %>');
 
 app.config($locationProvider => {
   $locationProvider.html5Mode({
@@ -32,4 +32,4 @@ function RootController($scope, $element, $http) {
   });
 }
 
-chrome.setRootController("<%= camelCase(name) %>", RootController);
+chrome.setRootController('<%= camelCase(name) %>', RootController);

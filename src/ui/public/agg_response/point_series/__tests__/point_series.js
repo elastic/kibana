@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import './_main';
-import './_add_to_siri';
-import './_fake_x_aspect';
-import './_get_aspects';
-import './_get_point';
-import './_get_series';
-import './_init_x_axis';
-import './_init_y_axis';
-import './_ordered_date_axis';
-import './_tooltip_formatter';
+
 describe('Point Series Agg Response', function () {
+  require ('./_main');
+  require('./_add_to_siri');
+  require('./_fake_x_aspect');
+  require('./_get_aspects');
+  require('./_get_point');
+  require('./_get_series');
+  require('./_init_x_axis');
+  require('./_init_y_axis');
+  require('./_ordered_date_axis');
+  require('./_tooltip_formatter');
 });

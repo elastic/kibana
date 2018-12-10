@@ -1,0 +1,40 @@
+{
+  "paths": {
+    "common.ui": "src/ui",
+    "server": "src/server",
+    "console": "src/legacy/core_plugins/console",
+    "inputControl": "src/legacy/core_plugins/input_control_vis",
+    "kbn": "src/legacy/core_plugins/kibana",
+    "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
+    "markdownVis": "src/legacy/core_plugins/markdown_vis",
+    "metricVis": "src/legacy/core_plugins/metric_vis",
+    "vega": "src/legacy/core_plugins/vega",
+    "tableVis": "src/legacy/core_plugins/table_vis",
+    "regionMap": "src/legacy/core_plugins/region_map",
+    "statusPage": "src/legacy/core_plugins/status_page",
+    "tileMap": "src/legacy/core_plugins/tile_map",
+    "timelion": "src/legacy/core_plugins/timelion",
+    "tagCloud": "src/legacy/core_plugins/tagcloud",
+    "tsvb": "src/legacy/core_plugins/metrics",
+    "xpack.beatsManagement": "x-pack/plugins/beats_management",
+    "xpack.graph": "x-pack/plugins/graph",
+    "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
+    "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "xpack.infra": "x-pack/plugins/infra",
+    "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.ml": "x-pack/plugins/ml",
+    "xpack.logstash": "x-pack/plugins/logstash",
+    "xpack.monitoring": "x-pack/plugins/monitoring",
+    "xpack.reporting": "x-pack/plugins/reporting",
+    "xpack.rollupJobs": "x-pack/plugins/rollup",
+    "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
+    "xpack.security": "x-pack/plugins/security",
+    "xpack.watcher": "x-pack/plugins/watcher"
+  },
+  "exclude": [
+    "src/ui/ui_render/bootstrap/app_bootstrap.js",
+    "src/ui/ui_render/ui_render_mixin.js",
+    "x-pack/plugins/infra/public/utils/loading_state/loading_result.ts",
+    "x-pack/plugins/infra/server/lib/domains/log_entries_domain/log_entries_domain.ts"
+  ]
+}

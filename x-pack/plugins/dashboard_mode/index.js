@@ -51,7 +51,7 @@ export function dashboardMode(kibana) {
             icon: 'plugins/kibana/assets/dashboard.svg',
           }
         ],
-      }
+      },
     },
 
     config(Joi) {

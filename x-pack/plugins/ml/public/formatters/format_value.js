@@ -41,7 +41,7 @@ export function formatValue(value, mlFunction, fieldFormat) {
   }
 }
 
-// Formats a single value according to the specifield ML function.
+// Formats a single value according to the specified ML function.
 // If a Kibana fieldFormat is not supplied, will fall back to default
 // formatting depending on the magnitude of the value.
 function formatSingleValue(value, mlFunction, fieldFormat) {

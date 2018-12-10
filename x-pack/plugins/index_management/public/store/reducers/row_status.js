@@ -7,6 +7,7 @@
 import { handleActions } from 'redux-actions';
 import {
   clearCacheIndicesStart,
+  clearRowStatus,
   closeIndicesStart,
   openIndicesStart,
   flushIndicesStart,
@@ -26,6 +27,14 @@ import {
 } from '../../../common/constants';
 
 export const rowStatus = handleActions({
+  [clearRowStatus](state, action) {
+    const { indexNames } = action.payload;
+    const newState = { ...state };
+    indexNames.forEach((indexName) => {
+      delete newState[indexName];
+    });
+    return newState;
+  },
   [closeIndicesStart](state, action) {
     const { indexNames } = action.payload;
 
@@ -112,6 +121,7 @@ export const rowStatus = handleActions({
     }, {});
 
     const newState = { ...state };
+    // eslint-disable-next-line guard-for-in
     for (const indexName in state) {
       if (state[indexName] === INDEX_CLOSING && indicesByName[indexName].status === INDEX_CLOSED) {
         delete newState[indexName];

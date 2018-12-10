@@ -5,13 +5,13 @@
  */
 
 import React, { Component } from 'react';
-import { Route } from "react-router-dom";
+import { FormattedMessage } from '@kbn/i18n/react';
+import { Route } from 'react-router-dom';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
 
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,8 +22,8 @@ import {
   EuiTab,
   EuiTitle
 } from '@elastic/eui';
-import { IndexActionsContextMenu } from "../../components";
-import { INDEX_OPEN } from "../../../../../common/constants";
+import { IndexActionsContextMenu } from '../../components';
+import { INDEX_OPEN } from '../../../../../common/constants';
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -69,21 +69,22 @@ export class DetailPanel extends Component {
         component = <Summary />;
     }
     return (
-      <EuiFlyout data-test-subj="indexDetailFlyout" onClose={closeDetailPanel}>
+      <EuiFlyout
+        data-test-subj="indexDetailFlyout"
+        onClose={closeDetailPanel}
+        aria-labelledby="indexDetailsFlyoutTitle"
+      >
         <EuiFlyoutHeader>
-          <EuiTitle size="l">
+          <EuiTitle size="l" id="indexDetailsFlyoutTitle">
             <h2>{indexName}</h2>
           </EuiTitle>
           <EuiTabs>{this.renderTabs()}</EuiTabs>
         </EuiFlyoutHeader>
+
         <EuiFlyoutBody>{component}</EuiFlyoutBody>
+
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeDetailPanel}>
-                Close
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <Route
                 key="menu"
@@ -94,7 +95,7 @@ export class DetailPanel extends Component {
                     anchorPosition="upRight"
                     detailPanel={true}
                     iconType="arrowUp"
-                    label="Manage"
+                    label={<FormattedMessage id="xpack.idxMgmt.detailPanel.manageContextMenuLabel" defaultMessage="Manage" />}
                   />
                 )}
               />

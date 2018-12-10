@@ -50,6 +50,7 @@ export function VislibLibAxisTitleProvider() {
           const axisPrefix = config.isHorizontal() ? 'x' : 'y';
 
           const svg = div.append('svg')
+            .attr('focusable', 'false')
             .attr('width', width)
             .attr('height', height)
             .attr('class', `axis-title ${axisPrefix}-axis-title`);

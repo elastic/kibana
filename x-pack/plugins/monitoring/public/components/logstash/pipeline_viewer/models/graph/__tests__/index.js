@@ -144,16 +144,6 @@ describe('Graph', () => {
       });
     });
 
-    it('identifies cola representations of vertices correctly', () => {
-      const colaVertices = graph.colaVertices;
-      expect(colaVertices).to.be.an(Array);
-      expect(colaVertices.length).to.be(5);
-
-      expect(colaVertices[0]).to.have.property('vertex');
-      expect(colaVertices[0]).to.have.property('width');
-      expect(colaVertices[0]).to.have.property('height');
-    });
-
     it('identifies the correct edges', () => {
       const edges = graph.edges;
       expect(edges).to.be.an(Array);
@@ -161,81 +151,6 @@ describe('Graph', () => {
 
       edges.forEach(edge => {
         expect(edge).to.be.an(Edge);
-      });
-    });
-
-    it('identifies cola representations of edges correctly', () => {
-      const colaEdges = graph.colaEdges;
-      expect(colaEdges).to.be.an(Array);
-      expect(colaEdges.length).to.be(4);
-
-      colaEdges.forEach(colaEdge => {
-        expect(colaEdge).to.have.property('edge');
-        expect(colaEdge).to.have.property('source');
-        expect(colaEdge).to.have.property('target');
-      });
-    });
-
-    it('identifies its root vertices correctly', () => {
-      const roots = graph.roots;
-      expect(roots).to.be.an(Array);
-      expect(roots.length).to.be(1);
-
-      roots.forEach(root => {
-        expect(root).to.be.a(Vertex);
-        expect(root.json.id).to.be('my-prefix:my-really-long-named-generator');
-      });
-    });
-
-    it('identifies its leaf vertices correctly', () => {
-      const leaves = graph.leaves;
-      expect(leaves).to.be.an(Array);
-      expect(leaves.length).to.be(2);
-
-      leaves.forEach(leaf => {
-        expect(leaf).to.be.a(Vertex);
-      });
-    });
-
-    it('identifies the highest vertex rank correctly', () => {
-      expect(graph.maxRank).to.be(3);
-    });
-
-    describe('vertex layout ranking', () => {
-      const expectedRanks = [
-        ['my-prefix:my-really-long-named-generator'],
-        ['my-queue'],
-        ['my-if'],
-        ['my-grok', 'my-sleep']
-      ];
-
-      it('should store a 2d array of the vertices in the expected ranks', () => {
-        const result = graph.verticesByLayoutRank;
-        expectedRanks.forEach((expectedVertexIds, rank) => {
-          const resultVertices = result[rank];
-          expectedVertexIds.forEach(expectedVertexId => {
-            const expectedVertex = graph.getVertexById(expectedVertexId);
-            expect(resultVertices).to.contain(expectedVertex);
-          });
-        });
-      });
-
-      it('should add a .layoutRank property to each Vertex', () => {
-        expectedRanks.forEach((expectedVertexIds, rank) => {
-          expectedVertexIds.forEach(expectedVertexId => {
-            const vertex = graph.getVertexById(expectedVertexId);
-            expect(vertex.layoutRank).to.be(rank);
-          });
-        });
-      });
-    });
-
-    it('should classify the if triangle correctly', () => {
-      expect(graph.triangularIfGroups.length).to.be(1);
-      expect(graph.triangularIfGroups[0]).to.eql({
-        ifVertex: graph.getVertexById('my-if'),
-        trueVertex: graph.getVertexById('my-grok'),
-        falseVertex: graph.getVertexById('my-sleep'),
       });
     });
   });

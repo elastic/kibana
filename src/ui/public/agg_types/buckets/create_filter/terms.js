@@ -17,8 +17,29 @@
  * under the License.
  */
 
-import { buildPhraseFilter } from '../../../filter_manager/lib/phrase';
+import { buildPhraseFilter, buildPhrasesFilter, buildExistsFilter } from '@kbn/es-query';
 
-export function createFilterTerms(aggConfig, key) {
-  return buildPhraseFilter(aggConfig.params.field, key, aggConfig.vis.indexPattern);
+export function createFilterTerms(aggConfig, key, params) {
+  const field = aggConfig.params.field;
+  const indexPattern = field.indexPattern;
+
+  if (key === '__other__') {
+    const terms = params.terms;
+
+    const phraseFilter = buildPhrasesFilter(field, terms, indexPattern);
+    phraseFilter.meta.negate = true;
+
+    const filters = [phraseFilter];
+
+    if (terms.some(term => term === '__missing__')) {
+      filters.push(buildExistsFilter(field, indexPattern));
+    }
+
+    return filters;
+  } else if (key === '__missing__') {
+    const existsFilter = buildExistsFilter(field, indexPattern);
+    existsFilter.meta.negate = true;
+    return existsFilter;
+  }
+  return buildPhraseFilter(field, key, indexPattern);
 }

@@ -36,7 +36,7 @@ describe('add filters', function () {
     'kibana/courier',
     'kibana/global_state',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
 
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {
@@ -101,6 +101,52 @@ describe('add filters', function () {
 
       expect(appState.filters.length).to.be(1);
       expect(globalState.filters.length).to.be(0);
+    });
+
+    it('should allow overwriting a positive filter by a negated one', () => {
+      $rootScope.$digest();
+
+      // Add negate: false version of the filter
+      const filter = _.cloneDeep(filters[0]);
+      filter.meta.negate = false;
+
+      queryFilter.addFilters(filter);
+      $rootScope.$digest();
+      expect(appState.filters.length).to.be(1);
+      expect(appState.filters[0]).to.eql(filter);
+
+      // Add negate: true version of the same filter
+      const negatedFilter = _.cloneDeep(filters[0]);
+      negatedFilter.meta.negate = true;
+
+      queryFilter.addFilters(negatedFilter);
+      $rootScope.$digest();
+      // The negated filter should overwrite the positive one
+      expect(appState.filters.length).to.be(1);
+      expect(appState.filters[0]).to.eql(negatedFilter);
+    });
+
+    it('should allow overwriting a negated filter by a positive one', () => {
+      $rootScope.$digest();
+
+      // Add negate: true version of the same filter
+      const negatedFilter = _.cloneDeep(filters[0]);
+      negatedFilter.meta.negate = true;
+
+      queryFilter.addFilters(negatedFilter);
+      $rootScope.$digest();
+      // The negated filter should overwrite the positive one
+      expect(appState.filters.length).to.be(1);
+      expect(appState.filters[0]).to.eql(negatedFilter);
+
+      // Add negate: false version of the filter
+      const filter = _.cloneDeep(filters[0]);
+      filter.meta.negate = false;
+
+      queryFilter.addFilters(filter);
+      $rootScope.$digest();
+      expect(appState.filters.length).to.be(1);
+      expect(appState.filters[0]).to.eql(filter);
     });
 
     it('should fire the update and fetch events', function () {

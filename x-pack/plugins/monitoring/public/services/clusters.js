@@ -6,11 +6,11 @@
 
 import { uiModules } from 'ui/modules';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
+import { timefilter } from 'ui/timefilter';
 
 const uiModule = uiModules.get('monitoring/clusters');
 uiModule.service('monitoringClusters', ($injector) => {
   return (clusterUuid, ccs) => {
-    const timefilter = $injector.get('timefilter');
     const { min, max } = timefilter.getBounds();
 
     // append clusterUuid if the parameter is given

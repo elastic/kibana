@@ -10,7 +10,7 @@ import { LOGGING_TAG } from '../../common/constants';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
- * This allows the app to connect to a decidated monitoring cluster even if
+ * This allows the app to connect to a dedicated monitoring cluster even if
  * Kibana itself is connected to a production cluster.
  */
 
@@ -42,7 +42,7 @@ export function exposeClient(server) {
 
   const esPlugin = server.plugins.elasticsearch;
   const cluster = esPlugin.createCluster('monitoring', config);
-  server.on('close', bindKey(cluster, 'close'));
+  server.events.on('stop', bindKey(cluster, 'close'));
 
   server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster (${config.url})`);
 }

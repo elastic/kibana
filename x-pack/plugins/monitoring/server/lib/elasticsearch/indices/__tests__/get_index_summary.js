@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { handleResponse } from '../get_index_summary';
 
 describe('get_index_summary handleResponse', () => {
-  it('default jndefined fields in result for empty response', () => {
+  it('default undefined fields in result for empty response', () => {
     const shardStats = {};
     const indexUuid = null;
 

@@ -21,12 +21,12 @@ import expect from 'expect.js';
 
 import {
   VisualizeConstants
-} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+} from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('create and add embeddables', async () => {
@@ -37,12 +37,12 @@ export default function ({ getService, getPageObjects }) {
     describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
         await dashboardAddPanel.ensureAddPanelIsShowing();
         await dashboardAddPanel.clickAddNewEmbeddableLink();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.visualize.saveVisualization('visualization from add new link');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('visualization from add new link');
 
         return retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('saves the saved visualization url to the app link', async () => {
         await PageObjects.header.clickVisualize();
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });
 

@@ -31,6 +31,10 @@ export class ProviderCollection {
     this._getInstance('Service', name)
   )
 
+  hasService = name => (
+    Boolean(this._findProvider('Service', name))
+  )
+
   getPageObject = name => (
     this._getInstance('PageObject', name)
   )
@@ -68,8 +72,12 @@ export class ProviderCollection {
     }
   }
 
+  _findProvider(type, name) {
+    return this._providers.find(p => p.type === type && p.name === name);
+  }
+
   _getProvider(type, name) {
-    const providerDef = this._providers.find(p => p.type === type && p.name === name);
+    const providerDef = this._findProvider(type, name);
     if (!providerDef) {
       throw new Error(`Unknown ${type} "${name}"`);
     }
@@ -87,6 +95,7 @@ export class ProviderCollection {
       if (!instances.has(provider)) {
         let instance = provider({
           getService: this.getService,
+          hasService: this.hasService,
           getPageObject: this.getPageObject,
           getPageObjects: this.getPageObjects,
         });

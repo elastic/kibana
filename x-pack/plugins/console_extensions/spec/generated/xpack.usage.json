@@ -1,0 +1,14 @@
+{
+  "xpack.usage": {
+    "url_params": {
+      "master_timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/usage"
+    ],
+    "documentation": "Retrieve information about xpack features usage"
+  }
+}

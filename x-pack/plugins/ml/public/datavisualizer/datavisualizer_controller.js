@@ -14,22 +14,20 @@
 import _ from 'lodash';
 import rison from 'rison-node';
 
-import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/ml/components/form_filter_input';
 
-import 'ui/courier';
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { notify } from 'ui/notify';
-import { luceneStringToDsl } from 'ui/courier/data_source/build_query/lucene_string_to_dsl.js';
-import { decorateQuery } from 'ui/courier/data_source/_decorate_query';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
+import { notify, toastNotifications } from 'ui/notify';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { getDataVisualizerBreadcrumbs } from './breadcrumbs';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
-import { checkLicenseExpired } from 'plugins/ml/license/check_license';
+import { checkBasicLicense, isFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -39,8 +37,9 @@ import template from './datavisualizer.html';
 uiRoutes
   .when('/jobs/new_job/datavisualizer', {
     template,
+    k7Breadcrumbs: getDataVisualizerBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicenseExpired,
+      CheckLicense: checkBasicLicense,
       privileges: checkGetJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
@@ -49,24 +48,27 @@ uiRoutes
     }
   });
 
+import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
   .controller('MlDataVisualizerViewFields', function (
     $scope,
-    $route,
     $timeout,
     $window,
     Private,
-    timefilter,
-    AppState) {
+    AppState,
+    config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
+
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
-      query } = createSearchItems($route);
+      query } = createSearchItems();
+
     timeBasedIndexCheck(indexPattern, true);
 
     // List of system fields we don't want to display.
@@ -96,21 +98,19 @@ module
     $scope.fieldFilter = '';
     $scope.recognizerResults = { count: 0 };
 
+    $scope.showSidebar = isFullLicense();
+
     // Check for a saved query in the AppState or via a savedSearchId in the URL.
+    // TODO - add in support for lucene queries with filters and Kuery.
     $scope.searchQueryText = '';
-    if (_.has($scope.appState, 'query')) {
-    // Currently only support lucene syntax.
-      if (_.get($scope.appState, 'query.language') === 'lucene') {
-        $scope.searchQueryText = _.get($scope.appState, 'query.query', '');
-      }
+    const queryBarQry = ($scope.appState.query !== undefined) ? ($scope.appState.query) : query;
+    if (queryBarQry.language === 'lucene') {
+      $scope.searchQueryText = _.get(queryBarQry, 'query', '');
     } else {
-    // Use the query built from the savedSearchId supplied in the URL.
-    // If no savedSearchId, the query will default to '*'.
-    // TODO - when filtering is supported, use the filters part too.
-      const queryString = _.get(query, 'query_string.query', '');
-      if (queryString !== '*') {
-        $scope.searchQueryText = queryString;
-      }
+      toastNotifications.addWarning({
+        title: `${(queryBarQry.language !== undefined) ? queryBarQry.language : ''} syntax not supported`,
+        text: 'The Data Visualizer currently only supports queries using the lucene query syntax.',
+      });
     }
 
     $scope.searchQuery = buildSearchQuery();
@@ -143,7 +143,7 @@ module
 
 
     // Refresh the data when the time range is altered.
-    $scope.$listen(timefilter, 'fetch', function () {
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
       $scope.earliest = timefilter.getActiveBounds().min.valueOf();
       $scope.latest = timefilter.getActiveBounds().max.valueOf();
       loadOverallStats();
@@ -261,7 +261,8 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery);
+      const queryStringOptions = config.get('query:queryString:options');
+      decorateQuery(searchQuery, queryStringOptions);
       return searchQuery;
     }
 

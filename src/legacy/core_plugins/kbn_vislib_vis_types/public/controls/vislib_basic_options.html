@@ -1,0 +1,31 @@
+<div class="form-group">
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="visualizeBasicSettingsLegendPosition"
+      i18n-id="kbnVislibVisTypes.controls.vislibBasicOptions.legendPositionLabel"
+      i18n-default-message="Legend Position"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="visualizeBasicSettingsLegendPosition"
+        class="form-control"
+        ng-model="editorState.params.legendPosition"
+        ng-options="position.value as position.text for position in vis.type.editorConfig.collections.legendPositions"
+      >
+      </select>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="showTooltip"
+      i18n-id="kbnVislibVisTypes.controls.vislibBasicOptions.showTooltipLabel"
+      i18n-default-message="Show Tooltip"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input id="showTooltip" type="checkbox" ng-model="editorState.params.addTooltip">
+    </div>
+  </div>
+</div>

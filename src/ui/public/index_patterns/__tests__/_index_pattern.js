@@ -29,15 +29,13 @@ import { FixturesStubbedSavedObjectIndexPatternProvider } from 'fixtures/stubbed
 import { IndexPatternsIntervalsProvider } from '../_intervals';
 import { IndexPatternProvider } from '../_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
-import { Notifier } from '../../notify';
+import { toastNotifications } from '../../notify';
 
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
 import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
 import { SavedObjectsClientProvider } from '../../saved_objects';
-
-const MARKDOWN_LINK_RE = /\[(.+?)\]\((.+?)\)/;
 
 describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
@@ -238,7 +236,7 @@ describe('index pattern', function () {
   });
 
   describe('popularizeField', function () {
-    it('should increment the poplarity count by default', function () {
+    it('should increment the popularity count by default', function () {
       const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
         const oldCount = field.count;
@@ -250,7 +248,7 @@ describe('index pattern', function () {
       });
     });
 
-    it('should increment the poplarity count', function () {
+    it('should increment the popularity count', function () {
       const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
         const oldCount = field.count;
@@ -263,7 +261,7 @@ describe('index pattern', function () {
       });
     });
 
-    it('should decrement the poplarity count', function () {
+    it('should decrement the popularity count', function () {
       indexPattern.fields.forEach(function (field) {
         const oldCount = field.count;
         const incrementAmount = 4;
@@ -468,23 +466,22 @@ describe('index pattern', function () {
     }
 
     it('logs a warning when the index pattern source includes `intervalName`', async () => {
-      const indexPattern = await createUnsupportedTimePattern();
-      expect(Notifier.prototype._notifs).to.have.length(1);
-
-      const notif = Notifier.prototype._notifs.shift();
-      expect(notif).to.have.property('type', 'warning');
-      expect(notif.content).to.match(MARKDOWN_LINK_RE);
-
-      const [, text, url] = notif.content.match(MARKDOWN_LINK_RE);
-      expect(text).to.contain(indexPattern.title);
-      expect(url).to.contain(indexPattern.id);
-      expect(url).to.contain('management/kibana/indices');
+      await createUnsupportedTimePattern();
+      expect(toastNotifications.list).to.have.length(1);
     });
 
     it('does not notify if isUserAwareOfUnsupportedTimePattern() returns true', async () => {
+      // Ideally, _index_pattern.js shouldn't be tightly coupled to toastNotifications. Instead, it
+      // should notify its consumer of this state and the consumer should be responsible for
+      // notifying the user. This test verifies the side effect of the state until we can remove
+      // this coupling.
+
+      // Clear existing toasts.
+      toastNotifications.list.splice(0);
+
       isUserAwareOfUnsupportedTimePattern.returns(true);
       await createUnsupportedTimePattern();
-      expect(Notifier.prototype._notifs).to.have.length(0);
+      expect(toastNotifications.list).to.have.length(0);
     });
   });
 });

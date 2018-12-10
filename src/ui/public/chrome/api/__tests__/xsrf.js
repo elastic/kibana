@@ -111,7 +111,7 @@ describe('chrome xsrf apis', function () {
         $httpBackend.flush();
       });
 
-      it('skips requests with the kbnXsrfToken set falsey', function () {
+      it('skips requests with the kbnXsrfToken set falsy', function () {
         $httpBackend.expectPOST('/api/test', undefined, function (headers) {
           return !(xsrfHeader in headers);
         }).respond(200, '');

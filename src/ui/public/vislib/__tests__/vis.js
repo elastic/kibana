@@ -105,11 +105,11 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove all DOM elements from el', function () {
-        expect($(secondVis.el).find('.vis-wrapper').length).to.be(0);
+        expect($(secondVis.el).find('.visWrapper').length).to.be(0);
       });
 
       it('should not remove visualizations that have not been destroyed', function () {
-        expect($(vis.el).find('.vis-wrapper').length).to.be(1);
+        expect($(vis.el).find('.visWrapper').length).to.be(1);
       });
     });
 
@@ -131,7 +131,7 @@ dataArray.forEach(function (data, i) {
         vis.render(data, persistedState);
       });
 
-      it('should get attribue values', function () {
+      it('should get attribute values', function () {
         expect(vis.get('addLegend')).to.be(true);
         expect(vis.get('addTooltip')).to.be(true);
         expect(vis.get('type')).to.be('point_series');

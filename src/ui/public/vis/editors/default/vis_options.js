@@ -22,6 +22,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from '../../../modules';
 import visOptionsTemplate from './vis_options.html';
+import { I18nProvider } from '@kbn/i18n/react';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.
@@ -40,19 +41,23 @@ uiModules
         visData: '=',
         uiState: '=',
         editor: '=',
-        visualizeEditor: '='
+        visualizeEditor: '=',
+        editorState: '=',
       },
       link: function ($scope, $el) {
         const $optionContainer = $el.find('[data-visualization-options]');
 
         const reactOptionsComponent = typeof $scope.editor !== 'string';
         const stageEditorParams = (params) => {
-          $scope.vis.params = _.cloneDeep(params);
+          $scope.editorState.params = _.cloneDeep(params);
           $scope.$apply();
         };
         const renderReactComponent = () => {
           const Component = $scope.editor;
-          render(<Component scope={$scope} stageEditorParams={stageEditorParams} />, $el[0]);
+          render(
+            <I18nProvider>
+              <Component scope={$scope} editorState={$scope.editorState} stageEditorParams={stageEditorParams} />
+            </I18nProvider>, $el[0]);
         };
         // Bind the `editor` template with the scope.
         if (reactOptionsComponent) {
@@ -62,7 +67,7 @@ uiModules
           $optionContainer.append($editor);
         }
 
-        $scope.$watchGroup(['visData', 'visualizeEditor', 'vis.params'], () => {
+        $scope.$watchGroup(['visData', 'visualizeEditor', 'editorState.params'], () => {
           if (reactOptionsComponent) {
             renderReactComponent();
           }

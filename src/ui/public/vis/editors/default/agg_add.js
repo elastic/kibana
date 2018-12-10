@@ -36,12 +36,13 @@ uiModules
         self.submit = function (schema) {
           self.form = false;
 
-          const aggConfig = new AggConfig($scope.vis, {
-            schema: schema
+          const aggConfig = new AggConfig($scope.state.aggs, {
+            schema: schema,
+            id: AggConfig.nextId($scope.state.aggs),
           });
           aggConfig.brandNew = true;
 
-          $scope.vis.aggs.push(aggConfig);
+          $scope.state.aggs.push(aggConfig);
         };
       }
     };

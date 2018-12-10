@@ -18,15 +18,11 @@
  */
 
 import { IndexedArray } from '../indexed_array';
-import { IndexPatternsFieldProvider } from './_field';
-import { createLegacyClass } from '../utils/legacy_class';
+import { Field } from './_field';
 
-export function IndexPatternsFieldListProvider(Private) {
-  const Field = Private(IndexPatternsFieldProvider);
-
-  createLegacyClass(FieldList).inherits(IndexedArray);
-  function FieldList(indexPattern, specs) {
-    FieldList.Super.call(this, {
+export class FieldList extends IndexedArray {
+  constructor(indexPattern, specs) {
+    super({
       index: ['name'],
       group: ['type'],
       initialSet: specs.map(function (field) {
@@ -34,6 +30,4 @@ export function IndexPatternsFieldListProvider(Private) {
       })
     });
   }
-
-  return FieldList;
 }

@@ -26,7 +26,7 @@ uiRoutes.when('/home', {
             return Promise.reject();
           }
           if (clusters.length === 1) {
-          // Bypass the cluster listing if there is just 1 cluster
+            // Bypass the cluster listing if there is just 1 cluster
             kbnUrl.changePath('/overview');
             return Promise.reject();
           }

@@ -5,6 +5,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 
 The create saved object API enables you to persist a Kibana saved object.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `POST /api/saved_objects/<type>` +

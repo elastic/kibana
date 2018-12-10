@@ -12,8 +12,8 @@ other requests.  The clients use the {client-ref}/javascript-api/current/index.h
 Server clients are exposed through the elasticsearch plugin.
 [source,javascript]
 ----
-  const adminCluster = server.plugins.elasticsearch.getCluster('admin);
-  const dataCluster = server.plugins.elasticsearch.getCluster('data);
+  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+  const dataCluster = server.plugins.elasticsearch.getCluster('data');
 
   //ping as the configured elasticsearch.user in kibana.yml
   adminCluster.callWithInternalUser('ping');

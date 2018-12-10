@@ -1,0 +1,391 @@
+[
+  {
+    "cluster_name": "docker-cluster",
+    "cluster_stats": {
+      "indices": {
+        "completion": {
+          "size_in_bytes": 0
+        },
+        "count": 6,
+        "docs": {
+          "count": 5898,
+          "deleted": 48
+        },
+        "fielddata": {
+          "evictions": 0,
+          "memory_size_in_bytes": 456
+        },
+        "query_cache": {
+          "cache_count": 0,
+          "cache_size": 0,
+          "evictions": 0,
+          "hit_count": 0,
+          "memory_size_in_bytes": 0,
+          "miss_count": 0,
+          "total_count": 0
+        },
+        "segments": {
+          "count": 37,
+          "doc_values_memory_in_bytes": 104900,
+          "file_sizes": {},
+          "fixed_bit_set_memory_in_bytes": 1200,
+          "index_writer_memory_in_bytes": 0,
+          "max_unsafe_auto_id_timestamp": -1,
+          "memory_in_bytes": 1121087,
+          "norms_memory_in_bytes": 106240,
+          "points_memory_in_bytes": 4382,
+          "stored_fields_memory_in_bytes": 11792,
+          "term_vectors_memory_in_bytes": 0,
+          "terms_memory_in_bytes": 893773,
+          "version_map_memory_in_bytes": 0
+        },
+        "shards": {
+          "index": {
+            "primaries": {
+              "avg": 1.6666666666666667,
+              "max": 5,
+              "min": 1
+            },
+            "replication": {
+              "avg": 0,
+              "max": 0,
+              "min": 0
+            },
+            "shards": {
+              "avg": 1.6666666666666667,
+              "max": 5,
+              "min": 1
+            }
+          },
+          "primaries": 10,
+          "replication": 0,
+          "total": 10
+        },
+        "store": {
+          "size_in_bytes": 6355041
+        }
+      },
+      "nodes": {
+        "count": {
+          "coordinating_only": 0,
+          "data": 1,
+          "ingest": 1,
+          "master": 1,
+          "total": 1
+        },
+        "fs": {
+          "available_in_bytes": 44910747648,
+          "free_in_bytes": 48363286528,
+          "total_in_bytes": 67368431616
+        },
+        "jvm": {
+          "max_uptime_in_millis": 2891292,
+          "mem": {
+            "heap_max_in_bytes": 1065025536,
+            "heap_used_in_bytes": 613329488
+          },
+          "threads": 38,
+          "versions": [
+            {
+              "count": 1,
+              "version": "10.0.1",
+              "vm_name": "OpenJDK 64-Bit Server VM",
+              "vm_vendor": "Oracle Corporation",
+              "vm_version": "10.0.1+10"
+            }
+          ]
+        },
+        "network_types": {
+          "http_types": {
+            "security4": 1
+          },
+          "transport_types": {
+            "security4": 1
+          }
+        },
+        "os": {
+          "allocated_processors": 1,
+          "available_processors": 1,
+          "mem": {
+            "free_in_bytes": 223698944,
+            "free_percent": 5,
+            "total_in_bytes": 4139307008,
+            "used_in_bytes": 3915608064,
+            "used_percent": 95
+          },
+          "names": [
+            {
+              "count": 1,
+              "name": "Linux"
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "classname": "org.elasticsearch.ingest.useragent.IngestUserAgentPlugin",
+            "description": "Ingest processor that extracts information from a user agent",
+            "elasticsearch_version": "6.3.1",
+            "extended_plugins": [],
+            "has_native_controller": false,
+            "java_version": "1.8",
+            "name": "ingest-user-agent",
+            "version": "6.3.1"
+          },
+          {
+            "classname": "org.elasticsearch.ingest.geoip.IngestGeoIpPlugin",
+            "description": "Ingest processor that uses looksup geo data based on ip adresses using the Maxmind geo database",
+            "elasticsearch_version": "6.3.1",
+            "extended_plugins": [],
+            "has_native_controller": false,
+            "java_version": "1.8",
+            "name": "ingest-geoip",
+            "version": "6.3.1"
+          }
+        ],
+        "process": {
+          "cpu": {
+            "percent": 1
+          },
+          "open_file_descriptors": {
+            "avg": 223,
+            "max": 223,
+            "min": 223
+          }
+        },
+        "versions": [
+          "6.3.1"
+        ]
+      },
+      "status": "yellow",
+      "timestamp": 1532386499084
+    },
+    "cluster_uuid": "ooEYzl3fSL222Y6eVm7SAA",
+    "license": {
+      "issue_date": "2018-07-23T22:07:23.540Z",
+      "status": "active",
+      "type": "basic"
+    },
+    "stack_stats": {
+      "apm": {
+        "found": true
+      },
+      "kibana": {
+        "count": 1,
+        "dashboard": {
+          "total": 0
+        },
+        "graph_workspace": {
+          "total": 0
+        },
+        "index_pattern": {
+          "total": 1
+        },
+        "os": {
+          "distros": [],
+          "distroReleases": [],
+          "platforms": [],
+          "platformReleases": []
+        },
+        "indices": 1,
+        "search": {
+          "total": 0
+        },
+        "timelion_sheet": {
+          "total": 0
+        },
+        "versions": [
+          {
+            "count": 1,
+            "version": "6.3.1"
+          }
+        ],
+        "visualization": {
+          "total": 0
+        },
+        "plugins": {
+          "reporting": {
+            "available": true,
+            "enabled": false,
+            "csv": {
+              "available": true
+            },
+            "printable_pdf": {
+              "available": false
+            },
+            "status": {},
+            "lastDay": {
+              "csv": {
+                "available": true
+              },
+              "printable_pdf": {
+                "available": false
+              },
+              "status": {}
+            },
+            "last7Days": {
+              "csv": {
+                "available": true
+              },
+              "printable_pdf": {
+                "available": false
+              },
+              "status": {}
+            }
+          }
+        }
+      },
+      "xpack": {
+        "graph": {
+          "available": false,
+          "enabled": true,
+          "graph_workspace": {
+            "total": 0
+          }
+        },
+        "logstash": {
+          "available": false,
+          "enabled": true
+        },
+        "ml": {
+          "available": false,
+          "datafeeds": {
+            "_all": {
+              "count": 0
+            }
+          },
+          "enabled": true,
+          "jobs": {
+            "_all": {
+              "count": 0,
+              "detectors": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              },
+              "model_size": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "available": true,
+          "collection_enabled": true,
+          "enabled": true,
+          "enabled_exporters": {
+            "local": 1
+          }
+        },
+        "rollup": {
+          "available": true,
+          "enabled": true
+        },
+        "security": {
+          "anonymous": {
+            "enabled": false
+          },
+          "audit": {
+            "enabled": false,
+            "outputs": [
+              "logfile"
+            ]
+          },
+          "available": false,
+          "enabled": true,
+          "ipfilter": {
+            "http": false,
+            "transport": false
+          },
+          "realms": {
+            "active_directory": {
+              "available": false,
+              "enabled": false
+            },
+            "file": {
+              "available": false,
+              "enabled": false
+            },
+            "ldap": {
+              "available": false,
+              "enabled": false
+            },
+            "native": {
+              "available": false,
+              "enabled": false
+            },
+            "pki": {
+              "available": false,
+              "enabled": false
+            },
+            "saml": {
+              "available": false,
+              "enabled": false
+            }
+          },
+          "role_mapping": {
+            "native": {
+              "enabled": 0,
+              "size": 0
+            }
+          },
+          "roles": {
+            "file": {
+              "dls": false,
+              "fls": false,
+              "size": 0
+            },
+            "native": {
+              "dls": false,
+              "fls": false,
+              "size": 0
+            }
+          },
+          "ssl": {
+            "http": {
+              "enabled": false
+            },
+            "transport": {
+              "enabled": false
+            }
+          }
+        },
+        "watcher": {
+          "available": false,
+          "count": {
+            "active": 0,
+            "total": 0
+          },
+          "enabled": true,
+          "execution": {
+            "actions": {
+              "_all": {
+                "total": 0,
+                "total_time_in_ms": 0
+              }
+            }
+          },
+          "watch": {
+            "input": {
+              "_all": {
+                "active": 0,
+                "total": 0
+              }
+            },
+            "trigger": {
+              "_all": {
+                "active": 0,
+                "total": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "timestamp": "2018-07-23T22:54:59.087Z",
+    "version": "6.3.1"
+  }
+]

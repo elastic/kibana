@@ -40,10 +40,10 @@ export function MonitoringBeatDetailProvider({ getService }) {
         output: await testSubjects.getVisibleText(SUBJ_SUMMARY_OUTPUT),
         uptime: await testSubjects.getVisibleText(SUBJ_SUMMARY_UPTIME),
         bytesWritten: await testSubjects.getVisibleText(SUBJ_SUMMARY_BYTES_WRITTEN),
-        configReloads: parseInt(await testSubjects.getVisibleText(SUBJ_SUMMARY_CONFIG_RELOADS), 10),
-        eventsDropped: parseInt(await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_DROPPED), 10),
-        eventsEmitted: parseInt(await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_EMITTED), 10),
-        eventsTotal: parseInt(await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_TOTAL), 10),
+        configReloads: await testSubjects.getVisibleText(SUBJ_SUMMARY_CONFIG_RELOADS),
+        eventsDropped: await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_DROPPED),
+        eventsEmitted: await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_EMITTED),
+        eventsTotal: await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_TOTAL),
       };
     }
 

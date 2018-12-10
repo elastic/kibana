@@ -31,25 +31,30 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { SavedObjectNotFound } from '../../errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../errors';
 import MappingSetupProvider from '../../utils/mapping_setup';
 
-import { SearchSourceProvider } from '../data_source/search_source';
+import { SearchSourceProvider } from '../search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../../saved_objects';
-import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
+import { migrateLegacyQuery } from '../../utils/migrate_legacy_query';
 import { recentlyAccessed } from '../../persisted_log';
+import { i18n } from '@kbn/i18n';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
  * @type {string}
  */
-const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+const OVERWRITE_REJECTED = i18n.translate('common.ui.courier.savedObject.overwriteRejectedDescription', {
+  defaultMessage: 'Overwrite confirmation was rejected'
+});
 
 /**
  * An error message to be used when the user rejects a confirm save with duplicate title.
  * @type {string}
  */
-const SAVE_DUPLICATE_REJECTED = 'Save with duplicate title confirmation was rejected';
+const SAVE_DUPLICATE_REJECTED = i18n.translate('common.ui.courier.savedObject.saveDuplicateRejectedDescription', {
+  defaultMessage: 'Save with duplicate title confirmation was rejected'
+});
 
 /**
  * @param error {Error} the error
@@ -105,6 +110,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     // the id of the document
     this.id = config.id || void 0;
 
+    // the migration version of the document, should only be set on imports
+    this.migrationVersion = config.migrationVersion;
+
     // Whether to create a copy when the object is saved. This should eventually go away
     // in favor of a better rename/save flow.
     this.copyOnSave = false;
@@ -112,23 +120,31 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     const parseSearchSource = (searchSourceJson) => {
       if (!this.searchSource) return;
 
-      // if we have a searchSource, set its state based on the searchSourceJSON field
-      let state;
+      // if we have a searchSource, set its values based on the searchSourceJson field
+      let searchSourceValues;
       try {
-        state = JSON.parse(searchSourceJson);
+        searchSourceValues = JSON.parse(searchSourceJson);
       } catch (e) {
-        state = {};
+        throw new InvalidJSONProperty(
+          `Invalid JSON in ${esType} "${this.id}". ${e.message} JSON: ${searchSourceJson}`
+        );
       }
 
-      const oldState = this.searchSource.toJSON();
-      const fnProps = _.transform(oldState, function (dynamic, val, name) {
+      // This detects a scenario where documents with invalid JSON properties have been imported into the saved object index.
+      // (This happened in issue #20308)
+      if (!searchSourceValues || typeof searchSourceValues !== 'object') {
+        throw new InvalidJSONProperty(`Invalid searchSourceJSON in ${esType} "${this.id}".`);
+      }
+
+      const searchSourceFields = this.searchSource.getFields();
+      const fnProps = _.transform(searchSourceFields, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
-      this.searchSource.set(_.defaults(state, fnProps));
+      this.searchSource.setFields(_.defaults(searchSourceValues, fnProps));
 
-      if (!_.isUndefined(this.searchSource.getOwn('query'))) {
-        this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
+      if (!_.isUndefined(this.searchSource.getOwnField('query'))) {
+        this.searchSource.setField('query', migrateLegacyQuery(this.searchSource.getOwnField('query')));
       }
     };
 
@@ -144,11 +160,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       if (config.clearSavedIndexPattern) {
-        this.searchSource.set('index', undefined);
+        this.searchSource.setField('index', null);
         return Promise.resolve(null);
       }
 
-      let index = id || config.indexPattern || this.searchSource.getOwn('index');
+      let index = id || config.indexPattern || this.searchSource.getOwnField('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -162,7 +178,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // At this point index will either be an IndexPattern, if cached, or a promise that
       // will return an IndexPattern, if not cached.
       return Promise.resolve(index).then(indexPattern => {
-        this.searchSource.set('index', indexPattern);
+        this.searchSource.setField('index', indexPattern);
       });
     };
 
@@ -211,7 +227,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
 
-      if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);
+      if (resp.found != null && !resp.found) {
+        throw new SavedObjectNotFound(esType, this.id);
+      }
 
       const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;
@@ -260,8 +278,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       if (this.searchSource) {
+        const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         body.kibanaSavedObjectMeta = {
-          searchSourceJSON: angular.toJson(_.omit(this.searchSource.toJSON(), ['sort', 'size']))
+          searchSourceJSON: angular.toJson(searchSourceFields)
         };
       }
 
@@ -276,6 +295,12 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       return this._source && this._source.title !== this.title;
     };
 
+    this.creationOpts = (opts = {}) => ({
+      id: this.id,
+      migrationVersion: this.migrationVersion,
+      ...opts,
+    });
+
     /**
      * Attempts to create the current object using the serialized source. If an object already
      * exists, a warning message requests an overwrite confirmation.
@@ -288,14 +313,22 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      * @resolved {SavedObject}
      */
     const createSource = (source) => {
-      return savedObjectsClient.create(esType, source, { id: this.id })
+      return savedObjectsClient.create(esType, source, this.creationOpts())
         .catch(err => {
           // record exists, confirm overwriting
-          if (_.get(err, 'statusCode') === 409) {
-            const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
+          if (_.get(err, 'res.status') === 409) {
+            const confirmMessage = i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteConfirmationMessage', {
+              defaultMessage: 'Are you sure you want to overwrite {title}?',
+              values: { title: this.title }
+            });
 
-            return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
-              .then(() => savedObjectsClient.create(esType, source, { id: this.id, overwrite: true }))
+            return confirmModalPromise(confirmMessage, {
+              confirmButtonText: i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteButtonLabel', {
+                defaultMessage: 'Overwrite {name}',
+                values: { name: this.getDisplayName() }
+              })
+            })
+              .then(() => savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true })))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
           return Promise.reject(err);
@@ -303,10 +336,17 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     };
 
     const displayDuplicateTitleConfirmModal = () => {
-      const confirmMessage =
-        `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
+      const confirmMessage = i18n.translate('common.ui.courier.savedObject.confirmModal.saveDuplicateConfirmationMessage', {
+        defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
+        values: { title: this.title, name: this.getDisplayName() }
+      });
 
-      return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
+      return confirmModalPromise(confirmMessage, {
+        confirmButtonText: i18n.translate('common.ui.courier.savedObject.confirmModal.saveDuplicateButtonLabel', {
+          defaultMessage: 'Save {name}',
+          values: { name: this.getDisplayName() }
+        })
+      })
         .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
     };
 
@@ -372,14 +412,14 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           if (confirmOverwrite) {
             return createSource(source);
           } else {
-            return savedObjectsClient.create(esType, source, { id: this.id, overwrite: true });
+            return savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true }));
           }
         })
         .then((resp) => {
           this.id = resp.id;
         })
         .then(() => {
-          if (this.showInRecenltyAccessed && this.getFullPath) {
+          if (this.showInRecentlyAccessed && this.getFullPath) {
             recentlyAccessed.add(this.getFullPath(), this.title, this.id);
           }
           this.isSaving = false;

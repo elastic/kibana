@@ -50,7 +50,7 @@ export function parseRange(input) {
 
   const match = String(input).match(RANGE_RE);
   if (!match) {
-    throw new TypeError('expected input to be in interval notation eg. (100, 200]');
+    throw new TypeError('expected input to be in interval notation e.g., (100, 200]');
   }
 
   return new Range(

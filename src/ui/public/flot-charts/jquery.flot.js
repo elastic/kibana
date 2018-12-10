@@ -1,4 +1,4 @@
-/* Javascript plotting library for jQuery, version 0.8.3.
+/* JavaScript plotting library for jQuery, version 0.8.3.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
@@ -517,7 +517,7 @@ Licensed under the MIT license.
                 colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
                 legend: {
                     show: true,
-                    noColumns: 1, // number of colums in legend table
+                    noColumns: 1, // number of columns in legend table
                     labelFormatter: null, // fn: string -> string
                     labelBoxBorderColor: "#ccc", // border color for the little label boxes
                     container: null, // container (as jQuery object) to put legend in, null means default on top of graph

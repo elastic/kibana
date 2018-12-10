@@ -69,6 +69,7 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
       const zScale = this.getValueAxis().getScale();
       const [min, max] = zScale.domain();
       const labels = [];
+      const maxColorCnt = 10;
       if (cfg.get('setColorRange')) {
         colorsRange.forEach(range => {
           const from = isFinite(range.from) ? zAxisFormatter(range.from) : range.from;
@@ -90,8 +91,14 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
           } else {
             val = val * (max - min) + min;
             nextVal = nextVal * (max - min) + min;
-            if (max > 1) {
-              val = Math.ceil(val);
+            if (max - min > maxColorCnt) {
+              const valInt = Math.ceil(val);
+              if (i === 0) {
+                val = (valInt === val ? val : valInt - 1);
+              }
+              else{
+                val = valInt;
+              }
               nextVal = Math.ceil(nextVal);
             }
             if (isFinite(val)) val = zAxisFormatter(val);
@@ -107,14 +114,13 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
     }
 
     getHeatmapColors(cfg) {
-      const colorsNumber = cfg.get('colorsNumber');
       const invertColors = cfg.get('invertColors');
       const colorSchema = cfg.get('colorSchema');
       const labels = this.getHeatmapLabels(cfg);
       const colors = {};
       for (const i in labels) {
         if (labels[i]) {
-          const val = invertColors ? 1 - i / colorsNumber : i / colorsNumber;
+          const val = invertColors ? 1 - i / labels.length : i / labels.length;
           colors[labels[i]] = getHeatmapColors(val, colorSchema);
         }
       }
@@ -185,12 +191,16 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
             val = Math.min(colorsNumber - 1, Math.floor(val * colorsNumber));
           }
         }
+        if (d.y == null) {
+          return -1;
+        }
         return !isNaN(val) ? val : -1;
       }
 
       function label(d) {
         const colorBucket = getColorBucket(d);
-        if (colorBucket === -1) d.hide = true;
+        // colorBucket id should always GTE 0
+        if (colorBucket < 0) d.hide = true;
         return labels[colorBucket];
       }
 

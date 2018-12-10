@@ -19,14 +19,13 @@
 
 import { UiNavLink } from './ui_nav_link';
 
-export function uiNavLinksMixin(kbnServer, server, config) {
+export function uiNavLinksMixin(kbnServer, server) {
   const uiApps = server.getAllUiApps();
 
   const { navLinkSpecs = [] } = kbnServer.uiExports;
-  const urlBasePath = config.get('server.basePath');
 
   const fromSpecs = navLinkSpecs
-    .map(navLinkSpec => new UiNavLink(urlBasePath, navLinkSpec));
+    .map(navLinkSpec => new UiNavLink(navLinkSpec));
 
   const fromApps = uiApps
     .map(app => app.getNavLink())

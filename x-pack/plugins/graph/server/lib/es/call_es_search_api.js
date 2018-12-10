@@ -11,11 +11,12 @@ export async function callEsSearchApi({ callCluster, index, body }) {
     return {
       ok: true,
       resp: await callCluster('search', {
+        rest_total_hits_as_int: true,
         index,
         body
       })
     };
   } catch (error) {
-    throw Boom.wrap(error, error.statusCode || 500);
+    throw Boom.boomify(error, { statusCode: error.statusCode || 500 });
   }
 }

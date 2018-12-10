@@ -28,9 +28,7 @@ test('does nothing when Kibana `link:` dependencies', async () => {
 
   // We're checking for undefined, but we don't really care about what's
   // returned, we only care about it resolving.
-  await expect(
-    prepareExternalProjectDependencies(projectPath)
-  ).resolves.toBeUndefined();
+  await expect(prepareExternalProjectDependencies(projectPath)).resolves.toBeUndefined();
 });
 
 test('throws if non-Kibana `link` dependencies', async () => {

@@ -15,14 +15,14 @@ import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
 import {
   xpackInfoRoute,
-  xpackUsageRoute,
-  kibanaStatsRoute,
   telemetryRoute,
+  settingsRoute,
 } from './server/routes/api/v1';
 import {
   CONFIG_TELEMETRY,
   CONFIG_TELEMETRY_DESC,
 } from './common/constants';
+import mappings from './mappings.json';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 
@@ -66,11 +66,13 @@ export const xpackMain = (kibana) => {
     },
 
     uiExports: {
+      managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
           name: 'Telemetry opt-in',
           description: CONFIG_TELEMETRY_DESC,
-          value: false
+          value: false,
+          readonly: true,
         },
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
           name: 'Admin email',
@@ -80,11 +82,20 @@ export const xpackMain = (kibana) => {
           value: null
         }
       },
+      savedObjectSchemas: {
+        telemetry: {
+          isNamespaceAgnostic: true,
+        },
+      },
       injectDefaultVars(server) {
         const config = server.config();
         return {
           telemetryUrl: config.get('xpack.xpack_main.telemetry.url'),
           telemetryEnabled: isTelemetryEnabled(config),
+          telemetryOptedIn: null,
+          activeSpace: null,
+          spacesEnabled: config.get('xpack.spaces.enabled'),
+          userProfile: {},
         };
       },
       hacks: [
@@ -102,6 +113,7 @@ export const xpackMain = (kibana) => {
           raw: true,
         });
       },
+      mappings,
     },
 
     init(server) {
@@ -111,9 +123,8 @@ export const xpackMain = (kibana) => {
 
       // register routes
       xpackInfoRoute(server);
-      xpackUsageRoute(server); // To replace kibanaStatsRoute
-      kibanaStatsRoute(server); // Only used internally. Remove in the next major.
       telemetryRoute(server);
+      settingsRoute(server, this.kbnServer);
     }
   });
 };

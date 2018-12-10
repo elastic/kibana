@@ -20,7 +20,8 @@
 import execa from 'execa';
 import { statSync } from 'fs';
 
-import Rx from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { tap, share, take, mergeMap, map, ignoreElements } from 'rxjs/operators';
 import { gray } from 'chalk';
 
 import treeKill from 'tree-kill';
@@ -38,9 +39,7 @@ async function withTimeout(attempt, ms, onTimeout) {
   try {
     await Promise.race([
       attempt(),
-      new Promise((resolve, reject) =>
-        setTimeout(() => reject(TIMEOUT), STOP_TIMEOUT)
-      ),
+      new Promise((resolve, reject) => setTimeout(() => reject(TIMEOUT), STOP_TIMEOUT)),
     ]);
   } catch (error) {
     if (error === TIMEOUT) {
@@ -82,52 +81,60 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
   return new class Proc {
     name = name;
 
-    lines$ = Rx.Observable.merge(
-      observeLines(childProcess.stdout),
-      observeLines(childProcess.stderr)
-    )
-      .do(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`))
-      .share();
+    lines$ = Rx.merge(observeLines(childProcess.stdout), observeLines(childProcess.stderr)).pipe(
+      tap(line => log.write(` ${gray('proc')} [${gray(name)}] ${line}`)),
+      share()
+    );
 
-    outcome$ = Rx.Observable.defer(() => {
+    outcome$ = Rx.defer(() => {
       // observe first exit event
-      const exit$ = Rx.Observable.fromEvent(childProcess, 'exit')
-        .take(1)
-        .map(code => {
+      const exit$ = Rx.fromEvent(childProcess, 'exit').pipe(
+        take(1),
+        map(([code]) => {
+          if (this._stopCalled) {
+            return null;
+          }
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
           if (code > 0 && !(code === 143 || code === 130)) {
             throw createCliError(`[${name}] exited with code ${code}`);
           }
 
           return code;
-        });
+        })
+      );
 
       // observe first error event until there is a close event
-      const error$ = Rx.Observable.fromEvent(childProcess, 'error')
-        .take(1)
-        .mergeMap(err => Rx.Observable.throw(err));
+      const error$ = Rx.fromEvent(childProcess, 'error').pipe(
+        take(1),
+        mergeMap(err => Rx.throwError(err))
+      );
 
-      return Rx.Observable.race(exit$, error$);
-    }).share();
+      return Rx.race(exit$, error$);
+    }).pipe(share());
 
-    _outcomePromise = Rx.Observable.merge(
-      this.lines$.ignoreElements(),
-      this.outcome$
-    ).toPromise();
+    _outcomePromise = Rx.merge(this.lines$.pipe(ignoreElements()), this.outcome$).toPromise();
 
     getOutcomePromise() {
       return this._outcomePromise;
     }
 
+    _stopCalled = false;
+
     async stop(signal) {
+      if (this._stopCalled) {
+        return;
+      }
+      this._stopCalled = true;
       await withTimeout(
         async () => {
+          log.debug(`Sending "${signal}" to proc "${name}"`);
           await treeKillAsync(childProcess.pid, signal);
+          await this.getOutcomePromise();
         },
         STOP_TIMEOUT,
         async () => {
           log.warning(
-            `Proc "${name}" was sent "${signal}" and didn't exit after ${STOP_TIMEOUT} ms, sending SIGKILL`
+            `Proc "${name}" was sent "${signal}" didn't emit the "exit" or "error" events after ${STOP_TIMEOUT} ms, sending SIGKILL`
           );
           await treeKillAsync(childProcess.pid, 'SIGKILL');
         }
@@ -144,7 +151,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
         STOP_TIMEOUT,
         async () => {
           throw new Error(
-            `Proc "${name}" was stopped but never emiited either the "exit" or "error" event after ${STOP_TIMEOUT} ms`
+            `Proc "${name}" was stopped but never emitted either the "exit" or "error" event after ${STOP_TIMEOUT} ms`
           );
         }
       );

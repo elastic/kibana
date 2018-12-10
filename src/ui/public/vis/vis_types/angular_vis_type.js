@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { VisTypeProvider } from './';
+import { BaseVisTypeProvider } from './base_vis_type';
 import $ from 'jquery';
 
 
 export function AngularVisTypeProvider(Private, $compile, $rootScope) {
-  const VisType = Private(VisTypeProvider);
+  const BaseVisType = Private(BaseVisTypeProvider);
 
   class AngularVisController {
     constructor(domeElement, vis) {
@@ -46,9 +46,10 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
 
         if (!this.$scope) {
           this.$scope = $rootScope.$new();
-          updateScope();
           this.$scope.uiState = this.vis.getUiState();
+          updateScope();
           this.el.html($compile(this.vis.type.visConfig.template)(this.$scope));
+          this.$scope.$apply();
         } else {
           updateScope();
         }
@@ -63,7 +64,7 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
     }
   }
 
-  class AngularVisType extends VisType {
+  class AngularVisType extends BaseVisType {
     constructor(opts) {
       opts.visualization = AngularVisController;
 

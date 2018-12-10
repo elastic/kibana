@@ -46,19 +46,19 @@ export default function ({ getService }) {
 
           expect(body.metrics.collection_interval_in_millis).to.be.a('number');
 
-          expect(body.metrics.process.mem.heap_max_in_bytes).to.be.a('number');
-          expect(body.metrics.process.mem.heap_used_in_bytes).to.be.a('number');
+          expect(body.metrics.process.memory.heap.total_in_bytes).to.be.a('number');
+          expect(body.metrics.process.memory.heap.used_in_bytes).to.be.a('number');
+          expect(body.metrics.process.memory.heap.size_limit).to.be.a('number');
 
-          expect(body.metrics.os.cpu.load_average['1m']).to.be.a('number');
-          expect(body.metrics.os.cpu.load_average['5m']).to.be.a('number');
-          expect(body.metrics.os.cpu.load_average['15m']).to.be.a('number');
+          expect(body.metrics.os.load['1m']).to.be.a('number');
+          expect(body.metrics.os.load['5m']).to.be.a('number');
+          expect(body.metrics.os.load['15m']).to.be.a('number');
 
           expect(body.metrics.response_times.avg_in_millis).not.to.be(null); // ok if undefined
           expect(body.metrics.response_times.max_in_millis).not.to.be(null); // ok if undefined
 
           expect(body.metrics.requests.total).to.be.a('number');
           expect(body.metrics.requests.disconnects).to.be.a('number');
-          expect(body.metrics.requests.status_codes).to.be.an('object');
           expect(body.metrics.concurrent_connections).to.be.a('number');
         });
     });

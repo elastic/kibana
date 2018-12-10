@@ -10,7 +10,7 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 In order for the client to have the most up-to-date snapshot of the current license,
 it needs to make a round-trip to the kibana server. This refresh endpoint is provided
 for when the client needs to check the license, but doesn't need to pull data from the
-server for any reason. ie: When adding a new watch
+server for any reason, i.e., when adding a new watch.
 */
 export function registerRefreshRoute(server) {
   const licensePreRouting = licensePreRoutingFactory(server);
@@ -18,8 +18,8 @@ export function registerRefreshRoute(server) {
   server.route({
     path: '/api/watcher/license/refresh',
     method: 'GET',
-    handler: (request, reply) => {
-      reply({ success: true });
+    handler: () => {
+      return { success: true };
     },
     config: {
       pre: [ licensePreRouting ]

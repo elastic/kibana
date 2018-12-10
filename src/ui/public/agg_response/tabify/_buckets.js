@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-function TabifyBuckets(aggResp, aggParams) {
+function TabifyBuckets(aggResp, aggParams, timeRange) {
   if (_.has(aggResp, 'buckets')) {
     this.buckets = aggResp.buckets;
   } else if (aggResp) {
@@ -38,7 +38,12 @@ function TabifyBuckets(aggResp, aggParams) {
     this.length = this.buckets.length;
   }
 
-  if (this.length && aggParams) this._orderBucketsAccordingToParams(aggParams);
+  if (this.length && aggParams) {
+    this._orderBucketsAccordingToParams(aggParams);
+    if (aggParams.drop_partials) {
+      this._dropPartials(aggParams, timeRange);
+    }
+  }
 }
 
 TabifyBuckets.prototype.forEach = function (fn) {
@@ -63,7 +68,9 @@ TabifyBuckets.prototype._isRangeEqual = function (range1, range2) {
 TabifyBuckets.prototype._orderBucketsAccordingToParams = function (params) {
   if (params.filters && this.objectMode) {
     this._keys = params.filters.map(filter => {
-      return filter.label || filter.input.query || '*';
+      const query = _.get(filter, 'input.query.query_string.query', filter.input.query);
+      const queryString = typeof query === 'string' ? query : JSON.stringify(query);
+      return filter.label || queryString || '*';
     });
   } else if (params.ranges && this.objectMode) {
     this._keys = params.ranges.map(range => {
@@ -75,10 +82,37 @@ TabifyBuckets.prototype._orderBucketsAccordingToParams = function (params) {
       ranges = params.ipRangeType === 'mask' ? ranges.mask : ranges.fromTo;
     }
     this.buckets = ranges.map(range => {
-      if (range.mask) return this.buckets.find(el => el.key === range.mask);
+      if (range.mask) {
+        return this.buckets.find(el => el.key === range.mask);
+      }
       return this.buckets.find(el => this._isRangeEqual(el, range));
     });
   }
+};
+
+// dropPartials should only be called if the aggParam setting is enabled,
+// and the agg field is the same as the Time Range.
+TabifyBuckets.prototype._dropPartials = function (params, timeRange) {
+  if (!timeRange ||
+    this.buckets.length <= 1 ||
+    this.objectMode ||
+    params.field.name !== timeRange.name) {
+    return;
+  }
+
+  const interval = this.buckets[1].key - this.buckets[0].key;
+
+  this.buckets = this.buckets.filter(bucket => {
+    if (bucket.key < timeRange.gte) {
+      return false;
+    }
+    if (bucket.key + interval > timeRange.lte) {
+      return false;
+    }
+    return true;
+  });
+
+  this.length = this.buckets.length;
 };
 
 export { TabifyBuckets };

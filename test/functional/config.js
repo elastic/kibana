@@ -32,6 +32,7 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
+  SharePageProvider
 } from './page_objects';
 
 import {
@@ -48,6 +49,12 @@ import {
   VisualizeListingTableProvider,
   DashboardAddPanelProvider,
   DashboardPanelActionsProvider,
+  FlyoutProvider,
+  ComboBoxProvider,
+  EmbeddingProvider,
+  RenderableProvider,
+  TableProvider,
+  BrowserProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -57,7 +64,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       require.resolve('./apps/console'),
       require.resolve('./apps/getting_started'),
-      // require.resolve('./apps/context'),
+      require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
@@ -81,14 +88,15 @@ export default async function ({ readConfigFile }) {
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
       visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider
+      timelion: TimelionPageProvider,
+      share: SharePageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
       retry: commonConfig.get('services.retry'),
-      remote: RemoteProvider,
+      __leadfoot__: RemoteProvider,
       filterBar: FilterBarProvider,
       queryBar: QueryBarProvider,
       find: FindProvider,
@@ -101,10 +109,14 @@ export default async function ({ readConfigFile }) {
       visualizeListingTable: VisualizeListingTableProvider,
       dashboardAddPanel: DashboardAddPanelProvider,
       dashboardPanelActions: DashboardPanelActionsProvider,
+      flyout: FlyoutProvider,
+      comboBox: ComboBoxProvider,
+      embedding: EmbeddingProvider,
+      renderable: RenderableProvider,
+      table: TableProvider,
+      browser: BrowserProvider,
     },
     servers: commonConfig.get('servers'),
-
-    env: commonConfig.get('env'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
 
@@ -114,6 +126,12 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
       ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
     },
 
     apps: {
@@ -146,6 +164,10 @@ export default async function ({ readConfigFile }) {
       console: {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
+      },
+      account: {
+        pathname: '/app/kibana',
+        hash: '/account',
       },
       home: {
         pathname: '/app/kibana',

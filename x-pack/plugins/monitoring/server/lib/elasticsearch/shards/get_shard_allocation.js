@@ -9,24 +9,34 @@ import { checkParam } from '../../error_missing_required';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
 
-export function handleResponse(nodeResolver) {
-  return response => {
-    const hits = get(response, 'hits.hits');
-    if (!hits) {
-      return [];
+export function handleResponse(response) {
+  const hits = get(response, 'hits.hits');
+  if (!hits) {
+    return [];
+  }
+
+  // deduplicate any shards from earlier days with the same cluster state state_uuid
+  const uniqueShards = new Set();
+
+  // map into object with shard and source properties
+  return hits.reduce((shards, hit) => {
+    const shard = hit._source.shard;
+
+    if (shard) {
+      // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
+      const shardId = `${shard.index}-${shard.shard}-${shard.primary}-${shard.relocating_node}-${shard.node}`;
+
+      if (!uniqueShards.has(shardId)) {
+        shards.push(shard);
+        uniqueShards.add(shardId);
+      }
     }
 
-    // map into object with shard and source properties
-    return hits.map(hit => {
-      return {
-        ...hit._source.shard,
-        resolver: get(hit, `_source.source_node[${nodeResolver}]`)
-      };
-    });
-  };
+    return shards;
+  }, []);
 }
 
-export function getShardAllocation(req, esIndexPattern, { nodeResolver, shardFilter, stateUuid, showSystemIndices = false }) {
+export function getShardAllocation(req, esIndexPattern, { shardFilter, stateUuid, showSystemIndices = false }) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardAllocation');
 
   const filters = [ { term: { state_uuid: stateUuid } }, shardFilter ];
@@ -52,5 +62,5 @@ export function getShardAllocation(req, esIndexPattern, { nodeResolver, shardFil
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params)
-    .then(handleResponse(nodeResolver));
+    .then(handleResponse);
 }

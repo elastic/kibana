@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import ngMock from 'ng_mock';
 import { ReactVisTypeProvider } from '../../vis_types/react_vis_type';
 
 describe('React Vis Type', function () {
+
   let ReactVisType;
 
   const visConfig = {

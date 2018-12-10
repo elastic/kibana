@@ -6,13 +6,17 @@
 
 import { resolve } from 'path';
 import { initTransactionsApi } from './server/routes/transactions';
+import { initTransactionGroupsApi } from './server/routes/transaction_groups';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
+import { initTracesApi } from './server/routes/traces';
+import mappings from './mappings';
+import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export function apm(kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
@@ -22,26 +26,39 @@ export function apm(kibana) {
         title: 'APM',
         description: 'APM for the Elastic Stack',
         main: 'plugins/apm/index',
-        icon: 'plugins/apm/icon.svg'
+        icon: 'plugins/apm/icon.svg',
+        euiIconType: 'apmApp',
+        order: 8100
       },
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPattern: config.get('xpack.apm.indexPattern')
+          apmIndexPatternTitle: config.get('apm_oss.indexPattern') // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
         };
       },
-      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav']
+      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
+      savedObjectSchemas: {
+        'apm-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
+      mappings
     },
 
     config(Joi) {
       return Joi.object({
+        // display menu item
         ui: Joi.object({
-          enabled: Joi.boolean().default(true)
+          enabled: Joi.boolean().default(true),
+          transactionGroupBucketSize: Joi.number().default(100)
         }).default(),
+
+        // enable plugin
         enabled: Joi.boolean().default(true),
-        indexPattern: Joi.string().default('apm*'),
+
+        // buckets
         minimumBucketSize: Joi.number().default(15),
         bucketTargetCount: Joi.number().default(27)
       }).default();
@@ -49,9 +66,12 @@ export function apm(kibana) {
 
     init(server) {
       initTransactionsApi(server);
+      initTransactionGroupsApi(server);
+      initTracesApi(server);
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);
+      makeApmUsageCollector(server);
     }
   });
 }

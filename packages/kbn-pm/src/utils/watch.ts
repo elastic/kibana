@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Observable, Subject } from 'rxjs';
+import * as Rx from 'rxjs';
+import { catchError, delay, finalize, first, map, mapTo, mergeMap, timeout } from 'rxjs/operators';
 
 /**
  * Number of milliseconds we wait before we fall back to the default watch handler.
@@ -48,42 +49,48 @@ interface IWatchOptions {
 }
 
 function getWatchHandlers(
-  buildOutput$: Observable<string>,
+  buildOutput$: Rx.Observable<string>,
   {
     handlerDelay = defaultHandlerDelay,
     handlerReadinessTimeout = defaultHandlerReadinessTimeout,
   }: IWatchOptions
 ) {
-  const typescriptHandler = buildOutput$
-    .first(data => data.includes('$ tsc'))
-    .map(() =>
-      buildOutput$
-        .first(data => data.includes('Compilation complete.'))
-        .mapTo('tsc')
-    );
+  const typescriptHandler = buildOutput$.pipe(
+    first(data => data.includes('$ tsc')),
+    map(() =>
+      buildOutput$.pipe(
+        first(data => data.includes('Compilation complete.')),
+        mapTo('tsc')
+      )
+    )
+  );
 
-  const webpackHandler = buildOutput$
-    .first(data => data.includes('$ webpack'))
-    .map(() =>
-      buildOutput$.first(data => data.includes('Chunk Names')).mapTo('webpack')
-    );
+  const webpackHandler = buildOutput$.pipe(
+    first(data => data.includes('$ webpack')),
+    map(() =>
+      buildOutput$.pipe(
+        first(data => data.includes('Chunk Names')),
+        mapTo('webpack')
+      )
+    )
+  );
 
-  const defaultHandler = Observable.of(undefined)
-    .delay(handlerReadinessTimeout)
-    .map(() =>
-      buildOutput$.timeout(handlerDelay).catch(() => Observable.of('timeout'))
-    );
+  const defaultHandler = Rx.of(undefined).pipe(
+    delay(handlerReadinessTimeout),
+    map(() =>
+      buildOutput$.pipe(
+        timeout(handlerDelay),
+        catchError(() => Rx.of('timeout'))
+      )
+    )
+  );
 
   return [typescriptHandler, webpackHandler, defaultHandler];
 }
 
-export function waitUntilWatchIsReady(
-  stream: NodeJS.EventEmitter,
-  opts: IWatchOptions = {}
-) {
-  const buildOutput$ = new Subject<string>();
-  const onDataListener = (data: Buffer) =>
-    buildOutput$.next(data.toString('utf-8'));
+export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter, opts: IWatchOptions = {}) {
+  const buildOutput$ = new Rx.Subject<string>();
+  const onDataListener = (data: Buffer) => buildOutput$.next(data.toString('utf-8'));
   const onEndListener = () => buildOutput$.complete();
   const onErrorListener = (e: Error) => buildOutput$.error(e);
 
@@ -91,14 +98,16 @@ export function waitUntilWatchIsReady(
   stream.once('error', onErrorListener);
   stream.on('data', onDataListener);
 
-  return Observable.race(getWatchHandlers(buildOutput$, opts))
-    .mergeMap(whenReady => whenReady)
-    .finally(() => {
-      stream.removeListener('data', onDataListener);
-      stream.removeListener('end', onEndListener);
-      stream.removeListener('error', onErrorListener);
+  return Rx.race(getWatchHandlers(buildOutput$, opts))
+    .pipe(
+      mergeMap(whenReady => whenReady),
+      finalize(() => {
+        stream.removeListener('data', onDataListener);
+        stream.removeListener('end', onEndListener);
+        stream.removeListener('error', onErrorListener);
 
-      buildOutput$.complete();
-    })
+        buildOutput$.complete();
+      })
+    )
     .toPromise();
 }

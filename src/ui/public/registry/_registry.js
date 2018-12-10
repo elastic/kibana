@@ -53,7 +53,7 @@ const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor', 'invokePro
  *
  * # init
  * @param {Function} [spec.constructor] - an injectable function that is called when
- *                                      the registry is first instanciated by the app.
+ *                                      the registry is first instantiated by the app.
  * @param {boolean} [spec.filter] - function that will be used to filter items before
  *                                registering them. Function will called on each item and
  *                                should return true to keep the item (register it) or

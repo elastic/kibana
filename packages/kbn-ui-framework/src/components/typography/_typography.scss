@@ -4,7 +4,7 @@
 .kuiTitle {
   margin: 0; /* 1 */
   font-weight: $kuiFontWeightRegular; /* 1 */
-  font-size: $typcographyTitleFontSize;
+  font-size: $typographyTitleFontSize;
 
   @include darkTheme {
     color: $kuiTextColor--darkTheme;

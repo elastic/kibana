@@ -18,8 +18,6 @@ function formatHit(hit) {
 
 async function fetchSettings(callWithRequest, indexName) {
   const params = {
-    ignoreUnavailable: true,
-    allowNoIndices: false,
     expandWildcards: 'none',
     flatSettings: false,
     local: false,
@@ -37,20 +35,20 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/index_management/settings/{indexName}',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexName } = request.params;
       try {
         const hit = await fetchSettings(callWithRequest, indexName);
         const response = formatHit(hit);
 
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          throw wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

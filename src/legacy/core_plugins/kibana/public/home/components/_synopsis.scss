@@ -1,0 +1,27 @@
+// SASSTODO: Move out of being specifically in home
+// ML uses these classes as well
+.synopsis {
+  display: flex;
+  flex-grow: 1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+
+    .synopsisTitle {
+      text-decoration: underline;
+    }
+  }
+}
+
+
+.synopsisTitle {
+  font-size: $euiSize;
+  font-weight: normal;
+  color: $euiColorPrimary;
+}
+
+.synopsisIcon {
+  padding-top: $euiSizeS;
+}

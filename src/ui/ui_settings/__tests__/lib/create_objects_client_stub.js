@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { SavedObjectsClient } from '../../../../server/saved_objects/client';
+import { SavedObjectsClient } from '../../../../server/saved_objects';
 
 export const savedObjectsClientErrors = SavedObjectsClient.errors;
 

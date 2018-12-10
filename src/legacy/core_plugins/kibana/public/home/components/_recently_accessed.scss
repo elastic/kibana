@@ -1,0 +1,29 @@
+@include euiBreakpoint('xs', 's') {
+  .homRecentlyAccessed__separator {
+    display: none;
+  }
+}
+
+.homRecentlyAccessed__item {
+  overflow: hidden;
+  max-width: 300px;
+}
+
+.homRecentlyAccessed__anchor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.homRecentlyAccessed__longLink {
+  @include euiTextTruncate;
+  line-height: normal;
+}
+
+.homRecentlyAccessed__flexItem {
+  max-width: 1000px;
+}
+
+.homRecentlyAccessed__dropdownLink,
+.homRecentlyAccessed__dropdownLabel {
+  white-space: nowrap;
+}

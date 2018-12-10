@@ -99,7 +99,11 @@ describe('IndexedArray', function () {
       reg.push(firstUser);
 
       // end up with the same structure that is in the users fixture
-      expect(reg.byGroup).to.eql(users.byGroup);
+      expect(Object.keys(reg.byGroup).length).to.be(Object.keys(users.byGroup).length);
+      for (const group of Object.keys(reg.byGroup)) {
+        expect(reg.byGroup[group].toJSON()).to.eql(users.byGroup[group]);
+      }
+
       expect(reg.inIdOrder).to.eql(users.inIdOrder);
     });
 

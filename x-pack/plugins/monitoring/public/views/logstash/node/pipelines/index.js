@@ -16,12 +16,12 @@ import {
   isPipelineMonitoringSupportedInVersion
 } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 const getPageData = ($injector) => {
   const $route = $injector.get('$route');
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
-  const timefilter = $injector.get('timefilter');
   const Private = $injector.get('Private');
 
   const logstashUuid = $route.current.params.uuid;
@@ -42,12 +42,18 @@ const getPageData = ($injector) => {
     });
 };
 
-function makeUpgradeMessage(logstashVersion) {
+function makeUpgradeMessage(logstashVersion, i18n) {
   if (isPipelineMonitoringSupportedInVersion(logstashVersion)) {
     return null;
   }
 
-  return `Pipeline monitoring is only available in Logstash version 6.0.0 or higher. This node is running version ${logstashVersion}.`;
+  return i18n('xpack.monitoring.logstash.node.pipelines.notAvailableDescription', {
+    defaultMessage:
+    'Pipeline monitoring is only available in Logstash version 6.0.0 or higher. This node is running version {logstashVersion}.',
+    values: {
+      logstashVersion
+    }
+  });
 }
 
 uiRoutes
@@ -60,28 +66,33 @@ uiRoutes
       },
       pageData: getPageData
     },
-    controller($injector, $scope) {
+    controller($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
-      const timefilter = $injector.get('timefilter');
       const title = $injector.get('title');
       const $executor = $injector.get('$executor');
 
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
       $scope.pageData = $route.current.locals.pageData;
 
-      $scope.upgradeMessage = makeUpgradeMessage($scope.pageData.nodeSummary.version);
+      $scope.upgradeMessage = makeUpgradeMessage($scope.pageData.nodeSummary.version, i18n);
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 
-      title($scope.cluster, `Logstash - ${$scope.pageData.nodeSummary.name} - Pipelines`);
+      const routeTitle = i18n('xpack.monitoring.logstash.node.pipelines.routeTitle', {
+        defaultMessage: 'Logstash - {nodeName} - Pipelines',
+        values: {
+          nodeName: $scope.pageData.nodeSummary.name
+        }
+      });
+      title($scope.cluster, routeTitle);
 
       $executor.register({
         execute: () => getPageData($injector),
         handleResponse: (response) => $scope.pageData = response
       });
 
-      $executor.start();
+      $executor.start($scope);
 
       $scope.$on('$destroy', $executor.destroy);
     }

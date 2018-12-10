@@ -7,6 +7,7 @@
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes.when('/overview', {
   template,
@@ -20,8 +21,7 @@ uiRoutes.when('/overview', {
       return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
     }
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -29,7 +29,7 @@ uiRoutes.when('/overview', {
     $scope.cluster = $route.current.locals.cluster;
 
     const title = $injector.get('title');
-    title($scope.cluster, 'Overview');
+    title($scope.cluster, i18n('xpack.monitoring.cluster.overviewTitle', { defaultMessage: 'Overview' }));
 
     const $executor = $injector.get('$executor');
     const monitoringClusters = $injector.get('monitoringClusters');
@@ -41,7 +41,7 @@ uiRoutes.when('/overview', {
       }
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

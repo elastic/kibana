@@ -17,7 +17,7 @@ import {
   ERROR_EXC_HANDLED,
   ERROR_CULPRIT
 } from '../../../../../common/constants';
-import { createWatch } from '../../../../services/rest';
+import { createWatch } from '../../../../services/rest/watcher';
 
 function getSlackPathUrl(slackUrl) {
   if (slackUrl) {
@@ -35,7 +35,7 @@ export async function createErrorGroupWatch({
   timeRange
 }) {
   const id = `apm-${uuid.v4()}`;
-  const apmIndexPattern = chrome.getInjected('apmIndexPattern');
+  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
 
   const slackUrlPath = getSlackPathUrl(slackUrl);
   const emailTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"
@@ -69,7 +69,7 @@ export async function createErrorGroupWatch({
     input: {
       search: {
         request: {
-          indices: [apmIndexPattern],
+          indices: [apmIndexPatternTitle],
           body: {
             size: 0,
             query: {
@@ -150,9 +150,9 @@ export async function createErrorGroupWatch({
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+        body: `__json__::${JSON.stringify({
           text: slackTemplate
-        })
+        })}`
       }
     };
   }

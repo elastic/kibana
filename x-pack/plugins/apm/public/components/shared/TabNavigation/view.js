@@ -80,7 +80,8 @@ function TabNavigation({ urlParams, location }) {
               <TooltipOverlay
                 content={
                   <span>
-                    Transaction type:<br />
+                    Transaction type:
+                    <br />
                     {label}
                   </span>
                 }

@@ -57,7 +57,7 @@ export function createReplaceStream(toReplace, replacement) {
         // never found this would lead to us buffering the entire stream.
         //
         // Instead, we only keep enough buffer to complete a potentially
-        // patial instance of `toReplace`
+        // partial instance of `toReplace`
         if (buffer.length > toReplace.length) {
           // the entire buffer except the last `toReplace.length` bytes
           // so that if all but one byte from `toReplace` is in the buffer,

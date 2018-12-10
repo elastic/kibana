@@ -29,7 +29,7 @@ module.exports = (function () {
     const dataForServer = JSON.stringify(request);
     $.ajax({
       type: 'POST',
-      url: 'http://localhost:9200/' + indexName + '/_search',
+      url: 'http://localhost:9200/' + indexName + '/_search?rest_total_hits_as_int=true',
       dataType: 'json',
       contentType: 'application/json;charset=utf-8', //Not sure why this was necessary - worked without elsewhere
       async: true,
@@ -1277,7 +1277,7 @@ module.exports = (function () {
         });
 
         buckets.forEach(function (bucket) {
-          // We callibrate line thickness based on % of max weight of
+          // We calibrate line thickness based on % of max weight of
           // all edges (including the edges we may already have in the workspace)
           const ids = bucket.key.split("|");
           if(ids.length === 2) {

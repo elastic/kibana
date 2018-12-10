@@ -17,8 +17,6 @@ async function flushIndices(callWithRequest, indices) {
   const params = {
     force: true,
     waitIfOngoing: true,
-    ignoreUnavailable: true,
-    allowNoIndices: false,
     expandWildcards: 'none',
     index: indices
   };
@@ -33,7 +31,7 @@ export function registerFlushRoute(server) {
   server.route({
     path: '/api/index_management/indices/flush',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const indices = getIndexArrayFromPayload(request.payload);
 
@@ -41,13 +39,13 @@ export function registerFlushRoute(server) {
         await flushIndices(callWithRequest, indices);
 
         //TODO: Should we check acknowledged = true?
-        reply();
+        return h.response();
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          throw wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

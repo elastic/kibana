@@ -30,10 +30,10 @@ export const createBulkGetRoute = (prereqs) => ({
         id: Joi.string().required(),
       }).required())
     },
-    handler(request, reply) {
+    handler(request) {
       const { savedObjectsClient } = request.pre;
 
-      reply(savedObjectsClient.bulkGet(request.payload));
+      return savedObjectsClient.bulkGet(request.payload);
     }
   }
 });

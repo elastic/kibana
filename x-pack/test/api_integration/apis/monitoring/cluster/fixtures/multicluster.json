@@ -85,6 +85,14 @@
       "memory_limit": 0,
       "count": 0
     },
+    "apm": {
+      "totalEvents": null,
+      "memRss": null,
+      "memTotal": null,
+      "apms": {
+        "total": null
+      }
+    },
     "beats": {
       "totalEvents": null,
       "bytesSent": null,
@@ -191,6 +199,14 @@
       "memory_size": 0,
       "memory_limit": 0,
       "count": 0
+    },
+    "apm": {
+      "totalEvents": null,
+      "memRss": null,
+      "memTotal": null,
+      "apms": {
+        "total": null
+      }
     },
     "beats": {
       "totalEvents": null,
@@ -300,6 +316,14 @@
       "memory_size": 231141376,
       "memory_limit": 1501560832,
       "count": 1
+    },
+    "apm": {
+      "totalEvents": null,
+      "memRss": null,
+      "memTotal": null,
+      "apms": {
+        "total": null
+      }
     },
     "beats": {
       "totalEvents": null,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { resolve } from 'path';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -14,12 +15,13 @@ import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
 import { validateConfig } from './server/lib/validate_config';
+import { validateMaxContentLength } from './server/lib/validate_max_content_length';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
-import { createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
+import { PHANTOM, createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
-import { callClusterFactory } from '../xpack_main';
 import { getReportingUsageCollector } from './server/usage';
+import { i18n } from '@kbn/i18n';
 
 const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -33,12 +35,11 @@ export const reporting = (kibana) => {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     uiExports: {
-      navbarExtensions: [
-        'plugins/reporting/controls/discover',
-        'plugins/reporting/controls/visualize',
-        'plugins/reporting/controls/dashboard',
+      shareContextMenuExtensions: [
+        'plugins/reporting/share_context_menu/register_csv_reporting',
+        'plugins/reporting/share_context_menu/register_reporting',
       ],
-      hacks: [ 'plugins/reporting/hacks/job_completion_notifier'],
+      hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {
@@ -48,9 +49,13 @@ export const reporting = (kibana) => {
       },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-          name: 'PDF footer image',
+          name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
+            defaultMessage: 'PDF footer image'
+          }),
           value: null,
-          description: `Custom image to use in the PDF's footer`,
+          description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
+            defaultMessage: `Custom image to use in the PDF's footer`
+          }),
           type: 'image',
           options: {
             maxSize: {
@@ -73,12 +78,12 @@ export const reporting = (kibana) => {
         }).default(),
         queue: Joi.object({
           indexInterval: Joi.string().default('week'),
+          pollEnabled: Joi.boolean().default(true),
           pollInterval: Joi.number().integer().default(3000),
           pollIntervalErrorMultiplier: Joi.number().integer().default(10),
-          timeout: Joi.number().integer().default(30000),
+          timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
-          record: Joi.boolean().default(false),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({
             width: Joi.number().integer().default(1950),
@@ -89,7 +94,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),
+            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: make chromium the only valid option in 7.0
             autoDownload: Joi.boolean().when('$dev', {
               is: true,
               then: Joi.default(true),
@@ -144,10 +149,13 @@ export const reporting = (kibana) => {
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
-      validateConfig(config, message => server.log(['reporting', 'warning'], message));
+      const logWarning = message => server.log(['reporting', 'warning'], message);
+
+      validateConfig(config, logWarning);
+      validateMaxContentLength(server, logWarning);
       logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
-      const { xpack_main: xpackMainPlugin, monitoring: monitoringPlugin } = server.plugins;
+      const { xpack_main: xpackMainPlugin } = server.plugins;
 
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
@@ -157,13 +165,8 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Register a function to with Monitoring to manage the collection of usage stats
-      monitoringPlugin.status.once('green', () => {
-        if (monitoringPlugin.collectorSet) {
-          const callCluster = callClusterFactory(server).getCallClusterInternal(); // uses callWithInternal as this is for internal collection
-          monitoringPlugin.collectorSet.register(getReportingUsageCollector(server, callCluster));
-        }
-      });
+      // Register a function with server to manage the collection of usage stats
+      server.usage.collectorSet.register(getReportingUsageCollector(server));
 
       server.expose('browserDriverFactory', await createBrowserDriverFactory(server));
       server.expose('queue', createQueueFactory(server));
@@ -175,6 +178,15 @@ export const reporting = (kibana) => {
 
     deprecations: function ({ unused }) {
       return [
+        (settings, log) => {
+          const isPhantom = get(settings, 'capture.browser.type') === PHANTOM;
+          if (isPhantom) {
+            log(
+              'Phantom browser support for Reporting will be removed and Chromium will be the only valid option starting in 7.0.0. ' +
+              'Use the default `chromium` value for `xpack.reporting.capture.browser.type` to dismiss this warning.'
+            );
+          }
+        },
         unused("capture.concurrency"),
         unused("capture.timeout"),
         unused("capture.settleTime"),

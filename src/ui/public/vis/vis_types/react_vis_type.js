@@ -19,14 +19,15 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { VisTypeProvider } from './';
+import chrome from '../../chrome';
+import { BaseVisTypeProvider } from './base_vis_type';
 
-export function ReactVisTypeProvider(Private, getAppState, config) {
-  const VisType = Private(VisTypeProvider);
+export function ReactVisTypeProvider(Private) {
+  const BaseVisType = Private(BaseVisTypeProvider);
 
   class ReactVisController {
-    constructor(el, vis) {
-      this.el = el;
+    constructor(element, vis) {
+      this.el = element;
       this.vis = vis;
     }
 
@@ -35,10 +36,10 @@ export function ReactVisTypeProvider(Private, getAppState, config) {
 
       return new Promise((resolve) => {
         const Component = this.vis.type.visConfig.component;
+        const config = chrome.getUiSettingsClient();
         render(<Component
           config={config}
           vis={this.vis}
-          appState={getAppState()}
           visData={visData}
           renderComplete={resolve}
           updateStatus={updateStatus}
@@ -51,11 +52,12 @@ export function ReactVisTypeProvider(Private, getAppState, config) {
     }
   }
 
-  class ReactVisType extends VisType {
+  class ReactVisType extends BaseVisType {
     constructor(opts) {
-      opts.visualization = ReactVisController;
-
-      super(opts);
+      super({
+        ...opts,
+        visualization: ReactVisController
+      });
 
       if (!this.visConfig.component) {
         throw new Error('Missing component for ReactVisType');

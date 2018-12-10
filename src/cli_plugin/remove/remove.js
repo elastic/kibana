@@ -24,12 +24,11 @@ import rimraf from 'rimraf';
 
 export default function remove(settings, logger) {
   try {
-    errorIfXPackRemove(settings, logger);
-
     let stat;
     try {
       stat = statSync(settings.pluginPath);
     } catch (e) {
+      errorIfXPackRemove(settings, logger);
       throw new Error(`Plugin [${settings.plugin}] is not installed`);
     }
 
@@ -39,6 +38,7 @@ export default function remove(settings, logger) {
 
     logger.log(`Removing ${settings.plugin}...`);
     rimraf.sync(settings.pluginPath);
+    logger.log('Plugin removal complete');
   } catch (err) {
     logger.error(`Unable to remove plugin because of error: "${err.message}"`);
     process.exit(74); // eslint-disable-line no-process-exit

@@ -6,11 +6,15 @@
 
 export default function ({ loadTestFile }) {
   describe('security app', function () {
+    this.tags('ciGroup4');
+
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./doc_level_security_roles'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./secure_roles_perm'));
     loadTestFile(require.resolve('./field_level_security'));
+    loadTestFile(require.resolve('./rbac_phase1'));
+    loadTestFile(require.resolve('./user_email'));
   });
 }

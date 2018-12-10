@@ -27,7 +27,7 @@ import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_
 import { FilterBarLibMapFlattenAndWrapFiltersProvider } from './lib/map_flatten_and_wrap_filters';
 import { FilterBarLibExtractTimeFilterProvider } from './lib/extract_time_filter';
 import { FilterBarLibFilterOutTimeBasedFilterProvider } from './lib/filter_out_time_based_filter';
-import { FilterBarLibChangeTimeFilterProvider } from './lib/change_time_filter';
+import { changeTimeFilter } from './lib/change_time_filter';
 import { FilterBarQueryFilterProvider } from './query_filter';
 import { compareFilters } from './lib/compare_filters';
 import { uiModules } from '../modules';
@@ -42,7 +42,6 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
   const mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
   const filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
-  const changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   return {
@@ -77,18 +76,18 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
       $scope.filterNavToggle = {
         isOpen: true,
-        tooltipContent: 'Collapse to hide filters'
+        tooltipContent: 'Collapse filter bar \n to show less'
       };
 
       $scope.toggleFilterShown = () => {
         const collapser = $elem.find('.filter-nav-link__collapser');
         const filterPanelPill = $elem.find('.filter-panel__pill');
         if ($scope.filterNavToggle.isOpen) {
-          $scope.filterNavToggle.tooltipContent = 'Expand to show filters';
+          $scope.filterNavToggle.tooltipContent = 'Expand filter bar \n to show more';
           collapser.attr('aria-expanded', 'false');
           filterPanelPill.attr('style', 'width: calc(100% - 80px)');
         } else {
-          $scope.filterNavToggle.tooltipContent = 'Collapse to hide filters';
+          $scope.filterNavToggle.tooltipContent = 'Collapse filter bar \n to show less';
           collapser.attr('aria-expanded', 'true');
           filterPanelPill.attr('style', 'width: auto');
         }

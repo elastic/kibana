@@ -147,6 +147,14 @@ notifications {
   }
 }
 
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  .kibana-nav-actions .active {
+    background-color: @gray3;
+    color: @white;
+  }
+}
+
 //== Nav tweaks
 .nav-condensed > li > a {
   padding-top: 2px;
@@ -187,30 +195,10 @@ kbn-table, .kbn-table {
     white-space: nowrap;
     padding-right: 10px;
 
-    .table-header-move {
-      border: none;
-      background: none;
-      padding: 0;
-    }
-
-    .table-header-move, .table-header-sortchange {
-      opacity: 0;
-
-      &:focus {
-        opacity: 1;
-      }
-    }
-
     .fa {
       font-size: 1.1em;
     }
 
-  }
-
-  th:hover {
-    .table-header-move, .table-header-sortchange {
-      opacity: 1;
-    }
   }
 }
 

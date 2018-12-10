@@ -8,12 +8,11 @@
 
 import _ from 'lodash';
 
-import 'plugins/kibana/visualize/styles/main.less';
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
@@ -21,10 +20,10 @@ import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { getCreateSingleMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
-import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { getIndexedFields } from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
 import { changeJobIDCase } from 'plugins/ml/jobs/new_job/simple/components/general_job_details/change_job_id_case';
 import { CHART_STATE, JOB_STATE } from 'plugins/ml/jobs/new_job/simple/components/constants/states';
@@ -32,11 +31,12 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } 
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
-  createSearchItems,
-  createResultsUrl,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { SingleMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
@@ -44,9 +44,12 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 import template from './create_job.html';
 
+import { timefilter } from 'ui/timefilter';
+
 uiRoutes
   .when('/jobs/new_job/simple/single_metric', {
     template,
+    k7Breadcrumbs: getCreateSingleMetricJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
@@ -66,7 +69,7 @@ module
     $scope,
     $route,
     $filter,
-    timefilter,
+    $timeout,
     Private,
     AppState) {
 
@@ -113,12 +116,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
@@ -198,6 +202,7 @@ module
       end: 0,
       timeField: indexPattern.timeFieldName,
       indexPattern: undefined,
+      usesSavedSearch: (savedSearch.id !== undefined),
       query,
       filters,
       combinedQuery,
@@ -245,8 +250,8 @@ module
 
     function setTime() {
       $scope.ui.bucketSpanValid = true;
-      $scope.formConfig.start = dateMath.parse(timefilter.time.from).valueOf();
-      $scope.formConfig.end = dateMath.parse(timefilter.time.to).valueOf();
+      $scope.formConfig.start = dateMath.parse(timefilter.getTime().from).valueOf();
+      $scope.formConfig.end = dateMath.parse(timefilter.getTime().to).valueOf();
       $scope.formConfig.format = 'epoch_millis';
 
       const bucketSpanInterval = parseInterval($scope.formConfig.bucketSpan);
@@ -395,11 +400,13 @@ module
                     $scope.formConfig.resultsIntervalSeconds = bucketSpanSeconds;
                   }
 
-                  $scope.resultsUrl = createResultsUrl(
+                  $scope.resultsUrl = mlJobService.createResultsUrl(
                     [$scope.formConfig.jobId],
                     $scope.formConfig.start,
                     $scope.formConfig.end,
                     'timeseriesexplorer');
+
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
 
                   loadCharts();
                 })
@@ -451,6 +458,7 @@ module
               }
             } else {
               $scope.jobState = JOB_STATE.FINISHED;
+              focusOnResultsLink('job_finished_view_results_link', $timeout);
             }
 
             if (ignoreModel) {
@@ -563,18 +571,17 @@ module
     };
 
     $scope.setFullTimeRange = function () {
-      mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
+      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
-    $scope.$listen(timefilter, 'fetch', $scope.loadVis);
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
     });
 
     $scope.$evalAsync(() => {
-    // populate the fields with any settings from the URL
-      populateAppStateSettings(appState, $scope);
+      preLoadJob($scope, appState);
     });
 
   });

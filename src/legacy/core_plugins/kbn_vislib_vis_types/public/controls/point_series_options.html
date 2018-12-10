@@ -1,0 +1,55 @@
+<div>
+  <div class="vis-option-item" ng-show="vis.hasSchemaAgg('segment', 'date_histogram')">
+    <label>
+      <input type="checkbox" ng-model="editorState.params.addTimeMarker" ng-checked="editorState.params.addTimeMarker">
+      Current time marker
+    </label>
+  </div>
+  <div class="vis-option-item">
+    <label>
+      <input type="checkbox" ng-model="editorState.params.setYExtents">
+      Set Y-Axis Extents
+    </label>
+    <div ng-if="editorState.params.setYExtents">
+      <label>
+        y-max
+        <input name="yMax"
+               class="form-control"
+               type="number"
+               step="0.1"
+               greater-than="{{editorState.params.yAxis.min}}"
+               ng-model="editorState.params.yAxis.max"
+               ng-required="editorState.params.setYExtents">
+      </label>
+      <div ng-show="editorState.params.yAxis.min >= editorState.params.yAxis.max">
+        <span class="text-danger">Max must be greater than min</span>
+      </div>
+      <label>
+        y-min
+        <input name="yMin"
+               class="form-control"
+               type="number"
+               step="0.1"
+               less-than="{{editorState.params.yAxis.max}}"
+               greater-than="{{editorState.params.scale === 'log' ? 0 : ''}}"
+               ng-model="editorState.params.yAxis.min"
+               ng-required="editorState.params.setYExtents">
+      </label>
+    </div>
+    <div ng-show="editorState.params.setYExtents && editorState.params.scale === 'log' && editorState.params.yAxis.min <= 0">
+      <span class="text-danger">Min must exceed 0 when a log scale is selected</span>
+    </div>
+    <div class="vis-option-item">
+      <label>
+        <input type="checkbox" ng-model="editorState.params.defaultYExtents" ng-disabled="editorState.params.setYExtents">
+        Scale Y-Axis to Data Bounds
+      </label>
+    </div>
+    <div class="vis-option-item">
+      <label>
+        <input type="checkbox" ng-model="editorState.params.orderBucketsBySum">
+        Order buckets by descending sum
+      </label>
+    </div>
+  </div>
+</div>

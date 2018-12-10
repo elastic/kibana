@@ -26,5 +26,11 @@ export { DocTableProvider } from './doc_table';
 export { ScreenshotsProvider } from './screenshots';
 export { FailureDebuggingProvider } from './failure_debugging';
 export { VisualizeListingTableProvider } from './visualize_listing_table';
+export { FlyoutProvider } from './flyout';
+export { EmbeddingProvider } from './embedding';
+export { ComboBoxProvider } from './combo_box';
+export { RenderableProvider } from './renderable';
+export { TableProvider } from './table';
+export { BrowserProvider } from './browser';
 
 export * from './dashboard';

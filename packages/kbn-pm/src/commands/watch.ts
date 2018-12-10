@@ -69,9 +69,7 @@ export const WatchCommand: ICommand = {
     const projectNames = Array.from(projectsToWatch.keys());
     log.write(
       chalk.bold(
-        chalk.green(
-          `Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`
-        )
+        chalk.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)
       )
     );
 
@@ -79,10 +77,7 @@ export const WatchCommand: ICommand = {
     // topological batching and push it to the last one-entry batch manually.
     const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
 
-    const batchedProjects = topologicallyBatchProjects(
-      projectsToWatch,
-      projectGraph
-    );
+    const batchedProjects = topologicallyBatchProjects(projectsToWatch, projectGraph);
 
     if (shouldWatchKibanaProject) {
       batchedProjects.push([projects.get(kibanaProjectName)!]);
@@ -94,11 +89,7 @@ export const WatchCommand: ICommand = {
       );
 
       log.write(
-        chalk.bold(
-          `[${chalk.green(
-            pkg.name
-          )}] Initial build completed (${completionHint}).`
-        )
+        chalk.bold(`[${chalk.green(pkg.name)}] Initial build completed (${completionHint}).`)
       );
     });
   },

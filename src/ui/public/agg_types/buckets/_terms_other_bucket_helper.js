@@ -18,10 +18,7 @@
  */
 
 import _ from 'lodash';
-import { AggConfig } from '../../vis/agg_config';
-import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
-import { buildExistsFilter } from '../../filter_manager/lib/exists';
-import { buildQueryFromFilters } from '../../courier/data_source/build_query/from_filters';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -102,6 +99,7 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
   );
 };
 
+
 const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const bucketAggs = aggConfigs.filter(agg => agg.type.type === 'buckets');
   const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
@@ -109,12 +107,11 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
 
   // create filters aggregation
-  const filterAgg = new AggConfig(aggConfigs[index].vis, {
+  const filterAgg = aggConfigs.createAggConfig({
     type: 'filters',
     id: 'other',
-    schema: {
-      group: 'buckets'
-    }
+  }, {
+    addToAggConfigs: false,
   });
 
   // nest all the child aggregations of aggWithOtherBucket
@@ -132,8 +129,8 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     if (aggIndex < index) {
       _.each(agg.buckets, (bucket, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
-        const filter = _.cloneDeep(bucket.filter) || currentAgg.createFilter(bucketKey);
-        const newFilters = [...filters, filter];
+        const filter = _.cloneDeep(bucket.filters) || currentAgg.createFilter(bucketKey);
+        const newFilters = _.flatten([...filters, filter]);
         walkBucketTree(newAggIndex, bucket, newAgg.id, newFilters, `${key}-${bucketKey.toString()}`);
       });
       return;
@@ -175,12 +172,11 @@ const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherA
     const phraseFilter = buildPhrasesFilter(otherAgg.params.field, requestFilterTerms, otherAgg.params.field.indexPattern);
     phraseFilter.meta.negate = true;
     bucket.filters = [ phraseFilter ];
-    bucket.key = otherAgg.params.otherBucketLabel;
+    bucket.key = '__other__';
 
     if (aggResultBuckets.some(bucket => bucket.key === '__missing__')) {
       bucket.filters.push(buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern));
     }
-
     aggResultBuckets.push(bucket);
   });
   return updatedResponse;
@@ -190,12 +186,13 @@ const updateMissingBucket = (response, aggConfigs, agg) => {
   const updatedResponse = _.cloneDeep(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
   aggResultBuckets.forEach(bucket => {
-    bucket.key = agg.params.missingBucketLabel;
-    const existsFilter = buildExistsFilter(agg.params.field, agg.params.field.indexPattern);
-    existsFilter.meta.negate = true;
-    bucket.filters = [ existsFilter ];
+    bucket.key = '__missing__';
   });
   return updatedResponse;
 };
 
-export { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket };
+export {
+  buildOtherBucketAgg,
+  mergeOtherBucketAggResponse,
+  updateMissingBucket,
+};

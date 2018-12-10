@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { AggType } from '../agg_type';
 import { fieldFormats } from '../../registry/field_formats';
 import { createLegacyClass } from '../../utils/legacy_class';
+import { i18n } from '@kbn/i18n';
 
 createLegacyClass(MetricAggType).inherits(AggType);
 function MetricAggType(config) {
@@ -34,7 +35,9 @@ function MetricAggType(config) {
   }, this);
 }
 
-MetricAggType.prototype.subtype = 'Metric Aggregations';
+MetricAggType.prototype.subtype = i18n.translate('common.ui.aggTypes.metrics.metricAggregationsSubtypeTitle', {
+  defaultMessage: 'Metric Aggregations'
+});
 /**
  * Read the values for this metric from the
  * @param  {[type]} bucket [description]
@@ -53,11 +56,11 @@ MetricAggType.prototype.getValue = function (agg, bucket) {
 
 /**
  * Pick a format for the values produced by this agg type,
- * overriden by several metrics that always output a simple
+ * overridden by several metrics that always output a simple
  * number
  *
  * @param  {agg} agg - the agg to pick a format for
- * @return {FieldFromat}
+ * @return {FieldFormat}
  */
 MetricAggType.prototype.getFormat = function (agg) {
   const field = agg.getField();

@@ -8,12 +8,16 @@
 export class LevelLogger {
 
   static createForServer(server, tags) {
-    return new LevelLogger((tags, msg) => server.log(tags, msg), tags);
+    return new LevelLogger(
+      (tags, msg) => server.log(tags, msg),
+      tags,
+      server.config().get('logging.verbose'));
   }
 
-  constructor(logger, tags) {
+  constructor(logger, tags, isVerbose) {
     this._logger = logger;
     this._tags = tags;
+    this.isVerbose = isVerbose;
   }
 
   error(msg, tags = []) {
@@ -33,6 +37,6 @@ export class LevelLogger {
   }
 
   clone(tags) {
-    return new LevelLogger(this._logger, [...this._tags, ...tags]);
+    return new LevelLogger(this._logger, [...this._tags, ...tags], this.isVerbose);
   }
 }

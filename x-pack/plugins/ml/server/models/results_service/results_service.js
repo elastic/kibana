@@ -35,6 +35,7 @@ export function resultsServiceProvider(callWithRequest) {
     threshold,
     earliestMs,
     latestMs,
+    dateFormatTz,
     maxRecords = DEFAULT_QUERY_SIZE,
     maxExamples = DEFAULT_MAX_EXAMPLES) {
 
@@ -119,6 +120,7 @@ export function resultsServiceProvider(callWithRequest) {
 
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: maxRecords,
       body: {
         query: {
@@ -163,7 +165,7 @@ export function resultsServiceProvider(callWithRequest) {
         tableData.interval = (daysDiff < 2 ? 'hour' : 'day');
       }
 
-      tableData.anomalies = buildAnomalyTableItems(records, tableData.interval);
+      tableData.anomalies = buildAnomalyTableItems(records, tableData.interval, dateFormatTz);
 
       // Load examples for any categorization anomalies.
       const categoryAnomalies = tableData.anomalies.filter(item => item.entityName === 'mlcategory');
@@ -200,6 +202,7 @@ export function resultsServiceProvider(callWithRequest) {
   async function getCategoryExamples(jobId, categoryIds, maxExamples) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
       body: {
         query: {
@@ -234,6 +237,7 @@ export function resultsServiceProvider(callWithRequest) {
   async function getCategoryDefinition(jobId, categoryId) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: 1,
       body: {
         query: {

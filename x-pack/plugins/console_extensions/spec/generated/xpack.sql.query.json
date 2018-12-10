@@ -1,0 +1,15 @@
+{
+  "xpack.sql.query": {
+    "url_params": {
+      "format": ""
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/sql"
+    ],
+    "documentation": "Execute SQL"
+  }
+}

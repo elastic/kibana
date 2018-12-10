@@ -30,11 +30,11 @@ export const createDeleteRoute = (prereqs) => ({
         id: Joi.string().required(),
       }).required()
     },
-    handler(request, reply) {
+    handler(request) {
       const { savedObjectsClient } = request.pre;
       const { type, id } = request.params;
 
-      reply(savedObjectsClient.delete(type, id));
+      return savedObjectsClient.delete(type, id);
     }
   }
 });

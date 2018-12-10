@@ -7,7 +7,7 @@
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import mustache from 'mustache';
 import chrome from 'ui/chrome';
-import * as rest from '../../../../../services/rest';
+import * as rest from '../../../../../services/rest/watcher';
 import { isObject, isArray, isString } from 'lodash';
 import esResponse from './esResponse.json';
 
@@ -57,8 +57,9 @@ describe('createErrorGroupWatch', () => {
     expect(tmpl.actions.slack_webhook.webhook.path).toBe(
       '/services/slackid1/slackid2/slackid3'
     );
+
     expect(
-      JSON.parse(tmpl.actions.slack_webhook.webhook.body).text
+      JSON.parse(tmpl.actions.slack_webhook.webhook.body.slice(10)).text
     ).toMatchSnapshot();
   });
 
@@ -74,7 +75,7 @@ describe('createErrorGroupWatch', () => {
     ).toMatchSnapshot();
   });
 
-  it('should format entire template correctly', () => {
+  it('should format template correctly', () => {
     expect(tmpl).toMatchSnapshot();
   });
 
@@ -84,7 +85,7 @@ describe('createErrorGroupWatch', () => {
   });
 });
 
-// Recusively iterate a nested structure and render strings as mustache templates
+// Recursively iterate a nested structure and render strings as mustache templates
 function renderMustache(input, ctx) {
   if (isString(input)) {
     return mustache.render(input, {

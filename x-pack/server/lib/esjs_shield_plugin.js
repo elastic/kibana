@@ -259,6 +259,19 @@
     });
 
     /**
+     * Perform a [shield.getUserPrivileges](Retrieve a user's list of privileges) request
+     *
+     */
+    shield.getUserPrivileges = ca({
+      params: {},
+      urls: [
+        {
+          fmt: '/_xpack/security/user/_privileges'
+        }
+      ]
+    });
+
+    /**
      * Asks Elasticsearch to prepare SAML authentication request to be sent to
      * the 3rd-party SAML identity provider.
      *
@@ -347,18 +360,86 @@
     });
 
     /**
-     * Refreshes SAML access token.
+     * Refreshes an access token.
      *
      * @param {string} grant_type Currently only "refresh_token" grant type is supported.
      * @param {string} refresh_token One-time refresh token that will be exchanged to the new access/refresh token pair.
      *
      * @returns {{access_token: string, type: string, expires_in: number, refresh_token: string}}
      */
-    shield.samlRefreshAccessToken = ca({
+    shield.getAccessToken = ca({
       method: 'POST',
       needBody: true,
       url: {
         fmt: '/_xpack/security/oauth2/token'
+      }
+    });
+
+    /**
+     * Invalidates an access token.
+     *
+     * @param {string} token The access token to invalidate
+     *
+     * @returns {{created: boolean}}
+     */
+    shield.deleteAccessToken = ca({
+      method: 'DELETE',
+      needBody: true,
+      params: {
+        token: {
+          type: 'string'
+        }
+      },
+      url: {
+        fmt: '/_xpack/security/oauth2/token'
+      }
+    });
+
+    shield.getPrivilege = ca({
+      method: 'GET',
+      urls: [{
+        fmt: '/_xpack/security/privilege/<%=privilege%>',
+        req: {
+          privilege: {
+            type: 'string',
+            required: false
+          }
+        }
+      }, {
+        fmt: '/_xpack/security/privilege'
+      }]
+    });
+
+    shield.deletePrivilege = ca({
+      method: 'DELETE',
+      urls: [{
+        fmt: '/_xpack/security/privilege/<%=application%>/<%=privilege%>',
+        req: {
+          application: {
+            type: 'string',
+            required: true
+          },
+          privilege: {
+            type: 'string',
+            required: true
+          }
+        }
+      }]
+    });
+
+    shield.postPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/privilege'
+      }
+    });
+
+    shield.hasPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/user/_has_privileges'
       }
     });
   };

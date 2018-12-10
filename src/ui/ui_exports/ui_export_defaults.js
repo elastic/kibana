@@ -28,29 +28,29 @@ export const UI_EXPORT_DEFAULTS = {
 
   webpackAliases: {
     ui: resolve(ROOT, 'src/ui/public'),
-    ui_framework: resolve(ROOT, 'ui_framework'),
+    '__kibanaCore__$': resolve(ROOT, 'src/core/public'),
     test_harness: resolve(ROOT, 'src/test_harness/public'),
     querystring: 'querystring-browser',
     moment$: resolve(ROOT, 'webpackShims/moment'),
     'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone')
   },
 
-  translationPaths: [
-    resolve(ROOT, 'src/ui/ui_i18n/translations/en.json'),
-  ],
+  translationPaths: [],
+
+  styleSheetPaths: [],
 
   appExtensions: {
     fieldFormatEditors: [
-      'ui/field_format_editor/register'
+      'ui/field_editor/components/field_format_editor/register'
     ],
     visRequestHandlers: [
       'ui/vis/request_handlers/courier',
       'ui/vis/request_handlers/none'
     ],
     visResponseHandlers: [
-      'ui/vis/response_handlers/basic',
+      'ui/vis/response_handlers/vislib',
       'ui/vis/response_handlers/none',
-      'ui/vis/response_handlers/tabify',
+      'ui/vis/response_handlers/legacy',
     ],
     visEditorTypes: [
       'ui/vis/editors/default/default',
@@ -58,6 +58,9 @@ export const UI_EXPORT_DEFAULTS = {
     embeddableFactories: [
       'plugins/kibana/visualize/embeddable/visualize_embeddable_factory_provider',
       'plugins/kibana/discover/embeddable/search_embeddable_factory_provider',
-    ]
+    ],
+    search: [
+      'ui/courier/search_strategy/default_search_strategy',
+    ],
   },
 };

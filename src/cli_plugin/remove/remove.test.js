@@ -24,7 +24,7 @@ import mkdirp from 'mkdirp';
 import Logger from '../lib/logger';
 import remove from './remove';
 import { join } from 'path';
-import { writeFileSync } from 'fs';
+import { writeFileSync, existsSync } from 'fs';
 
 describe('kibana cli', function () {
 
@@ -67,6 +67,23 @@ describe('kibana cli', function () {
       remove(settings, logger);
       expect(logger.error.firstCall.args[0]).toMatch(/not a plugin/);
       expect(process.exit.called).toBe(true);
+    });
+
+    it('remove x-pack if it exists', () => {
+      settings.pluginPath = join(pluginDir, 'x-pack');
+      settings.plugin = 'x-pack';
+      mkdirp.sync(join(pluginDir, 'x-pack'));
+      expect(existsSync(settings.pluginPath)).toEqual(true);
+      remove(settings, logger);
+      expect(existsSync(settings.pluginPath)).toEqual(false);
+    });
+
+    it('distribution error if x-pack does not exist', () => {
+      settings.pluginPath = join(pluginDir, 'x-pack');
+      settings.plugin = 'x-pack';
+      expect(existsSync(settings.pluginPath)).toEqual(false);
+      remove(settings, logger);
+      expect(logger.error.getCall(0).args[0]).toMatch(/Please install the OSS-only distribution to remove X-Pack features/);
     });
 
     it('delete the specified folder.', function () {

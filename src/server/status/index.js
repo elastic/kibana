@@ -18,30 +18,39 @@
  */
 
 import ServerStatus from './server_status';
-import { MetricsCollector } from './metrics_collector';
-import { Metrics } from './metrics_collector/metrics';
+import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
+import { getOpsStatsCollector } from './collectors';
+import Oppsy from 'oppsy';
+import { cloneDeep } from 'lodash';
 
 export function statusMixin(kbnServer, server, config) {
-  const collector = new MetricsCollector(server, config);
   kbnServer.status = new ServerStatus(kbnServer.server);
 
-  const { ['even-better']: evenBetter } = server.plugins;
+  const statsCollector = getOpsStatsCollector(server, kbnServer);
+  const { collectorSet } = server.usage;
+  collectorSet.register(statsCollector);
 
-  if (evenBetter) {
-    const metrics = new Metrics(config, server);
+  const metrics = new Metrics(config, server);
 
-    evenBetter.monitor.on('ops', event => {
-      // for status API (to deprecate in next major)
+  const oppsy = new Oppsy(server);
+  oppsy.on('ops', event => {
+    // Oppsy has a bad race condition that will modify this data before
+    // we ship it off to the buffer. Let's create our copy first.
+    event = cloneDeep(event);
+    // Oppsy used to provide this, but doesn't anymore. Grab it ourselves.
+    server.listener.getConnections((_, count) => {
+      event.concurrent_connections = count;
+
+      // captures (performs transforms on) the latest event data and stashes
+      // the metrics for status/stats API payload
       metrics.capture(event).then(data => { kbnServer.metrics = data; });
-
-      // for metrics API (replacement API)
-      collector.collect(event); // collect() is async, but here we aren't depending on the return value
     });
-  }
+  });
+  oppsy.start(config.get('ops.interval'));
 
   // init routes
   registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);
-  registerStatsApi(kbnServer, server, config, collector);
+  registerStatsApi(kbnServer, server, config);
 }

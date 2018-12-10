@@ -15,8 +15,6 @@ function getIndexArrayFromPayload(payload) {
 
 async function deleteIndices(callWithRequest, indices) {
   const params = {
-    ignore_unavailable: true,
-    allow_no_indices: false,
     expand_wildcards: 'none',
     format: 'json',
     index: indices
@@ -32,19 +30,19 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/index_management/indices/delete',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const indices = getIndexArrayFromPayload(request.payload);
 
       try {
         await deleteIndices(callWithRequest, indices);
-        reply();
+        return h.response();
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          throw wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

@@ -9,19 +9,27 @@ import { toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 import template from './account.html';
 import '../management/change_password_form/change_password_form';
-import './account.less';
 import '../../services/shield_user';
+import { i18n } from '@kbn/i18n';
 
 routes.when('/account', {
   template,
+  k7Breadcrumbs: () => [
+    {
+      text: i18n.translate('xpack.security.account.breadcrumb', {
+        defaultMessage: 'Account',
+      })
+    }
+  ],
   resolve: {
     user(ShieldUser) {
-      return ShieldUser.getCurrent();
+      return ShieldUser.getCurrent().$promise;
     }
   },
   controllerAs: 'accountController',
-  controller($scope, $route, Notifier) {
+  controller($scope, $route, Notifier, config, i18n) {
     $scope.user = $route.current.locals.user;
+    config.bindToScope($scope, 'k7design');
 
     const notifier = new Notifier();
 
@@ -33,7 +41,12 @@ routes.when('/account', {
       }
 
       $scope.user.$changePassword()
-        .then(() => toastNotifications.addSuccess('Updated password'))
+        .then(() => toastNotifications.addSuccess({
+          title: i18n('xpack.security.account.updatedPasswordTitle', {
+            defaultMessage: 'Updated password'
+          }),
+          'data-test-subj': 'passwordUpdateSuccess',
+        }))
         .then(onSuccess)
         .catch(error => {
           if (error.status === 401) {
@@ -45,7 +58,9 @@ routes.when('/account', {
 
     this.getEmail = () => {
       if ($scope.user.email) return $scope.user.email;
-      return '(No email)';
+      return i18n('xpack.security.account.noEmailMessage', {
+        defaultMessage: '(No email)'
+      });
     };
   }
 });

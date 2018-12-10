@@ -20,10 +20,7 @@
 const resolve = require('path').resolve;
 const readFileSync = require('fs').readFileSync;
 
-const configFiles = [
-  '.kibana-plugin-helpers.json',
-  '.kibana-plugin-helpers.dev.json',
-];
+const configFiles = ['.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json'];
 const configCache = {};
 
 module.exports = function(root) {
@@ -62,8 +59,7 @@ module.exports = function(root) {
 
   // use resolve to ensure correct resolution of paths
   const { includePlugins } = config;
-  if (includePlugins)
-    config.includePlugins = includePlugins.map(path => resolve(root, path));
+  if (includePlugins) config.includePlugins = includePlugins.map(path => resolve(root, path));
 
   return config;
 };

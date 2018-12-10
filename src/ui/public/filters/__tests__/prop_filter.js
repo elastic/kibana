@@ -44,6 +44,16 @@ describe('prop filter', function () {
     return objects;
   }
 
+  it('returns list when no filters are provided', function () {
+    const objects = getObjects('table', 'table', 'pie');
+    expect(nameFilter(objects)).to.eql(objects);
+  });
+
+  it('returns list when empty list of filters is provided', function () {
+    const objects = getObjects('table', 'table', 'pie');
+    expect(nameFilter(objects, [])).to.eql(objects);
+  });
+
   it('should keep only the tables', function () {
     const objects = getObjects('table', 'table', 'pie');
     expect(nameFilter(objects, 'table')).to.eql(getObjects('table', 'table'));
@@ -73,5 +83,11 @@ describe('prop filter', function () {
     const objects = getObjects('table', 'line', 'pie');
     const line = (value) => value === 'line';
     expect(nameFilter(objects, line)).to.eql(getObjects('line'));
+  });
+
+  it('gracefully handles a filter function with zero arity', function () {
+    const objects = getObjects('table', 'line', 'pie');
+    const rejectEverything = () => false;
+    expect(nameFilter(objects, rejectEverything)).to.eql([]);
   });
 });

@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiFlexItem, EuiCard, EuiLink, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   if (!shouldShowRequestTrialExtension) {
@@ -14,28 +15,44 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   }
   const description = (
     <span>
-      If you’d like to continuing using Security, Machine Learning, and our
-      other awesome{' '}
-      <EuiLink
-        href="https://www.elastic.co/subscriptions/xpack"
-        target="_blank"
-      >
-        platinum features
-      </EuiLink>, request an extension now.
+      <FormattedMessage
+        id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.howToContinueUsingPluginsDescription"
+        defaultMessage="If you’d like to continuing using security, machine learning, and our
+        other awesome {platinumLicenseFeaturesLinkText}, request an extension now."
+        values={{
+          platinumLicenseFeaturesLinkText: (
+            <EuiLink
+              href="https://www.elastic.co/subscriptions/xpack"
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.platinumLicenseFeaturesLinkText"
+                defaultMessage="Platinum features"
+              />
+            </EuiLink>
+          )
+        }}
+      />
     </span>
   );
   return (
     <EuiFlexItem>
       <EuiCard
-        title="Extend your trial"
+        title={(<FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.extendYourTrialTitle"
+          defaultMessage="Extend your trial"
+        />)}
         description={description}
         footer={
           <EuiButton
-            style={{ marginTop: 'auto' }}
+            data-test-subj="extendTrialButton"
             target="_blank"
             href="https://www.elastic.co/trialextension"
           >
-            Extend trial
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.extendTrialButtonLabel"
+              defaultMessage="Extend trial"
+            />
           </EuiButton>
         }
       />

@@ -59,10 +59,7 @@ test('starts system with core api', () => {
     },
   });
 
-  const createSystemApi: KibanaSystemApiFactory<IKibanaCoreApi, IMetadata> = (
-    name,
-    metadata
-  ) => {
+  const createSystemApi: KibanaSystemApiFactory<IKibanaCoreApi, IMetadata> = (name, metadata) => {
     return {
       fromCore: true,
       metadata,
@@ -226,11 +223,7 @@ test('receives values from dependencies but not transitive dependencies', () => 
     };
   }
 
-  class GrandchildSystem extends KibanaSystem<
-    CoreType,
-    {},
-    IGrandchild['grandchild']
-  > {
+  class GrandchildSystem extends KibanaSystem<CoreType, {}, IGrandchild['grandchild']> {
     public start() {
       return {
         value: 'grandchild',
@@ -238,11 +231,7 @@ test('receives values from dependencies but not transitive dependencies', () => 
     }
   }
 
-  class ChildSystem extends KibanaSystem<
-    CoreType,
-    IGrandchild,
-    IChild['child']
-  > {
+  class ChildSystem extends KibanaSystem<CoreType, IGrandchild, IChild['child']> {
     public start() {
       expect(this.deps.grandchild).toEqual({ value: 'grandchild' });
 

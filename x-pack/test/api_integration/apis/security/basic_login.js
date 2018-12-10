@@ -54,7 +54,7 @@ export default function ({ getService }) {
       const loginResponse = await supertest.post('/api/security/v1/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: validPassword })
-        .expect(200);
+        .expect(204);
 
       const cookies = loginResponse.headers['set-cookie'];
       expect(cookies).to.have.length(1);
@@ -100,7 +100,9 @@ export default function ({ getService }) {
         'roles',
         'scope',
         'metadata',
-        'enabled'
+        'enabled',
+        'authentication_realm',
+        'lookup_realm',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
     });
@@ -111,7 +113,7 @@ export default function ({ getService }) {
         const loginResponse = await supertest.post('/api/security/v1/login')
           .set('kbn-xsrf', 'xxx')
           .send({ username: validUsername, password: validPassword })
-          .expect(200);
+          .expect(204);
 
         sessionCookie = request.cookie(loginResponse.headers['set-cookie'][0]);
       });
@@ -137,7 +139,9 @@ export default function ({ getService }) {
           'roles',
           'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
       });

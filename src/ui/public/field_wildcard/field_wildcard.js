@@ -26,7 +26,8 @@ export function FieldWildcardProvider(config) {
     return new RegExp('^' + glob.split('*').map(escapeRegExp).join('.*') + '$');
   });
 
-  function fieldWildcardMatcher(globs) {
+  // Note that this will return an essentially noop function if globs is undefined.
+  function fieldWildcardMatcher(globs = []) {
     return function matcher(val) {
       // do not test metaFields or keyword
       if (metaFields.indexOf(val) !== -1) {
@@ -36,7 +37,8 @@ export function FieldWildcardProvider(config) {
     };
   }
 
-  function fieldWildcardFilter(globs) {
+  // Note that this will return an essentially noop function if globs is undefined.
+  function fieldWildcardFilter(globs = []) {
     const matcher = fieldWildcardMatcher(globs);
     return function filter(val) {
       return !matcher(val);

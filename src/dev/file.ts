@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { dirname, extname, join, relative, resolve } from 'path';
+import { dirname, extname, join, relative, resolve, sep } from 'path';
 
 import { REPO_ROOT } from './constants';
 
@@ -46,6 +46,10 @@ export class File {
 
   public isTypescript() {
     return this.ext === '.ts' || this.ext === '.tsx';
+  }
+
+  public isFixture() {
+    return this.relativePath.split(sep).includes('__fixtures__');
   }
 
   public getRelativeParentDirs() {

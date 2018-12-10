@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { createToolingLog } from './tooling_log';
+export { ToolingLog } from './tooling_log';
+export { ToolingLogTextWriter } from './tooling_log_text_writer';
 export { pickLevelFromFlags } from './log_levels';

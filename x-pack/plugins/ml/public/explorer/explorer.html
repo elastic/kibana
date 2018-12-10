@@ -55,14 +55,7 @@
           ng-mouseenter="setSwimlaneSelectActive(true)"
           ng-mouseleave="setSwimlaneSelectActive(false)"
         >
-          <ml-explorer-swimlane
-            swimlane-type="overall"
-            swimlane-data="overallSwimlaneData"
-            selected-job-ids="selectedJobIds"
-            chart-width="swimlaneWidth"
-            app-state="appState"
-            style="width: 100%; height: 250px;">
-          </ml-explorer-swimlane>
+          <ml-explorer-swimlane swimlane-type="overall" />
         </div>
 
         <div ng-if="viewBySwimlaneOptions.length > 0">
@@ -91,21 +84,14 @@
 
           <div
             class="ml-explorer-swimlane euiText"
-            ng-if="showViewBySwimlane()"
+            ng-if="showViewBySwimlane"
             ng-mouseenter="setSwimlaneSelectActive(true)"
             ng-mouseleave="setSwimlaneSelectActive(false)"
           >
-            <ml-explorer-swimlane
-              swimlane-type="viewBy"
-              swimlane-data="viewBySwimlaneData"
-              selected-job-ids="selectedJobIds"
-              chart-width="swimlaneWidth"
-              app-state="appState"
-              style="width: 100%; height: 250px;">
-            </ml-explorer-swimlane>
+            <ml-explorer-swimlane swimlane-type="viewBy" />
           </div>
 
-          <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
+          <div ng-if="!showViewBySwimlane" class="text-center visError euiText">
             <div class="item top"></div>
             <div class="item">
               <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
@@ -119,28 +105,37 @@
           Anomalies
         </span>
 
-        <div class="ml-table-controls">
-          <ml-select-severity />
-          <ml-select-interval />
-          <ml-checkbox-show-charts
-            visible="anomalyChartRecords.length > 0"
-          />
+        <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive ml-anomalies-controls">
+          <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
+            <div class="euiFormRow" id="select_severity_control">
+              <label class="euiFormLabel" for="select_severity">Severity threshold</label>
+              <div class="euiFormControlLayout">
+                <ml-select-severity id="select_severity" />
+              </div>
+            </div>
+          </div>
+          <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
+            <div class="euiFormRow" id="select_interval_control">
+              <label class="euiFormLabel" for="select_interval">Interval</label>
+              <div class="euiFormControlLayout">
+                <ml-select-interval id="select_interval" />
+              </div>
+            </div>
+          </div>
+          <div class="euiFlexItem euiFlexItem--flexGrowZero" ng-show="anomalyChartRecords.length > 0">
+            <div class="euiFormRow" id="show_charts_checkbox_control">
+              <div class="euiFormControlLayout">
+                <ml-checkbox-show-charts id="show_charts_checkbox" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div ng-controller="MlExplorerChartsContainerController" class="euiText">
-          <ml-explorer-charts-container
-            series-to-plot="seriesToPlot"
-            time-field-name="timeFieldName"
-            plot-earliest="plotEarliest"
-            plot-latest="plotLatest"
-            selected-earliest="selectedEarliest"
-            selected-latest="selectedLatest"
-            charts-per-row="chartsPerRow"
-            layout-cells-per-chart="layoutCellsPerChart"
-            too-many-buckets="tooManyBuckets">
-          </ml-explorer-charts-container>
-        </div>
+        <div class="euiSpacer euiSpacer--m"></div>
 
+        <div class="euiText explorer-charts">
+          <ml-explorer-charts-container />
+        </div>
 
         <ml-anomalies-table
           table-data="tableData"

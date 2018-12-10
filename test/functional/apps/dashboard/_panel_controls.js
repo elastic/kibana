@@ -22,11 +22,11 @@ import expect from 'expect.js';
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   VisualizeConstants
-} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+} from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await kibanaServer.uiSettings.disableToastAutohide();
-      await remote.refresh();
+      await browser.refresh();
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
@@ -61,69 +61,53 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
         await dashboardPanelActions.openContextMenu();
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-        expect(editLinkExists).to.equal(false);
-        expect(removeExists).to.equal(false);
+        await dashboardPanelActions.expectMissingEditPanelAction();
+        await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
       it('are shown in edit mode', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
 
         const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
         expect(isContextMenuIconVisible).to.equal(true);
         await dashboardPanelActions.openContextMenu();
 
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-        expect(editLinkExists).to.equal(true);
-        expect(removeExists).to.equal(true);
+        await dashboardPanelActions.expectExistsEditPanelAction();
+        await dashboardPanelActions.expectExistsRemovePanelAction();
       });
 
       // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
       // controls.
       it('are shown in edit mode after a hard refresh', async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
-        await remote.get(currentUrl.toString(), true);
+        await browser.get(currentUrl.toString(), true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await dashboardPanelActions.openContextMenu();
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        expect(editLinkExists).to.equal(true);
-
-        const removeExists = await dashboardPanelActions.removePanelActionExists();
-        expect(removeExists).to.equal(true);
+        await dashboardPanelActions.expectExistsEditPanelAction();
+        await dashboardPanelActions.expectExistsRemovePanelAction();
 
         // Get rid of the timestamp in the url.
-        await remote.get(currentUrl.toString(), false);
+        await browser.get(currentUrl.toString(), false);
       });
 
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
           await PageObjects.dashboard.saveDashboard(dashboardName);
-          await dashboardPanelActions.toggleExpandPanel();
-
           await dashboardPanelActions.openContextMenu();
-          const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-          const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-          expect(editLinkExists).to.equal(false);
-          expect(removeExists).to.equal(false);
+          await dashboardPanelActions.clickExpandPanelToggle();
+          await dashboardPanelActions.openContextMenu();
+          await dashboardPanelActions.expectMissingEditPanelAction();
+          await dashboardPanelActions.expectMissingRemovePanelAction();
         });
 
         it('in edit mode hides remove icons ', async function () {
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await dashboardPanelActions.openContextMenu();
-          const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-          const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-          expect(editLinkExists).to.equal(true);
-          expect(removeExists).to.equal(false);
-
-          await dashboardPanelActions.toggleExpandPanel();
+          await dashboardPanelActions.expectExistsEditPanelAction();
+          await dashboardPanelActions.expectMissingRemovePanelAction();
+          await dashboardPanelActions.clickExpandPanelToggle();
         });
       });
 
@@ -132,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
         });
 
@@ -160,6 +144,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('opens a saved search when edit link is clicked', async () => {
+          await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const queryName = await PageObjects.discover.getCurrentQueryName();
@@ -182,8 +167,7 @@ export default function ({ getService, getPageObjects }) {
       it('shown in edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await dashboardPanelActions.openContextMenu();
-        const expandExists = await dashboardPanelActions.toggleExpandActionExists();
-        expect(expandExists).to.equal(true);
+        await dashboardPanelActions.expectExistsToggleExpandAction();
       });
     });
   });

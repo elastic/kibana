@@ -17,10 +17,13 @@
  * under the License.
  */
 
-export function FilterBarProvider({ getService }) {
-  const remote = getService('remote');
+import Keys from 'leadfoot/keys';
+
+export function FilterBarProvider({ getService, getPageObjects }) {
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const PageObjects = getPageObjects(['common', 'header']);
 
   async function typeIntoReactSelect(testSubj, value) {
     const select = await testSubjects.find(testSubj);
@@ -40,41 +43,65 @@ export function FilterBarProvider({ getService }) {
 
     async removeFilter(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await remote.moveMouseTo(filterElement);
+      await browser.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterEnabled(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await remote.moveMouseTo(filterElement);
+      await browser.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async addFilter(field, operator, values) {
-      if (!Array.isArray(values)) {
-        values = [values];
-      }
+    async toggleFilterPinned(key) {
+      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
+      await browser.moveMouseTo(filterElement);
+      await testSubjects.click(`filter & filter-key-${key} pinFilter-${key}`);
+    }
+
+    /**
+     * Adds a filter to the filter bar.
+     *
+     * @param {string} field The name of the field the filter should be applied for.
+     * @param {string} operator A valid operator for that fields, e.g. "is one of", "is", "exists", etc.
+     * @param {string[]|string} values The remaining parameters are the values passed into the individual
+     *   value input fields, i.e. the third parameter into the first input field, the fourth into the second, etc.
+     *   Each value itself can be an array, in case you want to enter multiple values into one field (e.g. for "is one of"):
+     * @example
+     * // Add a plain single value
+     * filterBar.addFilter('country', 'is', 'NL');
+     * // Add an exists filter
+     * filterBar.addFilter('country', 'exists');
+     * // Add a range filter for a numeric field
+     * filterBar.addFilter('bytes', 'is between', '500', '1000');
+     * // Add a filter containing multiple values
+     * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
+     */
+    async addFilter(field, operator, ...values) {
       await testSubjects.click('addFilter');
       await typeIntoReactSelect('filterfieldSuggestionList', field);
       await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
       const paramFields = await params.findAllByTagName('input');
-      await Promise.all(values.map(async (value, index) => {
-        await paramFields[index].type(value);
-        // Checks if the actual options value has an auto complete (like 'is one of' filter)
-        // In this case we need to click the active autocompletion.
-        const hasAutocompletion = await find.exists(async () => await params.findByClassName('active'));
-        if (hasAutocompletion) {
-          const activeSelection = await params.findByClassName('active');
-          await activeSelection.click();
+      for (let i = 0; i < values.length; i++) {
+        let fieldValues = values[i];
+        if (!Array.isArray(fieldValues)) {
+          fieldValues = [fieldValues];
         }
-      }));
+        for (let j = 0; j < fieldValues.length; j++) {
+          await paramFields[i].type(fieldValues[j]);
+          await browser.pressKeys(Keys.RETURN);
+        }
+      }
       await testSubjects.click('saveFilter');
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickEditFilter(key, value) {
       const pill = await testSubjects.find(`filter & filter-key-${key} & filter-value-${value}`);
-      await remote.moveMouseTo(pill);
+      await browser.moveMouseTo(pill);
       await testSubjects.click('editFilter');
     }
 

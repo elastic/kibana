@@ -115,7 +115,12 @@ export class DataRecognizer {
       query: moduleConfig.query
     };
 
-    const resp = await this.callWithRequest('search', { index, size, body });
+    const resp = await this.callWithRequest('search', {
+      index,
+      rest_total_hits_as_int: true,
+      size,
+      body
+    });
     return (resp.hits.total !== 0);
   }
 
@@ -132,7 +137,7 @@ export class DataRecognizer {
       dirName = manifestFile.dirName;
     }
     else {
-      return Boom.notFound(`Module with the id "${id}" not found`);
+      throw Boom.notFound(`Module with the id "${id}" not found`);
     }
 
     const jobs = [];
@@ -197,6 +202,7 @@ export class DataRecognizer {
     groups,
     indexPatternName,
     query,
+    useDedicatedIndex,
     startDatafeed,
     start,
     end,
@@ -213,7 +219,7 @@ export class DataRecognizer {
       manifestFile && manifestFile.json &&
       manifestFile.json.defaultIndexPattern === undefined) {
 
-      return Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
+      throw Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
     }
     this.indexPatternName = (indexPatternName === undefined) ? manifestFile.json.defaultIndexPattern : indexPatternName;
     this.indexPatternId = this.getIndexPatternId(this.indexPatternName);
@@ -233,6 +239,11 @@ export class DataRecognizer {
       if (Array.isArray(groups)) {
         // update groups list for each job
         moduleConfig.jobs.forEach(job => job.config.groups = groups);
+      }
+
+      // Set the results_index_name property for each job if useDedicatedIndex is true
+      if (useDedicatedIndex === true) {
+        moduleConfig.jobs.forEach(job => job.config.results_index_name = job.id);
       }
       saveResults.jobs = await this.saveJobs(moduleConfig.jobs);
     }
@@ -361,12 +372,12 @@ export class DataRecognizer {
 
   // save the savedObjects if they do not exist already
   async saveKibanaObjects(objectExistResults) {
-    let results = [];
+    let results = { saved_objects: [] };
     const filteredSavedObjects = objectExistResults.filter(o => o.exists === false).map(o => o.savedObject);
     if (filteredSavedObjects.length) {
       results = await this.savedObjectsClient.bulkCreate(filteredSavedObjects);
     }
-    return results;
+    return results.saved_objects;
   }
 
   // save the jobs.

@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 
+import { toastNotifications } from 'ui/notify';
 import '../../validate_date_interval';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
@@ -26,11 +27,14 @@ import { createFilterHistogram } from './create_filter/histogram';
 import intervalTemplate from '../controls/number_interval.html';
 import minDocCountTemplate from '../controls/min_doc_count.html';
 import extendedBoundsTemplate from '../controls/extended_bounds.html';
+import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
 export const histogramBucketAgg = new BucketAggType({
   name: 'histogram',
-  title: 'Histogram',
+  title: i18n.translate('common.ui.aggTypes.buckets.histogramTitle', {
+    defaultMessage: 'Histogram',
+  }),
   ordered: {},
   makeLabel: function (aggConfig) {
     return aggConfig.getFieldDisplayName();
@@ -57,9 +61,18 @@ export const histogramBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'number'
     },
-
+    {
+      /*
+       * This parameter can be set if you want the auto scaled interval to always
+       * be a multiple of a specific base.
+       */
+      name: 'intervalBase',
+      default: null,
+      write: () => {},
+    },
     {
       name: 'interval',
       editor: intervalTemplate,
@@ -70,9 +83,9 @@ export const histogramBucketAgg = new BucketAggType({
           : { field: field.name };
 
         return searchSource
-          .extend()
-          .size(0)
-          .aggs({
+          .createChild()
+          .setField('size', 0)
+          .setField('aggs', {
             maxAgg: {
               max: aggBody
             },
@@ -80,12 +93,18 @@ export const histogramBucketAgg = new BucketAggType({
               min: aggBody
             }
           })
-          .fetchAsRejectablePromise()
+          .fetch()
           .then((resp) => {
             aggConfig.setAutoBounds({
               min: _.get(resp, 'aggregations.minAgg.value'),
               max: _.get(resp, 'aggregations.maxAgg.value')
             });
+          })
+          .catch(() => {
+            toastNotifications.addWarning(i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
+              // eslint-disable-next-line max-len
+              defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.'
+            }));
           });
       },
       write: function (aggConfig, output) {
@@ -102,12 +121,23 @@ export const histogramBucketAgg = new BucketAggType({
             const minInterval = range / config.get('histogram:maxBars');
             // Round interval by order of magnitude to provide clean intervals
             // Always round interval up so there will always be less buckets than histogram:maxBars
-            const orderOfMaginute = Math.pow(10, Math.floor(Math.log10(minInterval)));
-            let roundInterval = orderOfMaginute;
+            const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(minInterval)));
+            let roundInterval = orderOfMagnitude;
             while (roundInterval < minInterval) {
-              roundInterval += orderOfMaginute;
+              roundInterval += orderOfMagnitude;
             }
             interval = roundInterval;
+          }
+        }
+
+        const base = aggConfig.params.intervalBase;
+        if (base) {
+          if (interval < base) {
+            // In case the specified interval is below the base, just increase it to it's base
+            interval = base;
+          } else if (interval % base !== 0) {
+            // In case the interval is not a multiple of the base round it to the next base
+            interval = Math.round(interval / base) * base;
           }
         }
 

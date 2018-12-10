@@ -7,15 +7,39 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-jest.mock('../../../../utils/timepicker', () => {});
 
 import Breadcrumbs from '../Breadcrumbs';
 import { toJson } from '../../../../utils/testHelpers';
 
+jest.mock(
+  'ui/chrome',
+  () => ({
+    breadcrumbs: {
+      set: () => {}
+    },
+    getBasePath: () => `/some/base/path`,
+    getUiSettingsClient: () => {
+      return {
+        get: key => {
+          switch (key) {
+            case 'timepicker:timeDefaults':
+              return { from: 'now-15m', to: 'now', mode: 'quick' };
+            case 'timepicker:refreshIntervalDefaults':
+              return { display: 'Off', pause: false, value: 0 };
+            default:
+              throw new Error(`Unexpected config key: ${key}`);
+          }
+        }
+      };
+    }
+  }),
+  { virtual: true }
+);
+
 function expectBreadcrumbToMatchSnapshot(route) {
   const wrapper = mount(
-    <MemoryRouter initialEntries={[`${route}?_g=`]}>
-      <Breadcrumbs />
+    <MemoryRouter initialEntries={[`${route}?_g=myG&kuery=myKuery`]}>
+      <Breadcrumbs showPluginBreadcrumbs={true} />
     </MemoryRouter>
   );
   expect(
@@ -52,5 +76,14 @@ describe('Breadcrumbs', () => {
     expectBreadcrumbToMatchSnapshot(
       '/:serviceName/transactions/request/my-transaction-name'
     );
+  });
+
+  it('does not render breadcrumbs when showPluginBreadcrumbs = false', () => {
+    const wrapper = mount(
+      <MemoryRouter initialEntries={[`/?_g=myG&kuery=myKuery`]}>
+        <Breadcrumbs showPluginBreadcrumbs={false} />
+      </MemoryRouter>
+    );
+    expect(wrapper.find('.kuiLocalBreadcrumbs').exists()).toEqual(false);
   });
 });

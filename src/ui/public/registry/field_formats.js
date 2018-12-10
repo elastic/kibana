@@ -39,7 +39,7 @@ class FieldFormatRegistry extends IndexedArray {
   init() {
     this.parseDefaultTypeMap(this._uiSettings.get('format:defaultTypeMap'));
 
-    this._uiSettings.subscribe(({ key, newValue }) => {
+    this._uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
       if (key === 'format:defaultTypeMap') {
         this.parseDefaultTypeMap(newValue);
       }
@@ -86,6 +86,9 @@ class FieldFormatRegistry extends IndexedArray {
    */
   getInstance = _.memoize(function (formatId) {
     const FieldFormat = this.byId[formatId];
+    if (!FieldFormat) {
+      throw new Error(`Field Format '${formatId}' not found!`);
+    }
     return new FieldFormat(null, this.getConfig);
   });
 

@@ -138,7 +138,7 @@ describe('plugin discovery/plugin spec', () => {
       });
     });
 
-    describe('#getVerison()', () => {
+    describe('#getVersion()', () => {
       it('uses spec.version', () => {
         const spec = new PluginSpec(fooPack, {
           version: 'bar'

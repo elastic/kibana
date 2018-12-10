@@ -5,5 +5,4 @@
  */
 
 
-
-import './select_interval.js';
+import './select_interval_directive';

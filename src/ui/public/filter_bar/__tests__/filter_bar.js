@@ -48,7 +48,7 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana');
 
     ngMock.module('kibana/courier', function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
     });
 
     ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {

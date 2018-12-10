@@ -20,6 +20,7 @@
 import './sidebar';
 import './vis_options';
 import './vis_editor_resizer';
+import './vis_type_agg_filter';
 import $ from 'jquery';
 
 import _ from 'lodash';
@@ -29,33 +30,36 @@ import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
+import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 
-const defaultEditor = function ($rootScope, $compile) {
+
+const defaultEditor = function ($rootScope, $compile, i18n) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el, vis, showSpyPanel) {
+    constructor(el, savedObj) {
       this.el = $(el);
-      this.vis = vis;
-      this.showSpyPanel = showSpyPanel;
+      this.savedObj = savedObj;
+      this.vis = savedObj.vis;
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.vis.type.editorConfig.optionsTemplate }
+          {
+            name: 'options',
+            title: i18n('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            editor: this.vis.type.editorConfig.optionsTemplate,
+          }
         ];
       }
     }
 
-    render(visData, searchSource, updateStatus, uiState) {
+    render({ uiState, timeRange, filters, appState }) {
       let $scope;
 
       const updateScope = () => {
-        $scope.showSpyPanel = this.showSpyPanel;
         $scope.vis = this.vis;
-        $scope.visData = visData;
         $scope.uiState = uiState;
-        $scope.searchSource = searchSource;
-        $scope.$apply();
+        //$scope.$apply();
       };
 
       return new Promise(resolve => {
@@ -64,19 +68,23 @@ const defaultEditor = function ($rootScope, $compile) {
 
           updateScope();
 
+          $scope.state = $scope.vis.copyCurrentState(true);
+          $scope.oldState = $scope.vis.getSerializableState($scope.state);
+
           $scope.toggleSidebar = () => {
             $scope.$broadcast('render');
           };
 
           this.el.one('renderComplete', resolve);
-
           // track state of editable vis vs. "actual" vis
           $scope.stageEditableVis = () => {
+            $scope.oldState = $scope.vis.getSerializableState($scope.state);
+            $scope.vis.setCurrentState($scope.state);
             $scope.vis.updateState();
             $scope.vis.dirty = false;
           };
           $scope.resetEditableVis = () => {
-            $scope.vis.resetState();
+            $scope.state = $scope.vis.copyCurrentState(true);
             $scope.vis.dirty = false;
           };
 
@@ -102,22 +110,21 @@ const defaultEditor = function ($rootScope, $compile) {
 
           $scope.getSidebarClass = () => {
             if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.SMALL) {
-              return 'collapsible-sidebar--small';
+              return 'visEditor__collapsibleSidebar--small';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.MEDIUM) {
-              return 'collapsible-sidebar--medium';
+              return 'visEditor__collapsibleSidebar--medium';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.LARGE) {
-              return 'collapsible-sidebar--large';
+              return 'visEditor__collapsibleSidebar--large';
             }
           };
 
-          $scope.$watch(function () {
-            return $scope.vis.getCurrentState(false);
+          $scope.$watch(() => {
+            return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
-            $scope.vis.dirty = !angular.equals(newState, $scope.vis.getEnabledState());
-
+            $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
             $scope.responseValueAggs = null;
             try {
-              $scope.responseValueAggs = $scope.vis.aggs.getResponseAggs().filter(function (agg) {
+              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
                 return _.get(agg, 'schema.group') === 'metrics';
               });
             }
@@ -125,6 +132,16 @@ const defaultEditor = function ($rootScope, $compile) {
             // params have not been set yet. watcher will trigger again
             // when the params update
             catch (e) {} // eslint-disable-line no-empty
+          }, true);
+
+          // fires when visualization state changes, and we need to copy changes to editorState
+          $scope.$watch(() => {
+            return $scope.vis.getCurrentState(false);
+          }, (newState) => {
+            if (!_.isEqual(newState, $scope.oldState)) {
+              $scope.state = $scope.vis.copyCurrentState(true);
+              $scope.oldState = newState;
+            }
           }, true);
 
           // Load the default editor template, attach it to the DOM and compile it.
@@ -138,7 +155,28 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
         }
 
-        $scope.$broadcast('render');
+        if (!this._handler) {
+          const visualizationEl = this.el.find('.visEditor__canvas')[0];
+          getVisualizeLoader().then(loader => {
+            if (!visualizationEl) {
+              return;
+            }
+            this._loader = loader;
+            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
+              uiState: uiState,
+              listenOnChange: false,
+              timeRange: timeRange,
+              filters: filters,
+              appState: appState,
+            });
+          });
+        } else {
+          this._handler.update({
+            timeRange: timeRange,
+            filters: filters,
+          });
+        }
+
       });
     }
 
@@ -150,6 +188,9 @@ const defaultEditor = function ($rootScope, $compile) {
       if (this.$scope) {
         this.$scope.$destroy();
         this.$scope = null;
+      }
+      if (this._handler) {
+        this._handler.destroy();
       }
     }
   };

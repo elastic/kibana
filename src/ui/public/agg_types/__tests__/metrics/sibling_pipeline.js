@@ -68,8 +68,7 @@ describe('sibling pipeline aggs', function () {
             title: 'New Visualization',
             type: 'metric',
             params: {
-              fontSize: 60,
-              handleNoResults: true
+              fontSize: 60
             },
             aggs: [
               {
@@ -89,7 +88,7 @@ describe('sibling pipeline aggs', function () {
 
           // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
           aggConfig = vis.aggs[1];
-          aggDsl = aggConfig.toDsl();
+          aggDsl = aggConfig.toDsl(vis.aggs);
         });
       }
 

@@ -251,7 +251,7 @@ describe('timepicker directive', function () {
         $scope.relative.from.unit = shortUnit;
         $scope.formatRelative('from');
 
-        // The preview should match the start of the unit eg, the start of the minute
+        // The preview should match the start of the unit e.g., the start of the minute
         expect($scope.relative.from.preview).to.be(moment().startOf(longUnit).format($scope.format));
       });
     });
@@ -275,7 +275,7 @@ describe('timepicker directive', function () {
 
         const fn = opp === '+' ? 'add' : 'subtract';
 
-        // The preview should match the start of the unit eg, the start of the minute
+        // The preview should match the start of the unit e.g., the start of the minute
         expect($scope.relative.from.preview).to.be(moment()[fn](1, unit).format($scope.format));
       });
     });

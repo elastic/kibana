@@ -26,18 +26,18 @@ export default function ({ getService, getPageObjects }) {
   describe('visualize app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVega');
       await PageObjects.visualize.clickVega();
     });
 
     describe('vega chart', () => {
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
-      it('should have some initial vega spec text', async function () {
+      it.skip('should have some initial vega spec text', async function () {
         const vegaSpec = await PageObjects.visualize.getVegaSpec();
         expect(vegaSpec).to.contain('{').and.to.contain('data');
         expect(vegaSpec.length).to.be.above(500);

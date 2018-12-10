@@ -47,15 +47,14 @@ const paramTypeMap = {
  * @class AggParams
  * @constructor
  * @extends IndexedArray
- * @param {object[]} params - array of params that get new-ed up as AggParam objects as descibed above
+ * @param {object[]} params - array of params that get new-ed up as AggParam objects as described above
  */
 createLegacyClass(AggParams).inherits(IndexedArray);
 function AggParams(params) {
   AggParams.Super.call(this, {
     index: ['name'],
     initialSet: params.map(function (config) {
-      const type = config.name === 'field' ? config.name : config.type;
-      const Class = paramTypeMap[type] || paramTypeMap._default;
+      const Class = paramTypeMap[config.type] || paramTypeMap._default;
       return new Class(config);
     })
   });
@@ -75,13 +74,13 @@ function AggParams(params) {
  *         output object which is used to create the agg dsl for the search request. All other properties
  *         are dependent on the AggParam#write methods which should be studied for each AggType.
  */
-AggParams.prototype.write = function (aggConfig, locals) {
+AggParams.prototype.write = function (aggConfig, aggs, locals) {
   const output = { params: {} };
   locals = locals || {};
 
   this.forEach(function (param) {
     if (param.write) {
-      param.write(aggConfig, output, locals);
+      param.write(aggConfig, output, aggs, locals);
     } else {
       output.params[param.name] = aggConfig.params[param.name];
     }

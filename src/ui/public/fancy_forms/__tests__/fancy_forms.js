@@ -54,13 +54,13 @@ describe('fancy forms', function () {
     });
 
     it('clears errors', function () {
-      $scope.val = 'someting';
+      $scope.val = 'something';
       $scope.$apply();
       expect(ngForm.errorCount()).to.be(0);
     });
 
     it('describes 0 errors', function () {
-      $scope.val = 'someting';
+      $scope.val = 'something';
       $scope.$apply();
       expect(ngForm.describeErrors()).to.be('0 Errors');
     });

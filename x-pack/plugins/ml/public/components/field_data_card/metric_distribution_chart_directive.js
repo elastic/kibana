@@ -14,13 +14,14 @@
 import _ from 'lodash';
 import d3 from 'd3';
 
-import { numTicks } from 'plugins/ml/util/chart_utils';
+import { numTicks } from '../../util/chart_utils';
 import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
+import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlMetricDistributionChart', function (mlChartTooltipService) {
+module.directive('mlMetricDistributionChart', function () {
 
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
@@ -198,7 +199,7 @@ module.directive('mlMetricDistributionChart', function (mlChartTooltipService) {
       const axes = chartGroup.append('g')
         .attr('class', 'axes');
 
-      // Use the numTicks util function to aalculate the number of ticks
+      // Use the numTicks util function to calculate the number of ticks
       // for the x axis, according to the width of the chart.
       // Note that d3 doesn't guarantee that the axis will end up with
       // this exact number of ticks.
@@ -254,7 +255,7 @@ module.directive('mlMetricDistributionChart', function (mlChartTooltipService) {
           contents = `${bar.percent}% of documents have<br>a value of ${minValFormatted}`;
         }
 
-        contents = `<div class='centered-text'>${contents}</div>`;
+        contents = `<div class='eui-textCenter'>${contents}</div>`;
 
         if (path.length && path[0].length) {
           mlChartTooltipService.show(contents, path[0][0], {

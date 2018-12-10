@@ -29,6 +29,7 @@ function applySpecDefaults(spec, type, pluginSpec) {
     order = 0,
     description = '',
     icon,
+    euiIconType,
     hidden = false,
     linkToLastSubUrl = true,
     listed = !hidden,
@@ -36,7 +37,9 @@ function applySpecDefaults(spec, type, pluginSpec) {
   } = spec;
 
   if (spec.injectVars) {
-    throw new Error(`[plugin:${pluginId}] uiExports.app.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`);
+    throw new Error(
+      `[plugin:${pluginId}] uiExports.app.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`
+    );
   }
 
   if (spec.uses) {
@@ -53,6 +56,7 @@ function applySpecDefaults(spec, type, pluginSpec) {
     order,
     description,
     icon,
+    euiIconType,
     hidden,
     linkToLastSubUrl,
     listed,

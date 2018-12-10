@@ -42,7 +42,7 @@ function groupFilesByProject(files: File[]) {
 }
 
 /**
- * Lints a list of files with eslint. eslint reports are written to the log
+ * Lints a list of files with tslint. tslint reports are written to the log
  * and a FailError is thrown when linting errors occur.
  *
  * @param  {ToolingLog} log
@@ -72,11 +72,7 @@ export async function lintFiles(log: ToolingLog, files: File[]) {
     if (exitCode > 0) {
       throw createFailError(`[tslint] failure`, 1);
     } else {
-      log.success(
-        '[tslint/%s] %d files linted successfully',
-        project.name,
-        filesInProject.length
-      );
+      log.success('[tslint/%s] %d files linted successfully', project.name, filesInProject.length);
     }
   }
 }

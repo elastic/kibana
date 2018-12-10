@@ -30,10 +30,19 @@ let attemptCounter = 0;
 async function attemptToCreateCommand(log, server, driverApi) {
   const attemptId = ++attemptCounter;
   log.debug('[leadfoot:command] Creating session');
-  const session = await server.createSession({}, driverApi.getRequiredCapabilities());
+
+  let browserOptions = {};
+  if (process.env.TEST_DISABLE_GPU) {
+    browserOptions = { chromeOptions: { args: ['disable-gpu'] } };
+  }
+  if (process.env.TEST_BROWSER_HEADLESS) {
+    browserOptions = { chromeOptions: { args: ['headless', 'disable-gpu'] } };
+  }
+  const session = await server.createSession(browserOptions, driverApi.getRequiredCapabilities());
+
   if (attemptId !== attemptCounter) return; // abort
 
-  log.debug('[leadfoot:command] Registerying session for teardown');
+  log.debug('[leadfoot:command] Registering session for teardown');
   driverApi.beforeStop(async () => session.quit());
   if (attemptId !== attemptCounter) return; // abort
 
@@ -41,7 +50,7 @@ async function attemptToCreateCommand(log, server, driverApi) {
   await server._fillCapabilities(session);
   if (attemptId !== attemptCounter) return; // abort
 
-  // command looks like a promise beacuse it has a `.then()` function
+  // command looks like a promise because it has a `.then()` function
   // so we wrap it in an object to prevent async/await from trying to
   // unwrap/resolve it
   return { command: new Command(session) };

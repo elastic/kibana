@@ -11,17 +11,18 @@ import { ElasticsearchMetric } from '../../metrics';
 import { getDefaultNodeFromId } from './get_default_node_from_id';
 import { calculateNodeType } from './calculate_node_type';
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
+import { i18n } from '@kbn/i18n';
 
-export function handleResponse(clusterState, shardStats, resolver) {
+export function handleResponse(clusterState, shardStats, nodeUuid) {
   return response => {
     let nodeSummary = {};
     const nodeStatsHits = get(response, 'hits.hits', []);
     const nodes = nodeStatsHits.map(hit => hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
-    const node = nodes[0] || getDefaultNodeFromId(resolver);
+    const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
     const sourceStats = get(response, 'hits.hits[0]._source.node_stats');
-    const clusterNode = get(clusterState, [ 'nodes', resolver ]);
+    const clusterNode = get(clusterState, [ 'nodes', nodeUuid ]);
     const stats = {
-      resolver,
+      resolver: nodeUuid,
       node_ids: nodes.map(node => node.uuid),
       attributes: node.attributes,
       transport_address: node.transport_address,
@@ -30,7 +31,7 @@ export function handleResponse(clusterState, shardStats, resolver) {
     };
 
     if (clusterNode) {
-      const _shardStats = get(shardStats, [ 'nodes', resolver ], {});
+      const _shardStats = get(shardStats, [ 'nodes', nodeUuid ], {});
       const calculatedNodeType = calculateNodeType(stats, get(clusterState, 'master_node')); // set type for labeling / iconography
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node, calculatedNodeType);
 
@@ -44,13 +45,16 @@ export function handleResponse(clusterState, shardStats, resolver) {
         dataSize: get(sourceStats, 'indices.store.size_in_bytes'),
         freeSpace: get(sourceStats, 'fs.total.available_in_bytes'),
         usedHeap: get(sourceStats, 'jvm.mem.heap_used_percent'),
-        status: 'Online',
+        status: i18n.translate('xpack.monitoring.es.nodes.onlineStatusLabel', {
+          defaultMessage: 'Online' }),
         isOnline: true,
       };
     } else {
       nodeSummary = {
-        nodeTypeLabel: 'Offline Node',
-        status: 'Offline',
+        nodeTypeLabel: i18n.translate('xpack.monitoring.es.nodes.offlineNodeStatusLabel', {
+          defaultMessage: 'Offline Node' }),
+        status: i18n.translate('xpack.monitoring.es.nodes.offlineStatusLabel', {
+          defaultMessage: 'Offline' }),
         isOnline: false,
       };
     }
@@ -62,17 +66,13 @@ export function handleResponse(clusterState, shardStats, resolver) {
   };
 }
 
-export function getNodeSummary(req, esIndexPattern, clusterState, shardStats, { clusterUuid, resolver, start, end }) {
+export function getNodeSummary(req, esIndexPattern, clusterState, shardStats, { clusterUuid, nodeUuid, start, end }) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getNodeSummary');
 
-  // Get the params from the POST body for the request
-  const config = req.server.config();
-
   // Build up the Elasticsearch request
-  const resolverKey = config.get('xpack.monitoring.node_resolver');
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [{
-    term: { [`source_node.${resolverKey}`]: resolver }
+    term: { 'source_node.uuid': nodeUuid }
   }];
   const params = {
     index: esIndexPattern,
@@ -86,6 +86,6 @@ export function getNodeSummary(req, esIndexPattern, clusterState, shardStats, { 
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params)
-    .then(handleResponse(clusterState, shardStats, resolver));
+    .then(handleResponse(clusterState, shardStats, nodeUuid));
 }
 

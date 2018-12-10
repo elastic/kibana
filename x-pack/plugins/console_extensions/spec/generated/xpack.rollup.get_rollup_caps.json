@@ -1,0 +1,11 @@
+{
+  "xpack.rollup.get_rollup_caps": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/rollup/data/{id}",
+      "_xpack/rollup/data/"
+    ]
+  }
+}

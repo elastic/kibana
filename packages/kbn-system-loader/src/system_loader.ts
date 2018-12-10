@@ -19,14 +19,11 @@
 
 import { getSortedSystemNames } from './sorted_systems';
 import { System } from './system';
-import { ISystemMetadata, ISystemsType, SystemName } from './system_types';
+import { SystemMetadata, SystemName, SystemsType } from './system_types';
 
-export type KibanaSystemApiFactory<C, M> = (
-  name: SystemName,
-  metadata?: M
-) => C;
+export type KibanaSystemApiFactory<C, M> = (name: SystemName, metadata?: M) => C;
 
-export class SystemLoader<C, M extends ISystemMetadata> {
+export class SystemLoader<C, M extends SystemMetadata> {
   private readonly systems = new Map<SystemName, System<C, M, any, any>>();
   private startedSystems: SystemName[] = [];
 
@@ -45,9 +42,7 @@ export class SystemLoader<C, M extends ISystemMetadata> {
     });
   }
 
-  public addSystem<D extends ISystemsType, E = void>(
-    system: System<C, M, D, E>
-  ) {
+  public addSystem<D extends SystemsType, E = void>(system: System<C, M, D, E>) {
     if (this.systems.has(system.name)) {
       throw new Error(`a system named [${system.name}] has already been added`);
     }
@@ -92,21 +87,14 @@ export class SystemLoader<C, M extends ISystemMetadata> {
     }
   }
 
-  private startSystem<D extends ISystemsType, E = void>(
-    system: System<C, M, D, E>
-  ) {
+  private startSystem<D extends SystemsType, E = void>(system: System<C, M, D, E>) {
     const dependenciesValues = {} as D;
 
     for (const dependency of system.dependencies) {
-      dependenciesValues[dependency] = this.systems
-        .get(dependency)!
-        .getExposedValues();
+      dependenciesValues[dependency] = this.systems.get(dependency)!.getExposedValues();
     }
 
-    const kibanaSystemApi = this.kibanaSystemApiFactory(
-      system.name,
-      system.metadata
-    );
+    const kibanaSystemApi = this.kibanaSystemApiFactory(system.name, system.metadata);
 
     system.start(kibanaSystemApi, dependenciesValues);
     this.startedSystems.push(system.name);

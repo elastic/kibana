@@ -60,7 +60,7 @@ export default function ({ getService }) {
             .then(resp => {
               expect(resp.body).to.eql({
                 error: 'Not Found',
-                message: 'Not Found',
+                message: 'Saved object [visualization/foobar] not found',
                 statusCode: 404,
               });
             })
@@ -84,7 +84,7 @@ export default function ({ getService }) {
           .then(resp => {
             expect(resp.body).to.eql({
               error: 'Not Found',
-              message: 'Not Found',
+              message: 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',
               statusCode: 404,
             });
           })

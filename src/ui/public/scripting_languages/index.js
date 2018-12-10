@@ -18,9 +18,7 @@
  */
 
 import chrome from '../chrome';
-import { Notifier } from '../notify';
-
-const notify = new Notifier({ location: 'Scripting Language Service' });
+import { toastNotifications } from '../notify';
 
 export function getSupportedScriptingLanguages() {
   return ['painless'];
@@ -35,7 +33,7 @@ export function GetEnabledScriptingLanguagesProvider($http) {
     return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
       .then((res) => res.data)
       .catch(() => {
-        notify.error('Error getting available scripting languages from Elasticsearch');
+        toastNotifications.addDanger('Error getting available scripting languages from Elasticsearch');
         return [];
       });
   };

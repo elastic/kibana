@@ -51,7 +51,7 @@ export class IndexedArray {
     Object.defineProperty(this, 'raw', { value: [] });
 
     this._indexNames = _.union(
-      this._setupIndex(config.group, inflectIndex, organizeBy),
+      this._setupIndex(config.group, inflectIndex, organizeByIndexedArray(config)),
       this._setupIndex(config.index, inflectIndex, _.indexBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
         return [...raw].sort((itemA, itemB) => {
@@ -140,7 +140,7 @@ export class IndexedArray {
    * @param  {function} inflect - a function that will be called with a property name, and
    *                            creates the public property at which the index will be exposed
    * @param  {function} op      - the function that will be used to create the indices, it is passed
-   *                            the raw representaion of the registry, and a getter for reading the
+   *                            the raw representation of the registry, and a getter for reading the
    *                            right prop
    *
    * @returns {string[]}        - the public keys of all indices created
@@ -195,3 +195,20 @@ export class IndexedArray {
 // using traditional `extends Array` syntax doesn't work with babel
 // See https://babeljs.io/docs/usage/caveats/
 Object.setPrototypeOf(IndexedArray.prototype, Array.prototype);
+
+
+// Similar to `organizeBy` but returns IndexedArrays instead of normal Arrays.
+function organizeByIndexedArray(config) {
+  return (...args) => {
+    const grouped = organizeBy(...args);
+
+    return _.reduce(grouped, (acc, value, group) => {
+      acc[group] = new IndexedArray({
+        ...config,
+        initialSet: value
+      });
+
+      return acc;
+    }, {});
+  };
+}

@@ -18,7 +18,6 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
-import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -27,41 +26,50 @@ import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
+import { usageMixin } from './usage';
 import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
+import { transformDeprecations } from './config/transform_deprecations';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { kibanaIndexMappingsMixin } from './mappings';
+import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
+import { sassMixin } from './sass';
+import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
-  constructor(settings) {
+  constructor(settings, core) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
 
+    this.core = core;
+
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
 
       // sets this.config, reads this.settings
       configSetupMixin,
+
       // sets this.server
       httpMixin,
+
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
+      usageMixin,
       statusMixin,
 
       // writes pid file
@@ -75,10 +83,8 @@ export default class KbnServer {
 
       // setup this.uiExports and this.uiBundles
       uiMixin,
+      i18nMixin,
       indexPatternsMixin,
-
-      // setup server.getKibanaIndexMappingsDsl()
-      kibanaIndexMappingsMixin,
 
       // setup saved object routes
       savedObjectsMixin,
@@ -86,22 +92,21 @@ export default class KbnServer {
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,
 
+      // setup routes for short urls
+      urlShorteningMixin,
+
       // ensure that all bundles are built, or that the
       // watch bundle server is running
       optimizeMixin,
 
+      // transpiles SCSS into CSS
+      sassMixin,
+
       // initialize the plugins
       Plugins.initializeMixin,
 
-      // notify any deffered setup logic that plugins have intialized
+      // notify any deferred setup logic that plugins have initialized
       Plugins.waitForInitResolveMixin,
-
-      () => {
-        if (this.config.get('server.autoListen')) {
-          this.ready = constant(Promise.resolve());
-          return this.listen();
-        }
-      }
     ));
 
     this.listen = once(this.listen);
@@ -130,13 +135,11 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const {
-      server,
-      config,
-    } = this;
-
     await this.ready();
-    await fromNode(cb => server.start(cb));
+
+    const { server, config } = this;
+
+    await server.kibanaMigrator.awaitMigration();
 
     if (isWorker) {
       // help parent process know when we are ready
@@ -148,11 +151,16 @@ export default class KbnServer {
         ? config.get('server.basePath')
         : ''
     }`);
+
     return server;
   }
 
   async close() {
-    await fromNode(cb => this.server.stop(cb));
+    if (!this.server) {
+      return;
+    }
+
+    await this.server.stop();
   }
 
   async inject(opts) {
@@ -163,15 +171,19 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  async applyLoggingConfiguration(settings) {
-    const config = await Config.withDefaultSchema(settings);
+  applyLoggingConfiguration(settings) {
+    const config = new Config(
+      this.config.getSchema(),
+      transformDeprecations(settings)
+    );
+
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),
-      logging: config.get('logging')
+      logging: config.get('logging'),
     };
     const plain = JSON.stringify(subset, null, 2);
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
-    this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
+    this.server.plugins['@elastic/good'].reconfigure(loggingOptions);
   }
 }

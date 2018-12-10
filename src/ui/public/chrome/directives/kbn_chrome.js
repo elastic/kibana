@@ -29,8 +29,6 @@ import {
 } from '../../state_management/state_hashing';
 import {
   notify,
-  GlobalToastList,
-  toastNotifications,
   GlobalBannerList,
   banners,
 } from '../../notify';
@@ -59,14 +57,10 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, $location, $http, Private) {
+        controller($scope, $rootScope, Private, config) {
+          config.watch('k7design', (val) => $scope.k7design = val);
+
           const getUnhashableStates = Private(getUnhashableStatesProvider);
-
-          // are we showing the embedded version of the chrome?
-          if (Boolean($location.search().embed)) {
-            internals.permanentlyHideChrome();
-          }
-
           const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 
           function updateSubUrls() {
@@ -97,17 +91,6 @@ export function kbnChromeProvider(chrome, internals) {
               subscribe={banners.onChange}
             />,
             document.getElementById('globalBannerList')
-          );
-
-          // Toast Notifications
-          ReactDOM.render(
-            <GlobalToastList
-              toasts={toastNotifications.list}
-              dismissToast={toastNotifications.remove}
-              toastLifeTimeMs={6000}
-              subscribe={toastNotifications.onChange}
-            />,
-            document.getElementById('globalToastList')
           );
 
           return chrome;

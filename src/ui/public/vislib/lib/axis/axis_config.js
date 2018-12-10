@@ -26,7 +26,7 @@ export function VislibLibAxisConfigProvider() {
   const defaults = {
     show: true,
     type: 'value',
-    elSelector: '.axis-wrapper-{pos} .axis-div',
+    elSelector: '.visAxis__column--{pos} .axis-div',
     position: 'left',
     scale: {
       type: 'linear',
@@ -61,7 +61,7 @@ export function VislibLibAxisConfigProvider() {
     },
     title: {
       text: '',
-      elSelector: '.axis-wrapper-{pos} .axis-div',
+      elSelector: '.visAxis__column--{pos} .axis-div',
     }
   };
 
@@ -148,7 +148,7 @@ export function VislibLibAxisConfigProvider() {
       }
 
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
-      // unless explicitly overriden by user
+      // unless explicitly overridden by user
       if (this.isHorizontal() && this.isOrdinal()) {
         this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
         this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 90);

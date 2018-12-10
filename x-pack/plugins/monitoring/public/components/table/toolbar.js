@@ -12,6 +12,7 @@ import {
   KuiToolBarSection,
   KuiToolBarText
 } from '@kbn/ui-framework/components';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function MonitoringTableToolBar(props) {
   const searchBox = props.showSearchBox
@@ -37,9 +38,24 @@ export function MonitoringTableToolBar(props) {
     )
     : null;
 
+  const totalRows = Boolean(props.showTotalRows)
+    ? (
+      <p tabIndex="0" className="monitoringTableToolbarTotalRows">
+        <FormattedMessage
+          id="xpack.monitoring.table.toolbar.totalRowsDescription"
+          defaultMessage="{totalRows} in total"
+          values={{
+            totalRows: props.totalRows
+          }}
+        />
+      </p>
+    )
+    : null;
+
   return (
     <KuiToolBar>
       { searchBox }
+      { totalRows }
       { props.renderToolBarSections(props) }
       { paginationSection }
     </KuiToolBar>
@@ -47,5 +63,6 @@ export function MonitoringTableToolBar(props) {
 }
 MonitoringTableToolBar.defaultProps = {
   renderToolBarSections: noop,
-  showSearchBox: true
+  showSearchBox: true,
+  showTotalRows: true
 };

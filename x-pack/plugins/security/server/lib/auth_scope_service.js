@@ -24,7 +24,7 @@ export class AuthScopeService {
   _getterFunctions = [];
 
   /**
-   *  Add a function that will be used to determin the list of scopes for a
+   *  Add a function that will be used to determine the list of scopes for a
    *  request+user combo.
    *
    *  The getterFunction should take two arguments: a `Hapi.Request` object

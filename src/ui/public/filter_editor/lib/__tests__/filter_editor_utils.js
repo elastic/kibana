@@ -36,11 +36,12 @@ import {
   getFieldFromFilter,
   getOperatorFromFilter,
   getParamsFromFilter,
-  getFieldOptions,
+  getFilterableFields,
   getOperatorOptions,
   isFilterValid,
   buildFilter,
-  areIndexPatternsProvided
+  areIndexPatternsProvided,
+  isFilterPinned
 } from '../filter_editor_utils';
 
 describe('FilterEditorUtils', function () {
@@ -170,20 +171,20 @@ describe('FilterEditorUtils', function () {
     });
   });
 
-  describe('getFieldOptions', function () {
+  describe('getFilterableFields', function () {
     it('returns an empty array when no index patterns are provided', function () {
-      const fieldOptions = getFieldOptions();
+      const fieldOptions = getFilterableFields();
       expect(fieldOptions).to.eql([]);
     });
 
     it('returns the list of fields from the given index patterns', function () {
-      const fieldOptions = getFieldOptions([indexPattern]);
+      const fieldOptions = getFilterableFields([indexPattern]);
       expect(fieldOptions).to.be.an('array');
       expect(fieldOptions.length).to.be.greaterThan(0);
     });
 
     it('limits the fields to the filterable fields', function () {
-      const fieldOptions = getFieldOptions([indexPattern]);
+      const fieldOptions = getFilterableFields([indexPattern]);
       const nonFilterableFields = fieldOptions.filter(field => !field.filterable);
       expect(nonFilterableFields.length).to.be(0);
     });
@@ -370,6 +371,26 @@ describe('FilterEditorUtils', function () {
     it('should return true when index patterns are provided', function () {
       const indexPatternMock = {};
       expect(areIndexPatternsProvided([indexPatternMock])).to.be(true);
+    });
+  });
+
+  describe('isFilterPinned', function () {
+    it('should return false when the store is appState', function () {
+      const filter = { $state: { store: 'appState' } };
+      expect(isFilterPinned(filter, false)).to.be(false);
+      expect(isFilterPinned(filter, true)).to.be(false);
+    });
+
+    it('should return true when the store is globalState', function () {
+      const filter = { $state: { store: 'globalState' } };
+      expect(isFilterPinned(filter, false)).to.be(true);
+      expect(isFilterPinned(filter, true)).to.be(true);
+    });
+
+    it('should return the default when the store does not exist', function () {
+      const filter = {};
+      expect(isFilterPinned(filter, false)).to.be(false);
+      expect(isFilterPinned(filter, true)).to.be(true);
     });
   });
 });

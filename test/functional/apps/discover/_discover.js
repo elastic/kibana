@@ -23,13 +23,13 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
   const defaultSettings = {
     'dateFormat:tz': 'UTC',
-    'defaultIndex': 'logstash-*'
+    defaultIndex: 'logstash-*',
   };
 
   describe('discover app', function describeIndexTests() {
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
-        const actualTimeString = await PageObjects.discover.getTimespanText();
+        const actualTimeString = await PageObjects.header.getPrettyDuration();
 
         const expectedTimeString = `${fromTimeString} to ${toTimeString}`;
         expect(actualTimeString).to.be(expectedTimeString);
@@ -73,20 +73,48 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.loadSavedSearch(queryName1);
 
         await retry.try(async function () {
-          expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
+          expect(await PageObjects.discover.getCurrentQueryName()).to.be(
+            queryName1
+          );
         });
       });
 
       it('should show the correct hit count', async function () {
         const expectedHitCount = '14,004';
         await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+          expect(await PageObjects.discover.getHitCount()).to.be(
+            expectedHitCount
+          );
         });
       });
 
       it('should show the correct bar chart', async function () {
-        const expectedBarChartData = [ 35, 189, 694, 1347, 1285, 704, 176, 29, 39, 189, 640,
-          1276, 1327, 663, 166, 25, 30, 164, 663, 1320, 1270, 681, 188, 27 ];
+        const expectedBarChartData = [
+          35,
+          189,
+          694,
+          1347,
+          1285,
+          704,
+          176,
+          29,
+          39,
+          189,
+          640,
+          1276,
+          1327,
+          663,
+          166,
+          25,
+          30,
+          164,
+          663,
+          1320,
+          1270,
+          681,
+          188,
+          27,
+        ];
         await verifyChartData(expectedBarChartData);
       });
 
@@ -97,7 +125,27 @@ export default function ({ getService, getPageObjects }) {
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
+      it('should show bars in the correct time zone', async function () {
+        const ticks = await PageObjects.discover.getBarChartXTicks();
+        expect(ticks).to.eql(['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00']);
+      });
+
+      it('should modify the time range when a bar is clicked', async function () {
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.clickHistogramBar(0);
+        const actualTimeString = await PageObjects.header.getPrettyDuration();
+        expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
+      });
+
+      it('should modify the time range when the histogram is brushed', async function () {
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.brushHistogram(0, 1);
+        const actualTimeString = await PageObjects.header.getPrettyDuration();
+        expect(actualTimeString).to.be('September 19th 2015, 23:52:17.080 to September 20th 2015, 02:59:51.112');
+      });
+
       it('should show correct initial chart interval of Auto', async function () {
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
@@ -107,16 +155,86 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Hourly', async function () {
         await PageObjects.discover.setChartInterval('Hourly');
 
-        const expectedBarChartData = [ 4, 7, 16, 23, 38, 87, 132, 159, 248, 320, 349, 376, 380,
-          324, 293, 233, 188, 125, 69, 40, 28, 17, 2, 3, 8, 10, 12, 28, 36, 84, 111, 157, 229, 292,
-          324, 373, 378, 345, 306, 223, 167, 124, 72, 35, 22, 11, 7, 1, 6, 5, 12, 25, 27, 76, 111, 175,
-          228, 294, 358, 372, 366, 344, 276, 213, 201, 113, 72, 39, 36, 12, 7, 3 ];
+        const expectedBarChartData = [
+          4,
+          7,
+          16,
+          23,
+          38,
+          87,
+          132,
+          159,
+          248,
+          320,
+          349,
+          376,
+          380,
+          324,
+          293,
+          233,
+          188,
+          125,
+          69,
+          40,
+          28,
+          17,
+          2,
+          3,
+          8,
+          10,
+          12,
+          28,
+          36,
+          84,
+          111,
+          157,
+          229,
+          292,
+          324,
+          373,
+          378,
+          345,
+          306,
+          223,
+          167,
+          124,
+          72,
+          35,
+          22,
+          11,
+          7,
+          1,
+          6,
+          5,
+          12,
+          25,
+          27,
+          76,
+          111,
+          175,
+          228,
+          294,
+          358,
+          372,
+          366,
+          344,
+          276,
+          213,
+          201,
+          113,
+          72,
+          39,
+          36,
+          12,
+          7,
+          3,
+        ];
         await verifyChartData(expectedBarChartData);
       });
 
       it('should show correct data for chart interval Daily', async function () {
         const chartInterval = 'Daily';
-        const expectedBarChartData = [ 4757, 4614, 4633 ];
+        const expectedBarChartData = [4757, 4614, 4633];
         await PageObjects.discover.setChartInterval(chartInterval);
         await retry.try(async () => {
           await verifyChartData(expectedBarChartData);
@@ -125,7 +243,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data for chart interval Weekly', async function () {
         const chartInterval = 'Weekly';
-        const expectedBarChartData = [ 4757, 9247 ];
+        const expectedBarChartData = [4757, 9247];
 
         await PageObjects.discover.setChartInterval(chartInterval);
         await retry.try(async () => {
@@ -135,9 +253,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('browser back button should show previous interval Daily', async function () {
         const expectedChartInterval = 'Daily';
-        const expectedBarChartData = [ 4757, 4614, 4633 ];
+        const expectedBarChartData = [4757, 4614, 4633];
 
-        await remote.goBack();
+        await browser.goBack();
         await retry.try(async function tryingForTime() {
           const actualInterval = await PageObjects.discover.getChartInterval();
           expect(actualInterval).to.be(expectedChartInterval);
@@ -147,7 +265,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data for chart interval Monthly', async function () {
         const chartInterval = 'Monthly';
-        const expectedBarChartData = [ 13129 ];
+        const expectedBarChartData = [13129];
 
         await PageObjects.discover.setChartInterval(chartInterval);
         await verifyChartData(expectedBarChartData);
@@ -155,7 +273,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data for chart interval Yearly', async function () {
         const chartInterval = 'Yearly';
-        const expectedBarChartData = [ 13129 ];
+        const expectedBarChartData = [13129];
 
         await PageObjects.discover.setChartInterval(chartInterval);
         await verifyChartData(expectedBarChartData);
@@ -163,8 +281,32 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data for chart interval Auto', async function () {
         const chartInterval = 'Auto';
-        const expectedBarChartData = [ 35, 189, 694, 1347, 1285, 704, 176, 29, 39, 189,
-          640, 1276, 1327, 663, 166, 25, 30, 164, 663, 1320, 1270, 681, 188, 27 ];
+        const expectedBarChartData = [
+          35,
+          189,
+          694,
+          1347,
+          1285,
+          704,
+          176,
+          29,
+          39,
+          189,
+          640,
+          1276,
+          1327,
+          663,
+          166,
+          25,
+          30,
+          164,
+          663,
+          1320,
+          1270,
+          681,
+          188,
+          27,
+        ];
 
         await PageObjects.discover.setChartInterval(chartInterval);
         await verifyChartData(expectedBarChartData);
@@ -190,9 +332,19 @@ export default function ({ getService, getPageObjects }) {
           let stringResults = '';
           let hasFailure = false;
           for (let y = 0; y < expectedBarChartData.length; y++) {
-            stringResults += y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
-             ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
-            if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
+            stringResults +=
+              y +
+              ': expected = ' +
+              expectedBarChartData[y] +
+              ', actual = ' +
+              paths[y] +
+              ', Pass = ' +
+              (Math.abs(expectedBarChartData[y] - paths[y]) <
+                barHeightTolerance) +
+              '\n';
+            if (
+              Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance
+            ) {
               hasFailure = true;
             }
           }
@@ -201,7 +353,9 @@ export default function ({ getService, getPageObjects }) {
             log.debug(paths);
           }
           for (let x = 0; x < expectedBarChartData.length; x++) {
-            expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
+            expect(
+              Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance
+            ).to.be.ok();
           }
         });
       }
@@ -213,8 +367,7 @@ export default function ({ getService, getPageObjects }) {
 
       before(() => {
         log.debug('setAbsoluteRangeForAnotherQuery');
-        return PageObjects.header
-          .setAbsoluteRange(fromTime, toTime);
+        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
       });
 
       it('should show "no results"', async () => {
@@ -257,15 +410,28 @@ export default function ({ getService, getPageObjects }) {
       it('should have correct data-shared-item title and description', async () => {
         const expected = {
           title: 'A Saved Search',
-          description: 'A Saved Search Description'
+          description: 'A Saved Search Description',
         };
 
         await retry.try(async () => {
           await PageObjects.discover.loadSavedSearch(expected.title);
-          const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
+          const {
+            title,
+            description,
+          } = await PageObjects.common.getSharedItemTitleAndDescription();
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });
+      });
+    });
+
+    describe('time zone switch', () => {
+      it('should show bars in the correct time zone after switching', async function () {
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await browser.refresh();
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        const ticks = await PageObjects.discover.getBarChartXTicks();
+        expect(ticks).to.eql(['2015-09-19 17:00', '2015-09-20 17:00', '2015-09-21 17:00', '2015-09-22 17:00']);
       });
     });
   });

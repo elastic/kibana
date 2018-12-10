@@ -1,0 +1,22 @@
+{
+  "indices.rollover": {
+    "data_autocomplete_rules": {
+      "conditions" : {
+        "max_age": "7d",
+        "max_docs": 1000,
+        "max_size": "5gb"
+      },
+      "settings": {
+        "__scope_link": "put_settings"
+      },
+      "mappings": {
+        "__scope_link": "put_mapping"
+      },
+      "aliases": {
+        "__template": {
+          "NAME": {}
+        }
+      }
+    }
+  }
+}

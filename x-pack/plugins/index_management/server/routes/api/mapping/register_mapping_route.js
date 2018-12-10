@@ -19,8 +19,6 @@ function formatHit(hit, indexName) {
 
 async function fetchMapping(callWithRequest, indexName) {
   const params = {
-    ignore_unavailable: true,
-    allow_no_indices: false,
     expand_wildcards: 'none',
     index: indexName,
   };
@@ -35,7 +33,7 @@ export function registerMappingRoute(server) {
   server.route({
     path: '/api/index_management/mapping/{indexName}',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexName } = request.params;
 
@@ -43,13 +41,13 @@ export function registerMappingRoute(server) {
         const hit = await fetchMapping(callWithRequest, indexName);
         const response = formatHit(hit, indexName);
 
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          throw wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

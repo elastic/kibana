@@ -27,7 +27,7 @@ describe('inspectSettings', function () {
 
   });
 
-  it('should break when unavailble info', function () {
+  it('should break when unavailable info', function () {
 
     const mockSettings = {
       isAvailable: () => false

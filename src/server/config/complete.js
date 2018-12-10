@@ -20,13 +20,26 @@
 import { difference } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
+import { getTransform } from '../../deprecation';
+
 
 const getFlattenedKeys = object => (
   Object.keys(getFlattenedObject(object))
 );
 
-const getUnusedConfigKeys = (disabledPluginSpecs, rawSettings, configValues) => {
-  const settings = transformDeprecations(rawSettings);
+async function getUnusedConfigKeys(
+  coreHandledConfigPaths,
+  plugins,
+  disabledPluginSpecs,
+  rawSettings,
+  configValues
+) {
+  // transform deprecated settings
+  const transforms = [
+    transformDeprecations,
+    ...await Promise.all(plugins.map(({ spec }) => getTransform(spec)))
+  ];
+  const settings = transforms.reduce((a, c) => c(a), rawSettings);
 
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
@@ -43,28 +56,39 @@ const getUnusedConfigKeys = (disabledPluginSpecs, rawSettings, configValues) => 
     inputKeys[inputKeys.indexOf('env')] = 'env.name';
   }
 
-  return difference(inputKeys, appliedKeys);
-};
+  // Filter out keys that are marked as used in the core (e.g. by new core plugins).
+  return difference(inputKeys, appliedKeys).filter(
+    unusedConfigKey => !coreHandledConfigPaths.some(
+      usedInCoreConfigKey => unusedConfigKey.startsWith(usedInCoreConfigKey)
+    )
+  );
+}
 
-export default function (kbnServer, server, config) {
+export default async function (kbnServer, server, config) {
 
   server.decorate('server', 'config', function () {
     return kbnServer.config;
   });
 
-  const unusedKeys = getUnusedConfigKeys(kbnServer.disabledPluginSpecs, kbnServer.settings, config.get())
-    .map(key => `"${key}"`);
+  const unusedKeys = await getUnusedConfigKeys(
+    kbnServer.core.handledConfigPaths,
+    kbnServer.plugins,
+    kbnServer.disabledPluginSpecs,
+    kbnServer.settings,
+    config.get()
+  );
 
   if (!unusedKeys.length) {
     return;
   }
 
-  const desc = unusedKeys.length === 1
+  const formattedUnusedKeys = unusedKeys.map(key => `"${key}"`);
+  const desc = formattedUnusedKeys.length === 1
     ? 'setting was'
     : 'settings were';
 
   const error = new Error(
-    `${formatListAsProse(unusedKeys)} ${desc} not applied. ` +
+    `${formatListAsProse(formattedUnusedKeys)} ${desc} not applied. ` +
     'Check for spelling errors and ensure that expected ' +
     'plugins are installed.'
   );

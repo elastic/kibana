@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import { asPrettyString } from '../../../core_plugins/kibana/common/utils/as_pretty_string';
+import { asPrettyString } from '../../../legacy/core_plugins/kibana/common/utils/as_pretty_string';
 import { FieldFormat } from '../field_format';
 
 describe('FieldFormat class', function () {
@@ -105,7 +105,7 @@ describe('FieldFormat class', function () {
         expect(html('formatted')).to.be('<span ng-non-bindable>formatted</span>');
       });
 
-      it('can be an object, with seperate text and html converter', function () {
+      it('can be an object, with separate text and html converter', function () {
         TestFormat.prototype._convert = {
           text: _.constant('formatted text'),
           html: _.constant('formatted html'),

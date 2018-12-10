@@ -22,6 +22,7 @@ import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
+import { i18n } from '@kbn/i18n';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -36,7 +37,9 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
-      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" title="Fit Data Bounds" aria-label="Fit Data Bounds"></a>')
+      const fitDatBoundsLabel = i18n.translate('common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel',
+        { defaultMessage: 'Fit Data Bounds' });
+      $(this._fitContainer).html(`<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`)
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();
@@ -52,7 +55,7 @@ function makeFitControl(fitContainer, kibanaMap) {
   return new FitControl(fitContainer, kibanaMap);
 }
 
-function makeLegedControl(container, kibanaMap, position) {
+function makeLegendControl(container, kibanaMap, position) {
 
   const LegendControl = L.Control.extend({
 
@@ -69,7 +72,7 @@ function makeLegedControl(container, kibanaMap, position) {
 
     updateContents() {
       this._legendContainer.empty();
-      const $div = $('<div>').addClass('tilemap-legend');
+      const $div = $('<div>').addClass('visMapLegend');
       this._legendContainer.append($div);
       const layers = this._kibanaMap.getLayers();
       layers.forEach((layer) =>layer.appendLegendContents($div));
@@ -497,8 +500,8 @@ export class KibanaMap extends EventEmitter {
     if (this._leafletLegendControl) {
       this._leafletMap.removeControl(this._leafletLegendControl);
     }
-    const $wrapper = $('<div>').addClass('tilemap-legend-wrapper');
-    this._leafletLegendControl = makeLegedControl($wrapper, this, this._legendPosition);
+    const $wrapper = $('<div>').addClass('visMapLegend__wrapper');
+    this._leafletLegendControl = makeLegendControl($wrapper, this, this._legendPosition);
     this._leafletMap.addControl(this._leafletLegendControl);
   }
 
@@ -647,7 +650,6 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      visualization.sessionState.mapBounds = this.getBounds();
     }
 
     this._leafletMap.on('resize', () => {
@@ -676,7 +678,7 @@ export class KibanaMap extends EventEmitter {
 
 function getAttributionArray(attribution) {
   const attributionString = attribution || '';
-  let attributions = attributionString.split('|');
+  let attributions = attributionString.split(/\s*\|\s*/);
   if (attributions.length === 1) {//temp work-around due to inconsistency in manifests of how attributions are delimited
     attributions = attributions[0].split(',');
   }

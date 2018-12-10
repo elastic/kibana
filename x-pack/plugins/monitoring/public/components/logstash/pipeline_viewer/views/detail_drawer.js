@@ -7,31 +7,30 @@
 import React from 'react';
 import { last } from 'lodash';
 import {
-  EuiTitle,
-  EuiText,
+  EuiBadge,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiSpacer,
   EuiTable,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
-import { LOGSTASH } from '../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function renderIcon(vertex) {
   return (
-    <img
-      src={vertex.icon}
-      width={LOGSTASH.PIPELINE_VIEWER.ICON.WIDTH_PX}
-      height={LOGSTASH.PIPELINE_VIEWER.ICON.HEIGHT_PX}
+    <EuiIcon
+      type={vertex.iconType}
       className="lspvDetailDrawerIcon"
     />
   );
@@ -48,7 +47,12 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
     ? null
     : (
       <EuiTableRow key="events_latency">
-        <EuiTableRowCell>Events Latency</EuiTableRowCell>
+        <EuiTableRowCell>
+          <FormattedMessage
+            id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
+            defaultMessage="Events Latency"
+          />
+        </EuiTableRowCell>
         <EuiTableRowCell>
           <div className="lspvDetailDrawerSparklineContainer">
             <Sparkline
@@ -71,7 +75,12 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
   const eventsOutRateValueFormatter = (value) => formatMetric(value, '0.[0]a', 'e/s');
   const eventsOutRateRow = (
     <EuiTableRow key="events_out_rate">
-      <EuiTableRowCell>Events Emitted Rate</EuiTableRowCell>
+      <EuiTableRowCell>
+        <FormattedMessage
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
+          defaultMessage="Events Emitted Rate"
+        />
+      </EuiTableRowCell>
       <EuiTableRowCell>
         <div className="lspvDetailDrawerSparklineContainer">
           <Sparkline
@@ -101,7 +110,12 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
     ? null
     : (
       <EuiTableRow key="events_in">
-        <EuiTableRowCell>Events Received</EuiTableRowCell>
+        <EuiTableRowCell>
+          <FormattedMessage
+            id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
+            defaultMessage="Events Received"
+          />
+        </EuiTableRowCell>
         <EuiTableRowCell>
           <div className="lspvDetailDrawerSparklineContainer">
             <Sparkline
@@ -128,7 +142,12 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
       : null;
   const eventsOutRow = (
     <EuiTableRow key="events_out">
-      <EuiTableRowCell>Events Emitted</EuiTableRowCell>
+      <EuiTableRowCell>
+        <FormattedMessage
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
+          defaultMessage="Events Emitted"
+        />
+      </EuiTableRowCell>
       <EuiTableRowCell>
         <div className="lspvDetailDrawerSparklineContainer">
           <Sparkline
@@ -162,13 +181,23 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
 
 function renderIfBasicStats(_vertex) {
   return (
-    <p>There are currently no metrics to show for this if condition.</p>
+    <p>
+      <FormattedMessage
+        id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForIfDescription"
+        defaultMessage="There are currently no metrics to show for this if condition."
+      />
+    </p>
   );
 }
 
 function renderQueueBasicStats(_vertex) {
   return (
-    <p>There are currently no metrics to show for the queue.</p>
+    <p>
+      <FormattedMessage
+        id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForQueueDescription"
+        defaultMessage="There are currently no metrics to show for the queue."
+      />
+    </p>
   );
 }
 
@@ -189,15 +218,25 @@ function renderBasicStats(vertex, timeseriesTooltipXValueFormatter) {
 function renderPluginBasicInfo(vertex) {
   if (vertex.hasExplicitId) {
     return (
-      <p>This {vertex.typeString}&#39;s ID is <strong>{ vertex.id }</strong>.</p>
+      <p>
+        <FormattedMessage
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.vertexIdDescription"
+          defaultMessage="This {vertexType}&#39;s ID is {vertexId}."
+          values={{ vertexType: vertex.typeString, vertexId: (<EuiBadge>{ vertex.id }</EuiBadge>) }}
+        />
+      </p>
     );
   }
 
   return (
     <div>
       <p>
-        This {vertex.typeString} does not have an ID explicitly specified. Specifying an ID allows you to track differences
-        across pipeline changes. You can explicitly specify an ID for this plugin like so:
+        <FormattedMessage
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.specifyVertexIdDescription"
+          defaultMessage="This {vertexType} does not have an ID explicitly specified. Specifying an ID allows you to track differences
+          across pipeline changes. You can explicitly specify an ID for this plugin like so:"
+          values={{ vertexType: vertex.typeString }}
+        />
       </p>
       <EuiCodeBlock>
         {vertex.name} {`{
@@ -210,14 +249,17 @@ function renderPluginBasicInfo(vertex) {
 }
 
 function renderIfBasicInfo(vertex) {
-  const ifCode = `if (${vertex.subtitle.complete}) {
+  const ifCode = `if (${vertex.subtitle}) {
   ...
 }`;
 
   return (
     <div>
       <p>
-        This is a conditional statement in your pipeline.
+        <FormattedMessage
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.conditionalStatementDescription"
+          defaultMessage="This is a conditional statement in your pipeline."
+        />
       </p>
       <EuiCodeBlock>{ ifCode }</EuiCodeBlock>
       <EuiSpacer />
@@ -228,8 +270,11 @@ function renderIfBasicInfo(vertex) {
 function renderQueueBasicInfo(_vertex) {
   return (
     <p>
-      This is an internal structure used by Logstash to buffer events between
-      inputs and the rest of the pipeline.
+      <FormattedMessage
+        id="xpack.monitoring.logstash.pipeline.detailDrawer.structureDescription"
+        defaultMessage="This is an internal structure used by Logstash to buffer events between
+        inputs and the rest of the pipeline."
+      />
     </p>
   );
 }
@@ -268,19 +313,16 @@ export function DetailDrawer({ vertex, onHide, timeseriesTooltipXValueFormatter 
     >
       <EuiFlyoutHeader>
         <EuiFlexGroup
-          alignItems="center"
+          alignItems="baseline"
+          gutterSize="s"
         >
+          <EuiFlexItem grow={false}>
+            { renderIcon(vertex) }
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2>{ renderIcon(vertex) }{ renderTitle(vertex) }</h2>
+              <h2>{ renderTitle(vertex) }</h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={onHide}
-              iconType="cross"
-              aria-label="Close"
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

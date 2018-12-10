@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from './client';
+import { createSavedObjectsService } from './service';
+import { KibanaMigrator } from './migrations';
+import { SavedObjectsSchema } from './schema';
+import { SavedObjectsSerializer } from './serialization';
 
 import {
+  createBulkCreateRoute,
   createBulkGetRoute,
   createCreateRoute,
   createDeleteRoute,
@@ -29,15 +33,31 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
+  const migrator = new KibanaMigrator({ kbnServer });
+
+  server.decorate('server', 'getKibanaIndexMappingsDsl', () => migrator.getActiveMappings());
+  server.decorate('server', 'kibanaMigrator', migrator);
+
+  // we use kibana.index which is technically defined in the kibana plugin, so if
+  // we don't have the plugin (mainly tests) we can't initialize the saved objects
+  if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
+    server.log(
+      ['warning', 'saved-objects'],
+      `Saved Objects uninitialized because the Kibana plugin is disabled.`
+    );
+    return;
+  }
+
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
-      method(req, reply) {
-        reply(req.getSavedObjectsClient());
+      method(req) {
+        return req.getSavedObjectsClient();
       },
     },
   };
 
+  server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
@@ -45,50 +65,9 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  async function onBeforeWrite() {
-    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-
-    try {
-      const index = server.config().get('kibana.index');
-      await adminCluster.callWithInternalUser('indices.putTemplate', {
-        name: `kibana_index_template:${index}`,
-        body: {
-          template: index,
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-          mappings: server.getKibanaIndexMappingsDsl(),
-        },
-      });
-    } catch (error) {
-      server.log(['debug', 'savedObjects'], {
-        tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
-        es: {
-          resp: error.body,
-          status: error.status,
-        },
-        err: {
-          message: error.message,
-          stack: error.stack,
-        },
-      });
-
-      // We reject with `es.ServiceUnavailable` because writing an index
-      // template is a very simple operation so if we get an error here
-      // then something must be very broken
-      throw new adminCluster.errors.ServiceUnavailable();
-    }
-  }
-
-  server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
-    return new SavedObjectsClient({
-      index: server.config().get('kibana.index'),
-      mappings: server.getKibanaIndexMappingsDsl(),
-      callCluster,
-      onBeforeWrite,
-    });
-  });
+  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const serializer = new SavedObjectsSerializer(schema);
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server, schema, serializer, migrator));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
@@ -98,9 +77,7 @@ export function savedObjectsMixin(kbnServer, server) {
       return savedObjectsClientCache.get(request);
     }
 
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    const callCluster = (...args) => callWithRequest(request, ...args);
-    const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

@@ -35,14 +35,6 @@ describe('AggConfigs', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    // replace the AggConfig module with a spy
-
-    const spy = sinon.spy(AggConfig);
-    Object.defineProperty(spy, 'aggTypes', {
-      get: function () { return AggConfig.aggTypes; },
-      set: function (val) { AggConfig.aggTypes = val; }
-    });
-
     // load main deps
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
@@ -60,7 +52,7 @@ describe('AggConfigs', function () {
         aggs: []
       });
 
-      const ac = new AggConfigs(vis);
+      const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
       expect(ac).to.have.length(1);
     });
 
@@ -70,21 +62,21 @@ describe('AggConfigs', function () {
         aggs: []
       });
 
-      const ac = new AggConfigs(vis, [
+      const ac = new AggConfigs(vis.indexPattern, [
         {
           type: 'date_histogram',
           schema: 'segment'
         },
-        new AggConfig(vis, {
+        new AggConfig(vis.aggs, {
           type: 'terms',
           schema: 'split'
         })
-      ]);
+      ], vis.type.schemas.all);
 
       expect(ac).to.have.length(3);
     });
 
-    it('attemps to ensure that all states have an id', function () {
+    it('attempts to ensure that all states have an id', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: []
@@ -102,7 +94,7 @@ describe('AggConfigs', function () {
       ];
 
       const spy = sinon.spy(AggConfig, 'ensureIds');
-      new AggConfigs(vis, states);
+      new AggConfigs(vis.indexPattern, states, vis.type.schemas.all);
       expect(spy.callCount).to.be(1);
       expect(spy.firstCall.args[0]).to.be(states);
       AggConfig.ensureIds.restore();
@@ -144,17 +136,17 @@ describe('AggConfigs', function () {
       });
 
       it('should only set the number of defaults defined by the max', function () {
-        const ac = new AggConfigs(vis);
+        const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
         expect(ac.bySchemaName.metric).to.have.length(2);
       });
 
       it('should set the defaults defined in the schema when none exist', function () {
-        const ac = new AggConfigs(vis);
+        const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
         expect(ac).to.have.length(3);
       });
 
       it('should NOT set the defaults defined in the schema when some exist', function () {
-        const ac = new AggConfigs(vis, [{ schema: 'segment', type: 'date_histogram' }]);
+        const ac = new AggConfigs(vis.indexPattern, [{ schema: 'segment', type: 'date_histogram' }], vis.type.schemas.all);
         expect(ac).to.have.length(3);
         expect(ac.bySchemaName.segment[0].type.name).to.equal('date_histogram');
       });
@@ -340,7 +332,7 @@ describe('AggConfigs', function () {
       });
       vis.isHierarchical = _.constant(true);
 
-      const topLevelDsl = vis.aggs.toDsl();
+      const topLevelDsl = vis.aggs.toDsl(vis.isHierarchical());
       const buckets = vis.aggs.bySchemaGroup.buckets;
       const metrics = vis.aggs.bySchemaGroup.metrics;
 

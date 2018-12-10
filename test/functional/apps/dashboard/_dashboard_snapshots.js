@@ -22,18 +22,20 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
-      await remote.setWindowSize(1000, 500);
+      await browser.setWindowSize(1000, 500);
     });
 
     after(async function () {
-      await remote.setWindowSize(1300, 900);
+      await browser.setWindowSize(1300, 900);
+      const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+      await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
     // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
@@ -48,11 +50,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      // Render complete flag doesn't handle resizes from expanding.
-      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
@@ -70,11 +71,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      // Render complete flag doesn't handle resizes from expanding.
-      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();

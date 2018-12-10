@@ -57,7 +57,7 @@ describe('jQuery.findTestSubject', function () {
     expect($found.filter($noMatch).length).to.be(0);
   });
 
-  it('finds all of the elements with a decendant selector', function () {
+  it('finds all of the elements with a descendant selector', function () {
     const $container = $('<div>');
     const $parent = $make('foo name').appendTo($container);
     const $bar = $make('bar othername').appendTo($parent);

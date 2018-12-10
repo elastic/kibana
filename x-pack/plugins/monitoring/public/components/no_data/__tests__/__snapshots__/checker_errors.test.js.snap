@@ -8,7 +8,7 @@ Array [
     class="euiSpacer euiSpacer--l"
   />,
   <div
-    class="euiCallOut euiCallOut--danger noData__alignLeft"
+    class="euiCallOut euiCallOut--danger eui-textLeft"
   >
     <div
       class="euiCallOutHeader"
@@ -36,7 +36,7 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          Error: no access for you
+          no access for you
         </dd>
         <dt
           class="euiDescriptionList__title"

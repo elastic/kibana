@@ -30,7 +30,7 @@ export class KibanaServerVersion {
 
     const status = await this.kibanaStatus.get();
     if (status && status.version && status.version.number) {
-      this._cachedVersionNumber = status.version.number;
+      this._cachedVersionNumber = status.version.number + (status.version.build_snapshot ? '-SNAPSHOT' : '');
       return this._cachedVersionNumber;
     }
 

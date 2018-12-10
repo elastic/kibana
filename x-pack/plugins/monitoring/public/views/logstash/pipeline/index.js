@@ -14,6 +14,8 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
+import { i18n } from '@kbn/i18n';
 
 function getPageData($injector) {
   const $route = $injector.get('$route');
@@ -40,8 +42,16 @@ function getPageData($injector) {
 
         return {
           ...version,
-          relativeFirstSeen: `${relativeFirstSeen} ago`,
-          relativeLastSeen: isLastSeenCloseToNow ? 'now' : `until ${relativeLastSeen} ago`
+          relativeFirstSeen: i18n.translate('xpack.monitoring.logstash.pipeline.relativeFirstSeenAgoLabel', {
+            defaultMessage: '{relativeFirstSeen} ago', values: { relativeFirstSeen }
+          }),
+          relativeLastSeen: isLastSeenCloseToNow ?
+            i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenNowLabel', {
+              defaultMessage: 'now'
+            })
+            : i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenAgoLabel', {
+              defaultMessage: 'until {relativeLastSeen} ago', values: { relativeLastSeen }
+            })
         };
       });
 
@@ -62,12 +72,11 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     const $route = $injector.get('$route');
     const $executor = $injector.get('$executor');
     const globalState = $injector.get('globalState');
     const title = $injector.get('title');
-    const timefilter = $injector.get('timefilter');
 
     timefilter.disableTimeRangeSelector(); // Do not display time picker in UI
     timefilter.enableAutoRefreshSelector();
@@ -78,7 +87,9 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
     }
     setClusters($route.current.locals.clusters);
     $scope.pageData = $route.current.locals.pageData;
-    title($scope.cluster, `Logstash - Pipeline`);
+    title($scope.cluster, i18n('xpack.monitoring.logstash.pipeline.routeTitle', {
+      defaultMessage: 'Logstash - Pipeline'
+    }));
 
     $executor.register({
       execute: () => getPageData($injector),
@@ -86,7 +97,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         $scope.pageData = response;
       }
     });
-    $executor.start();
+    $executor.start($scope);
     $scope.$on('$destroy', $executor.destroy);
   }
 });

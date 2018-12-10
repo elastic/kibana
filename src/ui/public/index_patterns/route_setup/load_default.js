@@ -27,6 +27,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { clearTimeout } from 'timers';
+import { i18n } from '@kbn/i18n';
 
 let bannerId;
 let timeoutId;
@@ -43,8 +44,9 @@ function displayBanner() {
         color="warning"
         iconType="iInCircle"
         title={
-          `In order to visualize and explore data in Kibana,
-          you'll need to create an index pattern to retrieve data from Elasticsearch.`
+          i18n.translate('common.ui.indexPattern.bannerLabel',
+            //eslint-disable-next-line max-len
+            { defaultMessage: 'In order to visualize and explore data in Kibana, you\'ll need to create an index pattern to retrieve data from Elasticsearch.' })
         }
       />
     )
@@ -67,6 +69,10 @@ export default function (opts) {
       const getIds = Private(IndexPatternsGetProvider)('id');
       const route = _.get($route, 'current.$$route');
 
+      if (!route.requireDefaultIndex) {
+        return;
+      }
+
       return getIds()
         .then(function (patterns) {
           let defaultId = config.get('defaultIndex');
@@ -78,7 +84,7 @@ export default function (opts) {
             defaultId = defined = false;
           }
 
-          if (!defined && route.requireDefaultIndex) {
+          if (!defined) {
             // If there is only one index pattern, set it as default
             if (patterns.length === 1) {
               defaultId = patterns[0];

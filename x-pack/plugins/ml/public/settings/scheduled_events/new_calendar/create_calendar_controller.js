@@ -15,7 +15,8 @@ import 'plugins/ml/settings/scheduled_events/components/events_list';
 import { validateCalendarId } from 'plugins/ml/settings/scheduled_events/components/utils/validate_calendar';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -29,8 +30,9 @@ import template from './create_calendar.html';
 uiRoutes
   .when('/settings/calendars_list/new_calendar', {
     template,
+    k7Breadcrumbs: getCreateCalendarBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
       initPromise: initPromise(true)
@@ -38,8 +40,9 @@ uiRoutes
   })
   .when('/settings/calendars_list/edit_calendar/:calendarId', {
     template,
+    k7Breadcrumbs: getEditCalendarBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
       initPromise: initPromise(true)

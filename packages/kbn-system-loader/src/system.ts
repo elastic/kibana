@@ -18,25 +18,23 @@
  */
 
 import {
-  IKibanaSystemClassStatic,
-  ISystemMetadata,
-  ISystemsType,
   KibanaSystem,
+  KibanaSystemClassStatic,
+  SystemMetadata,
   SystemName,
+  SystemsType,
 } from './system_types';
 
 function isPromise(obj: any) {
-  return (
-    obj != null && typeof obj === 'object' && typeof obj.then === 'function'
-  );
+  return obj != null && typeof obj === 'object' && typeof obj.then === 'function';
 }
 
-export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
+export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
   public readonly name: SystemName;
   public readonly dependencies: SystemName[];
   public readonly metadata?: M;
 
-  private readonly systemClass: IKibanaSystemClassStatic<C, D, E>;
+  private readonly systemClass: KibanaSystemClassStatic<C, D, E>;
   private systemInstance?: KibanaSystem<C, D, E>;
   private exposedValues?: E;
 
@@ -45,7 +43,7 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
     config: {
       metadata?: M;
       dependencies?: SystemName[];
-      implementation: IKibanaSystemClassStatic<C, D, E>;
+      implementation: KibanaSystemClassStatic<C, D, E>;
     }
   ) {
     this.name = name;
@@ -56,19 +54,14 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
 
   public getExposedValues(): E {
     if (this.systemInstance === undefined) {
-      throw new Error(
-        'trying to get the exposed value of a system that is NOT running'
-      );
+      throw new Error('trying to get the exposed value of a system that is NOT running');
     }
 
     return this.exposedValues!;
   }
 
   public start(kibanaValues: C, dependenciesValues: D) {
-    this.systemInstance = new this.systemClass(
-      kibanaValues,
-      dependenciesValues
-    );
+    this.systemInstance = new this.systemClass(kibanaValues, dependenciesValues);
     const exposedValues = this.systemInstance.start();
 
     if (isPromise(exposedValues)) {
@@ -79,8 +72,7 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
       );
     }
 
-    this.exposedValues =
-      exposedValues === undefined ? ({} as E) : exposedValues;
+    this.exposedValues = exposedValues === undefined ? ({} as E) : exposedValues;
   }
 
   public stop() {
@@ -91,9 +83,7 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
 
     if (isPromise(stoppedResponse)) {
       throw new Error(
-        `A promise was returned when stopping [${
-          this.name
-        }], but systems must stop synchronously.`
+        `A promise was returned when stopping [${this.name}], but systems must stop synchronously.`
       );
     }
   }

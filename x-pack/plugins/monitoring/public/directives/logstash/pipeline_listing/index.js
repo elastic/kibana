@@ -23,12 +23,31 @@ import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { SORT_ASCENDING } from '../../../../common/constants';
 import { formatMetric } from '../../../lib/format_number';
+import { timefilter } from 'ui/timefilter';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const filterFields = [ 'id' ];
 const columns = [
-  { title: 'ID', sortKey: 'id', sortOrder: SORT_ASCENDING },
-  { title: 'Events Emitted Rate', sortKey: 'latestThroughput' },
-  { title: 'Number of Nodes', sortKey: 'latestNodesCount', }
+  {
+    title: i18n.translate('xpack.monitoring.logstash.pipelines.idTitle', {
+      defaultMessage: 'ID'
+    }),
+    sortKey: 'id',
+    sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.pipelines.eventsEmittedRateTitle', {
+      defaultMessage: 'Events Emitted Rate'
+    }),
+    sortKey: 'latestThroughput'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.pipelines.numberOfNodesTitle', {
+      defaultMessage: 'Number of Nodes'
+    }),
+    sortKey: 'latestNodesCount',
+  }
 ];
 
 const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, tooltipYValueFormatter) => {
@@ -40,7 +59,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
     return (
       <KuiTableRow>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__name">
+          <div className="monTableCell__name">
             <EuiLink
               onClick={onPipelineClick.bind(null, id)}
               data-test-subj="id"
@@ -66,7 +85,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
               />
             </KuiFlexItem>
             <KuiFlexItem
-              className="monitoringTableCell__number"
+              className="monTableCell__number"
               data-test-subj="eventsEmittedRate"
             >
               { formatMetric(latestThroughput, '0.[0]a', throughputMetric.metric.units) }
@@ -90,7 +109,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
               />
             </KuiFlexItem>
             <KuiFlexItem
-              className="monitoringTableCell__number"
+              className="monTableCell__number"
               data-test-subj="nodeCount"
             >
               { formatMetric(latestNodesCount, '0a') }
@@ -103,9 +122,8 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringLogstashPipelineListing', ($injector) => {
+uiModule.directive('monitoringLogstashPipelineListing', ($injector, i18n) => {
   const kbnUrl = $injector.get('kbnUrl');
-  const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
 
   const dateFormat = config.get('dateFormat');
@@ -124,10 +142,10 @@ uiModule.directive('monitoringLogstashPipelineListing', ($injector) => {
     link: function (scope, $el) {
 
       function onBrush(xaxis) {
-        scope.$evalAsync(() => {
-          timefilter.time.from = moment(xaxis.from);
-          timefilter.time.to = moment(xaxis.to);
-          timefilter.time.mode = 'absolute';
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute'
         });
       }
 
@@ -150,20 +168,26 @@ uiModule.directive('monitoringLogstashPipelineListing', ($injector) => {
           return;
         }
 
+        const filterPipelinesPlaceholder = i18n('xpack.monitoring.logstash.filterPipelinesPlaceholder', {
+          defaultMessage: 'Filter Pipelines…'
+        });
+
         const pipelinesTable = (
-          <MonitoringTable
-            className="logstashPipelinesTable"
-            rows={pipelines}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Pipelines..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={pipelineRowFactory(onPipelineClick, onBrush, tooltipXValueFormatter, tooltipYValueFormatter)}
-          />
+          <I18nProvider>
+            <MonitoringTable
+              className="logstashPipelinesTable"
+              rows={pipelines}
+              pageIndex={scope.pageIndex}
+              filterText={scope.filterText}
+              sortKey={scope.sortKey}
+              sortOrder={scope.sortOrder}
+              onNewState={scope.onNewState}
+              placeholder={filterPipelinesPlaceholder}
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={pipelineRowFactory(onPipelineClick, onBrush, tooltipXValueFormatter, tooltipYValueFormatter)}
+            />
+          </I18nProvider>
         );
         render(pipelinesTable, $el[0]);
       });

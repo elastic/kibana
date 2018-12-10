@@ -21,7 +21,8 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
-const { log: defaultLog, extractTarball } = require('../utils');
+const del = require('del');
+const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 
 /**
@@ -45,46 +46,26 @@ exports.installArchive = async function installArchive(archive, options = {}) {
 
   if (fs.existsSync(installPath)) {
     log.info('install directory already exists, removing');
-    rmrfSync(installPath);
+    await del(installPath, { force: true });
   }
 
   log.info('extracting %s', chalk.bold(archive));
-  await extractTarball(archive, installPath);
+  await decompress(archive, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
-  if (license !== 'oss') {
-    await appendToConfig(
-      installPath,
-      'xpack.license.self_generated.type',
-      license
-    );
-
+  if (license === 'trial') {
+    // starting in 6.3, security is disabled by default. Since we bootstrap
+    // the keystore, we can enable security ourselves.
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+  }
+
+  if (license !== 'oss') {
+    await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
     await configureKeystore(installPath, password, log);
   }
 
   return { installPath };
 };
-
-/**
- * Recurive deletion for a directory
- *
- * @param {String} path
- */
-function rmrfSync(path) {
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(file => {
-      const curPath = path + '/' + file;
-
-      if (fs.lstatSync(curPath).isDirectory()) {
-        rmrfSync(curPath);
-      } else {
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
-}
 
 /**
  * Appends single line to elasticsearch.yml config file
@@ -94,11 +75,7 @@ function rmrfSync(path) {
  * @param {String} value
  */
 async function appendToConfig(installPath, key, value) {
-  fs.appendFileSync(
-    path.resolve(installPath, ES_CONFIG),
-    `${key}: ${value}\n`,
-    'utf8'
-  );
+  fs.appendFileSync(path.resolve(installPath, ES_CONFIG), `${key}: ${value}\n`, 'utf8');
 }
 
 /**

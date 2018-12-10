@@ -21,10 +21,8 @@ import _ from 'lodash';
 import angular from 'angular';
 
 import { metadata } from '../metadata';
-import 'babel-polyfill';
-import 'whatwg-fetch';
-import 'custom-event-polyfill';
-import '../timefilter';
+import '../state_management/global_state';
+import '../config';
 import '../notify';
 import '../private';
 import '../promises';
@@ -35,14 +33,17 @@ import './services';
 
 import { initAngularApi } from './api/angular';
 import appsApi from './api/apps';
-import controlsApi from './api/controls';
+import { initChromeControlsApi } from './api/controls';
 import { initChromeNavApi } from './api/nav';
+import { initBreadcrumbsApi } from './api/breadcrumbs';
 import templateApi from './api/template';
-import themeApi from './api/theme';
-import translationsApi from './api/translations';
+import { initChromeThemeApi } from './api/theme';
 import { initChromeXsrfApi } from './api/xsrf';
 import { initUiSettingsApi } from './api/ui_settings';
 import { initLoadingCountApi } from './api/loading_count';
+import { initSavedObjectClient } from './api/saved_object_client';
+import { initChromeBasePathApi } from './api/base_path';
+import { initChromeInjectedVarsApi } from './api/injected_vars';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -61,27 +62,35 @@ const internals = _.defaults(
 );
 
 initUiSettingsApi(chrome);
+initSavedObjectClient(chrome);
 appsApi(chrome, internals);
 initChromeXsrfApi(chrome, internals);
+initChromeBasePathApi(chrome);
+initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
+initBreadcrumbsApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
 initAngularApi(chrome, internals);
-controlsApi(chrome, internals);
+initChromeControlsApi(chrome);
 templateApi(chrome, internals);
-themeApi(chrome, internals);
-translationsApi(chrome, internals);
+initChromeThemeApi(chrome);
 
 const waitForBootstrap = new Promise(resolve => {
-  chrome.bootstrap = function () {
+  chrome.bootstrap = function (targetDomElement) {
     // import chrome nav controls and hacks now so that they are executed after
     // everything else, can safely import the chrome, and interact with services
     // and such setup by all other modules
     require('uiExports/chromeNavControls');
     require('uiExports/hacks');
 
+    // sets attribute on body for stylesheet sandboxing
+    document.body.setAttribute('id', `${internals.app.id}-app`);
+
     chrome.setupAngular();
-    angular.bootstrap(document.body, ['kibana']);
-    resolve();
+    targetDomElement.setAttribute('id', 'kibana-body');
+    targetDomElement.setAttribute('kbn-chrome', 'true');
+    angular.bootstrap(targetDomElement, ['kibana']);
+    resolve(targetDomElement);
   };
 });
 
@@ -100,10 +109,10 @@ const waitForBootstrap = new Promise(resolve => {
  * tests. Look into 'src/test_utils/public/stub_get_active_injector' for more information.
  */
 chrome.dangerouslyGetActiveInjector = () => {
-  return waitForBootstrap.then(() => {
-    const $injector = angular.element(document.body).injector();
+  return waitForBootstrap.then((targetDomElement) => {
+    const $injector = angular.element(targetDomElement).injector();
     if (!$injector) {
-      return Promise.reject('document.body had no angular context after bootstrapping');
+      return Promise.reject('targetDomElement had no angular context after bootstrapping');
     }
     return $injector;
   });

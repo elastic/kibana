@@ -24,7 +24,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterManagerProvider } from '..';
 import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
-import { getPhraseScript } from '../lib/phrase';
+import { getPhraseScript } from '@kbn/es-query';
 let queryFilter;
 let filterManager;
 let appState;
@@ -46,7 +46,7 @@ describe('Filter Manager', function () {
     'kibana/courier',
     'kibana/global_state',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
 
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {

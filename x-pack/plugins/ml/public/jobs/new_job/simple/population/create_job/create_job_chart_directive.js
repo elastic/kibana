@@ -16,13 +16,14 @@ import angular from 'angular';
 import moment from 'moment';
 
 import { TimeBuckets } from 'ui/time_buckets';
-import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
-import { mlEscape } from 'plugins/ml/util/string_utils';
+import { numTicksForDateFormat } from '../../../../../util/chart_utils';
+import { mlEscape } from '../../../../../util/string_utils';
+import { mlChartTooltipService } from '../../../../../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlPopulationJobChart', function (mlChartTooltipService) {
+module.directive('mlPopulationJobChart', function () {
 
   function link(scope, element) {
 

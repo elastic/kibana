@@ -41,7 +41,7 @@ POST /api/notifications/v1/notify
 
 There are two interfaces that are important from this package. `NotificationService`, which is exposed as
 a singleton from the plugin: `server.plugins.notifications.notificationService`. And `Action`, which
-provides an abstract Javascript `class` to implement new `Action`s.
+provides an abstract JavaScript `class` to implement new `Action`s.
 
 ### NotificationService Interface
 

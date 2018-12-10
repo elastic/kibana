@@ -112,7 +112,7 @@ describe('CloudService', () => {
       await tryParseResponse('{{}');
     });
 
-    it('expects unsuable bodies', async () => {
+    it('expects unusable bodies', async () => {
       const parseBody = (parsedBody) => {
         expect(parsedBody).to.eql(body);
 

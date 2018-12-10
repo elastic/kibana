@@ -20,14 +20,11 @@
 import _ from 'lodash';
 import { VisProvider } from '../../vis';
 import { aggTypes } from '..';
-import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggConfig } from '../../vis/agg_config';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
-  const visTypes = Private(VisTypesRegistryProvider);
   const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
   /**
@@ -49,84 +46,57 @@ export default function AggParamWriterHelper(Private) {
    * @param {object} opts - describe the properties of this paramWriter
    * @param {string} opts.aggType - the name of the aggType we want to test. ('histogram', 'filter', etc.)
    */
-  function AggParamWriter(opts) {
-    const self = this;
+  class AggParamWriter {
 
-    self.aggType = opts.aggType;
-    if (_.isString(self.aggType)) {
-      self.aggType = aggTypes.byName[self.aggType];
-    }
-
-    // not configurable right now, but totally required
-    self.indexPattern = stubbedLogstashIndexPattern;
-
-    // the vis type we will use to write the aggParams
-    self.visType = null;
-
-    // the schema that the aggType satisfies
-    self.visAggSchema = null;
-
-    // find a suitable vis type and schema
-    _.find(visTypes, function (visType) {
-      const schema = _.find(visType.schemas.all, function (schema) {
-        // type, type, type, type, type... :(
-        return schema.group === self.aggType.type;
-      });
-
-      if (schema) {
-        self.visType = visType;
-        self.visAggSchema = schema;
-        return true;
+    constructor(opts) {
+      this.aggType = opts.aggType;
+      if (_.isString(this.aggType)) {
+        this.aggType = aggTypes.byName[this.aggType];
       }
-    });
 
-    if (!self.aggType || !self.visType || !self.visAggSchema) {
-      throw new Error('unable to find a usable visType and schema for the ' + opts.aggType + ' agg type');
+      // not configurable right now, but totally required
+      this.indexPattern = stubbedLogstashIndexPattern;
+
+      // the schema that the aggType satisfies
+      this.visAggSchema = null;
+
+      this.vis = new Vis(this.indexPattern, {
+        type: 'histogram',
+        aggs: [{
+          id: 1,
+          type: this.aggType.name,
+          params: {}
+        }]
+      });
     }
 
-    self.vis = new Vis(self.indexPattern, {
-      type: self.visType.name
-    });
+    write(paramValues, modifyAggConfig = null) {
+      paramValues = _.clone(paramValues);
+
+      if (this.aggType.params.byName.field && !paramValues.field) {
+        // pick a field rather than force a field to be specified everywhere
+        if (this.aggType.type === 'metrics') {
+          paramValues.field = _.sample(this.indexPattern.fields.byType.number);
+        } else {
+          const type = this.aggType.params.byName.field.filterFieldTypes || 'string';
+          let field;
+          do {
+            field = _.sample(this.indexPattern.fields.byType[type]);
+          } while (!field.aggregatable);
+          paramValues.field = field.name;
+        }
+      }
+
+      const aggConfig = this.vis.aggs[0];
+      aggConfig.setParams(paramValues);
+
+      if (modifyAggConfig) {
+        modifyAggConfig(aggConfig);
+      }
+
+      return aggConfig.write(this.vis.aggs);
+    }
   }
 
-  AggParamWriter.prototype.write = function (paramValues) {
-    const self = this;
-    paramValues = _.clone(paramValues);
-
-    if (self.aggType.params.byName.field && !paramValues.field) {
-      // pick a field rather than force a field to be specified everywhere
-      if (self.aggType.type === 'metrics') {
-        paramValues.field = _.sample(self.indexPattern.fields.byType.number);
-      } else {
-        const type = self.aggType.params.byName.field.filterFieldTypes || 'string';
-        let field;
-        do {
-          field = _.sample(self.indexPattern.fields.byType[type]);
-        } while (!field.aggregatable);
-        paramValues.field = field.name;
-      }
-    }
-
-
-    const agg = new AggConfig(self.vis, {
-      id: 1,
-      schema: self.visAggSchema.name,
-      type: self.aggType.name,
-      params: paramValues
-    });
-
-    self.vis.setState({
-      type: self.vis.type.name,
-      aggs: [agg.toJSON()]
-    });
-
-    const aggConfig = _.find(self.vis.aggs, function (aggConfig) {
-      return aggConfig.type === self.aggType;
-    });
-
-    return aggConfig.type.params.write(aggConfig);
-  };
-
   return AggParamWriter;
-
 }

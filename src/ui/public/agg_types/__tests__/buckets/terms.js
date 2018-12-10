@@ -194,6 +194,36 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
+    describe('custom field formatter', () => {
+      beforeEach(() => {
+        init({
+          responseValueAggs: [
+            {
+              id: 'agg1',
+              type: {
+                name: 'count'
+              }
+            }
+          ],
+          aggParams: {
+            otherBucketLabel: 'Other',
+            missingBucketLabel: 'Missing'
+          }
+        });
+        $rootScope.$digest();
+      });
+
+      it ('converts __other__ key', () => {
+        const formatter = $rootScope.agg.type.getFormat($rootScope.agg).getConverterFor('text');
+        expect(formatter('__other__')).to.be('Other');
+      });
+
+      it ('converts __missing__ key', () => {
+        const formatter = $rootScope.agg.type.getFormat($rootScope.agg).getConverterFor('text');
+        expect(formatter('__missing__')).to.be('Missing');
+      });
+    });
+
     it('adds "custom metric" option');
     it('lists all metric agg responses');
     it('lists individual values of a multi-value metric');

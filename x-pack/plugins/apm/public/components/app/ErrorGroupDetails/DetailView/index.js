@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -16,20 +17,23 @@ import {
 } from '../../../../style/variables';
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
-
-import { ContextProperties } from '../../../shared/ContextProperties';
+import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
-import DiscoverButton from '../../../shared/DiscoverButton';
+import { DiscoverErrorButton } from '../../../shared/DiscoverButtons/DiscoverErrorButton';
 import {
   PropertiesTable,
-  getLevelOneProps
+  getPropertyTabNames
 } from '../../../shared/PropertiesTable';
-import Stacktrace from '../../../shared/Stacktrace';
+import { Stacktrace } from '../../../shared/Stacktrace';
 import {
-  SERVICE_NAME,
-  ERROR_GROUP_ID,
   SERVICE_AGENT_NAME,
-  SERVICE_LANGUAGE_NAME
+  SERVICE_LANGUAGE_NAME,
+  USER_ID,
+  REQUEST_URL_FULL,
+  REQUEST_METHOD,
+  ERROR_EXC_HANDLED,
+  ERROR_LOG_STACKTRACE,
+  ERROR_EXC_STACKTRACE
 } from '../../../../../common/constants';
 import { fromQuery, toQuery, history } from '../../../../utils/url';
 
@@ -70,7 +74,7 @@ function getTabs(context, logStackframes) {
   return [
     ...(logStackframes ? [LOG_STACKTRACE_TAB] : []),
     EXC_STACKTRACE_TAB,
-    ...getLevelOneProps(dynamicProps)
+    ...getPropertyTabNames(dynamicProps)
   ];
 }
 
@@ -84,57 +88,49 @@ function DetailView({ errorGroup, urlParams, location }) {
   }
 
   const { serviceName } = urlParams;
-
-  const timestamp = get(errorGroup, 'data.error.@timestamp');
-  const url = get(errorGroup.data.error, 'context.request.url.full', 'N/A');
-
   const stickyProperties = [
     {
+      fieldName: '@timestamp',
+      label: 'Timestamp',
+      val: get(errorGroup.data.error, '@timestamp'),
+      width: '50%'
+    },
+    {
+      fieldName: REQUEST_URL_FULL,
+      label: 'URL',
+      val: get(errorGroup.data.error, REQUEST_URL_FULL, 'N/A'),
+      truncated: true,
+      width: '50%'
+    },
+    {
+      fieldName: REQUEST_METHOD,
       label: 'Request method',
-      fieldName: 'context.request.method',
-      val: get(errorGroup.data, 'error.context.request.method', 'N/A')
+      val: get(errorGroup.data.error, REQUEST_METHOD, 'N/A'),
+      width: '25%'
     },
     {
+      fieldName: ERROR_EXC_HANDLED,
       label: 'Handled',
-      fieldName: 'error.exception.handled',
-      val: get(errorGroup.data, 'error.error.exception.handled', 'N/A')
+      val: get(errorGroup.data.error, ERROR_EXC_HANDLED, 'N/A'),
+      width: '25%'
     },
     {
+      fieldName: USER_ID,
       label: 'User ID',
-      fieldName: 'context.user.id',
-      val: get(errorGroup.data, 'error.context.user.id', 'N/A')
+      val: get(errorGroup.data.error, USER_ID, 'N/A'),
+      width: '50%'
     }
   ];
 
-  const excStackframes = get(
-    errorGroup.data.error.error,
-    'exception.stacktrace'
-  );
-  const logStackframes = get(errorGroup.data.error.error, 'log.stacktrace');
-
+  const excStackframes = get(errorGroup.data.error, ERROR_EXC_STACKTRACE);
+  const logStackframes = get(errorGroup.data.error, ERROR_LOG_STACKTRACE);
   const codeLanguage = get(errorGroup.data.error, SERVICE_LANGUAGE_NAME);
-
   const context = get(errorGroup.data.error, 'context', {});
-
   const tabs = getTabs(context, logStackframes);
-
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
-
   const occurencesCount = errorGroup.data.occurrencesCount;
   const groupId = errorGroup.data.groupId;
-
   const agentName = get(errorGroup.data.error, SERVICE_AGENT_NAME);
-
-  const discoverQuery = {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query: `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:${groupId}`
-      },
-      sort: { '@timestamp': 'desc' }
-    }
-  };
 
   return (
     <Container>
@@ -146,16 +142,20 @@ function DetailView({ errorGroup, urlParams, location }) {
         >
           Error occurrence
         </HeaderMedium>
-        <DiscoverButton query={discoverQuery}>
-          {`View ${occurencesCount} occurences in Discover`}
-        </DiscoverButton>
+        <DiscoverErrorButton
+          serviceName={serviceName}
+          groupId={groupId}
+          kuery={urlParams.kuery}
+        >
+          <EuiButtonEmpty iconType="discoverApp">
+            {`View ${occurencesCount} occurences in Discover`}
+          </EuiButtonEmpty>
+        </DiscoverErrorButton>
       </HeaderContainer>
 
-      <ContextProperties
-        timestamp={timestamp}
-        url={url}
-        stickyProperties={stickyProperties}
-      />
+      <TabContentContainer>
+        <StickyProperties stickyProperties={stickyProperties} />
+      </TabContentContainer>
 
       <TabContainer>
         {tabs.map(key => {

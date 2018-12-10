@@ -34,7 +34,7 @@ function isAccessTokenExpiredError(err) {
 }
 
 /**
- * Checks the error returned by Elasticsearch as the result of `samlRefreshAccessToken` call and returns `true` if
+ * Checks the error returned by Elasticsearch as the result of `getAccessToken` call and returns `true` if
  * request has been rejected because of invalid refresh token (expired after 24 hours or have been used already),
  * otherwise returns `false`.
  * @param {Object} err Error returned from Elasticsearch.
@@ -269,7 +269,7 @@ export class SAMLAuthenticationProvider {
         access_token: newAccessToken,
         refresh_token: newRefreshToken
       } = await this._options.client.callWithInternalUser(
-        'shield.samlRefreshAccessToken',
+        'shield.getAccessToken',
         { body: { grant_type: 'refresh_token', refresh_token: refreshToken } }
       );
 
@@ -357,7 +357,7 @@ export class SAMLAuthenticationProvider {
       return AuthenticationResult.redirectTo(
         redirect,
         // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
-        { requestId, nextURL: `${this._options.basePath}${request.url.path}` }
+        { requestId, nextURL: `${request.getBasePath()}${request.url.path}` }
       );
     } catch (err) {
       this._options.log(['debug', 'security', 'saml'], `Failed to initiate SAML handshake: ${err.message}`);
@@ -410,7 +410,7 @@ export class SAMLAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.succeeded();
+      return DeauthenticationResult.redirectTo('/logged_out');
     } catch(err) {
       this._options.log(['debug', 'security', 'saml'], `Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);

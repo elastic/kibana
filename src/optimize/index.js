@@ -19,6 +19,7 @@
 
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
+import { DllCompiler } from './dynamic_dll_plugin';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -28,9 +29,9 @@ export default async (kbnServer, server, config) => {
   // bundles in a "middleware" style.
   //
   // the server listening on 5601 may be restarted a number of times, depending
-  // on the watch setup managed by the cli. It proxies all bundles/* requests to
-  // the other server. The server on 5602 is long running, in order to prevent
-  // complete rebuilds of the optimize content.
+  // on the watch setup managed by the cli. It proxies all bundles/* and dlls/*
+  // requests to the other server. The server on 5602 is long running, in order
+  // to prevent complete rebuilds of the optimize content.
   const watch = config.get('optimize.watch');
   if (watch) {
     return await kbnServer.mixin(require('./watch/watch'));
@@ -38,17 +39,12 @@ export default async (kbnServer, server, config) => {
 
   const { uiBundles } = kbnServer;
   server.route(createBundlesRoute({
-    bundlesPath: uiBundles.getWorkingDir(),
+    regularBundlesPath: uiBundles.getWorkingDir(),
+    dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
     basePublicPath: config.get('server.basePath')
   }));
 
-  await uiBundles.writeEntryFiles();
-
-  // Not all entry files produce a css asset. Ensuring they exist prevents
-  // an error from occuring when the file is missing.
-  await uiBundles.ensureStyleFiles();
-
-  // in prod, only bundle when someing is missing or invalid
+  // in prod, only bundle when something is missing or invalid
   const reuseCache = config.get('optimize.useBundleCache')
     ? await uiBundles.areAllBundleCachesValid()
     : false;
@@ -62,12 +58,14 @@ export default async (kbnServer, server, config) => {
     return;
   }
 
+  await uiBundles.resetBundleDir();
+
   // only require the FsOptimizer when we need to
   const optimizer = new FsOptimizer({
+    log: (tags, data) => server.log(tags, data),
     uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
-    unsafeCache: config.get('optimize.unsafeCache'),
   });
 
   server.log(

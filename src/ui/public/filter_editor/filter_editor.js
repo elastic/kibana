@@ -35,9 +35,10 @@ import {
   getParamsFromFilter,
   isFilterValid,
   buildFilter,
-  areIndexPatternsProvided
+  areIndexPatternsProvided,
+  isFilterPinned
 } from './lib/filter_editor_utils';
-import * as filterBuilder from '../filter_manager/lib';
+import * as filterBuilder from '@kbn/es-query';
 import { keyMap } from '../utils/key_map';
 
 const module = uiModules.get('kibana');
@@ -54,7 +55,9 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     },
     controllerAs: 'filterEditor',
     bindToController: true,
-    controller: callAfterBindingsWorkaround(function ($scope, $element) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, config) {
+      const pinnedByDefault = config.get('filters:pinnedByDefault');
+
       this.init = async () => {
         if (!areIndexPatternsProvided(this.indexPatterns)) {
           const defaultIndexPattern = await indexPatterns.getDefault();
@@ -144,8 +147,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         }
         newFilter.meta.disabled = filter.meta.disabled;
         newFilter.meta.alias = alias;
-
-        const isPinned = _.get(filter, ['$state', 'store']) === 'globalState';
+        const isPinned = isFilterPinned(filter, pinnedByDefault);
         return this.onSave({ filter, newFilter, isPinned });
       };
 

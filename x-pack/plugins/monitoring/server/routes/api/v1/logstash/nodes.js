@@ -16,7 +16,7 @@ import { prefixIndexPattern } from '../../../../lib/ccs_utils';
  */
 export function logstashNodesRoute(server) {
   /**
-   * Logtash Nodes request.
+   * Logstash Nodes request.
    *
    * This will fetch all data required to display the Logstash Nodes page.
    *
@@ -42,7 +42,7 @@ export function logstashNodesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -54,13 +54,13 @@ export function logstashNodesRoute(server) {
           getNodes(req, lsIndexPattern, { clusterUuid }),
         ]);
 
-        reply({
+        return {
           clusterStatus,
           nodes,
-        });
+        };
       }
       catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

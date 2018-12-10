@@ -22,6 +22,7 @@ import { MonitoringTableToolBar } from './toolbar';
 import { MonitoringTableNoData } from './no_data';
 import { MonitoringTableFooter } from './footer';
 import classNames from 'classnames';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 /*
  * State and data management for Monitoring Tables
@@ -36,17 +37,17 @@ import classNames from 'classnames';
  * const columns = [
  *  {
  *    title: 'Name', // visible title string
- *    sortKey: 'metadata.name', // sording this colunn sorts by the `metadata.name` field in the data
+ *    sortKey: 'metadata.name', // sorting this column sorts by the `metadata.name` field in the data
  *    secondarySortOrder: 1, // optional field, makes the column secondarily sorted by default
  *  },
  *  {
  *    title: 'Status', // visible title string
- *    sortKey: 'status', // sording this colunn sorts by the `metadata.name` field in the data
+ *    sortKey: 'status', // sorting this column sorts by the `metadata.name` field in the data
  *    sortOrder: -1, // optional field, makes the column sorted by default
  *  }
  * ];
  */
-export class MonitoringTable extends React.Component {
+class MonitoringTableUI extends React.Component {
   constructor(props) {
     super(props);
 
@@ -121,7 +122,13 @@ export class MonitoringTable extends React.Component {
         this.resetPaging();
         break;
       default:
-        throw new Error(`Unknown table action type ${action}! This shouldn't happen!`);
+        throw new Error(
+          this.props.intl.formatMessage({
+            id: 'xpack.monitoring.table.unknownTableActionTypeErrorMessage',
+            defaultMessage: `Unknown table action type {action}! This shouldn't happen!` }, {
+            action
+          })
+        );
     }
   }
 
@@ -256,6 +263,7 @@ export class MonitoringTable extends React.Component {
         pageIndexFirstRow={numVisibleRows ? firstRow + 1 : 0}
         pageIndexLastRow={numVisibleRows ? numVisibleRows + firstRow : 0}
         rowsFiltered={numAvailableRows}
+        totalRows={this.state.rows.length}
         filterText={this.state.filterText}
         paginationControls={this.getPaginationControls(numAvailableRows, this.props.alwaysShowPageControls)}
         onFilterChange={this.onFilterChange}
@@ -392,7 +400,7 @@ export class MonitoringTable extends React.Component {
   }
 
   render() {
-    const classes = classNames(this.props.className, 'monitoringTable');
+    const classes = classNames(this.props.className, 'monTable');
 
     let table; // This will come out to either be the KuiTable or a "No Data" message
 
@@ -402,7 +410,14 @@ export class MonitoringTable extends React.Component {
 
     if (this.state.rows === null) {
       // rows are null, show loading message
-      table = <MonitoringTableNoData message="Loading..." />;
+      table = (<MonitoringTableNoData
+        message={(
+          <FormattedMessage
+            id="xpack.monitoring.table.loadingTitle"
+            defaultMessage="Loading…"
+          />
+        )}
+      />);
     } else if (numVisibleRows > 0) {
       // data has some rows, show them
       const RowComponent = this.props.rowComponent;
@@ -433,7 +448,7 @@ export class MonitoringTable extends React.Component {
     }
 
     return (
-      <KuiControlledTable className={classes} data-test-subj={`${this.props.className}Container`}>
+      <KuiControlledTable className={classes} data-test-subj={`${this.props.className}Container`} style={{ margin: 10 }}>
         { this.getToolBar(numVisibleRows, numAvailableRows) }
         { table }
         { this.getFooter(numVisibleRows, numAvailableRows, this.props.alwaysShowPageControls) }
@@ -449,10 +464,12 @@ const defaultGetNoDataMessage = filterText => {
   return DEFAULT_NO_DATA_MESSAGE;
 };
 
-MonitoringTable.defaultProps = {
+MonitoringTableUI.defaultProps = {
   rows: [],
   filterFields: [],
   getNoDataMessage: defaultGetNoDataMessage,
   alwaysShowPageControls: false,
   rowsPerPage: 20
 };
+
+export const MonitoringTable = injectI18n(MonitoringTableUI);

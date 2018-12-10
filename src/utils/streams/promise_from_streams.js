@@ -27,7 +27,7 @@
  *  If the last stream is readable, it's final value
  *  will be provided as the promise value.
  *
- *  Errors emmitted from any stream will cause
+ *  Errors emitted from any stream will cause
  *  the promise to be rejected with that error.
  *
  *  @param  {Array<Stream>} streams

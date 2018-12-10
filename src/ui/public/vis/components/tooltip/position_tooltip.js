@@ -94,7 +94,7 @@ function getOverflow(size, pos, containers) {
       return a.area - b.area;
     })
     .forEach(function (bounds) {
-    // number of pixels that the toolip would overflow it's far
+    // number of pixels that the tooltip would overflow it's far
     // side, if we placed it that way. (negative === no overflow)
       mergeOverflows(overflow, {
         north: bounds.top - pos.north,
@@ -144,7 +144,7 @@ function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
   }
 
   // if we don't find one that doesn't overflow, use
-  // the first choice and offset based on overflo
+  // the first choice and offset based on overflow
   if (value == null) {
     dir = dirs[0];
 

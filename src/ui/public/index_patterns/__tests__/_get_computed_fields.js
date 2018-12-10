@@ -43,8 +43,19 @@ describe('get computed fields', function () {
   });
 
   it('should request date fields as docvalue_fields', function () {
-    expect(fn().docvalueFields).to.contain('@timestamp');
-    expect(fn().docvalueFields).to.not.contain('bytes');
+    const docvalueFields = fn().docvalueFields;
+    const docvalueFieldNames = docvalueFields.map(field => field.field);
+
+    expect(docvalueFields).to.have.length(3);
+    expect(docvalueFieldNames).to.contain('@timestamp');
+    expect(docvalueFieldNames).to.contain('time');
+    expect(docvalueFieldNames).to.contain('utc_time');
+  });
+
+  it('should request date field doc values in date_time format', function () {
+    const docvalueFields = fn().docvalueFields;
+    const timestampField = docvalueFields.find((field) => field.field === '@timestamp');
+    expect(timestampField).to.have.property('format', 'date_time');
   });
 
   it('should not request scripted date fields as docvalue_fields', function () {

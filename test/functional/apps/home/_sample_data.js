@@ -32,31 +32,52 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('should display registered sample data sets', async ()=> {
+    it('should display registered flights sample data sets', async ()=> {
       await retry.try(async () => {
         const exists = await PageObjects.home.doesSampleDataSetExist('flights');
         expect(exists).to.be(true);
       });
     });
 
-    it('should install sample data set', async ()=> {
-      await PageObjects.home.addSampleDataSet('flights');
+    it('should display registered logs sample data sets', async ()=> {
       await retry.try(async () => {
-        const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulInstallToastExist();
-        expect(successToastExists).to.be(true);
+        const exists = await PageObjects.home.doesSampleDataSetExist('logs');
+        expect(exists).to.be(true);
       });
+    });
 
+    it('should display registered ecommerce sample data sets', async ()=> {
+      await retry.try(async () => {
+        const exists = await PageObjects.home.doesSampleDataSetExist('ecommerce');
+        expect(exists).to.be(true);
+      });
+    });
+
+    it('should install flights sample data set', async ()=> {
+      await PageObjects.home.addSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(true);
     });
 
+    it('should install logs sample data set', async ()=> {
+      await PageObjects.home.addSampleDataSet('logs');
+      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
+      expect(isInstalled).to.be(true);
+    });
+
+    it('should install ecommerce sample data set', async ()=> {
+      await PageObjects.home.addSampleDataSet('ecommerce');
+      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
+      expect(isInstalled).to.be(true);
+    });
+
     describe('dashboard', () => {
-      after(async () => {
+      afterEach(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('should launch sample data set dashboard', async ()=> {
+      it('should launch sample flights data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const today = new Date();
@@ -67,6 +88,7 @@ export default function ({ getService, getPageObjects }) {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(19);
       });
+
 
       it.skip('pie charts rendered', async () => {
         await dashboardExpect.pieSliceCount(4);
@@ -89,21 +111,53 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it.skip('vega chart renders', async () => {
-        const tsvb = await find.existsByCssSelector('.vega-view-container');
+        const tsvb = await find.existsByCssSelector('.vgaVis__view');
         expect(tsvb).to.be(true);
       });
+
+      it('should launch sample logs data set dashboard', async ()=> {
+        await PageObjects.home.launchSampleDataSet('logs');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const today = new Date();
+        const todayYearMonthDay = today.toISOString().substring(0, 10);
+        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.be(11);
+      });
+
+      it('should launch sample ecommerce data set dashboard', async ()=> {
+        await PageObjects.home.launchSampleDataSet('ecommerce');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const today = new Date();
+        const todayYearMonthDay = today.toISOString().substring(0, 10);
+        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.be(12);
+      });
+
     });
 
     // needs to be in describe block so it is run after 'dashboard describe block'
     describe('uninstall', () => {
-      it('should uninstall sample data set', async ()=> {
+      it('should uninstall flights sample data set', async ()=> {
         await PageObjects.home.removeSampleDataSet('flights');
-        await retry.try(async () => {
-          const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulUninstallToastExist();
-          expect(successToastExists).to.be(true);
-        });
-
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+        expect(isInstalled).to.be(false);
+      });
+
+      it('should uninstall logs sample data set', async ()=> {
+        await PageObjects.home.removeSampleDataSet('logs');
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
+        expect(isInstalled).to.be(false);
+      });
+
+      it('should uninstall ecommerce sample data set', async ()=> {
+        await PageObjects.home.removeSampleDataSet('ecommerce');
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
         expect(isInstalled).to.be(false);
       });
     });

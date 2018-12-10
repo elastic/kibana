@@ -17,18 +17,18 @@
  * under the License.
  */
 
+import { sortBy } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
-import _ from 'lodash';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';
 import '../../filters/field_type';
 import { IndexedArray } from '../../indexed_array';
-import { Notifier } from '../../notify';
-import { propFilter } from '../../filters/_prop_filter';
+import { toastNotifications } from '../../notify';
 import { createLegacyClass } from '../../utils/legacy_class';
+import { propFilter } from '../../filters/_prop_filter';
+import { i18n } from '@kbn/i18n';
 
-const notifier = new Notifier();
-
+const filterByType = propFilter('type');
 
 export function FieldParamType(config) {
   FieldParamType.Super.call(this, config);
@@ -53,38 +53,6 @@ FieldParamType.prototype.serialize = function (field) {
 };
 
 /**
- * Get the options for this field from the indexPattern
- */
-FieldParamType.prototype.getFieldOptions = function (aggConfig) {
-  const indexPattern = aggConfig.getIndexPattern();
-  let fields = indexPattern.fields.raw;
-
-  if (this.onlyAggregatable) {
-    fields = fields.filter(f => f.aggregatable);
-  }
-
-  if (!this.scriptable) {
-    fields = fields.filter(field => !field.scripted);
-  }
-
-  if (this.filterFieldTypes) {
-    let filters = this.filterFieldTypes;
-    if (_.isFunction(this.filterFieldTypes)) {
-      filters = this.filterFieldTypes.bind(this, aggConfig.vis);
-    }
-    fields = propFilter('type')(fields, filters);
-    fields = _.sortBy(fields, ['type', 'name']);
-  }
-
-
-  return new IndexedArray({
-    index: ['name'],
-    group: ['type'],
-    initialSet: fields
-  });
-};
-
-/**
  * Called to read values from a database record into the
  * aggConfig object
  *
@@ -98,12 +66,44 @@ FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
     throw new SavedObjectNotFound('index-pattern-field', fieldName);
   }
 
-  const validField = this.getFieldOptions(aggConfig).byName[fieldName];
+  const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).byName[fieldName];
   if (!validField) {
-    notifier.error(`Saved "field" parameter is now invalid. Please select a new field.`);
+    toastNotifications.addDanger(
+      i18n.translate('common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage', {
+        defaultMessage: 'Saved {fieldParameter} parameter is now invalid. Please select a new field.',
+        values: {
+          fieldParameter: '"field"'
+        }
+      })
+    );
   }
 
   return validField;
+};
+
+/**
+ * filter the fields to the available ones
+ */
+FieldParamType.prototype.getAvailableFields = function (fields) {
+  const filteredFields = fields.filter(field => {
+    const { onlyAggregatable, scriptable, filterFieldTypes } = this;
+
+    if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
+      return false;
+    }
+
+    if (!filterFieldTypes) {
+      return true;
+    }
+
+    return filterByType([field], filterFieldTypes).length !== 0;
+  });
+
+  return new IndexedArray({
+    index: ['name'],
+    group: ['type'],
+    initialSet: sortBy(filteredFields, ['type', 'name']),
+  });
 };
 
 /**
@@ -120,7 +120,14 @@ FieldParamType.prototype.write = function (aggConfig, output) {
   const field = aggConfig.getField();
 
   if (!field) {
-    throw new TypeError('"field" is a required parameter');
+    throw new TypeError(
+      i18n.translate('common.ui.aggTypes.paramTypes.field.requiredFieldParameterErrorMessage', {
+        defaultMessage: '{fieldParameter} is a required parameter',
+        values: {
+          fieldParameter: '"field"'
+        }
+      })
+    );
   }
 
   if (field.scripted) {

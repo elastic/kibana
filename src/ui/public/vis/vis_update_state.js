@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 /**
  * Will figure out if an heatmap state was saved before the auto coloring
- * feature of heatmaps was created. If so it will set the ovewriteColor flag
+ * feature of heatmaps was created. If so it will set the overwriteColor flag
  * for the label to true if labels are enabled and a non default color has been used.
  * So that those earlier created heatmaps will still use the manual specified color.
  */
@@ -49,6 +49,14 @@ function convertTermAggregation(visState) {
   }
 }
 
+function convertPropertyNames(visState) {
+  // 'showMeticsAtAllLevels' is a legacy typo we'll fix by changing it to 'showMetricsAtAllLevels'.
+  if (typeof _.get(visState, 'params.showMeticsAtAllLevels') === 'boolean') {
+    visState.params.showMetricsAtAllLevels = visState.params.showMeticsAtAllLevels;
+    delete visState.params.showMeticsAtAllLevels;
+  }
+}
+
 /**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
@@ -61,6 +69,7 @@ export const updateOldState = (visState) => {
   const newState = _.cloneDeep(visState);
 
   convertTermAggregation(newState);
+  convertPropertyNames(newState);
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
@@ -68,6 +77,7 @@ export const updateOldState = (visState) => {
   }
 
   // update old metric to the new one
+  // Changed from 6.0 -> 6.1
   if (['gauge', 'metric'].includes(visState.type) && _.get(visState.params, 'gauge.gaugeType', null) === 'Metric') {
     newState.type = 'metric';
     newState.params.addLegend = false;
@@ -84,6 +94,9 @@ export const updateOldState = (visState) => {
     delete newState.params.metric.autoExtend;
     newState.params.metric.metricColorMode = newState.params.metric.gaugeColorMode;
     delete newState.params.metric.gaugeColorMode;
+  } else if(visState.type === 'metric' && _.get(visState.params, 'gauge.gaugeType', 'Metric') !== 'Metric') {
+    newState.type = 'gauge';
+    newState.params.type = 'gauge';
   }
 
   convertHeatmapLabelColor(newState);

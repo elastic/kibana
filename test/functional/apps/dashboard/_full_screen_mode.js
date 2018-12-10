@@ -21,7 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
 
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('option not available in edit mode', async () => {
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
       expect(exists).to.be(false);
     });
@@ -60,7 +60,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('displays exit full screen logo button when panel is expanded', async () => {
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();
       expect(exists).to.be(true);
@@ -68,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('exits when the text button is clicked on', async () => {
       const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await remote.moveMouseTo(logoButton);
+      await browser.moveMouseTo(logoButton);
       await PageObjects.dashboard.clickExitFullScreenTextButton();
 
       await retry.try(async () => {

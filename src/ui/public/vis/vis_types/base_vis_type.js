@@ -17,30 +17,39 @@
  * under the License.
  */
 
-import { CATEGORY } from '../vis_category';
 import _ from 'lodash';
+import { VisFiltersProvider } from '../vis_filters';
 
-export function VisTypeProvider() {
-  class VisType {
+export function BaseVisTypeProvider(Private) {
+  const visFilters = Private(VisFiltersProvider);
 
-    constructor(opts) {
-      opts = opts || {};
+  class BaseVisType {
+    constructor(opts = {}) {
 
-      if (!opts.name) throw('vis_type must define its name');
-      if (!opts.title) throw('vis_type must define its title');
-      if (!opts.description) throw('vis_type must define its description');
-      if (!opts.icon && !opts.image) throw('vis_type must define its icon or image');
-      if (!opts.visualization) throw('vis_type must define visualization controller');
+      if (!opts.name) {
+        throw('vis_type must define its name');
+      }
+      if (!opts.title) {
+        throw('vis_type must define its title');
+      }
+      if (!opts.description) {
+        throw('vis_type must define its description');
+      }
+      if (!opts.icon && !opts.image && !opts.legacyIcon) {
+        throw('vis_type must define its icon or image');
+      }
+      if (!opts.visualization) {
+        throw('vis_type must define visualization controller');
+      }
 
       const _defaults = {
         // name, title, description, icon, image
-        category: CATEGORY.OTHER,
         visualization: null,       // must be a class with render/resize/destroy methods
         visConfig: {
           defaults: {},            // default configuration
         },
         requestHandler: 'courier',    // select one from registry or pass a function
-        responseHandler: 'tabify',
+        responseHandler: 'none',
         editor: 'default',
         editorConfig: {
           collections: {},         // collections used for configuration (list of positions, ...)
@@ -52,31 +61,32 @@ export function VisTypeProvider() {
           showIndexSelection: true,
           hierarchicalData: false  // we should get rid of this i guess ?
         },
+        events: {
+          filterBucket: {
+            defaultAction: visFilters.addFilter,
+          }
+        },
         stage: 'production',
-        feedbackMessage: ''
+        feedbackMessage: '',
+        hidden: false,
       };
 
       _.defaultsDeep(this, opts, _defaults);
 
-      this.requiresSearch = !(this.requestHandler === 'none');
+      this.requiresSearch = this.requestHandler !== 'none';
     }
 
     shouldMarkAsExperimentalInUI() {
-      //we are not making a distinction in the UI if a plugin is experimental and/or labs.
-      //we just want to indicate it is special. the current flask icon is sufficient for that.
-      return this.stage === 'experimental' || this.stage === 'lab';
+      return this.stage === 'experimental';
     }
-  }
 
-  Object.defineProperty(VisType.prototype, 'schemas', {
-    get() {
+    get schemas() {
       if (this.editorConfig && this.editorConfig.schemas) {
         return this.editorConfig.schemas;
       }
-
-      return []; //throw `Can't get schemas from a visualization without using the default editor`;
+      return [];
     }
-  });
+  }
 
-  return VisType;
+  return BaseVisType;
 }

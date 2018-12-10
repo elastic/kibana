@@ -4,26 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import pluralize from 'pluralize';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './watch_list.html';
 import '../watch_table';
-import { PAGINATION, REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
+import { PAGINATION, REFRESH_INTERVALS, WATCH_TYPES } from 'plugins/watcher/../common/constants';
 import 'ui/pager_control';
 import 'ui/pager';
 import 'ui/react_components';
 import 'ui/table_info';
 import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/components/forbidden_message';
-import 'plugins/watcher/components/watch_type_select';
 import 'plugins/watcher/services/watches';
 import 'plugins/watcher/services/license';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchList', function ($injector) {
+app.directive('watchList', function ($injector, i18n) {
   const pagerFactory = $injector.get('pagerFactory');
   const watchesService = $injector.get('xpackWatcherWatchesService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
@@ -59,7 +57,6 @@ app.directive('watchList', function ($injector) {
         this.sortField = 'id';
         this.sortReverse = false;
 
-        this.notifier = new Notifier({ location: 'Watcher' });
         this.pager = pagerFactory.create(this.watches.length, PAGINATION.PAGE_SIZE, 1);
 
         // Reload watches periodically
@@ -96,7 +93,7 @@ app.directive('watchList', function ($injector) {
                 if (err.status === 403) {
                   this.forbidden = true;
                 } else {
-                  this.notifier.error(err);
+                  toastNotifications.addDanger(err.data.message);
                 }
               });
           });
@@ -123,18 +120,31 @@ app.directive('watchList', function ($injector) {
         this.selectedWatches = selectedWatches;
       };
 
-      onWatchTypeChange = (watchType) => {
+      onClickCreateThresholdAlert = () => {
+        this.goToWatchWizardForType(WATCH_TYPES.THRESHOLD);
+      };
+
+      onClickCreateAdvancedWatch = () => {
+        this.goToWatchWizardForType(WATCH_TYPES.JSON);
+      };
+
+      goToWatchWizardForType = (watchType) => {
         const url = `management/elasticsearch/watcher/watches/new-watch/${watchType}`;
         kbnUrl.change(url, {});
-      }
+      };
 
       onSelectedWatchesDelete = () => {
         const watchesBeingDeleted = this.selectedWatches;
         const numWatchesToDelete = watchesBeingDeleted.length;
-        const watchesStr = pluralize('Watch', numWatchesToDelete);
 
-        const confirmModalText = `This will permanently delete ${numWatchesToDelete} ${watchesStr}. Are you sure?`;
-        const confirmButtonText = `Delete ${numWatchesToDelete} ${watchesStr}`;
+        const confirmModalText = i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.descriptionText', {
+          defaultMessage: 'This will permanently delete {numWatchesToDelete, plural, one {# Watch} other {# Watches}}. Are you sure?',
+          values: { numWatchesToDelete }
+        });
+        const confirmButtonText = i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.deleteButtonLabel', {
+          defaultMessage: 'Delete {numWatchesToDelete, plural, one {# Watch} other {# Watches}} ',
+          values: { numWatchesToDelete }
+        });
 
         const confirmModalOptions = {
           confirmButtonText,
@@ -148,7 +158,6 @@ app.directive('watchList', function ($injector) {
         this.watchesBeingDeleted = watchesBeingDeleted;
 
         const numWatchesToDelete = this.watchesBeingDeleted.length;
-        const watchesStr = pluralize('Watch', numWatchesToDelete);
 
         const watchIds = this.watchesBeingDeleted.map(watch => watch.id);
         return watchesService.deleteWatches(watchIds)
@@ -158,18 +167,30 @@ app.directive('watchList', function ($injector) {
             const numTotal = numWatchesToDelete;
 
             if (numSuccesses > 0) {
-              toastNotifications.addSuccess(`Deleted ${numSuccesses} out of ${numTotal} selected ${watchesStr}`);
+              toastNotifications.addSuccess(
+                i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesSuccessNotification.descriptionText', {
+                  defaultMessage:
+                    'Deleted {numSuccesses} out of {numTotal} selected {numWatchesToDelete, plural, one {# watch} other {# watches}}',
+                  values: { numSuccesses, numTotal, numWatchesToDelete }
+                })
+              );
             }
 
             if (numErrors > 0) {
-              toastNotifications.addError(`Couldn't delete ${numErrors} out of ${numTotal} selected ${watchesStr}`);
+              toastNotifications.addError(
+                i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText', {
+                  defaultMessage:
+                    'Couldn\'t delete {numErrors} out of {numTotal} selected {numWatchesToDelete, plural, one {# watch} other {# watches}}',
+                  values: { numErrors, numTotal, numWatchesToDelete }
+                })
+              );
             }
 
             this.loadWatches();
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err.data.message));
           });
       }
 

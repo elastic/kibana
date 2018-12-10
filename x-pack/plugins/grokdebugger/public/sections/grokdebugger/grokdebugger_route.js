@@ -8,7 +8,7 @@ import routes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import template from './grokdebugger_route.html';
-import './components/grokdebugger';
+import './directives/grokdebugger';
 
 routes
   .when('/dev_tools/grokdebugger', {

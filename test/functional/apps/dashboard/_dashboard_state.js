@@ -22,12 +22,12 @@ import expect from 'expect.js';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   DEFAULT_PANEL_WIDTH,
-} from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
+} from '../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
 
       await PageObjects.visualize.openLegendOptionColors('Count');
       await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('Saved search with column changes will not update when the saved object changes', async () => {
       await PageObjects.discover.removeHeaderColumn('bytes');
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
@@ -125,13 +125,12 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization('Visualization TileMap');
       await PageObjects.dashboard.saveDashboard('No local edits');
 
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.openSpyPanel();
-      const tileMapData = await PageObjects.visualize.getDataTableData();
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.closeSpyPanel();
+      await dashboardPanelActions.openInspector();
+      const tileMapData = await PageObjects.visualize.getInspectorTableData();
+      await PageObjects.visualize.closeInspector();
 
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
 
       await PageObjects.visualize.clickMapZoomIn();
@@ -139,15 +138,16 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMapZoomIn();
       await PageObjects.visualize.clickMapZoomIn();
 
-      await PageObjects.visualize.saveVisualization('Visualization TileMap');
+      await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.visualize.saveVisualizationExpectSuccess('Visualization TileMap');
 
       await PageObjects.header.clickDashboard();
 
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.openSpyPanel();
-      const changedTileMapData = await PageObjects.visualize.getDataTableData();
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.closeSpyPanel();
+      await dashboardPanelActions.openInspector();
+      const changedTileMapData = await PageObjects.visualize.getInspectorTableData();
+      await PageObjects.visualize.closeInspector();
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 
@@ -166,21 +166,21 @@ export default function ({ getService, getPageObjects }) {
 
         const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
-        await remote.get(newUrl.toString(), false);
+        await browser.get(newUrl.toString(), false);
         const newQuery = await queryBar.getQueryString();
         expect(newQuery).to.equal('hi');
       });
 
       it('for panel size parameters', async function () {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
-        await remote.get(newUrl.toString(), false);
+        await browser.get(newUrl.toString(), false);
         await retry.try(async () => {
           const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
           if (newPanelDimensions.length < 0) {
@@ -196,9 +196,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('when removing a panel', async function () {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
-        await remote.get(newUrl.toString(), false);
+        await browser.get(newUrl.toString(), false);
 
         await retry.try(async () => {
           const newPanelCount = await PageObjects.dashboard.getPanelCount();
@@ -211,9 +211,9 @@ export default function ({ getService, getPageObjects }) {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await PageObjects.visualize.openLegendOptionColors('80,000');
           await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
-          await remote.get(newUrl.toString(), false);
+          await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
@@ -238,9 +238,9 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('resets a pie slice color to the original when removed', async function () {
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
-          await remote.get(newUrl.toString(), false);
+          await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {

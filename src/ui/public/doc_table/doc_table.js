@@ -20,13 +20,13 @@
 import _ from 'lodash';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
-import './doc_table.less';
 import '../directives/truncated';
 import '../directives/infinite_scroll';
 import './components/table_header';
 import './components/table_row';
 import { dispatchRenderComplete } from '../render_complete';
 import { uiModules } from '../modules';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../courier/utils/courier_inspector_utils';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
@@ -49,6 +49,7 @@ uiModules.get('kibana')
         onChangeSortOrder: '=?',
         onMoveColumn: '=?',
         onRemoveColumn: '=?',
+        inspectorAdapters: '=?',
       },
       link: function ($scope, $el) {
         const notify = new Notifier();
@@ -94,16 +95,16 @@ uiModules.get('kibana')
         $scope.$watch('searchSource', function () {
           if (!$scope.searchSource) return;
 
-          $scope.indexPattern = $scope.searchSource.get('index');
+          $scope.indexPattern = $scope.searchSource.getField('index');
 
-          $scope.searchSource.size(config.get('discover:sampleSize'));
-          $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
+          $scope.searchSource.setField('size', config.get('discover:sampleSize'));
+          $scope.searchSource.setField('sort', getSort($scope.sorting, $scope.indexPattern));
 
           // Set the watcher after initialization
           $scope.$watchCollection('sorting', function (newSort, oldSort) {
           // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
-            $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
+            $scope.searchSource.setField('sort', getSort(newSort, $scope.indexPattern));
             $scope.searchSource.fetchQueued();
           });
 
@@ -132,7 +133,26 @@ uiModules.get('kibana')
           }
 
           function startSearching() {
+            let inspectorRequest = undefined;
+            if (_.has($scope, 'inspectorAdapters.requests')) {
+              $scope.inspectorAdapters.requests.reset();
+              inspectorRequest = $scope.inspectorAdapters.requests.start('Data', {
+                description: `This request queries Elasticsearch to fetch the data for the search.`,
+              });
+              inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+              $scope.searchSource.getSearchRequestBody().then(body => {
+                inspectorRequest.json(body);
+              });
+            }
             $scope.searchSource.onResults()
+              .then(resp => {
+                if (inspectorRequest) {
+                  inspectorRequest
+                    .stats(getResponseInspectorStats($scope.searchSource, resp))
+                    .ok({ json: resp });
+                }
+                return resp;
+              })
               .then(onResults)
               .catch(error => {
                 notify.error(error);

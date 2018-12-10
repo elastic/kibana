@@ -31,7 +31,7 @@ tests when necessary. You access the test runner through a browser that it start
 
 If your plugin consists of a number of internal plugins, you may wish to keep the tests
 isolated to a specific plugin or plugins, instead of executing all of the tests. To do this,
-use `--plugins` and passing the plugins you would like to test. Muliple plugins can be
+use `--plugins` and passing the plugins you would like to test. Multiple plugins can be
 specified by separating them with commas.
 
 

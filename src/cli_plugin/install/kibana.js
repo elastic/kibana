@@ -42,8 +42,7 @@ export async function rebuildCache(settings, logger) {
     '--env.name=production',
     '--optimize.useBundleCache=false',
     '--server.autoListen=false',
-    '--plugins.initialize=false',
-    '--uiSettings.enabled=false'
+    '--plugins.initialize=false'
   ];
 
   const proc = execa(process.execPath, kibanaArgs, {
@@ -62,7 +61,6 @@ export function assertVersion(settings) {
   const actual = cleanVersion(settings.plugins[0].kibanaVersion);
   const expected = cleanVersion(settings.version);
   if (!versionSatisfies(actual, expected)) {
-    throw new Error (`Incorrect Kibana version in plugin [${settings.plugins[0].name}]. ` +
-      `Expected [${expected}]; found [${actual}]`);
+    throw new Error(`Plugin ${settings.plugins[0].name} [${actual}] is incompatible with Kibana [${expected}]`);
   }
 }

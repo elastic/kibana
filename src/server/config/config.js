@@ -21,15 +21,15 @@ import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
-import { pkg, unset, deepCloneWithBuffers as clone } from '../../utils';
+import { pkg, unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 
 export class Config {
-  static async withDefaultSchema(settings = {}) {
-    const defaultSchema = await createDefaultSchema();
+  static withDefaultSchema(settings = {}) {
+    const defaultSchema = createDefaultSchema();
     return new Config(defaultSchema, settings);
   }
 
@@ -107,8 +107,9 @@ export class Config {
       notDev: !dev,
       version: _.get(pkg, 'version'),
       branch: _.get(pkg, 'branch'),
-      buildNum: dev ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.number', NaN),
-      buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _.get(pkg, 'build.sha', '')
+      buildNum: IS_KIBANA_DISTRIBUTABLE ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildSha: IS_KIBANA_DISTRIBUTABLE ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      dist: IS_KIBANA_DISTRIBUTABLE,
     };
 
     if (!context.dev && !context.prod) {

@@ -1,0 +1,79 @@
+[[spaces-api-get]]
+=== Get Space
+
+experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+
+Retrieves all {kib} spaces, or a specific space.
+
+Note: You cannot access this endpoint via the Console in Kibana.
+
+==== Get all {kib} spaces
+
+===== Request
+
+To retrieve all spaces, issue a GET request to the
+/api/spaces/space endpoint.
+
+[source,js]
+--------------------------------------------------
+GET /api/spaces/space
+--------------------------------------------------
+// KIBANA
+
+===== Response
+
+A successful call returns a response code of `200` and a response body containing a JSON 
+representation of the spaces.
+
+[source,js]
+--------------------------------------------------
+[
+  {
+    "id": "default",
+    "name": "Default",
+    "description" : "This is the Default Space",
+    "_reserved": true
+  },
+  {
+    "id": "marketing",
+    "name": "Marketing",
+    "description" : "This is the Marketing Space",
+    "color": "#aabbcc",
+    "initials": "MK"
+  },
+  {
+    "id": "sales",
+    "name": "Sales",
+    "initials": "MK"
+  },
+]
+--------------------------------------------------
+
+==== Get a specific space
+
+===== Request
+
+To retrieve a specific space, issue a GET request to
+the `/api/spaces/space/<space_id>` endpoint:
+
+[source,js]
+--------------------------------------------------
+GET /api/spaces/space/marketing
+--------------------------------------------------
+// KIBANA
+
+===== Response
+
+A successful call returns a response code of `200` and a response body containing a JSON 
+representation of the space.
+
+[source,js]
+--------------------------------------------------
+{
+  "id": "marketing",
+  "name": "Marketing",
+  "description" : "This is the Marketing Space",
+  "color": "#aabbcc",
+  "initials": "MK"
+}
+--------------------------------------------------

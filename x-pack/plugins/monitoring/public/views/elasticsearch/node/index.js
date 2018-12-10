@@ -12,6 +12,7 @@ import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -22,8 +23,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -33,7 +33,14 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Nodes - ${$scope.pageData.nodeSummary.name} - Overview`);
+    const routeTitle = i18n('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+      defaultMessage: 'Elasticsearch - Nodes - {nodeSummaryName} - Overview',
+      values: {
+        nodeSummaryName: $scope.pageData.nodeSummary.name
+      }
+    });
+
+    title($scope.cluster, routeTitle);
 
     const features = $injector.get('features');
     const callPageData = partial(getPageData, $injector);
@@ -55,7 +62,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
       }
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

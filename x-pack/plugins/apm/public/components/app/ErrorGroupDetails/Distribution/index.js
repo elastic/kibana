@@ -6,7 +6,7 @@
 
 import React from 'react';
 import Histogram from '../../../shared/charts/Histogram';
-import EmptyMessage from '../../../shared/EmptyMessage';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { HeaderSmall } from '../../../shared/UIComponents';
 
 export function getFormattedBuckets(buckets, bucketSize) {
@@ -32,7 +32,7 @@ function Distribution({ distribution }) {
   const isEmpty = distribution.totalHits === 0;
 
   if (isEmpty) {
-    return <EmptyMessage heading="No errors in the selected time range." />;
+    return <EmptyMessage heading="No errors were found" />;
   }
 
   return (

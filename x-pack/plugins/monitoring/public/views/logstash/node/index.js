@@ -12,13 +12,13 @@ import uiRoutes from'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
   const $route = $injector.get('$route');
   const globalState = $injector.get('globalState');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash/node/${$route.current.params.uuid}`;
-  const timefilter = $injector.get('timefilter');
   const timeBounds = timefilter.getBounds();
 
   return $http.post(url, {
@@ -46,8 +46,7 @@ uiRoutes.when('/logstash/node/:uuid', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -57,7 +56,13 @@ uiRoutes.when('/logstash/node/:uuid', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Logstash - ${$scope.pageData.nodeSummary.name}`);
+    const routeTitle = i18n('xpack.monitoring.logstash.node.routeTitle', {
+      defaultMessage: 'Logstash - {nodeName}',
+      values: {
+        nodeName: $scope.pageData.nodeSummary.name
+      }
+    });
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({
@@ -65,7 +70,7 @@ uiRoutes.when('/logstash/node/:uuid', {
       handleResponse: (response) => $scope.pageData = response
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

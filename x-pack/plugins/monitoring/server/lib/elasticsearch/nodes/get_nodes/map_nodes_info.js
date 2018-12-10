@@ -35,7 +35,7 @@ export function mapNodesInfo(nodeHits, clusterStats, shardStats) {
         isOnline,
         nodeTypeLabel: nodeTypeLabel,
         nodeTypeClass: nodeTypeClass,
-        shardCount: get(shardStats, `nodes[${sourceNode.uuid}].shardCount`, null),
+        shardCount: get(shardStats, `nodes[${sourceNode.uuid}].shardCount`, 0),
       }
     };
   }, {});

@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import { dataSetSchema } from './data_set_schema';
+import { sampleDataSchema } from './data_set_schema';
 import {
   createListRoute,
   createInstallRoute,
@@ -26,6 +26,8 @@ import {
 } from './routes';
 import {
   flightsSpecProvider,
+  logsSpecProvider,
+  ecommerceSpecProvider
 } from './data_sets';
 
 export function sampleDataMixin(kbnServer, server) {
@@ -40,7 +42,7 @@ export function sampleDataMixin(kbnServer, server) {
   });
 
   server.decorate('server', 'registerSampleDataset', (specProvider) => {
-    const { error, value } = Joi.validate(specProvider(server), dataSetSchema);
+    const { error, value } = Joi.validate(specProvider(server), sampleDataSchema);
 
     if (error) {
       throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
@@ -65,5 +67,19 @@ export function sampleDataMixin(kbnServer, server) {
     sampleDatasets.push(value);
   });
 
+  server.decorate('server', 'addSavedObjectsToSampleDataset', (id, savedObjects) => {
+    const sampleDataset = sampleDatasets.find(sampleDataset => {
+      return sampleDataset.id === id;
+    });
+
+    if (!sampleDataset) {
+      throw new Error(`Unable to find sample dataset with id: ${id}`);
+    }
+
+    sampleDataset.savedObjects = sampleDataset.savedObjects.concat(savedObjects);
+  });
+
   server.registerSampleDataset(flightsSpecProvider);
+  server.registerSampleDataset(logsSpecProvider);
+  server.registerSampleDataset(ecommerceSpecProvider);
 }

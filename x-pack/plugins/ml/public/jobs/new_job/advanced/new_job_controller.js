@@ -11,15 +11,23 @@ import angular from 'angular';
 import 'ace';
 
 import { parseInterval } from 'ui/utils/parse_interval';
+import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
-import { createSearchItems, createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { getAdvancedJobConfigurationBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
+import {
+  SearchItemsProvider,
+  createJobForSaving,
+  checkCardinalitySuccess,
+  getMinimalValidJob,
+} from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadIndexPatterns, loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ML_JOB_FIELD_TYPES, ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults, newJobLimits, newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
@@ -35,8 +43,9 @@ import { initPromise } from 'plugins/ml/util/promise';
 uiRoutes
   .when('/jobs/new_job/advanced', {
     template,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
@@ -48,8 +57,9 @@ uiRoutes
   })
   .when('/jobs/new_job/advanced/:jobId', {
     template,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
@@ -69,7 +79,7 @@ module.controller('MlNewJob',
     $route,
     $location,
     $modal,
-    timefilter,
+    Private,
     mlDatafeedService,
     mlConfirmModalService) {
 
@@ -98,6 +108,8 @@ module.controller('MlNewJob',
       '_type',
       '_uid',
       '_version',
+      '_feature',
+      '_ignored',
     ];
 
     const allowedInfluencerTypes = [
@@ -111,6 +123,8 @@ module.controller('MlNewJob',
     const mlConfirm = mlConfirmModalService;
     msgs.clear();
     const jobDefaults = newJobDefaults();
+    // For keeping a copy of the detectors for comparison
+    const currentConfigs = { detectors: [], model_plot_config: { enabled: false } };
 
     $scope.job = {};
     $scope.mode = MODE.NEW;
@@ -153,6 +167,15 @@ module.controller('MlNewJob',
           $scope.ui.validation.tabs[tab].valid = valid;
         }
       },
+      cardinalityValidator: {
+        status: 0, message: '', STATUS: {
+          FAILED: -1,
+          NOT_RUNNING: 0,
+          RUNNING: 1,
+          FINISHED: 2,
+          WARNING: 3,
+        }
+      },
       jsonText: '',
       changeTab: changeTab,
       influencers: [],
@@ -178,6 +201,7 @@ module.controller('MlNewJob',
       types: {},
       isDatafeed: true,
       useDedicatedIndex: false,
+      enableModelPlot: false,
       modelMemoryLimit: '',
       modelMemoryLimitDefault: jobDefaults.anomaly_detectors.model_memory_limit,
 
@@ -191,6 +215,7 @@ module.controller('MlNewJob',
         scrollSizeDefault: 1000,
         indicesText: '',
         typesText: '',
+        scriptFields: [],
       },
       saveStatus: {
         job: 0,
@@ -278,9 +303,37 @@ module.controller('MlNewJob',
         });
     }
 
+    function checkForConfigUpdates() {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+      // Check if enable model plot was set/has changed and update if it has.
+      const jobModelPlotValue = $scope.job.model_plot_config ? $scope.job.model_plot_config : { enabled: false };
+      const modelPlotSettingsEqual = _.isEqual(currentConfigs.model_plot_config, jobModelPlotValue);
+
+      if (!modelPlotSettingsEqual) {
+        // Update currentConfigs.
+        currentConfigs.model_plot_config.enabled = jobModelPlotValue.enabled;
+        // Update ui portion so checkbox is checked
+        $scope.ui.enableModelPlot = jobModelPlotValue.enabled;
+      }
+
+      if ($scope.ui.enableModelPlot === true) {
+        const unchanged = _.isEqual(currentConfigs.detectors, $scope.job.analysis_config.detectors);
+        // if detectors changed OR model plot was just toggled on run cardinality
+        if (!unchanged || !modelPlotSettingsEqual) {
+          runValidateCardinality();
+        }
+      } else {
+        $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+        $scope.ui.cardinalityValidator.message = '';
+      }
+    }
+
     function changeTab(tab) {
       $scope.ui.currentTab = tab.index;
-      if (tab.index === 4) {
+      // Selecting Analysis Configuration tab
+      if (tab.index === 1) {
+        checkForConfigUpdates();
+      } else if (tab.index === 4) {
         createJSONText();
       } else if (tab.index === 5) {
         if ($scope.ui.dataLocation === 'ES') {
@@ -347,6 +400,16 @@ module.controller('MlNewJob',
                     }
                   });
                 });
+              });
+
+              // Add script fields from the job configuration to $scope.fields
+              // so they're available from within the dropdown in the detector modal.
+              const scriptFields = Object.keys(_.get($scope.job, 'datafeed_config.script_fields', {}));
+              // This type information is retrieved via fieldCaps for regular fields,
+              // here we're creating a similar object so the script field is usable further on.
+              const scriptType = { type: 'script_fields', searchable: false, aggregatable: true };
+              scriptFields.forEach((fieldName) => {
+                $scope.fields[fieldName] = scriptType;
               });
 
               if (Object.keys($scope.fields).length) {
@@ -472,7 +535,7 @@ module.controller('MlNewJob',
                     // mappings should be fully set up, but the Kibana mappings then
                     // need to be refreshed to reflect the Elasticsearch mappings for
                     // any new analytical fields that have been configured in the job.
-                    //courier.indexPatterns.get('.ml-anomalies-*')
+                    //indexPatterns.get('.ml-anomalies-*')
                     //.then((indexPattern) => {
                     //  indexPattern.refreshFields()
                     //  .then(() => {
@@ -555,10 +618,11 @@ module.controller('MlNewJob',
     // if an index pattern or saved search has been added to the url
     // populate those items in the form and datafeed config
     function populateFormFromUrl() {
+      const createSearchItems = Private(SearchItemsProvider);
       const {
         indexPattern,
         savedSearch,
-        combinedQuery } = createSearchItems($route);
+        combinedQuery } = createSearchItems();
 
       if (indexPattern.id !== undefined) {
         timeBasedIndexCheck(indexPattern, true);
@@ -637,6 +701,83 @@ module.controller('MlNewJob',
       }
     };
 
+    function runValidateCardinality() {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+      $scope.ui.cardinalityValidator.status = $scope.ui.cardinalityValidator.STATUS.RUNNING;
+
+      const tempJob = mlJobService.cloneJob($scope.job);
+      _.merge(tempJob, getMinimalValidJob());
+
+      ml.validateCardinality(tempJob)
+        .then((response) => {
+          const validationResult = checkCardinalitySuccess(response);
+
+          if (validationResult.success === true) {
+            $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+            $scope.ui.cardinalityValidator.message = '';
+          } else {
+            $scope.ui.cardinalityValidator.message = `Creating model plots is resource intensive and not recommended
+                  where the cardinality of the selected fields is greater than 100. Estimated cardinality
+                  for this job is ${validationResult.highCardinality}.
+                  If you enable model plot with this configuration
+                  we recommend you select a dedicated results index on the Job Details tab.`;
+
+            $scope.ui.cardinalityValidator.status = STATUS.WARNING;
+          }
+        })
+        .catch((error) => {
+          console.log('Cardinality check error:', error);
+          $scope.ui.cardinalityValidator.message = `An error occurred validating the configuration
+            for running the job with model plot enabled.
+            Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high.
+            You may want to select a dedicated results index on the Job Details tab.`;
+
+          $scope.ui.cardinalityValidator.status = STATUS.FAILED;
+        });
+    }
+
+    $scope.onDetectorsUpdate = function () {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+
+      if ($scope.ui.enableModelPlot === true) {
+        // Update currentConfigs since config changed
+        currentConfigs.detectors = _.cloneDeep($scope.job.analysis_config.detectors);
+
+        if ($scope.job.analysis_config.detectors.length === 0) {
+          $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+          $scope.ui.cardinalityValidator.message = '';
+        } else {
+          runValidateCardinality();
+        }
+      }
+    };
+
+    $scope.setModelPlotEnabled = function () {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+
+      if ($scope.ui.enableModelPlot === true) {
+        // Start keeping track of the config in case of changes from Edit JSON tab requiring another cardinality check
+        currentConfigs.detectors = _.cloneDeep($scope.job.analysis_config.detectors);
+
+        $scope.job.model_plot_config = {
+          enabled: true
+        };
+
+        currentConfigs.model_plot_config.enabled = true;
+        // return early if there's nothing to run a check on yet.
+        if ($scope.job.analysis_config.detectors.length === 0) {
+          return;
+        }
+
+        runValidateCardinality();
+      } else {
+        currentConfigs.model_plot_config.enabled = false;
+        $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+        $scope.ui.cardinalityValidator.message = '';
+        delete $scope.job.model_plot_config;
+      }
+    };
+
     // function called by field-select components to set
     // properties in the analysis_config
     $scope.setAnalysisConfigProperty = function (value, field) {
@@ -696,7 +837,16 @@ module.controller('MlNewJob',
         });
 
         const indicesText = datafeedConfig.indices.join(',');
-        $scope.ui.fieldsUpToDate = (indicesText === $scope.ui.datafeed.indicesText);
+
+        const scriptFields = (datafeedConfig.script_fields !== undefined) ? Object.keys(datafeedConfig.script_fields) : [];
+
+        let fieldsUpToDate = true;
+        if (indicesText !== $scope.ui.datafeed.indicesText || _.isEqual(scriptFields, $scope.ui.datafeed.scriptFields) === false) {
+          fieldsUpToDate = false;
+        }
+
+        $scope.ui.fieldsUpToDate = fieldsUpToDate;
+
         const types = Array.isArray(datafeedConfig.types) ? datafeedConfig.types : [];
 
         $scope.ui.datafeed = {
@@ -709,6 +859,7 @@ module.controller('MlNewJob',
           scrollSizeDefault: scrollSizeDefault,
           indicesText,
           typesText: types.join(','),
+          scriptFields,
         };
 
         if ($scope.ui.fieldsUpToDate === false) {
@@ -745,8 +896,8 @@ module.controller('MlNewJob',
     function setFieldDelimiterControlsFromText() {
       if ($scope.job.data_description && $scope.job.data_description.field_delimiter) {
 
-      // if the data format has not been set and fieldDelimiter exists,
-      // assume the format is delimited
+        // if the data format has not been set and fieldDelimiter exists,
+        // assume the format is delimited
         if ($scope.job.data_description.format === undefined) {
           $scope.job.data_description.format = 'delimited';
         }
@@ -1012,6 +1163,13 @@ module.controller('MlNewJob',
           let msg = 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
           msg += 'must start and end with an alphanumeric character';
           tabs[0].checks.groupIds.message = msg;
+        }
+
+        if (validationResults.contains('model_memory_limit_units_invalid')) {
+          tabs[0].checks.modelMemoryLimit.valid = false;
+          const str = `${(ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', '))} or ${([...ALLOWED_DATA_UNITS].pop())}`;
+          const msg = `Model memory limit data unit unrecognized. It must be ${str}`;
+          tabs[0].checks.modelMemoryLimit.message = msg;
         }
 
         if (validationResults.contains('model_memory_limit_invalid')) {

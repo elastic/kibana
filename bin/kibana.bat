@@ -14,7 +14,6 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
-TITLE Kibana Server
 "%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" %*
 
 :finally

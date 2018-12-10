@@ -126,7 +126,7 @@ dataTypesArray.forEach(function (dataType) {
       function checkChart(chart) {
         const rect = $(chart.chartEl).find('.series rect').get(0);
 
-        // check for existance of stuff and things
+        // check for existence of stuff and things
         return {
           click: !!rect.__onclick,
           mouseOver: !!rect.__onmouseover,
@@ -322,7 +322,7 @@ describe('datumWidth - monthly interval', function () {
     const chart = vis.handler.charts[0];
     const rects = $(chart.chartEl).find('.series rect');
     const januaryBarWidth = $(rects.get(0)).attr('width');
-    const febuaryBarWidth = $(rects.get(1)).attr('width');
-    expect(febuaryBarWidth).to.be.lessThan(januaryBarWidth);
+    const februaryBarWidth = $(rects.get(1)).attr('width');
+    expect(februaryBarWidth).to.be.lessThan(januaryBarWidth);
   });
 });

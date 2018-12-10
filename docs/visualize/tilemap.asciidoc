@@ -8,7 +8,7 @@ to display map tiles. To use other tile service providers, configure the <<tilem
 in `kibana.yml`.
 
 [float]
-[[configuration]]
+[[tilemap-configuration]]
 === Configuration
 
 [float]

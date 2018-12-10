@@ -1,0 +1,12 @@
+[[development-security]]
+== Security
+
+Kibana has generally been able to implement security transparently to core and plugin developers, and this largely remains the case. {kib} on two methods that the <<development-elasticsearch, elasticsearch plugin>>'s `Cluster` provides: `callWithRequest` and `callWithInternalUser`. 
+
+`callWithRequest` executes requests against Elasticsearch using the authentication credentials of the Kibana end-user. So, if you log into Kibana with the user of `foo` when `callWithRequest` is used, {kib} execute the request against Elasticsearch as the user `foo`. Historically, `callWithRequest` has been used extensively to perform actions that are initiated at the request of Kibana end-users.
+
+`callWithInternalUser` executes requests against Elasticsearch using the internal Kibana server user, and has historically been used for performing actions that aren't initiated by Kibana end users; for example, creating the initial `.kibana` index or performing health checks against Elasticsearch.
+
+However, with the changes that role-based access control (RBAC) introduces, this is no longer cut and dry. {kib} now requires all access to the `.kibana` index goes through the `SavedObjectsClient`. This used to be a best practice, as the `SavedObjectsClient` was responsible for translating the documents stored in Elasticsearch to and from Saved Objects, but RBAC is now taking advantage of this abstraction to implement access control and determine when to use `callWithRequest` versus `callWithInternalUser`.
+
+include::rbac.asciidoc[]

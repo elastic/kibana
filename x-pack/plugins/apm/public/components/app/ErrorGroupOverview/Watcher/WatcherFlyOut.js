@@ -9,10 +9,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import moment from 'moment-timezone';
 import _ from 'lodash';
-
+import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -29,13 +28,12 @@ import {
   EuiSpacer,
   EuiRadio,
   EuiSelect,
-  EuiGlobalToastList,
   EuiLink
 } from '@elastic/eui';
 
-import { ELASTIC_DOCS } from '../../../../utils/documentation';
+import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
 
-import { KibanaLink } from '../../../../utils/url';
+import { UnconnectedKibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch } from './createErrorGroupWatch';
 import chrome from 'ui/chrome';
 
@@ -73,8 +71,7 @@ export default class WatcherFlyout extends Component {
     },
     daily: '08:00',
     emails: '',
-    slackUrl: '',
-    toasts: []
+    slackUrl: ''
   };
 
   onChangeSchedule = schedule => {
@@ -177,61 +174,43 @@ export default class WatcherFlyout extends Component {
   };
 
   addErrorToast = () => {
-    this.setState({
-      toasts: [
-        {
-          id: 2,
-          title: 'Watch creation failed',
-          color: 'warning',
-          text: <p>Make sure your user has permission to create watches.</p>
-        }
-      ]
+    toastNotifications.addWarning({
+      title: 'Watch creation failed',
+      text: <p>Make sure your user has permission to create watches.</p>
     });
   };
 
   addSuccessToast = id => {
-    this.setState({
-      toasts: [
-        {
-          id: 1,
-          title: 'New watch created!',
-          color: 'success',
-          text: (
-            <p>
-              The watch is now ready and will send error reports for{' '}
-              {this.props.serviceName}.{' '}
-              <KibanaLink
-                pathname={'/app/kibana'}
-                hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
-                query={{}}
-              >
-                View watch.
-              </KibanaLink>
-            </p>
-          )
-        }
-      ]
-    });
-  };
-
-  removeToasts = () => {
-    this.setState({
-      toasts: []
+    toastNotifications.addSuccess({
+      title: 'New watch created!',
+      text: (
+        <p>
+          The watch is now ready and will send error reports for{' '}
+          {this.props.serviceName}.{' '}
+          <UnconnectedKibanaLink
+            location={this.props.location}
+            pathname={'/app/kibana'}
+            hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
+          >
+            View watch.
+          </UnconnectedKibanaLink>
+        </p>
+      )
     });
   };
 
   render() {
+    if (!this.props.isOpen) {
+      return null;
+    }
+
     const userTimezoneSetting = getUserTimezone();
-
     const dailyTime = this.state.daily;
-
     const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
     const inputFormat = 'HH:mmZ'; // Parse as 24 hour w. tz
-
     const dailyTimeFormatted = moment(inputTime, inputFormat)
       .tz(userTimezoneSetting)
       .format('HH:mm'); // Format as 24h
-
     const dailyTime12HourFormatted = moment(inputTime, inputFormat)
       .tz(userTimezoneSetting)
       .format('hh:mm A (z)'); // Format as 12h w. tz
@@ -242,18 +221,16 @@ export default class WatcherFlyout extends Component {
       return { value: `${hour}:00`, text: `${hour}:00 UTC` };
     });
 
-    const flyoutContent = (
+    const flyoutBody = (
       <EuiText>
         <p>
           This form will assist in creating a Watch that can notify you of error
           occurrences from this service. To learn more about Watcher, please
           read our{' '}
-          <EuiLink
-            target="_blank"
-            href={_.get(ELASTIC_DOCS, 'watcher-get-started.url')}
-          >
+          <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
             documentation
-          </EuiLink>.
+          </EuiLink>
+          .
         </p>
 
         <EuiForm>
@@ -360,17 +337,15 @@ export default class WatcherFlyout extends Component {
           <EuiSpacer size="m" />
           {this.state.actions.email && (
             <EuiFormRow
-              label="Receipients (seperated with comma)"
+              label="Recipients (separated with comma)"
               compressed
               helpText={
                 <span>
                   If you have not configured email, please see the{' '}
-                  <EuiLink
-                    target="_blank"
-                    href={_.get(ELASTIC_DOCS, 'x-pack-emails.url')}
-                  >
+                  <EuiLink target="_blank" href={XPACK_DOCS.xpackEmails}>
                     documentation
-                  </EuiLink>.
+                  </EuiLink>
+                  .
                 </span>
               }
             >
@@ -401,7 +376,8 @@ export default class WatcherFlyout extends Component {
                     href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack"
                   >
                     documentation
-                  </EuiLink>.
+                  </EuiLink>
+                  .
                 </span>
               }
             >
@@ -416,55 +392,35 @@ export default class WatcherFlyout extends Component {
       </EuiText>
     );
 
-    const flyout = (
+    return (
       <EuiFlyout onClose={this.props.onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>Create new watch assistant</h2>
+            <h2>Enable error reports</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{flyoutContent}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={this.props.onClose}
-                flush="left"
-              >
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={this.createWatch}
-                fill
-                disabled={
-                  !this.state.actions.email && !this.state.actions.slack
-                }
-              >
-                Create watch
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlyoutBody>{flyoutBody}</EuiFlyoutBody>
+        <EuiFlyoutFooter
+          style={{
+            flexDirection: 'row-reverse',
+            display: 'flex'
+          }}
+        >
+          <EuiButton
+            onClick={this.createWatch}
+            fill
+            disabled={!this.state.actions.email && !this.state.actions.slack}
+          >
+            Create watch
+          </EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
-    );
-
-    return (
-      <React.Fragment>
-        {this.props.isOpen && flyout}
-        <EuiGlobalToastList
-          toasts={this.state.toasts}
-          dismissToast={this.removeToasts}
-          toastLifeTimeMs={5000}
-        />
-      </React.Fragment>
     );
   }
 }
 
 WatcherFlyout.propTypes = {
+  location: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   serviceName: PropTypes.string,
   onClose: PropTypes.func.isRequired

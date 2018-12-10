@@ -72,7 +72,6 @@ export default function ({ getPageObjects }) {
         it('should show index pattern suggestions for index argument', async () => {
           await PageObjects.timelion.updateExpression('index');
           await PageObjects.timelion.clickSuggestion();
-          await PageObjects.common.sleep(500);
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).to.eql(1);
           expect(suggestions[0].includes('logstash-*')).to.eql(true);
@@ -82,7 +81,6 @@ export default function ({ getPageObjects }) {
         it('should show field suggestions for timefield argument when index pattern set', async () => {
           await PageObjects.timelion.updateExpression(',timefield');
           await PageObjects.timelion.clickSuggestion();
-          await PageObjects.common.sleep(500);
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).to.eql(4);
           expect(suggestions[0].includes('@timestamp')).to.eql(true);
@@ -92,7 +90,6 @@ export default function ({ getPageObjects }) {
         it('should show field suggestions for split argument when index pattern set', async () => {
           await PageObjects.timelion.updateExpression(',split');
           await PageObjects.timelion.clickSuggestion();
-          await PageObjects.common.sleep(500);
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).to.eql(52);
           expect(suggestions[0].includes('@message.raw')).to.eql(true);
@@ -102,7 +99,6 @@ export default function ({ getPageObjects }) {
         it('should show field suggestions for metric argument when index pattern set', async () => {
           await PageObjects.timelion.updateExpression(',metric');
           await PageObjects.timelion.clickSuggestion();
-          await PageObjects.common.sleep(500);
           await PageObjects.timelion.updateExpression('avg:');
           await PageObjects.timelion.clickSuggestion();
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();

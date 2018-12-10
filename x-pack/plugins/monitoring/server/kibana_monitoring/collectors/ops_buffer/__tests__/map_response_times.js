@@ -36,7 +36,7 @@ describe('Map response times', () => {
     expect(isEqual(mapResponseTimes(responseTimes), expected)).to.be(true);
   });
 
-  it('combine results with different maxes for average and max value', () => {
+  it('combine results with different maximums for average and max value', () => {
     const responseTimes = {
       '5600': {
         avg: 5,

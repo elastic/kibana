@@ -17,7 +17,7 @@ const distroSupportsUnprivilegedUsernamespaces = (distro) => {
   }
 
   // Starting at CentOS 7.2 usernamespaces are in the kernel
-  // but they must be explicitly enabled. This should be reevaulated
+  // but they must be explicitly enabled. This should be reevaluated
   // once CentOS 7.5+ is available
   if (distro.toLowerCase() === 'centos') {
     return false;

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export { createBulkCreateRoute } from './bulk_create';
 export { createBulkGetRoute } from './bulk_get';
 export { createCreateRoute } from './create';
 export { createDeleteRoute } from './delete';

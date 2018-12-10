@@ -75,7 +75,7 @@ ObjDefine.prototype.comp = function (name, val) {
 
 /**
  * Creates an object, decorated by the property descriptors
- * created by other ObjDefine methods and inheritting form the
+ * created by other ObjDefine methods and inheriting form the
  * prototype
  *
  * # note:

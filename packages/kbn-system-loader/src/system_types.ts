@@ -18,15 +18,15 @@
  */
 
 export type SystemName = string;
-export interface ISystemMetadata {
+export interface SystemMetadata {
   [key: string]: any;
 }
 
-export interface ISystemsType {
+export interface SystemsType {
   [systemName: string]: any;
 }
 
-export abstract class KibanaSystem<C, D extends ISystemsType, E = void> {
+export abstract class KibanaSystem<C, D extends SystemsType, E = void> {
   constructor(readonly kibana: C, readonly deps: D) {}
 
   public abstract start(): E;
@@ -46,6 +46,6 @@ export abstract class KibanaSystem<C, D extends ISystemsType, E = void> {
  *
  * See https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes
  */
-export interface IKibanaSystemClassStatic<C, D extends ISystemsType, E = void> {
+export interface KibanaSystemClassStatic<C, D extends SystemsType, E = void> {
   new (kibana: C, deps: D): KibanaSystem<C, D, E>;
 }

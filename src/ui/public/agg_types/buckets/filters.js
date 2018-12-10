@@ -19,16 +19,20 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { luceneStringToDsl } from '../../courier/data_source/build_query/lucene_string_to_dsl.js';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
-import { decorateQuery } from '../../courier/data_source/_decorate_query';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import filtersTemplate from '../controls/filters.html';
+import { i18n } from '@kbn/i18n';
+
+import chrome from 'ui/chrome';
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
-  title: 'Filters',
+  title: i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
+    defaultMessage: 'Filters',
+  }),
   createFilter: createFilterFilters,
   customLabels: false,
   params: [
@@ -53,8 +57,10 @@ export const filtersBucketAgg = new BucketAggType({
             console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
             return;
           }
+          const config = chrome.getUiSettingsClient();
+          const queryStringOptions = config.get('query:queryString:options');
 
-          decorateQuery(query);
+          decorateQuery(query, queryStringOptions);
 
           const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
           const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);

@@ -19,7 +19,7 @@
 
 import 'angular-ui-select';
 import { uiModules } from '../modules';
-import { getFieldOptions } from './lib/filter_editor_utils';
+import { getFilterableFields } from './lib/filter_editor_utils';
 import template from './filter_field_select.html';
 import '../directives/ui_select_focus_on';
 import '../directives/scroll_bottom';
@@ -37,7 +37,7 @@ module.directive('filterFieldSelect', function () {
     },
     link: function ($scope) {
       $scope.$watch('indexPatterns', (indexPatterns) => {
-        $scope.fieldOptions = getFieldOptions(indexPatterns);
+        $scope.fieldOptions = getFilterableFields(indexPatterns);
       });
 
       $scope.getFieldIndexPattern = (field) => {

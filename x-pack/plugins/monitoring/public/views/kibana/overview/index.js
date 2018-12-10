@@ -12,12 +12,12 @@ import uiRoutes from'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/kibana`;
-  const timefilter = $injector.get('timefilter');
   const timeBounds = timefilter.getBounds();
 
   return $http.post(url, {
@@ -44,8 +44,7 @@ uiRoutes.when('/kibana', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -55,7 +54,11 @@ uiRoutes.when('/kibana', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, 'Kibana');
+    const routeTitle = i18n('xpack.monitoring.kibana.overview.routeTitle', {
+      defaultMessage: 'Kibana'
+    });
+
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({
@@ -63,7 +66,7 @@ uiRoutes.when('/kibana', {
       handleResponse: (response) => $scope.pageData = response
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

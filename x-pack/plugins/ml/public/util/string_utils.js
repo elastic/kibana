@@ -201,19 +201,19 @@ export function guessTimeFormat(time) {
 
           if (match[13] !== undefined) {
             // found a word as the first part
-            // eg Jan 01 2000
+            // e.g., Jan 01 2000
             format += 'MMM';
             format += match[14];
             format += 'dd';
           } else if (match[17] !== undefined) {
             // found a word as the second part
-            // eg 01 Jan 2000
+            // e.g., 01 Jan 2000
             format += 'dd';
             format += match[14];
             format += 'MMM';
           } else {
             // check to see if the first number is greater than 12
-            // eg 24/03/1981
+            // e.g., 24/03/1981
             // this is a guess, but is only thing we can do
             // with one line from the data set
             if (match[12] !== undefined && (+match[12] > 12)) {
@@ -285,7 +285,7 @@ export function guessTimeFormat(time) {
   } else {
     // time field is a number, so probably epoch or epoch_ms
     if (time > 10000000000) {
-      // probably millseconds
+      // probably milliseconds
       format = 'epoch_ms';
 
     } else {

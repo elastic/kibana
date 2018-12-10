@@ -69,11 +69,15 @@ export function fieldsServiceProvider(callWithRequest) {
       })
         .then((resp) => {
           const aggregations = resp.aggregations;
-          const results = fieldNames.reduce((obj, field) => {
-            obj[field] = (aggregations[field] || { value: 0 }).value;
-            return obj;
-          }, {});
-          resolve(results);
+          if (aggregations !== undefined) {
+            const results = fieldNames.reduce((obj, field) => {
+              obj[field] = (aggregations[field] || { value: 0 }).value;
+              return obj;
+            }, {});
+            resolve(results);
+          } else {
+            resolve({});
+          }
         })
         .catch((resp) => {
           reject(resp);
