@@ -48,12 +48,7 @@ export class ParameterForm extends React.Component {
             />
           );
         default:
-          throw new Error(this.props.intl.formatMessage({
-            id: 'kbn.home.tutorial.unhandledParameterTypeErrorDescription',
-            defaultMessage: 'Unhandled parameter type {type}'
-          }, {
-            type: param.type
-          }));
+          throw new Error(`Unhandled parameter type ${param.type}`);
       }
     });
   }

@@ -27,7 +27,7 @@ import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 
-export function QueryActionsProvider(courier, Private, Promise) {
+export function QueryActionsProvider(courier, Private, Promise, i18n) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
   const {
@@ -58,7 +58,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
     }
   );
 
-  const fetchAnchorRow = (state, i18n) => () => {
+  const fetchAnchorRow = (state) => () => {
     const { queryParameters: { indexPatternId, anchorType, anchorId, sort, tieBreakerField } } = state;
 
     if (!tieBreakerField) {
@@ -91,7 +91,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
       );
   };
 
-  const fetchPredecessorRows = (state, i18n) => () => {
+  const fetchPredecessorRows = (state) => () => {
     const {
       queryParameters: { indexPatternId, filters, predecessorCount, sort, tieBreakerField },
       rows: { anchor },
@@ -137,7 +137,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
       );
   };
 
-  const fetchSuccessorRows = (state, i18n) => () => {
+  const fetchSuccessorRows = (state) => () => {
     const {
       queryParameters: { indexPatternId, filters, sort, successorCount, tieBreakerField },
       rows: { anchor },

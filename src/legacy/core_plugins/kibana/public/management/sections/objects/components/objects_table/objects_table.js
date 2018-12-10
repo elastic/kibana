@@ -164,7 +164,7 @@ class ObjectsTableUI extends Component {
   }
 
   debouncedFetch = debounce(async () => {
-    const { savedObjectsClient } = this.props;
+    const { intl, savedObjectsClient } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
     const findOptions = {
@@ -191,7 +191,7 @@ class ObjectsTableUI extends Component {
         });
       }
       toastNotifications.addDanger({
-        title: this.props.intl.formatMessage({
+        title: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
           defaultMessage: 'Unable find saved objects'
         }),

@@ -32,7 +32,7 @@ import {
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const HeaderComponent = ({
+const HeaderUi = ({
   prompt,
   indexPatternName,
   showSystemIndices,
@@ -105,4 +105,4 @@ export const HeaderComponent = ({
   </div>
 );
 
-export const Header = injectI18n(HeaderComponent);
+export const Header = injectI18n(HeaderUi);
