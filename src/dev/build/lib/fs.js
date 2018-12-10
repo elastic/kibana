@@ -95,7 +95,7 @@ export async function copy(source, destination) {
   await chmodAsync(destination, stat.mode);
 }
 
-export async function deleteAll(log, patterns) {
+export async function deleteAll(patterns, log = {}) {
   if (!Array.isArray(patterns)) {
     throw new TypeError('Expected patterns to be an array');
   }
