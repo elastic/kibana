@@ -126,6 +126,10 @@ export class ReportInfoButton extends Component<Props, State> {
           title: 'Content Type',
           description: get(info, 'output.content_type') || NA,
         },
+        {
+          title: 'Size in Bytes',
+          description: get(info, 'output.size') || NA,
+        },
       ],
       status: [
         {

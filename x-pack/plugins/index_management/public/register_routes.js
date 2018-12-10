@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { setHttpClient } from './services/api';
 import { setUrlService } from './services/navigation';
@@ -16,6 +17,7 @@ import { App } from './app';
 import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import template from './main.html';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
@@ -36,6 +38,14 @@ const renderReact = async (elem) => {
 
 routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
   template: template,
+  k7Breadcrumbs: () => [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.idxMgmt.breadcrumb', {
+        defaultMessage: 'Index management'
+      }),
+    }
+  ],
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {
     constructor($scope, $route, $http, kbnUrl, $rootScope) {
