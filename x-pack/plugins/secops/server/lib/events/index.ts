@@ -10,11 +10,7 @@ export * from './elasticsearch_adapter';
 import { EventsAdapter, EventsRequestOptions } from './types';
 
 export class Events {
-  private adapter: EventsAdapter;
-
-  constructor(adapter: EventsAdapter) {
-    this.adapter = adapter;
-  }
+  constructor(private readonly adapter: EventsAdapter) {}
 
   public async getEvents(
     req: FrameworkRequest,

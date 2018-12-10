@@ -10,11 +10,7 @@ export * from './elasticsearch_adapter';
 import { HostsAdapter, HostsRequestOptions } from './types';
 
 export class Hosts {
-  private adapter: HostsAdapter;
-
-  constructor(adapter: HostsAdapter) {
-    this.adapter = adapter;
-  }
+  constructor(private readonly adapter: HostsAdapter) {}
 
   public async getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData> {
     return await this.adapter.getHosts(req, options);

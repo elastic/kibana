@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { filter } from 'lodash/fp';
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';

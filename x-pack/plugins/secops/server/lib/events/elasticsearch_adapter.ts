@@ -12,10 +12,7 @@ import { buildQuery, EventFieldsMap } from './query.dsl';
 import { EventData, EventsAdapter, EventsRequestOptions } from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
-  private framework: FrameworkAdapter;
-  constructor(framework: FrameworkAdapter) {
-    this.framework = framework;
-  }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getEvents(
     request: FrameworkRequest,

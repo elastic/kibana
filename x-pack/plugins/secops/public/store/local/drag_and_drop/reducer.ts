@@ -5,7 +5,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { registerProvider, unRegisterProvider } from './actions';

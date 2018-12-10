@@ -12,10 +12,7 @@ import { buildQuery, HostsFieldsMap } from './query.dsl';
 import { HostBucket, HostData, HostHit, HostsAdapter, HostsRequestOptions } from './types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
-  private framework: FrameworkAdapter;
-  constructor(framework: FrameworkAdapter) {
-    this.framework = framework;
-  }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getHosts(
     request: FrameworkRequest,
