@@ -150,9 +150,7 @@ export class ESGeohashGridSource extends VectorSource {
 
 
   async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerId, layerName }) {
-
     inspectorAdapters.requests.resetRequest(layerId);
-
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -181,7 +179,9 @@ export class ESGeohashGridSource extends VectorSource {
         return filters;
       });
 
-      inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
+      inspectorRequest = inspectorAdapters.requests.start(
+        layerName,
+        { id: layerId, description: 'Elasticsearch geohash_grid aggregation layer' });
       inspectorRequest.stats(getRequestInspectorStats(searchSource));
       searchSource.getSearchRequestBody().then(body => {
         inspectorRequest.json(body);

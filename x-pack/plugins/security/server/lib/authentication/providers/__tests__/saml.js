@@ -236,7 +236,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(request.headers).to.not.have.property('authorization');
       expect(authenticationResult.failed()).to.be(true);
       expect(authenticationResult.error).to.be(failureReason);
-      sinon.assert.neverCalledWith(callWithRequest, 'shield.samlRefreshAccessToken');
+      sinon.assert.neverCalledWith(callWithRequest, 'shield.getAccessToken');
     });
 
     it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
@@ -259,7 +259,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'valid-refresh-token' } }
         )
         .returns(Promise.resolve({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' }));
@@ -291,7 +291,7 @@ describe('SAMLAuthenticationProvider', () => {
       const refreshFailureReason = new Error('Something is wrong with refresh token.');
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
         )
         .returns(Promise.reject(refreshFailureReason));
@@ -318,7 +318,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'token has already been refreshed' } }));
@@ -352,7 +352,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'token has already been refreshed' } }));
@@ -388,7 +388,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'refresh token is expired' } }));
@@ -422,7 +422,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'refresh token is expired' } }));

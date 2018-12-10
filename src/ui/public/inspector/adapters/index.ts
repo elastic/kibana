@@ -18,4 +18,4 @@
  */
 
 export { DataAdapter, FormattedData } from './data';
-export { RequestAdapter, RequestStatus, MappedRequestAdapter } from './request';
+export { RequestAdapter, RequestStatus } from './request';

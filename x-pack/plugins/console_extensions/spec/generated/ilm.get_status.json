@@ -1,0 +1,11 @@
+{
+  "ilm.get_status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ilm/status"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-get-status.html"
+  }
+}
