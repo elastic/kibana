@@ -79,7 +79,7 @@ export class Sha256 {
 
     const blockSize = 64;
     const finalSize = 56;
-    this._block = new Buffer(blockSize);
+    this._block = Buffer.alloc(blockSize);
     this._finalSize = finalSize;
     this._blockSize = blockSize;
     this._len = 0;
@@ -102,7 +102,7 @@ export class Sha256 {
   update(data, enc) {
     if (typeof data === 'string') {
       enc = enc || 'utf8';
-      data = new Buffer(data, enc);
+      data = Buffer.from(data, enc);
     }
 
     const l = this._len += data.length;
@@ -195,7 +195,7 @@ export class Sha256 {
   }
 
   _hash() {
-    const H = new Buffer(32);
+    const H = Buffer.alloc(32);
 
     H.writeInt32BE(this._a, 0);
     H.writeInt32BE(this._b, 4);
