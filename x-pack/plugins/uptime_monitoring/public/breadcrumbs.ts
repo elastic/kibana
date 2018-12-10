@@ -6,7 +6,7 @@
 
 import { Breadcrumb } from 'ui/chrome';
 
-export const monitorBreadcrumb = {
+export const monitorBreadcrumb: Breadcrumb = {
   text: 'Monitor',
 };
 
