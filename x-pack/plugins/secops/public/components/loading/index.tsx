@@ -15,7 +15,7 @@ interface LoadingProps {
   width: number | string;
 }
 
-export const LoadingPanel = pure<LoadingProps>(({ height, text, width }) => (
+export const LoadingPanel = pure<LoadingProps>(({ height = 'auto', text, width }) => (
   <InfraLoadingStaticPanel style={{ height, width }}>
     <InfraLoadingStaticContentPanel>
       <EuiPanel>
@@ -40,4 +40,5 @@ export const InfraLoadingStaticContentPanel = styled.div`
   flex: 0 0 auto;
   align-self: center;
   text-align: center;
+  height: fit-content;
 `;

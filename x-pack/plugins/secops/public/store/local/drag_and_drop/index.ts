@@ -6,5 +6,6 @@
 
 import * as dragAndDropActions from './actions';
 
+export * from './selectors';
 export { dragAndDropActions };
 export * from './reducer';

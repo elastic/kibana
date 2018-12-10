@@ -6,15 +6,11 @@
 
 import { EventsData } from '../../../common/graphql/types';
 import { FrameworkRequest } from '../framework';
-export { ElasticsearchEventsAdapter } from './elasticsearch_adapter';
+export * from './elasticsearch_adapter';
 import { EventsAdapter, EventsRequestOptions } from './types';
 
 export class Events {
-  private adapter: EventsAdapter;
-
-  constructor(adapter: EventsAdapter) {
-    this.adapter = adapter;
-  }
+  constructor(private readonly adapter: EventsAdapter) {}
 
   public async getEvents(
     req: FrameworkRequest,

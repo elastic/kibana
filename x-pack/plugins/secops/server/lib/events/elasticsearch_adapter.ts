@@ -4,133 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, isEmpty, merge } from 'lodash/fp';
+import { get, has, merge } from 'lodash/fp';
 import { EventItem, EventsData, KpiItem } from '../../../common/graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
-import {
-  EventData,
-  EventFilterQuery,
-  EventsAdapter,
-  EventsRequestOptions,
-  TermAggregation,
-} from './types';
-
-const EventFieldsMap = {
-  timestamp: '@timestamp',
-  'host.hostname': 'host.name',
-  'host.ip': 'host.ip',
-  'event.category': 'suricata.eve.alert.category',
-  'event.id': 'suricata.eve.flow_id',
-  'event.module': 'event.module',
-  'event.type': 'event.type',
-  'event.severity': 'suricata.eve.alert.severity',
-  'suricata.eve.flow_id': 'suricata.eve.flow_id',
-  'suricata.eve.proto': 'suricata.eve.proto',
-  'suricata.eve.alert.signature': 'suricata.eve.alert.signature',
-  'suricata.eve.alert.signature_id': 'suricata.eve.alert.signature_id',
-  'source.ip': 'source.ip',
-  'source.port': 'source.port',
-  'destination.ip': 'destination.ip',
-  'destination.port': 'destination.port',
-  'geo.region_name': 'destination.geo.region_name',
-  'geo.country_iso_code': 'destination.geo.country_iso_code',
-};
+import { TermAggregation } from '../types';
+import { buildQuery, EventFieldsMap } from './query.dsl';
+import { EventData, EventsAdapter, EventsRequestOptions } from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
-  private framework: FrameworkAdapter;
-  constructor(framework: FrameworkAdapter) {
-    this.framework = framework;
-  }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getEvents(
     request: FrameworkRequest,
     options: EventsRequestOptions
   ): Promise<EventsData> {
-    const { to, from } = options.timerange;
-    const Fields = options.fields;
-    const filterQuery = options.filterQuery;
-    const EsFields = Fields.reduce(
-      (res, f: string) => {
-        if (EventFieldsMap.hasOwnProperty(f)) {
-          const esField = Object.getOwnPropertyDescriptor(EventFieldsMap, f);
-          if (esField && esField.value) {
-            res = [...res, esField.value];
-          }
-        }
-        return res;
-      },
-      [] as string[]
-    );
-
-    const filter = [
-      ...createQueryFilterClauses(filterQuery as EventFilterQuery),
-      {
-        range: {
-          [options.sourceConfiguration.fields.timestamp]: {
-            gte: to,
-            lte: from,
-          },
-        },
-      },
-    ];
-
-    const agg = options.fields.includes('kpiEventType')
-      ? {
-          count_event_type: {
-            terms: {
-              field: 'event.type',
-              size: 5,
-              order: {
-                _count: 'desc',
-              },
-            },
-          },
-        }
-      : {};
-
-    const query = {
-      allowNoIndices: true,
-      index: options.sourceConfiguration.logAlias,
-      ignoreUnavailable: true,
-      body: {
-        aggregations: agg,
-        query: {
-          bool: {
-            must: [
-              {
-                match_all: {},
-              },
-              {
-                range: {
-                  [options.sourceConfiguration.fields.timestamp]: {
-                    gte: to,
-                    lte: from,
-                  },
-                },
-              },
-              {
-                exists: {
-                  field: 'event.type',
-                },
-              },
-            ],
-            filter,
-          },
-        },
-        size: 100,
-        sort: [
-          {
-            [options.sourceConfiguration.fields.timestamp]: 'desc',
-          },
-        ],
-        _source: EsFields,
-      },
-    };
-
     const response = await this.framework.callWithRequest<EventData, TermAggregation>(
       request,
       'search',
-      query
+      buildQuery(options)
     );
 
     const kpiEventType: KpiItem[] =
@@ -141,7 +32,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
           }))
         : [];
     const hits = response.hits.hits;
-    const events = hits.map(formatEventsData(Fields)) as [EventItem];
+    const events = hits.map(formatEventsData(options.fields)) as [EventItem];
     return {
       events,
       kpiEventType,
@@ -171,6 +62,3 @@ const formatEventsData = (fields: string[]) => (hit: EventData) =>
     },
     {} as { [fieldName: string]: string | number | boolean | null }
   );
-
-const createQueryFilterClauses = (filterQuery: EventFilterQuery) =>
-  !isEmpty(filterQuery) ? [filterQuery] : [];

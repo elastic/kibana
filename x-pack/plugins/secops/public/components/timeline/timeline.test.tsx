@@ -10,7 +10,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { DragDropContext } from 'react-beautiful-dnd';
 
-import { eventsQuery } from '../../containers/events/events.gql_query';
+import { eventsQuery } from '../../containers/events/index.gql_query';
 import { mockECSData } from '../../mock/mock_ecs';
 import { DEFAULT_PAGE_COUNT } from '../../store/local/timeline/model';
 import { ColumnHeaderType } from './body/column_headers/column_header';

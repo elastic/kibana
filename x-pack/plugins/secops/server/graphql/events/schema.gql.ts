@@ -7,15 +7,6 @@
 import gql from 'graphql-tag';
 
 export const eventsSchema = gql`
-  input TimerangeInput {
-    "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
-    interval: String!
-    "The end of the timerange"
-    to: Float!
-    "The beginning of the timerange"
-    from: Float!
-  }
-
   type KpiItem {
     value: String!
     count: Float!

@@ -39,6 +39,7 @@ export interface Source {
   configuration: SourceConfiguration /** The raw configuration of the source */;
   status: SourceStatus /** The status of the source */;
   getEvents?: EventsData | null /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+  Hosts: HostsData /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
   whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
@@ -135,6 +136,35 @@ export interface SuricataAlertData {
   signature_id?: number | null;
 }
 
+export interface HostsData {
+  edges: (HostsEdges | null)[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface HostsEdges {
+  host: HostItem;
+  cursor: CursorType;
+}
+
+export interface HostItem {
+  _id?: string | null;
+  name?: string | null;
+  firstSeen?: string | null;
+  version?: string | null;
+  os?: string | null;
+}
+
+export interface CursorType {
+  value: string;
+  tiebreaker?: string | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+  hasNextPage?: boolean | null;
+}
+
 export interface SayMyName {
   appName: string /** The id of the source */;
 }
@@ -144,11 +174,24 @@ export interface TimerangeInput {
   to: number /** The end of the timerange */;
   from: number /** The beginning of the timerange */;
 }
+
+export interface PaginationInput {
+  limit: number /** The size parameter allows you to configure the maximum amount of items to be returned */;
+  cursor?: string | null /** The cursor parameter defines the next result you want to fetch */;
+  tiebreaker?:
+    | string
+    | null /** The tiebreaker parameter allow to be more precise to fetch the next item */;
+}
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
 export interface GetEventsSourceArgs {
   timerange: TimerangeInput;
+  filterQuery?: string | null;
+}
+export interface HostsSourceArgs {
+  timerange: TimerangeInput;
+  pagination: PaginationInput;
   filterQuery?: string | null;
 }
 export interface IndexFieldsSourceStatusArgs {
@@ -202,6 +245,11 @@ export namespace SourceResolvers {
       any,
       Context
     > /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+    Hosts?: HostsResolver<
+      HostsData,
+      any,
+      Context
+    > /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
     whoAmI?: WhoAmIResolver<
       SayMyName | null,
       any,
@@ -228,6 +276,18 @@ export namespace SourceResolvers {
   >;
   export interface GetEventsArgs {
     timerange: TimerangeInput;
+    filterQuery?: string | null;
+  }
+
+  export type HostsResolver<R = HostsData, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context,
+    HostsArgs
+  >;
+  export interface HostsArgs {
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
     filterQuery?: string | null;
   }
 
@@ -644,6 +704,116 @@ export namespace SuricataAlertDataResolvers {
   >;
 }
 
+export namespace HostsDataResolvers {
+  export interface Resolvers<Context = any> {
+    edges?: EdgesResolver<(HostsEdges | null)[], any, Context>;
+    totalCount?: TotalCountResolver<number, any, Context>;
+    pageInfo?: PageInfoResolver<PageInfo, any, Context>;
+  }
+
+  export type EdgesResolver<R = (HostsEdges | null)[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TotalCountResolver<R = number, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PageInfoResolver<R = PageInfo, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace HostsEdgesResolvers {
+  export interface Resolvers<Context = any> {
+    host?: HostResolver<HostItem, any, Context>;
+    cursor?: CursorResolver<CursorType, any, Context>;
+  }
+
+  export type HostResolver<R = HostItem, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CursorResolver<R = CursorType, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace HostItemResolvers {
+  export interface Resolvers<Context = any> {
+    _id?: IdResolver<string | null, any, Context>;
+    name?: NameResolver<string | null, any, Context>;
+    firstSeen?: FirstSeenResolver<string | null, any, Context>;
+    version?: VersionResolver<string | null, any, Context>;
+    os?: OsResolver<string | null, any, Context>;
+  }
+
+  export type IdResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type NameResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FirstSeenResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type VersionResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type OsResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace CursorTypeResolvers {
+  export interface Resolvers<Context = any> {
+    value?: ValueResolver<string, any, Context>;
+    tiebreaker?: TiebreakerResolver<string | null, any, Context>;
+  }
+
+  export type ValueResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type TiebreakerResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace PageInfoResolvers {
+  export interface Resolvers<Context = any> {
+    endCursor?: EndCursorResolver<CursorType | null, any, Context>;
+    hasNextPage?: HasNextPageResolver<boolean | null, any, Context>;
+  }
+
+  export type EndCursorResolver<R = CursorType | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type HasNextPageResolver<R = boolean | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace SayMyNameResolvers {
   export interface Resolvers<Context = any> {
     appName?: AppNameResolver<string, any, Context> /** The id of the source */;
@@ -746,6 +916,63 @@ export namespace GetEventsQuery {
     __typename?: 'KpiItem';
     value: string;
     count: number;
+  };
+}
+
+export namespace GetHostsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+    Hosts: Hosts;
+  };
+
+  export type Hosts = {
+    __typename?: 'HostsData';
+    totalCount: number;
+    edges: (Edges | null)[];
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'HostsEdges';
+    host: Host;
+    cursor: Cursor;
+  };
+
+  export type Host = {
+    __typename?: 'HostItem';
+    _id?: string | null;
+    name?: string | null;
+    os?: string | null;
+    version?: string | null;
+    firstSeen?: string | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+    endCursor?: EndCursor | null;
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+    value: string;
   };
 }
 

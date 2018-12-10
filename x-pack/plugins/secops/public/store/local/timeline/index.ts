@@ -8,3 +8,4 @@ import * as timelineActions from './actions';
 
 export { timelineActions };
 export * from './reducer';
+export * from './selectors';

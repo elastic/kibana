@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { timelineByIdSelector } from './local/timeline/selectors';
+export { dataProvidersSelector, hostsSelector, timelineByIdSelector } from './local';

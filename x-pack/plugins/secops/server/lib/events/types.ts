@@ -5,40 +5,11 @@
  */
 
 import { EventsData, SourceConfiguration, TimerangeInput } from '../../../common/graphql/types';
-import { JsonObject } from '../../../common/typed_json';
 import { FrameworkRequest } from '../framework';
+import { ESQuery, SearchHit } from '../types';
 
 export interface EventsAdapter {
   getEvents(req: FrameworkRequest, options: EventsRequestOptions): Promise<EventsData>;
-}
-
-export type ESQuery = ESRangeQuery | ESQueryStringQuery | ESMatchQuery | JsonObject;
-
-export interface ESRangeQuery {
-  range: {
-    [name: string]: {
-      gte: number;
-      lte: number;
-      format: string;
-    };
-  };
-}
-
-export interface ESMatchQuery {
-  match: {
-    [name: string]: {
-      query: string;
-      operator: string;
-      zero_terms_query: string;
-    };
-  };
-}
-
-export interface ESQueryStringQuery {
-  query_string: {
-    query: string;
-    analyze_wildcard: boolean;
-  };
 }
 
 export interface EventsRequestOptions {
@@ -47,50 +18,6 @@ export interface EventsRequestOptions {
   filterQuery: ESQuery | undefined;
   fields: string[];
 }
-
-export interface SearchResponse<T> {
-  took: number;
-  timed_out: boolean;
-  _scroll_id?: string;
-  _shards: ShardsResponse;
-  hits: {
-    total: number;
-    max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      _explanation?: Explanation;
-      fields?: string[];
-      // tslint:disable-next-line:no-any
-      highlight?: any;
-      // tslint:disable-next-line:no-any
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
-  };
-  // tslint:disable-next-line:no-any
-  aggregations?: any;
-}
-
-export interface ShardsResponse {
-  total: number;
-  successful: number;
-  failed: number;
-  skipped: number;
-}
-
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
-}
-
-export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 
 export interface EventData extends SearchHit {
   sort: string[];
@@ -103,14 +30,3 @@ export interface EventData extends SearchHit {
     [agg: string]: any;
   };
 }
-
-export interface TermAggregation {
-  [agg: string]: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
-}
-
-export type EventFilterQuery = JsonObject;

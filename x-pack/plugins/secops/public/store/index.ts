@@ -6,4 +6,6 @@
 
 export * from './actions';
 export * from './reducer';
+export * from './selectors';
+
 export { createStore } from './store';
