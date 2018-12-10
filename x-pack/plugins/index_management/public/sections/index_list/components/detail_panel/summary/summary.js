@@ -107,7 +107,7 @@ export class Summary extends React.PureComponent {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="i18n.translate('xpack.idxMgmt.summary.summaryTitle"
+              id="xpack.idxMgmt.summary.summaryTitle"
               defaultMessage="General"
             />
           </h3>
