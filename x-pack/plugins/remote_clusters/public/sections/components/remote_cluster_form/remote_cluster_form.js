@@ -99,7 +99,7 @@ export class RemoteClusterFormUi extends Component {
       errors.seeds = (
         <FormattedMessage
           id="xpack.remoteClusters.form.errors.seedMissing"
-          defaultMessage="At least one seed is required."
+          defaultMessage="At least one seed node is required."
         />
       );
     }
@@ -118,7 +118,7 @@ export class RemoteClusterFormUi extends Component {
     this.setState({
       fields: newFields,
       fieldsErrors: this.getFieldsErrors(newFields),
-      areErrorsVisible: false,
+      // areErrorsVisible: false,
     });
   };
 
@@ -140,9 +140,8 @@ export class RemoteClusterFormUi extends Component {
 
   save = () => {
     const { save } = this.props;
-    const { fieldsErrors } = this.state;
 
-    if (Object.keys(fieldsErrors).length > 0) {
+    if (this.hasErrors()) {
       this.setState({
         areErrorsVisible: true,
       });
@@ -150,7 +149,6 @@ export class RemoteClusterFormUi extends Component {
     }
 
     const cluster = this.getAllFields();
-
     save(cluster);
   };
 
@@ -158,6 +156,10 @@ export class RemoteClusterFormUi extends Component {
     const { intl } = this.props;
 
     const errors = [];
+
+    if (!seedNode) {
+      return errors;
+    }
 
     const isInvalid = !isSeedNodeValid(seedNode);
 
@@ -182,6 +184,11 @@ export class RemoteClusterFormUi extends Component {
   };
 
   onCreateSeed = (newSeed) => {
+    // If the user just hit enter without typing anything, treat it as a no-op.
+    if (!newSeed) {
+      return;
+    }
+
     const localSeedErrors = this.getLocalSeedErrors(newSeed);
 
     if (localSeedErrors.length !== 0) {
@@ -248,6 +255,13 @@ export class RemoteClusterFormUi extends Component {
     });
   };
 
+  hasErrors = () => {
+    const { fieldsErrors, localSeedErrors } = this.state;
+    const errorValues = Object.values(fieldsErrors);
+    const hasErrors = errorValues.some(error => error !== undefined) || localSeedErrors.length;
+    return hasErrors;
+  };
+
   renderSeeds() {
     const {
       areErrorsVisible,
@@ -300,7 +314,7 @@ export class RemoteClusterFormUi extends Component {
           label={(
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
-              defaultMessage="IP addresses or hostnames"
+              defaultMessage="Seed nodes"
             />
           )}
           helpText={(
@@ -404,6 +418,7 @@ export class RemoteClusterFormUi extends Component {
 
   renderActions() {
     const { isSaving, cancel } = this.props;
+    const { areErrorsVisible } = this.state;
 
     if (isSaving) {
       return (
@@ -442,6 +457,8 @@ export class RemoteClusterFormUi extends Component {
       );
     }
 
+    const isSaveDisabled = areErrorsVisible && this.hasErrors();
+
     return (
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
@@ -450,6 +467,7 @@ export class RemoteClusterFormUi extends Component {
             iconType="check"
             onClick={this.save}
             fill
+            disabled={isSaveDisabled}
           >
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
@@ -516,9 +534,8 @@ export class RemoteClusterFormUi extends Component {
   }
 
   renderErrors = () => {
-    const { areErrorsVisible, fieldsErrors } = this.state;
-    const errorValues = Object.values(fieldsErrors);
-    const hasErrors = errorValues.some(error => error !== undefined);
+    const { areErrorsVisible } = this.state;
+    const hasErrors = this.hasErrors();
 
     if (!areErrorsVisible || !hasErrors) {
       return null;
