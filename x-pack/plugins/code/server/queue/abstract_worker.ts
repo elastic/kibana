@@ -78,7 +78,7 @@ export abstract class AbstractWorker implements Worker {
       intervalErrorMultiplier: 1,
     };
 
-    const queueWorker = this.queue.registerWorker(this.id, workerFn, workerOptions);
+    const queueWorker = this.queue.registerWorker(this.id, workerFn as any, workerOptions);
 
     queueWorker.on(esqueueEvents.EVENT_WORKER_COMPLETE, async (res: any) => {
       const result: WorkerResult = res.output.content;

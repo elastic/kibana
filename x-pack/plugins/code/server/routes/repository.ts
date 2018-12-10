@@ -10,7 +10,7 @@ import hapi from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryConfig } from '../../model';
-import { RepositoryIndexInitializerFactory } from '../indexer';
+import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
 import { RepositoryObjectClient } from '../search';
@@ -29,7 +29,7 @@ export function repositoryRoute(
     path: '/api/code/repo',
     method: 'POST',
     async handler(req, h) {
-      const repoUrl: string = req.payload.url;
+      const repoUrl: string = (req.payload as any).url;
       const log = new Log(req.server);
 
       // Reject the request if the url is an invalid git url.
@@ -52,7 +52,11 @@ export function repositoryRoute(
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
           // Create the index for the repository
-          await repoIndexInitializerFactory.create(repo.uri, '').init();
+          const initializer = repoIndexInitializerFactory.create(
+            repo.uri,
+            ''
+          ) as RepositoryIndexInitializer;
+          await initializer.init();
 
           // Persist to elasticsearch
           await repoObjectClient.setRepository(repo.uri, repo);

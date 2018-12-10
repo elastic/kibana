@@ -113,6 +113,9 @@ export class DeleteWorker extends AbstractWorker {
   public async onJobCompleted(_: Job, res: WorkerResult) {
     this.log.info(`Delete job ${this.id} completed with result ${JSON.stringify(res)}`);
     // Don't update the delete progress anymore.
+    return new Promise<WorkerResult>((resolve, reject) => {
+      resolve();
+    });
   }
 
   public async updateProgress(uri: string, progress: number) {

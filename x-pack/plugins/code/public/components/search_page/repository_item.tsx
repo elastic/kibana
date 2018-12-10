@@ -20,7 +20,7 @@ export const Repos = styled.table`
   border-collapse: collapse;
 `;
 
-export const RepoItem = props => (
+export const RepoItem = (props: any) => (
   <tr>
     <Repo>
       <Link to={`/${props.uri}`}>{props.uri}</Link>
