@@ -21,3 +21,12 @@ export const object = {
     return Object.keys(obj).map(k => ({ ...obj[k], __id__: k }));
   },
 };
+
+export const array = {
+  toObject(array, idProp = 'id') {
+    return array.reduce((acc, item) => {
+      acc[item[idProp]] = item;
+      return acc;
+    }, {});
+  }
+};
