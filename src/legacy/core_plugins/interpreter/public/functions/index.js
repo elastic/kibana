@@ -17,34 +17,24 @@
  * under the License.
  */
 
-import { boolean } from './boolean';
-import { datatable } from './datatable';
-import { error } from './error';
-import { filter } from './filter';
-import { image } from './image';
-import { nullType } from './null';
-import { number } from './number';
-import { pointseries } from './pointseries';
-import { render } from './render';
-import { shape } from './shape';
-import { string } from './string';
-import { style } from './style';
-import { kibanaTable } from './kibana_table';
+import { esaggs } from './esaggs';
+import { kibana } from './kibana';
 import { kibanaContext } from './kibana_context';
+import { vega } from './vega';
+import { timelionVis } from './timelion_vis';
+import { tsvb } from './tsvb';
+import { kibanaMarkdown } from './markdown';
+import { inputControlVis } from './input_control';
+import { metric } from './metric';
+import { kibanaPie } from './pie';
+import { regionmap } from './regionmap';
+import { tilemap } from './tilemap';
+import { kibanaTable } from './table';
+import { tagcloud } from './tagcloud';
+import { vislib } from './vislib';
+import { visualization } from './visualization';
 
-export const typeSpecs = [
-  boolean,
-  datatable,
-  error,
-  filter,
-  image,
-  number,
-  nullType,
-  pointseries,
-  render,
-  shape,
-  string,
-  style,
-  kibanaTable,
-  kibanaContext,
+export const functions = [
+  esaggs, kibana, kibanaContext, vega, timelionVis, tsvb, kibanaMarkdown, inputControlVis,
+  metric, kibanaPie, regionmap, tilemap, kibanaTable, tagcloud, vislib, visualization
 ];

@@ -17,26 +17,34 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
-import { functions } from './functions';
+import { i18n } from '@kbn/i18n';
 
-const basePath = chrome.getBasePath();
-
-const types = {
-  commonFunctions: functionsRegistry,
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-
-createSocket(basePath).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter();
+export const inputControlVis = () => ({
+  name: 'input_control_vis',
+  type: 'render',
+  context: {
+    types: [],
+  },
+  help: i18n.translate('common.core_plugins.interpreter.public.functions.input_control.help', {
+    defaultMessage: 'Input control visualization'
+  }),
+  args: {
+    visConfig: {
+      types: ['string'],
+      default: '"{}"',
+    }
+  },
+  fn(context, args) {
+    const params = JSON.parse(args.visConfig);
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: {
+        visConfig: {
+          type: 'input_controls_vis',
+          params: params
+        },
+      }
+    };
+  }
 });

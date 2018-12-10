@@ -392,9 +392,9 @@ export default function ({ getService, getPageObjects }) {
         ]);
       });
 
-      it('should allow nesting multiple splits', async () => {
+      it.skip('should allow nesting multiple splits', async () => {
         // This test can be removed as soon as we remove the nested split table
-        // feature (https://github.com/elastic/kibana/issues/24560).
+        // feature (https://github.com/elastic/kibana/issues/24560). (7.0)
         await PageObjects.visualize.clickData();
         await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Table');
