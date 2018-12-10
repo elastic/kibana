@@ -146,7 +146,7 @@ export class ContentHoverWidget extends ContentWidget {
   }
 
   private toMonacoRange(r: Range): EditorRange {
-    return new window.monaco.Range(
+    return new monaco.Range(
       r.start.line + 1,
       r.start.character + 1,
       r.end.line + 1,
@@ -177,7 +177,7 @@ export class ContentHoverWidget extends ContentWidget {
   }
 
   private highlightOccurrences(range: EditorRange) {
-    const pos = new window.monaco.Position(range.startLineNumber, range.startColumn);
+    const pos = new monaco.Position(range.startLineNumber, range.startColumn);
     return createCancelablePromise((token: any) =>
       getOccurrencesAtPosition(this.editor.getModel(), pos, token).then(
         (data: DocumentHighlight[]) => {

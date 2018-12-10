@@ -6,7 +6,7 @@
 
 import SocketIO from 'socket.io';
 
-import { InstallEvent } from '../common/install_events';
+import { InstallEvent } from '../common/installation';
 import { CloneProgress, RepositoryUri, SocketKind } from '../model';
 import { Server } from './kibana_types';
 import { Log } from './log';

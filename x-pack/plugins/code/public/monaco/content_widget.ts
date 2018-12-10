@@ -8,6 +8,7 @@ import { editor as Editor } from 'monaco-editor';
 // @ts-ignore
 import { DomScrollableElement } from 'monaco-editor/esm/vs/base/browser/ui/scrollbar/scrollableElement';
 import { Disposable } from './disposable';
+import { monaco } from './monaco';
 
 export function toggleClass(node: HTMLElement, clazzName: string, toggle: boolean) {
   node.classList.toggle(clazzName, toggle);
@@ -42,6 +43,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     this.editor.onDidChangeModel(() => this.hide());
     this.updateMaxHeight();
     this.showAtPosition = null;
+    // @ts-ignore
     this.editor.addContentWidget(this);
   }
 
@@ -55,6 +57,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
 
   public showAt(position: any, focus: boolean): void {
     this.showAtPosition = position;
+    // @ts-ignore
     this.editor.layoutContentWidget(this);
     this.isVisible = true;
     this.editor.render();
@@ -70,6 +73,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     }
 
     this.isVisible = false;
+    // @ts-ignore
     this.editor.layoutContentWidget(this);
     if (this.stoleFocus) {
       this.editor.focus();
@@ -78,7 +82,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
 
   // @ts-ignore
   public getPosition() {
-    const { ContentWidgetPositionPreference } = window.monaco.editor;
+    const { ContentWidgetPositionPreference } = monaco.editor;
     if (this.isVisible) {
       return {
         position: this.showAtPosition!,
@@ -89,6 +93,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
   }
 
   public dispose(): void {
+    // @ts-ignore
     this.editor.removeContentWidget(this);
     this.disposables.forEach(d => d.dispose());
   }
@@ -97,6 +102,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     this.domNode.textContent = '';
     this.domNode.appendChild(node);
     this.updateFont();
+    // @ts-ignore
     this.editor.layoutContentWidget(this);
     this.onContentsChange();
   }

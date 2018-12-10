@@ -59,7 +59,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
   server.route({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
-    async handler(req, h: hapi.ResponseToolkit) {
+    async handler(req: hapi.Request, h: hapi.ResponseToolkit) {
       const fileResolver = new GitOperations(options.repoPath);
       const { uri, path, ref } = req.params;
       try {
@@ -78,8 +78,9 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
               .code(204);
           }
         } else {
-          if (req.query.line) {
-            const [from, to] = req.query.line.split(',');
+          const line = (req.query as RequestQuery).line as string;
+          if (line) {
+            const [from, to] = line.split(',');
             let fromLine = parseInt(from, 10);
             let toLine = to === undefined ? fromLine + 1 : parseInt(to, 10);
             if (fromLine > toLine) {

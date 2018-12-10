@@ -1602,8 +1602,8 @@
 
 "@types/mkdirp@^0.5.2":
   version "0.5.2"
-  resolved "https://registry.yarnpkg.com/@types/mkdirp/-/mkdirp-0.5.2.tgz#503aacfe5cc2703d5484326b1b27efa67a339c1f"
-  integrity sha512-U5icWpv7YnZYGsN4/cmh3WD2onMY0aJIiTE6+51TwJCttdHvtCYmkBNOobHlXwrJRL0nkH9jH4kD+1FAdMN4Tg==
+  resolved "http://registry.npm.taobao.org/@types/mkdirp/download/@types/mkdirp-0.5.2.tgz#503aacfe5cc2703d5484326b1b27efa67a339c1f"
+  integrity sha1-UDqs/lzCcD1UhDJrGyfvpnoznB8=
   dependencies:
     "@types/node" "*"
 
@@ -1628,6 +1628,20 @@
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/ncp/-/ncp-2.0.1.tgz#749432511f6ad747d04e98837b18cca9045567fb"
   integrity sha512-TeiJ7uvv/92ugSqZ0v9l0eNXzutlki0aK+R1K5bfA5SYUil46ITlxLW4iNTCf55P4L5weCmaOdtxGeGWvudwPg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/nock@^9.3.0":
+  version "9.3.0"
+  resolved "http://registry.npm.taobao.org/@types/nock/download/@types/nock-9.3.0.tgz#9d34358fdcc08afd07144e0784ac9e951d412dd4"
+  integrity sha1-nTQ1j9zAiv0HFE4HhKyelR1BLdQ=
+  dependencies:
+    "@types/node" "*"
+
+"@types/node-fetch@^2.1.4":
+  version "2.1.4"
+  resolved "http://registry.npm.taobao.org/@types/node-fetch/download/@types/node-fetch-2.1.4.tgz#093d1beae11541aef25999d70aa09286fd025b1a"
+  integrity sha1-CT0b6uEVQa7yWZnXCqCShv0CWxo=
   dependencies:
     "@types/node" "*"
 
@@ -12273,6 +12287,11 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
 
+isnumber@~1.0.0:
+  version "1.0.0"
+  resolved "http://registry.npm.taobao.org/isnumber/download/isnumber-1.0.0.tgz#0e3f9759b581d99dd85086f0ec2a74909cfadd01"
+  integrity sha1-Dj+XWbWB2Z3YUIbw7Cp0kJz63QE=
+
 isobject@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-2.1.0.tgz#f065561096a3f1da2ef46272f815c840d87e0c89"
@@ -15463,7 +15482,7 @@ node-fetch@^1.0.1, node-fetch@^1.3.3:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
-node-fetch@^2.0.0, node-fetch@^2.1.2:
+node-fetch@^2.0.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
   integrity sha1-q4hOjn5X44qUR1POxwb3iNF2i7U=
@@ -20386,6 +20405,13 @@ static-module@^1.1.0:
     shallow-copy "~0.0.1"
     static-eval "~0.2.0"
     through2 "~0.4.1"
+
+stats-lite@^2.2.0:
+  version "2.2.0"
+  resolved "http://registry.npm.taobao.org/stats-lite/download/stats-lite-2.2.0.tgz#278a5571fa1d2e8b1691295dccc0235282393bbf"
+  integrity sha1-J4pVcfodLosWkSldzMAjUoI5O78=
+  dependencies:
+    isnumber "~1.0.0"
 
 "statuses@>= 1.3.1 < 2", statuses@~1.4.0:
   version "1.4.0"

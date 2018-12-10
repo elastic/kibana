@@ -27,10 +27,9 @@ const fakePackageFile: string = path.join(fakeTestDir, 'fakePackage.tar.gz');
 const fakeTarDir = path.join(fakeTestDir, 'fakePackage');
 const fakeFile = 'fake.file';
 const fakeContent = 'fake content';
-// @ts-ignore
 const options: ServerOptions = {
   langServerPath: fakeTestDir
-};
+} as ServerOptions;
 
 const manager = new InstallManager(options);
 

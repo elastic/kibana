@@ -114,7 +114,8 @@ import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution'
   },
 };*/
 
-import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import * as eui_them_k6 from '@elastic/eui/dist/eui_theme_k6_light.json';
+const euiVars = eui_them_k6 as any;
 function rgb2hex(rgb: string): string {
   const regex = /rgb\(\s*(\d*),\s*(\d*),\s*(\d*)\)/g;
   const m = regex.exec(rgb);

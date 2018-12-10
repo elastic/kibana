@@ -9,6 +9,7 @@ import IEditorContribution = Editor.IEditorContribution;
 import ICodeEditor = Editor.ICodeEditor;
 import IEditorMouseEvent = Editor.IEditorMouseEvent;
 import { EditorActions } from '../../components/editor/editor';
+import { monaco } from '../monaco';
 import { ContentHoverWidget } from './content_hover_widget';
 
 export class HoverController implements IEditorContribution {
@@ -41,7 +42,7 @@ export class HoverController implements IEditorContribution {
 
   private onEditorMouseMove(mouseEvent: IEditorMouseEvent) {
     const targetType = mouseEvent.target.type;
-    const { MouseTargetType } = window.monaco.editor;
+    const { MouseTargetType } = monaco.editor;
 
     if (
       targetType === MouseTargetType.CONTENT_WIDGET &&
@@ -58,7 +59,7 @@ export class HoverController implements IEditorContribution {
   }
 
   private onKeyDown(e: IKeyboardEvent): void {
-    if (e.keyCode === window.monaco.KeyCode.Escape) {
+    if (e.keyCode === monaco.KeyCode.Escape) {
       // Do not hide hover when Ctrl/Meta is pressed
       this.contentWidget.hide();
     }

@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import hapi from 'hapi';
+// @ts-ignore
 import { entries, groupBy } from 'lodash';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
@@ -102,7 +103,7 @@ export function lspRoute(
           }));
           const ranges = expandRanges(lines, 3);
           const mergedRanges = mergeRanges(ranges);
-          const blob = await gitOperations.fileContent(repoUri, file, revision);
+          const blob = await gitOperations.fileContent(repoUri, file!, revision);
           const source = blob
             .content()
             .toString('utf8')

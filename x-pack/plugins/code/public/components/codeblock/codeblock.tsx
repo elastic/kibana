@@ -25,7 +25,7 @@ export class CodeBlock extends React.PureComponent<Props> {
   private el: HTMLDivElement | null = null;
   private ed?: editor.IStandaloneCodeEditor;
   private resizeChecker?: ResizeChecker;
-  private currentHighlightDecorations: string[];
+  private currentHighlightDecorations: string[] = [];
 
   public componentDidMount(): void {
     if (this.el) {
