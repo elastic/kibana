@@ -21,6 +21,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
   public async getAll(user: FrameworkUser, ESQuery?: any) {
     const params = {
+      ignore: [404],
       _source: true,
       size: 10000,
       index: INDEX_NAMES.BEATS,
@@ -112,6 +113,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     const ids = tagIds.map(tag => `tag:${tag}`);
 
     const params = {
+      ignore: [404],
       _source: true,
       body: {
         ids,
