@@ -83,6 +83,8 @@ export class TaskStore {
     this.index = opts.index;
     this.maxAttempts = opts.maxAttempts;
     this.supportedTypes = opts.supportedTypes;
+
+    this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
   }
 
   public addSupportedTypes(types: string[]) {
@@ -150,7 +152,10 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
-    await this.init();
+    if (!this.wasInitialized) {
+      await this.init();
+    }
+
     if (!this.supportedTypes.includes(taskInstance.taskType)) {
       throw new Error(
         `Unsupported task type "${
