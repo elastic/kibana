@@ -7,7 +7,7 @@
 import { EsClient } from '@code/esqueue';
 
 import { Indexer, IndexProgress, ProgressReporter } from '.';
-import { IndexRequest, IndexStats, RepositoryUri } from '../../model';
+import { IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
 import { Log } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { IndexCreationRequest } from './index_creation_request';
@@ -37,7 +37,7 @@ export abstract class AbstractIndexer implements Indexer {
     const res = await this.prepareIndex();
     if (!res) {
       this.log.error(`Prepare index for ${this.repoUri} error. Skip indexing.`);
-      return;
+      return new Map<IndexStatsKey, number>();
     }
 
     // Clean up the index if necessary

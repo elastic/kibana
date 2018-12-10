@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from 'hapi';
 import SocketIO, { Socket } from 'socket.io';
 import ClientIO from 'socket.io-client';
 
 import { SocketKind } from '../../model';
-import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { ServerOptions } from '../server_options';
 import { BASE_PLACEHOLDER, mainNodeBaseUrl } from './redirect';

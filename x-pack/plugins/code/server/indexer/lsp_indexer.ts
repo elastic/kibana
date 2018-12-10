@@ -39,9 +39,6 @@ import {
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
-  // Currently without the multi revision support, we use this placeholder revision string
-  // to construct any ES document id.
-  private PLACEHOLDER_REVISION: string = 'head';
   private batchIndexHelper: BatchIndexHelper;
 
   constructor(

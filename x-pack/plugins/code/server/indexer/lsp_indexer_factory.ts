@@ -6,11 +6,11 @@
 
 import { EsClient } from '@code/esqueue';
 
+import { Indexer, IndexerFactory, LspIndexer } from '.';
 import { RepositoryUri } from '../../model';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
-import { IndexerFactory, LspIndexer } from './';
 
 export class LspIndexerFactory implements IndexerFactory {
   constructor(
@@ -20,7 +20,7 @@ export class LspIndexerFactory implements IndexerFactory {
     protected readonly log: Log
   ) {}
 
-  public create(repoUri: RepositoryUri, revision: string) {
+  public create(repoUri: RepositoryUri, revision: string): Indexer {
     return new LspIndexer(repoUri, revision, this.lspService, this.options, this.client, this.log);
   }
 }
