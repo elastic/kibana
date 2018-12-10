@@ -64,6 +64,58 @@ class BeatDetailsPageComponent extends React.PureComponent<
     });
   };
 
+<<<<<<< HEAD
+=======
+  public renderActionSection(beat?: CMPopulatedBeat) {
+    return beat ? (
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionTypeLabel"
+              defaultMessage="Type: {beatType}."
+              values={{ beatType: <strong>{beat.type}</strong> }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionVersionLabel"
+              defaultMessage="Version: {beatVersion}."
+              values={{ beatVersion: <strong>{beat.version}</strong> }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {beat.full_tags && beat.full_tags.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
+                defaultMessage="Last Config Update: {lastUpdateTime}."
+                values={{
+                  lastUpdateTime: (
+                    <strong>
+                      {moment(
+                        first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
+                      ).fromNow()}
+                    </strong>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ) : (
+      <FormattedMessage
+        id="xpack.beatsManagement.beat.beatNotFoundMessage"
+        defaultMessage="Beat not found"
+      />
+    );
+  }
+
+>>>>>>> 45a67701f2... Upgrade to NodeJS 10 (#25157)
   public render() {
     const { intl } = this.props;
     const { beat } = this.state;
