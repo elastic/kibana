@@ -215,6 +215,7 @@ export class TaskStore {
       query: {
         bool: {
           must: [
+            { term: { 'task.status': 'idle' } },
             { terms: { 'task.taskType': this.supportedTypes } },
             { range: { 'task.attempts': { lte: this.maxAttempts } } },
             { range: { 'task.runAt': { lte: 'now' } } },
