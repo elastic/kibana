@@ -203,9 +203,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('extension.raw');
         await PageObjects.visualize.setSize(2);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         await PageObjects.visualize.toggleOtherBucket();
         await PageObjects.visualize.toggleMissingBucket();
         await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should show correct data', async () => {
