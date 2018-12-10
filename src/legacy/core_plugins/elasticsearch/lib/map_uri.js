@@ -38,7 +38,7 @@ export default function mapUri(cluster, proxyPrefix) {
       query: esUrlQuery
     } = parseUrl(cluster.getUrl(), true);
 
-    // copy most url components directly from the elasticsearch.url
+    // copy most url components directly from elasticsearch.hosts
     const mappedUrlComponents = {
       protocol: esUrlProtocol,
       slashes: esUrlHasSlashes,
