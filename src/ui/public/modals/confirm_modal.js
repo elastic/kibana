@@ -30,6 +30,8 @@ import {
   EUI_MODAL_CANCEL_BUTTON as CANCEL_BUTTON,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 export const ConfirmationButtonTypes = {
   CONFIRM: CONFIRM_BUTTON,
   CANCEL: CANCEL_BUTTON
@@ -55,12 +57,18 @@ module.factory('confirmModal', function ($rootScope, $compile) {
   return function confirmModal(message, customOptions) {
     const defaultOptions = {
       onCancel: noop,
-      cancelButtonText: 'Cancel',
+      cancelButtonText: i18n.translate('common.ui.modals.cancelButtonLabel', {
+        defaultMessage: 'Cancel'
+      }),
       defaultFocusedButton: ConfirmationButtonTypes.CONFIRM
     };
 
     if (!customOptions.confirmButtonText || !customOptions.onConfirm) {
-      throw new Error('Please specify confirmation button text and onConfirm action');
+      throw new Error(
+        i18n.translate('common.ui.modals.specifyConfirmationParametersErrorMessage', {
+          defaultMessage: 'Please specify confirmation button text and onConfirm action'
+        }),
+      );
     }
 
     const options = Object.assign(defaultOptions, customOptions);
