@@ -16,6 +16,8 @@ import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 
 import { SourceErrorPage, SourceLoadingPage, WithSource } from '../../containers/with_source';
 
+import { ServicesPageContent } from './page_content';
+
 interface ServicesPageProps {
   intl: InjectedIntl;
 }
@@ -41,7 +43,7 @@ export const ServicesPage = injectI18n(
             }) =>
               metricIndicesExist ? (
                 <>
-                  <div>Hello Services</div>
+                  <ServicesPageContent />
                 </>
               ) : isLoading ? (
                 <SourceLoadingPage />

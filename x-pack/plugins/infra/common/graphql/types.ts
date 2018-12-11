@@ -899,3 +899,32 @@ export namespace InfraTimeKeyFields {
     tiebreaker: number;
   };
 }
+
+export namespace ServiceMetadataQuery {
+  export type Variables = {
+    sourceId: string;
+    start: number;
+    end: number;
+    filterQuery?: String | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    serviceMetadataBetween: (ServiceMetadataBetween | null)[];
+  };
+
+  export type ServiceMetadataBetween = {
+    __typename?: 'IHaveNoIdea';
+    name: string;
+    hosts: boolean;
+    containers: boolean;
+    pods: boolean;
+    logs: boolean;
+  };
+}
