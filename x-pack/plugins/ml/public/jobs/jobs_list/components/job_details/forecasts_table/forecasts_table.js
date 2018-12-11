@@ -191,6 +191,7 @@ class ForecastsTableUI extends Component {
         }),
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
@@ -201,6 +202,7 @@ class ForecastsTableUI extends Component {
         }),
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
@@ -211,6 +213,7 @@ class ForecastsTableUI extends Component {
         }),
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
@@ -250,6 +253,7 @@ class ForecastsTableUI extends Component {
           defaultMessage: 'Expires'
         }),
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
@@ -267,7 +271,8 @@ class ForecastsTableUI extends Component {
               })}
             </div>
           );
-        }
+        },
+        textOnly: true,
       },
       {
         name: intl.formatMessage({
