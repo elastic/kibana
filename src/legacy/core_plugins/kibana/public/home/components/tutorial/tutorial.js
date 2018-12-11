@@ -125,7 +125,12 @@ class TutorialUi extends React.Component {
       case INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD:
         return this.state.tutorial.onPremElasticCloud;
       default:
-        throw new Error(`Unhandled instruction type ${this.state.visibleInstructions}`);
+        throw new Error(this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.unhandledInstructionTypeErrorDescription',
+          defaultMessage: 'Unhandled instruction type {visibleInstructions}'
+        }, {
+          visibleInstructions: this.state.visibleInstructions
+        }));
     }
   };
 

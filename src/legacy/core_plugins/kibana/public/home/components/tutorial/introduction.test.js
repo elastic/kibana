@@ -18,12 +18,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Introduction } from './introduction';
 
 test('render', () => {
-  const component = shallow(<Introduction
+  const component = shallowWithIntl(<Introduction.WrappedComponent
     description="this is a great tutorial about..."
     title="Great tutorial"
   />);
@@ -32,7 +32,7 @@ test('render', () => {
 
 describe('props', () => {
   test('iconType', () => {
-    const component = shallow(<Introduction
+    const component = shallowWithIntl(<Introduction.WrappedComponent
       description="this is a great tutorial about..."
       title="Great tutorial"
       iconType="logoElastic"
@@ -41,7 +41,7 @@ describe('props', () => {
   });
 
   test('exportedFieldsUrl', () => {
-    const component = shallow(<Introduction
+    const component = shallowWithIntl(<Introduction.WrappedComponent
       description="this is a great tutorial about..."
       title="Great tutorial"
       exportedFieldsUrl="exported_fields_url"
@@ -50,7 +50,7 @@ describe('props', () => {
   });
 
   test('previewUrl', () => {
-    const component = shallow(<Introduction
+    const component = shallowWithIntl(<Introduction.WrappedComponent
       description="this is a great tutorial about..."
       title="Great tutorial"
       previewUrl="preview_image_url"
@@ -59,7 +59,7 @@ describe('props', () => {
   });
 
   test('isBeta', () => {
-    const component = shallow(<Introduction
+    const component = shallowWithIntl(<Introduction.WrappedComponent
       description="this is a great tutorial about..."
       title="Great tutorial"
       isBeta={true}
