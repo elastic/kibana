@@ -14,6 +14,8 @@ import {
   Request,
 } from 'src/core_plugins/elasticsearch';
 
+import { LAST_MAJOR_VERSION } from '../../common/version';
+
 import fakeAssistance from './__fixtures__/fake_assistance.json';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
@@ -90,10 +92,25 @@ const getCombinedIndexInfos = (
 
   Object.keys(deprecations.index_settings).forEach(indexName => {
     deprecations.index_settings[indexName]
-      .map(d => ({ ...d, index: indexName }))
+      .map(d => ({ ...d, index: indexName } as EnrichedDeprecationInfo))
+      .map(d => {
+        // Add reindexing action if it's the old index deprecation warning.
+        if (d.message === `Index created before ${LAST_MAJOR_VERSION}.0`) {
+          d.actions = [
+            {
+              label: 'Reindex in Console',
+              url: consoleTemplateUrl(basePath, indexName),
+            },
+          ];
+        }
+
+        return d;
+      })
       .forEach(d => combinedIndexInfo.push(d));
   });
 
+  // TODO: remove the entire usage of this API pending response to
+  // https://github.com/elastic/elasticsearch/issues/36024#issuecomment-446394345
   for (const indexName of Object.keys(migrationAssistance.indices)) {
     const actionRequired = migrationAssistance.indices[indexName].action_required;
 

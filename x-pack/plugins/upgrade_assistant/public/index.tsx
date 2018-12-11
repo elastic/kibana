@@ -11,8 +11,8 @@ import { management } from 'ui/management';
 import { uiModules } from 'ui/modules';
 // @ts-ignore
 import routes from 'ui/routes';
+import { NEXT_MAJOR_VERSION } from '../common/version';
 import { RootComponent } from './app';
-import { NEXT_MAJOR_VERSION } from './version';
 
 const BASE_PATH = `/management/elasticsearch/upgrade_assistant`;
 

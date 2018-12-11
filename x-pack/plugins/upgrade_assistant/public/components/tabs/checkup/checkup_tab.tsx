@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { NEXT_MAJOR_VERSION } from '../../../version';
+import { NEXT_MAJOR_VERSION } from '../../../../common/version';
 import {
   GroupByOption,
   LevelFilterOption,

@@ -11,4 +11,8 @@ const currentVersionNum = pkg.version as string;
 const matches = currentVersionNum.match(/^([1-9]+)\.([0-9]+)\.([0-9]+)$/)!;
 
 export const CURRENT_MAJOR_VERSION = matches[1];
-export const NEXT_MAJOR_VERSION = (parseInt(CURRENT_MAJOR_VERSION, 10) + 1).toString();
+
+const CURRENT_MAJOR_INT = parseInt(CURRENT_MAJOR_VERSION, 10);
+
+export const LAST_MAJOR_VERSION = (CURRENT_MAJOR_INT - 1).toString();
+export const NEXT_MAJOR_VERSION = (CURRENT_MAJOR_INT + 1).toString();

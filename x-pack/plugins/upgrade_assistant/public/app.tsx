@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, injectI18nProvider } from '@kbn/i18n/react';
 
+import { NEXT_MAJOR_VERSION } from '../common/version';
 import { UpgradeAssistantTabs } from './components/tabs';
-import { NEXT_MAJOR_VERSION } from './version';
 
 export const RootComponentUI: React.StatelessComponent = () => (
   <EuiPage restrictWidth data-test-subj="upgradeAssistantRoot">

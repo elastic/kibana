@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-import { NEXT_MAJOR_VERSION } from '../../../version';
+import { NEXT_MAJOR_VERSION } from '../../../../common/version';
 import { UpgradeAssistantTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../version';
+import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../../common/version';
 import { LoadingState, UpgradeAssistantTabProps } from '../../types';
 import { Steps } from './steps';
 
