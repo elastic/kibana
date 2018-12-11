@@ -234,3 +234,46 @@ export function renderAnnotations(
   annotations.classed('ml-annotation-hidden', !showAnnotations);
   annotations.exit().remove();
 }
+
+export function highlightFocusChartAnnotation(annotation: Annotation) {
+  const annotations = d3.selectAll('.ml-annotation');
+
+  annotations.each(function(d) {
+    // @ts-ignore
+    const element = d3.select(this);
+
+    if (d._id === annotation._id) {
+      element
+        .selectAll('.ml-annotation-text-rect')
+        .classed('ml-annotation-text-rect-highlight', true);
+      element.selectAll('.ml-annotation-text').classed('ml-annotation-text-highlight', true);
+      element.selectAll('.ml-annotation-rect').classed('ml-annotation-rect-highlight', true);
+    } else {
+      element.selectAll('.ml-annotation-text-rect').classed('ml-annotation-text-rect-blur', true);
+      element.selectAll('.ml-annotation-text').classed('ml-annotation-text-blur', true);
+      element.selectAll('.ml-annotation-rect').classed('ml-annotation-rect-blur', true);
+    }
+  });
+}
+
+export function unhighlightFocusChartAnnotation() {
+  const annotations = d3.selectAll('.ml-annotation');
+
+  annotations.each(function() {
+    // @ts-ignore
+    const element = d3.select(this);
+
+    element
+      .selectAll('.ml-annotation-text-rect')
+      .classed('ml-annotation-text-rect-highlight', false)
+      .classed('ml-annotation-text-rect-blur', false);
+    element
+      .selectAll('.ml-annotation-rect')
+      .classed('ml-annotation-rect-highlight', false)
+      .classed('ml-annotation-rect-blur', false);
+    element
+      .selectAll('.ml-annotation-text')
+      .classed('ml-annotation-text-highlight', false)
+      .classed('ml-annotation-text-blur', false);
+  });
+}

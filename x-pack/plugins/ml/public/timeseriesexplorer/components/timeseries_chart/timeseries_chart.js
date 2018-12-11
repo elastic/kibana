@@ -44,7 +44,14 @@ import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
 import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
-import { getAnnotationBrush, getAnnotationLevels, renderAnnotations } from './timeseries_chart_annotations';
+import {
+  getAnnotationBrush,
+  getAnnotationLevels,
+  renderAnnotations,
+
+  highlightFocusChartAnnotation,
+  unhighlightFocusChartAnnotation
+} from './timeseries_chart_annotations';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
@@ -247,22 +254,22 @@ export class TimeseriesChart extends React.Component {
     // Listeners for mouseenter/leave events for rows in the table
     // to highlight the corresponding anomaly mark in the focus chart.
     const highlightFocusChartAnomaly = this.highlightFocusChartAnomaly.bind(this);
-    const highlightFocusChartAnnotation = this.highlightFocusChartAnnotation.bind(this);
+    const boundHighlightFocusChartAnnotation = highlightFocusChartAnnotation.bind(this);
     this.tableRecordMousenterListener = function (record, type = 'anomaly') {
       if (type === 'anomaly') {
         highlightFocusChartAnomaly(record);
       } else if (type === 'annotation') {
-        highlightFocusChartAnnotation(record);
+        boundHighlightFocusChartAnnotation(record);
       }
     };
 
     const unhighlightFocusChartAnomaly = this.unhighlightFocusChartAnomaly.bind(this);
-    const unhighlightFocusChartAnnotation = this.unhighlightFocusChartAnnotation.bind(this);
+    const boundUnhighlightFocusChartAnnotation = unhighlightFocusChartAnnotation.bind(this);
     this.tableRecordMouseleaveListener = function (record, type = 'anomaly') {
       if (type === 'anomaly') {
         unhighlightFocusChartAnomaly(record);
       } else {
-        unhighlightFocusChartAnnotation(record);
+        boundUnhighlightFocusChartAnnotation(record);
       }
     };
 
@@ -637,18 +644,8 @@ export class TimeseriesChart extends React.Component {
       if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
-        console.warn('focusZoomPanelHeight', focusZoomPanelHeight);
-        console.warn('maxLevel', maxLevel);
-        // const maxRange = focusZoomPanelHeight + 14 + (maxLevel + 1) * 28;
-        const desiredDiff = (14 + ((maxLevel + 2) * 28));
-        console.warn('desiredDiff', desiredDiff);
-        console.warn('ratio', desiredDiff / focusChartHeight);
-        // this.focusYScale.range([defaultRange[0], maxRange]);
-        // yMax = this.focusYScale(focusZoomPanelHeight);
-        // focusChartHeight
-        console.warn('range', this.focusYScale.range());
+        // TODO needs revisting to be a more robust normalization
         yMax = yMax * (1 + (maxLevel + 1) / 5);
-        console.warn('yMax', yMax);
       }
       this.focusYScale.domain([yMin, yMax]);
 
@@ -1347,57 +1344,6 @@ export class TimeseriesChart extends React.Component {
     mlChartTooltipService.show(contents, circle, {
       x: LINE_CHART_ANOMALY_RADIUS * 2,
       y: 0
-    });
-  }
-
-  highlightFocusChartAnnotation(annotation) {
-    const annotations = d3.selectAll('.ml-annotation');
-
-    annotations.each(function (d) {
-      const element = d3.select(this);
-
-      if (d._id === annotation._id) {
-        element
-          .selectAll('.ml-annotation-text-rect')
-          .classed('ml-annotation-text-rect-highlight', true);
-        element
-          .selectAll('.ml-annotation-text')
-          .classed('ml-annotation-text-highlight', true);
-        element
-          .selectAll('.ml-annotation-rect')
-          .classed('ml-annotation-rect-highlight', true);
-      } else {
-        element
-          .selectAll('.ml-annotation-text-rect')
-          .classed('ml-annotation-text-rect-blur', true);
-        element
-          .selectAll('.ml-annotation-text')
-          .classed('ml-annotation-text-blur', true);
-        element
-          .selectAll('.ml-annotation-rect')
-          .classed('ml-annotation-rect-blur', true);
-      }
-    });
-  }
-
-  unhighlightFocusChartAnnotation() {
-    const annotations = d3.selectAll('.ml-annotation');
-
-    annotations.each(function () {
-      const element = d3.select(this);
-
-      element
-        .selectAll('.ml-annotation-text-rect')
-        .classed('ml-annotation-text-rect-highlight', false)
-        .classed('ml-annotation-text-rect-blur', false);
-      element
-        .selectAll('.ml-annotation-rect')
-        .classed('ml-annotation-rect-highlight', false)
-        .classed('ml-annotation-rect-blur', false);
-      element
-        .selectAll('.ml-annotation-text')
-        .classed('ml-annotation-text-highlight', false)
-        .classed('ml-annotation-text-blur', false);
     });
   }
 
