@@ -17,6 +17,7 @@ export interface UptimeAppProps {
   isUsingK7Design: boolean;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
   kibanaBreadcrumbs: Breadcrumb[];
+  routerBasename: string;
 }
 
 export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<any>;

@@ -49,9 +49,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   public render() {
-    const { isUsingK7Design } = this.props;
+    const { isUsingK7Design, routerBasename } = this.props;
     return (
-      <Router basename="/app/uptime_monitoring#/">
+      <Router basename={routerBasename}>
         <EuiPage className="app-wrapper-panel">
           <EuiHeader>
             <EuiHeaderSection>

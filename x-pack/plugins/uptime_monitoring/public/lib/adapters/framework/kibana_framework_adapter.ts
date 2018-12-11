@@ -7,6 +7,7 @@
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome, { Breadcrumb } from 'ui/chrome';
+import { PLUGIN } from '../../../../common/constants';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
@@ -34,11 +35,16 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               kibanaBreadcrumbs = breadcrumbs;
             });
           }
+          const basePath = chrome.getBasePath();
+          const routerBasename = basePath.endsWith('/')
+            ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
+            : basePath + PLUGIN.ROUTER_BASE_NAME;
           ReactDOM.render(
             renderRootComponent({
               isUsingK7Design: $scope.k7design,
               updateBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
+              routerBasename,
             }),
             elem
           );

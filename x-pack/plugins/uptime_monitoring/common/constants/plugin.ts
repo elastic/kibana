@@ -6,4 +6,5 @@
 
 export const PLUGIN = {
   ID: 'uptime_monitoring',
+  ROUTER_BASE_NAME: '/app/uptime_monitoring#/',
 };
