@@ -21,6 +21,14 @@ import _ from 'lodash';
 import AggConfigResult from '../../vis/agg_config_result';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
+const getSchema = column => {
+  return _.get(column, 'aggConfig.schema.name') || _.get(column, 'aggConfig.schema');
+};
+
+const getType = column => {
+  return _.get(column, 'aggConfig.type.type') || _.get(column, 'aggConfig.type');
+};
+
 const LegacyResponseHandlerProvider = function () {
 
   return {
@@ -30,12 +38,12 @@ const LegacyResponseHandlerProvider = function () {
         const converted = { tables: [] };
 
         // check if there are buckets after the first metric
-        const metricsAtAllLevels = table.columns.findIndex(column => _.get(column, 'aggConfig.type.type') === 'metrics') <
-          _.findLastIndex(table.columns, column => _.get(column, 'aggConfig.type.type') === 'buckets');
+        const metricsAtAllLevels = table.columns.findIndex(column => getType(column) === 'metrics') <
+          _.findLastIndex(table.columns, column => getType(column) === 'buckets');
 
-        const splitColumn = table.columns.find(column => _.get(column, 'aggConfig.schema.name') === 'split');
-        const numberOfMetrics = table.columns.filter(column => _.get(column, 'aggConfig.type.type') === 'metrics').length;
-        const numberOfBuckets = table.columns.filter(column => _.get(column, 'aggConfig.type.type') === 'buckets').length;
+        const splitColumn = table.columns.find(column => getSchema(column) === 'split');
+        const numberOfMetrics = table.columns.filter(column => getType(column) === 'metrics').length;
+        const numberOfBuckets = table.columns.filter(column => getType(column) === 'buckets').length;
         const metricsPerBucket = numberOfMetrics / numberOfBuckets;
 
         if (splitColumn) {
@@ -84,7 +92,7 @@ const LegacyResponseHandlerProvider = function () {
                 column: table.columns.findIndex(c => c.id === column.id),
                 row: rowIndex,
               };
-              if (column.aggConfig.type.type === 'buckets') {
+              if (getType(column) === 'buckets') {
                 previousSplitAgg = aggConfigResult;
               }
               return aggConfigResult;
@@ -106,7 +114,7 @@ const LegacyResponseHandlerProvider = function () {
                   column: columnIndex,
                   row: rowIndex,
                 };
-                if (column.aggConfig.type.type === 'buckets') {
+                if (getType(column) === 'buckets') {
                   previousSplitAgg = aggConfigResult;
                 }
                 return aggConfigResult;
