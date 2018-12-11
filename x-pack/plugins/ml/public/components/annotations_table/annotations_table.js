@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+/*
+ * Table for displaying annotations. This is mostly a copy of the forecasts table.
+ * This version supports both fetching the annotations by itself (used in the jobs list) and
+ * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
+ */
 
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
