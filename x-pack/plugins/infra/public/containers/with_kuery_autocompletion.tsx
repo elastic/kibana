@@ -84,17 +84,16 @@ export class WithKueryAutocompletion extends React.Component<
       selectionEnd: cursorPosition,
     });
 
-    this.setState(
-      state =>
-        state.currentRequest &&
-        state.currentRequest.expression !== expression &&
-        state.currentRequest.cursorPosition !== cursorPosition
-          ? state // ignore this result, since a newer request is in flight
-          : {
-              ...state,
-              currentRequest: null,
-              suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
-            }
+    this.setState(state =>
+      state.currentRequest &&
+      state.currentRequest.expression !== expression &&
+      state.currentRequest.cursorPosition !== cursorPosition
+        ? state // ignore this result, since a newer request is in flight
+        : {
+            ...state,
+            currentRequest: null,
+            suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
+          }
     );
   };
 }

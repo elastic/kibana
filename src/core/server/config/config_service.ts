@@ -79,8 +79,8 @@ export class ConfigService {
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     return this.getDistinctConfig(path).pipe(
-      map(
-        config => (config === undefined ? undefined : this.createConfig(path, config, ConfigClass))
+      map(config =>
+        config === undefined ? undefined : this.createConfig(path, config, ConfigClass)
       )
     );
   }
