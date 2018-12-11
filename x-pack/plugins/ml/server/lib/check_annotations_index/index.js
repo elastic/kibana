@@ -6,7 +6,11 @@
 
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 
-import { ML_ANNOTATIONS_INDEX_ALIAS, ML_ANNOTATIONS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import {
+  ML_ANNOTATIONS_INDEX_ALIAS_READ,
+  ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+  ML_ANNOTATIONS_INDEX_PATTERN
+} from '../../../common/constants/index_patterns';
 
 export async function checkAnnotationsIndex(server) {
   const callWithInternalUser = callWithInternalUserFactory(server);
@@ -24,24 +28,44 @@ export async function checkAnnotationsIndex(server) {
       throw new Error(`Creating index ${ML_ANNOTATIONS_INDEX_PATTERN} failed.`);
     }
 
-    const annotationsAliasExists = await callWithInternalUser('indices.existsAlias', {
-      name: ML_ANNOTATIONS_INDEX_ALIAS
+    const annotationsReadAliasExists = await callWithInternalUser('indices.existsAlias', {
+      name: ML_ANNOTATIONS_INDEX_ALIAS_READ
     });
 
-    if (annotationsAliasExists) {
-      server.log(['ML', 'info'], `Deleting alias ${ML_ANNOTATIONS_INDEX_ALIAS}`);
+    if (annotationsReadAliasExists) {
+      server.log(['ML', 'info'], `Deleting alias ${ML_ANNOTATIONS_INDEX_ALIAS_READ}`);
       await callWithInternalUser('indices.deleteAlias', {
         index: '_all',
-        name: ML_ANNOTATIONS_INDEX_ALIAS
+        name: ML_ANNOTATIONS_INDEX_ALIAS_READ
       });
     }
 
-    server.log(['ML', 'info'], `Pointing alias ${ML_ANNOTATIONS_INDEX_ALIAS} to ${ML_ANNOTATIONS_INDEX_PATTERN}`);
-    const aliasCreationParams = { name: ML_ANNOTATIONS_INDEX_ALIAS, index: ML_ANNOTATIONS_INDEX_PATTERN };
-    const annotationsAliasCreated = await callWithInternalUser('indices.putAlias', aliasCreationParams);
+    const annotationsWriteAliasExists = await callWithInternalUser('indices.existsAlias', {
+      name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE
+    });
 
-    if (!annotationsAliasCreated) {
-      throw new Error(`Creating alias ${ML_ANNOTATIONS_INDEX_ALIAS} failed.`);
+    if (annotationsWriteAliasExists) {
+      server.log(['ML', 'info'], `Deleting alias ${ML_ANNOTATIONS_INDEX_ALIAS_WRITE}`);
+      await callWithInternalUser('indices.deleteAlias', {
+        index: '_all',
+        name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE
+      });
+    }
+
+    server.log(['ML', 'info'], `Pointing alias ${ML_ANNOTATIONS_INDEX_ALIAS_READ} to ${ML_ANNOTATIONS_INDEX_PATTERN}`);
+    const readAliasCreationParams = { name: ML_ANNOTATIONS_INDEX_ALIAS_READ, index: ML_ANNOTATIONS_INDEX_PATTERN };
+    const annotationsReadAliasCreated = await callWithInternalUser('indices.putAlias', readAliasCreationParams);
+
+    if (!annotationsReadAliasCreated) {
+      throw new Error(`Creating alias ${ML_ANNOTATIONS_INDEX_ALIAS_READ} failed.`);
+    }
+
+    server.log(['ML', 'info'], `Pointing alias ${ML_ANNOTATIONS_INDEX_ALIAS_WRITE} to ${ML_ANNOTATIONS_INDEX_PATTERN}`);
+    const writeAliasCreationParams = { name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE, index: ML_ANNOTATIONS_INDEX_PATTERN };
+    const annotationsWriteAliasCreated = await callWithInternalUser('indices.putAlias', writeAliasCreationParams);
+
+    if (!annotationsWriteAliasCreated) {
+      throw new Error(`Creating alias ${ML_ANNOTATIONS_INDEX_ALIAS_WRITE} failed.`);
     }
   }
 }

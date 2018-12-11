@@ -7,7 +7,10 @@
 import Boom from 'boom';
 import _ from 'lodash';
 
-import { ML_ANNOTATIONS_INDEX_ALIAS } from '../../../common/constants/index_patterns';
+import {
+  ML_ANNOTATIONS_INDEX_ALIAS_READ,
+  ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+} from '../../../common/constants/index_patterns';
 
 import {
   Annotation,
@@ -73,7 +76,7 @@ export function annotationProvider(
     annotation.modified_username = '<user unknown>';
 
     const params: IndexParams = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS,
+      index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       type: 'annotation',
       body: annotation,
       refresh: 'wait_for',
@@ -176,7 +179,7 @@ export function annotationProvider(
     }
 
     const params: GetParams = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS,
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
       body: {
         query: {
@@ -224,7 +227,7 @@ export function annotationProvider(
 
   async function deleteAnnotation(id: string) {
     const param: DeleteParams = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS,
+      index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       type: 'annotation',
       id,
       refresh: 'wait_for',

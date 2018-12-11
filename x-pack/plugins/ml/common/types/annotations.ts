@@ -5,7 +5,7 @@
  */
 
 // The Annotation interface is based on annotation documents stored in the
-// `.ml-annotations-6` index, accessed via the `.ml-annotations` alias.
+// `.ml-annotations-6` index, accessed via the `.ml-annotations-[read|write]` aliases.
 
 // Annotation document mapping:
 // PUT .ml-annotations-6
@@ -53,7 +53,8 @@
 // POST /_aliases
 // {
 //     "actions" : [
-//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations" } }
+//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations-read" } },
+//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations-write" } }
 //     ]
 // }
 
