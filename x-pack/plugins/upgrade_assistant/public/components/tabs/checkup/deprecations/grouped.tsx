@@ -116,12 +116,45 @@ interface GroupedDeprecationsState {
 const PER_PAGE = 25;
 
 /**
+ * Collection of calculated fields based on props, extracted for reuse in
+ * `render` and `getDerivedStateFromProps`.
+ */
+const CalcFields = {
+  filteredDeprecations(props: GroupedDeprecationsProps) {
+    const { allDeprecations = [], currentFilter, search } = props;
+    return allDeprecations.filter(filterDeps(currentFilter, search));
+  },
+
+  groups(props: GroupedDeprecationsProps) {
+    const { currentGroupBy } = props;
+    return groupBy(CalcFields.filteredDeprecations(props), currentGroupBy);
+  },
+
+  numPages(props: GroupedDeprecationsProps) {
+    return Math.ceil(Object.keys(CalcFields.groups(props)).length / PER_PAGE);
+  },
+};
+
+/**
  * Displays groups of deprecation messages in an accordion.
  */
 export class GroupedDeprecations extends React.Component<
   GroupedDeprecationsProps,
   GroupedDeprecationsState
 > {
+  public static getDerivedStateFromProps(
+    nextProps: GroupedDeprecationsProps,
+    { currentPage }: GroupedDeprecationsState
+  ) {
+    // If filters change and the currentPage is now bigger than the num of pages we're going to show,
+    // reset the current page to 0.
+    if (currentPage >= CalcFields.numPages(nextProps)) {
+      return { currentPage: 0 };
+    } else {
+      return null;
+    }
+  }
+
   public state = {
     forceExpand: false,
     // `expandNumber` is used as workaround to force EuiAccordion to re-render by
@@ -131,11 +164,11 @@ export class GroupedDeprecations extends React.Component<
   };
 
   public render() {
-    const { currentGroupBy, allDeprecations = [], currentFilter, search } = this.props;
+    const { currentGroupBy, allDeprecations = [] } = this.props;
     const { forceExpand, expandNumber, currentPage } = this.state;
 
-    const deprecations = allDeprecations.filter(filterDeps(currentFilter, search));
-    const groups = groupBy(deprecations, currentGroupBy);
+    const filteredDeprecations = CalcFields.filteredDeprecations(this.props);
+    const groups = CalcFields.groups(this.props);
 
     return (
       <Fragment>
@@ -168,7 +201,10 @@ export class GroupedDeprecations extends React.Component<
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
-            <DeprecationCountSummary {...{ deprecations, allDeprecations }} />
+            <DeprecationCountSummary
+              allDeprecations={allDeprecations}
+              deprecations={filteredDeprecations}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -197,7 +233,7 @@ export class GroupedDeprecations extends React.Component<
               <EuiFlexGroup justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
                   <EuiPagination
-                    pageCount={Math.ceil(Object.keys(groups).length / PER_PAGE)}
+                    pageCount={CalcFields.numPages(this.props)}
                     activePage={currentPage}
                     onPageClick={this.setPage}
                   />

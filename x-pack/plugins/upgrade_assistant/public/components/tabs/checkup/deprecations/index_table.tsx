@@ -88,6 +88,7 @@ export class IndexDeprecationTableUI extends React.Component<
         sorting={sorting}
         pagination={pagination}
         onChange={this.onTableChange}
+        hasActions={false}
       />
     );
   }

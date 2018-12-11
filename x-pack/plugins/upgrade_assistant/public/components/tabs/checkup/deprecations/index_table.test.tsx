@@ -45,6 +45,7 @@ describe('IndexDeprecationTable', () => {
       },
     ]
   }
+  hasActions={false}
   items={
     Array [
       Object {
