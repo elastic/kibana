@@ -385,7 +385,7 @@ export class SAMLAuthenticationProvider {
       logoutArgs = [
         'shield.samlInvalidate',
         // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-        { body: { queryString: request.url.search.slice(1), acs: this._getACS() } }
+        { body: { queryString: request.url.search ? request.url.search.slice(1) : '', acs: this._getACS() } }
       ];
     } else {
       this._options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the user.');
