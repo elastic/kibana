@@ -131,6 +131,10 @@ export class ALayer {
     return layerDescriptor;
   }
 
+  destroy() {
+    this._source.destroy();
+  }
+
   isJoinable() {
     return false;
   }

@@ -125,25 +125,17 @@ export function map(state = INITIAL_STATE, action) {
       }
       return state;
     case ADD_LAYER:
-      // Remove temporary layers (if any)
-      const preAddLayerList = action.layer.temporary ? state.layerList.filter(
-        ({ temporary }) => !temporary) : state.layerList;
-      let postAddLayerList;
-      if (
-        action.position === -1 ||
-        action.position > state.layerList.length
-      ) {
-        postAddLayerList = [...preAddLayerList, action.layer];
-      } else {
-        state.layerList.splice(action.position, 0, action.layer);
-        postAddLayerList = state.layerList.slice();
-      }
-      return { ...state, layerList: postAddLayerList };
+      return {
+        ...state,
+        layerList: [
+          ...state.layerList,
+          action.layer
+        ]
+      };
     case REMOVE_LAYER:
-      const removeId = action.id || state.selectedLayerId;
       return {
         ...state, layerList: [...state.layerList.filter(
-          ({ id }) => id !== removeId)]
+          ({ id }) => id !== action.id)]
       };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:

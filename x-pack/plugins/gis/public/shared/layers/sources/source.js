@@ -20,6 +20,8 @@ export class ASource {
     this._descriptor = descriptor;
   }
 
+  destory() {}
+
   renderDetails() {
     return (<div>{`Here be details for source`}</div>);
   }

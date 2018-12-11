@@ -34,6 +34,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
   let isDarkTheme;
   let unsubscribe;
 
+  inspectorAdapters.requests.reset();
+
   getStore().then(store => {
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {

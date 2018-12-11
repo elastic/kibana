@@ -11,6 +11,7 @@ import { ASource } from './source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   fetchSearchSourceAndRecordWithInspector,
+  inspectorAdapters,
   indexPatternService,
   SearchSource,
 } from '../../../kibana_services';
@@ -77,6 +78,10 @@ export class ESTableSource extends ASource {
     }
 
     return false;
+  }
+
+  destroy() {
+    inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
   async getTable(searchFilters, leftSourceName, leftFieldName) {

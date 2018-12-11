@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import uuid from 'uuid/v4';
 
 import {
   EuiFormRow,
@@ -21,6 +22,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   indexPatternService,
   fetchSearchSourceAndRecordWithInspector,
+  inspectorAdapters,
   SearchSource,
   timeService,
 } from '../../../kibana_services';
@@ -68,6 +70,7 @@ export class ESGeohashGridSource extends VectorSource {
   static createDescriptor({ indexPatternId, geoField, requestType }) {
     return {
       type: ESGeohashGridSource.type,
+      id: uuid(),
       indexPatternId: indexPatternId,
       geoField: geoField,
       requestType: requestType
@@ -95,8 +98,11 @@ export class ESGeohashGridSource extends VectorSource {
     );
   }
 
+  destroy() {
+    inspectorAdapters.requests.resetRequest(this._descriptor.id);
+  }
 
-  async getGeoJsonWithMeta({ layerId, layerName }, searchFilters) {
+  async getGeoJsonWithMeta({ layerName }, searchFilters) {
 
     let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
     targetPrecision += 0;//should have refinement param, similar to heatmap style
@@ -104,8 +110,7 @@ export class ESGeohashGridSource extends VectorSource {
       precision: targetPrecision,
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
-      layerId: layerId,
-      layerName: layerName
+      layerName,
     });
 
     if (this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON) {
@@ -135,7 +140,7 @@ export class ESGeohashGridSource extends VectorSource {
   }
 
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerId, layerName }) {
+  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
 
     let indexPattern;
     try {
@@ -167,7 +172,7 @@ export class ESGeohashGridSource extends VectorSource {
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,
         requestName: layerName,
-        requestId: layerId,
+        requestId: this._descriptor.id,
         requestDesc: 'Elasticsearch geohash_grid aggregation request'
       });
     } catch(error) {

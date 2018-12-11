@@ -35,7 +35,6 @@ export class GeohashGridLayer extends ALayer {
     return [HeatmapStyle];
   }
 
-
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
@@ -125,7 +124,6 @@ export class GeohashGridLayer extends ALayer {
         precision,
         extent: buffer,
         timeFilters,
-        layerId: this.getId(),
         layerName,
       });
       stopLoading('source', requestToken, data);

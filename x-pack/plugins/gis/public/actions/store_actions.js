@@ -8,7 +8,7 @@ import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getDataFilters, getSelectedLayer } from '../selectors/map_selectors';
+import { getLayerList, getLayerListRaw, getDataFilters, getSelectedLayer } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -93,12 +93,18 @@ export function updateLayerOrder(newLayerOrder) {
   };
 }
 
-export function addLayer(layer, position = -1) {
-  return async dispatch => {
+export function addLayer(layer) {
+  return (dispatch, getState) => {
+    // Remove temporary layers
+    getLayerListRaw(getState()).forEach(({ temporary, id }) => {
+      if (temporary) {
+        dispatch(removeLayer(id));
+      }
+    });
+
     dispatch({
       type: ADD_LAYER,
       layer,
-      position
     });
   };
 }
@@ -256,10 +262,27 @@ export function updateLayerAlphaValue(id, newAlphaValue) {
   };
 }
 
+export function removeSelectedLayer() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const layer = getSelectedLayer(state);
+    dispatch(removeLayer(layer.getId()));
+  };
+}
+
 export function removeLayer(id) {
-  return {
-    type: REMOVE_LAYER,
-    id
+  return (dispatch, getState) => {
+    const layerGettingRemoved = getLayerList(getState()).find(layer => {
+      return id === layer.getId();
+    });
+    if (layerGettingRemoved) {
+      layerGettingRemoved.destroy();
+    }
+
+    dispatch({
+      type: REMOVE_LAYER,
+      id
+    });
   };
 }
 

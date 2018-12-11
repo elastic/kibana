@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+import uuid from 'uuid/v4';
 
 import { VectorSource } from './vector_source';
 import {
@@ -18,6 +19,7 @@ import { SingleFieldSelect } from '../../components/single_field_select';
 import { MultiFieldSelect } from './multi_field_select';
 import {
   fetchSearchSourceAndRecordWithInspector,
+  inspectorAdapters,
   indexPatternService,
   SearchSource,
 } from '../../../kibana_services';
@@ -33,7 +35,10 @@ export class ESSearchSource extends VectorSource {
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (layerConfig) => {
-      const layerSource = new ESSearchSource(layerConfig);
+      const layerSource = new ESSearchSource({
+        id: uuid(),
+        ...layerConfig
+      });
       onPreviewSource(layerSource);
     };
     return (<Editor onSelect={onSelect}/>);
@@ -41,6 +46,7 @@ export class ESSearchSource extends VectorSource {
 
   constructor(descriptor) {
     super({
+      id: descriptor.id,
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
@@ -49,6 +55,10 @@ export class ESSearchSource extends VectorSource {
       showTooltip: _.get(descriptor, 'showTooltip', false),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
+  }
+
+  destroy() {
+    inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
   async getNumberFields() {
@@ -89,7 +99,7 @@ export class ESSearchSource extends VectorSource {
     return indexPattern;
   }
 
-  async getGeoJsonWithMeta({ layerId, layerName }, searchFilters) {
+  async getGeoJsonWithMeta({ layerName }, searchFilters) {
     const indexPattern = await this._getIndexPattern();
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
@@ -126,7 +136,7 @@ export class ESSearchSource extends VectorSource {
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,
         requestName: layerName,
-        requestId: layerId,
+        requestId: this._descriptor.id,
         requestDesc: 'Elasticsearch document request'
       });
     } catch(error) {

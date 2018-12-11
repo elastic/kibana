@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
 import { promoteTemporaryStyles, clearTemporaryStyles, clearTemporaryLayers,
-  setSelectedLayer, removeLayer, promoteTemporaryLayers } from '../../../actions/store_actions';
+  setSelectedLayer, removeSelectedLayer, promoteTemporaryLayers } from '../../../actions/store_actions';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 
 const mapStateToProps = state => {
@@ -35,7 +35,7 @@ const mapDispatchToProps = dispatch => {
     },
     removeLayer: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(removeLayer());
+      dispatch(removeSelectedLayer());
       dispatch(setSelectedLayer(null));
     }
   };

@@ -31,9 +31,7 @@ export function GisMap(props) {
   } else if (layerDetailsVisible) {
     currentPanelClassName = "gisLayerPanel-isVisible";
     currentPanel = (
-      <LayerPanel
-        removeLayer={() => console.warn('removeLayer not implemented.')}
-      />
+      <LayerPanel/>
     );
   }
   return (
@@ -43,7 +41,7 @@ export function GisMap(props) {
         <LayerControl/>
       </EuiFlexItem>
 
-      <EuiFlexItem className={`gisLayerPanel ${currentPanelClassName}`}grow={false}>
+      <EuiFlexItem className={`gisLayerPanel ${currentPanelClassName}`} grow={false}>
         {currentPanel}
       </EuiFlexItem>
 

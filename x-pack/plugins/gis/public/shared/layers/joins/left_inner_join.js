@@ -18,6 +18,10 @@ export class LeftInnerJoin {
     this._rightSource = new ESTableSource(joinDescriptor.right);
   }
 
+  destroy() {
+    this._rightSource.destroy();
+  }
+
   hasCompleteConfig() {
     if (this._descriptor.leftField && this._rightSource) {
       return this._rightSource.hasCompleteConfig();

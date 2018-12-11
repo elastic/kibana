@@ -76,6 +76,13 @@ export class VectorLayer extends ALayer {
     }
   }
 
+  destroy() {
+    this._source.destroy();
+    this._joins.forEach(joinSource => {
+      joinSource.destroy();
+    });
+  }
+
   isJoinable() {
     return !this._source.isFilterByMapBounds();
   }
@@ -252,7 +259,6 @@ export class VectorLayer extends ALayer {
       startLoading(sourceDataId, requestToken, filters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
-        layerId: this.getId(),
         layerName,
       }, filters);
       stopLoading(sourceDataId, requestToken, data, meta);
