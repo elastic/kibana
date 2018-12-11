@@ -97,7 +97,7 @@ describe('TaskStore', () => {
 
     test('sets runAt to now if not specified', async () => {
       const now = Date.now();
-      const { arg } = await testSchedule({ taskType: 'dernstraight', params: {} });
+      const { arg } = await testSchedule({ taskType: 'dernstraight', params: {}, state: {} });
       expect(arg.body.task.runAt.getTime()).toBeGreaterThanOrEqual(now);
     });
 
@@ -108,7 +108,7 @@ describe('TaskStore', () => {
     });
 
     test('errors if the task type is unknown', async () => {
-      await expect(testSchedule({ taskType: 'nope', params: {} })).rejects.toThrow(
+      await expect(testSchedule({ taskType: 'nope', params: {}, state: {} })).rejects.toThrow(
         /Unsupported task type "nope"/i
       );
     });
