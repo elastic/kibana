@@ -16,17 +16,13 @@ export const wait = (time = 1000) => (data) => {
   });
 };
 
-export const object = {
-  toArray(obj) {
-    return Object.keys(obj).map(k => ({ ...obj[k], __id__: k }));
-  },
-};
+export const objectToArray = (obj) => (
+  Object.keys(obj).map(k => ({ ...obj[k], __id__: k }))
+);
 
-export const array = {
-  toObject(array, idProp = 'id') {
-    return array.reduce((acc, item) => {
-      acc[item[idProp]] = item;
-      return acc;
-    }, {});
-  }
-};
+export const arrayToObject = (array, keyProp = 'id') => (
+  array.reduce((acc, item) => {
+    acc[item[keyProp]] = item;
+    return acc;
+  }, {})
+);

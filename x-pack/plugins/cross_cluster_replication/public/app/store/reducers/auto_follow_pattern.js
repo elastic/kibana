@@ -5,7 +5,7 @@
  */
 
 import * as t from '../action_types';
-import { array } from '../../services/utils';
+import { arrayToObject } from '../../services/utils';
 
 const initialState = {
   byId: {},
@@ -17,7 +17,7 @@ const success = action => `${action}_SUCCESS`;
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.AUTO_FOLLOW_PATTERN_LOAD): {
-      return { ...state, byId: array.toObject(action.payload.patterns, 'name') };
+      return { ...state, byId: arrayToObject(action.payload.patterns, 'name') };
     }
     case success(t.AUTO_FOLLOW_PATTERN_GET): {
       return { ...state, byId: { ...state.byId, [action.payload.name]: action.payload } };
