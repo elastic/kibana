@@ -10,7 +10,6 @@ export interface FrameworkAdapter {
   // Instance vars
   info: FrameworkInfo;
   currentUser: FrameworkUser;
-  management: any;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
   renderUIAtPath(path: string, component: React.ReactElement<any>): void;

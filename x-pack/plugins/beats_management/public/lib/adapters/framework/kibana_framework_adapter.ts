@@ -31,7 +31,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public management: any;
   public get currentUser() {
     return this.shieldUser!;
   }

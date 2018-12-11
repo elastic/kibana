@@ -21,18 +21,20 @@ import { EuiIcon, EuiSideNav, IconType } from '@elastic/eui';
 import React from 'react';
 import { IndexedArray } from 'ui/indexed_array';
 
-interface Section {
+interface Subsection {
   disabled: boolean;
   visible: boolean;
   id: string;
   display: string;
   url?: string;
   icon?: IconType;
-  items: IndexedArray<Section>;
+}
+interface Section extends Subsection {
+  items: IndexedArray<Subsection>;
 }
 
-const sectionVisible = (section: Section) => !section.disabled && section.visible;
-const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Section) => ({
+const sectionVisible = (section: Subsection) => !section.disabled && section.visible;
+const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Subsection) => ({
   id,
   name: display,
   icon: icon ? <EuiIcon type={icon} /> : null,
