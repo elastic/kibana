@@ -32,7 +32,7 @@ import { getVisualizeLoader } from '../visualize_loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
 import { dispatchRenderComplete } from '../../../render_complete';
-import { VisualizeDataLoader } from '../visualize_data_loader';
+import { PipelineDataLoader } from '../pipeline_data_loader';
 import { PersistedState } from '../../../persisted_state';
 import { DataAdapter } from '../../../inspector/adapters/data';
 import { RequestAdapter } from '../../../inspector/adapters/request';
@@ -420,7 +420,7 @@ describe('visualize loader', () => {
       });
 
       it('should allow updating the time range of the visualization', async () => {
-        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
+        const spy = sandbox.spy(PipelineDataLoader.prototype, 'fetch');
 
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
           timeRange: { from: 'now-7d', to: 'now' }
@@ -442,7 +442,7 @@ describe('visualize loader', () => {
       });
 
       it('should not set forceFetch on uiState change', async () => {
-        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
+        const spy = sandbox.spy(PipelineDataLoader.prototype, 'fetch');
 
         const uiState = new PersistedState();
         loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
