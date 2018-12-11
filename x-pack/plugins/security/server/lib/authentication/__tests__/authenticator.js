@@ -102,7 +102,7 @@ describe('Authenticator', () => {
       }
     });
 
-    it('fails if all authentication providers fail.', async () => {
+    it('fails if any authentication providers fail.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
       session.get.withArgs(request).returns(Promise.resolve(null));
 
