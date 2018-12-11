@@ -22,7 +22,7 @@ import os from 'os';
 import v8 from 'v8';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
@@ -437,10 +437,10 @@ export default class BaseOptimizer {
       optimization: {
         minimize: true,
         minimizer: [
-          new UglifyJsPlugin({
+          new TerserPlugin({
             parallel: true,
             sourceMap: false,
-            uglifyOptions: {
+            terserOptions: {
               compress: {
                 // The following is required for dead-code the removal
                 // check in React DevTools

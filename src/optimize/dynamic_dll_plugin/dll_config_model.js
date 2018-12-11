@@ -21,7 +21,7 @@ import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 
 function generateDLL(config) {
   const {
@@ -199,10 +199,10 @@ function optimized() {
       optimization: {
         minimize: true,
         minimizer: [
-          new UglifyJsPlugin({
+          new TerserPlugin({
             parallel: true,
             sourceMap: false,
-            uglifyOptions: {
+            terserOptions: {
               compress: {
                 // The following is required for dead-code the removal
                 // check in React DevTools
