@@ -7,9 +7,10 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiBreadcrumbs,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -20,6 +21,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
 import { AutoFollowPatternForm, RemoteClustersProvider, SectionLoading, SectionError } from '../../components';
@@ -30,6 +32,10 @@ class AutoFollowPatternAddUi extends PureComponent {
     clearApiError: PropTypes.func.isRequired,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
+  }
+
+  componentDidMount() {
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
   }
 
   componentWillUnmount() {
@@ -109,23 +115,6 @@ class AutoFollowPatternAddUi extends PureComponent {
   render() {
     const { saveAutoFollowPattern, apiStatus, apiError, intl } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.breadcrumbs.listText"
-          defaultMessage="Cross Cluster Replication"
-        />
-      ),
-      ...routing.getRouterLinkProps('/'),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPattern.breadcrumbs.addText"
-          defaultMessage="Add auto-follow pattern"
-        />
-      ),
-    }];
-
     return (
       <EuiPage>
         <EuiPageBody>
@@ -133,7 +122,6 @@ class AutoFollowPatternAddUi extends PureComponent {
             horizontalPosition="center"
             className="ccrPageContent"
           >
-            <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
             <EuiSpacer size="xs" />
 
             <EuiPageContentHeader>

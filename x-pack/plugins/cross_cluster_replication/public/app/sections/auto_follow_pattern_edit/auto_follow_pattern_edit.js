@@ -7,9 +7,10 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiBreadcrumbs,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -22,6 +23,7 @@ import {
   EuiFlexItem
 } from '@elastic/eui';
 
+import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
 import { AutoFollowPatternForm, RemoteClustersProvider, SectionLoading, SectionError } from '../../components';
@@ -41,6 +43,8 @@ class AutoFollowPatternEditUi extends PureComponent {
     if (!autoFollowPattern) {
       this.props.getAutoFollowPattern(id);
     }
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);
   }
 
   componentWillUnmount() {
@@ -127,23 +131,6 @@ class AutoFollowPatternEditUi extends PureComponent {
   render() {
     const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.breadcrumbs.listText"
-          defaultMessage="Cross Cluster Replication"
-        />
-      ),
-      ...routing.getRouterLinkProps('/'),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPattern.breadcrumbs.editText"
-          defaultMessage="Edit auto-follow pattern"
-        />
-      ),
-    }];
-
     return (
       <EuiPage>
         <EuiPageBody>
@@ -151,7 +138,6 @@ class AutoFollowPatternEditUi extends PureComponent {
             horizontalPosition="center"
             className="ccrPageContent"
           >
-            <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
             <EuiSpacer size="xs" />
 
             <EuiPageContentHeader>
