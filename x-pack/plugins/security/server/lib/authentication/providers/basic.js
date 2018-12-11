@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -19,6 +18,14 @@ import { DeauthenticationResult } from '../deauthentication_result';
  *  client: Client,
  *  log: Function
  * }} ProviderOptions
+ */
+
+/**
+ * Object that represents return value of internal header auth
+ * @typedef {{
+ *  authenticationResult: AuthenticationResult,
+ *  headerNotRecognized?: boolean
+ * }} HeaderAuthAttempt
  */
 
 /**
@@ -49,7 +56,13 @@ export class BasicAuthenticationProvider {
   async authenticate(request, state) {
     this._options.log(['debug', 'security', 'basic'], `Trying to authenticate user request to ${request.url.path}.`);
 
-    let authenticationResult = await this._authenticateViaHeader(request);
+    let {
+      authenticationResult,
+      headerNotRecognized, // eslint-disable-line prefer-const
+    } = await this._authenticateViaHeader(request);
+    if (headerNotRecognized) {
+      return authenticationResult;
+    }
 
     if (authenticationResult.notHandled() && state) {
       authenticationResult = await this._authenticateViaState(request, state);
@@ -81,7 +94,7 @@ export class BasicAuthenticationProvider {
    * Validates whether request contains `Basic ***` Authorization header and just passes it
    * forward to Elasticsearch backend.
    * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<AuthenticationResult>}
+   * @returns {Promise.<HeaderAuthAttempt>}
    * @private
    */
   async _authenticateViaHeader(request) {
@@ -90,19 +103,18 @@ export class BasicAuthenticationProvider {
     const authorization = request.headers.authorization;
     if (!authorization) {
       this._options.log(['debug', 'security', 'basic'], 'Authorization header is not presented.');
-      return AuthenticationResult.notHandled();
+      return {
+        authenticationResult: AuthenticationResult.notHandled()
+      };
     }
 
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'basic') {
       this._options.log(['debug', 'security', 'basic'], `Unsupported authentication schema: ${authenticationSchema}`);
-
-      // It's essential that we fail if non-empty, but unsupported authentication schema
-      // is provided to allow authenticator to consult other authentication providers
-      // that may support that schema.
-      return AuthenticationResult.failed(
-        Boom.badRequest(`Unsupported authentication schema: ${authenticationSchema}`)
-      );
+      return {
+        authenticationResult: AuthenticationResult.notHandled(),
+        headerNotRecognized: true
+      };
     }
 
     try {
@@ -110,10 +122,14 @@ export class BasicAuthenticationProvider {
 
       this._options.log(['debug', 'security', 'basic'], 'Request has been authenticated via header.');
 
-      return AuthenticationResult.succeeded(user, { authorization });
+      return {
+        authenticationResult: AuthenticationResult.succeeded(user, { authorization })
+      };
     } catch(err) {
       this._options.log(['debug', 'security', 'basic'], `Failed to authenticate request via header: ${err.message}`);
-      return AuthenticationResult.failed(err);
+      return {
+        authenticationResult: AuthenticationResult.failed(err)
+      };
     }
   }
 
