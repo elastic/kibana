@@ -93,7 +93,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.1",
-    "@elastic/eui": "5.5.1",
+    "@elastic/eui": "5.6.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
