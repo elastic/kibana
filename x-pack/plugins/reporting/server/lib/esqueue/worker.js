@@ -353,15 +353,10 @@ export class Worker extends events.EventEmitter {
         constant_score: {
           filter: {
             bool: {
-              filter: { term: { jobtype: this.jobtype } },
-              should: [
+              filter: [
+                { term: { jobtype: this.jobtype } },
                 { term: { status: 'pending' } },
-                { bool: {
-                  filter: [
-                    { term: { status: 'processing' } },
-                    { range: { process_expiration: { lte: nowTime } } }
-                  ] }
-                }
+                { range: { process_expiration: { lte: nowTime } } }
               ]
             }
           }
