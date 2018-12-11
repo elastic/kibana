@@ -22,6 +22,7 @@ import Listr from 'listr';
 import { resolve } from 'path';
 
 import { run, createFailError } from './run';
+import config from '../../.i18nrc.json';
 import {
   filterPaths,
   extractMessagesFromPathToMap,
@@ -30,9 +31,31 @@ import {
   serializeToJson5,
 } from './i18n/';
 
-run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
+run(async ({ flags: { path, output, 'output-format': outputFormat, include = [], exclude } }) => {
   const paths = Array.isArray(path) ? path : [path || './'];
-  const filteredPaths = filterPaths(paths);
+  const additionalPluginsPaths = Array.isArray(include) ? include : [include];
+
+  const configWithAdditionalPlugins = {
+    paths: {
+      ...config.paths,
+      ...additionalPluginsPaths.reduce((pairs, pair) => {
+        const parsedPair = pair.split(':');
+        const [namespace, path] = parsedPair;
+
+        if (parsedPair.length !== 2) {
+          throw createFailError(
+            `${chalk.white.bgRed(' I18N ERROR ')} Cannot parse '--include ${pair}'`
+          );
+        }
+
+        pairs[namespace] = path;
+        return pairs;
+      }, {}),
+    },
+    exclude: config.exclude.concat(exclude || []),
+  };
+
+  const filteredPaths = filterPaths(paths, configWithAdditionalPlugins);
 
   if (filteredPaths.length === 0) {
     throw createFailError(
@@ -43,7 +66,8 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
 
   const list = new Listr(
     filteredPaths.map(filteredPath => ({
-      task: messages => extractMessagesFromPathToMap(filteredPath, messages),
+      task: messages =>
+        extractMessagesFromPathToMap(filteredPath, messages, configWithAdditionalPlugins),
       title: filteredPath,
     }))
   );

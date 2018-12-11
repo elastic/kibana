@@ -31,21 +31,21 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_3'),
 ];
 
-jest.mock('../../../.i18nrc.json', () => ({
+const config = {
   paths: {
     plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
     plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
     plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
   },
   exclude: [],
-}));
+};
 
 describe('dev/i18n/extract_default_translations', () => {
   test('extracts messages from path to map', async () => {
     const [pluginPath] = pluginsPaths;
     const resultMap = new Map();
 
-    await extractMessagesFromPathToMap(pluginPath, resultMap);
+    await extractMessagesFromPathToMap(pluginPath, resultMap, config);
 
     expect([...resultMap].sort()).toMatchSnapshot();
   });
@@ -54,7 +54,7 @@ describe('dev/i18n/extract_default_translations', () => {
     const [, , pluginPath] = pluginsPaths;
 
     await expect(
-      extractMessagesFromPathToMap(pluginPath, new Map())
+      extractMessagesFromPathToMap(pluginPath, new Map(), config)
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
@@ -64,7 +64,7 @@ describe('dev/i18n/extract_default_translations', () => {
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath)).not.toThrow();
+    expect(() => validateMessageNamespace(id, filePath, config)).not.toThrow();
   });
 
   test('throws on wrong message namespace', () => {
@@ -73,6 +73,6 @@ describe('dev/i18n/extract_default_translations', () => {
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath)).toThrowErrorMatchingSnapshot();
+    expect(() => validateMessageNamespace(id, filePath, config)).toThrowErrorMatchingSnapshot();
   });
 });
