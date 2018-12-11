@@ -32,6 +32,7 @@ interface Props {
   intl: InjectedIntl;
   spaceId?: string;
   onChange: (featureId: string, privileges: string[]) => void;
+  disabled?: boolean;
 }
 
 interface ToolTipDefinition {
@@ -144,6 +145,10 @@ export class FeatureTable extends Component<Props, {}> {
           assignedFeaturePrivileges.length === 0
             ? effectiveFeaturePrivileges
             : assignedFeaturePrivileges;
+
+        if (this.props.disabled) {
+          return <EuiText>{actualPrivilegeValue[0]}</EuiText>;
+        }
 
         // if (featurePrivileges.length === 1) {
         //   const isAllowedPrivilege = allowedFeaturePrivileges.includes(featurePrivileges[0]);

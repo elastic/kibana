@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import { EuiForm, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiForm, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
   EffectivePrivileges,
@@ -25,6 +25,7 @@ interface Props {
   spaces: Space[];
   mode: 'create' | 'edit';
   spaceId?: string | null;
+  hasCustomizedGlobalPrivileges: boolean;
   privilegeDefinition: PrivilegeDefinition;
   effectivePrivileges: EffectivePrivileges;
   onChange: (role: Role) => void;
@@ -64,12 +65,7 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
 
   public render() {
     const { spaces, effectivePrivileges } = this.props;
-
-    const assignedMimimumPrivilege = this.state.selectedMinimumPrivilege || [];
     const effectiveMinimumPrivilege = effectivePrivileges.grants.space.minimum || [];
-
-    const actualMinimumPrivilege =
-      assignedMimimumPrivilege.length > 0 ? assignedMimimumPrivilege : effectiveMinimumPrivilege;
 
     return (
       <EuiForm>
@@ -99,7 +95,8 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
             onChange={this.onSpaceMinimumPrivilegeChange}
             options={[
               {
-                disabled: effectiveMinimumPrivilege.length > 0,
+                disabled:
+                  effectiveMinimumPrivilege.length > 0 || this.props.hasCustomizedGlobalPrivileges,
                 value: NO_PRIVILEGE_VALUE,
                 inputDisplay: <EuiText>None</EuiText>,
                 dropdownDisplay: (
@@ -110,8 +107,20 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
                 ),
               },
               {
+                value: 'custom',
+                inputDisplay: <EuiText>Custom</EuiText>,
+                dropdownDisplay: (
+                  <EuiText>
+                    <strong>Custom</strong>
+                    <p>Customize access to this space</p>
+                  </EuiText>
+                ),
+              },
+              {
                 value: 'read',
-                disabled: !effectivePrivileges.allows.space.minimum.includes('read'),
+                disabled:
+                  !effectivePrivileges.allows.space.minimum.includes('read') ||
+                  this.props.hasCustomizedGlobalPrivileges,
                 inputDisplay: <EuiText>Read</EuiText>,
                 dropdownDisplay: (
                   <EuiText>
@@ -133,7 +142,7 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
               },
             ]}
             hasDividers
-            valueOfSelected={actualMinimumPrivilege[0] || NO_PRIVILEGE_VALUE}
+            valueOfSelected={this.getDisplayedMinimumPrivilege(effectivePrivileges)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -143,21 +152,55 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
             </EuiText>
           }
         >
-          <FeatureTable
-            onChange={this.onFeaturesPrivilegesChange}
-            features={this.props.features}
-            privilegeDefinition={this.props.privilegeDefinition}
-            effectivePrivileges={getEffectivePrivileges(
-              this.props.privilegeDefinition,
-              this.state.role,
-              this.state.selectedSpaceIds[0]
-            )}
-            spaceId={this.state.selectedSpaceIds[0]}
-            role={this.state.role}
-            intl={this.props.intl}
-          />
+          {this.maybeGetFeatureTable()}
         </EuiFormRow>
       </EuiForm>
+    );
+  }
+
+  public getDisplayedMinimumPrivilege(effectivePrivileges: EffectivePrivileges) {
+    const assignedMimimumPrivilege = this.state.selectedMinimumPrivilege || [];
+    const effectiveMinimumPrivilege = effectivePrivileges.grants.space.minimum || [];
+
+    if (this.props.hasCustomizedGlobalPrivileges) {
+      return 'custom';
+    }
+
+    const actualMinimumPrivilege =
+      assignedMimimumPrivilege.length > 0 ? assignedMimimumPrivilege : effectiveMinimumPrivilege;
+
+    return actualMinimumPrivilege[0] || NO_PRIVILEGE_VALUE;
+  }
+
+  public maybeGetFeatureTable() {
+    if (this.state.selectedSpaceIds.length > 0) {
+      return (
+        <FeatureTable
+          disabled={
+            this.props.disabled ||
+            this.getDisplayedMinimumPrivilege(this.props.effectivePrivileges) !== 'custom'
+          }
+          onChange={this.onFeaturesPrivilegesChange}
+          features={this.props.features}
+          privilegeDefinition={this.props.privilegeDefinition}
+          effectivePrivileges={getEffectivePrivileges(
+            this.props.privilegeDefinition,
+            this.state.role,
+            this.state.selectedSpaceIds[0]
+          )}
+          spaceId={this.state.selectedSpaceIds[0]}
+          role={this.state.role}
+          intl={this.props.intl}
+        />
+      );
+    }
+    return (
+      <EuiCallOut
+        size={'s'}
+        color={'primary'}
+        iconType={'iInCircle'}
+        title={'Choose a space to customize feature privileges'}
+      />
     );
   }
 

@@ -69,6 +69,7 @@ interface State {
   spacePrivileges: SpacePrivileges;
   role: Role | null;
   editingSpaceId: string | null;
+  isCustomizingGlobalPrivileges: boolean;
   showGlobalFeatureTable: boolean;
   showSpacePrivilegeEditor: boolean;
 }
@@ -91,11 +92,12 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
       showSpacePrivilegeEditor: false,
       role: null,
       editingSpaceId: null,
+      isCustomizingGlobalPrivileges: hasCustomizedGlobalFeatures,
     };
   }
 
   public render() {
-    const { role, uiCapabilities, intl } = this.props;
+    const { uiCapabilities, intl } = this.props;
 
     if (!uiCapabilities.spaces.manage) {
       return (
@@ -137,13 +139,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
         </EuiCallOut>
       );
     }
-
-    const assignedPrivileges = role.kibana;
-
-    const basePrivilege =
-      assignedPrivileges.global.minimum.length > 0
-        ? assignedPrivileges.global.minimum[0]
-        : NO_PRIVILEGE_VALUE;
+    const basePrivilege = this.getDisplayedBasePrivilege();
 
     const description = (
       <p>
@@ -202,16 +198,16 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
                     </EuiText>
                   ),
                 },
-                // {
-                //   value: 'custom',
-                //   inputDisplay: <EuiText>Custom</EuiText>,
-                //   dropdownDisplay: (
-                //     <EuiText>
-                //       <strong>Custom</strong>
-                //       <p>Customize access to Kibana</p>
-                //     </EuiText>
-                //   ),
-                // },
+                {
+                  value: 'custom',
+                  inputDisplay: <EuiText>Custom</EuiText>,
+                  dropdownDisplay: (
+                    <EuiText>
+                      <strong>Custom</strong>
+                      <p>Customize access to Kibana</p>
+                    </EuiText>
+                  ),
+                },
                 {
                   value: 'read',
                   inputDisplay: <EuiText>Read</EuiText>,
@@ -237,26 +233,26 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
               valueOfSelected={basePrivilege}
             />
           </EuiFormRow>
-          {basePrivilege !== 'all' && (
+          {this.state.isCustomizingGlobalPrivileges && (
             <Fragment>
-              <EuiFormRow label={'Control features for all spaces'}>
+              {/* <EuiFormRow label={'Control features for all spaces'}>
                 <EuiSwitch
                   checked={this.state.showGlobalFeatureTable}
                   onChange={e => this.setState({ showGlobalFeatureTable: e.target.checked })}
                 />
               </EuiFormRow>
-              {this.state.showGlobalFeatureTable && (
-                <EuiFormRow>
-                  <FeatureTable
-                    role={this.props.role}
-                    features={this.props.features}
-                    privilegeDefinition={this.props.privilegeDefinition}
-                    effectivePrivileges={this.props.effectivePrivileges}
-                    intl={this.props.intl}
-                    onChange={this.onGlobalFeaturePrivilegesChange}
-                  />
-                </EuiFormRow>
-              )}
+              {this.state.showGlobalFeatureTable && ( */}
+              <EuiFormRow>
+                <FeatureTable
+                  role={this.props.role}
+                  features={this.props.features}
+                  privilegeDefinition={this.props.privilegeDefinition}
+                  effectivePrivileges={this.props.effectivePrivileges}
+                  intl={this.props.intl}
+                  onChange={this.onGlobalFeaturePrivilegesChange}
+                />
+              </EuiFormRow>
+              {/* )} */}
             </Fragment>
           )}
         </EuiDescribedFormGroup>
@@ -264,6 +260,18 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
         {this.renderSpacePrivileges(basePrivilege)}
       </Fragment>
     );
+  }
+
+  private getDisplayedBasePrivilege() {
+    if (this.state.isCustomizingGlobalPrivileges) {
+      return 'custom';
+    }
+
+    const assignedPrivileges = this.props.role.kibana;
+
+    return assignedPrivileges.global.minimum.length > 0
+      ? assignedPrivileges.global.minimum[0]
+      : NO_PRIVILEGE_VALUE;
   }
 
   private renderSpacePrivileges = (basePrivilege: string) => {
@@ -388,6 +396,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           <EuiFlyoutBody>
             <PrivilegeSpaceForm
               mode={editing ? 'edit' : 'create'}
+              hasCustomizedGlobalPrivileges={this.state.isCustomizingGlobalPrivileges}
               spaceId={this.state.editingSpaceId}
               spaces={editing ? this.props.spaces : unassignedSpaces}
               effectivePrivileges={this.props.effectivePrivileges}
@@ -466,9 +475,13 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     // Remove base privilege value
     role.kibana.global.minimum = [];
 
-    if (privilege !== NO_PRIVILEGE_VALUE) {
+    if (privilege !== NO_PRIVILEGE_VALUE && privilege !== 'custom') {
       role.kibana.global.minimum = [privilege];
     }
+
+    this.setState({
+      isCustomizingGlobalPrivileges: privilege === 'custom',
+    });
 
     this.props.onChange(role);
   };
