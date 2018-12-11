@@ -39,13 +39,13 @@ interface FlyoutProps {
 interface FlyoutState {
   isLoading: boolean;
   hasMlJob: boolean;
-  hasIndexPattern: boolean | null;
+  hasIndexPattern: boolean;
 }
 
 export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   public state = {
     isLoading: false,
-    hasIndexPattern: null,
+    hasIndexPattern: false,
     hasMlJob: false
   };
 
@@ -164,7 +164,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
           {hasMlJob && (
             <div>
               <EuiCallOut
-                title={<span>Job already exists</span>}
+                title="Job already exists"
                 color="success"
                 iconType="check"
               >
@@ -217,10 +217,6 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
               the Machine Learning job and annotate the graph once the anomaly
               score is &gt;=75.
             </p>
-            {/* <img
-              src="/plugins/apm/images/apm-ml-anomaly-detection-example.png"
-              alt="Anomaly detection on response times in APM"
-            /> */}
             <p>
               Jobs can be created per transaction type and based on the average
               response time. Once a job is created, you can manage it and see
@@ -230,9 +226,6 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
               </KibanaLink>
               . It might take some time for the job to calculate the results.
               Please refresh the graph a few minutes after creating the job.
-            </p>
-            <p>
-              {/* <a href="#">Learn more</a> about the Machine Learning integration. */}
             </p>
           </EuiText>
         </EuiFlyoutBody>

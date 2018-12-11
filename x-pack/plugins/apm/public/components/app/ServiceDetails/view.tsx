@@ -4,27 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { HistoryTabs } from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
-import { HeaderContainer } from '../../shared/UIComponents';
-import { ErrorGroupOverview } from '../ErrorGroupOverview/beta';
-import { TransactionOverview } from '../TransactionOverview/beta';
+import { ErrorGroupOverview } from '../ErrorGroupOverview';
+import { TransactionOverview } from '../TransactionOverview';
 import { ServiceIntegrations } from './ServiceIntegrations';
 import { ServiceMetrics } from './ServiceMetrics';
-
-const TabContentWrapper: React.SFC = ({ children }) => {
-  return (
-    <React.Fragment>
-      <EuiSpacer />
-      {children}
-    </React.Fragment>
-  );
-};
 
 interface ServiceDetailsProps {
   urlParams: IUrlParams;
@@ -70,18 +60,26 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
 
     return (
       <div>
-        <HeaderContainer>
-          <h1>{serviceName}</h1>
-          <ServiceIntegrations
-            location={this.props.location}
-            serviceName={serviceName}
-            transactionType={urlParams.transactionType}
-          />
-        </HeaderContainer>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>{serviceName}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ServiceIntegrations
+              location={this.props.location}
+              serviceName={serviceName}
+              transactionType={urlParams.transactionType}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer />
 
         <KueryBar />
 
-        <HistoryTabs tabs={tabs} contentWrapper={TabContentWrapper} />
+        <HistoryTabs tabs={tabs} />
       </div>
     );
   }

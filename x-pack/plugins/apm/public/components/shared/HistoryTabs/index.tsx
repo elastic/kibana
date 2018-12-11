@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTab'"
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route, RouteComponentProps, withRouter } from 'react-router-dom';
 
@@ -17,12 +16,10 @@ export interface IHistoryTab {
 
 export interface HistoryTabsProps extends RouteComponentProps {
   tabs: IHistoryTab[];
-  contentWrapper?: React.SFC | React.ComponentClass;
 }
 
 const HistoryTabsWithoutRouter = ({
   tabs,
-  contentWrapper: ContentWrapper = React.Fragment,
   history,
   location
 }: HistoryTabsProps) => {
@@ -39,14 +36,12 @@ const HistoryTabsWithoutRouter = ({
           </EuiTab>
         ))}
       </EuiTabs>
-      <ContentWrapper>
-        {tabs.map(
-          tab =>
-            tab.component ? (
-              <Route path={tab.path} component={tab.component} key={tab.path} />
-            ) : null
-        )}
-      </ContentWrapper>
+      <EuiSpacer />
+      {tabs.map(tab =>
+        tab.component ? (
+          <Route path={tab.path} component={tab.component} key={tab.path} />
+        ) : null
+      )}
     </React.Fragment>
   );
 };

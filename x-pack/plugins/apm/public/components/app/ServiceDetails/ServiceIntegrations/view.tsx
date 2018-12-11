@@ -14,6 +14,8 @@ import {
 import React from 'react';
 import chrome from 'ui/chrome';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
+// @ts-ignore
+import { WatcherFlyout } from './WatcherFlyout';
 
 interface ServiceIntegrationProps {
   mlAvailable: boolean;
@@ -59,7 +61,11 @@ export class ServiceIntegrationsView extends React.Component<
     this.panelItems = this.panelItems.concat([
       {
         name: 'Enable watcher error reports',
-        icon: 'watchesApp'
+        icon: 'watchesApp',
+        onClick: () => {
+          this.closePopover();
+          this.openFlyout('Watcher');
+        }
       },
       {
         name: 'View existing watches',
@@ -139,72 +145,13 @@ export class ServiceIntegrationsView extends React.Component<
           serviceName={this.props.serviceName}
           transactionType={this.props.transactionType}
         />
+        <WatcherFlyout
+          location={this.props.location}
+          isOpen={this.state.activeFlyout === 'Watcher'}
+          onClose={this.closeFlyouts}
+          serviceName={this.props.serviceName}
+        />
       </React.Fragment>
     );
   }
 }
-
-// {
-// get(license.data, 'features.ml.isAvailable') &&
-//   mlEnabled && (
-//     <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
-//   )
-// }
-
-// export default class DynamicBaselineButton extends Component {
-//   state = {
-//     isPopoverOpen: false
-//   };
-
-//   onButtonClick = () => this.setState({ isPopoverOpen: true });
-//   closePopover = () => this.setState({ isPopoverOpen: false });
-
-//   popOverPanels = [
-//     {
-//       id: 0,
-//       title: 'Machine Learning',
-//       items: [
-//         {
-//           name: 'Anomaly detection',
-//           icon: <EuiIcon type="stats" size="m" />,
-//           onClick: () => {
-//             this.closePopover();
-//             this.props.onOpenFlyout();
-//           }
-//         },
-//         {
-//           name: 'View existing jobs',
-//           icon: 'tableOfContents',
-//           href: chrome.addBasePath('/app/ml'),
-//           target: '_blank',
-//           onClick: () => this.closePopover()
-//         }
-//       ]
-//     }
-//   ];
-
-//   button = (
-//     <EuiButton
-//       size="s"
-//       iconType="arrowDown"
-//       iconSide="right"
-//       onClick={this.onButtonClick}
-//     >
-//       Integrations
-//     </EuiButton>
-//   );
-
-//   render() {
-//     return (
-//       <EuiPopover
-//         button={this.button}
-//         isOpen={this.state.isPopoverOpen}
-//         closePopover={this.closePopover}
-//         panelPaddingSize="none"
-//         anchorPosition="downRight"
-//       >
-//         <EuiContextMenu initialPanelId={0} panels={this.popOverPanels} />
-//       </EuiPopover>
-//     );
-//   }
-// }

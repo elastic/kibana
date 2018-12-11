@@ -5,19 +5,16 @@
  */
 
 import { connect } from 'react-redux';
+import { getServiceList } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceList';
+import { IReduxState } from 'x-pack/plugins/apm/public/store/rootReducer';
+import { getUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ServiceOverview as View } from './view';
-import { getServiceList } from '../../../store/reactReduxRequest/serviceList';
-import { getUrlParams } from '../../../store/urlParams';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state = {} as IReduxState) {
   return {
     serviceList: getServiceList(state),
     urlParams: getUrlParams(state)
   };
 }
 
-const mapDispatchToProps = {};
-export const ServiceOverview = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(View);
+export const ServiceOverview = connect(mapStateToProps)(View);

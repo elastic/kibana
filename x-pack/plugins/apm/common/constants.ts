@@ -43,8 +43,3 @@ export const ERROR_LOG_STACKTRACE = 'error.log.stacktrace';
 export const ERROR_EXC_MESSAGE = 'error.exception.message';
 export const ERROR_EXC_STACKTRACE = 'error.exception.stacktrace';
 export const ERROR_EXC_HANDLED = 'error.exception.handled';
-
-export const TRANSACTION_TYPE_MAP: StringMap<string> = {
-  request: 'Request',
-  'page-load': 'Page load'
-};
