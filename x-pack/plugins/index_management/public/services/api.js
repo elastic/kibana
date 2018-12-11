@@ -9,6 +9,9 @@ let httpClient;
 export const setHttpClient = (client) => {
   httpClient = client;
 };
+export const getHttpClient = () => {
+  return httpClient;
+};
 const apiPrefix = chrome.addBasePath('/api/index_management');
 
 export async function loadIndices() {

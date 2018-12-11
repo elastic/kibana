@@ -37,3 +37,8 @@ export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
  * @type {string}
  */
 export const KIBANA_REPORTING_TYPE = 'reporting';
+
+export const PDF_JOB_TYPE = 'printable_pdf';
+export const PNG_JOB_TYPE = 'PNG';
+export const CSV_JOB_TYPE = 'csv';
+export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
