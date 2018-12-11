@@ -67,7 +67,7 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private) {
+function ContextAppController($scope, config, Private, i18n) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
@@ -137,7 +137,12 @@ function ContextAppController($scope, config, Private) {
       _.assign(this, newParameters);
     },
   );
+
+  this.discover = i18n('kbn.context.discoverDescription', {
+    defaultMessage: 'Discover'
+  });
 }
+
 
 function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
   return {
