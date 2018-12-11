@@ -38,7 +38,7 @@ export function WelcomeContent() {
                   <ExperimentalBadge
                     tooltipContent={
                       <FormattedMessage
-                        id="xpack.ml.fileDatavisualizer.welcomeContent.experimentalFeatureBadgeLabel"
+                        id="xpack.ml.fileDatavisualizer.welcomeContent.experimentalFeatureTooltip"
                         defaultMessage="Experimental feature. We'd love to hear your feedback."
                       />
                     }
@@ -119,7 +119,7 @@ export function WelcomeContent() {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.welcomeContent.uploadFilesLessHundredMBDescription"
+              id="xpack.ml.fileDatavisualizer.welcomeContent.uploadedFilesAllowedSizeDescription"
               defaultMessage="You can upload files up to 100 MB."
             />
           </p>
@@ -136,10 +136,7 @@ export function WelcomeContent() {
                     href="https://github.com/elastic/kibana/issues/new"
                     target="_blank"
                   >
-                    <FormattedMessage
-                      id="xpack.ml.fileDatavisualizer.welcomeContent.githubLinkTitle"
-                      defaultMessage="GitHub"
-                    />
+                    GitHub
                   </EuiLink>
                 )
               }}

@@ -120,7 +120,7 @@ function createDisplayItems(results) {
       title: (
         <FormattedMessage
           id="xpack.ml.fileDatavisualizer.analysisSummary.timeFormatTitle"
-          defaultMessage="Time {timestampFormats, plural, one {format} other {formats}}"
+          defaultMessage="Time {timestampFormats, plural, zero {format} one {format} other {formats}}"
           values={{
             timestampFormats: results.joda_timestamp_formats.length,
           }}

@@ -245,7 +245,7 @@ export class Overrides extends Component {
                 id={'hasHeaderRow'}
                 label={
                   <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.hasHeaderRowFormRowLabel"
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.hasHeaderRowLabel"
                     defaultMessage="Has header row"
                   />
                 }
@@ -259,7 +259,7 @@ export class Overrides extends Component {
                 id={'shouldTrimFields'}
                 label={
                   <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.trimFieldsFormRowLabel"
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.trimFieldsLabel"
                     defaultMessage="Should trim fields"
                   />
                 }

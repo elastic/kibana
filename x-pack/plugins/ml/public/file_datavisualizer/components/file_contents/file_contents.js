@@ -37,7 +37,7 @@ export function FileContents({ data, format, numberOfLines }) {
       <div>
         <FormattedMessage
           id="xpack.ml.fileDatavisualizer.fileContents.firstLinesDescription"
-          defaultMessage="First {numberOfLines} {numberOfLines, plural, one {line} other {lines}}"
+          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
           values={{
             numberOfLines: numberOfLines,
           }}

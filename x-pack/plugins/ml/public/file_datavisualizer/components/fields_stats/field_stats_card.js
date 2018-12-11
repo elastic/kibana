@@ -42,7 +42,7 @@ export function FieldStatsCard({ field }) {
                     <i className="fa fa-files-o" aria-hidden="true" />
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.fieldStatsCard.documentsCountDescription"
-                      defaultMessage="{fieldCount} {fieldCount, plural, one {document} other {documents}} ({fieldPercent}%)"
+                      defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
                       values={{
                         fieldCount: field.count,
                         fieldPercent: percent,
@@ -53,7 +53,7 @@ export function FieldStatsCard({ field }) {
                     <i className="fa fa-cubes" aria-hidden="true" />
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.fieldStatsCard.distinctCountDescription"
-                      defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, one {value} other {values}}"
+                      defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, zero {value} one {value} other {values}}"
                       values={{
                         fieldCardinality: field.cardinality,
                       }}
@@ -66,19 +66,19 @@ export function FieldStatsCard({ field }) {
                       <div>
                         <div className="stat min heading">
                           <FormattedMessage
-                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.minHeadingValueDescription"
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.minTitle"
                             defaultMessage="min"
                           />
                         </div>
                         <div className="stat median heading">
                           <FormattedMessage
-                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.medianHeadingValueDescription"
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.medianTitle"
                             defaultMessage="median"
                           />
                         </div>
                         <div className="stat max heading">
                           <FormattedMessage
-                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.maxHeadingValueDescription"
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.maxTitle"
                             defaultMessage="max"
                           />
                         </div>
@@ -130,7 +130,7 @@ export function FieldStatsCard({ field }) {
               <div className="stats">
                 <div className="stat">
                   <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.fieldStatsCard.unavailableInformationDescription"
+                    id="xpack.ml.fileDatavisualizer.fieldStatsCard.noFieldInformationAvailableDescription"
                     defaultMessage="No field information available"
                   />
                 </div>
