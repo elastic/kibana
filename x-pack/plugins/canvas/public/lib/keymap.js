@@ -10,10 +10,10 @@ export const keymap = {
   EDITOR: {
     UNDO: { osx: 'command+z', windows: 'ctrl+z', linux: 'ctrl+z', other: 'ctrl+z' },
     REDO: {
-      osx: 'command+shift+y',
-      windows: 'ctrl+shift+y',
-      linux: 'ctrl+shift+y',
-      other: 'ctrl+shift+y',
+      osx: ['command+y', 'command+shift+z'],
+      windows: ['ctrl+y', 'ctrl+shift+z'],
+      linux: ['ctrl+y', 'ctrl+shift+z'],
+      other: ['ctrl+y', 'ctrl+shift+z'],
     },
     NEXT: { osx: 'option+]', windows: 'alt+]', linux: 'alt+]', other: 'alt+]' },
     PREV: { osx: 'option+[', windows: 'alt+[', linux: 'alt+[', other: 'alt+[' },
