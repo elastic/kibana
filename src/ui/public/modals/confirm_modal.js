@@ -62,11 +62,7 @@ module.factory('confirmModal', function ($rootScope, $compile, i18n) {
     };
 
     if (!customOptions.confirmButtonText || !customOptions.onConfirm) {
-      throw new Error(
-        i18n('common.ui.modals.specifyConfirmationParametersErrorMessage', {
-          defaultMessage: 'Please specify confirmation button text and onConfirm action'
-        }),
-      );
+      throw new Error('Please specify confirmation button text and onConfirm action');
     }
 
     const options = Object.assign(defaultOptions, customOptions);
