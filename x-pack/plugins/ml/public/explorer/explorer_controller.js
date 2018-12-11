@@ -48,7 +48,9 @@ import {
   SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE
 } from './explorer_constants';
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
+
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/explorer/?', {
@@ -954,7 +956,7 @@ module.controller('MlExplorerController', function (
     const timeRange = getSelectionTimeRange(cellData);
 
 
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       const resp = await ml.annotations.getAnnotations({
         jobIds,
         earliestMs: timeRange.earliestMs,

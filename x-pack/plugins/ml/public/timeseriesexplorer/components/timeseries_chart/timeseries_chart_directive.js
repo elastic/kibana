@@ -27,7 +27,8 @@ const module = uiModules.get('apps/ml');
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../common/constants/feature_flags';
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 module.directive('mlTimeseriesChart', function () {
 
@@ -90,7 +91,7 @@ module.directive('mlTimeseriesChart', function () {
     scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
     scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       scope.$watchCollection('focusAnnotationData', renderFocusChart);
       scope.$watch('showAnnotations', renderFocusChart);
     }

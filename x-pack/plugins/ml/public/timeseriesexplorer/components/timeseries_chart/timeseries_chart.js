@@ -19,6 +19,8 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
+import chrome from 'ui/chrome';
+
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -43,7 +45,8 @@ import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 import { getAnnotationBrush, getAnnotationLevels, renderAnnotations } from './annotation';
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../common/constants/feature_flags';
+
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -232,7 +235,7 @@ export class TimeseriesChart extends React.Component {
     this.fieldFormat = undefined;
 
     // Annotations Brush
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       this.annotateBrush = getAnnotationBrush.call(this);
     }
 
@@ -459,7 +462,7 @@ export class TimeseriesChart extends React.Component {
       .attr('class', 'chart-border');
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       const annotateBrush = this.annotateBrush.bind(this);
 
       fcsGroup.append('g')
@@ -530,7 +533,7 @@ export class TimeseriesChart extends React.Component {
     }
 
     // Create the elements for annotations
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       fcsGroup.append('g').classed('ml-annotations', true);
     }
 
@@ -631,7 +634,7 @@ export class TimeseriesChart extends React.Component {
 
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
-      if (FEATURE_ANNOTATIONS_ENABLED && focusAnnotationData && focusAnnotationData.length > 0) {
+      if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
         console.warn('focusZoomPanelHeight', focusZoomPanelHeight);
@@ -677,7 +680,7 @@ export class TimeseriesChart extends React.Component {
         .classed('hidden', !showModelBounds);
     }
 
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       renderAnnotations(
         focusChart,
         focusAnnotationData,
@@ -1332,7 +1335,7 @@ export class TimeseriesChart extends React.Component {
       contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
     }
 
-    if (FEATURE_ANNOTATIONS_ENABLED && _.has(marker, 'annotation')) {
+    if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
       contents = marker.annotation;
       contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
 
@@ -1469,7 +1472,7 @@ export class TimeseriesChart extends React.Component {
     return (
       <React.Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {FEATURE_ANNOTATIONS_ENABLED && isFlyoutVisible &&
+        {mlAnnotationsEnabled && isFlyoutVisible &&
           <AnnotationFlyout
             annotation={annotation}
             cancelAction={closeFlyout}

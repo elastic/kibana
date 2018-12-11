@@ -80,7 +80,7 @@ export function isAnnotation(arg: any): arg is Annotation {
     arg.timestamp !== undefined &&
     typeof arg.annotation === 'string' &&
     typeof arg.job_id === 'string' &&
-    (arg.result_type === ANNOTATION_TYPE.ANNOTATION || arg.result_type === ANNOTATION_TYPE.COMMENT)
+    (arg.type === ANNOTATION_TYPE.ANNOTATION || arg.type === ANNOTATION_TYPE.COMMENT)
   );
 }
 

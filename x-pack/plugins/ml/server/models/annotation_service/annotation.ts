@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import _ from 'lodash';
 
+import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -187,7 +188,7 @@ export function annotationProvider(
             filter: [
               {
                 query_string: {
-                  query: 'result_type:annotation',
+                  query: `type:${ANNOTATION_TYPE.ANNOTATION}`,
                   analyze_wildcard: false,
                 },
               },

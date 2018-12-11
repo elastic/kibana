@@ -24,7 +24,8 @@ import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
 import { injectI18n } from '@kbn/i18n/react';
 
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../../common/constants/feature_flags';
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 class JobDetailsUI extends Component {
   constructor(props) {
@@ -129,7 +130,7 @@ class JobDetailsUI extends Component {
       }
       ];
 
-      if (FEATURE_ANNOTATIONS_ENABLED) {
+      if (mlAnnotationsEnabled) {
         tabs.push({
           id: 'annotations',
           name: 'Annotations',

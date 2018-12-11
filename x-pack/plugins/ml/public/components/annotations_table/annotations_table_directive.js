@@ -21,7 +21,8 @@ import 'angular';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../../common/constants/feature_flags';
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 module.directive('mlAnnotationTable', function () {
 
@@ -54,7 +55,7 @@ module.directive('mlAnnotationTable', function () {
       renderReactComponent(true);
     }
 
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       scope.$watchCollection('annotations', renderFocusChart);
     }
 

@@ -51,7 +51,9 @@ import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import { initPromise } from 'plugins/ml/util/promise';
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
+
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -100,8 +102,8 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
-  $scope.showAnnotations = FEATURE_ANNOTATIONS_ENABLED;// Toggles display of annotations in the focus chart
-  $scope.showAnnotationsCheckbox = FEATURE_ANNOTATIONS_ENABLED;
+  $scope.showAnnotations = mlAnnotationsEnabled;// Toggles display of annotations in the focus chart
+  $scope.showAnnotationsCheckbox = mlAnnotationsEnabled;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
 
@@ -453,7 +455,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     });
 
     // Query 4 - load any annotations for the selected job.
-    if (FEATURE_ANNOTATIONS_ENABLED) {
+    if (mlAnnotationsEnabled) {
       ml.annotations.getAnnotations({
         jobIds: [$scope.selectedJob.job_id],
         earliestMs: searchBounds.min.valueOf(),
@@ -592,7 +594,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     }, 0);
   };
 
-  if (FEATURE_ANNOTATIONS_ENABLED) {
+  if (mlAnnotationsEnabled) {
     $scope.toggleShowAnnotations = function () {
       $timeout(() => {
         $scope.showAnnotations = !$scope.showAnnotations;
