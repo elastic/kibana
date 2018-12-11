@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export const all = [
+export const getAll = () => [
   {
     id: 'red',
     title: i18n.translate('server.status.redTitle', {
@@ -85,7 +85,7 @@ export const all = [
   }
 ];
 
-export const allById = _.indexBy(exports.all, 'id');
+export const getAllById = () => _.indexBy(exports.getAll(), 'id');
 
 export const defaults = {
   icon: 'question',
@@ -93,5 +93,5 @@ export const defaults = {
 };
 
 export function get(id) {
-  return exports.allById[id] || _.defaults({ id: id }, exports.defaults);
+  return exports.getAllById()[id] || _.defaults({ id: id }, exports.defaults);
 }
