@@ -5,9 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { object as objectUtils } from '../../services/utils';
-
-const { toArray } = objectUtils;
+import { objectToArray } from '../../services/utils';
 
 // Api
 export const getApiState = (state) => state.api;
@@ -29,4 +27,4 @@ export const getSelectedAutoFollowPattern = createSelector(getAutoFollowPatternS
   }
   return autoFollowPatternsState.byId[autoFollowPatternsState.selectedId];
 });
-export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  toArray(autoFollowPatterns));
+export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  objectToArray(autoFollowPatterns));

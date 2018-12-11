@@ -14,6 +14,8 @@ jest.mock('../../lib/call_with_request_factory');
 jest.mock('../../lib/is_es_error_factory');
 jest.mock('../../lib/license_pre_routing_factory');
 
+const DESERIALIZED_KEYS = Object.keys(deserializeAutoFollowPattern(getAutoFollowPatternMock()));
+
 /**
  * Hashtable to save the route handlers
  */
@@ -30,7 +32,9 @@ const registerHandlers = () => {
 
   const HANDLER_INDEX_TO_ACTION = {
     0: 'list',
-    1: 'create'
+    1: 'create',
+    2: 'get',
+    3: 'delete'
   };
 
   const server = {
@@ -74,14 +78,13 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
     it('should deserialize the response from Elasticsearch', async () => {
       const totalResult = 2;
-      const deserializedKeys = Object.keys(deserializeAutoFollowPattern('random', getAutoFollowPatternMock()));
       setHttpRequestResponse(null, getAutoFollowPatternListMock(totalResult));
 
       const response = await routeHandler();
-      const autoFollowPattern = Object.values(response)[0];
+      const autoFollowPattern = response.patterns[0];
 
-      expect(Object.keys(response).length).toEqual(totalResult);
-      expect(Object.keys(autoFollowPattern)).toEqual(deserializedKeys);
+      expect(response.patterns.length).toEqual(totalResult);
+      expect(Object.keys(autoFollowPattern)).toEqual(DESERIALIZED_KEYS);
     });
   });
 
@@ -113,5 +116,20 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
         },
       });
     });
+  });
+
+  describe('get()', () => {
+    beforeEach(() => {
+      routeHandler = routeHandlers.get;
+    });
+
+    it('should return a single resource even though ES return an array with 1 item', async () => {
+      const autoFollowPattern = getAutoFollowPatternMock();
+      setHttpRequestResponse(null, { patterns: [autoFollowPattern] });
+
+      const response = await routeHandler({ params: { id: 1 } });
+      expect(Object.keys(response)).toEqual(DESERIALIZED_KEYS);
+    });
+
   });
 });

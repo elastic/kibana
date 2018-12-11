@@ -37,7 +37,9 @@ export const registerAutoFollowPatternRoutes = (server) => {
 
       try {
         const response = await callWithRequest('ccr.autoFollowPatterns');
-        return deserializeListAutoFollowPatterns(response);
+        return ({
+          patterns: deserializeListAutoFollowPatterns(response.patterns)
+        });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
@@ -48,7 +50,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Returns a list of all Auto follow patterns
+   * Save an auto-follow pattern
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
@@ -87,7 +89,9 @@ export const registerAutoFollowPatternRoutes = (server) => {
 
       try {
         const response = await callWithRequest('ccr.autoFollowPattern', { id });
-        return deserializeAutoFollowPattern(id, response[id]);
+        const autoFollowPattern = response.patterns[0];
+
+        return deserializeAutoFollowPattern(autoFollowPattern);
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
