@@ -400,6 +400,12 @@ describe('Worker class', function () {
         expect(expiredMatch).to.not.be(undefined);
       });
 
+      it('specify that there should be at least one match', function () {
+        const { body } = getSearchParams(jobtype);
+        const conditions = get(body, conditionPath);
+        expect(conditions).to.have.property('minimum_should_match', 1);
+      });
+
       it('should use default size', function () {
         const { body } = getSearchParams(jobtype);
         expect(body).to.have.property('size', defaults.size);
