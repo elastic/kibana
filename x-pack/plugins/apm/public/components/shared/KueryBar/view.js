@@ -17,8 +17,11 @@ import {
 } from '../../../utils/url';
 import { Typeahead } from './Typeahead';
 import chrome from 'ui/chrome';
-import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
-import { convertKueryToEsQuery, getSuggestions } from '../../../services/kuery';
+import {
+  convertKueryToEsQuery,
+  getSuggestions,
+  getAPMIndexPatternForKuery
+} from '../../../services/kuery';
 import styled from 'styled-components';
 
 import { getBoolFilter } from './get_bool_filter';
@@ -36,7 +39,7 @@ class KueryBarView extends Component {
   };
 
   async componentDidMount() {
-    const indexPattern = await getAPMIndexPattern();
+    const indexPattern = await getAPMIndexPatternForKuery();
     this.setState({ indexPattern, isLoadingIndexPattern: false });
   }
 
