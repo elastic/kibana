@@ -13,7 +13,7 @@
     "argv-split": "^2.0.1",
     "commander": "^2.9.0",
     "del": "^2.2.2",
-    "execa": "^0.10.0",
+    "execa": "^1.0.0",
     "gulp-rename": "1.2.2",
     "gulp-zip": "^4.1.0",
     "inquirer": "^1.2.2",
