@@ -28,8 +28,8 @@ exports[`SpacesGridPage renders as expected 1`] = `
           >
             <h1>
               <FormattedMessage
-                defaultMessage="Spaces"
-                id="xpack.spaces.management.spacesGridPage.spacesTitle"
+                defaultMessage="Create a space"
+                id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
                 values={Object {}}
               />
             </h1>
