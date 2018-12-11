@@ -74,10 +74,9 @@ class InteractivePlot extends PureComponent {
         {hoverX && <MarkSeries data={markPoints} colorType="literal" />}
         {hoverX && <VerticalGridLines tickValues={[hoverX]} />}
 
-        {isDrawing &&
-          selectionEnd !== null && (
-            <SelectionMarker start={x(selectionStart)} end={x(selectionEnd)} />
-          )}
+        {isDrawing && selectionEnd !== null && (
+          <SelectionMarker start={x(selectionStart)} end={x(selectionEnd)} />
+        )}
       </SharedPlot>
     );
   }

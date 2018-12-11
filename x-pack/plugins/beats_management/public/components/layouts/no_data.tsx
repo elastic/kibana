@@ -11,8 +11,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -21,13 +19,11 @@ import {
 interface LayoutProps {
   title: string;
   actionSection?: React.ReactNode;
-  modalRender?: () => React.ReactNode;
   modalClosePath?: string;
 }
 
 export const NoDataLayout: React.SFC<LayoutProps> = withRouter<any>(
-  ({ actionSection, title, modalRender, modalClosePath, children, history }) => {
-    const modalContent = modalRender && modalRender();
+  ({ actionSection, title, modalClosePath, children, history }) => {
     return (
       <EuiPage>
         <EuiPageBody>
@@ -44,18 +40,6 @@ export const NoDataLayout: React.SFC<LayoutProps> = withRouter<any>(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageBody>
-        {modalContent && (
-          <EuiOverlayMask>
-            <EuiModal
-              onClose={() => {
-                history.push(modalClosePath);
-              }}
-              style={{ width: '640px' }}
-            >
-              {modalContent}
-            </EuiModal>
-          </EuiOverlayMask>
-        )}
       </EuiPage>
     );
   }
