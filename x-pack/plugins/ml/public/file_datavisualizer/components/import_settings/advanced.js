@@ -5,8 +5,7 @@
  */
 
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -21,7 +20,7 @@ import {
 import { MLJobEditor, EDITOR_MODE } from '../../../jobs/jobs_list/components/ml_job_editor';
 const EDITOR_HEIGHT = '300px';
 
-export function AdvancedSettings({
+function AdvancedSettingsUi({
   index,
   indexPattern,
   initialized,
@@ -37,6 +36,7 @@ export function AdvancedSettings({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
+  intl,
 }) {
 
   return (
@@ -52,7 +52,7 @@ export function AdvancedSettings({
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder={i18n.translate('xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder', {
+          placeholder={intl.formatMessage('xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder', {
             defaultMessage: 'index name'
           })}
           value={index}
@@ -127,6 +127,8 @@ export function AdvancedSettings({
     </React.Fragment>
   );
 }
+
+export const AdvancedSettings = injectI18n(AdvancedSettingsUi);
 
 function IndexSettings({ initialized, data, onChange }) {
   return (

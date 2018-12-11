@@ -133,7 +133,7 @@ export function ImportProgress({ statuses }) {
     statusInfo = (<UploadFunctionProgress progress={uploadProgress} />);
   }
   if (completedStep >= 4) {
-    uploadingDataTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.dataUploadTitle', {
+    uploadingDataTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.dataUploadedTitle', {
       defaultMessage: 'Data uploaded'
     });
     if (createIndexPattern === true) {
@@ -225,7 +225,7 @@ function UploadFunctionProgress({ progress }) {
     <React.Fragment>
       <p>
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importProgress.uploadDataDescription"
+          id="xpack.ml.fileDatavisualizer.importProgress.uploadingDataDescription"
           defaultMessage="Uploading data"
         />
       </p>

@@ -93,7 +93,7 @@ export class ResultsLinks extends Component {
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.viewDiscoverIndexTitle"
+                id="xpack.ml.fileDatavisualizer.resultsLinks.viewIndexInDiscoverTitle"
                 defaultMessage="View index in Discover"
               />
             }
@@ -123,7 +123,7 @@ export class ResultsLinks extends Component {
             icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
             title={
               <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.openDataVisualizerTitle"
+                id="xpack.ml.fileDatavisualizer.resultsLinks.openInDataVisualizerTitle"
                 defaultMessage="Open in Data Visualizer"
               />
             }

@@ -366,13 +366,13 @@ export class ImportView extends Component {
             <h3>
               <FormattedMessage
                 id="xpack.ml.fileDatavisualizer.importView.importDataTitle"
-                defaultMessage="Import data&nbsp;{experimentalBadge}"
+                defaultMessage="Import data &nbsp;{experimentalBadge}"
                 values={{
                   experimentalBadge: (
                     <ExperimentalBadge
                       tooltipContent={
                         <FormattedMessage
-                          id="xpack.ml.fileDatavisualizer.importView.experimentalFeatureBadgeLabel"
+                          id="xpack.ml.fileDatavisualizer.importView.experimentalFeatureTooltip"
                           defaultMessage="Experimental feature. We'd love to hear your feedback."
                         />
                       }

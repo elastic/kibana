@@ -27,12 +27,12 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
     errorText = (
       <p>
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsPermittedSizeErrorMessage"
+          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
           defaultMessage="The size of the file you selected for upload is {fileSizeFormatted} which
           exceeds the maximum permitted size of {maxFileSizeFormatted}"
           values={{
-            fileSizeFormatted: fileSizeFormatted,
-            maxFileSizeFormatted: maxFileSizeFormatted,
+            fileSizeFormatted,
+            maxFileSizeFormatted,
           }}
         />
       </p>
@@ -42,12 +42,12 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
     errorText = (
       <p>
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsPermittedSizeByDiffFormatErrorMessage"
+          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
           defaultMessage="The size of the file you selected for upload exceeds the maximum
           permitted size of {maxFileSizeFormatted} by {diffFormatted}"
           values={{
-            maxFileSizeFormatted: maxFileSizeFormatted,
-            diffFormatted: diffFormatted,
+            maxFileSizeFormatted,
+            diffFormatted,
           }}
         />
       </p>

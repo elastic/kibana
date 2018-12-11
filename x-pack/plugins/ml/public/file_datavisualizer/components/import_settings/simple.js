@@ -50,7 +50,7 @@ export function SimpleSettings({
         id="createIndexPattern"
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.simpleImportSettings.createIndexPatternFormRowLabel"
+            id="xpack.ml.fileDatavisualizer.simpleImportSettings.createIndexPatternLabel"
             defaultMessage="Create index pattern"
           />
         }
