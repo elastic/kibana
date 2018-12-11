@@ -132,6 +132,11 @@ export default class BaseOptimizer {
       name: 'optimizer-thread-loader-main-pool',
       workers: calculatedCpus,
       workerParallelJobs: 20,
+      // This is a safe check in order to set
+      // max_old_space_size in the workers
+      // accordingly to memory allowed in the main process.
+      // Otherwise, if the user sets max_old_space_size into
+      // NODE_OPTIONS, it won't affect the workers.
       workerNodeArgs: [`--max_old_space_size=${Math.trunc(v8.getHeapStatistics().total_heap_size / 1000000)}`],
       poolParallelJobs: calculatedCpus * 20,
       poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 5000
