@@ -403,7 +403,7 @@ module
                 msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.openJobErrorMessage', {
                   defaultMessage: 'Could not open job: '
                 }), resp);
-                msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.creatingDatafeedAnyWayErrorMessage', {
+                msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.creatingDatafeedErrorMessage', {
                   defaultMessage: 'Job created, creating datafeed anyway'
                 }));
                 // if open failed, still attempt to create the datafeed

@@ -199,13 +199,13 @@
 
       <div class="form-group">
         <ml-form-label label-id="new_job_description">
-          {{ ::'xpack.ml.newJob.simple.singleMetric.DescriptionLabel' | i18n: {defaultMessage: 'Description'} }}
+          {{ ::'xpack.ml.newJob.simple.singleMetric.descriptionLabel' | i18n: {defaultMessage: 'Description'} }}
         </ml-form-label>
         <input
           aria-labelledby="ml_aria_label_new_job_description"
           aria-describedby="ml_aria_description_new_job_description"
           ng-model="formConfig.description"
-          placeholder="{{ ::'xpack.ml.newJob.simple.singleMetric.DescriptionPlaceholder' | i18n: {defaultMessage: 'Job description'} }}"
+          placeholder="{{ ::'xpack.ml.newJob.simple.singleMetric.descriptionPlaceholder' | i18n: {defaultMessage: 'Job description'} }}"
           ng-disabled="jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
           class="form-control" />
       </div>
@@ -317,14 +317,14 @@
         ng-show="jobState === JOB_STATE.RUNNING"
         i18n-id="xpack.ml.newJob.simple.singleMetric.analysisRunningLabel"
         i18n-default-message="Analysis running {spinIcon}"
-        i18n-values="{ spinIcon: '<i class=\'fa fa-spinner fa-spin\'></i>'}"
+        i18n-values="{ html_spinIcon: '<i class=\'fa fa-spinner fa-spin\'></i>'}"
       ></div>
       <div
         class='job-state-info'
         ng-show="jobState === JOB_STATE.STOPPING"
         i18n-id="xpack.ml.newJob.simple.singleMetric.analysisStoppingLabel"
         i18n-default-message="Analysis stopping {spinIcon}"
-        i18n-values="{ spinIcon: '<i class=\'fa fa-spinner fa-spin\'></i>'}"
+        i18n-values="{ html_spinIcon: '<i class=\'fa fa-spinner fa-spin\'></i>'}"
       ></div>
 
       <button
