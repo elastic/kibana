@@ -58,8 +58,6 @@ export function initializeOutput($el) {
     const lastLine = session.getLength();
     if (foldPrevious) {
       output.moveCursorTo(Math.max(0, lastLine - 1), 0);
-      session.toggleFold(false);
-
     }
     session.insert({ row: lastLine, column: 0 }, '\n' + val);
     output.moveCursorTo(lastLine + 1, 0);
