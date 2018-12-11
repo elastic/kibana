@@ -130,9 +130,9 @@ export default class BaseOptimizer {
     return {
       name: 'optimizer-thread-loader-main-pool',
       workers: calculatedCpus,
-      workerParallelJobs: 50,
+      workerParallelJobs: 20,
       workerNodeArgs: [`--max_old_space_size=${Math.trunc(v8.getHeapStatistics().total_heap_size / 1000000)}`],
-      poolParallelJobs: 50,
+      poolParallelJobs: calculatedCpus * 20,
       poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 5000
     };
   }
@@ -435,7 +435,6 @@ export default class BaseOptimizer {
     const productionConfig = {
       mode: 'production',
       optimization: {
-        minimize: true,
         minimizer: [
           new TerserPlugin({
             parallel: true,
