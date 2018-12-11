@@ -25,7 +25,7 @@
       <use fill="url(#bg_top_branded-c)" xlink:href="#bg_top_branded-b" style="mix-blend-mode:overlay"/>
     </g>
     <g opacity=".05">
-      <use fill="#F5F5F5" xlink:href="#bg_top_branded-d"/>
+      <use fill="#F5F7FA" xlink:href="#bg_top_branded-d"/>
       <use fill="url(#bg_top_branded-e)" xlink:href="#bg_top_branded-d" style="mix-blend-mode:overlay"/>
       <use fill="url(#bg_top_branded-f)" xlink:href="#bg_top_branded-d" style="mix-blend-mode:darken"/>
     </g>
