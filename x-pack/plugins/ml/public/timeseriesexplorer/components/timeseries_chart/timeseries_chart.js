@@ -44,7 +44,7 @@ import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
 import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
-import { getAnnotationBrush, getAnnotationLevels, renderAnnotations } from './annotation';
+import { getAnnotationBrush, getAnnotationLevels, renderAnnotations } from './timeseries_chart_annotations';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 

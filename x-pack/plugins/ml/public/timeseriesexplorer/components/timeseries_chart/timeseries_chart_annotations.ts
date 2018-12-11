@@ -88,6 +88,15 @@ export function getAnnotationLevels(focusAnnotationData: Annotations) {
   return levels;
 }
 
+const ANNOTATION_DEFAULT_LEVEL = 1;
+const ANNOTATION_LEVEL_HEIGHT = 28;
+const ANNOTATION_UPPER_RECT_MARGIN = 0;
+const ANNOTATION_UPPER_TEXT_MARGIN = -7;
+const ANNOTATION_MIN_WIDTH = 2;
+const ANNOTATION_RECT_BORDER_RADIUS = 2;
+const ANNOTATION_TEXT_VERTICAL_OFFSET = 26;
+const ANNOTATION_TEXT_RECT_VERTICAL_OFFSET = 12;
+
 export function renderAnnotations(
   focusChart: d3.Selection<[]>,
   focusAnnotationData: Annotations,
@@ -98,8 +107,8 @@ export function renderAnnotations(
   showFocusChartTooltip: (d: Annotation, t: object) => {},
   showFlyout: TimeseriesChart['showFlyout']
 ) {
-  const upperRectMargin = 0;
-  const upperTextMargin = -7;
+  const upperRectMargin = ANNOTATION_UPPER_RECT_MARGIN;
+  const upperTextMargin = ANNOTATION_UPPER_TEXT_MARGIN;
 
   const durations: Dictionary<number> = {};
   focusAnnotationData.forEach(d => {
@@ -117,7 +126,7 @@ export function renderAnnotations(
     return durations[b.key] - durations[a.key];
   });
 
-  const levelHeight = 28;
+  const levelHeight = ANNOTATION_LEVEL_HEIGHT;
   const levels = getAnnotationLevels(focusAnnotationData);
 
   const annotations = focusChart
@@ -135,8 +144,8 @@ export function renderAnnotations(
   rects
     .enter()
     .append('rect')
-    .attr('rx', 2)
-    .attr('ry', 2)
+    .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
+    .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
     .classed('ml-annotation-rect', true)
     .on('mouseover', function(this: object, d: Annotation) {
       showFocusChartTooltip(d, this);
@@ -152,18 +161,20 @@ export function renderAnnotations(
       return focusXScale(date);
     })
     .attr('y', (d: Annotation) => {
-      const level = d.key !== undefined ? levels[d.key] : 1;
+      const level = d.key !== undefined ? levels[d.key] : ANNOTATION_DEFAULT_LEVEL;
       return focusZoomPanelHeight + 1 + upperRectMargin + level * levelHeight;
     })
     .attr('height', (d: Annotation) => {
-      const level = d.key !== undefined ? levels[d.key] : 1;
+      const level = d.key !== undefined ? levels[d.key] : ANNOTATION_DEFAULT_LEVEL;
       return focusChartHeight - 2 - upperRectMargin - level * levelHeight;
     })
     .attr('width', (d: Annotation) => {
       const s = focusXScale(moment(d.timestamp)) + 1;
       const e =
-        typeof d.end_timestamp !== 'undefined' ? focusXScale(moment(d.end_timestamp)) - 1 : s + 2;
-      const width = Math.max(2, e - s);
+        typeof d.end_timestamp !== 'undefined'
+          ? focusXScale(moment(d.end_timestamp)) - 1
+          : s + ANNOTATION_MIN_WIDTH;
+      const width = Math.max(ANNOTATION_MIN_WIDTH, e - s);
       return width;
     });
 
@@ -176,8 +187,8 @@ export function renderAnnotations(
     .enter()
     .append('rect')
     .classed('ml-annotation-text-rect', true)
-    .attr('rx', 2)
-    .attr('ry', 2);
+    .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
+    .attr('ry', ANNOTATION_RECT_BORDER_RADIUS);
 
   texts
     .enter()
@@ -191,8 +202,13 @@ export function renderAnnotations(
       return x + 17;
     })
     .attr('y', (d: Annotation) => {
-      const level = d.key !== undefined ? levels[d.key] : 1;
-      return focusZoomPanelHeight + upperTextMargin + 26 + level * levelHeight;
+      const level = d.key !== undefined ? levels[d.key] : ANNOTATION_DEFAULT_LEVEL;
+      return (
+        focusZoomPanelHeight +
+        upperTextMargin +
+        ANNOTATION_TEXT_VERTICAL_OFFSET +
+        level * levelHeight
+      );
     })
     .text((d: Annotation) => d.key as any);
 
@@ -203,8 +219,13 @@ export function renderAnnotations(
       return x + 5;
     })
     .attr('y', (d: Annotation) => {
-      const level = d.key !== undefined ? levels[d.key] : 1;
-      return focusZoomPanelHeight + upperTextMargin + 12 + level * levelHeight;
+      const level = d.key !== undefined ? levels[d.key] : ANNOTATION_DEFAULT_LEVEL;
+      return (
+        focusZoomPanelHeight +
+        upperTextMargin +
+        ANNOTATION_TEXT_RECT_VERTICAL_OFFSET +
+        level * levelHeight
+      );
     });
 
   textRects.exit().remove();
