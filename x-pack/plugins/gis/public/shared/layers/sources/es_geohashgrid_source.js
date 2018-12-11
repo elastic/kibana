@@ -63,7 +63,7 @@ const REQUEST_TYPE =  {
 export class ESGeohashGridSource extends VectorSource {
 
   static type = 'ES_GEOHASH_GRID';
-  static typeDisplayName = 'Elasticsearch geohash heatmap';
+  static typeDisplayName = 'Elasticsearch geohash aggregation';
 
   static createDescriptor({ indexPatternId, geoField, requestType }) {
     return {
