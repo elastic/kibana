@@ -8,6 +8,7 @@ import d3 from 'd3';
 import moment from 'moment';
 
 import { Annotation, Annotations } from '../../../../common/types/annotations';
+import { Dictionary } from '../../../../common/types/common';
 
 // @ts-ignore
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
@@ -44,7 +45,7 @@ export function getAnnotationBrush(this: TimeseriesChart) {
       end_timestamp: endTimestamp,
       annotation: this.state.annotation.annotation || '',
       job_id: selectedJob.job_id,
-      result_type: 'annotation',
+      type: 'annotation',
     };
 
     this.showFlyout(annotation);
@@ -53,19 +54,35 @@ export function getAnnotationBrush(this: TimeseriesChart) {
   return annotateBrush;
 }
 
-export function getAnnotationLevels(focusAnnotationData) {
-  const levels = {};
+// Used to resolve overlapping annotations in the UI.
+// The returned levels can be used to create a vertical offset.
+export function getAnnotationLevels(focusAnnotationData: Annotations) {
+  const levels: Dictionary<number> = {};
   focusAnnotationData.forEach((d, i) => {
-    const longerAnnotations = focusAnnotationData.filter((d2, i2) => i2 < i);
-    levels[d.key] = longerAnnotations.reduce((level, d2) => {
-      if (
-        (d2.timestamp < d.timestamp && d2.end_timestamp < d.timestamp) ||
-        (d2.timestamp > d.end_timestamp && d2.end_timestamp > d.end_timestamp)
-      ) {
-        return level;
-      }
-      return levels[d2.key] + 1;
-    }, 0);
+    if (d.key !== undefined) {
+      const longerAnnotations = focusAnnotationData.filter((d2, i2) => i2 < i);
+      levels[d.key] = longerAnnotations.reduce((level, d2) => {
+        // For now we only support overlap removal for annotations which have both
+        // `timestamp` and `end_timestamp` set.
+        if (
+          d.end_timestamp === undefined ||
+          d2.end_timestamp === undefined ||
+          d2.key === undefined
+        ) {
+          return level;
+        }
+
+        if (
+          // d2 is completely before d
+          (d2.timestamp < d.timestamp && d2.end_timestamp < d.timestamp) ||
+          // d2 is completely after d
+          (d2.timestamp > d.end_timestamp && d2.end_timestamp > d.end_timestamp)
+        ) {
+          return level;
+        }
+        return levels[d2.key] + 1;
+      }, 0);
+    }
   });
   return levels;
 }
@@ -83,14 +100,19 @@ export function renderAnnotations(
   const upperRectMargin = 0;
   const upperTextMargin = -7;
 
-  const durations = {};
+  const durations: Dictionary<number> = {};
   focusAnnotationData.forEach(d => {
-    const duration = (d.end_timestamp || 0) - d.timestamp;
-    durations[d.key] = duration;
+    if (d.key !== undefined) {
+      const duration = (d.end_timestamp || 0) - d.timestamp;
+      durations[d.key] = duration;
+    }
   });
 
   // sort by duration
   focusAnnotationData.sort((a, b) => {
+    if (a.key === undefined || b.key === undefined) {
+      return 0;
+    }
     return durations[b.key] - durations[a.key];
   });
 
@@ -129,10 +151,12 @@ export function renderAnnotations(
       return focusXScale(date);
     })
     .attr('y', (d: Annotation) => {
-      return focusZoomPanelHeight + 1 + upperRectMargin + levels[d.key] * levelHeight;
+      const level = d.key !== undefined ? levels[d.key] : 1;
+      return focusZoomPanelHeight + 1 + upperRectMargin + level * levelHeight;
     })
     .attr('height', (d: Annotation) => {
-      return focusChartHeight - 2 - upperRectMargin - levels[d.key] * levelHeight;
+      const level = d.key !== undefined ? levels[d.key] : 1;
+      return focusChartHeight - 2 - upperRectMargin - level * levelHeight;
     })
     .attr('width', (d: Annotation) => {
       const s = focusXScale(moment(d.timestamp)) + 1;
@@ -166,7 +190,8 @@ export function renderAnnotations(
       return x + 17;
     })
     .attr('y', (d: Annotation) => {
-      return focusZoomPanelHeight + upperTextMargin + 26 + levels[d.key] * levelHeight;
+      const level = d.key !== undefined ? levels[d.key] : 1;
+      return focusZoomPanelHeight + upperTextMargin + 26 + level * levelHeight;
     })
     .text((d: Annotation) => d.key as any);
 
@@ -177,7 +202,8 @@ export function renderAnnotations(
       return x + 5;
     })
     .attr('y', (d: Annotation) => {
-      return focusZoomPanelHeight + upperTextMargin + 12 + levels[d.key] * levelHeight;
+      const level = d.key !== undefined ? levels[d.key] : 1;
+      return focusZoomPanelHeight + upperTextMargin + 12 + level * levelHeight;
     });
 
   textRects.exit().remove();

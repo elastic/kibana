@@ -41,7 +41,7 @@
 //         "modified_username": {
 //           "type": "keyword"
 //         },
-//         "result_type": {
+//         "type": {
 //           "type": "keyword"
 //         }
 //       }
@@ -70,7 +70,7 @@ export interface Annotation {
   end_timestamp?: number;
   annotation: string;
   job_id: string;
-  result_type: 'annotation';
+  type: 'annotation' | 'comment';
 }
 
 export function isAnnotation(arg: any): arg is Annotation {
