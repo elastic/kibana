@@ -31,9 +31,9 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function Introduction({ description, previewUrl, title, exportedFieldsUrl, iconType, isBeta }) {
+function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, iconType, isBeta, intl }) {
   let img;
   if (previewUrl) {
     img = (
@@ -42,12 +42,10 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
         hasShadow
         allowFullScreen
         fullScreenIconColor="dark"
-        alt={
-          <FormattedMessage
-            id="kbn.home.tutorial.introduction.imageAltDescription"
-            defaultMessage="screenshot of primary dashboard."
-          />
-        }
+        alt={intl.formatMessage({
+          id: 'kbn.home.tutorial.introduction.imageAltDescription',
+          defaultMessage: 'screenshot of primary dashboard.'
+        })}
         url={previewUrl}
       />
     );
@@ -80,7 +78,12 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
   let betaBadge;
   if (isBeta) {
     betaBadge = (
-      <EuiBetaBadge label="Beta" />
+      <EuiBetaBadge
+        label={intl.formatMessage({
+          id: 'kbn.home.tutorial.introduction.betaLabel',
+          defaultMessage: 'Beta'
+        })}
+      />
     );
   }
   return (
@@ -114,7 +117,7 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
   );
 }
 
-Introduction.propTypes = {
+IntroductionUI.propTypes = {
   description: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   previewUrl: PropTypes.string,
@@ -123,6 +126,8 @@ Introduction.propTypes = {
   isBeta: PropTypes.bool,
 };
 
-Introduction.defaultProps = {
+IntroductionUI.defaultProps = {
   isBeta: false
 };
+
+export const Introduction = injectI18n(IntroductionUI);
