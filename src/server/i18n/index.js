@@ -37,7 +37,7 @@ export async function i18nMixin(kbnServer, server, config) {
     }),
 
     ...config.get('plugins.paths').map(async path => {
-      const entries = await globby('plugins/*/translations/*.json', {
+      const entries = await globby(['translations/*.json', 'plugins/*/translations/*.json'], {
         cwd: path,
       });
       return entries.map(entry => resolve(path, entry));
