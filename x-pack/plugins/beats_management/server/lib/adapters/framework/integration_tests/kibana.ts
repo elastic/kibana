@@ -11,22 +11,17 @@ import { esTestConfig, kbnTestConfig, OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 // @ts-ignore
 import { xpackKbnServerConfig } from '../../../../../../../test_utils/kbn_server_config';
+import { PLUGIN } from './../../../../../common/constants/plugin';
+
 import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';
 import { contractTests } from './test_contract';
 let servers: any;
 contractTests('Kibana  Framework Adapter', {
   async before() {
-    try {
-      servers = await kbnTestServer.startTestServers({
-        adjustTimeout: (t: number) => jest.setTimeout(t),
-        settings: xpackKbnServerConfig,
-      });
-    } catch (e) {
-      // tslint:disable-next-line
-      console.log('kbnTestServer.startTestServers failed to start because', e);
-      return process.exit(1);
-    }
-
+    servers = await kbnTestServer.startTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: xpackKbnServerConfig,
+    });
     // const config = legacyServer.server.config();
     // config.extendSchema(beatsPluginConfig, {}, configPrefix);
 
@@ -36,6 +31,6 @@ contractTests('Kibana  Framework Adapter', {
     await servers.stop();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(servers.kbnServer.server);
+    return new KibanaBackendFrameworkAdapter(PLUGIN.ID, servers.kbnServer.server);
   },
 });

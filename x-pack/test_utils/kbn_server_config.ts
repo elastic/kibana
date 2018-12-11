@@ -6,12 +6,14 @@
 
 import { resolve } from 'path';
 
-export const xpackKbnServerConfig = {
+type Licenses = 'oss' | 'basic' | 'gold' | 'trial';
+
+export const TestKbnServerConfig = {
   kbn: {
     plugins: { paths: [resolve(__dirname, '../../node_modules/x-pack')] },
   },
   es: {
-    license: 'trial',
+    license: 'trial' as Licenses,
   },
   users: [
     {
