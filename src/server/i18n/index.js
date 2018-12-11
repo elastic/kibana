@@ -30,21 +30,24 @@ export async function i18nMixin(kbnServer, server, config) {
 
   const groupedEntries = await Promise.all([
     ...config.get('plugins.scanDirs').map(async path => {
-      const entries = await globby('*/translations/*.json', {
+      const entries = await globby(`*/translations/${locale}.json`, {
         cwd: path,
       });
       return entries.map(entry => resolve(path, entry));
     }),
 
     ...config.get('plugins.paths').map(async path => {
-      const entries = await globby(['translations/*.json', 'plugins/*/translations/*.json'], {
-        cwd: path,
-      });
+      const entries = await globby(
+        [`translations/${locale}.json`, `plugins/*/translations/${locale}.json`],
+        {
+          cwd: path,
+        }
+      );
       return entries.map(entry => resolve(path, entry));
     }),
 
     ...translationsDirs.map(async path => {
-      const entries = await globby('*.json', {
+      const entries = await globby(`${locale}.json`, {
         cwd: path,
       });
       return entries.map(entry => resolve(path, entry));
