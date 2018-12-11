@@ -97,6 +97,10 @@ export class ReportInfoButton extends Component<Props, State> {
           description: get(info, 'completed_at', NA),
         },
         {
+          title: 'Processed By',
+          description: `${get(info, 'kibana_name', NA)} (${get(info, 'kibana_id', NA)})`,
+        },
+        {
           title: 'Browser Timezone',
           description: get(info, 'payload.browserTimezone', NA),
         },
