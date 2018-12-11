@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import moment from 'moment';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 
@@ -82,7 +82,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
       areaTcp.push({ x: rtt.minTcp.x, y0: rtt.minTcp.y, y: rtt.maxTcp.y });
     });
     return (
-      <div>
+      <Fragment>
         <EuiTitle>
           <h2>{id}</h2>
         </EuiTitle>
@@ -205,7 +205,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
           valuable information. In the next set of changes, this page will be replaced with more
           useful visualizations and data.
         </p> */}
-      </div>
+      </Fragment>
     );
   }
 }
