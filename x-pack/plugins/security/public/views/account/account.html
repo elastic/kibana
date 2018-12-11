@@ -52,7 +52,14 @@
   </div>
 
   <!-- Change password -->
+  <div class="kuiFormSection" ng-if="!showChangePassword">
+    <label class="kuiFormLabel" i18n-id="xpack.security.account.passwordLabel" i18n-default-message="Password"></label>
+    <div class="euiText">
+      <p i18n-id="xpack.security.account.changePasswordNotSupportedText"  i18n-default-message="You cannot change the password for this account."></p>
+    </div>
+  </div>
   <kbn-change-password-form
+    ng-if="showChangePassword"
     require-current-password="true"
     show-kibana-warning="user.metadata._reserved && user.username === 'kibana'"
     on-change-password="saveNewPassword(newPassword, currentPassword, onSuccess, onIncorrectPassword)"
