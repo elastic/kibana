@@ -58,6 +58,7 @@ const schema = {
     type: 'object',
     properties: {
       content_type: { type: 'keyword' },
+      size: { type: 'keyword' },
       content: { type: 'object', enabled: false }
     }
   }
