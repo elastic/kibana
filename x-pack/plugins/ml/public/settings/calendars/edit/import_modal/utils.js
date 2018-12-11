@@ -8,13 +8,14 @@
 
 const icalendar = require('icalendar');
 import moment from 'moment';
+import { generateTempId } from '../utils';
 
 
 function createEvents(ical) {
   const events = ical.events();
   const mlEvents = [];
 
-  events.forEach((e, i) => {
+  events.forEach((e) => {
     if (e.element === 'VEVENT') {
       const description = e.properties.SUMMARY;
       const start = e.properties.DTSTART;
@@ -23,7 +24,7 @@ function createEvents(ical) {
 
       if (description && start && end && description.length && start.length && end.length) {
         // Temp reference to unsaved events to allow removal from table
-        const tempId = `${i}${start[0].value.valueOf()}`;
+        const tempId = generateTempId();
 
         mlEvents.push({
           event_id: tempId,

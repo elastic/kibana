@@ -143,11 +143,18 @@ export class NewCalendar extends Component {
     const jobIds = selectedJobOptions.map((option) => option.label);
     const groupIds = selectedGroupOptions.map((option) => option.label);
 
+    // Reduce events to fields expected by api
+    const eventsToSave = events.map((event) => ({
+      description: event.description,
+      start_time: event.start_time,
+      end_time: event.end_time
+    }));
+
     // set up calendar
     const calendar = {
       calendarId: formCalendarId,
       description,
-      events,
+      events: eventsToSave,
       job_ids: [...jobIds, ...groupIds]
     };
 

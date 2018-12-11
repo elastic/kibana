@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import { TIME_FORMAT } from '../events_table/';
+import { generateTempId } from '../utils';
 
 const VALID_DATE_STRING_LENGTH = 19;
 
@@ -56,10 +57,14 @@ export class NewEventModal extends Component {
 
   handleAddEvent = () => {
     const { description, startDate, endDate } = this.state;
+    // Temp reference to unsaved events to allow removal from table
+    const tempId = generateTempId();
+
     const event = {
       description,
       start_time: startDate.valueOf(),
-      end_time: endDate.valueOf()
+      end_time: endDate.valueOf(),
+      event_id: tempId
     };
 
     this.props.addEvent(event);

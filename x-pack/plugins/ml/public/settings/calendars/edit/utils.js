@@ -81,3 +81,7 @@ export function validateCalendarId(calendarId) {
 
   return valid;
 }
+
+export function generateTempId() {
+  return Math.random().toString(36).substr(2, 9);
+}

@@ -93,7 +93,8 @@ export class ImportModal extends Component {
     const events = eventsToImport.map((event) => ({
       description: event.description,
       start_time: event.start_time,
-      end_time: event.end_time
+      end_time: event.end_time,
+      event_id: event.event_id
     }));
 
     this.props.addImportedEvents(events);
