@@ -155,25 +155,25 @@ class ShareContextMenuUI extends Component<Props> {
           }
         ),
         items: menuItems
-          .map(menuItem => {
-            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
-            if (!menuItem.sortOrder) {
-              menuItem.sortOrder = 0;
-            }
-            return menuItem;
-          })
           // Sorts ascending on sort order first and then ascending on name
           .sort((a, b) => {
-            if (a.sortOrder > b.sortOrder) {
+            const aSortOrder = a.sortOrder || 0;
+            const bSortOrder = b.sortOrder || 0;
+            if (aSortOrder > bSortOrder) {
               return 1;
             }
-            if (a.sortOrder < b.sortOrder) {
+            if (aSortOrder < bSortOrder) {
               return -1;
             }
             if (a.name.toLowerCase().localeCompare(b.name.toLowerCase()) > 0) {
               return 1;
             }
             return -1;
+          })
+          .map(menuItem => {
+            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
+            delete menuItem.sortOrder;
+            return menuItem;
           }),
       };
       panels.push(topLevelMenuPanel);
