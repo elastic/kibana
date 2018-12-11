@@ -19,6 +19,7 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
+import v8 from 'v8';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
@@ -64,6 +65,9 @@ export default class BaseOptimizer {
         break;
     }
 
+    // Run some pre loading in order to prevent
+    // high delay when booting thread loader workers
+    this.warmupThreadLoaderPool();
   }
 
   async init() {
@@ -77,10 +81,6 @@ export default class BaseOptimizer {
     // register the webpack compiler hooks
     // for the base optimizer
     this.registerCompilerHooks();
-
-    // Run some pre loading in order to prevent
-    // high delay when booting thread loader workers
-    this.warmupThreadLoaderPool();
 
     return this;
   }
@@ -111,21 +111,29 @@ export default class BaseOptimizer {
     threadLoader.warmup(
       // pool options, like passed to loader options
       // must match loader options to boot the correct pool
-      this.getThreadLoaderConfig(),
+      this.getThreadLoaderPoolConfig(),
       [
         // modules to load on the pool
         'babel-loader',
+        'ts-loader',
         BABEL_PRESET_PATH
       ]
     );
   }
 
-  getThreadLoaderConfig() {
+  getThreadLoaderPoolConfig() {
+    const currentAvailableOsCpus = os.cpus().length - 1;
+    const calculatedCpus = currentAvailableOsCpus > 0
+      ? currentAvailableOsCpus
+      : 4;
+
     return {
       name: 'optimizer-thread-loader-main-pool',
+      workers: calculatedCpus,
       workerParallelJobs: 50,
+      workerNodeArgs: [`--max_old_space_size=${Math.trunc(v8.getHeapStatistics().total_heap_size / 1000000)}`],
       poolParallelJobs: 50,
-      poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 2000
+      poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 5000
     };
   }
 
@@ -204,7 +212,6 @@ export default class BaseOptimizer {
       mode: 'development',
       node: { fs: 'empty' },
       context: fromRoot('.'),
-      parallelism: os.cpus().length - 1,
       cache: true,
       entry: this.uiBundles.toWebpackEntries(),
 
@@ -236,6 +243,7 @@ export default class BaseOptimizer {
       plugins: [
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
+          threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
           log: this.log
         }),
 
@@ -304,7 +312,7 @@ export default class BaseOptimizer {
             use: maybeAddCacheLoader('babel', [
               {
                 loader: 'thread-loader',
-                options: this.getThreadLoaderConfig()
+                options: this.getThreadLoaderPoolConfig()
               },
               {
                 loader: 'babel-loader',
@@ -371,8 +379,13 @@ export default class BaseOptimizer {
               resource: createSourceFileResourceSelector(/\.tsx?$/),
               use: maybeAddCacheLoader('typescript', [
                 {
+                  loader: 'thread-loader',
+                  options: this.getThreadLoaderPoolConfig()
+                },
+                {
                   loader: 'ts-loader',
                   options: {
+                    happyPackMode: true,
                     transpileOnly: true,
                     experimentalWatchApi: true,
                     onlyCompileBundledFiles: true,

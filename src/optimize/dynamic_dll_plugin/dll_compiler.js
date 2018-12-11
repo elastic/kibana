@@ -32,10 +32,12 @@ const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class DllCompiler {
-  static getRawDllConfig(alias = {}, noParseRules = []) {
+  static getRawDllConfig(alias = {}, noParseRules = [], babelCacheDir = '', threadLoaderPoolConfig = {}) {
     return {
       alias,
       noParseRules,
+      babelCacheDir,
+      threadLoaderPoolConfig,
       context: fromRoot('.'),
       entryName: 'vendors',
       dllName: '[name]',
@@ -50,10 +52,12 @@ export class DllCompiler {
     };
   }
 
-  constructor(uiBundles, log) {
+  constructor(uiBundles, threadLoaderPoolConfig, log) {
     this.rawDllConfig = DllCompiler.getRawDllConfig(
       uiBundles.getAliases(),
-      uiBundles.getWebpackNoParseRules()
+      uiBundles.getWebpackNoParseRules(),
+      uiBundles.getCacheDirectory('babel'),
+      threadLoaderPoolConfig
     );
     this.log = log || (() => null);
   }

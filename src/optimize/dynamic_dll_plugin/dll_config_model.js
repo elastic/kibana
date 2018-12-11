@@ -34,7 +34,9 @@ function generateDLL(config) {
     dllBundleName,
     dllBundleFilename,
     dllStyleFilename,
-    dllManifestPath
+    dllManifestPath,
+    babelCacheDir,
+    threadLoaderPoolConfig
   } = config;
 
   const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
@@ -82,17 +84,12 @@ function generateDLL(config) {
             {
               loader: 'cache-loader',
               options: {
-                cacheDirectory: '/Users/tiagocosta/elastic/kibana/optimize/.cache/b5f3dae2ca73f163e95a62be1c99dafb5fd8c378'
+                cacheDirectory: babelCacheDir
               }
             },
             {
               loader: 'thread-loader',
-              options: {
-                name: 'optimizer-thread-loader-main-pool',
-                workerParallelJobs: 50,
-                poolParallelJobs: 50,
-                poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 2000
-              }
+              options: threadLoaderPoolConfig
             },
             {
               loader: 'babel-loader',
@@ -164,6 +161,8 @@ function extendRawConfig(rawConfig) {
   const dllBundleFilename = `${dllBundleName}${dllBundleExt}`;
   const dllManifestPath = `${dllOutputPath}/${dllManifestName}${dllManifestExt}`;
   const dllStyleFilename = `${dllStyleName}${dllStyleExt}`;
+  const babelCacheDir = rawConfig.babelCacheDir;
+  const threadLoaderPoolConfig = rawConfig.threadLoaderPoolConfig;
 
   // Create webpack entry object key with the provided dllEntryName
   dllEntry[dllEntryName] = [
@@ -181,7 +180,9 @@ function extendRawConfig(rawConfig) {
     dllBundleName,
     dllBundleFilename,
     dllStyleFilename,
-    dllManifestPath
+    dllManifestPath,
+    babelCacheDir,
+    threadLoaderPoolConfig
   };
 }
 
