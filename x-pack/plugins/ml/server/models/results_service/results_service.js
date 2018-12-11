@@ -11,12 +11,12 @@ import moment from 'moment';
 
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
 
-const DEFAULT_QUERY_SIZE = 500;
 const DEFAULT_MAX_EXAMPLES = 500;
 
 export function resultsServiceProvider(callWithRequest) {

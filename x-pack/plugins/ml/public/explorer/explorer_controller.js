@@ -48,6 +48,7 @@ import {
   SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE
 } from './explorer_constants';
+import { DEFAULT_QUERY_SIZE } from '../../common/constants/search';
 
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
@@ -946,7 +947,6 @@ module.controller('MlExplorerController', function (
     }
   }
 
-  const MAX_ANNOTATIONS = 1000;
   async function loadAnnotationsTableData() {
     $scope.annotationsData = [];
 
@@ -961,7 +961,7 @@ module.controller('MlExplorerController', function (
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
-        maxAnnotations: MAX_ANNOTATIONS
+        maxAnnotations: DEFAULT_QUERY_SIZE
       });
 
       $scope.$evalAsync(() => {
@@ -999,7 +999,7 @@ module.controller('MlExplorerController', function (
       timeRange.earliestMs,
       timeRange.latestMs,
       dateFormatTz,
-      500,
+      DEFAULT_QUERY_SIZE,
       MAX_CATEGORY_EXAMPLES
     ).then((resp) => {
       const anomalies = resp.anomalies;

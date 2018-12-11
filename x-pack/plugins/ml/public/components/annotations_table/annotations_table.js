@@ -35,8 +35,8 @@ import chrome from 'ui/chrome';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlAnomaliesTableService } from '../anomalies_table/anomalies_table_service';
+import { DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 
-const MAX_ANNOTATIONS = 1000;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
@@ -65,7 +65,7 @@ class AnnotationsTable extends Component {
         jobIds: [job.job_id],
         earliestMs: dataCounts.earliest_record_timestamp,
         latestMs: dataCounts.latest_record_timestamp,
-        maxAnnotations: MAX_ANNOTATIONS
+        maxAnnotations: DEFAULT_QUERY_SIZE
       }).then((resp) => {
         this.setState((prevState, props) => ({
           annotations: resp.annotations[props.jobs[0].job_id] || [],

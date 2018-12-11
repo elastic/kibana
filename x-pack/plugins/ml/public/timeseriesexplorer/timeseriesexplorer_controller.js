@@ -51,6 +51,7 @@ import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import { initPromise } from 'plugins/ml/util/promise';
+import { DEFAULT_QUERY_SIZE } from '../../common/constants/search';
 
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
@@ -85,8 +86,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   timefilter.enableAutoRefreshSelector();
 
   const CHARTS_POINT_TARGET = 500;
-  const ANOMALIES_MAX_RESULTS = 500;
-  const MAX_ANNOTATIONS = 1000;
+  const ANOMALIES_MAX_RESULTS = DEFAULT_QUERY_SIZE;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
@@ -460,7 +460,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         jobIds: [$scope.selectedJob.job_id],
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
-        maxAnnotations: MAX_ANNOTATIONS
+        maxAnnotations: DEFAULT_QUERY_SIZE
       }).then((resp) => {
         refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
           .sort((a, b) => {
