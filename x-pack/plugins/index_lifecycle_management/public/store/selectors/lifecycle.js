@@ -204,11 +204,6 @@ export const getLifecycle = state => {
         accum[phaseName] = phaseToES(state, phase);
 
         // These seem to be constants
-        // TODO: verify this assumption
-        if (phaseName === PHASE_HOT) {
-          accum[phaseName].min_age = '0s';
-        }
-
         if (phaseName === PHASE_DELETE) {
           accum[phaseName].actions = {
             ...accum[phaseName].actions,
