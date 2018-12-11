@@ -13,7 +13,7 @@ declare module '@elastic/eui' {
   export const EuiWrappingPopover: React.SFC<any>;
 }
 
-import { EuiToolTipPosition } from '@elastic/eui';
+import { EuiToolTipPosition, IconType } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
 import { MouseEventHandler, ReactType, Ref } from 'react';
