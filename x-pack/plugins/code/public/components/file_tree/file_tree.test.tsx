@@ -8,14 +8,9 @@ import { History, Location } from 'history';
 import React from 'react';
 import { match } from 'react-router-dom';
 import renderer from 'react-test-renderer';
-import { MainRouteParams, PathTypes } from '../../../common/types';
-import {
-  createHistory,
-  createLocation,
-  createMatch,
-  mockFunction,
-} from '../../../utils/test_utils';
-import { CodeFileTree } from '../file_tree';
+import { MainRouteParams, PathTypes } from '../../common/types';
+import { createHistory, createLocation, createMatch, mockFunction } from '../../utils/test_utils';
+import { CodeFileTree } from './file_tree';
 import props from './props.json';
 
 const location: Location = createLocation({
