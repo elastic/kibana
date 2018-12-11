@@ -27,35 +27,41 @@ import {
   filterPaths,
   extractMessagesFromPathToMap,
   writeFileAsync,
+  readFileAsync,
   serializeToJson,
   serializeToJson5,
+  normalizePath,
 } from './i18n/';
 
-run(async ({ flags: { path, output, 'output-format': outputFormat, include = [], exclude } }) => {
+run(async ({ flags: { path, output, 'output-format': outputFormat, include = [] } }) => {
   const paths = Array.isArray(path) ? path : [path || './'];
-  const additionalPluginsPaths = Array.isArray(include) ? include : [include];
+  const additionalI18nConfigPaths = Array.isArray(include) ? include : [include];
 
-  const configWithAdditionalPlugins = {
-    paths: {
-      ...config.paths,
-      ...additionalPluginsPaths.reduce((pairs, pair) => {
-        const parsedPair = pair.split(':');
-        const [namespace, path] = parsedPair;
-
-        if (parsedPair.length !== 2) {
-          throw createFailError(
-            `${chalk.white.bgRed(' I18N ERROR ')} Cannot parse '--include ${pair}'`
-          );
-        }
-
-        pairs[namespace] = path;
-        return pairs;
-      }, {}),
-    },
-    exclude: config.exclude.concat(exclude || []),
+  const fullConfig = {
+    ...config,
   };
 
-  const filteredPaths = filterPaths(paths, configWithAdditionalPlugins);
+  for (const configPath of additionalI18nConfigPaths) {
+    const configJson = await readFileAsync(resolve(configPath));
+    const additionalConfig = JSON.parse(configJson);
+
+    fullConfig.paths = {
+      ...fullConfig.paths,
+      ...Object.entries(additionalConfig.paths).reduce((acc, [pluginNamespace, pluginPath]) => {
+        acc[pluginNamespace] = normalizePath(resolve(configPath, '..', pluginPath));
+        return acc;
+      }, {}),
+    };
+
+    fullConfig.exclude = [
+      ...fullConfig.exclude,
+      ...additionalConfig.exclude.map(excludePath => {
+        normalizePath(resolve(configPath, '..', excludePath));
+      }),
+    ];
+  }
+
+  const filteredPaths = filterPaths(paths, fullConfig);
 
   if (filteredPaths.length === 0) {
     throw createFailError(
@@ -66,8 +72,7 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
 
   const list = new Listr(
     filteredPaths.map(filteredPath => ({
-      task: messages =>
-        extractMessagesFromPathToMap(filteredPath, messages, configWithAdditionalPlugins),
+      task: messages => extractMessagesFromPathToMap(filteredPath, messages, fullConfig),
       title: filteredPath,
     }))
   );
