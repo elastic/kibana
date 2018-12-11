@@ -6,7 +6,6 @@
 
 import { isEmpty } from 'lodash';
 import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
-// @ts-ignore TODO type this
 import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { ElasticsearchAdapter } from './adapter_types';
