@@ -1,48 +1,25 @@
 # I18n
 
-Kibana relies on several UI frameworks (React and Angular) and
+Kibana relies on several UI frameworks (ReactJS and AngularJS) and
 requires localization in different environments (browser and NodeJS).
 Internationalization engine is framework agnostic and consumable in
-all parts of Kibana (React, Angular and NodeJS). In order to simplify
+all parts of Kibana (ReactJS, AngularJS and NodeJS). In order to simplify
 internationalization in UI frameworks, the additional abstractions are
 built around the I18n engine: `react-intl` for React and custom
-components for Angular. [React-intl](https://github.com/yahoo/react-intl)
+components for AngularJS. [React-intl](https://github.com/yahoo/react-intl)
 is built around [intl-messageformat](https://github.com/yahoo/intl-messageformat),
-so both React and Angular frameworks use the same engine and the same
+so both React and AngularJS frameworks use the same engine and the same
 message syntax.
 
 ## Localization files
 
-Localization files have [JSON5](https://github.com/json5/json5) format.
-
-The main benefits of using `JSON5`:
-
-- Objects may have a single trailing comma.
-- Single and multi-line comments are allowed.
-- Strings may span multiple lines by escaping new line characters.
-
-Short example:
-
-```js
-{
-  // comments
-  unquoted: 'and you can quote me on that',
-  singleQuotes: 'I can use "double quotes" here',
-  lineBreaks: "Wow! \
-No \\n's!",
-  hexadecimal: 0xdecaf,
-  leadingDecimalPoint: .8675309, andTrailing: 8675309.,
-  positiveSign: +1,
-  trailingComma: 'in objects', andIn: ['arrays',],
-  "backwardsCompatible": "with JSON",
-}
-```
+Localization files are JSON files.
 
 Using comments can help to understand which section of the application
 the localization key is used for. Also `namespaces`
 are used in order to simplify message location search. For example, if
 we are going to translate the title of `/management/sections/objects/_objects.html`
-file, we should use message path like this: `'MANAGEMENT.OBJECTS.TITLE'`.
+file, we should use message path like this: `'management.objects.objectsTitle'`.
 
 Each Kibana plugin has a separate folder with translation files located at
 ```
@@ -93,7 +70,7 @@ when missing translations
 For the detailed explanation, see the section below
 - `getFormats()` - returns current formats
 - `getRegisteredLocales()` - returns array of locales having translations
-- `translate(id: string, [{values: object, defaultMessage: string, description: string}])` –
+- `translate(id: string, { values: object, defaultMessage: string, description: string })` –
 translate message by id. `description` is optional context comment that will be extracted
 by i18n tools and added as a comment next to translation message at `defaultMessages.json`.
 - `init(messages: Map<string, string>)` - initializes the engine
@@ -185,6 +162,20 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 }),
 ```
 
+One more example with a parameter:
+
+```js
+import { i18n } from '@kbn/i18n';
+
+export function getGreetingMessage(userName) {
+  return i18n.translate('hello.wonderful.world', {
+    defaultMessage: 'Greetings, {name}!',
+    values: { name: userName },
+    context: 'This is greeting message for main screen.'
+  });
+}
+```
+
 We're also able to use all methods exposed by the i18n engine
 (see [I18n engine](#i18n-engine) section above for more details).
 
@@ -259,8 +250,21 @@ Optionally we can pass `description` prop into `FormattedMessage` component.
 This prop is optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
+In case when ReactJS component is rendered with the help of `reactDirective` AngularJS service, it's necessary to use React HOC `injectI18nProvider` to pass `intl` object to `FormattedMessage` component via context.
 
-#### Attributes translation in React
+```js
+import { injectI18nProvider } from '@kbn/i18n/react';
+import { Header } from './components/header';
+
+module.directive('headerGlobalNav', (reactDirective) => {
+  return reactDirective(injectI18nProvider(Header));
+});
+
+```
+
+**NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `injectI18nProvider` or `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
+
+### Attributes translation in React
 
 React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` Higher-Order Component. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component with `injectI18n` Higher-Order Component. The formatting API will be provided to the wrapped component via `props.intl`.
 
@@ -310,7 +314,7 @@ class MyComponentContent extends React.Component {
       <input
         type="text"
         placeholder={intl.formatMessage({
-          id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
+          id: 'kbn.management.objects.searchPlaceholder',
           defaultMessage: 'Search',
         })}
       />
@@ -321,9 +325,9 @@ class MyComponentContent extends React.Component {
 export const MyComponent = injectI18n(MyComponentContent);
 ```
 
-## Angular
+## AngularJS
 
-Angular wrapper has 4 entities: translation `provider`, `service`, `directive`
+AngularJS wrapper has 4 entities: translation `provider`, `service`, `directive`
 and `filter`. Both the directive and the filter use the translation `service`
 with i18n engine under the hood.
 
@@ -343,13 +347,13 @@ when missing translations
 - `init(messages: Map<string, string>)` - initializes the engine
 
 The translation `service` provides only one method:
-- `i18n(id: string, [{values: object, defaultMessage: string, description: string }])`–
+- `i18n(id: string, { values: object, defaultMessage: string, description: string })` –
 translate message by id
 
 The translation `filter` is used for attributes translation and has
 the following syntax:
 ```
-{{'translationId' | i18n[:{ values: object, defaultMessage: string, description: string }]}}
+{{ ::'translationId' | i18n: { values: object, defaultMessage: string, description: string } }}
 ```
 
 Where:
@@ -400,30 +404,21 @@ loaded automatically. After that we can use i18n directive in Angular templates:
 ></span>
 ```
 
-In order to translate attributes in Angular we should use `i18nFilter`:
+In order to translate attributes in AngularJS we should use `i18nFilter`:
 ```html
 <input
   type="text"
-  placeholder="{{ ::'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
-    defaultMessage: 'Search'
+  placeholder="{{ ::'kbn.management.objects.searchAriaLabel' | i18n: {
+    defaultMessage: 'Search { title } Object',
+    values: { title }
   } }}"
 >
 ```
 
-## Build tools
+## I18n tools
 
-In order to simplify localization process, some build tools will be added:
-- tool for verifying all translations have translatable strings
-- tool for checking unused translation strings
-- tool for extracting default messages from templates
+In order to simplify localization process, some additional tools were implemented:
+- tool for verifying all translations have translatable strings and extracting default messages from templates
+- tool for verifying translation files and integrating them to Kibana
 
-While `react-intl` has
-[babel-plugin-react-intl](https://github.com/yahoo/babel-plugin-react-intl)
-library which extracts string messages for translation, angular wrapper requires
-own implementation of such tool. In order to extracrt translation keys from the
-template, we have to parse it and create AST object. There is a
-[babel-plugin-syntax-jsx](https://github.com/babel/babel/tree/master/packages/babel-plugin-syntax-jsx)
-plugin which helps to parse JSX syntax and then create AST object. Unfortunately,
-there are no babel plugins to parse angular templates. One of the solution can be internal
-[`$parse.$$getAst`](https://github.com/angular/angular.js/blob/master/src/ng/parse.js#L1819)
-angular method.
+[I18n tools documentation](../../src/dev/i18n/README.md)

@@ -27,6 +27,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AdvancedSettings } from './advanced_settings';
 import { i18n } from '@kbn/i18n';
+import { getBreadcrumbs } from './breadcrumbs';
 
 const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
 
@@ -54,7 +55,8 @@ function destroyAdvancedSettings() {
 
 uiRoutes
   .when('/management/kibana/settings/:setting?', {
-    template: indexTemplate
+    template: indexTemplate,
+    k7Breadcrumbs: getBreadcrumbs
   });
 
 uiModules.get('apps/management')
