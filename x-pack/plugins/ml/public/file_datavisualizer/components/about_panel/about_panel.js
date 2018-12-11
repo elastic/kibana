@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -36,7 +37,12 @@ export function AboutPanel({ onFilePickerChange }) {
               <div style={{ textAlign: 'center' }} >
                 <EuiFilePicker
                   id="filePicker"
-                  initialPromptText="Select or drag and drop a file"
+                  initialPromptText={
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription"
+                      defaultMessage="Select or drag and drop a file"
+                    />
+                  }
                   onChange={files => onFilePickerChange(files)}
                   className="file-datavisualizer-file-picker"
                 />
@@ -58,7 +64,12 @@ export function LoadingPanel() {
           <EuiFlexItem grow={false}>
             <EuiPanel paddingSize="l" style={{ textAlign: 'center' }} >
               <EuiTitle size="s">
-                <h3>Analyzing data</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
+                    defaultMessage="Analyzing data"
+                  />
+                </h3>
               </EuiTitle>
 
               <EuiSpacer size="l" />
