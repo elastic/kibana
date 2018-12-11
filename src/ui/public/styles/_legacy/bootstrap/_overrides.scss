@@ -13,7 +13,7 @@
 
 .navbar {
   border-width: 0;
-  margin-bottom: 0px !important;
+  margin-bottom: 0 !important;
 }
 
   .navbar-btn-link {
@@ -59,7 +59,7 @@
   }
 
   .navbar-nav {
-    font-size: $font-size-small;
+    font-size: $euiFontSizeXS;
 
     & > .active > a {
       border-bottom-color: $euiColorDarkShade;
@@ -68,7 +68,7 @@
   }
 
   .navbar-toggle {
-    margin-top: 4px;
+    margin-top: $euiSizeXS;
   }
 
 
@@ -76,27 +76,28 @@
 
 .text-primary,
 .text-primary:hover {
-  color: $brand-primary;
+  color: $euiColorPrimary;
 }
 
 .text-success,
 .text-success:hover {
-  color: $brand-success;
+  color: $euiColorSuccess;
 }
 
 .text-danger,
 .text-danger:hover {
-  color: $brand-danger;
+  color: $euiColorDanger;
 }
 
+.text-color-warning,
 .text-warning,
 .text-warning:hover {
-  color: $brand-warning;
+  color: $euiColorWarning;
 }
 
 .text-info,
 .text-info:hover {
-  color: $brand-info;
+  color: $euiColorPrimary;
 }
 
 // Tables =====================================================================
@@ -116,14 +117,14 @@ table,
   }
 }
 
-  .table-bordered > thead > tr > th,
-  .table-bordered > tbody > tr > th,
-  .table-bordered > tfoot > tr > th,
-  .table-bordered > thead > tr > td,
-  .table-bordered > tbody > tr > td,
-  .table-bordered > tfoot > tr > td {
-    border: 1px solid $table-border-color;
-  }
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > th,
+.table-bordered > tfoot > tr > th,
+.table-bordered > thead > tr > td,
+.table-bordered > tbody > tr > td,
+.table-bordered > tfoot > tr > td {
+  border: $euiBorderThin;
+}
 
 // Forms ======================================================================
 
@@ -155,17 +156,17 @@ input {
   .radio-inline,
   .checkbox-inline,
   .form-control-feedback {
-    color: $brand-warning;
+    color: $euiColorWarning;
   }
 
   .form-control,
   .form-control:focus {
     border: 1px solid;
-    border-color: $brand-warning;
+    border-color: $euiColorWarning;
   }
 
   .input-group-addon {
-    border-color: $brand-warning;
+    border-color: $euiColorWarning;
   }
 }
 
@@ -177,17 +178,17 @@ input {
   .radio-inline,
   .checkbox-inline,
   .form-control-feedback {
-    color: $brand-danger;
+    color: $euiColorDanger;
   }
 
   .form-control,
   .form-control:focus {
     border: 1px solid;
-    border-color: $brand-danger;
+    border-color: $euiColorDanger;
   }
 
   .input-group-addon {
-    border-color: $brand-danger;
+    border-color: $euiColorDanger;
   }
 }
 
@@ -199,16 +200,16 @@ input {
   .radio-inline,
   .checkbox-inline,
   .form-control-feedback {
-    color: $brand-success;
+    color: $euiColorSuccess;
   }
 
   .form-control,
   .form-control:focus {
-    border: solid $brand-success;
+    border: solid $euiColorSuccess;
   }
 
   .input-group-addon {
-    border-color: $brand-success;
+    border-color: $euiColorSuccess;
   }
 }
 
@@ -233,7 +234,7 @@ input {
     &>a:hover,
     &>a:focus,
     &>span {
-      background-color: $pagination-disabled-bg;
+      background-color: transparent;
     }
   }
 }
@@ -275,8 +276,8 @@ input {
   box-shadow: none;
 
   .progress-bar {
-    font-size: 10px;
-    line-height: 10px;
+    font-size: font-size(10px);
+    line-height: font-size(10px);
   }
 }
 
@@ -289,9 +290,9 @@ input {
 // Tooltips =================================================================
 
 .bsTooltip {
-  font-size: 8pt;
-  font-weight: normal;
-  opacity: 90%;
+  font-size: font-size(8px);
+  font-weight: $euiFontWeightRegular;
+  opacity: 1;
 }
 
 .bsTooltip-inner {

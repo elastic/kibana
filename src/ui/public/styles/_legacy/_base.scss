@@ -1,10 +1,11 @@
-// Base
+// Forms
 
+// Angular form states
 .ng-dirty, .ng-touched {
   input.ng-invalid#{&},
   textarea.ng-invalid#{&},
   select.ng-invalid#{&} {
-    border-color: $state-danger-bg !important;
+    border-color: $euiColorDanger !important;
   }
 }
 
@@ -21,39 +22,6 @@ input[type="checkbox"],
   }
 }
 
-// chrome-context
-
-.content {
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-
-  > nav {
-    z-index: 5;
-
-    .navbar-right {
-      margin-right: 0 !important;
-    }
-  }
-}
-
-.application {
-  position: relative;
-  z-index: 0;
-  background-color: $white;
-  display: flex;
-  flex-grow: 1;
-  flex-shrink: 0;
-  flex-basis: auto;
-  flex-direction: column;
-
-  > * {
-    flex-shrink: 0;
-  }
-}
-
 .checkbox label {
   display: flex;
   align-items: center;
@@ -61,19 +29,21 @@ input[type="checkbox"],
 
   input[type="checkbox"] {
     float: none;
-    margin: 0 4px;
+    margin: 0 $euiSizeXS;
     position: static;
   }
 }
 
-notifications {
-  z-index: 1;
+// Application Layout
+
+// chrome-context
+.content {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
-
-//== Subnav
-//
-// Use for adding a subnav to your app
-
 
 .application,
 .app-container {
@@ -99,126 +69,19 @@ notifications {
   }
 }
 
-//== Table
-
-kbn-table, .kbn-table {
-  font-size: $euiFontSizeXS;
-
-  th {
-    white-space: nowrap;
-    padding-right: $euiSizeS;
-
-    .fa {
-      font-size: 1.1em;
-    }
-  }
-}
-
-//== SavedObjectFinder
-saved-object-finder,
-paginated-selectable-list {
-
-  .list-sort-button {
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
-    border: none;
-    padding: $euiSizeS $euiSize;
-    font-weight: $euiFontWeightRegular;
-    background-color: $euiColorLightestShade;
-  }
-
-  ul.li-striped {
-    li {
-      border: none;
-    }
-
-    li:nth-child(even) {
-      background-color: $euiColorLightestShade;
-    }
-
-    li:nth-child(odd) {
-      background-color: $euiColorEmptyShade;
-    }
-
-    .paginate-heading {
-      font-weight: $euiFontWeightRegular;
-      color: $euiColorDarkestShade;
-    }
-
-    .list-group-item {
-      padding: $euiSizeS $euiSize;
-
-      ul {
-        padding: 0;
-        display: flex;
-        flex-direction: row;
-
-        .finder-type {
-          margin-right: $euiSizeS;
-        }
-      }
-
-      a {
-        display: block;
-        color: $euiColorPrimary !important;
-
-        i {
-          color: shade($euiColorPrimary, 10%) !important;
-          margin-right: $euiSizeS;
-        }
-      }
-
-      &:first-child {
-        border-top-left-radius: 0 !important;
-        border-top-right-radius: 0 !important;
-      }
-
-      &.list-group-no-results p {
-        margin-bottom: 0 !important;
-      }
-    }
-  }
-
-  paginate {
-    paginate-controls {
-      margin: $euiSize;
-    }
-  }
-}
-
-style-compile {
-  display: none;
-}
-
-.cell-hover {
+.application {
+  background-color: $euiColorEmptyShade;
   position: relative;
+  z-index: 0;
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
 
-  /**
-   * 1. Center vertically regardless of row height.
-   */
-  .table-cell-filter {
-    position: absolute;
-    white-space: nowrap;
-    right: 0;
-    top: 50%; /* 1 */
-    transform: translateY(-50%); /* 1 */
-    display: none;
+  > * {
+    flex-shrink: 0;
   }
-
-  &:hover {
-    .table-cell-filter {
-      display: inline;
-    }
-
-    .cell-hover-show {
-      visibility: visible;
-    }
-  }
-}
-
-.cell-hover-show {
-  // so that the cell doesn't change size on hover
-  visibility: hidden;
 }
 
 [fixed-scroll] {
@@ -234,7 +97,7 @@ style-compile {
 }
 
 
-// TODO: Extract these styles into the UI Framework.
+// Too overused in many places to be moved elsewhere
 
 .page-row {
   padding: 0 $euiSize;
@@ -244,32 +107,6 @@ style-compile {
 .page-row-text {
   color: $euiColorDarkShade;
   font-size: $euiFontSizeS;
-}
-
-.kuiFormSection {
-  margin-bottom: $euiSize;
-}
-
-.kuiFormLabel {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 700;
-}
-
-.kuiInputNote {
-  margin: $euiSizeXS 0 $euiSizeS;
-}
-
-.kuiInputNote--danger {
-  color: $euiColorDanger;
-}
-
-.kuiInputNote--warning {
-  color: $euiColorWarning;
-}
-
-.kuiFormSection {
-  margin-bottom: $euiSize;
 }
 
 // EUITODO: Move to EUI to ensure this doesn't happen elsewhere
@@ -295,11 +132,6 @@ style-compile {
   font-size: 0.7em !important;
 }
 
-// Colors available for font awesome icons, these might not look good with normal text
-.text-color-warning {
-  color: $brand-warning;
-}
-
 .text-monospace {
-  font-family: $font-family-monospace;
+  font-family: $euiCodeFontFamily;
 }
