@@ -106,7 +106,8 @@ class CodeContent extends React.PureComponent<Props, State> {
         observer.disconnect();
         return;
       }
-      const scrollTop = -parseInt(records[records.length - 1].target.style.top, 10);
+      const target = records[records.length - 1].target as HTMLElement;
+      const scrollTop = -parseInt(target.style.top!, 10);
       ele.scrollTop = scrollTop;
     });
     const targetNode = document.querySelector('#mainEditor:first-child:first-child:first-child');

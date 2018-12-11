@@ -21,7 +21,7 @@ const initialState: StatusState = {
 
 export const status = handleActions(
   {
-    [String(loadStatus)]: (state: StatusState, action: any) =>
+    [String(loadStatus)]: (state: StatusState) =>
       produce<StatusState>(state, draft => {
         draft.loading = true;
       }),

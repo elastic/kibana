@@ -5,11 +5,15 @@
  */
 
 import { connect } from 'react-redux';
-import { Route as ReactRoute } from 'react-router';
-import { routeChange } from '../actions';
+import { Route as ReactRoute, RouteProps } from 'react-router';
+import { Match, routeChange } from '../actions';
 
-class CSRoute extends ReactRoute {
+interface Props extends RouteProps {
+  routeChange: (match: Match) => void;
+}
+class CSRoute extends ReactRoute<Props> {
   public componentWillMount() {
+    // @ts-ignore
     super.componentWillMount();
     this.props.routeChange({ ...this.state.match, location: this.props.location });
   }

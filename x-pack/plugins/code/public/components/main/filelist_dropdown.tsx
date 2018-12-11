@@ -15,21 +15,18 @@ interface Props {
   revision: string;
   repoUri: string;
   paths: string[];
-  dir: FileTree;
+  dir?: FileTree;
   fetchDirectory: (payload: FetchRepoTreePayload) => void;
 }
 interface State {
   isOpen: boolean;
 }
 class FileListDropdownComponent extends React.Component<Props, State> {
-  constructor(props: Props, context: any) {
-    super(props, context);
-    this.state = {
-      isOpen: false,
-    };
-  }
+  public state = {
+    isOpen: false,
+  };
 
-  public onClick = (e: Event) => {
+  public onClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     const { repoUri, revision, paths } = this.props;
     this.props.fetchDirectory({
       uri: repoUri,
@@ -52,7 +49,12 @@ class FileListDropdownComponent extends React.Component<Props, State> {
       </span>
     );
     return (
-      <EuiPopover isOpen={this.state.isOpen} closePopover={this.close} button={button}>
+      <EuiPopover
+        id="filelist_dropdown"
+        isOpen={this.state.isOpen}
+        closePopover={this.close}
+        button={button}
+      >
         {this.renderSiblings()}
       </EuiPopover>
     );

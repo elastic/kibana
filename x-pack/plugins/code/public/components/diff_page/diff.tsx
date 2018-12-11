@@ -9,10 +9,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { CommitDiff } from '../../../common/git_diff';
+import { RootState } from '../../reducers';
 import { DiffEditor } from './diff_editor';
 
 interface Props {
-  commit: CommitDiff;
+  commit: CommitDiff | null;
 }
 
 const Container = styled.div`
@@ -66,9 +67,14 @@ const RedSquare = styled.span`
   border: 1px solid black;
 `;
 
-const Modification = props => {
+interface ModificationProps {
+  additions: number;
+  deletions: number;
+}
+
+const Modification = (props: ModificationProps) => {
   const greenSquaresCount = Math.min(
-    parseInt((props.additions * 6) / (props.deletions + props.additions), 10),
+    Math.floor((props.additions * 6) / (props.deletions + props.additions)),
     6
   );
   const redSquaresCount = 6 - greenSquaresCount;
@@ -113,9 +119,9 @@ export class DiffPage extends React.Component<Props> {
         </div>
         <DiffEditor
           key={file.path}
-          originCode={file.originCode}
-          modifiedCode={file.modifiedCode}
-          language={file.language}
+          originCode={file.originCode!}
+          modifiedCode={file.modifiedCode!}
+          language={file.language!}
           renderSideBySide={this.state.diffLayout === DiffLayout.Split}
         />
       </div>
@@ -155,7 +161,7 @@ export class DiffPage extends React.Component<Props> {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: RootState) => ({
   commit: state.commit.commit,
 });
 

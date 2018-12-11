@@ -12,6 +12,7 @@ import { loadBlame, loadBlameFailed, loadBlameSuccess } from '../actions/blame';
 export interface BlameState {
   blames: GitBlame[];
   loading: boolean;
+  error?: Error;
 }
 
 const initialState: BlameState = {
@@ -19,20 +20,21 @@ const initialState: BlameState = {
   loading: false,
 };
 
-export const blame = handleActions(
+export const blame = handleActions<BlameState, any>(
   {
-    [String(loadBlame)]: (state: BlameState, action: Action<any>) =>
+    [String(loadBlame)]: (state: BlameState) =>
       produce<BlameState>(state, draft => {
         draft.loading = true;
       }),
-    [String(loadBlameSuccess)]: (state: BlameState, action: Action<any>) =>
+    [String(loadBlameSuccess)]: (state: BlameState, action: Action<GitBlame[]>) =>
       produce<BlameState>(state, draft => {
-        draft.blames = action.payload;
+        draft.blames = action.payload!;
         draft.loading = false;
       }),
-    [String(loadBlameFailed)]: (state: BlameState, action: Action<any>) =>
+    [String(loadBlameFailed)]: (state: BlameState, action: Action<Error>) =>
       produce<BlameState>(state, draft => {
         draft.loading = false;
+        draft.error = action.payload;
         draft.blames = [];
       }),
   },

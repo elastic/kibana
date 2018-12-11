@@ -18,7 +18,7 @@ import {
 import { CodeFileTree } from '../file_tree';
 import props from './props.json';
 
-const location: Location<any> = createLocation({
+const location: Location = createLocation({
   pathname: '/github.com/google/guava/tree/master/guava/src/com/google',
 });
 

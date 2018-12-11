@@ -5,7 +5,7 @@
  */
 import { monaco } from './monaco';
 export class MonacoDiffEditor {
-  public diffEditor: monaco.editor.IStandaloneDiffEditor | null = null;
+  public diffEditor: monaco.editor.IDiffEditor | null = null;
   constructor(
     private readonly container: HTMLElement,
     private readonly originCode: string,

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactNode } from 'react';
+
 export enum SearchScope {
   repository = 'repository',
   default = 'default',
@@ -22,4 +24,14 @@ export interface MainRouteParams {
   org: string;
   revision: string;
   pathType: PathTypes;
+}
+
+export interface EuiSideNavItem {
+  id: string;
+  name: string;
+  isSelected?: boolean;
+  renderItem?: () => ReactNode;
+  forceOpen?: boolean;
+  items?: EuiSideNavItem[];
+  onClick: () => void;
 }

@@ -51,6 +51,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
   public switchTab = (tab: Tabs) => {
     const { history } = this.props;
     const { pathname, search } = history.location;
+    // @ts-ignore
     history.push(QueryString.replaceParamInUrl(`${pathname}${search}`, 'tab', tab));
   };
 

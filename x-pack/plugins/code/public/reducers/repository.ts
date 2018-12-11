@@ -49,7 +49,7 @@ export const repository = handleActions(
       produce<RepositoryState>(state, draft => {
         draft.loading = true;
       }),
-    [String(fetchReposSuccess)]: (state: RepositoryState, action: Action<Repository[]>) =>
+    [String(fetchReposSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         draft.loading = false;
         draft.repositories = action.payload || [];

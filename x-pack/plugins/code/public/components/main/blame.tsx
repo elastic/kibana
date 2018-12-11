@@ -15,7 +15,12 @@ interface Props {
   lineHeight: number;
 }
 
-const BlameContainer = styled<{ lineHeight: number; lines: number }, 'div'>('div')`
+interface BlameContainerProps {
+  lineHeight: number;
+  lines: number;
+}
+
+const BlameContainer = styled('div')<BlameContainerProps>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;

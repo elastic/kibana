@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { EuiBreadcrumbs } from '@elastic/eui';
 import React from 'react';
 import { MainRouteParams } from '../../common/types';
