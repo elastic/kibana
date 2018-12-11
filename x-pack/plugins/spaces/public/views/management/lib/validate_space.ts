@@ -39,7 +39,7 @@ export class SpaceValidator {
     if (!space.name || !space.name.trim()) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.requiredNameErrorMessage', {
-          defaultMessage: 'Name is required',
+          defaultMessage: 'Name is required.',
         })
       );
     }
@@ -47,7 +47,7 @@ export class SpaceValidator {
     if (space.name.length > 1024) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.nameMaxLengthErrorMessage', {
-          defaultMessage: 'Name must not exceed 1024 characters',
+          defaultMessage: 'Name must not exceed 1024 characters.',
         })
       );
     }
@@ -63,7 +63,7 @@ export class SpaceValidator {
     if (space.description && space.description.length > 2000) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.describeMaxLengthErrorMessage', {
-          defaultMessage: 'Description must not exceed 2000 characters',
+          defaultMessage: 'Description must not exceed 2000 characters.',
         })
       );
     }
@@ -83,7 +83,7 @@ export class SpaceValidator {
     if (!space.id) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.urlIdentifierRequiredErrorMessage', {
-          defaultMessage: 'URL identifier is required',
+          defaultMessage: 'URL identifier is required.',
         })
       );
     }
@@ -94,7 +94,7 @@ export class SpaceValidator {
           'xpack.spaces.management.validateSpace.urlIdentifierAllowedCharactersErrorMessage',
           {
             defaultMessage:
-              'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"',
+              'URL identifier can only contain a-z, 0-9, and the characters "_" and "-".',
           }
         )
       );

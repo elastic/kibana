@@ -189,7 +189,12 @@ class ManageSpacePageUI extends Component<Props, State> {
     if (this.editingExistingSpace()) {
       return `Edit space`;
     }
-    return `Create a space`;
+    return (
+      <FormattedMessage
+        id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
+        defaultMessage="Create a space"
+      />
+    );
   };
 
   public maybeGetSecureSpacesMessage = () => {
@@ -297,7 +302,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             {
               id:
                 'xpack.spaces.management.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
-              defaultMessage: '{name} was saved',
+              defaultMessage: `Space {name} was saved.`,
             },
             {
               name: `'${name}'`,
