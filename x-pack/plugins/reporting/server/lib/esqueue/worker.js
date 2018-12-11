@@ -353,6 +353,7 @@ export class Worker extends events.EventEmitter {
         constant_score: {
           filter: {
             bool: {
+              minimum_should_match: 1,
               filter: { term: { jobtype: this.jobtype } },
               should: [
                 { term: { status: 'pending' } },
