@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
+
 export interface DatabaseAdapter {
   putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any>;
   get<Source>(
@@ -62,8 +63,8 @@ export interface DatabaseSearchParams extends DatabaseGenericParams {
   size?: number;
   sort?: DatabaseNameList;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
   terminateAfter?: number;
   stats?: DatabaseNameList;
   suggestField?: string;
@@ -141,8 +142,8 @@ export interface DatabaseBulkIndexDocumentsParams extends DatabaseGenericParams 
   type?: string;
   fields?: DatabaseNameList;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
   pipeline?: string;
   index?: string;
 }
@@ -153,8 +154,8 @@ export interface DatabaseMGetParams extends DatabaseGenericParams {
   realtime?: boolean;
   refresh?: boolean;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
   index: string;
   type?: string;
 }
@@ -272,8 +273,8 @@ export interface DatabaseGetParams extends DatabaseGenericParams {
   refresh?: boolean;
   routing?: string;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
   version?: number;
   versionType?: DatabaseVersionType;
   id: string;

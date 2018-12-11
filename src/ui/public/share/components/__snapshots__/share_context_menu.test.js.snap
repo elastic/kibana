@@ -62,7 +62,7 @@ exports[`should only render permalink panel when there are no other panels 1`] =
   panels={
     Array [
       Object {
-        "content": <UrlPanelContent
+        "content": <InjectIntl(UrlPanelContentUI)
           getUnhashableStates={[Function]}
           objectType="dashboard"
         />,
@@ -81,7 +81,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
   panels={
     Array [
       Object {
-        "content": <UrlPanelContent
+        "content": <InjectIntl(UrlPanelContentUI)
           getUnhashableStates={[Function]}
           objectType="dashboard"
         />,
@@ -89,7 +89,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
         "title": "Permalink",
       },
       Object {
-        "content": <UrlPanelContent
+        "content": <InjectIntl(UrlPanelContentUI)
           getUnhashableStates={[Function]}
           isEmbedded={true}
           objectType="dashboard"
