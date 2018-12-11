@@ -11,6 +11,7 @@ import template from './account.html';
 import '../management/change_password_form/change_password_form';
 import '../../services/shield_user';
 import { i18n } from '@kbn/i18n';
+import { REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE } from '../../../common/constants';
 
 routes.when('/account', {
   template,
@@ -27,11 +28,14 @@ routes.when('/account', {
     }
   },
   controllerAs: 'accountController',
-  controller($scope, $route, Notifier, config) {
+  controller($scope, $route, Notifier, config, i18n) {
     $scope.user = $route.current.locals.user;
     config.bindToScope($scope, 'k7design');
 
     const notifier = new Notifier();
+
+    const { authentication_realm: authenticationRealm } = $scope.user;
+    $scope.showChangePassword = REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(authenticationRealm.type);
 
     $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
       $scope.user.newPassword = newPassword;
@@ -42,7 +46,9 @@ routes.when('/account', {
 
       $scope.user.$changePassword()
         .then(() => toastNotifications.addSuccess({
-          title: 'Updated password',
+          title: i18n('xpack.security.account.updatedPasswordTitle', {
+            defaultMessage: 'Updated password'
+          }),
           'data-test-subj': 'passwordUpdateSuccess',
         }))
         .then(onSuccess)
@@ -56,7 +62,9 @@ routes.when('/account', {
 
     this.getEmail = () => {
       if ($scope.user.email) return $scope.user.email;
-      return '(No email)';
+      return i18n('xpack.security.account.noEmailMessage', {
+        defaultMessage: '(No email)'
+      });
     };
   }
 });

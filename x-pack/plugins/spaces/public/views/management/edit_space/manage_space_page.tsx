@@ -26,6 +26,7 @@ import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import { UserProfile } from 'plugins/xpack_main/services/user_profile';
+import { Breadcrumb } from 'ui/chrome';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
 import { isReservedSpace } from '../../../../common';
@@ -34,7 +35,7 @@ import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
-import { toSpaceIdentifier } from '../lib';
+import { getEditBreadcrumbs, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { DeleteSpacesButton } from './delete_spaces_button';
@@ -47,6 +48,7 @@ interface Props {
   userProfile: UserProfile;
   spacesNavState: SpacesNavState;
   intl: InjectedIntl;
+  setBreadcrumbs?: (breadcrumbs: Breadcrumb[]) => void;
 }
 
 interface State {
@@ -71,13 +73,17 @@ class ManageSpacePageUI extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    const { spaceId, spacesManager, intl } = this.props;
+    const { spaceId, spacesManager, intl, setBreadcrumbs } = this.props;
 
     if (spaceId) {
       spacesManager
         .getSpace(spaceId)
         .then((result: any) => {
           if (result.data) {
+            if (setBreadcrumbs) {
+              setBreadcrumbs(getEditBreadcrumbs(result.data));
+            }
+
             this.setState({
               space: result.data,
               isLoading: false,
@@ -207,7 +213,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             name="description"
             placeholder={intl.formatMessage({
               id: 'xpack.spaces.management.manageSpacePage.hereMagicHappensPlaceholder',
-              defaultMessage: 'This is where the magic happens',
+              defaultMessage: 'This is where the magic happens.',
             })}
             value={description}
             onChange={this.onDescriptionChange}
@@ -244,7 +250,7 @@ class ManageSpacePageUI extends Component<Props, State> {
     return (
       <FormattedMessage
         id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
-        defaultMessage="Create space"
+        defaultMessage="Create a space"
       />
     );
   };
@@ -400,7 +406,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             {
               id:
                 'xpack.spaces.management.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
-              defaultMessage: '{name} was saved',
+              defaultMessage: `Space {name} was saved.`,
             },
             {
               name: `'${name}'`,

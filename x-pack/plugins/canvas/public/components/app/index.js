@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createSocket,
-  initializeInterpreter,
-  populateBrowserRegistries,
-} from '@kbn/interpreter/public';
+import { populateBrowserRegistries, getInitializedFunctions } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_functions';
 import { elementsRegistry } from '../../lib/elements_registry';
+import { templatesRegistry } from '../../lib/templates_registry';
+import { tagsRegistry } from '../../lib/tags_registry';
 import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
 import {
   argTypeRegistry,
@@ -44,6 +42,8 @@ const types = {
   modelUIs: modelRegistry,
   viewUIs: viewRegistry,
   argumentUIs: argTypeRegistry,
+  templates: templatesRegistry,
+  tags: tagsRegistry,
 };
 
 const mapDispatchToProps = dispatch => ({
@@ -51,10 +51,9 @@ const mapDispatchToProps = dispatch => ({
   setAppReady: basePath => async () => {
     try {
       // initialize the socket and interpreter
-      await createSocket(basePath);
       loadPrivateBrowserFunctions();
       await populateBrowserRegistries(types, basePath);
-      await initializeInterpreter();
+      await getInitializedFunctions();
 
       // set app state to ready
       dispatch(appReady());

@@ -18,6 +18,8 @@
  */
 
 import { EventEmitter } from 'events';
+import _ from 'lodash';
+import uuid from 'uuid/v4';
 import { RequestResponder } from './request_responder';
 import { Request, RequestParams, RequestStatus } from './types';
 
@@ -29,7 +31,12 @@ import { Request, RequestParams, RequestStatus } from './types';
  * @extends EventEmitter
  */
 class RequestAdapter extends EventEmitter {
-  private requests: Request[] = [];
+  private requests: Map<string, Request>;
+
+  constructor() {
+    super();
+    this.requests = new Map();
+  }
 
   /**
    * Start logging a new request into this request adapter. The new request will
@@ -47,19 +54,25 @@ class RequestAdapter extends EventEmitter {
       name,
       startTime: Date.now(),
       status: RequestStatus.PENDING,
+      id: _.get(params, 'id', uuid()),
     };
-    this.requests.push(req);
+    this.requests.set(req.id, req);
     this._onChange();
     return new RequestResponder(req, () => this._onChange());
   }
 
   public reset(): void {
-    this.requests = [];
+    this.requests = new Map();
+    this._onChange();
+  }
+
+  public resetRequest(id: string): void {
+    this.requests.delete(id);
     this._onChange();
   }
 
   public getRequests(): Request[] {
-    return this.requests;
+    return Array.from(this.requests.values());
   }
 
   private _onChange(): void {
