@@ -51,13 +51,13 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
     const avgRtt: any[] = [];
     const areaRtt: any[] = [];
     id = google.key;
-    google.series.forEach(({ avg, max, min }: {avg: any, max: any, min: any}) => {
+    google.series.forEach(({ avg, max, min }: { avg: any; max: any; min: any }) => {
       maxRtt.push(max);
       minRtt.push(min);
       avgRtt.push(avg);
-      areaRtt.push({ x: min.x, y0: min.y, y: max.y});
+      areaRtt.push({ x: min.x, y0: min.y, y: max.y });
     });
-    const selectOptions = [{ value: 'http@https://www.google.com', inputDisplay: (<EuiHealth color="success" style={{ lineHeight: 'inherit'}}>https://www.google.com</EuiHealth>)}];
+    const selectOptions = [{ value: 'http@https://www.google.com', inputDisplay: <EuiHealth color="success" style={{ lineHeight: 'inherit'}}>https://www.google.com</EuiHealth>}];
     const rttexample = JSON.parse(rttsampledata);
     const rttcontent: any[] = [];
     const rttresponse: any[] = [];
@@ -83,9 +83,14 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
     });
     return (
       <div>
-        <EuiTitle><h2>{id}</h2></EuiTitle>
+        <EuiTitle>
+          <h2>{id}</h2>
+        </EuiTitle>
+        <EuiSpacer />
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}><span>Monitor:</span></EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>Monitor:</span>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperSelect
               options={selectOptions}
@@ -101,7 +106,9 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
               <EuiFlexGroup>
                 <EuiFlexItem>Status&#58;</EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiHealth color="success" style={{lineHeight: 'inherit'}}>Up</EuiHealth>
+                  <EuiHealth color="success" style={{ lineHeight: 'inherit' }}>
+                    Up
+                  </EuiHealth>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -119,7 +126,14 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
               <h5>RTT Breakdown &mu;s</h5>
             </EuiTitle>
             <EuiPanel>
-              <EuiSeriesChart stackBy="y" margins={{ left: 60, right: 20, top: 10, bottom: 40 }} ypadding={20} xType={EuiSeriesChartUtils.SCALE.TIME} width={550} height={200}>
+              <EuiSeriesChart
+                stackBy="y"
+                margins={{ left: 60, right: 20, top: 10, bottom: 40 }}
+                ypadding={20}
+                xType={EuiSeriesChartUtils.SCALE.TIME}
+                width={550}
+                height={200}
+              >
                 <EuiAreaSeries name="RTT Write Request" data={rttwriterequest} curve="curveBasis" />
                 <EuiAreaSeries name="RTT Content" data={rttcontent} curve="curveBasis" />
                 <EuiAreaSeries name="RTT Response" data={rttresponse} curve="curveBasis" />
