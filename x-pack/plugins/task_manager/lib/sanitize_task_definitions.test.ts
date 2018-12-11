@@ -157,7 +157,9 @@ Object {
           createTaskRunner() {
             return {
               async run() {
-                return {};
+                return {
+                  state: {},
+                };
               },
             };
           },

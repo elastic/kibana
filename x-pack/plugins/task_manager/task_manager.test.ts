@@ -32,6 +32,7 @@ describe('TaskManager', () => {
     const task = {
       taskType: 'foo',
       params: {},
+      state: {},
     };
     await expect(client.schedule(task)).rejects.toThrow(/^NotInitialized: .*/i);
   });

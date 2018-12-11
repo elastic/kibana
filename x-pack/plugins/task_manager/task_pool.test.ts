@@ -120,7 +120,9 @@ describe('TaskPool', () => {
           this.isExpired = true;
           expired.resolve();
           await sleep(10);
-          return {};
+          return {
+            state: {},
+          };
         },
         cancel: shouldRun,
       },
@@ -129,7 +131,9 @@ describe('TaskPool', () => {
         numWorkers: 1,
         async run() {
           await sleep(10);
-          return {};
+          return {
+            state: {},
+          };
         },
         cancel: shouldNotRun,
       },
@@ -164,7 +168,9 @@ describe('TaskPool', () => {
         async run() {
           this.isExpired = true;
           await sleep(10);
-          return {};
+          return {
+            state: {},
+          };
         },
         async cancel() {
           cancelled.resolve();

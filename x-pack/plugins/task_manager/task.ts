@@ -53,7 +53,7 @@ export interface RunResult {
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
    */
-  state?: object;
+  state: object;
 }
 
 export const validateRunResult = Joi.object({
@@ -181,7 +181,7 @@ export interface TaskInstance {
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  state?: object;
+  state: object;
 
   /**
    * The id of the user who scheduled this task.

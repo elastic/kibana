@@ -138,22 +138,23 @@ export class TaskManagerRunner implements TaskRunner {
    * @returns {Promise<RunResult>}
    */
   public async run(): Promise<RunResult> {
-    try {
-      this.logger.debug(`Running task ${this}`);
-      const modifiedContext = await this.beforeRun({
-        kbnServer: this.kbnServer,
-        taskInstance: this.instance,
-      });
-      const task = this.definition.createTaskRunner(modifiedContext);
-      this.task = task;
-      return this.processResult(this.validateResult(await this.task.run()));
-    } catch (err) {
-      this.logger.warning(`Task ${this} failed: ${err}`);
-      if (err && err.stack) {
-        this.logger.debug(`Task ${JSON.stringify(this.instance)} failed: ${err}`);
-      }
+    this.logger.debug(`Running task ${this}`);
+    const modifiedContext = await this.beforeRun({
+      kbnServer: this.kbnServer,
+      taskInstance: this.instance,
+    });
 
-      return this.processResult({ error: err });
+    try {
+      this.task = this.definition.createTaskRunner(modifiedContext);
+      const result = await this.task.run();
+      const validatedResult = this.validateResult(result);
+      return this.processResult(validatedResult);
+    } catch (err) {
+      this.logger.error(`Task ${this} failed: ${err}`);
+
+      // in error scenario, we can not get the RunResult
+      // re-use modifiedContext's state, which is correct as of beforeRun
+      return this.processResult({ error: err, state: modifiedContext.taskInstance.state });
     }
   }
 
@@ -205,7 +206,7 @@ export class TaskManagerRunner implements TaskRunner {
       this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
     }
 
-    return result || {};
+    return result || { state: {} };
   }
 
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {

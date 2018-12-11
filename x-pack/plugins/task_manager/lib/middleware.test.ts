@@ -14,6 +14,7 @@ interface BeforeSaveOpts {
 
 const getMockTaskInstance = () => ({
   taskType: 'nice_task',
+  state: {},
   params: { abc: 'def' },
 });
 const getMockConcreteTaskInstance = () => {
@@ -79,7 +80,7 @@ describe('addMiddlewareToChain', () => {
     middlewareChain = addMiddlewareToChain(m1, m2);
     middlewareChain = addMiddlewareToChain(middlewareChain, m3);
 
-    middlewareChain.beforeSave({ taskInstance: getMockTaskInstance() }).then(saveOpts => {
+    middlewareChain.beforeSave({ taskInstance: getMockTaskInstance() }).then((saveOpts: any) => {
       expect(saveOpts).toMatchInlineSnapshot(`
 Object {
   "taskInstance": Object {
@@ -89,6 +90,7 @@ Object {
       "m2": true,
       "m3": true,
     },
+    "state": Object {},
     "taskType": "nice_task",
   },
 }
