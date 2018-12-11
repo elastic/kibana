@@ -81,7 +81,7 @@ describe('shareContextMenuExtensions', () => {
   ];
 
   test('should sort ascending on sort order first and then ascending on name', () => {
-    const component = shallow(<ShareContextMenu
+    const component = shallowWithIntl(<ShareContextMenu.WrappedComponent
       allowEmbed={false}
       objectType="dashboard"
       getUnhashableStates={() => {}}

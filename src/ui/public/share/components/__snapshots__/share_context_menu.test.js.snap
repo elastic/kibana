@@ -7,7 +7,7 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
   panels={
     Array [
       Object {
-        "content": <UrlPanelContent
+        "content": <InjectIntl(UrlPanelContentUI)
           getUnhashableStates={[Function]}
           objectType="dashboard"
         />,
