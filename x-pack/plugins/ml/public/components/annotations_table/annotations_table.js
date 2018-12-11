@@ -220,6 +220,8 @@ class AnnotationsTable extends Component {
       );
     }
 
+    function renderDate(date) { return formatDate(date, TIME_FORMAT); }
+
     const columns = [
       {
         field: 'annotation',
@@ -230,7 +232,7 @@ class AnnotationsTable extends Component {
         field: 'timestamp',
         name: 'From',
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: renderDate,
         sortable: true,
         width: '180px'
       },
@@ -238,7 +240,7 @@ class AnnotationsTable extends Component {
         field: 'end_timestamp',
         name: 'To',
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: renderDate,
         sortable: true,
         width: '180px'
       },
@@ -246,7 +248,7 @@ class AnnotationsTable extends Component {
         field: 'create_time',
         name: 'Creation date',
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: renderDate,
         sortable: true,
         width: '180px'
       },
@@ -260,7 +262,7 @@ class AnnotationsTable extends Component {
         field: 'modified_time',
         name: 'Last modified date',
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: renderDate,
         sortable: true,
         width: '180px'
       },
