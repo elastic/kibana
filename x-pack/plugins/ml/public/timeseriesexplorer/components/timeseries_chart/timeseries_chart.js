@@ -42,7 +42,7 @@ import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
 import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
-import { getAnnotationBrush, renderAnnotations } from './annotation';
+import { getAnnotationBrush, getAnnotationLevels, renderAnnotations } from './annotation';
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../common/constants/feature_flags';
 
 const focusZoomPanelHeight = 25;
@@ -632,7 +632,20 @@ export class TimeseriesChart extends React.Component {
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
       if (FEATURE_ANNOTATIONS_ENABLED && focusAnnotationData && focusAnnotationData.length > 0) {
-        yMax = yMax * 1.15;
+        const levels = getAnnotationLevels(focusAnnotationData);
+        const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
+        console.warn('focusZoomPanelHeight', focusZoomPanelHeight);
+        console.warn('maxLevel', maxLevel);
+        // const maxRange = focusZoomPanelHeight + 14 + (maxLevel + 1) * 28;
+        const desiredDiff = (14 + ((maxLevel + 2) * 28));
+        console.warn('desiredDiff', desiredDiff);
+        console.warn('ratio', desiredDiff / focusChartHeight);
+        // this.focusYScale.range([defaultRange[0], maxRange]);
+        // yMax = this.focusYScale(focusZoomPanelHeight);
+        // focusChartHeight
+        console.warn('range', this.focusYScale.range());
+        yMax = yMax * (1 + (maxLevel + 1) / 5);
+        console.warn('yMax', yMax);
       }
       this.focusYScale.domain([yMin, yMax]);
 
@@ -1345,12 +1358,18 @@ export class TimeseriesChart extends React.Component {
           .selectAll('.ml-annotation-text-rect')
           .classed('ml-annotation-text-rect-highlight', true);
         element
+          .selectAll('.ml-annotation-text')
+          .classed('ml-annotation-text-highlight', true);
+        element
           .selectAll('.ml-annotation-rect')
           .classed('ml-annotation-rect-highlight', true);
       } else {
         element
           .selectAll('.ml-annotation-text-rect')
           .classed('ml-annotation-text-rect-blur', true);
+        element
+          .selectAll('.ml-annotation-text')
+          .classed('ml-annotation-text-blur', true);
         element
           .selectAll('.ml-annotation-rect')
           .classed('ml-annotation-rect-blur', true);
@@ -1366,16 +1385,16 @@ export class TimeseriesChart extends React.Component {
 
       element
         .selectAll('.ml-annotation-text-rect')
-        .classed('ml-annotation-text-rect-highlight', false);
-      element
-        .selectAll('.ml-annotation-rect')
-        .classed('ml-annotation-rect-highlight', false);
-      element
-        .selectAll('.ml-annotation-text-rect')
+        .classed('ml-annotation-text-rect-highlight', false)
         .classed('ml-annotation-text-rect-blur', false);
       element
         .selectAll('.ml-annotation-rect')
+        .classed('ml-annotation-rect-highlight', false)
         .classed('ml-annotation-rect-blur', false);
+      element
+        .selectAll('.ml-annotation-text')
+        .classed('ml-annotation-text-highlight', false)
+        .classed('ml-annotation-text-blur', false);
     });
   }
 

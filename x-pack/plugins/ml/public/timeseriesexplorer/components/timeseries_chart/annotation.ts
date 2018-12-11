@@ -53,6 +53,23 @@ export function getAnnotationBrush(this: TimeseriesChart) {
   return annotateBrush;
 }
 
+export function getAnnotationLevels(focusAnnotationData) {
+  const levels = {};
+  focusAnnotationData.forEach((d, i) => {
+    const longerAnnotations = focusAnnotationData.filter((d2, i2) => i2 < i);
+    levels[d.key] = longerAnnotations.reduce((level, d2) => {
+      if (
+        (d2.timestamp < d.timestamp && d2.end_timestamp < d.timestamp) ||
+        (d2.timestamp > d.end_timestamp && d2.end_timestamp > d.end_timestamp)
+      ) {
+        return level;
+      }
+      return levels[d2.key] + 1;
+    }, 0);
+  });
+  return levels;
+}
+
 export function renderAnnotations(
   focusChart: d3.Selection<[]>,
   focusAnnotationData: Annotations,
@@ -63,8 +80,22 @@ export function renderAnnotations(
   showFocusChartTooltip: (d: Annotation, t: object) => {},
   showFlyout: TimeseriesChart['showFlyout']
 ) {
-  const upperRectMargin = 25;
-  const upperTextMargin = 18;
+  const upperRectMargin = 0;
+  const upperTextMargin = -7;
+
+  const durations = {};
+  focusAnnotationData.forEach(d => {
+    const duration = (d.end_timestamp || 0) - d.timestamp;
+    durations[d.key] = duration;
+  });
+
+  // sort by duration
+  focusAnnotationData.sort((a, b) => {
+    return durations[b.key] - durations[a.key];
+  });
+
+  const levelHeight = 28;
+  const levels = getAnnotationLevels(focusAnnotationData);
 
   const annotations = focusChart
     .select('.ml-annotations')
@@ -81,6 +112,8 @@ export function renderAnnotations(
   rects
     .enter()
     .append('rect')
+    .attr('rx', 2)
+    .attr('ry', 2)
     .classed('ml-annotation-rect', true)
     .on('mouseover', function(this: object, d: Annotation) {
       showFocusChartTooltip(d, this);
@@ -95,8 +128,12 @@ export function renderAnnotations(
       const date = moment(d.timestamp);
       return focusXScale(date);
     })
-    .attr('y', focusZoomPanelHeight + 1 + upperRectMargin)
-    .attr('height', focusChartHeight - 2 - upperRectMargin)
+    .attr('y', (d: Annotation) => {
+      return focusZoomPanelHeight + 1 + upperRectMargin + levels[d.key] * levelHeight;
+    })
+    .attr('height', (d: Annotation) => {
+      return focusChartHeight - 2 - upperRectMargin - levels[d.key] * levelHeight;
+    })
     .attr('width', (d: Annotation) => {
       const s = focusXScale(moment(d.timestamp)) + 1;
       const e =
@@ -128,7 +165,9 @@ export function renderAnnotations(
       const x = focusXScale(date);
       return x + 17;
     })
-    .attr('y', focusZoomPanelHeight + upperTextMargin + 26)
+    .attr('y', (d: Annotation) => {
+      return focusZoomPanelHeight + upperTextMargin + 26 + levels[d.key] * levelHeight;
+    })
     .text((d: Annotation) => d.key as any);
 
   textRects
@@ -137,7 +176,9 @@ export function renderAnnotations(
       const x = focusXScale(date);
       return x + 5;
     })
-    .attr('y', focusZoomPanelHeight + upperTextMargin + 12);
+    .attr('y', (d: Annotation) => {
+      return focusZoomPanelHeight + upperTextMargin + 12 + levels[d.key] * levelHeight;
+    });
 
   textRects.exit().remove();
   texts.exit().remove();

@@ -7,21 +7,33 @@
 }
 
 .ml-annotation-rect {
-  stroke: #333;
-  transition: stroke 125ms;
-  stroke-width: 2;
-  stroke-dasharray: 5 2;
+  stroke: #000;
+  stroke-width: 1.5;
+  transition: stroke-width 125ms;
+  stroke-opacity: 0.2;
+  /*stroke-dasharray: 5 2;*/
+  fill: #000;
+  transition: fill 125ms;
   fill-opacity: 0.05;
+  transition: fill-opacity 125ms;
   shape-rendering: geometricPrecision;
+  border-radius: 5px 5px 0 0;
 }
 
-/*.ml-annotation-rect-highlight {
-  stroke: #32a7c2;
-}*/
+.ml-annotation-rect-highlight {
+  fill: #000;
+  transition: fill 125ms;
+  fill-opacity: 0.1;
+  transition: fill-opacity 125ms;
+  stroke-opacity: 0.3;
+  transition: stroke-opacity 125ms;
+}
 
 .ml-annotation-rect-blur {
-  stroke: rgb(232, 232, 232);
-  transition: stroke 125ms;
+  fill-opacity: 0.03;
+  transition: fill-opacity 125ms;
+  stroke-opacity: 0.1;
+  transition: stroke-opacity 125ms;
 }
 
 .ml-annotation-text {
@@ -29,7 +41,13 @@
   font-size: 12px;
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
   font-weight: 600;  
-  color: #000;
+  fill: #000;
+  transition: fill 125ms;
+}
+
+.ml-annotation-text-blur {
+  fill: #999;
+  transition: fill 125ms;
 }
 
 .ml-annotation-text-rect {
@@ -44,9 +62,9 @@
   transition: fill 125ms;
 }
 
-/*.ml-annotation-text-rect-highlight {
-  fill: #32a7c2;
-}*/
+.ml-annotation-text-rect-highlight {
+
+}
 
 .ml-annotation-hidden {
   display: none;
