@@ -100,7 +100,7 @@ export const TimeFieldComponent = ({
               {
                 text: intl.formatMessage({
                   id: 'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
-                  defaultMessage: 'Loading...'
+                  defaultMessage: 'Loading…'
                 }),
                 value: ''
               }
