@@ -30,40 +30,24 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     spaces={
       Array [
         Object {
-          "elasticsearch": Object {
-            "cluster": Array [],
-            "indices": Array [],
-            "run_as": Array [],
-          },
-          "kibana": Object {
-            "global": Array [],
-            "space": Object {},
-          },
-          "name": "",
-        }
-      }
-      spaces={
-        Array [
-          Object {
-            "_reserved": true,
-            "disabledFeatures": Array [],
-            "id": "default",
-            "name": "Default Space",
-          },
-          Object {
-            "disabledFeatures": Array [],
-            "id": "marketing",
-            "name": "Marketing",
-          },
-        ]
-      }
-      uiCapabilities={
+          "_reserved": true,
+          "disabledFeatures": Array [],
+          "id": "default",
+          "name": "Default Space",
+        },
         Object {
-          "navLinks": Object {},
-          "spaces": Object {
-            "manage": true,
-          },
-        }
+          "disabledFeatures": Array [],
+          "id": "marketing",
+          "name": "Marketing",
+        },
+      ]
+    }
+    uiCapabilities={
+      Object {
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
       }
     }
     validator={
