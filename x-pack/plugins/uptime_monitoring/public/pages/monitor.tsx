@@ -86,7 +86,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
         <EuiTitle>
           <h2>{id}</h2>
         </EuiTitle>
-        <EuiSpacer />
+        <EuiSpacer size="l" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <span>Monitor:</span>
