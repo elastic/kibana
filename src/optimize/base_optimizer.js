@@ -432,7 +432,8 @@ export default class BaseOptimizer {
       ]
     };
 
-    // in production we set the process.env.NODE_ENV and uglify our bundles
+    // in production we set the process.env.NODE_ENV and run
+    // the terser minimizer over our bundles
     const productionConfig = {
       mode: 'production',
       optimization: {
