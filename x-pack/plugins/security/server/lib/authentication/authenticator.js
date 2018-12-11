@@ -169,6 +169,10 @@ class Authenticator {
         }
       }
 
+      if (authenticationResult.failed()) {
+        return authenticationResult;
+      }
+
       if (authenticationResult.succeeded()) {
         // we have to do this here, as the auth scope's could be dependent on this
         await this._authorizationMode.initialize(request);
