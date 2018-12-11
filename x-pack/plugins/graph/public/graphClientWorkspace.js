@@ -15,7 +15,7 @@ module.exports = (function () {
     const dataForServer = JSON.stringify(request);
     $.ajax({
       type: 'POST',
-      url: 'http://localhost:9200/' + indexName + '/_xpack/graph/_explore',
+      url: 'http://localhost:9200/' + indexName + '/_graph/explore',
       dataType: 'json',
       contentType: 'application/json;charset=utf-8',
       async: true,
@@ -29,7 +29,7 @@ module.exports = (function () {
     const dataForServer = JSON.stringify(request);
     $.ajax({
       type: 'POST',
-      url: 'http://localhost:9200/' + indexName + '/_search',
+      url: 'http://localhost:9200/' + indexName + '/_search?rest_total_hits_as_int=true',
       dataType: 'json',
       contentType: 'application/json;charset=utf-8', //Not sure why this was necessary - worked without elsewhere
       async: true,

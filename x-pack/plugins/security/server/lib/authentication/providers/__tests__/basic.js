@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { requestFixture } from '../../../__tests__/__fixtures__/request';
@@ -44,13 +43,13 @@ describe('BasicAuthenticationProvider', () => {
 
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       const authenticationResult = await provider.authenticate(
-        requestFixture({ path: '/some-path # that needs to be encoded' }),
+        requestFixture({ path: '/some-path # that needs to be encoded', basePath: '/s/foo' }),
         null
       );
 
       expect(authenticationResult.redirected()).to.be(true);
       expect(authenticationResult.redirectURL).to.be(
-        '/base-path/login?next=%2Fbase-path%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+        '/base-path/login?next=%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
       );
     });
 
@@ -97,7 +96,7 @@ describe('BasicAuthenticationProvider', () => {
       sinon.assert.calledOnce(callWithRequest);
     });
 
-    it('fails if `authorization` header has unsupported schema even if state contains valid credentials.', async () => {
+    it('does not handle `authorization` header with unsupported schema even if state contains valid credentials.', async () => {
       const request = requestFixture({ headers: { authorization: 'Bearer ***' } });
       const authorization = generateAuthorizationHeader('user', 'password');
 
@@ -105,8 +104,7 @@ describe('BasicAuthenticationProvider', () => {
 
       sinon.assert.notCalled(callWithRequest);
       expect(request.headers.authorization).to.be('Bearer ***');
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.error).to.eql(Boom.badRequest('Unsupported authentication schema: Bearer'));
+      expect(authenticationResult.notHandled()).to.be(true);
     });
 
     it('fails if state contains invalid credentials.', async () => {

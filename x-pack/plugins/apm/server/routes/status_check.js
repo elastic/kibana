@@ -11,7 +11,6 @@ import { getAgentStatus } from '../lib/status_check/agent_check';
 import { setupRequest } from '../lib/helpers/setup_request';
 
 const ROOT = '/api/apm/status';
-const pre = [{ method: setupRequest, assign: 'setup' }];
 const defaultErrorHandler = err => {
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
@@ -22,7 +21,6 @@ export function initStatusApi(server) {
     method: 'GET',
     path: `${ROOT}/server`,
     config: {
-      pre,
       validate: {
         query: Joi.object().keys({
           _debug: Joi.bool()
@@ -30,7 +28,7 @@ export function initStatusApi(server) {
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       return getServerStatus({ setup }).catch(defaultErrorHandler);
     }
   });
@@ -39,7 +37,6 @@ export function initStatusApi(server) {
     method: 'GET',
     path: `${ROOT}/agent`,
     config: {
-      pre,
       validate: {
         query: Joi.object().keys({
           _debug: Joi.bool()
@@ -47,7 +44,7 @@ export function initStatusApi(server) {
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       return getAgentStatus({ setup }).catch(defaultErrorHandler);
     }
   });

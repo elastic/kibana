@@ -13,7 +13,7 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
@@ -30,6 +30,7 @@ import {
   isModelPlotEnabled,
   mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
+import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 import {
   createTimeSeriesJobData,
   processForecastResults,
@@ -53,6 +54,7 @@ import { initPromise } from 'plugins/ml/util/promise';
 uiRoutes
   .when('/timeseriesexplorer/?', {
     template,
+    k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
@@ -71,6 +73,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $timeout,
   Private,
   AppState,
+  config,
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
@@ -97,6 +100,10 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.showModelBoundsCheckbox = false;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
+
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = config.get('dateFormat:tz');
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
@@ -673,14 +680,16 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
     mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
-      .finally(() => {
-        // Load the data - if the FieldFormats failed to populate
-        // the default formatting will be used for metric values.
+      .catch((err) => { console.log('Error populating field formats:', err); })
+      // Load the data - if the FieldFormats failed to populate
+      // the default formatting will be used for metric values.
+      .then(() => {
         $scope.refresh();
       });
   }
 
   function loadAnomaliesTableData(earliestMs, latestMs) {
+
     ml.results.getAnomaliesTableData(
       [$scope.selectedJob.job_id],
       $scope.criteriaFields,
@@ -689,6 +698,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       mlSelectSeverityService.state.get('threshold').val,
       earliestMs,
       latestMs,
+      dateFormatTz,
       ANOMALIES_MAX_RESULTS
     ).then((resp) => {
       const anomalies = resp.anomalies;

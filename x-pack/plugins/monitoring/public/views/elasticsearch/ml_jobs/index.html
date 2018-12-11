@@ -1,7 +1,11 @@
 <monitoring-main product="elasticsearch" name="ml">
   <monitoring-cluster-status-elasticsearch status="mlJobs.data.clusterStatus"></monitoring-cluster-status-elasticsearch>
   <div class="page-row">
-    <h3 class="kuiScreenReaderOnly">Machine Learning Jobs</h3>
+    <h3
+      class="kuiScreenReaderOnly"
+      i18n-id="xpack.monitoring.elasticsearch.mlJobsTitle"
+      i18n-default-message="Machine Learning Jobs"
+    ></h3>
     <monitoring-ml-listing
       page-index="mlJobs.pageIndex"
       filter-text="mlJobs.filterText"

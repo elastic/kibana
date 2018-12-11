@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
@@ -43,6 +44,9 @@ export class WorkpadPage extends PureComponent {
     onMouseUp: PropTypes.func,
     onAnimationEnd: PropTypes.func,
     resetHandler: PropTypes.func,
+    copyElements: PropTypes.func,
+    cutElements: PropTypes.func,
+    pasteElements: PropTypes.func,
   };
 
   componentWillUnmount() {
@@ -66,12 +70,30 @@ export class WorkpadPage extends PureComponent {
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
+      copyElements,
+      cutElements,
+      pasteElements,
     } = this.props;
+
+    const keyHandler = action => {
+      switch (action) {
+        case 'COPY':
+          copyElements();
+          break;
+        case 'CUT':
+          cutElements();
+          break;
+        case 'PASTE':
+          pasteElements();
+          break;
+      }
+    };
 
     return (
       <div
         key={page.id}
         id={page.id}
+        data-test-subj="canvasWorkpadPage"
         className={`canvasPage ${className} ${isEditable ? 'canvasPage--isEditable' : ''}`}
         data-shared-items-container
         style={{
@@ -90,6 +112,14 @@ export class WorkpadPage extends PureComponent {
         onAnimationEnd={onAnimationEnd}
         tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
+        {isEditable && (
+          <Shortcuts
+            name="ELEMENT"
+            handler={keyHandler}
+            targetNodeSelector={`#${page.id}`}
+            global
+          />
+        )}
         {elements
           .map(element => {
             if (element.type === 'annotation') {

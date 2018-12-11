@@ -29,10 +29,6 @@ export default function ({ getService }) {
         expect(usage.reporting.enabled).to.be(true);
       });
 
-      it('is using phantom browser', async () => {
-        expect(usage.reporting.browser_type).to.be('phantom');
-      });
-
       it('all counts are 0', async () => {
         reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 0);
         reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 0);
@@ -92,7 +88,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('usage updated when new jobs are posted', async () => {
+    describe.skip('usage updated when new jobs are posted', async () => {
       it('post jobs', async () => {
         const reportPaths = [];
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3));
