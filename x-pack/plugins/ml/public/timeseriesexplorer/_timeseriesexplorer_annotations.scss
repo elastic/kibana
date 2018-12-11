@@ -1,3 +1,6 @@
+// SASS TODO: This uses non-BEM styles to be in line with the existing
+// legacy Time Series Viewer style. Where applicable it tries to avoid
+// overrides. The one override with `.extent` is because of d3.
 .ml-annotation-brush .extent {
   stroke: #999;
   stroke-width: 2px;
@@ -11,7 +14,6 @@
   stroke-width: 1.5;
   transition: stroke-width 125ms;
   stroke-opacity: 0.2;
-  /*stroke-dasharray: 5 2;*/
   fill: #000;
   transition: fill 125ms;
   fill-opacity: 0.05;
@@ -60,10 +62,6 @@
 .ml-annotation-text-rect-blur {
   fill: rgb(232, 232, 232);
   transition: fill 125ms;
-}
-
-.ml-annotation-text-rect-highlight {
-
 }
 
 .ml-annotation-hidden {
