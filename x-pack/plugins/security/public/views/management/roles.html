@@ -80,18 +80,14 @@
             class="kuiNoItems"
           >
             <span
-              i18n-id="xpack.security.management.roles.noFoundMatchingRolesDescription1"
-              i18n-default-message="No "
-              i18n-context="Part of composite label xpack.security.management.roles.noFoundMatchingRolesDescription1 + {matchingText} + xpack.security.management.roles.noFoundMatchingRolesDescription2"
-            ></span>
-            <span
               ng-show="query"
-              i18n-id="xpack.security.management.roles.matchingText"
-              i18n-default-message="matching"
+              i18n-id="xpack.security.management.roles.noMatchingResultsLabel"
+              i18n-default-message="No matching roles found"
             ></span>
             <span
-              i18n-id="xpack.security.management.roles.noFoundMatchingRolesDescription2"
-              i18n-default-message=" roles found"
+              ng-show="!query"
+              i18n-id="xpack.security.management.roles.noResultsLabel"
+              i18n-default-message="No roles found"
             ></span>
           </div>
         </div>
