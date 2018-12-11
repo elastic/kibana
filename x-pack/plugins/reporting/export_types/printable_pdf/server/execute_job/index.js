@@ -67,6 +67,11 @@ function executeJobFn(server) {
       getBasePath: () => job.basePath || serverBasePath
     };
 
+    if (server.plugins.security) {
+      const { authorization } = server.plugins.security;
+      await authorization.mode.initialize(fakeRequest);
+    }
+
     const savedObjects = server.savedObjects;
     const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
     const uiSettings = server.uiSettingsServiceFactory({

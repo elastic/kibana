@@ -5,6 +5,7 @@
  */
 export interface KbnServer {
   config: () => ConfigObject;
+  plugins: Record<string, any>;
 }
 
 export interface ConfigObject {
