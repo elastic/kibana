@@ -49,9 +49,8 @@ const SingleHealth: StatelessComponent<{ level: MIGRATION_DEPRECATION_LEVEL; lab
 );
 
 /**
- * Displays a summary health for a list of deprecations that shows the number and level of highest severity
+ * Displays a summary health for a list of deprecations that shows the number and level of severity
  * deprecations in the list.
- * TODO: Allow showing all severity levels
  */
 export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({
   deprecations,

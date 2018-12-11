@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash';
 import { Server } from 'src/server/kbn_server';
 
 import { getReindexTemplate } from '../lib/reindex_console_template';
