@@ -18,10 +18,9 @@
  */
 
 import Joi from 'joi';
-import Boom from 'boom';
 
 export function createProxy(server) {
-  const { callWithRequest } =  server.plugins.elasticsearch.getCluster('data');
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
   server.route({
     method: 'POST',
@@ -32,25 +31,14 @@ export function createProxy(server) {
       }
     },
     async handler(req, h) {
-      let body = null;
-      try {
-        const { payload } = req;
-        body = payload
-          .toString('utf8')
-          .split('\n')
-          .filter(Boolean)
-          .map(JSON.parse);
-      } catch (e) {
-        return h.response(Boom.badRequest('Unable to parse request'));
-      }
-
-      try {
-        const response = await callWithRequest(req, 'msearch', { body });
-        return h.response(response);
-      } catch(e) {
-        return h.response(e);
-      }
-    },
+      const { query, payload } = req;
+      return callWithRequest(req, 'transport.request', {
+        path: '/_msearch',
+        method: 'POST',
+        query,
+        body: payload.toString('utf8')
+      }).finally(r => h.response(r));
+    }
   });
 
   server.route({
@@ -63,17 +51,14 @@ export function createProxy(server) {
         })
       }
     },
-    async handler(req, h) {
-      const { payload } = req;
-      try {
-        const response = await callWithRequest(req, 'search', {
-          index: req.params.index,
-          body: payload
-        });
-        return h.response(response);
-      } catch(e) {
-        return h.response(e);
-      }
+    handler(req, h) {
+      const { query, payload: body } = req;
+      return callWithRequest(req, 'transport.request', {
+        path: `/${req.params.index}/_search`,
+        method: 'POST',
+        query,
+        body
+      }).finally(r => h.response(r));
     }
   });
 }
