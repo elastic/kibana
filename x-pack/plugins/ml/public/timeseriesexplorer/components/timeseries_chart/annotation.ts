@@ -7,6 +7,7 @@
 import d3 from 'd3';
 import moment from 'moment';
 
+import { ANNOTATION_TYPE } from '../../../../common/constants/annotations';
 import { Annotation, Annotations } from '../../../../common/types/annotations';
 import { Dictionary } from '../../../../common/types/common';
 
@@ -45,7 +46,7 @@ export function getAnnotationBrush(this: TimeseriesChart) {
       end_timestamp: endTimestamp,
       annotation: this.state.annotation.annotation || '',
       job_id: selectedJob.job_id,
-      type: 'annotation',
+      type: ANNOTATION_TYPE.ANNOTATION,
     };
 
     this.showFlyout(annotation);

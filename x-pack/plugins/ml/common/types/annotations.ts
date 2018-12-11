@@ -58,6 +58,8 @@
 //     ]
 // }
 
+import { ANNOTATION_TYPE } from '../constants/annotations';
+
 export interface Annotation {
   _id?: string;
   create_time?: number;
@@ -70,7 +72,7 @@ export interface Annotation {
   end_timestamp?: number;
   annotation: string;
   job_id: string;
-  type: 'annotation' | 'comment';
+  type: ANNOTATION_TYPE.ANNOTATION | ANNOTATION_TYPE.COMMENT;
 }
 
 export function isAnnotation(arg: any): arg is Annotation {
@@ -78,7 +80,7 @@ export function isAnnotation(arg: any): arg is Annotation {
     arg.timestamp !== undefined &&
     typeof arg.annotation === 'string' &&
     typeof arg.job_id === 'string' &&
-    arg.result_type === 'annotation'
+    (arg.result_type === ANNOTATION_TYPE.ANNOTATION || arg.result_type === ANNOTATION_TYPE.COMMENT)
   );
 }
 
