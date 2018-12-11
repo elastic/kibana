@@ -371,7 +371,6 @@ module.controller('MlExplorerController', function (
 
   function mapScopeToSwimlaneProps(swimlaneType) {
     return {
-      annotations: (swimlaneType === SWIMLANE_TYPE.OVERALL) ? $scope.annotationsData : undefined,
       chartWidth: $scope.swimlaneWidth,
       MlTimeBuckets: TimeBuckets,
       swimlaneData: getSwimlaneData(swimlaneType),
