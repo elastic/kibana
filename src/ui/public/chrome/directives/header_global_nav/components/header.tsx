@@ -78,13 +78,13 @@ class HeaderUI extends Component<Props> {
 
     return (
       <EuiHeader>
-        <EuiHeaderSection>
+        <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
 
           <HeaderNavControls navControls={leftNavControls} />
-
-          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
         </EuiHeaderSection>
+
+        <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
 
         <EuiHeaderSection side="right">
           <HeaderNavControls navControls={rightNavControls} />

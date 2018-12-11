@@ -85,7 +85,7 @@ export function createServer(options: ServerOptions) {
   server.listener.keepAliveTimeout = 120e3;
   server.listener.on('clientError', (err, socket) => {
     if (socket.writable) {
-      socket.end(new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
+      socket.end(Buffer.from('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
     } else {
       socket.destroy(err);
     }
