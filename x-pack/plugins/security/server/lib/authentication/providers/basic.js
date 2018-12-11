@@ -90,7 +90,7 @@ export class BasicAuthenticationProvider {
     // first try from login payload
     let authenticationResult = await this._authenticateViaLoginAttempt(request);
 
-    // if there isn't a payload, try header-based token auth
+    // if there isn't a payload, try header-based auth
     if (authenticationResult.notHandled()) {
       const {
         authenticationResult: headerAuthResult,
