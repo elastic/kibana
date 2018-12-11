@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// TS TODO: This is not yet a fully fledged representation of the job data structure,
+// but it fulfills some basic TypeScript related needs.
 export interface MlJob {
   analysis_config: {
     bucket_span: string;
