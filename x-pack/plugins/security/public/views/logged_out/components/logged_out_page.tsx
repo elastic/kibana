@@ -35,7 +35,7 @@ export class LoggedOutPage extends Component<Props, {}> {
             </div>
           </header>
           <div className="loggedOut__content eui-textCenter">
-            <EuiButton href={this.props.addBasePath('/login')}>
+            <EuiButton href={this.props.addBasePath('/')}>
               <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Login" />
             </EuiButton>
           </div>
