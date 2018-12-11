@@ -1,7 +1,7 @@
 @import './font_awesome';
 @import '../../bootstrap/variables';
 
-// Overrides
+// Variable Overrides
 @import './variables';
 
 // // Core variables and mixins
@@ -37,3 +37,6 @@
 // // Utility classes
 // @import "~ui/styles/bootstrap/utilities.less";
 // @import "~ui/styles/bootstrap/responsive-utilities.less";
+
+// Component Overrides
+@import './overrides';

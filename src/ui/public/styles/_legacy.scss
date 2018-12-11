@@ -12,18 +12,4 @@
 @import './_legacy/theme';
 
 // // Components
-// @import '~ui/filter_bar/filter_bar'; // is being converted to EUI, so leaving as LESS
-
-@import './_legacy/components/config';
-@import './_legacy/components/control_group';
-@import './_legacy/components/hintbox';
-@import './_legacy/components/input';
-@import './_legacy/components/list_group_menu';
-@import './_legacy/components/navbar'; // Seems to only be used by ML
-@import './_legacy/components/pagination';
-@import './_legacy/components/react_input_range';
-@import './_legacy/components/sidebar';
-@import './_legacy/components/spinner';
-@import './_legacy/components/table';
-@import './_legacy/components/truncate';
-@import './_legacy/components/ui_select';
+@import './_legacy/components/index';
