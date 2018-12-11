@@ -864,7 +864,10 @@ describe('GET roles', () => {
               run_as: [],
             },
             kibana: {
-              global: [],
+              global: {
+                minimum: [],
+                feature: {}
+              },
               space: {},
             },
             _unrecognized_applications: ['kibana-.another-kibana']
@@ -883,7 +886,10 @@ describe('GET roles', () => {
               run_as: [],
             },
             kibana: {
-              global: [],
+              global: {
+                minimum: [],
+                feature: {}
+              },
               space: {},
             },
             _unrecognized_applications: ['kibana-.another-kibana']
@@ -902,7 +908,10 @@ describe('GET roles', () => {
               run_as: [],
             },
             kibana: {
-              global: [],
+              global: {
+                minimum: [],
+                feature: {}
+              },
               space: {},
             },
             _unrecognized_applications: ['kibana-.another-kibana']
