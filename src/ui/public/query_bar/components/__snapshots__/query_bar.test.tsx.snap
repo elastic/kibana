@@ -18,6 +18,7 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
       onOutsideClick={[Function]}
     >
       <div
+        aria-controls="typeahead-items"
         aria-expanded={false}
         aria-haspopup="true"
         aria-owns="typeahead-items"
@@ -126,6 +127,7 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
       onOutsideClick={[Function]}
     >
       <div
+        aria-controls="typeahead-items"
         aria-expanded={false}
         aria-haspopup="true"
         aria-owns="typeahead-items"
@@ -234,6 +236,7 @@ exports[`QueryBar Should render the given query 1`] = `
       onOutsideClick={[Function]}
     >
       <div
+        aria-controls="typeahead-items"
         aria-expanded={false}
         aria-haspopup="true"
         aria-owns="typeahead-items"
