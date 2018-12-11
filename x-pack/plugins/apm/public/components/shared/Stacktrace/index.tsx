@@ -13,7 +13,7 @@ import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
 import { FrameHeading } from './FrameHeading';
-import { LibraryFrames } from './LibraryFrames';
+import { LibraryStackFrames } from './LibraryStackFrames';
 import { getGroupedStackframes, hasSourceLines } from './stacktraceUtils';
 
 interface Props {
@@ -21,17 +21,15 @@ interface Props {
   codeLanguage?: string;
 }
 
-interface StateLibraryframes {
-  [i: number]: boolean;
-}
-
 interface State {
-  libraryframes: StateLibraryframes;
+  visibilityMap: {
+    [i: number]: boolean;
+  };
 }
 
 export class Stacktrace extends PureComponent<Props, State> {
   public state = {
-    libraryframes: {}
+    visibilityMap: {}
   };
 
   public componentDidMount() {
@@ -46,18 +44,18 @@ export class Stacktrace extends PureComponent<Props, State> {
 
     if (!hasAnyAppFrames) {
       // If there are no app frames available, always show the only existing group
-      this.setState({ libraryframes: { 0: true } });
+      this.setState({ visibilityMap: { 0: true } });
     }
   }
 
   public toggle = (i: number) =>
-    this.setState(({ libraryframes }) => {
-      return { libraryframes: { ...libraryframes, [i]: !libraryframes[i] } };
+    this.setState(({ visibilityMap }) => {
+      return { visibilityMap: { ...visibilityMap, [i]: !visibilityMap[i] } };
     });
 
   public render() {
     const { stackframes = [], codeLanguage } = this.props;
-    const { libraryframes } = this.state as State;
+    const { visibilityMap } = this.state as State;
 
     if (isEmpty(stackframes)) {
       return <EmptyMessage heading="No stacktrace available." hideSubheading />;
@@ -72,9 +70,9 @@ export class Stacktrace extends PureComponent<Props, State> {
           ({ isLibraryFrame, stackframes: groupedStackframes }, i) => {
             if (isLibraryFrame) {
               return (
-                <LibraryFrames
+                <LibraryStackFrames
                   key={i}
-                  visible={libraryframes[i]}
+                  visible={visibilityMap[i]}
                   stackframes={groupedStackframes}
                   codeLanguage={codeLanguage}
                   onClick={() => this.toggle(i)}

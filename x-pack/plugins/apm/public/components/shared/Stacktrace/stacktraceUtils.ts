@@ -12,6 +12,17 @@ interface StackframesGroup {
   stackframes: Stackframe[];
 }
 
+function getNextGroupIndex(stackframes: Stackframe[]): number {
+  const isLibraryFrame = Boolean(stackframes[0].library_frame);
+  const groupEndIndex =
+    stackframes.findIndex(
+      stackframe =>
+        isLibraryFrame !== Boolean(stackframe.library_frame) ||
+        Boolean(stackframe.exclude_from_grouping)
+    ) || 1;
+  return groupEndIndex === -1 ? stackframes.length : groupEndIndex;
+}
+
 export function getGroupedStackframes(
   stackframes: Stackframe[]
 ): StackframesGroup[] {
@@ -19,22 +30,14 @@ export function getGroupedStackframes(
     return [];
   }
 
-  const isLibraryFrame = Boolean(stackframes[0].library_frame);
-
-  let i = 0;
-  while (
-    i < stackframes.length &&
-    isLibraryFrame === stackframes[i].library_frame &&
-    !stackframes[i].exclude_from_grouping
-  ) {
-    i++;
-  }
-
-  const stackFrameEndIndex = i || 1;
+  const nextGroupIndex = getNextGroupIndex(stackframes);
 
   return [
-    { isLibraryFrame, stackframes: stackframes.slice(0, stackFrameEndIndex) },
-    ...getGroupedStackframes(stackframes.slice(stackFrameEndIndex))
+    {
+      isLibraryFrame: Boolean(stackframes[0].library_frame),
+      stackframes: stackframes.slice(0, nextGroupIndex)
+    },
+    ...getGroupedStackframes(stackframes.slice(nextGroupIndex))
   ];
 }
 

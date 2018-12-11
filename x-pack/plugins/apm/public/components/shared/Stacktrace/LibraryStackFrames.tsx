@@ -47,7 +47,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const LibraryFrames: React.SFC<Props> = ({
+export const LibraryStackFrames: React.SFC<Props> = ({
   visible,
   stackframes,
   codeLanguage,
