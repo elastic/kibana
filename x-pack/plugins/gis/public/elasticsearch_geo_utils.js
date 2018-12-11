@@ -79,6 +79,23 @@ export function geoPointToGeometry(value) {
   };
 }
 
+
+export function makeGeohashGridPolygon(geohashGridFeature) {
+  const esBbox = geohashGridFeature.properties.geohash_meta.rectangle;
+  return {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [esBbox[0][1], esBbox[0][0]],
+        [esBbox[1][1], esBbox[1][0]],
+        [esBbox[2][1], esBbox[2][0]],
+        [esBbox[3][1], esBbox[3][0]],
+        [esBbox[0][1], esBbox[0][0]],
+      ]
+    ]
+  };
+}
+
 export function geoShapeToGeometry(value) {
   // TODO handle case where value is WKT and convert to geojson
   if (typeof value === "string") {

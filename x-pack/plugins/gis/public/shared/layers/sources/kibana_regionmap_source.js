@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VectorSource } from './source';
+import { VectorSource } from './vector_source';
 import React from 'react';
 import {
   EuiText,
@@ -66,7 +66,7 @@ export class KibanaRegionmapSource extends VectorSource {
     );
   }
 
-  async getGeoJson() {
+  async getGeoJsonWithMeta() {
     const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
     const featureCollection = await VectorSource.getGeoJson(fileSource, fileSource.url);
     return {

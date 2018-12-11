@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { TMSSource } from './source';
+import { TMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 import {
   EuiFieldText,

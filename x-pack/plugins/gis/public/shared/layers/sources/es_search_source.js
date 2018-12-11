@@ -8,7 +8,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
-import { VectorSource } from './source';
+import { VectorSource } from './vector_source';
 import {
   EuiFormRow,
   EuiSwitch,
@@ -89,7 +89,7 @@ export class ESSearchSource extends VectorSource {
     return indexPattern;
   }
 
-  async getGeoJson({ layerId, layerName }, searchFilters) {
+  async getGeoJsonWithMeta({ layerId, layerName }, searchFilters) {
     const indexPattern = await this._getIndexPattern();
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];

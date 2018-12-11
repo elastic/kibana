@@ -9,13 +9,14 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiFormRow
+  EuiFormRow,
+  EuiComboBox
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
-
-import { ASource } from './source';
+import { VectorSource } from './vector_source';
 import { GeohashGridLayer } from '../geohashgrid_layer';
+import { VectorLayer } from '../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   indexPatternService,
@@ -23,11 +24,13 @@ import {
   SearchSource,
   timeService,
 } from '../../../kibana_services';
-import { createExtentFilter } from '../../../elasticsearch_geo_utils';
+import { createExtentFilter, makeGeohashGridPolygon } from '../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { ESSourceDetails } from './es_geohashgrid_sourcedetails';
+import { ZOOM_TO_PRECISION } from '../../utils/zoom_to_precision';
+import { VectorStyle } from '../styles/vector_style';
 
 const aggSchemas = new Schemas([
   {
@@ -51,23 +54,29 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export class ESGeohashGridSource extends ASource {
+const REQUEST_TYPE =  {
+  AS_CENTROID_HEATMAP: 'AS_CENTROID_HEATMAP',
+  AS_CENTROID_POINT: 'AS_CENTROID_POINT',
+  AS_GEOHASHGRID_POLYGON: 'AS_CENTROID_POLYGON',
+};
+
+export class ESGeohashGridSource extends VectorSource {
 
   static type = 'ES_GEOHASH_GRID';
+  static typeDisplayName = 'Elasticsearch geohash aggregation';
 
-  static typeDisplayName = 'Elasticsearch geohash heatmap';
-
-  static createDescriptor({ indexPatternId, geoField }) {
+  static createDescriptor({ indexPatternId, geoField, requestType }) {
     return {
       type: ESGeohashGridSource.type,
       indexPatternId: indexPatternId,
       geoField: geoField,
+      requestType: requestType
     };
   }
 
   static renderEditor({ onPreviewSource }) {
-    const onSelect = (layerConfig) => {
-      const sourceDescriptor = ESGeohashGridSource.createDescriptor(layerConfig);
+    const onSelect = (sourceConfig) => {
+      const sourceDescriptor = ESGeohashGridSource.createDescriptor(sourceConfig);
       const source = new ESGeohashGridSource(sourceDescriptor);
       onPreviewSource(source);
     };
@@ -86,7 +95,48 @@ export class ESGeohashGridSource extends ASource {
     );
   }
 
+
+  async getGeoJsonWithMeta({ layerId, layerName }, searchFilters) {
+
+    let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
+    targetPrecision += 0;//should have refinement param, similar to heatmap style
+    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
+      precision: targetPrecision,
+      extent: searchFilters.buffer,
+      timeFilters: searchFilters.timeFilters,
+      layerId: layerId,
+      layerName: layerName
+    });
+
+    if (this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON) {
+      featureCollection.features.forEach((feature) => {
+        //replace geometries with the polygon
+        feature.geometry = makeGeohashGridPolygon(feature);
+      });
+    }
+
+    featureCollection.features.forEach((feature) => {
+      //give this some meaningful name
+      feature.properties.doc_count = feature.properties.value;
+      delete feature.properties.value;
+    });
+
+    return {
+      data: featureCollection,
+      meta: {
+        areResultsTrimmed: true
+      }
+    };
+
+  }
+
+  async getNumberFields() {
+    return ['doc_count'];
+  }
+
+
   async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerId, layerName }) {
+
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -177,18 +227,65 @@ export class ESGeohashGridSource extends ASource {
   }
 
   _createDefaultLayerDescriptor(options) {
-    return GeohashGridLayer.createDescriptor({
+
+    if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_HEATMAP) {
+      return GeohashGridLayer.createDescriptor({
+        sourceDescriptor: this._descriptor,
+        ...options
+      });
+    }
+
+    const descriptor = VectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
+    descriptor.style = {
+      ...descriptor.style,
+      "type": "VECTOR",
+      "properties": {
+        "fillColor": {
+          "type": "DYNAMIC",
+          "options": {
+            "field": {
+              "label": "doc_count",
+              "name": "doc_count",
+              "origin": "source"
+            },
+            "color": "Blues"
+          }
+        },
+        "iconSize": {
+          "type": "STATIC",
+          "options": {
+            "size": 10
+          }
+        },
+        "alphaValue": 0.5
+      }
+    };
+    return descriptor;
+
   }
 
   createDefaultLayer(options) {
-    return new GeohashGridLayer({
-      layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this
+
+    if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_HEATMAP) {
+      return new GeohashGridLayer({
+        layerDescriptor: this._createDefaultLayerDescriptor(options),
+        source: this
+      });
+    }
+
+    const layerDescriptor = this._createDefaultLayerDescriptor(options);
+    const style = new VectorStyle(layerDescriptor.style);
+    return new VectorLayer({
+      layerDescriptor: layerDescriptor,
+      source: this,
+      style: style
     });
+
   }
+
 
   async getDisplayName() {
     const indexPattern = await this._getIndexPattern();
@@ -202,19 +299,34 @@ class Editor extends React.Component {
     onSelect: PropTypes.func.isRequired,
   };
 
-
   static _filterGeoField = (field) => {
     return ['geo_point'].includes(field.type);
   };
 
   constructor() {
     super();
+
+    this._requestTypeOptions =   [{
+      label: 'heatmap',
+      value: REQUEST_TYPE.AS_CENTROID_HEATMAP
+    }, {
+      label: 'points',
+      value: REQUEST_TYPE.AS_CENTROID_POINT
+    },
+    {
+      label: 'grid rectangles',
+      value: REQUEST_TYPE.AS_GEOHASHGRID_POLYGON
+    }
+    ];
+
     this.state = {
       isLoadingIndexPattern: false,
       indexPatternId: '',
       geoField: '',
+      requestType: this._requestTypeOptions[0]
     };
   }
+
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -237,8 +349,7 @@ class Editor extends React.Component {
       indexPattern: undefined,
       geoField: undefined,
     }, this.debouncedLoad.bind(null, indexPatternId));
-  }
-
+  };
 
   debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
@@ -282,29 +393,35 @@ class Editor extends React.Component {
     }, this.previewLayer);
   };
 
+  _onRequestTypeSelect =  (selectedOptions) => {
+    this.setState({
+      requestType: selectedOptions[0]
+    }, this.previewLayer);
+  };
+
 
   previewLayer = () => {
     const {
       indexPatternId,
       geoField,
+      requestType
     } = this.state;
     if (indexPatternId && geoField) {
       this.props.onSelect({
         indexPatternId,
         geoField,
+        requestType: requestType.value
       });
     }
   };
 
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
-      return;
+      return null;
     }
 
     return (
-      <EuiFormRow
-        label="Geospatial field"
-      >
+      <EuiFormRow label="Geospatial field">
         <SingleFieldSelect
           placeholder="Select geo field"
           value={this.state.geoField}
@@ -316,23 +433,40 @@ class Editor extends React.Component {
     );
   }
 
+  _renderLayerSelect() {
+    return (
+      <EuiFormRow label="Show as">
+        <EuiComboBox
+          placeholder="Select a single option"
+          singleSelection={{ asPlainText: true }}
+          options={this._requestTypeOptions}
+          selectedOptions={[this.state.requestType]}
+          onChange={this._onRequestTypeSelect}
+          isClearable={false}
+        />
+      </EuiFormRow>);
+  }
+
+  _renderIndexPatternSelect() {
+    return (
+      <EuiFormRow label="Index pattern">
+        <IndexPatternSelect
+          indexPatternId={this.state.indexPatternId}
+          onChange={this.onIndexPatternSelect}
+          placeholder="Select index pattern"
+          fieldTypes={['geo_point']}
+        />
+      </EuiFormRow>
+    );
+  }
+
+
   render() {
     return (
       <Fragment>
-
-        <EuiFormRow
-          label="Index pattern"
-        >
-          <IndexPatternSelect
-            indexPatternId={this.state.indexPatternId}
-            onChange={this.onIndexPatternSelect}
-            placeholder="Select index pattern"
-            fieldTypes={['geo_point']}
-          />
-        </EuiFormRow>
-
+        {this._renderIndexPatternSelect()}
         {this._renderGeoSelect()}
-
+        {this._renderLayerSelect()}
       </Fragment>
     );
   }
