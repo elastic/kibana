@@ -803,10 +803,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.3.0":
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.3.0.tgz#6a871b209c757141ebe88f5c77393652cb43c24d"
-  integrity sha512-fvOSwZsdQHGpLUIPVLGZus+ty4hJtHVTGqhdwNIFyCt1/gha/S7nEN2Gsk442gfDbGE2girc6vhD3Bl1gzBYRA==
+"@elastic/eui@5.6.0":
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.0.tgz#5d58beff9a2b30ac38724c1704bbf807840f28ea"
+  integrity sha512-L5neMw4ejPtG+RNW48W3WVxlO8J5HIM2FAskuEERKH0nZWPQSk0wwXOvlegpd+RuHt4elfjTU+nrLvfB9cLKow==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -819,7 +819,6 @@
     prop-types "^15.6.0"
     react-ace "^5.5.0"
     react-color "^2.13.8"
-    react-datepicker v1.5.0
     react-input-autosize "^2.2.1"
     react-virtualized "^9.18.5"
     react-vis "1.10.2"
