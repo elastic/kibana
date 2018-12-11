@@ -10,7 +10,7 @@ import { setJoinsForLayer } from '../../../actions/store_actions';
 
 function mapDispatchToProps(dispatch) {
   return {
-    onJoinsEdited: (layer, joins) => {
+    onChange: (layer, joins) => {
       dispatch(setJoinsForLayer(layer, joins));
     }
   };
@@ -18,7 +18,10 @@ function mapDispatchToProps(dispatch) {
 
 function mapStateToProps({}, props) {
   return {
-    layer: props.layer
+    joins: props.layer.getJoins().map(join => {
+      return join.toDescriptor();
+    }),
+    layer: props.layer,
   };
 }
 

@@ -5,6 +5,7 @@
  */
 
 import React, {  } from 'react';
+import uuid from 'uuid/v4';
 
 import {
   EuiFlexGroup,
@@ -16,86 +17,65 @@ import {
 
 import { Join } from './resources/join';
 
+export function JoinEditor({ joins, layer, onChange }) {
 
-export class JoinEditor extends React.Component {
-
-  constructor() {
-    super();
-    this.state = {
-      joins: null
-    };
-  }
-
-  _renderJoins() {
-    const joins = this.state.joins.map((joinDescriptor, index) => {
-
-      const onJoinSelection = (joinDescriptor) => {
-        if (this.state.joins[index]) {
-          const updatedJoins = this.state.joins.slice();
-          updatedJoins[index] = joinDescriptor;
-          this.setState({
-            joins: updatedJoins
-          });
-          this.props.onJoinsEdited(this.props.layer, updatedJoins);
-        }
+  const renderJoins = () => {
+    return joins.map((joinDescriptor, index) => {
+      const handleOnChange = (updatedDescriptor) => {
+        onChange(layer, [
+          ...joins.slice(0, index),
+          updatedDescriptor,
+          ...joins.slice(index + 1)
+        ]);
       };
 
-      const onRemoveJoin = () => {
-        const updatedJoins = this.state.joins.slice();
-        updatedJoins.splice(index, 1);
-        this.setState({
-          joins: updatedJoins
-        });
-        this.props.onJoinsEdited(this.props.layer, updatedJoins);
+      const handleOnRemove = () => {
+        onChange(layer, [
+          ...joins.slice(0, index),
+          ...joins.slice(index + 1)
+        ]);
       };
 
       return (
         <Join
           key={index}
           join={joinDescriptor}
-          layer={this.props.layer}
-          onJoinSelection={onJoinSelection}
-          onRemoveJoin={onRemoveJoin}
+          layer={layer}
+          onChange={handleOnChange}
+          onRemove={handleOnRemove}
         />
       );
     });
+  };
 
-    return (joins);
+  const addJoin = () => {
+    onChange(layer, [
+      ...joins,
+      {
+        right: {
+          id: uuid()
+        }
+      }
+    ]);
+  };
+
+  if (!layer.isJoinable()) {
+    return null;
   }
 
-  render() {
+  return (
+    <div>
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="xs"><h5>Joins</h5></EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon iconType="plusInCircle" onClick={addJoin} aria-label="Add join" title="Add join" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m"  />
 
-    if (!this.props.layer.isJoinable()) {
-      return null;
-    }
-
-    if (this.state.joins === null) {
-      //init state
-      const joins = this.props.layer.getJoins();
-      this.state.joins = joins.map(join => join.toDescriptor());
-    }
-
-    const addJoin = () => {
-      const newJoin = {};
-      this.setState({
-        joins: this.state.joins.concat(newJoin)
-      });
-    };
-
-    return (
-      <div>
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem>
-            <EuiTitle size="xs"><h5>Joins</h5></EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="plusInCircle" onClick={addJoin} aria-label="Add join" title="Add join" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m"  />
-
-        {this._renderJoins()}
-      </div>
-    );
-  }
+      {renderJoins()}
+    </div>
+  );
 }
