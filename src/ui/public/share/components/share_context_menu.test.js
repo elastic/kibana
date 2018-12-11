@@ -43,3 +43,50 @@ test('should only render permalink panel when there are no other panels', () => 
   />);
   expect(component).toMatchSnapshot();
 });
+
+describe('shareContextMenuExtensions', () => {
+  const shareContextMenuExtensions = [
+    {
+      getShareActions: () => {
+        return [
+          {
+            panel: {
+              title: 'AAA panel',
+              content: (<div>panel content</div>),
+            },
+            shareMenuItem: {
+              name: 'AAA panel',
+              sortOrder: 5,
+            }
+          }
+        ];
+      }
+    },
+    {
+      getShareActions: () => {
+        return [
+          {
+            panel: {
+              title: 'ZZZ panel',
+              content: (<div>panel content</div>),
+            },
+            shareMenuItem: {
+              name: 'ZZZ panel',
+              sortOrder: 0,
+            }
+          }
+        ];
+      }
+    }
+  ];
+
+  test('should sort ascending on sort order first and then ascending on name', () => {
+    const component = shallowWithIntl(<ShareContextMenu.WrappedComponent
+      allowEmbed={false}
+      objectType="dashboard"
+      getUnhashableStates={() => {}}
+      shareContextMenuExtensions={shareContextMenuExtensions}
+    />);
+    expect(component).toMatchSnapshot();
+  });
+});
