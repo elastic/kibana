@@ -86,6 +86,7 @@ const removeUnsettableSettings = (settings: object) =>
   _.omit(settings, [
     'index.uuid',
     'index.creation_date',
+    'index.routing.allocation.initial_recovery._id',
     'index.version.created',
     'index.version.upgraded',
     'index.provided_name',
