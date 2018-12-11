@@ -44,13 +44,13 @@ describe('Authentication routes', () => {
         .firstCall
         .args[0];
 
-      request = {
+      request = requestFixture({
         headers: {},
         payload: { username: 'user', password: 'password' }
-      };
+      });
 
       authenticateStub = serverStub.plugins.security.authenticate.withArgs(
-        sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'password'))
+        sinon.match(BasicCredentials.decorateRequest(request, 'user', 'password'))
       );
       authorizationModeStub = serverStub.plugins.security.authorization.mode;
     });

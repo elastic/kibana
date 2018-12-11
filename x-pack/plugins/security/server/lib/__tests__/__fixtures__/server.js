@@ -13,6 +13,7 @@ export function serverFixture() {
     expose: stub(),
     log: stub(),
     route: stub(),
+    decorate: stub(),
 
     info: {
       protocol: 'protocol'

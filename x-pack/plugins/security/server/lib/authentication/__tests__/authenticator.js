@@ -12,6 +12,7 @@ import { serverFixture } from '../../__tests__/__fixtures__/server';
 import { requestFixture } from '../../__tests__/__fixtures__/request';
 import { Session } from '../session';
 import { AuthScopeService } from '../../auth_scope_service';
+import { LoginAttempt } from '../login_attempt';
 import { initAuthenticator } from '../authenticator';
 import * as ClientShield from '../../../../../../server/lib/get_client_shield';
 
@@ -153,6 +154,10 @@ describe('Authenticator', () => {
       const user = { username: 'user' };
       const systemAPIRequest = requestFixture({ headers: { authorization: 'Basic xxx' } });
       const notSystemAPIRequest = requestFixture({ headers: { authorization: 'Basic yyy' } });
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('foo', 'bar');
+      systemAPIRequest.loginAttempt.returns(loginAttempt);
+      notSystemAPIRequest.loginAttempt.returns(loginAttempt);
 
       server.plugins.kibana.systemApi.isSystemApiRequest
         .withArgs(systemAPIRequest).returns(true)
@@ -265,8 +270,14 @@ describe('Authenticator', () => {
 
     it('replaces existing session with the one returned by authentication provider.', async () => {
       const user = { username: 'user' };
-      const systemAPIRequest = requestFixture({ headers: { authorization: 'Basic xxx-new' } });
-      const notSystemAPIRequest = requestFixture({ headers: { authorization: 'Basic yyy-new' } });
+      const oldAuth = Buffer.from('foo:notbar').toString('base64');
+      const newAuth = Buffer.from('foo:bar').toString('base64');
+      const systemAPIRequest = requestFixture({ headers: { authorization: `Basic ${oldAuth}` } });
+      const notSystemAPIRequest = requestFixture({ headers: { authorization: `Basic ${oldAuth}` } });
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('foo', 'bar');
+      systemAPIRequest.loginAttempt.returns(loginAttempt);
+      notSystemAPIRequest.loginAttempt.returns(loginAttempt);
 
       session.get.withArgs(systemAPIRequest).returns(Promise.resolve({
         state: { authorization: 'Basic xxx-old' },
@@ -294,7 +305,7 @@ describe('Authenticator', () => {
       });
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, systemAPIRequest, {
-        state: { authorization: 'Basic xxx-new' },
+        state: { authorization: `Basic ${newAuth}` },
         provider: 'basic'
       });
 
@@ -306,7 +317,7 @@ describe('Authenticator', () => {
       });
       sinon.assert.calledTwice(session.set);
       sinon.assert.calledWithExactly(session.set, notSystemAPIRequest, {
-        state: { authorization: 'Basic yyy-new' },
+        state: { authorization: `Basic ${newAuth}` },
         provider: 'basic'
       });
     });
