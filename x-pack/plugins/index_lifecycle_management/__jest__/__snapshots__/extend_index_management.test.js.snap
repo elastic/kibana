@@ -137,7 +137,16 @@ exports[`ilm summary extension should return extension when index has lifecycle 
   }
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -169,6 +178,26 @@ exports[`ilm summary extension should return extension when index has lifecycle 
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -193,15 +222,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -673,7 +693,16 @@ exports[`ilm summary extension should return extension when index has lifecycle 
   }
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -705,6 +734,26 @@ exports[`ilm summary extension should return extension when index has lifecycle 
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -729,15 +778,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
