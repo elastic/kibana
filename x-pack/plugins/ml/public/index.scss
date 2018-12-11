@@ -24,7 +24,6 @@
   @import 'timeseriesexplorer/index';
 
   // Components
-  @import 'components/annotations_table/index';
   @import 'components/anomalies_table/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/chart_tooltip/index';
   @import 'components/confirm_modal/index';

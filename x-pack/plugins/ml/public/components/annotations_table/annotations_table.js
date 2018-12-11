@@ -15,13 +15,14 @@ import React, {
 
 import {
   EuiBadge,
-  EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiLoadingSpinner
+  EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import {
@@ -283,17 +284,22 @@ class AnnotationsTable extends Component {
     }
 
     if (isSingleMetricViewerLinkVisible) {
+      const openInSingleMetricViewerText = 'Open in Single Metric Viewer';
       columns.push({
         align: RIGHT_ALIGNMENT,
         width: '60px',
         name: 'View',
         render: (annotation) => (
-          <EuiButton
-            onClick={() => this.openSingleMetricView(annotation)}
-            className="view-annotations-btn"
+          <EuiToolTip
+            position="bottom"
+            content={openInSingleMetricViewerText}
           >
-            <i aria-hidden="true" className="fa fa-line-chart"/>
-          </EuiButton>
+            <EuiButtonIcon
+              onClick={() => this.openSingleMetricView(annotation)}
+              iconType="stats"
+              aria-label={openInSingleMetricViewerText}
+            />
+          </EuiToolTip>
         )
       });
     }
@@ -308,6 +314,7 @@ class AnnotationsTable extends Component {
     return (
       <EuiInMemoryTable
         className="annotations-table"
+        compressed={true}
         items={annotations}
         columns={columns}
         pagination={{
