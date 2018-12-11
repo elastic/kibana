@@ -52,7 +52,8 @@ function AdvancedSettingsUi({
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder={intl.formatMessage('xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder', {
+          placeholder={intl.formatMessage({
+            id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder',
             defaultMessage: 'index name'
           })}
           value={index}
