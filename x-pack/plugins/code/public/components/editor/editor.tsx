@@ -160,4 +160,5 @@ const mapDispatchToProps = {
 export const Editor = connect(
   mapStateToProps,
   mapDispatchToProps
+  // @ts-ignore
 )(EditorComponent);

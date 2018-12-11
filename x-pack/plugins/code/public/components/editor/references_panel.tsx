@@ -57,6 +57,7 @@ export class ReferencesPanel extends React.Component<Props> {
       <EuiAccordion
         id={repo}
         key={repo}
+        // @ts-ignore
         buttonClassName="euiAccordionForm__button"
         buttonContent={repo}
         paddingSize="l"
