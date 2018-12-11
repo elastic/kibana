@@ -1,0 +1,166 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewEventModal Renders NewEventModal 1`] = `
+<React.Fragment>
+  <EuiModal
+    initialFocus="[name=description]"
+    maxWidth={false}
+    onClose={[MockFunction]}
+  >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        Create new event
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiForm>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={true}
+          hasEmptyLabelSpace={false}
+          label="Description"
+        >
+          <EuiFieldText
+            compressed={false}
+            fullWidth={true}
+            isInvalid={true}
+            isLoading={false}
+            name="description"
+            onChange={[Function]}
+          />
+        </EuiFormRow>
+        <React.Fragment>
+          <EuiSpacer
+            size="s"
+          />
+          <React.Fragment>
+            <EuiFlexGroup
+              alignItems="stretch"
+              component="div"
+              direction="row"
+              gutterSize="l"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiFormRow
+                  describedByIds={Array []}
+                  fullWidth={false}
+                  hasEmptyLabelSpace={false}
+                  helpText="YYYY-MM-DD HH:mm:ss"
+                  label="From:"
+                >
+                  <EuiFieldText
+                    compressed={false}
+                    fullWidth={false}
+                    isLoading={false}
+                    name="startTime"
+                    onChange={[Function]}
+                    placeholder="YYYY-MM-DD HH:mm:ss"
+                    value="2018-12-11 00:00:00"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiFormRow
+                  describedByIds={Array []}
+                  fullWidth={false}
+                  hasEmptyLabelSpace={false}
+                  helpText="YYYY-MM-DD HH:mm:ss"
+                  label="To:"
+                >
+                  <EuiFieldText
+                    compressed={false}
+                    fullWidth={false}
+                    isLoading={false}
+                    name="endTime"
+                    onChange={[Function]}
+                    placeholder="YYYY-MM-DD HH:mm:ss"
+                    value="2018-12-12 00:00:00"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </React.Fragment>
+          <EuiSpacer
+            size="s"
+          />
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={true}
+            hasEmptyLabelSpace={false}
+          >
+            <EuiDatePickerRange
+              endDateControl={
+                <EuiDatePicker
+                  aria-label="End date"
+                  dateFormat="YYYY-MM-DD HH:mm:ss"
+                  endDate={"2018-12-12T06:00:00.000Z"}
+                  fullWidth={true}
+                  inline={true}
+                  isInvalid={false}
+                  isLoading={false}
+                  onChange={[Function]}
+                  selected={"2018-12-12T06:00:00.000Z"}
+                  shadow={true}
+                  shouldCloseOnSelect={true}
+                  showIcon={true}
+                  startDate={"2018-12-11T06:00:00.000Z"}
+                  timeFormat="YYYY-MM-DD HH:mm:ss"
+                />
+              }
+              fullWidth={true}
+              iconType={false}
+              startDateControl={
+                <EuiDatePicker
+                  aria-label="Start date"
+                  dateFormat="YYYY-MM-DD HH:mm:ss"
+                  endDate={"2018-12-12T06:00:00.000Z"}
+                  fullWidth={true}
+                  inline={true}
+                  isInvalid={false}
+                  isLoading={false}
+                  onChange={[Function]}
+                  selected={"2018-12-11T06:00:00.000Z"}
+                  shadow={true}
+                  shouldCloseOnSelect={true}
+                  showIcon={true}
+                  startDate={"2018-12-11T06:00:00.000Z"}
+                  timeFormat="YYYY-MM-DD HH:mm:ss"
+                />
+              }
+            />
+          </EuiFormRow>
+        </React.Fragment>
+      </EuiForm>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton
+        color="primary"
+        disabled={true}
+        fill={true}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
+      >
+        Add
+      </EuiButton>
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        onClick={[MockFunction]}
+        type="button"
+      >
+        Cancel
+      </EuiButtonEmpty>
+    </EuiModalFooter>
+  </EuiModal>
+</React.Fragment>
+`;

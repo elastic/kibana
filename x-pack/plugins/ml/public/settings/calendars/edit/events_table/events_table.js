@@ -82,6 +82,7 @@ export function EventsTable({
       name: '',
       render: (event) => (
         <DeleteButton
+          data-testid="event_delete"
           onClick={() => { onDeleteClick(event.event_id); }}
         />
       )
