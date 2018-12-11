@@ -165,7 +165,7 @@ export const validateLifecycle = state => {
     if (policyName.includes(' ')) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameContainsSpaceErrorMessage);
     }
-    if (TextEncoder && new TextEncoder('utf-8').encode(policyName).length > 255) {
+    if (window.TextEncoder && new window.TextEncoder('utf-8').encode(policyName).length > 255) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameTooLongErrorMessage);
     }
   }
