@@ -45,8 +45,12 @@ export class AppRouter extends Component<RouterProps, RouterState> {
 
   public async componentWillMount() {
     if (this.state.loadingStatus === 'loading') {
-      await this.props.beatsContainer.reload();
-      await this.props.tagsContainer.reload();
+      try {
+        await this.props.beatsContainer.reload();
+        await this.props.tagsContainer.reload();
+      } catch (e) {
+        // TODO in a furture version we will better manage this "error" in a returned arg
+      }
 
       const countOfEverything =
         this.props.beatsContainer.state.list.length + this.props.tagsContainer.state.list.length;

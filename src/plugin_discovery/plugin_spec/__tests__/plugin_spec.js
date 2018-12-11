@@ -66,7 +66,7 @@ describe('plugin discovery/plugin spec', () => {
       it('throws if spec.publicDir is truthy and not a string', () => {
         function assert(publicDir) {
           expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError(error => {
-            expect(error.message).to.contain('Path must be a string');
+            expect(error.message).to.contain(`The "path" argument must be of type string. Received type ${typeof publicDir}`);
           });
         }
 

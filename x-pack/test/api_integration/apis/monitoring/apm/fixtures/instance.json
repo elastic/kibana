@@ -581,6 +581,29 @@
         [1535723910000, 0],
         [1535723940000, 0]
       ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1535720389104,
+        "max": 1535723989104
+      },
+      "metric": {
+        "app": "apm",
+        "field": "beats_stats.metrics.apm-server.server.response.errors.internal",
+        "metricAgg": "max",
+        "label": "Internal",
+        "title": "Internal",
+        "description": "HTTP Requests rejected due to a miscellaneous internal error",
+        "units": "/m",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1535723880000, null],
+        [1535723910000, 0],
+        [1535723940000, 0]
+      ]
     }],
     "apm_requests": [{
       "bucket_size": "30 seconds",

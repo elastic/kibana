@@ -206,7 +206,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.state).to.be(undefined);
     });
 
-    it('fails if `authorization` header has unsupported schema even if state contains a valid token.', async () => {
+    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
 
       const authenticationResult = await provider.authenticate(request, {
@@ -216,8 +216,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       sinon.assert.notCalled(callWithRequest);
       expect(request.headers.authorization).to.be('Basic some:credentials');
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.error).to.eql(Boom.badRequest('Unsupported authentication schema: Basic'));
+      expect(authenticationResult.notHandled()).to.be(true);
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
