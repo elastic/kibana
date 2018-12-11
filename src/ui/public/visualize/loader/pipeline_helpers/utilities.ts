@@ -17,41 +17,11 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { identity } from 'lodash';
+// @ts-ignore
+import { fieldFormats } from '../../../registry/field_formats';
 
-export const metric = () => ({
-  name: 'kibana_metric',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_table'
-    ],
-  },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.metric.help', {
-    defaultMessage: 'Metric visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visConfig: {
-          type: 'metric',
-          params: visConfigParams,
-        },
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+export const getFieldFormat = (mapping: any) => {
+  const FieldFormat = fieldFormats.byId[mapping.id];
+  return FieldFormat && new FieldFormat(mapping.params, identity);
+};

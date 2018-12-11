@@ -21,8 +21,8 @@ import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisState } from 'ui/vis';
 
 interface Schemas {
-  metric: number[];
-  [key: string]: number[];
+  metric: any[];
+  [key: string]: any[];
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
@@ -50,6 +50,7 @@ export const getSchemas = (vis: Vis): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
+    const format = agg.params.field ? agg.params.field.format : null;
     if (!agg.enabled) {
       return;
     }
@@ -67,11 +68,17 @@ export const getSchemas = (vis: Vis): Schemas => {
       schemas[schemaName] = [];
     }
     if (!isHierarchical || agg.type.type !== 'metrics') {
-      schemas[schemaName].push(cnt++);
+      schemas[schemaName].push({
+        accessor: cnt++,
+        format,
+      });
     }
     if (isHierarchical && agg.type.type !== 'metrics') {
       metrics.forEach(() => {
-        schemas.metric.push(cnt++);
+        schemas.metric.push({
+          accessor: cnt++,
+          format,
+        });
       });
     }
   });
@@ -111,43 +118,50 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   table: (visState, schemas) => {
     let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)}`;
     if (schemas.split_row) {
-      pipeline += `splitRow='${schemas.split_row.join(',')}' `;
+      pipeline += `splitRow='${schemas.split_row.map(row => row.id).join(',')}' `;
+      pipeline += `splitRowFormat='${schemas.split_row.map(row => row.format).join(',')}' `;
     }
     if (schemas.split_column) {
-      pipeline += `splitColumn='${schemas.split_column.join(',')}' `;
+      pipeline += `splitColumn='${schemas.split_column.map(row => row.id).join(',')}' `;
+      pipeline += `splitColumnFormat='${schemas.split_column.map(row => row.format).join(',')}' `;
     }
     if (schemas.bucket) {
-      pipeline += `bucket='${schemas.bucket.join(',')}' `;
+      pipeline += `bucket='${schemas.bucket.map(row => row.id).join(',')}' `;
+      pipeline += `bucketFormat='${schemas.bucket.map(row => row.format).join(',')}' `;
     }
-    pipeline += `metric='${schemas.metric.join(',')}' `;
+    pipeline += `metric='${schemas.metric.map(row => row.id).join(',')}' `;
+    pipeline += `metricFormat='${schemas.metric.map(row => row.format).join(',')}' `;
     return pipeline;
   },
   metric: (visState, schemas) => {
-    let pipeline = `kibana_metric ${prepareJson('visConfig', visState.params)}`;
-    if (schemas.bucket) {
-      pipeline += `bucket='${schemas.bucket.join(',')}' `;
+    const visConfig = visState.params;
+    visConfig.metric.metrics = schemas.metric;
+    if (schemas.group) {
+      visConfig.metric.bucket = schemas.group[0];
     }
-    pipeline += `metric='${schemas.metric.join(',')}' `;
-    return pipeline;
+
+    return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    let pipeline = `tagcloud ${prepareJson('visConfig', visState.params)}`;
-    pipeline += `bucket='${schemas.segment.join(',')}' `;
-    pipeline += `metric='${schemas.metric.join(',')}' `;
-    return pipeline;
+    const visConfig = visState.params;
+    visConfig.metrics = schemas.metric;
+    if (schemas.group) {
+      visConfig.bucket = schemas.group[0];
+    }
+    return `tagcloud ${prepareJson('visConfig', visState.params)}`;
   },
   region_map: (visState, schemas) => {
     let pipeline = `regionmap ${prepareJson('visConfig', visState.params)}`;
-    pipeline += `bucket='${schemas.segment.join(',')}' `;
-    pipeline += `metric='${schemas.metric.join(',')}' `;
+    pipeline += `bucket='${schemas.segment.map(row => row.id).join(',')}' `;
+    pipeline += `metric='${schemas.metric.map(row => row.id).join(',')}' `;
     return pipeline;
   },
   tile_map: (visState, schemas) => {
     let pipeline = `tilemap ${prepareJson('visConfig', visState.params)}`;
     if (schemas.segment) {
-      pipeline += `bucket='${schemas.segment.join(',')}' `;
+      pipeline += `bucket='${schemas.segment.map(row => row.id).join(',')}' `;
     }
-    pipeline += `metric='${schemas.metric.join(',')}' `;
+    pipeline += `metric='${schemas.metric.map(row => row.id).join(',')}' `;
     return pipeline;
   },
   pie: (visState, schemas) => {
