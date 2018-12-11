@@ -78,7 +78,7 @@ export class TaskPoller {
    * this has no effect.
    */
   public async attemptWork() {
-    if (this.isWorking) {
+    if (!this.isStarted || this.isWorking) {
       return;
     }
 
