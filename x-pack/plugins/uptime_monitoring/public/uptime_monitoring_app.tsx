@@ -151,7 +151,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 render={props => <OverviewPage {...props} setBreadcrumbs={this.setBreadcrumbs} />}
               />
               <Route
-                path="/monitor"
+                path="/monitor/:id"
                 render={props => <MonitorPage {...props} updateBreadcrumbs={this.setBreadcrumbs} />}
               />
             </Switch>

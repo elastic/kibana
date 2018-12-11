@@ -6,11 +6,13 @@
 
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 
 interface MonitorPageProps {
   updateBreadcrumbs: UMUpdateBreadcrumbs;
+  match: { params: { id: string } };
 }
 
 export class MonitorPage extends React.Component<MonitorPageProps> {
@@ -23,10 +25,15 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
   }
 
   public render() {
+    const { id } = this.props.match.params;
     return (
       <div>
         <EuiTitle>
-          <h4>Monitor &#123;ID&#125;</h4>
+          <h4>
+            Monitor &#123;
+            {id}
+            &#125;
+          </h4>
         </EuiTitle>
         This is the Monitors page.
         <p>
