@@ -24,7 +24,7 @@ import {
   SearchSource,
   timeService,
 } from '../../../kibana_services';
-import { createExtentFilter } from '../../../elasticsearch_geo_utils';
+import { createExtentFilter, makeGeohashGridPolygon } from '../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
@@ -108,24 +108,10 @@ export class ESGeohashGridSource extends VectorSource {
       layerName: layerName
     });
 
-    if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_POINT) {
-      //can use as-is
-    } else if (this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON) {
+    if (this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON) {
       featureCollection.features.forEach((feature) => {
         //replace geometries with the polygon
-        const esBbox = feature.properties.geohash_meta.rectangle;
-        feature.geometry = {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [esBbox[0][1], esBbox[0][0]],
-              [esBbox[1][1], esBbox[1][0]],
-              [esBbox[2][1], esBbox[2][0]],
-              [esBbox[3][1], esBbox[3][0]],
-              [esBbox[0][1], esBbox[0][0]],
-            ]
-          ]
-        };
+        feature.geometry = makeGeohashGridPolygon(feature);
       });
     }
 
@@ -141,6 +127,7 @@ export class ESGeohashGridSource extends VectorSource {
         areResultsTrimmed: true
       }
     };
+
   }
 
   async getNumberFields() {
@@ -149,7 +136,7 @@ export class ESGeohashGridSource extends VectorSource {
 
 
   async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerId, layerName }) {
-    inspectorAdapters.requests.resetRequest(layerId);
+
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -240,67 +227,63 @@ export class ESGeohashGridSource extends VectorSource {
   }
 
   _createDefaultLayerDescriptor(options) {
+
     if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_HEATMAP) {
       return GeohashGridLayer.createDescriptor({
         sourceDescriptor: this._descriptor,
         ...options
       });
-    } else if (
-      this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_POINT ||
-      this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON
-    ) {
-      console.warn('should implement this properly, with some default styling');
-      const descriptor = VectorLayer.createDescriptor({
-        sourceDescriptor: this._descriptor,
-        ...options
-      });
-      descriptor.style = {
-        ...descriptor.style,
-        "type": "VECTOR",
-        "properties": {
-          "fillColor": {
-            "type": "DYNAMIC",
-            "options": {
-              "field": {
-                "label": "doc_count",
-                "name": "doc_count",
-                "origin": "source"
-              },
-              "color": "Blues"
-            }
-          },
-          "iconSize": {
-            "type": "STATIC",
-            "options": {
-              "size": 10
-            }
-          },
-          "alphaValue": 0.5
-        }
-      };
-      return descriptor;
     }
+
+    const descriptor = VectorLayer.createDescriptor({
+      sourceDescriptor: this._descriptor,
+      ...options
+    });
+    descriptor.style = {
+      ...descriptor.style,
+      "type": "VECTOR",
+      "properties": {
+        "fillColor": {
+          "type": "DYNAMIC",
+          "options": {
+            "field": {
+              "label": "doc_count",
+              "name": "doc_count",
+              "origin": "source"
+            },
+            "color": "Blues"
+          }
+        },
+        "iconSize": {
+          "type": "STATIC",
+          "options": {
+            "size": 10
+          }
+        },
+        "alphaValue": 0.5
+      }
+    };
+    return descriptor;
+
   }
 
   createDefaultLayer(options) {
+
     if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_HEATMAP) {
       return new GeohashGridLayer({
         layerDescriptor: this._createDefaultLayerDescriptor(options),
         source: this
       });
-    } else if (
-      this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_POINT ||
-      this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON
-    ) {
-      const layerDescriptor = this._createDefaultLayerDescriptor(options);
-      const style = new VectorStyle(layerDescriptor.style);
-      console.log(style);
-      return new VectorLayer({
-        layerDescriptor: layerDescriptor,
-        source: this,
-        style: style
-      });
     }
+
+    const layerDescriptor = this._createDefaultLayerDescriptor(options);
+    const style = new VectorStyle(layerDescriptor.style);
+    return new VectorLayer({
+      layerDescriptor: layerDescriptor,
+      source: this,
+      style: style
+    });
+
   }
 
 
