@@ -20,6 +20,42 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
 
   // Register a function with server to manage the collection of usage stats
   kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
+
+  // @ts-ignore
+  const xpackMainPlugin = kbnServer.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: 'infrastructure',
+    name: 'Infrastructure',
+    icon: 'infraApp',
+    navLinkId: 'infra:home',
+    privileges: {
+      all: {
+        app: ['infra'],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+  });
+
+  xpackMainPlugin.registerFeature({
+    id: 'logging',
+    name: 'Logs',
+    icon: 'loggingApp',
+    navLinkId: 'infra:logs',
+    privileges: {
+      all: {
+        app: ['infra'],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+  });
 };
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
