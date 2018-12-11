@@ -22,21 +22,13 @@ import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 
-export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
+export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>>;
 
-export class MapOfType<K, V> extends Type<Map<K, V>> {
-  constructor(keyType: Type<K>, valueType: Type<V>, options: MapOfOptions<K, V> = {}) {
-    const defaultValue = options.defaultValue;
-    const schema = internals.map().entries(keyType.getSchema(), valueType.getSchema());
+export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
+  constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
+    const schema = internals.record().entries(keyType.getSchema(), valueType.getSchema());
 
-    super(schema, {
-      ...options,
-      // Joi clones default values with `Hoek.clone`, and there is bug in cloning
-      // of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
-      // The only way to avoid cloning and hence the bug is to use function for
-      // default value instead.
-      defaultValue: defaultValue instanceof Map ? () => defaultValue : defaultValue,
-    });
+    super(schema, options);
   }
 
   protected handleError(
@@ -46,10 +38,10 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
   ) {
     switch (type) {
       case 'any.required':
-      case 'map.base':
-        return `expected value of type [Map] or [object] but got [${typeDetect(value)}]`;
-      case 'map.key':
-      case 'map.value':
+      case 'record.base':
+        return `expected value of type [object] but got [${typeDetect(value)}]`;
+      case 'record.key':
+      case 'record.value':
         const childPathWithIndex = reason.path.slice();
         childPathWithIndex.splice(path.length, 0, entryKey.toString());
 
