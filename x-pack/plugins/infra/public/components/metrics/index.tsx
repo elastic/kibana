@@ -8,7 +8,7 @@ import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraMetricData } from '../../../common/graphql/types';
+import { InfraMetricData } from '../../graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { metricTimeActions } from '../../store';
 import { InfraLoadingPanel } from '../loading';

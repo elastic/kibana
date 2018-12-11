@@ -8,7 +8,7 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elas
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 

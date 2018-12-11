@@ -1,0 +1,14 @@
+{
+  "flattenTypes": true,
+  "generatorConfig": {
+    "contextType": "InfraContext",
+    "prepend": ["import { InfraContext } from '../lib/infra_types';"]
+  },
+  "primitives": {
+    "String": "string",
+    "Int": "number",
+    "Float": "number",
+    "Boolean": "boolean",
+    "ID": "string"
+  }
+}

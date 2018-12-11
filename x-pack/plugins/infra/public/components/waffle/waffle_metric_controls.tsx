@@ -13,7 +13,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraMetricInput, InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
+
+import { InfraMetricInput, InfraMetricType, InfraNodeType } from '../../graphql/types';
+
 interface Props {
   nodeType: InfraNodeType;
   metric: InfraMetricInput;

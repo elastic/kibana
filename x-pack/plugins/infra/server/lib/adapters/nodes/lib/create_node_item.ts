@@ -7,7 +7,8 @@
 import { last } from 'lodash';
 import { isNumber } from 'lodash';
 import moment from 'moment';
-import { InfraNode, InfraNodeMetric } from '../../../../../common/graphql/types';
+
+import { InfraNode, InfraNodeMetric } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { getBucketSizeInSeconds } from './get_bucket_size_in_seconds';
 

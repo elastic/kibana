@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogEntries as LogEntriesQuery } from '../../../../common/graphql/types';
+import { LogEntries as LogEntriesQuery } from '../../../graphql/types';
 import {
   createGraphqlInitialState,
   GraphqlState,

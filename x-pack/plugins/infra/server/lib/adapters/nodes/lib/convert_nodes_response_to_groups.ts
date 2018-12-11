@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { InfraNode } from '../../../../../common/graphql/types';
+import { InfraNode } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { extractGroupPaths } from './extract_group_paths';
 

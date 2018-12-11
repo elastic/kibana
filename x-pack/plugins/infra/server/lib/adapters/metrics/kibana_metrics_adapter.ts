@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
-import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../../common/graphql/types';
+
+import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';

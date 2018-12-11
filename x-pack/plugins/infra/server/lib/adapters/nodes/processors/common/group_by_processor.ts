@@ -6,7 +6,7 @@
 
 import { cloneDeep, set } from 'lodash';
 
-import { InfraPathFilterInput, InfraPathInput } from '../../../../../../common/graphql/types';
+import { InfraPathFilterInput, InfraPathInput } from '../../../../../graphql/types';
 import {
   InfraESQueryStringQuery,
   InfraESSearchBody,

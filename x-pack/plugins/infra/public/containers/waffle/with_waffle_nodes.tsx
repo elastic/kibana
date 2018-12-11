@@ -9,12 +9,12 @@ import { Query } from 'react-apollo';
 
 import {
   InfraMetricInput,
+  InfraNodeType,
   InfraPathInput,
   InfraPathType,
   InfraTimerangeInput,
   WaffleNodesQuery,
-} from '../../../common/graphql/types';
-import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+} from '../../graphql/types';
 import { InfraWaffleMapGroup } from '../../lib/lib';
 import { nodesToWaffleMap } from './nodes_to_wafflemap';
 import { waffleNodesQuery } from './waffle_nodes.gql_query';

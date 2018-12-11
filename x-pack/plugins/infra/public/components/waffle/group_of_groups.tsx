@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,

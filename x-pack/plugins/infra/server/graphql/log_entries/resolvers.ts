@@ -9,30 +9,26 @@ import {
   InfraLogMessageFieldSegment,
   InfraLogMessageSegment,
   InfraSourceResolvers,
-} from '../../../common/graphql/types';
-import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
+} from '../../graphql/types';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
-import { InfraContext } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-export type InfraSourceLogEntriesAroundResolver = InfraResolverOf<
-  InfraSourceResolvers.LogEntriesAroundResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceLogEntriesAroundResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogEntriesAroundResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceLogEntriesBetweenResolver = InfraResolverOf<
-  InfraSourceResolvers.LogEntriesBetweenResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceLogEntriesBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogEntriesBetweenResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceLogSummaryBetweenResolver = InfraResolverOf<
-  InfraSourceResolvers.LogSummaryBetweenResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogSummaryBetweenResolver>,
+  QuerySourceResolver
 >;
 
 export const createLogEntriesResolvers = (libs: {

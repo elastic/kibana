@@ -12,7 +12,7 @@ import {
   InfraMetricType,
   InfraNodeType,
   InfraPathInput,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 
 interface Props {
   nodeType: InfraNodeType;
