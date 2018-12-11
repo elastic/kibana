@@ -371,8 +371,9 @@ export class WorkpadLoader extends React.PureComponent {
 
             {createPending && <div style={{ width: '100%' }}>Creating Workpad...</div>}
 
-            {!createPending &&
-              isLoading && <div style={{ width: '100%' }}>Fetching Workpads...</div>}
+            {!createPending && isLoading && (
+              <div style={{ width: '100%' }}>Fetching Workpads...</div>
+            )}
 
             {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
 
