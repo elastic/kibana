@@ -41,5 +41,5 @@ export const Toolbar = compose(
     },
   }),
   withState('tray', 'setTray', props => props.tray),
-  withState('showWorkpadLoader', 'setShowWorkpadLoader', false)
+  withState('showWorkpadManager', 'setShowWorkpadManager', false)
 )(Component);
