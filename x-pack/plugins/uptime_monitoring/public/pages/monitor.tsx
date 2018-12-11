@@ -199,12 +199,6 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        {/* <p>
-          It will display information like the monitor&#8217;s performance over time, and other
-          valuable information. In the next set of changes, this page will be replaced with more
-          useful visualizations and data.
-        </p> */}
       </Fragment>
     );
   }
