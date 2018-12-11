@@ -50,8 +50,10 @@ import {
 } from './explorer_constants';
 import { DEFAULT_QUERY_SIZE } from '../../common/constants/search';
 
-import chrome from 'ui/chrome';
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+// TODO Fully support Annotations in Anomaly Explorer
+// import chrome from 'ui/chrome';
+// const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+const mlAnnotationsEnabled = false;
 
 uiRoutes
   .when('/explorer/?', {
