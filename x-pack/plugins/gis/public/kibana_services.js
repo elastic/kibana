@@ -9,6 +9,7 @@ import { SearchSourceProvider } from 'ui/courier';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { MapAdapter } from './inspector/adapters/map_adapter';
 import { timefilter } from 'ui/timefilter/timefilter';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 export const timeService = timefilter;
 export let indexPatternService;
@@ -18,6 +19,28 @@ export const inspectorAdapters = {
   requests: new RequestAdapter(),
   map: new MapAdapter(),
 };
+
+export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc }) {
+  const inspectorRequest = inspectorAdapters.requests.start(
+    requestName,
+    { id: requestId, description: requestDesc });
+  let resp;
+  try {
+    inspectorRequest.stats(getRequestInspectorStats(searchSource));
+    searchSource.getSearchRequestBody().then(body => {
+      inspectorRequest.json(body);
+    });
+    resp = await searchSource.fetch();
+    inspectorRequest
+      .stats(getResponseInspectorStats(searchSource, resp))
+      .ok({ json: resp });
+  } catch(error) {
+    inspectorRequest.error({ error });
+    throw error;
+  }
+
+  return resp;
+}
 
 uiModules.get('app/gis').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');

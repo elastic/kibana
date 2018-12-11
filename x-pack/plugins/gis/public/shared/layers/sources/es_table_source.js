@@ -10,6 +10,7 @@ import React, { Fragment } from 'react';
 import { ASource } from './source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
+  fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
   SearchSource,
 } from '../../../kibana_services';
@@ -78,10 +79,7 @@ export class ESTableSource extends ASource {
     return false;
   }
 
-  async getTable(searchFilters) {
-
-    // inspectorAdapters.requests.resetRequest(layerId);
-
+  async getTable(searchFilters, leftSourceName, leftFieldName) {
 
     if (!this.hasCompleteConfig()) {
       return [];
@@ -108,7 +106,12 @@ export class ESTableSource extends ASource {
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
-      resp = await searchSource.fetch();
+      resp = await fetchSearchSourceAndRecordWithInspector({
+        searchSource,
+        requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
+        requestId: this._descriptor.id,
+        requestDesc: this.getJoinDescription(leftSourceName, leftFieldName),
+      });
     } catch (error) {
       throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
     }
@@ -153,9 +156,20 @@ export class ESTableSource extends ASource {
     return false;
   }
 
+  getJoinDescription(leftSourceName, leftFieldName) {
+    const metrics = this._getValidMetrics().map(metric => {
+      return metric.type !== 'count' ? `${metric.type}(${metric.field})` : 'count(*)';
+    });
+    const joinStatement = [];
+    joinStatement.push(`SELECT ${metrics.join(',')}`);
+    joinStatement.push(`FROM ${leftSourceName} left`);
+    joinStatement.push(`JOIN ${this._descriptor.indexPatternTitle} right`);
+    joinStatement.push(`ON left.${leftFieldName} right.${this._descriptor.term}`);
+    joinStatement.push(`GROUP BY right.${this._descriptor.term}`);
+    return `Elasticsearch terms aggregation request for join: "${joinStatement.join(' ')}"`;
+  }
 
-
-  getMetricFields() {
+  _getValidMetrics() {
     const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
       if (type === 'count') {
         return true;
@@ -169,7 +183,11 @@ export class ESTableSource extends ASource {
     if (metrics.length === 0) {
       metrics.push({ type: 'count' });
     }
-    return metrics.map(metric => {
+    return metrics;
+  }
+
+  getMetricFields() {
+    return this._getValidMetrics().map(metric => {
       const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
       const metricLabel = metric.type !== 'count' ? `${metric.type}(${metric.field})` : 'count(*)';
       return {
@@ -213,4 +231,6 @@ export class ESTableSource extends ASource {
   async getDisplayName() {
     return `es_table ${this._descriptor.indexPatternId}`;
   }
+
+
 }

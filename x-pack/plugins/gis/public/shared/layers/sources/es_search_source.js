@@ -17,12 +17,11 @@ import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_s
 import { SingleFieldSelect } from '../../components/single_field_select';
 import { MultiFieldSelect } from './multi_field_select';
 import {
+  fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
-  inspectorAdapters,
   SearchSource,
 } from '../../../kibana_services';
 import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_utils';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 import { ESSourceDetails } from './es_geohashgrid_sourcedetails';
 
@@ -98,7 +97,6 @@ export class ESSearchSource extends VectorSource {
       throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
     }
 
-    let inspectorRequest;
     let resp;
     try {
       const searchSource = new SearchSource();
@@ -125,19 +123,13 @@ export class ESSearchSource extends VectorSource {
         return filters;
       });
 
-      inspectorRequest = inspectorAdapters.requests.start(
-        layerName,
-        { id: layerId, description: 'Elasticsearch document layer' });
-      inspectorRequest.stats(getRequestInspectorStats(searchSource));
-      searchSource.getSearchRequestBody().then(body => {
-        inspectorRequest.json(body);
+      resp = await fetchSearchSourceAndRecordWithInspector({
+        searchSource,
+        requestName: layerName,
+        requestId: layerId,
+        requestDesc: 'Elasticsearch document request'
       });
-      resp = await searchSource.fetch();
-      inspectorRequest
-        .stats(getResponseInspectorStats(searchSource, resp))
-        .ok({ json: resp });
     } catch(error) {
-      inspectorRequest.error({ error });
       throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
     }
 

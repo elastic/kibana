@@ -20,7 +20,7 @@ import { VectorLayer } from '../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   indexPatternService,
-  inspectorAdapters,
+  fetchSearchSourceAndRecordWithInspector,
   SearchSource,
   timeService,
 } from '../../../kibana_services';
@@ -28,7 +28,6 @@ import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { ESSourceDetails } from './es_geohashgrid_sourcedetails';
 import { ZOOM_TO_PRECISION } from '../../utils/zoom_to_precision';
 import { VectorStyle } from '../styles/vector_style';
@@ -165,7 +164,6 @@ export class ESGeohashGridSource extends VectorSource {
 
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
 
-    let inspectorRequest;
     let resp;
     try {
       const searchSource = new SearchSource();
@@ -179,19 +177,13 @@ export class ESGeohashGridSource extends VectorSource {
         return filters;
       });
 
-      inspectorRequest = inspectorAdapters.requests.start(
-        layerName,
-        { id: layerId, description: 'Elasticsearch geohash_grid aggregation layer' });
-      inspectorRequest.stats(getRequestInspectorStats(searchSource));
-      searchSource.getSearchRequestBody().then(body => {
-        inspectorRequest.json(body);
+      resp = await fetchSearchSourceAndRecordWithInspector({
+        searchSource,
+        requestName: layerName,
+        requestId: layerId,
+        requestDesc: 'Elasticsearch geohash_grid aggregation request'
       });
-      resp = await searchSource.fetch();
-      inspectorRequest
-        .stats(getResponseInspectorStats(searchSource, resp))
-        .ok({ json: resp });
     } catch(error) {
-      inspectorRequest.error({ error });
       throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
     }
 

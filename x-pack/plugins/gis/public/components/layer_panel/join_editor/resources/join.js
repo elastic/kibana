@@ -119,16 +119,17 @@ export class Join extends Component {
   }
 
   _onLeftFieldChange = (leftField) => {
-    this.props.onJoinSelection({
+    this.props.onChange({
       leftField: leftField,
       right: this.props.join.right,
     });
   };
 
   _onRightSourceChange = ({ indexPatternId, indexPatternTitle }) => {
-    this.props.onJoinSelection({
+    this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
+        id: this.props.join.right.id,
         indexPatternId,
         indexPatternTitle,
       },
@@ -136,7 +137,7 @@ export class Join extends Component {
   }
 
   _onRightFieldChange = (term) => {
-    this.props.onJoinSelection({
+    this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
         ...this.props.join.right,
@@ -146,7 +147,7 @@ export class Join extends Component {
   }
 
   _onMetricsChange = (metrics) => {
-    this.props.onJoinSelection({
+    this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
         ...this.props.join.right,
@@ -158,7 +159,7 @@ export class Join extends Component {
   render() {
     const {
       join,
-      onRemoveJoin,
+      onRemove,
     } = this.props;
     const {
       leftSourceName,
@@ -231,7 +232,7 @@ export class Join extends Component {
           color="danger"
           aria-label="Delete join"
           title="Delete join"
-          onClick={onRemoveJoin}
+          onClick={onRemove}
         />
       </EuiFlexGroup>
     );

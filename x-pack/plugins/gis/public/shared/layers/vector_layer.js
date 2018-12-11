@@ -196,10 +196,11 @@ export class VectorLayer extends ALayer {
         };
       }
       startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
+      const leftSourceName = await this.getSourceName();
       const {
         rawData,
         propertiesMap
-      } = await tableSource.getTable(dataFilters);
+      } = await tableSource.getTable(dataFilters, leftSourceName, join.getLeftFieldName());
       stopLoading(sourceDataId, requestToken, rawData);
       return {
         shouldJoin: true,
