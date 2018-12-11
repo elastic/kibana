@@ -70,7 +70,7 @@
             i18n-id="xpack.ml.datavisualizer.documentsPerShardDescription"
             i18n-default-message="documents per shard from a total of {wrappedTotalCount} {totalCount, plural, one {document} other {documents}}"
             i18n-values="{
-              wrappedTotalCount: '<span class=\'field-emphasis\'>' + overallStats.totalCount + '</span>',
+              html_wrappedTotalCount: '<span class=\'field-emphasis\'>' + overallStats.totalCount + '</span>',
               totalCount: overallStats.totalCount
             }"
           ></span>
@@ -103,9 +103,9 @@
                   i18n-id="xpack.ml.datavisualizer.showMetricsDescription"
                   i18n-default-message="{wrappedMetricCardsCount} {metricCardsCount, plural, one {field exists} other {fields exist}} in documents ({totalMetricFieldCount} in total)"
                   i18n-values="{
-                      wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
+                      html_wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
                       metricCardsCount: metricCards.length,
-                      totalMetricFieldCount: '<span class=\'field-emphasis\'>' + totalMetricFieldCount + '</span>'
+                      html_totalMetricFieldCount: '<span class=\'field-emphasis\'>' + totalMetricFieldCount + '</span>'
                   }"
                 ></span>
               </div>
@@ -115,9 +115,9 @@
                   i18n-id="xpack.ml.datavisualizer.showAllMetricsDescription"
                   i18n-default-message="{wrappedMetricCardsCount} {metricCardsCount, plural, one {field} other {fields}} ({wrappedPopulatedMetricFieldCount} {populatedMetricFieldCount, plural, one {exists} other {exist}} in documents)"
                   i18n-values="{
-                    wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
+                    html_wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
                     metricCardsCount: metricCards.length,
-                    wrappedPopulatedMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedMetricFieldCount + '</span>',
+                    html_wrappedPopulatedMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedMetricFieldCount + '</span>',
                     populatedMetricFieldCount: populatedMetricFieldCount
                   }"
                 ></span>
@@ -168,12 +168,12 @@
             <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
               <div ng-if="showAllFields === false" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
                 <span
-                  i18n-id="xpack.ml.datavisualizer.showMFieldDescription"  
+                  i18n-id="xpack.ml.datavisualizer.showMFieldDescription"
                   i18n-default-message="{wrappedFieldCardsCount} {fieldCardsCount, plural, one {field exists} other {fields exist}} in documents ({totalNonMetricFieldCount} in total)"
                   i18n-values="{
-                      wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
+                      html_wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
                       fieldCardsCount: fieldCards.length,
-                      totalNonMetricFieldCount: '<span class=\'field-emphasis\'>' + totalNonMetricFieldCount + '</span>'
+                      html_totalNonMetricFieldCount: '<span class=\'field-emphasis\'>' + totalNonMetricFieldCount + '</span>'
                   }"
                 ></span>
               </div>
@@ -184,9 +184,9 @@
                   i18n-id="xpack.ml.datavisualizer.showAllFieldsDescription"
                   i18n-default-message="{wrappedFieldCardsCount} {fieldCardsCount, plural, one {field} other {fields}} ({wrappedPopulatedNonMetricFieldCount} {populatedNonMetricFieldCount, plural, one {exists} other {exist}} in documents)"
                   i18n-values="{
-                    wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
+                    html_wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
                     fieldCardsCount: fieldCards.length,
-                    wrappedPopulatedNonMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedNonMetricFieldCount +'</span>',
+                    html_wrappedPopulatedNonMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedNonMetricFieldCount +'</span>',
                     populatedNonMetricFieldCount: populatedNonMetricFieldCount
                   }"
                 ></span>
