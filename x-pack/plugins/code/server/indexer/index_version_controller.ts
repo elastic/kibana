@@ -8,9 +8,9 @@ import { EsClient } from '@code/esqueue';
 import _ from 'lodash';
 
 import { IndexMigrator } from '.';
-import pkg from '../../package.json';
 import { Log } from '../log';
 import { IndexCreationRequest } from './index_creation_request';
+import pkg from './schema/version.json';
 
 export class IndexVersionController {
   private version: number;
