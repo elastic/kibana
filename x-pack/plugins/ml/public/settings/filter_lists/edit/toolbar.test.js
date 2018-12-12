@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditFilterListToolbar } from './toolbar';
@@ -28,7 +28,7 @@ describe('EditFilterListToolbar', () => {
       selectedItemCount: 0,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <EditFilterListToolbar {...props} />
     );
 
@@ -42,7 +42,7 @@ describe('EditFilterListToolbar', () => {
       selectedItemCount: 1,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <EditFilterListToolbar {...props} />
     );
 

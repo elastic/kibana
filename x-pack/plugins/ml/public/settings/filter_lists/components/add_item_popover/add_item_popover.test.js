@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { AddItemPopover } from './add_item_popover';
@@ -16,8 +16,8 @@ function prepareTest(addItemsFn) {
     addItems: addItemsFn
   };
 
-  const wrapper = shallow(
-    <AddItemPopover {...props} />
+  const wrapper = shallowWithIntl(
+    <AddItemPopover.WrappedComponent {...props} />
   );
 
   return wrapper;

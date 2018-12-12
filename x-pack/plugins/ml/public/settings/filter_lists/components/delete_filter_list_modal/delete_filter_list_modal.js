@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -22,7 +23,12 @@ import { deleteFilterLists } from './delete_filter_lists';
 /*
  * React modal for confirming deletion of filter lists.
  */
-export class DeleteFilterListModal extends Component {
+export const DeleteFilterListModal = injectI18n(class extends Component {
+  static displayName = 'DeleteFilterListModal';
+  static propTypes = {
+    selectedFilterLists: PropTypes.array,
+  };
+
   constructor(props) {
     super(props);
 
@@ -53,12 +59,17 @@ export class DeleteFilterListModal extends Component {
   }
 
   render() {
-    const { selectedFilterLists } = this.props;
+    const { selectedFilterLists, intl } = this.props;
     let modal;
 
     if (this.state.isModalVisible) {
-      const title = `Delete ${(selectedFilterLists.length > 1) ?
-        `${selectedFilterLists.length} filter lists` : selectedFilterLists[0].filter_id}`;
+      const title = intl.formatMessage({
+        id: 'xpack.ml.settings.deleteFilterListModal.modalTitle',
+        defaultMessage: 'Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}',
+      }, {
+        selectedFilterListsLength: selectedFilterLists.length,
+        selectedFilterId: !!selectedFilterLists.length && selectedFilterLists[0].filter_id,
+      });
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -66,14 +77,24 @@ export class DeleteFilterListModal extends Component {
             className="eui-textBreakWord"
             onCancel={this.closeModal}
             onConfirm={this.onConfirmDelete}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={intl.formatMessage(
+              { id: 'xpack.ml.settings.deleteFilterListModal.cancelButtonLabel', defaultMessage: 'Cancel' })
+            }
+            confirmButtonText={intl.formatMessage(
+              { id: 'xpack.ml.settings.deleteFilterListModal.confirmButtonLabel', defaultMessage: 'Delete' })
+            }
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
             <p>
-              Are you sure you want to delete {(selectedFilterLists.length > 1) ?
-                'these filter lists' : 'this filter list'}?
+              <FormattedMessage
+                id="xpack.ml.settings.deleteFilterListModal.deleteWarningMessage"
+                defaultMessage="Are you sure you want to delete
+{selectedFilterListsLength, plural, one {this filter list} other {these filter lists}}"
+                values={{
+                  selectedFilterListsLength: selectedFilterLists.length,
+                }}
+              />
             </p>
           </EuiConfirmModal>
         </EuiOverlayMask>
@@ -89,16 +110,14 @@ export class DeleteFilterListModal extends Component {
           onClick={this.showModal}
           isDisabled={(selectedFilterLists === undefined || selectedFilterLists.length === 0 || this.canDeleteFilter === false)}
         >
-          Delete
+          <FormattedMessage
+            id="xpack.ml.settings.deleteFilterListModal.deleteButtonLabel"
+            defaultMessage="Delete"
+          />
         </EuiButton>
 
         {modal}
       </div>
     );
   }
-}
-DeleteFilterListModal.propTypes = {
-  selectedFilterLists: PropTypes.array,
-};
-
-
+});

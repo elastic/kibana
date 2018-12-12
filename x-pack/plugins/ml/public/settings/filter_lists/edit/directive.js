@@ -9,6 +9,8 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
@@ -17,6 +19,7 @@ import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { initPromise } from 'plugins/ml/util/promise';
+import { EditFilterList } from './edit_filter_list';
 
 import uiRoutes from 'ui/routes';
 
@@ -49,9 +52,6 @@ uiRoutes
     }
   });
 
-
-import { EditFilterList } from './edit_filter_list';
-
 module.directive('mlEditFilterList', function ($route) {
   return {
     restrict: 'E',
@@ -63,7 +63,9 @@ module.directive('mlEditFilterList', function ($route) {
       };
 
       ReactDOM.render(
-        React.createElement(EditFilterList, props),
+        <I18nProvider>
+          {React.createElement(EditFilterList, props)}
+        </I18nProvider>,
         element[0]
       );
     }

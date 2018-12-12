@@ -28,7 +28,7 @@ jest.mock('../../../services/ml_api_service', () => ({
   }
 }));
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { FilterLists } from './filter_lists';
@@ -37,8 +37,8 @@ describe('Filter Lists', () => {
 
   test('renders a list of filters', () => {
 
-    const wrapper = shallow(
-      <FilterLists />
+    const wrapper = shallowWithIntl(
+      <FilterLists.WrappedComponent />
     );
 
     // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters

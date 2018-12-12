@@ -85,7 +85,11 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -100,7 +104,11 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -195,7 +203,11 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -210,7 +222,11 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -300,7 +316,11 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -315,7 +335,11 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -389,7 +413,11 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -404,7 +432,11 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -478,7 +510,11 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -493,7 +529,11 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -584,7 +624,11 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -599,7 +643,11 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -690,7 +738,11 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -705,7 +757,11 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -796,7 +852,11 @@ exports[`EditFilterList updates the items per page 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -811,7 +871,11 @@ exports[`EditFilterList updates the items per page 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

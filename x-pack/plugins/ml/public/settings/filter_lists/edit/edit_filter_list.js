@@ -26,6 +26,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 import { toastNotifications } from 'ui/notify';
 
 import { EditFilterListHeader } from './header';
@@ -72,7 +74,12 @@ function returnToFiltersList() {
   window.location.href = `#/settings/filter_lists`;
 }
 
-export class EditFilterList extends Component {
+export const EditFilterList = injectI18n(class extends Component {
+  static displayName = 'EditFilterList';
+  static propTypes = {
+    filterId: PropTypes.string
+  };
+
   constructor(props) {
     super(props);
 
@@ -100,13 +107,21 @@ export class EditFilterList extends Component {
   }
 
   loadFilterList = (filterId) => {
+    const { intl } = this.props;
+
     ml.filters.filters({ filterId })
       .then((filter) => {
         this.setLoadedFilterState(filter);
       })
       .catch((resp) => {
         console.log(`Error loading filter ${filterId}:`, resp);
-        toastNotifications.addDanger(`An error occurred loading details of filter ${filterId}`);
+        toastNotifications.addDanger(intl.formatMessage({
+          id: 'xpack.ml.settings.editFilterList.loadingDetailsOfFilterErrorMessage',
+          defaultMessage: 'An error occurred loading details of filter {filterId}',
+          values: {
+            filterId,
+          },
+        }));
       });
   }
 
@@ -144,6 +159,8 @@ export class EditFilterList extends Component {
   }
 
   addItems = (itemsToAdd) => {
+    const { intl } = this.props;
+
     this.setState((prevState) => {
       const { itemsPerPage, searchQuery } = prevState;
       const items = [...prevState.items];
@@ -160,7 +177,13 @@ export class EditFilterList extends Component {
       });
 
       if (alreadyInFilter.length > 0) {
-        toastNotifications.addWarning(`The following items were already in the filter list: ${alreadyInFilter}`);
+        toastNotifications.addWarning(intl.formatMessage({
+          id: 'xpack.ml.settings.editFilterList.duplicatedItemsInFilterListWarningMessage',
+          defaultMessage: 'The following items were already in the filter list: {alreadyInFilter}',
+          values: {
+            alreadyInFilter,
+          },
+        }));
       }
 
       const matchingItems = getMatchingFilterItems(searchQuery, items);
@@ -245,6 +268,7 @@ export class EditFilterList extends Component {
     this.setState({ saveInProgress: true });
 
     const { loadedFilter, newFilterId, description, items } = this.state;
+    const { intl } = this.props;
     const filterId = (this.props.filterId !== undefined) ? this.props.filterId : newFilterId;
     saveFilterList(
       filterId,
@@ -258,7 +282,13 @@ export class EditFilterList extends Component {
       })
       .catch((resp) => {
         console.log(`Error saving filter ${filterId}:`, resp);
-        toastNotifications.addDanger(`An error occurred saving filter ${filterId}`);
+        toastNotifications.addDanger(intl.formatMessage({
+          id: 'xpack.ml.settings.editFilterList.savingFilterErrorMessage',
+          defaultMessage: 'An error occurred saving filter {filterId}',
+          values: {
+            filterId,
+          },
+        }));
         this.setState({ saveInProgress: false });
       });
   }
@@ -317,7 +347,10 @@ export class EditFilterList extends Component {
               <EuiButtonEmpty
                 onClick={returnToFiltersList}
               >
-                Cancel
+                <FormattedMessage
+                  id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -326,7 +359,10 @@ export class EditFilterList extends Component {
                 disabled={(saveInProgress === true) || (isNewFilterIdInvalid === true)}
                 fill
               >
-                Save
+                <FormattedMessage
+                  id="xpack.ml.settings.editFilterList.saveButtonLabel"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -334,8 +370,4 @@ export class EditFilterList extends Component {
       </EuiPage>
     );
   }
-}
-EditFilterList.propTypes = {
-  filterId: PropTypes.string
-};
-
+});

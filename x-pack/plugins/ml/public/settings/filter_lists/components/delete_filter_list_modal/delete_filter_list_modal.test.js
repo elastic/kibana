@@ -14,7 +14,7 @@ jest.mock('../../../../privilege/check_privilege', () => ({
 }));
 jest.mock('../../../../services/ml_api_service', () => 'ml');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { DeleteFilterListModal } from './delete_filter_list_modal';
@@ -31,24 +31,24 @@ const testProps = {
 describe('DeleteFilterListModal', () => {
 
   test('renders as disabled delete button when no lists selected', () => {
-    const component = shallow(
-      <DeleteFilterListModal />
+    const component = shallowWithIntl(
+      <DeleteFilterListModal.WrappedComponent />
     );
 
     expect(component).toMatchSnapshot();
   });
 
   test('renders as enabled delete button when a list is selected', () => {
-    const component = shallow(
-      <DeleteFilterListModal {...testProps} />
+    const component = shallowWithIntl(
+      <DeleteFilterListModal.WrappedComponent {...testProps} />
     );
 
     expect(component).toMatchSnapshot();
   });
 
   test('renders modal after clicking delete button', () => {
-    const wrapper = shallow(
-      <DeleteFilterListModal {...testProps} />
+    const wrapper = shallowWithIntl(
+      <DeleteFilterListModal.WrappedComponent {...testProps} />
     );
     wrapper.find('EuiButton').simulate('click');
     wrapper.update();
@@ -57,8 +57,8 @@ describe('DeleteFilterListModal', () => {
 
 
   test('renders as delete button after opening and closing modal', () => {
-    const wrapper = shallow(
-      <DeleteFilterListModal {...testProps} />
+    const wrapper = shallowWithIntl(
+      <DeleteFilterListModal.WrappedComponent {...testProps} />
     );
     wrapper.find('EuiButton').simulate('click');
     const instance = wrapper.instance();
@@ -82,8 +82,8 @@ describe('DeleteFilterListModal false canDeleteFilter privilege', () => {
       return false;
     });
 
-    const component = shallow(
-      <DeleteFilterListModal {...testProps} />
+    const component = shallowWithIntl(
+      <DeleteFilterListModal.WrappedComponent {...testProps} />
     );
 
     expect(component).toMatchSnapshot();
