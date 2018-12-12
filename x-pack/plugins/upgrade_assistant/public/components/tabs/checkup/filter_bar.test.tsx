@@ -16,7 +16,7 @@ const defaultProps = {
     { level: LevelFilterOption.critical },
     { level: LevelFilterOption.critical },
   ] as DeprecationInfo[],
-  currentFilter: new Set([LevelFilterOption.critical]),
+  currentFilter: LevelFilterOption.critical,
   onFilterChange: jest.fn(),
 };
 

@@ -37,7 +37,7 @@ interface CheckupTabProps extends UpgradeAssistantTabProps {
 }
 
 interface CheckupTabState {
-  currentFilter: Set<LevelFilterOption>;
+  currentFilter: LevelFilterOption;
   search: string;
   currentGroupBy: GroupByOption;
 }
@@ -52,7 +52,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
 
     this.state = {
       // initialize to all filters
-      currentFilter: new Set([LevelFilterOption.warning, LevelFilterOption.critical]),
+      currentFilter: LevelFilterOption.all,
       search: '',
       currentGroupBy: GroupByOption.message,
     };
@@ -199,16 +199,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
   }
 
   private changeFilter = (filter: LevelFilterOption) => {
-    // Make a copy so we don't modify the current one being rendered.
-    const newFilters = new Set(this.state.currentFilter);
-
-    if (newFilters.has(filter)) {
-      newFilters.delete(filter);
-    } else {
-      newFilters.add(filter);
-    }
-
-    this.setState({ currentFilter: newFilters });
+    this.setState({ currentFilter: filter });
   };
 
   private changeSearch = (search: string) => {

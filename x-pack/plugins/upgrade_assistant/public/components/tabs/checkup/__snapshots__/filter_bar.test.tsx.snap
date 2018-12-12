@@ -11,11 +11,12 @@ exports[`FilterBar renders 1`] = `
       grow={false}
       hasActiveFilters={false}
       iconSide="right"
-      key="warning"
+      key="all"
+      numFilters={2}
       onClick={[Function]}
       type="button"
     >
-      warning
+      all
     </EuiFilterButton>
     <EuiFilterButton
       color="text"

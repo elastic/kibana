@@ -17,31 +17,27 @@ import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped
 
 describe('filterDeps', () => {
   test('filters on levels', () => {
-    const fd = filterDeps(new Set([LevelFilterOption.critical]));
-    expect(fd({ level: LevelFilterOption.critical } as DeprecationInfo)).toBe(true);
-    expect(fd({ level: LevelFilterOption.warning } as DeprecationInfo)).toBe(false);
+    const fd = filterDeps(LevelFilterOption.critical);
+    expect(fd({ level: 'critical' } as DeprecationInfo)).toBe(true);
+    expect(fd({ level: 'warning' } as DeprecationInfo)).toBe(false);
   });
 
   test('filters on search', () => {
-    const fd = filterDeps(new Set([LevelFilterOption.critical]), 'wow');
-    expect(
-      fd({ level: LevelFilterOption.critical, message: 'the wow error' } as DeprecationInfo)
-    ).toBe(true);
-    expect(
-      fd({ level: LevelFilterOption.critical, message: 'other error' } as DeprecationInfo)
-    ).toBe(false);
+    const fd = filterDeps(LevelFilterOption.critical, 'wow');
+    expect(fd({ level: 'critical', message: 'the wow error' } as DeprecationInfo)).toBe(true);
+    expect(fd({ level: 'critical', message: 'other error' } as DeprecationInfo)).toBe(false);
   });
 });
 
 describe('GroupedDeprecations', () => {
   const defaultProps = {
-    currentFilter: new Set([LevelFilterOption.warning, LevelFilterOption.critical]),
+    currentFilter: LevelFilterOption.all,
     search: '',
     currentGroupBy: GroupByOption.message,
     allDeprecations: [
-      { message: 'Cluster error 1', url: '', level: LevelFilterOption.warning },
-      { message: 'Cluster error 2', url: '', level: LevelFilterOption.critical },
-    ],
+      { message: 'Cluster error 1', url: '', level: 'warning' },
+      { message: 'Cluster error 2', url: '', level: 'critical' },
+    ] as EnrichedDeprecationInfo[],
   };
 
   describe('expand + collapse all', () => {
@@ -93,7 +89,7 @@ describe('GroupedDeprecations', () => {
       ...defaultProps,
       allDeprecations: range(0, 40).map(i => ({
         message: `Message ${i}`,
-        level: LevelFilterOption.warning,
+        level: 'warning',
       })) as DeprecationInfo[],
     };
 
@@ -121,10 +117,10 @@ describe('GroupedDeprecations', () => {
           {...defaultProps}
           currentGroupBy={GroupByOption.message}
           allDeprecations={[
-            { message: 'Cluster error 1', url: '', level: LevelFilterOption.warning },
-            { message: 'Cluster error 2', url: '', level: LevelFilterOption.warning },
-            { message: 'Cluster error 2', url: '', level: LevelFilterOption.warning },
-            { message: 'Cluster error 2', url: '', level: LevelFilterOption.warning },
+            { message: 'Cluster error 1', url: '', level: 'warning' },
+            { message: 'Cluster error 2', url: '', level: 'warning' },
+            { message: 'Cluster error 2', url: '', level: 'warning' },
+            { message: 'Cluster error 2', url: '', level: 'warning' },
           ]}
         />
       );
@@ -142,25 +138,25 @@ describe('GroupedDeprecations', () => {
             {
               message: 'Cluster error 1',
               url: '',
-              level: LevelFilterOption.warning,
+              level: 'warning',
               index: 'index1',
             },
             {
               message: 'Cluster error 2',
               url: '',
-              level: LevelFilterOption.warning,
+              level: 'warning',
               index: 'index1',
             },
             {
               message: 'Cluster error 2',
               url: '',
-              level: LevelFilterOption.warning,
+              level: 'warning',
               index: 'index2',
             },
             {
               message: 'Cluster error 2',
               url: '',
-              level: LevelFilterOption.warning,
+              level: 'warning',
               index: 'index3',
             },
           ]}

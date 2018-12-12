@@ -17,7 +17,7 @@ interface CheckupControlsProps extends ReactIntl.InjectedIntlProps {
   allDeprecations?: DeprecationInfo[];
   loadingState: LoadingState;
   loadData: () => void;
-  currentFilter: Set<LevelFilterOption>;
+  currentFilter: LevelFilterOption;
   onFilterChange: (filter: LevelFilterOption) => void;
   search: string;
   onSearchChange: (filter: string) => void;

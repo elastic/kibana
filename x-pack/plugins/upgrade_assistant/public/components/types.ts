@@ -30,7 +30,7 @@ export enum LoadingState {
 }
 
 export enum LevelFilterOption {
-  warning = 'warning',
+  all = 'all',
   critical = 'critical',
 }
 

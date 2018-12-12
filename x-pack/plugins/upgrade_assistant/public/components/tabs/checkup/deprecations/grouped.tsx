@@ -27,10 +27,12 @@ import { DeprecationHealth } from './health';
 import { DeprecationList } from './list';
 
 // exported only for testing
-export const filterDeps = (levels: Set<LevelFilterOption>, search: string = '') => {
-  const conditions: Array<(dep: DeprecationInfo) => boolean> = [
-    dep => levels.has(dep.level as LevelFilterOption),
-  ];
+export const filterDeps = (level: LevelFilterOption, search: string = '') => {
+  const conditions: Array<(dep: DeprecationInfo) => boolean> = [];
+
+  if (level !== LevelFilterOption.all) {
+    conditions.push((dep: DeprecationInfo) => dep.level === level);
+  }
 
   if (search.length > 0) {
     // Change everything to lower case for a case-insensitive comparison
@@ -101,7 +103,7 @@ export const DeprecationAccordion: StatelessComponent<{
 };
 
 interface GroupedDeprecationsProps {
-  currentFilter: Set<LevelFilterOption>;
+  currentFilter: LevelFilterOption;
   search: string;
   currentGroupBy: GroupByOption;
   allDeprecations?: EnrichedDeprecationInfo[];

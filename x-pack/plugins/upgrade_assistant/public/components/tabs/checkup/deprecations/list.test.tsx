@@ -7,16 +7,17 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { GroupByOption, LevelFilterOption } from '../../../types';
+import { EnrichedDeprecationInfo } from 'x-pack/plugins/upgrade_assistant/server/lib/es_migration_apis';
+import { GroupByOption } from '../../../types';
 import { DeprecationList } from './list';
 
 describe('DeprecationList', () => {
   describe('group by message', () => {
     const defaultProps = {
       deprecations: [
-        { message: 'Issue 1', url: '', level: LevelFilterOption.warning },
-        { message: 'Issue 1', url: '', level: LevelFilterOption.warning },
-      ],
+        { message: 'Issue 1', url: '', level: 'warning' },
+        { message: 'Issue 1', url: '', level: 'warning' },
+      ] as EnrichedDeprecationInfo[],
       currentGroupBy: GroupByOption.message,
     };
 
@@ -89,9 +90,9 @@ describe('DeprecationList', () => {
   describe('group by index', () => {
     const defaultProps = {
       deprecations: [
-        { message: 'Issue 1', index: 'index1', url: '', level: LevelFilterOption.warning },
-        { message: 'Issue 2', index: 'index1', url: '', level: LevelFilterOption.warning },
-      ],
+        { message: 'Issue 1', index: 'index1', url: '', level: 'warning' },
+        { message: 'Issue 2', index: 'index1', url: '', level: 'warning' },
+      ] as EnrichedDeprecationInfo[],
       currentGroupBy: GroupByOption.index,
     };
 

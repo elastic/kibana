@@ -19,8 +19,6 @@ export const LEVEL_MAP = {
 export const REVERSE_LEVEL_MAP: { [idx: number]: LEVEL } = invert(LEVEL_MAP);
 
 export const COLOR_MAP: { [level: string]: IconColor } = {
-  none: 'success',
-  info: 'primary',
-  warning: 'warning',
+  warning: 'default',
   critical: 'danger',
 };

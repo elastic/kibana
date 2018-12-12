@@ -14,10 +14,9 @@ import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { LevelFilterOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {
-  warning: i18n.translate(
-    'xpack.upgradeAssistant.checkupTab.controls.filterBar.warningButtonLabel',
-    { defaultMessage: 'warning' }
-  ),
+  all: i18n.translate('xpack.upgradeAssistant.checkupTab.controls.filterBar.allButtonLabel', {
+    defaultMessage: 'all',
+  }),
   critical: i18n.translate(
     'xpack.upgradeAssistant.checkupTab.controls.filterBar.criticalButtonLabel',
     { defaultMessage: 'critical' }
@@ -28,7 +27,7 @@ const allFilterOptions = Object.keys(LevelFilterOption) as LevelFilterOption[];
 
 interface FilterBarProps {
   allDeprecations?: DeprecationInfo[];
-  currentFilter: Set<LevelFilterOption>;
+  currentFilter: LevelFilterOption;
   onFilterChange(level: LevelFilterOption): void;
 }
 
@@ -46,6 +45,8 @@ export const FilterBar: React.StatelessComponent<FilterBarProps> = ({
     {} as { [level: string]: number }
   );
 
+  const allCount = allDeprecations.length;
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFilterGroup>
@@ -53,8 +54,10 @@ export const FilterBar: React.StatelessComponent<FilterBarProps> = ({
           <EuiFilterButton
             key={option}
             onClick={onFilterChange.bind(null, option)}
-            hasActiveFilters={currentFilter.has(option)}
-            numFilters={levelCounts[option] || undefined}
+            hasActiveFilters={currentFilter === option}
+            numFilters={
+              option === LevelFilterOption.all ? allCount : levelCounts[option] || undefined
+            }
           >
             {LocalizedOptions[option]}
           </EuiFilterButton>
