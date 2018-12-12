@@ -72,7 +72,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
 
     return {
       id: nodeName,
-      name: get(sampleDoc._source, NAME_FIELDS[nodeType]),
+      name: get(sampleDoc, `_source.${NAME_FIELDS[nodeType]}`),
       buckets,
     };
   }
@@ -129,7 +129,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
 
     return {
       id: nodeName,
-      name: get(sampleDoc._source, NAME_FIELDS[nodeType]),
+      name: get(sampleDoc, `_source.${NAME_FIELDS[nodeType]}`),
       buckets,
     };
   }
