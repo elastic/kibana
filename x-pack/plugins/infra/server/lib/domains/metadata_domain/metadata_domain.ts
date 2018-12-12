@@ -36,11 +36,13 @@ export class InfraMetadataDomain {
       return { name: entry, source: 'metrics' };
     });
 
-    const logMetadata = pickMetadata(logs).map(entry => {
+    const logMetadata = pickMetadata(logs.buckets).map(entry => {
       return { name: entry, source: 'logs' };
     });
 
-    return { id: metrics.id, name: metrics.name, features: metricMetadata.concat(logMetadata) };
+    const id = metrics.id || logs.id;
+    const name = metrics.name || logs.name;
+    return { id, name, features: metricMetadata.concat(logMetadata) };
   }
 }
 

@@ -113,7 +113,7 @@ export const MetricDetail = withTheme(
                         nodeType={nodeType}
                         nodeId={nodeName}
                       >
-                        {({ filteredLayouts }) => {
+                        {({ name, filteredLayouts }) => {
                           return (
                             <WithMetrics
                               layouts={filteredLayouts}
@@ -148,7 +148,7 @@ export const MetricDetail = withTheme(
                                       <EuiShowFor sizes={['xs', 's']}>
                                         <EuiSideNav
                                           items={sideNav}
-                                          mobileTitle={nodeName}
+                                          mobileTitle={name}
                                           toggleOpenOnMobile={this.toggleOpenOnMobile}
                                           isOpenOnMobile={this.state.isSideNavOpenOnMobile}
                                         />
@@ -164,7 +164,7 @@ export const MetricDetail = withTheme(
                                                   <MetricsTitleTimeRangeContainer>
                                                     <EuiHideFor sizes={['xs', 's']}>
                                                       <EuiTitle size="m">
-                                                        <h1>{nodeName}</h1>
+                                                        <h1>{name}</h1>
                                                       </EuiTitle>
                                                     </EuiHideFor>
                                                     <MetricsTimeControls

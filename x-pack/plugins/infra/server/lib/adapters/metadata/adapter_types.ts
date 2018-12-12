@@ -9,7 +9,7 @@ import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../framew
 
 export interface InfraMetricsAdapterResponse {
   id: string;
-  name: string;
+  name?: string;
   buckets: InfraMetadataAggregationBucket[];
 }
 
@@ -25,5 +25,5 @@ export interface InfraMetadataAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string,
     nodeType: string
-  ): Promise<InfraMetadataAggregationBucket[]>;
+  ): Promise<InfraMetricsAdapterResponse>;
 }

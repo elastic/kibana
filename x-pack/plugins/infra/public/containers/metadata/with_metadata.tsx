@@ -48,7 +48,7 @@ export const WithMetadata = ({
         const metadata = data && data.source && data.source.metadataByNode;
         const filteredLayouts = (metadata && getFilteredLayouts(layouts, metadata.features)) || [];
         return children({
-          name: (metadata && metadata.name) || '',
+          name: (metadata && metadata.name) || nodeId,
           filteredLayouts,
           error: error && error.message,
           loading,

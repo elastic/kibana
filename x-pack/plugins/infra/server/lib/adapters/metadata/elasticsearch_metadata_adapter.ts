@@ -9,7 +9,6 @@ import { InfraSourceConfiguration } from '../../sources';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
-  InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../framework';
 import { InfraNodeType } from '../nodes/adapter_types';
@@ -89,7 +88,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string,
     nodeType: 'host' | 'container' | 'pod'
-  ): Promise<InfraMetadataAggregationBucket[]> {
+  ): Promise<InfraMetricsAdapterResponse> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const logQuery = {
       index: sourceConfiguration.logAlias,
@@ -101,7 +100,8 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
             },
           },
         },
-        size: 0,
+        size: 1,
+        _source: [NAME_FIELDS[nodeType]],
         aggs: {
           metrics: {
             terms: {
@@ -126,9 +126,18 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       { metrics?: InfraMetadataAggregationResponse }
     >(req, 'search', logQuery);
 
-    return response.aggregations && response.aggregations.metrics
-      ? response.aggregations.metrics.buckets
-      : [];
+    const buckets =
+      response.aggregations && response.aggregations.metrics
+        ? response.aggregations.metrics.buckets
+        : [];
+
+    const sampleDoc = first(response.hits.hits);
+
+    return {
+      id: nodeName,
+      name: get(sampleDoc._source, NAME_FIELDS[nodeType]),
+      buckets,
+    };
   }
 }
 
