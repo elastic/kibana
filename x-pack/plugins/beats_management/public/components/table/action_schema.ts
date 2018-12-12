@@ -62,7 +62,7 @@ export const tagListActions: ControlSchema[] = [
     danger: true,
     grow: false,
     name: i18n.translate('xpack.beatsManagement.tagListAssignmentOptions.removeTagsButtonLabel', {
-      defaultMessage: 'Remove tag(s)',
+      defaultMessage: 'Remove selected',
     }),
     type: ActionComponentType.Action,
     showWarning: true,
