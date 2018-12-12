@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import 'ui/autoload/styles';
-import { Alerts } from './components/alerts';
+import { Alerts } from './components';
 
 export function AlertsController($scope: ng.IScope, $element: ng.IAugmentedJQuery) {
   const domNode = $element[0];

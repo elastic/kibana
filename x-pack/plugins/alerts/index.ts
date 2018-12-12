@@ -17,7 +17,7 @@ export function alertService(kibana: any) {
       app: {
         title: 'Alerts',
         description: 'Alerting capabilities in Kibana',
-        main: 'plugins/alerts/index',
+        main: 'plugins/alerts/app',
       },
     },
     config(Joi: any) {
