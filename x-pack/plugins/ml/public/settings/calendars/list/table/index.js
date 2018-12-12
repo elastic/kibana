@@ -5,7 +5,4 @@
  */
 
 
-
-import './settings_controller';
-import './calendars';
-import './filter_lists';
+export { CalendarsListTable } from './table';

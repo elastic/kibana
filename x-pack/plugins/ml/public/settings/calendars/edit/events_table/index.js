@@ -5,7 +5,4 @@
  */
 
 
-
-import './settings_controller';
-import './calendars';
-import './filter_lists';
+export { EventsTable, TIME_FORMAT } from './events_table';
