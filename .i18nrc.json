@@ -29,6 +29,7 @@
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",
+    "xpack.spaces": "x-pack/plugins/spaces",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
