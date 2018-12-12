@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { NewEventModal } from './new_event_modal';
 
-
-import './settings_controller';
-import './calendars';
-import './filter_lists';
