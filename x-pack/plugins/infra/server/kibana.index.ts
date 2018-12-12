@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { PluginProperties, Server } from 'hapi';
 import JoiNamespace from 'joi';
+import { Feature } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
 
+interface KibanaPluginProperties extends PluginProperties {
+  xpack_main: {
+    registerFeature: (feature: Feature) => void;
+  };
+}
+
 export interface KbnServer extends Server {
   usage: any;
+  plugins: KibanaPluginProperties;
 }
 
 export const initServerWithKibana = (kbnServer: KbnServer) => {
@@ -20,6 +28,41 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
 
   // Register a function with server to manage the collection of usage stats
   kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
+
+  const xpackMainPlugin = kbnServer.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: 'infrastructure',
+    name: 'Infrastructure',
+    icon: 'infraApp',
+    navLinkId: 'infra:home',
+    privileges: {
+      all: {
+        app: ['infra'],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+  });
+
+  xpackMainPlugin.registerFeature({
+    id: 'logging',
+    name: 'Logs',
+    icon: 'loggingApp',
+    navLinkId: 'infra:logs',
+    privileges: {
+      all: {
+        app: ['infra'],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+  });
 };
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
