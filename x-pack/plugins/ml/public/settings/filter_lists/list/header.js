@@ -49,7 +49,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
               <EuiTextColor color="subdued">
                 <p>
                   <FormattedMessage
-                    id="xpack.ml.settings.listHeader.filterListsTitle"
+                    id="xpack.ml.settings.listHeader.filterListsDescription"
                     defaultMessage="{totalCount} in total"
                     values={{
                       totalCount,

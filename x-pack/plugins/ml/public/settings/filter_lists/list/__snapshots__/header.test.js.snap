@@ -52,7 +52,7 @@ exports[`Filter Lists Header renders header 1`] = `
             <p>
               <FormattedMessage
                 defaultMessage="{totalCount} in total"
-                id="xpack.ml.settings.listHeader.filterListsTitle"
+                id="xpack.ml.settings.listHeader.filterListsDescription"
                 values={
                   Object {
                     "totalCount": 3,
