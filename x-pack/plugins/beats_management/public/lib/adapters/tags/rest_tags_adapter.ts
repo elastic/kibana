@@ -16,8 +16,8 @@ export class RestTagsAdapter implements CMTagsAdapter {
     return tags;
   }
 
-  public async getAll(): Promise<BeatTag[]> {
-    return await this.REST.get<BeatTag[]>(`/api/beats/tags`);
+  public async getAll(ESQuery: string): Promise<BeatTag[]> {
+    return await this.REST.get<BeatTag[]>(`/api/beats/tags`, { ESQuery });
   }
 
   public async delete(tagIds: string[]): Promise<boolean> {

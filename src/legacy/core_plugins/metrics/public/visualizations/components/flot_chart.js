@@ -65,9 +65,9 @@ class FlotChart extends Component {
 
   shutdownChart() {
     if (!this.plot) return;
-    $(this.target).unbind('plothover', this.props.plothover);
-    if (this.props.onMouseOver) $(this.target).on('plothover', this.handleMouseOver);
-    if (this.props.onMouseLeave) $(this.target).on('mouseleave', this.handleMouseLeave);
+    $(this.target).off('plothover', this.props.plothover);
+    if (this.props.onMouseOver) $(this.target).off('plothover', this.handleMouseOver);
+    if (this.props.onMouseLeave) $(this.target).off('mouseleave', this.handleMouseLeave);
     if (this.props.onBrush) $(this.target).off('plotselected', this.brushChart);
     this.plot.shutdown();
     if (this.props.crosshair) {

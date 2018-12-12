@@ -5,7 +5,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { FlatObject } from '../../../app';
+import { FlatObject } from '../../../frontend_types';
 import { RestAPIAdapter } from './adapter_types';
 let globalAPI: AxiosInstance;
 

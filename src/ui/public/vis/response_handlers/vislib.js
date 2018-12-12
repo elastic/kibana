@@ -26,8 +26,9 @@ function convertTableGroup(tableGroup, convertTable) {
   const tables = tableGroup.tables;
   const firstChild = tables[0];
 
-  if (firstChild.columns) {
+  if (!tables.length) return;
 
+  if (firstChild.columns) {
     const chart = convertTable(firstChild);
     // if chart is within a split, assign group title to its label
     if (tableGroup.$parent) {
@@ -35,8 +36,6 @@ function convertTableGroup(tableGroup, convertTable) {
     }
     return chart;
   }
-
-  if (!tables.length) return;
 
   const out = {};
   let outList;

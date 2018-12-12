@@ -275,7 +275,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic AbCdEf')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(400);
+          .expect(401);
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });

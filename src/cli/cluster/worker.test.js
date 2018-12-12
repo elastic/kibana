@@ -35,7 +35,8 @@ function assertListenerRemoved(emitter, event) {
   const [, onEventListener] = emitter.on.mock.calls.find(([eventName]) => {
     return eventName === event;
   });
-  expect(emitter.removeListener).toHaveBeenCalledWith(event, onEventListener);
+
+  expect(emitter.off).toHaveBeenCalledWith(event, onEventListener);
 }
 
 function setup(opts = {}) {
@@ -98,7 +99,7 @@ describe('CLI cluster manager', () => {
         assertListenerAdded(fork, 'message');
         assertListenerAdded(fork, 'online');
         assertListenerAdded(fork, 'disconnect');
-        worker.shutdown();
+        await worker.shutdown();
         expect(fork.process.kill).toHaveBeenCalledTimes(1);
         assertListenerRemoved(fork, 'message');
         assertListenerRemoved(fork, 'online');

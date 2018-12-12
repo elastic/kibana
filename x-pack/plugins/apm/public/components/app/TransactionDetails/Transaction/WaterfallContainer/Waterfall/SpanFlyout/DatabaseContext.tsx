@@ -27,7 +27,7 @@ import { xcode } from 'react-syntax-highlighter/dist/styles';
 import sql from 'react-syntax-highlighter/dist/languages/sql';
 
 import { EuiTitle } from '@elastic/eui';
-import { DbContext } from '../../../../../../../../typings/Span';
+import { DbContext } from '../../../../../../../../typings/es_schemas/Span';
 
 registerLanguage('sql', sql);
 
