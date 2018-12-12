@@ -32,6 +32,11 @@ declare const datemath: {
   unitsAsc: Unit[];
   unitsDesc: Unit[];
 
+  /**
+   * Parses a string into a moment object. The string can be something like "now - 15m".
+   * @param options.forceNow If this optional parameter is supplied, "now" will be treated as this
+   * date, rather than the real "now".
+   */
   parse(
     input: string,
     options?: {
