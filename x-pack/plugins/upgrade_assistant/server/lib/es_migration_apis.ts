@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
 import {
   CallClusterWithRequest,
   DeprecationAPIResponse,
@@ -80,7 +81,14 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse, basePath: s
         if (d.message === `Index created before ${CURRENT_MAJOR_VERSION}.0`) {
           d.actions = [
             {
-              label: 'Reindex in Console',
+              label: i18n.translate(
+                'xpack.upgradeAssistant.checkupTab.indices.reindexInConsoleButtonLabel',
+                {
+                  defaultMessage: 'Reindex in Console',
+                  description:
+                    '"Console" should be the same name used to label the app under Dev Tools -> Console',
+                }
+              ),
               url: consoleTemplateUrl(basePath, indexName),
             },
           ];
