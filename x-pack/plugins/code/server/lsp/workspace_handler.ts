@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import del from 'del';
 import fs from 'fs';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
@@ -15,7 +16,6 @@ import { EsClient } from '@code/esqueue';
 import { Full } from 'elastic-lsp-extension';
 import { DetailSymbolInformation } from 'elastic-lsp-extension';
 
-import rimraf from 'rimraf';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
 import { LspRequest } from '../../model';
@@ -96,12 +96,12 @@ export class WorkspaceHandler {
       .filter(isDir);
   }
 
-  public clearWorkspace(repoUri: string, revision?: string) {
+  public async clearWorkspace(repoUri: string, revision?: string) {
     const workspaceDir = path.join(this.workspacePath, repoUri);
     if (revision) {
-      rimraf.sync(path.join(workspaceDir, revision));
+      await del([path.join(workspaceDir, revision)]);
     } else {
-      rimraf.sync(path.join(workspaceDir));
+      await del([path.join(workspaceDir)]);
     }
   }
 
