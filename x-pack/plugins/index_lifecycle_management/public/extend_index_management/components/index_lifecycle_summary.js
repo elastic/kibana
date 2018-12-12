@@ -169,7 +169,7 @@ export class IndexLifecycleSummary extends Component {
             />
           </h3>
         </EuiTitle>
-        { ilm.step_info && ilm.step_info.type ? (
+        { ilm.step_info && ilm.step_info.type && ilm.step_info.stack_trace ? (
           <Fragment>
             <EuiSpacer size="s"/>
             <EuiCallOut
@@ -185,6 +185,22 @@ export class IndexLifecycleSummary extends Component {
               {ilm.step_info.type}: {ilm.step_info.reason}
               <EuiSpacer size="s" />
               {this.renderStackPopoverButton(ilm)}
+            </EuiCallOut>
+          </Fragment>
+        ) : null}
+        { ilm.step_info && ilm.step_info.message && !ilm.step_info.stack_trace ? (
+          <Fragment>
+            <EuiSpacer size="s"/>
+            <EuiCallOut
+              color="primary"
+              title={
+                <FormattedMessage
+                  defaultMessage="Action status"
+                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.actionStatusTitle"
+                />
+              }
+            >
+              {ilm.step_info.message}
             </EuiCallOut>
           </Fragment>
         ) : null}
