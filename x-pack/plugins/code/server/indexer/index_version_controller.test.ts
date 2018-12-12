@@ -7,11 +7,11 @@
 import { AnyObject, EsClient } from '@code/esqueue';
 import sinon from 'sinon';
 
-import pkg from '../../package.json';
 import { Log } from '../log';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { IndexCreationRequest } from './index_creation_request';
 import { IndexVersionController } from './index_version_controller';
+import pkg from './schema/version.json';
 
 const log: Log = (new ConsoleLoggerFactory().getLogger(['test']) as any) as Log;
 

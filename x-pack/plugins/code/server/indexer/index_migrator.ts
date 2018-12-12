@@ -14,9 +14,9 @@ import {
   IndexVersionController,
 } from '.';
 import { Repository } from '../../model';
-import pkg from '../../package.json';
 import { Log } from '../../server/log';
 import { RepositoryObjectClient } from '../../server/search';
+import pkg from './schema/version.json';
 
 export class IndexMigrator {
   private version: number;
