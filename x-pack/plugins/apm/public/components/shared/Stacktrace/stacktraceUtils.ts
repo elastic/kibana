@@ -5,7 +5,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { Stackframe } from '../../../../typings/APMDoc';
+import { Stackframe } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
 
 interface StackframesGroup {
   isLibraryFrame: boolean;

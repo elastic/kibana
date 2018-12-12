@@ -5,19 +5,29 @@
  */
 
 import React from 'react';
-import { createInitialDataSelector } from './helpers';
-import { Request } from 'react-redux-request';
+import { Request, RRRRender } from 'react-redux-request';
+import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { loadErrorGroupDetails } from '../../services/rest/apm/error_groups';
+import { IReduxState } from '../rootReducer';
+import { IUrlParams } from '../urlParams';
+// @ts-ignore
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'errorGroupDetails';
-const INITIAL_DATA = {};
+const INITIAL_DATA: ErrorGroupAPIResponse = {};
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-export function getErrorGroupDetails(state) {
+export function getErrorGroupDetails(state: IReduxState) {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
-export function ErrorGroupDetailsRequest({ urlParams, render }) {
+export function ErrorGroupDetailsRequest({
+  urlParams,
+  render
+}: {
+  urlParams: IUrlParams;
+  render: RRRRender<ErrorGroupAPIResponse>;
+}) {
   const { serviceName, errorGroupId, start, end, kuery } = urlParams;
 
   if (!(serviceName && start && end && errorGroupId)) {

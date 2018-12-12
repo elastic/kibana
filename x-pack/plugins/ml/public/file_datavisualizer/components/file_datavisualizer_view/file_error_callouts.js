@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -25,23 +26,42 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
   if (fileSizeFormatted !== maxFileSizeFormatted) {
     errorText = (
       <p>
-        The size of the file you selected for upload is {fileSizeFormatted} which
-        exceeds the maximum permitted size of {maxFileSizeFormatted}
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
+          defaultMessage="The size of the file you selected for upload is {fileSizeFormatted} which
+          exceeds the maximum permitted size of {maxFileSizeFormatted}"
+          values={{
+            fileSizeFormatted,
+            maxFileSizeFormatted,
+          }}
+        />
       </p>
     );
   } else {
     const diffFormatted = numeral(fileSize - maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
     errorText = (
       <p>
-        The size of the file you selected for upload exceeds the maximum
-        permitted size of {maxFileSizeFormatted} by {diffFormatted}
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
+          defaultMessage="The size of the file you selected for upload exceeds the maximum
+          permitted size of {maxFileSizeFormatted} by {diffFormatted}"
+          values={{
+            maxFileSizeFormatted,
+            diffFormatted,
+          }}
+        />
       </p>
     );
   }
 
   return (
     <EuiCallOut
-      title="File size is too large"
+      title={
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeTooLargeTitle"
+          defaultMessage="File size is too large"
+        />
+      }
       color="danger"
       iconType="cross"
     >
@@ -53,7 +73,12 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
 export function FileCouldNotBeRead({ error, loaded }) {
   return (
     <EuiCallOut
-      title="File could not be read"
+      title={
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileCouldNotBeReadTitle"
+          defaultMessage="File could not be read"
+        />
+      }
       color="danger"
       iconType="cross"
     >
@@ -63,7 +88,12 @@ export function FileCouldNotBeRead({ error, loaded }) {
       }
       {
         loaded &&
-        <p>Reverting to previous settings</p>
+        <p>
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.fileErrorCallouts.revertingToPreviousSettingsDescription"
+            defaultMessage="Reverting to previous settings"
+          />
+        </p>
       }
     </EuiCallOut>
   );

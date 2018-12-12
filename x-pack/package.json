@@ -80,6 +80,7 @@
     "fetch-mock": "^5.13.1",
     "graphql-code-generator": "^0.13.0",
     "graphql-codegen-introspection-template": "^0.13.0",
+    "graphql-codegen-typescript-resolvers-template": "^0.13.0",
     "graphql-codegen-typescript-template": "^0.13.0",
     "gulp": "3.9.1",
     "gulp-mocha": "2.2.0",

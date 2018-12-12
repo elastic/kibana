@@ -5,19 +5,33 @@
  */
 
 import React from 'react';
-import { Request } from 'react-redux-request';
+import { Request, RRRRender } from 'react-redux-request';
+import { ErrorDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/distribution/get_distribution';
 import { loadErrorDistribution } from '../../services/rest/apm/error_groups';
+import { IReduxState } from '../rootReducer';
+import { IUrlParams } from '../urlParams';
+// @ts-ignore
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'errorDistribution';
-const INITIAL_DATA = { buckets: [], totalHits: 0 };
+const INITIAL_DATA: ErrorDistributionAPIResponse = {
+  buckets: [],
+  totalHits: 0,
+  bucketSize: 0
+};
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-export function getErrorDistribution(state) {
+export function getErrorDistribution(state: IReduxState) {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
-export function ErrorDistributionRequest({ urlParams, render }) {
+export function ErrorDistributionRequest({
+  urlParams,
+  render
+}: {
+  urlParams: IUrlParams;
+  render: RRRRender<ErrorDistributionAPIResponse>;
+}) {
   const { serviceName, start, end, errorGroupId, kuery } = urlParams;
 
   if (!(serviceName && start && end && errorGroupId)) {
