@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import elasticsearch from 'elasticsearch';
+import elasticsearch from '@elastic/elasticsearch';
 import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import Boom from 'boom';
+import Bluebird from 'bluebird';
 
 import filterHeaders from './filter_headers';
 import { parseConfig } from './parse_config';
@@ -82,6 +83,8 @@ export class Cluster {
     };
 
     const client = new elasticsearch.Client(parseConfig(config, parseOptions));
+    // client.on('request', console.log)
+    client.on('response', console.log)
     this._clients.add(client);
     return client;
   }
@@ -117,17 +120,21 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     throw new Error(`called with an invalid endpoint: ${endpoint}`);
   }
 
-  return api.call(apiContext, clientParams).catch((err) => {
-    if (!wrap401Errors || err.statusCode !== 401) {
-      return Promise.reject(err);
-    }
+  console.log(clientParams)
+  return Bluebird.resolve(api.call(apiContext, clientParams))
+    .then((result) => result.body)
+    .catch((err) => {
+    // return api.call(apiContext, clientParams).catch((err) => {
+      if (!wrap401Errors || err.statusCode !== 401) {
+        return Promise.reject(err);
+      }
 
-    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-    const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
-    boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
+      const boomError = Boom.boomify(err, { statusCode: err.statusCode });
+      const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
+      boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
 
-    throw boomError;
-  });
+      throw boomError;
+    });
 }
 
 function getClonedProperties(config, paths) {

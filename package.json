@@ -93,6 +93,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.1",
+    "@elastic/elasticsearch": "elastic/elasticsearch-js#next",
     "@elastic/eui": "5.6.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
@@ -134,7 +135,6 @@
     "d3-cloud": "1.2.1",
     "del": "^3.0.0",
     "dragula": "3.7.0",
-    "elasticsearch": "^15.2.0",
     "elasticsearch-browser": "^15.2.0",
     "encode-uri-query": "1.0.0",
     "execa": "^1.0.0",
