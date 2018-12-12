@@ -83,12 +83,14 @@ export function createIndex(client, indexName,
     index: indexName,
   })
     .then((exists) => {
+      console.log(`Tim special log: [${indexName}] exist? ${exists}`);
       if (!exists) {
         return client.indices.create({
           index: indexName,
           body: body
         })
-          .then(() => true);
+          .then(() => true)
+          .catch(err => console.log(`Tim special error: ${err}`));
       }
       return exists;
     });
