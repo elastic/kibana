@@ -8,9 +8,11 @@ import expect from 'expect.js';
 import { axisConfig } from '../axisConfig';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { testTable } from '../__tests__/fixtures/test_tables';
+import { getFunctionErrors } from '../../../errors';
 
 describe('axisConfig', () => {
   const fn = functionWrapper(axisConfig);
+  const functionErrors = getFunctionErrors();
 
   it('returns an axisConfig', () => {
     const result = fn(testTable, { show: true, position: 'right' });
@@ -59,7 +61,7 @@ describe('axisConfig', () => {
         expect(fn)
           .withArgs(testTable, { position: 'foo' })
           .to.throwException(e => {
-            expect(e.message).to.be(`Invalid position: 'foo'`);
+            expect(e.message).to.be(functionErrors.axisConfig.positionInvalid('foo').message);
           });
       });
     });
@@ -78,13 +80,11 @@ describe('axisConfig', () => {
         expect(result).to.have.property('min', 1504224000000);
       });
 
-      it('throws when given an invalid date string', () => {
+      it('throws when given an invalid min string', () => {
         expect(fn)
           .withArgs(testTable, { min: 'foo' })
           .to.throwException(e => {
-            expect(e.message).to.be(
-              `Invalid date string: 'foo'. 'min' must be a number, date in ms, or ISO8601 date string`
-            );
+            expect(e.message).to.be(functionErrors.axisConfig.minInvalid('foo').message);
           });
       });
     });
@@ -103,13 +103,11 @@ describe('axisConfig', () => {
         expect(result).to.have.property('max', 1538784000000);
       });
 
-      it('throws when given an invalid date string', () => {
+      it('throws when given an invalid max string', () => {
         expect(fn)
-          .withArgs(testTable, { max: '20/02/17' })
+          .withArgs(testTable, { max: 'foo' })
           .to.throwException(e => {
-            expect(e.message).to.be(
-              `Invalid date string: '20/02/17'. 'max' must be a number, date in ms, or ISO8601 date string`
-            );
+            expect(e.message).to.be(functionErrors.axisConfig.maxInvalid('foo').message);
           });
       });
     });

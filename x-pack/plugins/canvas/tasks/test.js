@@ -7,6 +7,7 @@
 import { resolve, join } from 'path';
 
 export default function testTasks(gulp, { mocha }) {
+  require('./mocks/canvas_i18n');
   const canvasRoot = resolve(__dirname, '..');
 
   function runMocha(globs, { withEnzyme = false, withDOM = false } = {}) {

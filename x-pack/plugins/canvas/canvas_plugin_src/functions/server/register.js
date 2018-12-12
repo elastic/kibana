@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { applyFunctionStrings } from '../../strings';
 import { functions } from './src/index';
 
-functions.forEach(canvas.register);
+const { register } = canvas;
+
+// Apply localized strings to the Common Function specs, then register them.
+applyFunctionStrings(functions).forEach(register);

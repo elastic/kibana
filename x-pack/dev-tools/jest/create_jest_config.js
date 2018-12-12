@@ -31,6 +31,7 @@ export function createJestConfig({
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
+      `<rootDir>/plugins/canvas/tasks/mocks/canvas_i18n.js`,
     ],
     testMatch: [
       "**/*.test.{js,ts,tsx}"
