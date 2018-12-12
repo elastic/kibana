@@ -31,9 +31,11 @@ import landingTemplate from './landing.html';
 import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
+import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
 import 'ui/kbn_top_nav';
 
 const SIDENAV_ID = 'management-sidenav';
+const LANDING_ID = 'management-landing';
 
 uiRoutes
   .when('/management', {
@@ -52,6 +54,38 @@ require('ui/index_patterns/route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index'
 });
 
+export function updateLandingPage(version) {
+  const node = document.getElementById(LANDING_ID);
+  if (!node) {
+    return;
+  }
+
+  render(
+    <EuiPageContent verticalPosition="center"  horizontalPosition="center">
+      <I18nProvider>
+        <div>
+          <div className="eui-textCenter">
+            <EuiIcon type="managementApp" size="xxl" />
+            <EuiSpacer />
+            <EuiTitle>
+              <h1>Kibana {version} management</h1>
+            </EuiTitle>
+            <EuiText>
+              <p>Manage your data, permissions, and content from an administrator level</p>
+            </EuiText>
+          </div>
+
+          <EuiHorizontalRule />
+
+          <EuiText color="subdued" size="s" textAlign="center">
+            <p>A full list of tools can be found in the left menu</p>
+          </EuiText>
+        </div>
+      </I18nProvider>
+    </EuiPageContent>,
+    node,
+  );
+}
 
 export function updateSidebar(
   items, id
@@ -73,8 +107,8 @@ export function updateSidebar(
   );
 }
 
-export const destroySidebar = () => {
-  const node = document.getElementById(SIDENAV_ID);
+export const destroyReact = id => {
+  const node = document.getElementById(id);
   node && unmountComponentAtNode(node);
 };
 
@@ -104,8 +138,11 @@ uiModules
         }
 
         updateSidebar($scope.sections, $scope.section.id);
-        $scope.$on('$destroy', destroySidebar);
+        $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
         management.addListener(() => updateSidebar(management.items.inOrder, $scope.section.id));
+
+        updateLandingPage($scope.$root.chrome.getKibanaVersion());
+        $scope.$on('$destroy', () => destroyReact(LANDING_ID));
       }
     };
   });

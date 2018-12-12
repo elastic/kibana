@@ -16,6 +16,11 @@ kbn-management-objects, kbn-management-app, .tab-management {
   flex-grow: 1;
 }
 
+#management-landing {
+  display: flex;
+  flex-grow: 1;
+}
+
 .kbn-management-tab:first-letter {
   text-transform: capitalize;
 }
