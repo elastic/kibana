@@ -23,7 +23,7 @@ export interface InfraSource {
   /** The status of the source */
   status: InfraSourceStatus;
   /** A hierarchy of metadata entries by node */
-  metadataByNode: (InfraNodeMetadata | null)[];
+  metadataByNode?: InfraNodeMetadata | null;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -89,6 +89,14 @@ export interface InfraIndexField {
 }
 /** One metadata entry for a node. */
 export interface InfraNodeMetadata {
+  id: string;
+
+  name: string;
+
+  features: (InfraNodeFeature | null)[];
+}
+
+export interface InfraNodeFeature {
   name: string;
 
   source: string;
@@ -416,11 +424,19 @@ export namespace MetadataQuery {
 
     id: string;
 
-    metadataByNode: (MetadataByNode | null)[];
+    metadataByNode?: MetadataByNode | null;
   };
 
   export type MetadataByNode = {
     __typename?: 'InfraNodeMetadata';
+
+    name: string;
+
+    features: (Features | null)[];
+  };
+
+  export type Features = {
+    __typename?: 'InfraNodeFeature';
 
     name: string;
 

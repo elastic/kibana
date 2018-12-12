@@ -51,7 +51,7 @@ export interface InfraSource {
   /** The status of the source */
   status: InfraSourceStatus;
   /** A hierarchy of metadata entries by node */
-  metadataByNode: (InfraNodeMetadata | null)[];
+  metadataByNode?: InfraNodeMetadata | null;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -117,6 +117,14 @@ export interface InfraIndexField {
 }
 /** One metadata entry for a node. */
 export interface InfraNodeMetadata {
+  id: string;
+
+  name: string;
+
+  features: (InfraNodeFeature | null)[];
+}
+
+export interface InfraNodeFeature {
   name: string;
 
   source: string;
@@ -461,7 +469,7 @@ export namespace InfraSourceResolvers {
     /** The status of the source */
     status?: StatusResolver<InfraSourceStatus, TypeParent, Context>;
     /** A hierarchy of metadata entries by node */
-    metadataByNode?: MetadataByNodeResolver<(InfraNodeMetadata | null)[], TypeParent, Context>;
+    metadataByNode?: MetadataByNodeResolver<InfraNodeMetadata | null, TypeParent, Context>;
     /** A consecutive span of log entries surrounding a point in time */
     logEntriesAround?: LogEntriesAroundResolver<InfraLogEntryInterval, TypeParent, Context>;
     /** A consecutive span of log entries within an interval */
@@ -490,7 +498,7 @@ export namespace InfraSourceResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
   export type MetadataByNodeResolver<
-    R = (InfraNodeMetadata | null)[],
+    R = InfraNodeMetadata | null,
     Parent = InfraSource,
     Context = InfraContext
   > = Resolver<R, Parent, Context, MetadataByNodeArgs>;
@@ -746,6 +754,32 @@ export namespace InfraIndexFieldResolvers {
 /** One metadata entry for a node. */
 export namespace InfraNodeMetadataResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeMetadata> {
+    id?: IdResolver<string, TypeParent, Context>;
+
+    name?: NameResolver<string, TypeParent, Context>;
+
+    features?: FeaturesResolver<(InfraNodeFeature | null)[], TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string, Parent = InfraNodeMetadata, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type NameResolver<
+    R = string,
+    Parent = InfraNodeMetadata,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type FeaturesResolver<
+    R = (InfraNodeFeature | null)[],
+    Parent = InfraNodeMetadata,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace InfraNodeFeatureResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeFeature> {
     name?: NameResolver<string, TypeParent, Context>;
 
     source?: SourceResolver<string, TypeParent, Context>;
@@ -753,12 +787,12 @@ export namespace InfraNodeMetadataResolvers {
 
   export type NameResolver<
     R = string,
-    Parent = InfraNodeMetadata,
+    Parent = InfraNodeFeature,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
     R = string,
-    Parent = InfraNodeMetadata,
+    Parent = InfraNodeFeature,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
