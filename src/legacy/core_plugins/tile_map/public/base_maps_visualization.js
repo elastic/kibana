@@ -147,9 +147,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
-            : tmsServices.find((s) => {
-              return s.id === DEFAULT_EMS_BASEMAP;
-            });
+            : tmsServices.find(s => s.id === DEFAULT_EMS_BASEMAP);
           if (initBasemapLayer) { this._setTmsLayer(initBasemapLayer); }
         } catch (e) {
           toastNotifications.addWarning(e.message);

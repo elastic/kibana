@@ -603,12 +603,13 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  _getTMSBaseLayer(options) {
-    return L.tileLayer(options.url, {
-      minZoom: options.minZoom,
-      maxZoom: options.maxZoom,
-      subdomains: options.subdomains || []
+  _getTMSBaseLayer({ url, minZoom, maxZoom, subdomains }) {
+    const tmsBaseLayer = L.tileLayer(url, {
+      minZoom: minZoom,
+      maxZoom: maxZoom,
+      subdomains: subdomains || []
     });
+    return tmsBaseLayer;
   }
 
   _getWMSBaseLayer(options) {
@@ -622,7 +623,10 @@ export class KibanaMap extends EventEmitter {
       version: options.version || '1.3.0'
     };
 
-    return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
+    const wmsBaseLayer = (typeof options.url === 'string' && options.url.length)
+      ? L.tileLayer.wms(options.url, wmsOptions)
+      : null;
+    return wmsBaseLayer;
   }
 
   _updateExtent() {
