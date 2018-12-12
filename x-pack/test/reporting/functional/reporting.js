@@ -283,8 +283,8 @@ export default function ({ getService, getPageObjects }) {
 
         it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
-          await PageObjects.reporting.openCsvReportingPanel();
           await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
       });
