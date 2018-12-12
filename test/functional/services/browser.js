@@ -323,6 +323,14 @@ export async function BrowserProvider({ getService }) {
         }
       }));
     }
+
+    async executeAsync(fn, ...args) {
+      return await driver.executeAsyncScript(fn, ...cloneDeep(args, arg => {
+        if (arg instanceof WebElementWrapper) {
+          return arg._webElement;
+        }
+      }));
+    }
   }
 
   return  new BrowserService();

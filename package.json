@@ -82,7 +82,8 @@
       "packages/*",
       "x-pack",
       "x-pack/plugins/*",
-      "test/plugin_functional/plugins/*"
+      "test/plugin_functional/plugins/*",
+      "test/interpreter_functional/plugins/*"
     ],
     "nohoist": [
       "**/@types/*",
