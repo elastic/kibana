@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -16,7 +15,7 @@ import {
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 
-export function ImportSettings({
+export const ImportSettings = injectI18n(function ({
   index,
   indexPattern,
   initialized,
@@ -31,12 +30,14 @@ export function ImportSettings({
   onMappingsStringChange,
   onPipelineStringChange,
   indexNameError,
-  indexPatternNameError
+  indexPatternNameError,
+  intl
 }) {
 
   const tabs = [{
     id: 'simple-settings',
-    name: i18n.translate('xpack.ml.fileDatavisualizer.importSettings.simpleTabName', {
+    name: intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importSettings.simpleTabName',
       defaultMessage: 'Simple'
     }),
     content: (
@@ -57,7 +58,8 @@ export function ImportSettings({
   },
   {
     id: 'advanced-settings',
-    name: i18n.translate('xpack.ml.fileDatavisualizer.importSettings.advancedTabName', {
+    name: intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importSettings.advancedTabName',
       defaultMessage: 'Advanced'
     }),
     content: (
@@ -95,4 +97,4 @@ export function ImportSettings({
       />
     </React.Fragment>
   );
-}
+});

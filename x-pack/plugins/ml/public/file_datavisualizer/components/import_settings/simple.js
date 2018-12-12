@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -15,13 +13,14 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-export function SimpleSettings({
+export const SimpleSettings = injectI18n(function ({
   index,
   initialized,
   onIndexChange,
   createIndexPattern,
   onCreateIndexPatternChange,
   indexNameError,
+  intl,
 }) {
   return (
     <React.Fragment>
@@ -36,7 +35,8 @@ export function SimpleSettings({
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder={i18n.translate('xpack.ml.fileDatavisualizer.simpleImportSettings.indexNamePlaceholder', {
+          placeholder={intl.formatMessage({
+            id: 'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNamePlaceholder',
             defaultMessage: 'index name'
           })}
           value={index}
@@ -60,4 +60,4 @@ export function SimpleSettings({
       />
     </React.Fragment>
   );
-}
+});

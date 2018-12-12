@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -21,7 +19,7 @@ export const IMPORT_STATUS = {
   FAILED: 'danger',
 };
 
-export function ImportProgress({ statuses }) {
+export const ImportProgress = injectI18n(function ({ statuses, intl }) {
 
   const {
     reading,
@@ -62,24 +60,30 @@ export function ImportProgress({ statuses }) {
     completedStep = 5;
   }
 
-  let processFileTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.processFileTitle', {
+  let processFileTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.processFileTitle',
     defaultMessage: 'Process file'
   });
-  let createIndexTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.createIndexTitle', {
+  let createIndexTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.createIndexTitle',
     defaultMessage: 'Create index'
   });
-  let createIngestPipelineTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.createIngestPipelineTitle', {
+  let createIngestPipelineTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.createIngestPipelineTitle',
     defaultMessage: 'Create ingest pipeline'
   });
-  let uploadingDataTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.uploadDataTitle', {
+  let uploadingDataTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.uploadDataTitle',
     defaultMessage: 'Upload data'
   });
-  let createIndexPatternTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.createIndexPatternTitle', {
+  let createIndexPatternTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.createIndexPatternTitle',
     defaultMessage: 'Create index pattern'
   });
 
   if (completedStep >= 0) {
-    processFileTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.processingFileTitle', {
+    processFileTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.processingFileTitle',
       defaultMessage: 'Processing file'
     });
     statusInfo = (
@@ -92,10 +96,12 @@ export function ImportProgress({ statuses }) {
     );
   }
   if (completedStep >= 1) {
-    processFileTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.fileProcessedTitle', {
+    processFileTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.fileProcessedTitle',
       defaultMessage: 'File processed'
     });
-    createIndexTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.creatingIndexTitle', {
+    createIndexTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIndexTitle',
       defaultMessage: 'Creating index'
     });
     statusInfo = (
@@ -108,10 +114,12 @@ export function ImportProgress({ statuses }) {
     );
   }
   if (completedStep >= 2) {
-    createIndexTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.indexCreatedTitle', {
+    createIndexTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.indexCreatedTitle',
       defaultMessage: 'Index created'
     });
-    createIngestPipelineTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.creatingIngestPipelineTitle', {
+    createIngestPipelineTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIngestPipelineTitle',
       defaultMessage: 'Creating ingest pipeline'
     });
     statusInfo = (
@@ -124,20 +132,24 @@ export function ImportProgress({ statuses }) {
     );
   }
   if (completedStep >= 3) {
-    createIngestPipelineTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.ingestPipelineCreatedTitle', {
+    createIngestPipelineTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.ingestPipelineCreatedTitle',
       defaultMessage: 'Ingest pipeline created'
     });
-    uploadingDataTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.uploadingDataTitle', {
+    uploadingDataTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.uploadingDataTitle',
       defaultMessage: 'Uploading data'
     });
     statusInfo = (<UploadFunctionProgress progress={uploadProgress} />);
   }
   if (completedStep >= 4) {
-    uploadingDataTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.dataUploadedTitle', {
+    uploadingDataTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.dataUploadedTitle',
       defaultMessage: 'Data uploaded'
     });
     if (createIndexPattern === true) {
-      createIndexPatternTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.creatingIndexPatternTitle', {
+      createIndexPatternTitle = intl.formatMessage({
+        id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIndexPatternTitle',
         defaultMessage: 'Creating index pattern'
       });
       statusInfo = (
@@ -153,7 +165,8 @@ export function ImportProgress({ statuses }) {
     }
   }
   if (completedStep >= 5) {
-    createIndexPatternTitle = i18n.translate('xpack.ml.fileDatavisualizer.importProgress.indexPatternCreatedTitle', {
+    createIndexPatternTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.indexPatternCreatedTitle',
       defaultMessage: 'Index pattern created'
     });
     statusInfo = null;
@@ -218,7 +231,7 @@ export function ImportProgress({ statuses }) {
       }
     </React.Fragment>
   );
-}
+});
 
 function UploadFunctionProgress({ progress }) {
   return (

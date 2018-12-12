@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -20,14 +18,15 @@ import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStats } from '../fields_stats';
 
-export function ResultsView({ data, results, showEditFlyout }) {
+export const ResultsView = injectI18n(function ({ data, results, showEditFlyout, intl }) {
 
   console.log(results);
 
   const tabs = [
     {
       id: 'file-stats',
-      name: i18n.translate('xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName', {
+      name: intl.formatMessage({
+        id: 'xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName',
         defaultMessage: 'File stats'
       }),
       content: <FieldsStats results={results} />,
@@ -73,4 +72,4 @@ export function ResultsView({ data, results, showEditFlyout }) {
 
     </div>
   );
-}
+});
