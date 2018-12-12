@@ -7,9 +7,11 @@
 import expect from 'expect.js';
 import { compare } from '../compare';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 
 describe('compare', () => {
   const fn = functionWrapper(compare);
+  const functionErrors = getFunctionErrors();
 
   describe('args', () => {
     describe('op', () => {
@@ -24,14 +26,10 @@ describe('compare', () => {
 
       it('throws when invalid op is provided', () => {
         expect(() => fn(1, { op: 'boo', to: 2 })).to.throwException(e => {
-          expect(e.message).to.be(
-            `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
-          );
+          expect(e.message).to.be(functionErrors.compare.operatorInvalid().message);
         });
         expect(() => fn(1, { op: 'boo' })).to.throwException(e => {
-          expect(e.message).to.be(
-            `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
-          );
+          expect(e.message).to.be(functionErrors.compare.operatorInvalid().message);
         });
       });
     });

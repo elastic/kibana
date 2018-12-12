@@ -1,0 +1,306 @@
+/* GIS plugin styles */
+map-listing, .gisListingPage {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+#gis-plugin {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden; }
+
+#react-gis-root {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column; }
+
+.gisMapWrapper {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  position: relative; }
+
+.layerToast {
+  margin-top: -150px !important;
+  pointer-events: none; }
+
+.mapContainer {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+/**
+ * 1. The overlay captures mouse events even if it's empty space. To counter-act this,
+ *    we remove all pointer events from the overlay then add them back on the
+ *    individual widgets.
+ */
+.gisWidgetOverlay {
+  position: absolute;
+  z-index: 1000;
+  min-width: 17rem;
+  max-width: 24rem;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  pointer-events: none;
+  /* 1 */ }
+
+.gisWidgetControl {
+  max-height: 100%;
+  overflow: hidden;
+  padding-bottom: 8px;
+  border-color: transparent !important;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  pointer-events: all;
+  /* 1 */ }
+  .gisWidgetControl.euiPanel--shadow {
+    -webkit-box-shadow: 0 40px 64px 0 rgba(59, 79, 93, 0.1), 0 24px 32px 0 rgba(59, 79, 93, 0.1), 0 16px 16px 0 rgba(59, 79, 93, 0.1), 0 8px 8px 0 rgba(59, 79, 93, 0.1), 0 4px 4px 0 rgba(59, 79, 93, 0.1), 0 2px 2px 0 rgba(59, 79, 93, 0.1);
+            box-shadow: 0 40px 64px 0 rgba(59, 79, 93, 0.1), 0 24px 32px 0 rgba(59, 79, 93, 0.1), 0 16px 16px 0 rgba(59, 79, 93, 0.1), 0 8px 8px 0 rgba(59, 79, 93, 0.1), 0 4px 4px 0 rgba(59, 79, 93, 0.1), 0 2px 2px 0 rgba(59, 79, 93, 0.1); }
+  .gisWidgetControl .gisWidgetControl__header {
+    padding: 8px 16px;
+    -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+            flex-shrink: 0; }
+
+.gisWidgetControl__tocHolder {
+  scrollbar-width: thin;
+  overflow-y: auto; }
+  .gisWidgetControl__tocHolder::-webkit-scrollbar {
+    width: 16px;
+    height: 16px; }
+  .gisWidgetControl__tocHolder::-webkit-scrollbar-thumb {
+    background-color: rgba(105, 112, 125, 0.5);
+    border: 6px solid transparent;
+    background-clip: content-box; }
+  .gisWidgetControl__tocHolder::-webkit-scrollbar-corner, .gisWidgetControl__tocHolder::-webkit-scrollbar-track {
+    background-color: transparent; }
+
+.layerEntry {
+  padding: 8px 16px;
+  position: relative; }
+
+.alphaRange .euiFieldNumber {
+  max-width: 5.5em !important; }
+
+.colorPicker .euiColorPickerPopUp {
+  z-index: 3000; }
+
+.colorGradient {
+  width: 100%;
+  height: 20px;
+  position: relative;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px; }
+
+.layerEntry > .visible {
+  opacity: 1; }
+
+.layerEntry > .notvisible {
+  opacity: 0.5; }
+
+.layerEntry .grab:hover {
+  cursor: -webkit-grab;
+  cursor: grab; }
+
+.layerSettings__type .euiIcon {
+  margin-top: -2px; }
+
+.hidden {
+  display: none; }
+
+.sourceSelectItem {
+  width: 374px; }
+
+.mapboxgl-popup {
+  z-index: 100; }
+
+.gisLayerPanel {
+  background-color: #F5F7FA;
+  width: 0;
+  overflow: hidden; }
+  .gisLayerPanel > * {
+    width: 440px; }
+  .gisLayerPanel-isVisible {
+    width: 440px;
+    -webkit-transition: width 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: width 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+
+.gisViewPanel__header,
+.gisViewPanel__body,
+.gisViewPanel__footer {
+  padding: 16px; }
+
+.gisViewPanel__header {
+  padding-bottom: 0;
+  -webkit-flex-shrink: 0;
+      -ms-flex-negative: 0;
+          flex-shrink: 0;
+  z-index: 2;
+  -webkit-box-shadow: 0 16px 16px -8px #F5F7FA;
+          box-shadow: 0 16px 16px -8px #F5F7FA; }
+
+.gisViewPanel__title svg {
+  margin: -.1em .5em 0 0; }
+
+.gisViewPanel__body {
+  overflow: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin; }
+  .gisViewPanel__body::-webkit-scrollbar {
+    width: 16px;
+    height: 16px; }
+  .gisViewPanel__body::-webkit-scrollbar-thumb {
+    background-color: rgba(105, 112, 125, 0.5);
+    border: 6px solid transparent;
+    background-clip: content-box; }
+  .gisViewPanel__body::-webkit-scrollbar-corner, .gisViewPanel__body::-webkit-scrollbar-track {
+    background-color: transparent; }
+  .gisViewPanel__body > *:not(:last-child) {
+    margin-bottom: 16px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 auto;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto; }
+
+.gisViewPanel__footer {
+  padding-top: 0;
+  -webkit-flex-shrink: 0;
+      -ms-flex-negative: 0;
+          flex-shrink: 0;
+  z-index: 2;
+  -webkit-box-shadow: 0 -16px 16px -8px #F5F7FA;
+          box-shadow: 0 -16px 16px -8px #F5F7FA; }
+
+.euiColorPicker__emptySwatch {
+  position: relative; }
+
+.visibilityToggle {
+  position: relative;
+  display: inline-block;
+  min-height: 20px;
+  color: #98A2B3; }
+  .visibilityToggle .visibilityToggle__body {
+    line-height: 19px; }
+    .visibilityToggle .visibilityToggle__body > * {
+      vertical-align: baseline; }
+  .visibilityToggle .visibilityToggle__content svg {
+    display: inline-block;
+    vertical-align: middle; }
+  .visibilityToggle .visibilityToggle__content .filter {
+    display: none; }
+  .visibilityToggle .visibilityToggle__eye,
+  .visibilityToggle .visibilityToggle__eyeClosed,
+  .visibilityToggle .visibilityToggle__content {
+    -webkit-transition: opacity .2s ease-in-out;
+    transition: opacity .2s ease-in-out; }
+  .visibilityToggle .visibilityToggle__eye,
+  .visibilityToggle .visibilityToggle__eyeClosed {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    z-index: 1; }
+  .visibilityToggle .euiSwitch__input {
+    z-index: 2;
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer; }
+  .visibilityToggle .visibilityToggle__body {
+    display: block;
+    display: block;
+    height: 16px;
+    width: 16px; }
+  .visibilityToggle:hover, .visibilityToggle:focus {
+    cursor: pointer;
+    color: #006BB4; }
+    .visibilityToggle:hover .visibilityToggle__content, .visibilityToggle:focus .visibilityToggle__content {
+      opacity: 0; }
+    .visibilityToggle:hover .euiSwitch__input:checked + .visibilityToggle__body > .visibilityToggle__eye, .visibilityToggle:focus .euiSwitch__input:checked + .visibilityToggle__body > .visibilityToggle__eye {
+      opacity: 1; }
+    .visibilityToggle:hover .euiSwitch__input:not(:checked) + .visibilityToggle__body > .visibilityToggle__content, .visibilityToggle:focus .euiSwitch__input:not(:checked) + .visibilityToggle__body > .visibilityToggle__content {
+      opacity: 0; }
+    .visibilityToggle:hover .euiSwitch__input:not(:checked) + .visibilityToggle__body > .visibilityToggle__eyeClosed, .visibilityToggle:focus .euiSwitch__input:not(:checked) + .visibilityToggle__body > .visibilityToggle__eyeClosed {
+      opacity: 1; }
+
+.euiComboBox .euiComboBox__inputWrap {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.gisJoinItem {
+  background: #f8f9fb;
+  border-radius: 4px;
+  margin: 4px 0;
+  padding: 4px;
+  position: relative; }
+  .gisJoinItem:last-of-type {
+    margin-bottom: 0; }
+  .gisJoinItem:hover .gisJoinItem__delete, .gisJoinItem:focus .gisJoinItem__delete {
+    visibility: visible;
+    opacity: 1; }
+
+.gisJoinItem__delete {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  margin-right: -8px;
+  margin-top: -12px;
+  background: #FFF;
+  -webkit-box-shadow: 0 2px 2px -1px rgba(152, 162, 179, 0.3), 0 1px 5px -2px rgba(152, 162, 179, 0.3);
+          box-shadow: 0 2px 2px -1px rgba(152, 162, 179, 0.3), 0 1px 5px -2px rgba(152, 162, 179, 0.3);
+  padding: 4px;
+  visibility: hidden;
+  opacity: 0; }
+
+.gisLayerDetails__label {
+  display: inline-block;
+  min-width: 5.5em;
+  margin-right: 8px;
+  white-space: nowrap; }
+  .gisLayerDetails__label + span {
+    word-break: break-all; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LnNjc3MiLCJfbWFpbi5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvdmFyaWFibGVzL196X2luZGV4LnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX3NpemUuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL21peGlucy9fc2hhZG93LnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy9mdW5jdGlvbnMvX2NvbG9ycy5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvbWl4aW5zL19oZWxwZXJzLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX2NvbG9ycy5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvdmFyaWFibGVzL19hbmltYXRpb25zLnNjc3MiLCJjb21wb25lbnRzL2xheWVyX3BhbmVsL2pvaW5fZWRpdG9yL3Jlc291cmNlcy9fam9pbi5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvdmFyaWFibGVzL19ib3JkZXJzLnNjc3MiLCJzaGFyZWQvbGF5ZXJzL19sYXllcnMuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFHQSx1QkFBdUI7QUNGdkI7RUFDRSxxQkFBYTtFQUFiLHNCQUFhO0VBQWIscUJBQWE7RUFBYixjQUFhO0VBQ2Isb0JBQVk7RUFBWixxQkFBWTtN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 */

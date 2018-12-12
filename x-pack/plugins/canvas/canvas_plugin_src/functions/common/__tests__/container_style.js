@@ -8,9 +8,11 @@ import expect from 'expect.js';
 import { containerStyle } from '../containerStyle';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticLogo } from '../../../lib/elastic_logo';
+import { getFunctionErrors } from '../../../errors';
 
 describe('containerStyle', () => {
   const fn = functionWrapper(containerStyle);
+  const functionErrors = getFunctionErrors();
 
   describe('default output', () => {
     const result = fn(null);
@@ -77,7 +79,7 @@ describe('containerStyle', () => {
         expect(fn)
           .withArgs(null, { backgroundImage: 'foo' })
           .to.throwException(e => {
-            expect(e.message).to.be('Invalid backgroundImage. Please provide an asset or a URL.');
+            expect(e.message).to.be(functionErrors.containerStyle.backgroundImageInvalid().message);
           });
       });
     });

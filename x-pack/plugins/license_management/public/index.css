@@ -1,0 +1,17 @@
+.licFeature {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+.licManagement__modal {
+  width: 70vw; }
+
+.licManagement__narrowText {
+  width: 240px; }
+
+.licManagement__ieFlex {
+  -webkit-flex-shrink: 0;
+      -ms-flex-negative: 0;
+          flex-shrink: 0; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIl9saWNlbnNlX21hbmFnZW1lbnQuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFLG9CQUFZO0VBQVoscUJBQVk7TUFBWixxQkFBWTtVQUFaLGFBQVksRUFDYjs7QUFHRDtFQUNFLFlBQVcsRUFDWjs7QUFFRDtFQUNFLGFBQVksRUFDYjs7QUFFRDtFQUNFLHVCQUFjO01BQWQscUJBQWM7VUFBZCxlQUFjLEVBQ2YiLCJmaWxlIjoidG8uY3NzIn0= */

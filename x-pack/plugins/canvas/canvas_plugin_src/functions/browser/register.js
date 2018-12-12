@@ -5,6 +5,11 @@
  */
 
 import 'babel-polyfill';
+
+import { applyFunctionStrings } from '../../strings';
 import { functions } from './index';
 
-functions.forEach(canvas.register);
+const { register } = canvas;
+
+// Apply localized strings to the Browser Function specs, then register them.
+applyFunctionStrings(functions).forEach(register);
