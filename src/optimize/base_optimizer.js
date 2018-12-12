@@ -108,15 +108,23 @@ export default class BaseOptimizer {
   }
 
   warmupThreadLoaderPool() {
+    const baseModules = [
+      'babel-loader',
+      BABEL_PRESET_PATH
+    ];
+
+    const devOnlyModules = !IS_KIBANA_DISTRIBUTABLE
+      ? ['ts-loader']
+      : [];
+
     threadLoader.warmup(
       // pool options, like passed to loader options
       // must match loader options to boot the correct pool
       this.getThreadLoaderPoolConfig(),
       [
         // modules to load on the pool
-        'babel-loader',
-        'ts-loader',
-        BABEL_PRESET_PATH
+        ...baseModules,
+        ...devOnlyModules
       ]
     );
   }
