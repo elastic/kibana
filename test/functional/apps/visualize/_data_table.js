@@ -209,7 +209,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleOtherBucket();
         await PageObjects.visualize.toggleMissingBucket();
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should show correct data', async () => {
