@@ -348,7 +348,9 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     // union beat tags
     flatten(this.getSelectedBeats().map(({ full_tags }) => full_tags))
       // map tag list to bool
-      .map(({ configuration_blocks }) => this.configBlocksRequireUniqueness(configuration_blocks))
+      .map(tag => {
+        return this.configBlocksRequireUniqueness(tag ? tag.configuration_blocks : []);
+      })
       // reduce to result
       .reduce((acc, cur) => acc || cur, false);
 }
