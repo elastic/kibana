@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
 import { NEXT_MAJOR_VERSION } from '../../../../common/version';
 import { UpgradeAssistantTabProps } from '../../types';
@@ -62,24 +63,30 @@ const START_UPGRADE_STEP = {
     <Fragment>
       <EuiText grow={false}>
         <p>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStep.stepDetail.followInstructionsDetail"
-            defaultMessage="Follow {instructionButton} to start your upgrade."
-            values={{
-              // TODO: swap out link if running on Cloud.
-              instructionButton: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStep.stepDetail.instructionButtonLabel"
-                    defaultMessage="these instructions"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          {chrome.getInjected('isCloudEnabled', false) ? (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStepCloud.stepDetail.goToCloudDashboardDetail"
+              defaultMessage="Go to the Deployments section on the Elastic Cloud dashboard to start your upgrade."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStepOnPrem.stepDetail.followInstructionsDetail"
+              defaultMessage="Follow {instructionButton} to start your upgrade."
+              values={{
+                instructionButton: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStepOnPrem.stepDetail.instructionButtonLabel"
+                      defaultMessage="these instructions"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          )}
         </p>
       </EuiText>
     </Fragment>
