@@ -43,7 +43,12 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
       case 'record.key':
       case 'record.value':
         const childPathWithIndex = reason.path.slice();
-        childPathWithIndex.splice(path.length, 0, entryKey.toString());
+        childPathWithIndex.splice(
+          path.length,
+          0,
+          // If `key` validation failed, let's stress that to make error more obvious.
+          type === 'record.key' ? `key("${entryKey}")` : entryKey.toString()
+        );
 
         return reason instanceof SchemaTypesError
           ? new SchemaTypesError(reason, childPathWithIndex, reason.errors)

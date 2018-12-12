@@ -49,7 +49,7 @@ test('fails when not receiving expected key type', () => {
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(`
-"[name]: types that failed validation:
+"[key(\\"name\\")]: types that failed validation:
 - [0]: expected value to equal [nickName] but got [name]
 - [1]: expected value to equal [lastName] but got [name]"
 `);
@@ -80,7 +80,7 @@ test('includes namespace in failure when wrong key type', () => {
   };
 
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace.name]: value is [name] but it must have a minimum length of [10]."`
+    `"[foo-namespace.key(\\"name\\")]: value is [name] but it must have a minimum length of [10]."`
   );
 });
 

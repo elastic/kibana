@@ -51,7 +51,12 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
       case 'map.key':
       case 'map.value':
         const childPathWithIndex = reason.path.slice();
-        childPathWithIndex.splice(path.length, 0, entryKey.toString());
+        childPathWithIndex.splice(
+          path.length,
+          0,
+          // If `key` validation failed, let's stress that to make error more obvious.
+          type === 'map.key' ? `key("${entryKey}")` : entryKey.toString()
+        );
 
         return reason instanceof SchemaTypesError
           ? new SchemaTypesError(reason, childPathWithIndex, reason.errors)
