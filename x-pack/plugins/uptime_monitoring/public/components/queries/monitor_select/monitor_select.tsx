@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+// @ts-ignore No typing for EuiSuperSelect
+import { EuiHealth, EuiSuperSelect } from '@elastic/eui';
+import React from 'react';
+import { Query } from 'react-apollo';
+import { Monitor } from '../../../../common/graphql/types';
+import { createGetLatestMonitorsQuery } from './get_latest_monitors';
+
+interface MonitorSelectProps {
+  dateRangeStart: number;
+  dateRangeEnd: number;
+  valueOfSelectedMonitor?: string;
+}
+
+export const MonitorSelect = (props: MonitorSelectProps) => (
+  <Query pollInterval={1000} query={createGetLatestMonitorsQuery({ ...props })}>
+    {({ loading, error, data }) => {
+      if (loading) {
+        return 'Loading...';
+      }
+      if (error) {
+        return `Error ${error.message}`;
+      }
+      const { latestMonitors } = data;
+      const options = latestMonitors.map(({ monitor }: { monitor: Monitor }) => ({
+        value: monitor.id,
+        inputDisplay: (
+          <EuiHealth
+            color={monitor.status === 'up' ? 'success' : 'danger'}
+            style={{ lineHeight: 'inherit' }}
+          >
+            {monitor.id}
+          </EuiHealth>
+        ),
+      }));
+      return (
+        <EuiSuperSelect
+          options={options}
+          valueOfSelected={props.valueOfSelectedMonitor}
+          // TODO: navigate page on change
+          // onChange={e => console.log(e)}
+        />
+      );
+    }}
+  </Query>
+);

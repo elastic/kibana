@@ -26,11 +26,15 @@ import {
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
+import { MonitorSelect } from '../components/queries/monitor_select';
+import { Pings } from '../components/queries/ping_list';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 
 interface MonitorPageProps {
   updateBreadcrumbs: UMUpdateBreadcrumbs;
   match: { params: { id: string } };
+  dateRangeStart: number;
+  dateRangeEnd: number;
 }
 
 export class MonitorPage extends React.Component<MonitorPageProps> {
@@ -43,6 +47,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
   }
 
   public render() {
+    const { dateRangeStart, dateRangeEnd } = this.props;
     let { id } = this.props.match.params;
     const example = JSON.parse(exampleData);
     const google = example[2];
@@ -57,7 +62,6 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
       avgRtt.push(avg);
       areaRtt.push({ x: min.x, y0: min.y, y: max.y });
     });
-    const selectOptions = [{ value: 'http@https://www.google.com', inputDisplay: <EuiHealth color="success" style={{ lineHeight: 'inherit'}}>https://www.google.com</EuiHealth>}];
     const rttexample = JSON.parse(rttsampledata);
     const rttcontent: any[] = [];
     const rttresponse: any[] = [];
@@ -91,11 +95,11 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
           <EuiFlexItem grow={false}>
             <span>Monitor:</span>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSuperSelect
-              options={selectOptions}
-              valueOfSelected={'http@https://www.google.com'}
-              onChange={(e: any) => e}
+          <EuiFlexItem>
+            <MonitorSelect
+              dateRangeStart={dateRangeStart}
+              dateRangeEnd={dateRangeEnd}
+              valueOfSelectedMonitor={'http@https://www.google.com/'}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -199,6 +203,12 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer />
+        <Pings
+          dateRangeStart={this.props.dateRangeStart}
+          dateRangeEnd={this.props.dateRangeEnd}
+          monitorId={'http@https://www.google.com/'}
+        />
       </Fragment>
     );
   }

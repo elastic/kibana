@@ -21,7 +21,9 @@ import {
   EuiPopover,
   EuiSwitch,
 } from '@elastic/eui';
+import moment from 'moment';
 import React from 'react';
+import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Breadcrumb } from 'ui/chrome';
 import { overviewBreadcrumb } from './breadcrumbs';
@@ -34,6 +36,8 @@ interface UptimeAppState {
   popoverIsOpen: boolean;
   selectedAutorefresh: any;
   autorefreshOptions: any[];
+  dateRangeStart: number;
+  dateRangeEnd: number;
 }
 
 class Application extends React.Component<UptimeAppProps, UptimeAppState> {
@@ -43,7 +47,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
     const { isUsingK7Design, kibanaBreadcrumbs, updateBreadcrumbs } = this.props;
     let initialBreadcrumbs: Breadcrumb[];
-
+    const dateRangeEnd = moment.now();
+    const dateRangeStart = moment()
+      .subtract(1, 'day')
+      .valueOf();
     if (isUsingK7Design) {
       this.setBreadcrumbs = updateBreadcrumbs;
       initialBreadcrumbs = kibanaBreadcrumbs;
@@ -68,6 +75,8 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       popoverIsOpen: false,
       autorefreshOptions,
       selectedAutorefresh: autorefreshOptions[0],
+      dateRangeStart,
+      dateRangeEnd,
     };
   }
 
@@ -76,87 +85,98 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   public render() {
-    const { isUsingK7Design, routerBasename } = this.props;
+    const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
     return (
       <Router basename={routerBasename}>
-        <EuiPage className="app-wrapper-panel">
-          <EuiHeader>
-            <EuiHeaderSection>
-              <EuiHeaderSectionItem border="right">
-                <EuiHeaderLogo
-                  aria-label="Go to Uptime Monitoring home page"
-                  href="#/"
-                  iconType="heartbeatApp"
-                  iconTitle="Uptime Monitoring"
-                >
-                  Uptime Monitoring
-                </EuiHeaderLogo>
-              </EuiHeaderSectionItem>
-              {!isUsingK7Design && (
-                <EuiHeaderSectionItem>
-                  <EuiHeaderBreadcrumbs
-                    breadcrumbs={this.state.breadcrumbs}
-                    // @ts-ignore TODO: handle style issues outside of code
-                    style={{ paddingTop: '20px', paddingRight: '8px' }}
-                  />
-                </EuiHeaderSectionItem>
-              )}
-            </EuiHeaderSection>
-            <EuiHeaderSection side="right">
-              <EuiPopover
-                id="autorefresPopover"
-                button={
-                  <EuiButton
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={() => this.setState({ popoverIsOpen: true })}
+        <ApolloProvider client={graphQLClient}>
+          <EuiPage className="app-wrapper-panel">
+            <EuiHeader>
+              <EuiHeaderSection>
+                <EuiHeaderSectionItem border="right">
+                  <EuiHeaderLogo
+                    aria-label="Go to Uptime Monitoring home page"
+                    href="#/"
+                    iconType="heartbeatApp"
+                    iconTitle="Uptime Monitoring"
                   >
-                    {this.state.autorefresh
-                      ? 'Autorefresh every ' + this.state.selectedAutorefresh.label
-                      : 'Autorefresh Disabled'}
-                  </EuiButton>
-                }
-                closePopover={() => this.setState({ popoverIsOpen: false })}
-                isOpen={this.state.popoverIsOpen}
-                style={{ paddingTop: '10px', paddingRight: '8px' }}
-              >
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem>
-                    <EuiSwitch
-                      label="Auto-refresh"
-                      checked={this.state.autorefresh}
-                      onChange={e => this.setState({ autorefresh: e.target.checked })}
+                    Uptime Monitoring
+                  </EuiHeaderLogo>
+                </EuiHeaderSectionItem>
+                {!isUsingK7Design && (
+                  <EuiHeaderSectionItem>
+                    <EuiHeaderBreadcrumbs
+                      breadcrumbs={this.state.breadcrumbs}
+                      // @ts-ignore TODO: handle style issues outside of code
+                      style={{ paddingTop: '20px', paddingRight: '8px' }}
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiComboBox
-                      onChange={selectedOptions =>
-                        this.setState({ selectedAutorefresh: selectedOptions[0] })
-                      }
-                      options={this.state.autorefreshOptions}
-                      isClearable={false}
-                      singleSelection={{ asPlainText: true }}
-                      selectedOptions={[this.state.selectedAutorefresh]}
+                  </EuiHeaderSectionItem>
+                )}
+              </EuiHeaderSection>
+              <EuiHeaderSection side="right">
+                <EuiHeaderSectionItem>
+                  <EuiPopover
+                    id="autorefresPopover"
+                    button={
+                      <EuiButton
+                        iconType="arrowDown"
+                        iconSide="right"
+                        onClick={() => this.setState({ popoverIsOpen: true })}
+                      >
+                        {this.state.autorefresh
+                          ? 'Autorefresh every ' + this.state.selectedAutorefresh.label
+                          : 'Autorefresh Disabled'}
+                      </EuiButton>
+                    }
+                    closePopover={() => this.setState({ popoverIsOpen: false })}
+                    isOpen={this.state.popoverIsOpen}
+                    style={{ paddingTop: '10px', paddingRight: '8px' }}
+                  >
+                    <EuiFlexGroup direction="column">
+                      <EuiFlexItem>
+                        <EuiSwitch
+                          label="Auto-refresh"
+                          checked={this.state.autorefresh}
+                          onChange={e => this.setState({ autorefresh: e.target.checked })}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiComboBox
+                          onChange={selectedOptions =>
+                            this.setState({ selectedAutorefresh: selectedOptions[0] })
+                          }
+                          options={this.state.autorefreshOptions}
+                          isClearable={false}
+                          singleSelection={{ asPlainText: true }}
+                          selectedOptions={[this.state.selectedAutorefresh]}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPopover>
+                </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+            </EuiHeader>
+            <EuiPageContent>
+              <Switch>
+                <Route
+                  exact
+                  path="/"
+                  render={props => <OverviewPage {...props} setBreadcrumbs={this.setBreadcrumbs} />}
+                />
+                <Route
+                  path="/monitor/:id"
+                  render={props => (
+                    <MonitorPage
+                      {...props}
+                      dateRangeStart={this.state.dateRangeStart}
+                      dateRangeEnd={this.state.dateRangeEnd}
+                      updateBreadcrumbs={this.setBreadcrumbs}
                     />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPopover>
-            </EuiHeaderSection>
-          </EuiHeader>
-          <EuiPageContent>
-            <Switch>
-              <Route
-                exact
-                path="/"
-                render={props => <OverviewPage {...props} setBreadcrumbs={this.setBreadcrumbs} />}
-              />
-              <Route
-                path="/monitor/:id"
-                render={props => <MonitorPage {...props} updateBreadcrumbs={this.setBreadcrumbs} />}
-              />
-            </Switch>
-          </EuiPageContent>
-        </EuiPage>
+                  )}
+                />
+              </Switch>
+            </EuiPageContent>
+          </EuiPage>
+        </ApolloProvider>
       </Router>
     );
   }

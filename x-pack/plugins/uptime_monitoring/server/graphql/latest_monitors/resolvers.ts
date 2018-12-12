@@ -4,47 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMPingSortDirectionArg } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
 import { Ping } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
 
-interface UMAllPingsArgs {
-  sort: UMPingSortDirectionArg;
-  size: number;
-  monitorId: string;
-  status: string;
+interface UMLatestMonitorsArgs {
   dateRangeStart: number;
   dateRangeEnd: number;
 }
 
-export type UMAllPingsResolver = UMResolver<
+export type UMLatestMonitorsResolver = UMResolver<
   Ping[] | Promise<Ping[]>,
   any,
-  UMAllPingsArgs,
+  UMLatestMonitorsArgs,
   UMContext
 >;
 
-export interface UMPingResolver {
-  allPings: () => Ping[];
+export interface UMGetLatestMonitorsResolver {
+  getLatestMonitors: () => Ping[];
 }
 
-export const createPingsResolvers: CreateUMGraphQLResolvers = (
+export const createLatestMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
   Query: {
-    allPings: UMAllPingsResolver;
+    getLatestMonitors: UMLatestMonitorsResolver;
   };
 } => ({
   Query: {
-    async allPings(
-      resolver,
-      { monitorId, sort, size, status, dateRangeStart, dateRangeEnd },
-      { req }
-    ): Promise<Ping[]> {
-      return libs.pings.getAll(req, dateRangeStart, dateRangeEnd, monitorId, status, sort, size);
+    async getLatestMonitors(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<Ping[]> {
+      return libs.pings.getLatestMonitorDocs(req, dateRangeStart, dateRangeEnd);
     },
   },
 });

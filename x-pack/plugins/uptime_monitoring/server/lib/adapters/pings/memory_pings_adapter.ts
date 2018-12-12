@@ -21,11 +21,31 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     this.pingsDB = pingsDB;
   }
 
-  public async getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]> {
+  public async getAll(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    monitorId?: string,
+    status?: string,
+    sort?: UMPingSortDirectionArg,
+    size?: number
+  ): Promise<Ping[]> {
+    let pings = this.pingsDB;
+    if (monitorId) {
+      pings = pings.filter(ping => ping.monitor && ping.monitor.id === monitorId);
+    }
     if (sort) {
-      const sortedPings = this.pingsDB.sort(sortPings(sort));
+      const sortedPings = pings.sort(sortPings(sort));
       return take(sortedPings, size ? size : 10);
     }
-    return take(this.pingsDB, size ? size : 10);
+    return take(pings, size ? size : 10);
+  }
+
+  public async getLatestMonitorDocs(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number
+  ): Promise<Ping[]> {
+    throw new Error('Method not implemented.');
   }
 }

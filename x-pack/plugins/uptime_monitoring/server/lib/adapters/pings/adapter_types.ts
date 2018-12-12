@@ -8,5 +8,15 @@ import { UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
 
 export interface UMPingsAdapter {
-  getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]>;
+  getAll(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    monitorId?: string,
+    status?: string,
+    sort?: UMPingSortDirectionArg,
+    size?: number
+  ): Promise<Ping[]>;
+
+  getLatestMonitorDocs(request: any, dateRangeStart: number, dateRangeEnd: number): Promise<Ping[]>;
 }

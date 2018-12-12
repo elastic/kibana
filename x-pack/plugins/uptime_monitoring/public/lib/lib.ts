@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
 import React from 'react';
 import { Breadcrumb } from 'ui/chrome';
 
@@ -18,10 +20,11 @@ export interface UptimeAppProps {
   updateBreadcrumbs: UMUpdateBreadcrumbs;
   kibanaBreadcrumbs: Breadcrumb[];
   routerBasename: string;
+  graphQLClient: ApolloClient<NormalizedCacheObject>;
 }
 
 export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<any>;
 
 export interface UMFrameworkAdapter {
-  render(component: BootstrapUptimeApp): void;
+  render(component: BootstrapUptimeApp, graphQLClient: ApolloClient<NormalizedCacheObject>): void;
 }

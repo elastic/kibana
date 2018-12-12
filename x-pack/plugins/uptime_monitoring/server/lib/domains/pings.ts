@@ -13,7 +13,31 @@ export class UMPingsDomain {
     this.adapter = adapter;
   }
 
-  public async getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]> {
-    return this.adapter.getAll(request, sort, size);
+  public async getAll(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    monitorId?: string,
+    status?: string,
+    sort?: UMPingSortDirectionArg,
+    size?: number
+  ): Promise<Ping[]> {
+    return this.adapter.getAll(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      monitorId,
+      status,
+      sort,
+      size
+    );
+  }
+
+  public async getLatestMonitorDocs(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number
+  ): Promise<Ping[]> {
+    return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd);
   }
 }

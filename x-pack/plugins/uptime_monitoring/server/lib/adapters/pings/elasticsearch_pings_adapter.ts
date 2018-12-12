@@ -17,14 +17,31 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     this.database = database;
   }
 
-  public async getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]> {
+  public async getAll(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    monitorId?: string,
+    status?: string,
+    sort?: UMPingSortDirectionArg,
+    size?: number
+  ): Promise<Ping[]> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
+    const must: any[] = [];
+    if (monitorId) {
+      must.push({ term: { 'monitor.id': monitorId } });
+    }
+    if (status) {
+      must.push({ term: { 'monitor.status': status } });
+    }
+    const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
+    const queryContext = { bool: { must, filter } };
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
-          match_all: {},
+          ...queryContext,
         },
         ...sortParam,
         ...sizeParam,
@@ -38,5 +55,57 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       const timestamp = _source['@timestamp'];
       return { timestamp, ..._source };
     });
+  }
+
+  public async getLatestMonitorDocs(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number
+  ): Promise<Ping[]> {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateRangeStart,
+                    lte: dateRangeEnd,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          by_id: {
+            terms: {
+              field: 'monitor.id',
+            },
+            aggs: {
+              latest: {
+                top_hits: {
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const {
+      aggregations: {
+        by_id: { buckets },
+      },
+    } = await this.database.search(request, params);
+
+    // @ts-ignore TODO fix destructuring implicit any
+    return buckets.map(({ latest: { hits: { hits } } }) => ({
+      ...hits[0]._source,
+      timestamp: hits[0]._source[`@timestamp`],
+    }));
   }
 }

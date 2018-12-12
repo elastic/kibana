@@ -13,7 +13,14 @@ export const pingsSchema = gql`
 
   type Query {
     "Get a list of all recorded pings for all monitors"
-    allPings(sort: String, size: Int): [Ping!]!
+    allPings(
+      sort: String
+      size: Int
+      monitorId: String
+      status: String
+      dateRangeStart: UnsignedInteger
+      dateRangeEnd: UnsignedInteger
+    ): [Ping!]!
   }
 
   "The monitor's status for a ping"

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome, { Breadcrumb } from 'ui/chrome';
@@ -17,11 +19,10 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     this.uiRoutes = uiRoutes;
   }
 
-  public render = (component: BootstrapUptimeApp) => {
-    this.register(component);
-  };
-
-  private register = (renderRootComponent: BootstrapUptimeApp) => {
+  public render = (
+    component: BootstrapUptimeApp,
+    graphQLClient: ApolloClient<NormalizedCacheObject>
+  ) => {
     const route = {
       controllerAs: 'uptime',
       // @ts-ignore angular
@@ -40,11 +41,12 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
             : basePath + PLUGIN.ROUTER_BASE_NAME;
           ReactDOM.render(
-            renderRootComponent({
+            component({
               isUsingK7Design: $scope.k7design,
               updateBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
               routerBasename,
+              graphQLClient,
             }),
             elem
           );
