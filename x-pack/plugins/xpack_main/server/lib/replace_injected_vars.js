@@ -5,6 +5,7 @@
  */
 
 import { getTelemetryOptIn } from "./get_telemetry_opt_in";
+import { populateUICapabilities } from './populate_ui_capabilities';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
@@ -12,6 +13,9 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
     ...originalInjectedVars,
     telemetryOptedIn: await getTelemetryOptIn(request),
     xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined,
+    uiCapabilities: {
+      ...populateUICapabilities(server.plugins.xpack_main, originalInjectedVars),
+    }
   });
 
   // security feature is disabled

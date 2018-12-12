@@ -47,6 +47,9 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        navLinks: {}
+      },
     });
 
     sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
@@ -66,6 +69,9 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        navLinks: {}
+      },
     });
   });
 
@@ -81,6 +87,9 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
+      },
+      uiCapabilities: {
+        navLinks: {}
       },
     });
   });
@@ -98,6 +107,9 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        navLinks: {}
+      },
     });
   });
 
@@ -114,6 +126,9 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        navLinks: {}
+      },
     });
   });
 
@@ -129,6 +144,9 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: false,
       xpackInitialInfo: {
         b: 1
+      },
+      uiCapabilities: {
+        navLinks: {}
       },
     });
   });
@@ -154,7 +172,7 @@ describe('replaceInjectedVars uiExport', () => {
   });
 
   it('sends the originalInjectedVars (with xpackInitialInfo = undefined) if security is disabled, xpack info is unavailable', async () => {
-    const originalInjectedVars = { a: 1 };
+    const originalInjectedVars = { a: 1, uiCapabilities: { navLinks: { foo: true }, bar: { baz: true } } };
     const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
@@ -165,6 +183,7 @@ describe('replaceInjectedVars uiExport', () => {
       a: 1,
       telemetryOptedIn: null,
       xpackInitialInfo: undefined,
+      uiCapabilities: { navLinks: { foo: true }, bar: { baz: true } },
     });
   });
 
@@ -189,6 +208,7 @@ function mockServer() {
         isAuthenticated: sinon.stub().returns(true)
       },
       xpack_main: {
+        getFeatures: () => [],
         info: {
           isAvailable: sinon.stub().returns(true),
           feature: () => ({

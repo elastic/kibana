@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`populateUICapabilities augments the original uiCapabilities with registered feature capabilities 1`] = `
+Object {
+  "feature": Object {
+    "someCapability": true,
+  },
+  "navLinks": Object {
+    "bar": true,
+    "foo": true,
+    "newFeatureNavLink": true,
+  },
+  "newFeature": Object {
+    "capability1": true,
+    "capability2": true,
+  },
+  "otherFeature": Object {},
+}
+`;
+
+exports[`populateUICapabilities handles features with no registered capabilities 1`] = `
+Object {
+  "feature": Object {
+    "someCapability": true,
+  },
+  "navLinks": Object {
+    "bar": true,
+    "foo": true,
+  },
+  "newFeature": Object {},
+  "otherFeature": Object {},
+}
+`;
+
+exports[`populateUICapabilities handles features with only a navlink specified 1`] = `
+Object {
+  "feature": Object {
+    "someCapability": true,
+  },
+  "navLinks": Object {
+    "bar": true,
+    "foo": true,
+    "newFeatureNavLink": true,
+  },
+  "newFeature": Object {},
+  "otherFeature": Object {},
+}
+`;
+
+exports[`populateUICapabilities handles no original uiCapabilites and no registered features gracefully 1`] = `
+Object {
+  "navLinks": Object {},
+}
+`;
+
+exports[`populateUICapabilities merges capabilities from all feature privileges 1`] = `
+Object {
+  "feature": Object {
+    "someCapability": true,
+  },
+  "navLinks": Object {
+    "bar": true,
+    "foo": true,
+    "newFeatureNavLink": true,
+  },
+  "newFeature": Object {
+    "capability1": true,
+    "capability2": true,
+    "capability3": true,
+    "capability4": true,
+    "capability5": true,
+  },
+  "otherFeature": Object {},
+}
+`;
+
+exports[`populateUICapabilities returns the original uiCapabilities untouched when no features are registered 1`] = `
+Object {
+  "feature": Object {
+    "someCapability": true,
+  },
+  "navLinks": Object {
+    "bar": true,
+    "foo": true,
+  },
+  "otherFeature": Object {},
+}
+`;
+
+exports[`populateUICapabilities supports merging multiple features with multiple privileges each 1`] = `
+Object {
+  "anotherNewFeature": Object {
+    "capability1": true,
+    "capability2": true,
+    "capability3": true,
+    "capability4": true,
+  },
+  "feature": Object {
+    "someCapability": true,
+  },
+  "navLinks": Object {
+    "bar": true,
+    "foo": true,
+    "newFeatureNavLink": true,
+    "yetAnotherNavLink": true,
+  },
+  "newFeature": Object {
+    "capability1": true,
+    "capability2": true,
+    "capability3": true,
+    "capability4": true,
+    "capability5": true,
+  },
+  "otherFeature": Object {},
+  "yetAnotherNewFeature": Object {
+    "capability1": true,
+    "capability2": true,
+    "something1": true,
+    "something2": true,
+    "something3": true,
+  },
+}
+`;
