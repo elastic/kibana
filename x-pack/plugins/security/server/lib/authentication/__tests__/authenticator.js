@@ -280,56 +280,66 @@ describe('Authenticator', () => {
       sinon.assert.notCalled(session.set);
     });
 
-    it('replaces existing session with the one returned by authentication provider.', async () => {
+    it('replaces existing session with the one returned by authentication provider for system API requests', async () => {
       const user = { username: 'user' };
-      const oldAuth = Buffer.from('foo:notbar').toString('base64');
-      const newAuth = Buffer.from('foo:bar').toString('base64');
-      const systemAPIRequest = requestFixture({ headers: { authorization: `Basic ${oldAuth}` } });
-      const notSystemAPIRequest = requestFixture({ headers: { authorization: `Basic ${oldAuth}` } });
+      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+      const request = requestFixture();
       const loginAttempt = new LoginAttempt();
       loginAttempt.setCredentials('foo', 'bar');
-      systemAPIRequest.loginAttempt.returns(loginAttempt);
-      notSystemAPIRequest.loginAttempt.returns(loginAttempt);
+      request.loginAttempt.returns(loginAttempt);
 
-      session.get.withArgs(systemAPIRequest).returns(Promise.resolve({
-        state: { authorization: 'Basic xxx-old' },
-        provider: 'basic'
-      }));
-
-      session.get.withArgs(notSystemAPIRequest).returns(Promise.resolve({
-        state: { authorization: 'Basic yyy-old' },
+      session.get.withArgs(request).returns(Promise.resolve({
+        state: { authorization: 'Basic some-old-token' },
         provider: 'basic'
       }));
 
       server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(systemAPIRequest).returns(true)
-        .withArgs(notSystemAPIRequest).returns(false);
+        .withArgs(request).returns(true);
 
       cluster.callWithRequest
-        .withArgs(systemAPIRequest).returns(Promise.resolve(user))
-        .withArgs(notSystemAPIRequest).returns(Promise.resolve(user));
+        .withArgs(request).returns(Promise.resolve(user));
 
-      const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
-      expect(systemAPIAuthenticationResult.succeeded()).to.be(true);
-      expect(systemAPIAuthenticationResult.user).to.be.eql({
+      const authenticationResult = await authenticate(request);
+      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.user).to.be.eql({
         ...user,
         scope: []
       });
       sinon.assert.calledOnce(session.set);
-      sinon.assert.calledWithExactly(session.set, systemAPIRequest, {
-        state: { authorization: `Basic ${newAuth}` },
+      sinon.assert.calledWithExactly(session.set, request, {
+        state: { authorization },
         provider: 'basic'
       });
+    });
 
-      const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
-      expect(notSystemAPIAuthenticationResult.succeeded()).to.be(true);
-      expect(notSystemAPIAuthenticationResult.user).to.be.eql({
+    it('replaces existing session with the one returned by authentication provider for non-system API requests', async () => {
+      const user = { username: 'user' };
+      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+      const request = requestFixture();
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('foo', 'bar');
+      request.loginAttempt.returns(loginAttempt);
+
+      session.get.withArgs(request).returns(Promise.resolve({
+        state: { authorization: 'Basic some-old-token' },
+        provider: 'basic'
+      }));
+
+      server.plugins.kibana.systemApi.isSystemApiRequest
+        .withArgs(request).returns(false);
+
+      cluster.callWithRequest
+        .withArgs(request).returns(Promise.resolve(user));
+
+      const authenticationResult = await authenticate(request);
+      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.user).to.be.eql({
         ...user,
         scope: []
       });
-      sinon.assert.calledTwice(session.set);
-      sinon.assert.calledWithExactly(session.set, notSystemAPIRequest, {
-        state: { authorization: `Basic ${newAuth}` },
+      sinon.assert.calledOnce(session.set);
+      sinon.assert.calledWithExactly(session.set, request, {
+        state: { authorization },
         provider: 'basic'
       });
     });
