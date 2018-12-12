@@ -164,7 +164,7 @@ export const EditFilterListHeader = injectI18n(function ({
               <EuiTextColor color="subdued">
                 <p>
                   <FormattedMessage
-                    id="xpack.ml.settings.editFilterList.filterIsNotUsedInJobsDescription"
+                    id="xpack.ml.settings.editFilterList.totalItemsDescription"
                     defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
                     values={{
                       totalItemCount,

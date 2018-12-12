@@ -48,7 +48,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
             <p>
               <FormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
-                id="xpack.ml.settings.editFilterList.filterIsNotUsedInJobsDescription"
+                id="xpack.ml.settings.editFilterList.totalItemsDescription"
                 values={
                   Object {
                     "totalItemCount": 15,
@@ -168,7 +168,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
             <p>
               <FormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
-                id="xpack.ml.settings.editFilterList.filterIsNotUsedInJobsDescription"
+                id="xpack.ml.settings.editFilterList.totalItemsDescription"
                 values={
                   Object {
                     "totalItemCount": 0,
@@ -283,7 +283,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
             textTransform="none"
           >
             <h1>
-              Filter list {filterId}
+              Filter list test_filter_list
             </h1>
           </EuiTitle>
         </EuiFlexItem>
@@ -298,7 +298,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
             <p>
               <FormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
-                id="xpack.ml.settings.editFilterList.filterIsNotUsedInJobsDescription"
+                id="xpack.ml.settings.editFilterList.totalItemsDescription"
                 values={
                   Object {
                     "totalItemCount": 0,
@@ -408,7 +408,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
             textTransform="none"
           >
             <h1>
-              Filter list {filterId}
+              Filter list test_filter_list
             </h1>
           </EuiTitle>
         </EuiFlexItem>
@@ -423,7 +423,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
             <p>
               <FormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
-                id="xpack.ml.settings.editFilterList.filterIsNotUsedInJobsDescription"
+                id="xpack.ml.settings.editFilterList.totalItemsDescription"
                 values={
                   Object {
                     "totalItemCount": 15,
