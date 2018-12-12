@@ -76,6 +76,6 @@ describe('Beats CPU Utilization Metric', () => {
     const bucket = {
       metric_deriv: { normalized_value: 33 }
     };
-    expect(myUtilizationMetric.calculation(bucket, null, null, 30)).toBe(0.11);
+    expect(myUtilizationMetric.calculation(bucket, null, null, 30)).toBe(1.1);
   });
 });
