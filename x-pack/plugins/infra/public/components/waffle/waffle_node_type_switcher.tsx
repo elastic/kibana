@@ -34,13 +34,25 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           }
           onClick={this.handleClick(InfraNodeType.host)}
         >
-          <img src="../plugins/infra/images/hosts.svg" className="euiIcon euiIcon--large" />
+          <img
+            src="../plugins/infra/images/hosts.svg"
+            role="presentation"
+            className="euiIcon euiIcon--large"
+          />
         </EuiKeyPadMenuItem>
         <EuiKeyPadMenuItem label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
-          <img src="../plugins/infra/images/k8.svg" className="euiIcon euiIcon--large" />
+          <img
+            src="../plugins/infra/images/k8.svg"
+            role="presentation"
+            className="euiIcon euiIcon--large"
+          />
         </EuiKeyPadMenuItem>
         <EuiKeyPadMenuItem label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
-          <img src="../plugins/infra/images/docker.svg" className="euiIcon euiIcon--large" />
+          <img
+            src="../plugins/infra/images/docker.svg"
+            role="presentation"
+            className="euiIcon euiIcon--large"
+          />
         </EuiKeyPadMenuItem>
       </EuiKeyPadMenu>
     );

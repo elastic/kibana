@@ -18,7 +18,7 @@
  */
 
 const { resolve } = require('path');
-const { readdirSync, existsSync, unlink } = require('fs');
+const { readdirSync, existsSync, unlinkSync } = require('fs');
 const del = require('del');
 const createBuild = require('../create_build');
 
@@ -96,7 +96,7 @@ describe('creating the build', () => {
     afterEach(() => {
       PLUGIN.skipInstallDependencies = false;
       PLUGIN.styleSheetToCompile = undefined;
-      unlink(cssPath);
+      unlinkSync(cssPath);
     });
 
     it('produces CSS', async () => {

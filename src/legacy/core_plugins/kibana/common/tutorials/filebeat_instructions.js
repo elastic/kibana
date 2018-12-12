@@ -102,8 +102,8 @@ export const createFilebeatInstructions = context => ({
         }
       }),
       commands: [
-        'PS > cd C:\\Program Files\\Filebeat',
-        'PS C:\\Program Files\\Filebeat> .\\install-service-filebeat.ps1',
+        'cd "C:\\Program Files\\Filebeat"',
+        '.\\install-service-filebeat.ps1',
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.windowsTextPost', {
         defaultMessage: 'Modify the settings under {propertyName} in the {filebeatPath} file to point to your Elasticsearch installation.',
@@ -159,8 +159,8 @@ export const createFilebeatInstructions = context => ({
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
-        'PS C:\\Program Files\\Filebeat> filebeat.exe setup',
-        'PS C:\\Program Files\\Filebeat> Start-Service filebeat',
+        '.\\filebeat.exe setup',
+        'Start-Service filebeat',
       ],
     },
   },
@@ -446,7 +446,7 @@ export function filebeatEnableInstructions(moduleName) {
         values: { path: `C:\\Program Files\\Filebeat` },
       }),
       commands: [
-        'PS C:\\Program Files\\Filebeat> filebeat.exe modules enable ' + moduleName,
+        'filebeat.exe modules enable ' + moduleName,
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.windowsTextPost', {
         defaultMessage: 'Modify the settings in the `modules.d/{moduleName}.yml` file.',

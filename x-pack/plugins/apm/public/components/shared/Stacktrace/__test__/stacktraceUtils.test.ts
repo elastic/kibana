@@ -5,21 +5,166 @@
  */
 
 import { Stackframe } from '../../../../../typings/APMDoc';
-import { getCollapsedLibraryFrames, hasSourceLines } from '../stacktraceUtils';
+import { getGroupedStackframes, hasSourceLines } from '../stacktraceUtils';
 import stacktracesMock from './stacktraces.json';
 
 const stackframeMockWithSource = stacktracesMock[0];
 const stackframeMockWithoutSource = stacktracesMock[1];
 
 describe('stactraceUtils', () => {
-  describe('getCollapsedLibraryFrames', () => {
-    it('should collapse the library frames into a set of grouped, nested stackframes', () => {
-      const result = getCollapsedLibraryFrames(stacktracesMock as Stackframe[]);
-      expect(result.length).toBe(3);
-      expect(result[0].libraryFrame).toBe(false);
-      expect(result[1].libraryFrame).toBe(true);
-      expect(result[1].stackframes).toHaveLength(2); // two nested stackframes
-      expect(result[2].libraryFrame).toBe(false);
+  describe('getGroupedStackframes', () => {
+    it('should collapse the library frames into a set of grouped stackframes', () => {
+      const result = getGroupedStackframes(stacktracesMock as Stackframe[]);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('should group stackframes when `library_frame` is identical and `exclude_from_grouping` is false', () => {
+      const stackframes = [
+        {
+          library_frame: false,
+          exclude_from_grouping: false,
+          filename: 'file-a.txt'
+        },
+        {
+          library_frame: false,
+          exclude_from_grouping: false,
+          filename: 'file-b.txt'
+        },
+        {
+          library_frame: true,
+          exclude_from_grouping: false,
+          filename: 'file-c.txt'
+        },
+        {
+          library_frame: true,
+          exclude_from_grouping: false,
+          filename: 'file-d.txt'
+        }
+      ] as Stackframe[];
+
+      const result = getGroupedStackframes(stackframes);
+
+      expect(result).toEqual([
+        {
+          isLibraryFrame: false,
+          stackframes: [
+            {
+              exclude_from_grouping: false,
+              filename: 'file-a.txt',
+              library_frame: false
+            },
+            {
+              exclude_from_grouping: false,
+              filename: 'file-b.txt',
+              library_frame: false
+            }
+          ]
+        },
+        {
+          isLibraryFrame: true,
+          stackframes: [
+            {
+              exclude_from_grouping: false,
+              filename: 'file-c.txt',
+              library_frame: true
+            },
+            {
+              exclude_from_grouping: false,
+              filename: 'file-d.txt',
+              library_frame: true
+            }
+          ]
+        }
+      ]);
+    });
+
+    it('should not group stackframes when `library_frame` is the different', () => {
+      const stackframes = [
+        {
+          library_frame: false,
+          exclude_from_grouping: false,
+          filename: 'file-a.txt'
+        },
+        {
+          library_frame: true,
+          exclude_from_grouping: false,
+          filename: 'file-b.txt'
+        }
+      ] as Stackframe[];
+      const result = getGroupedStackframes(stackframes);
+      expect(result).toEqual([
+        {
+          isLibraryFrame: false,
+          stackframes: [
+            {
+              exclude_from_grouping: false,
+              filename: 'file-a.txt',
+              library_frame: false
+            }
+          ]
+        },
+        {
+          isLibraryFrame: true,
+          stackframes: [
+            {
+              exclude_from_grouping: false,
+              filename: 'file-b.txt',
+              library_frame: true
+            }
+          ]
+        }
+      ]);
+    });
+
+    it('should not group stackframes when `exclude_from_grouping` is true', () => {
+      const stackframes = [
+        {
+          library_frame: false,
+          exclude_from_grouping: false,
+          filename: 'file-a.txt'
+        },
+        {
+          library_frame: false,
+          exclude_from_grouping: true,
+          filename: 'file-b.txt'
+        }
+      ] as Stackframe[];
+      const result = getGroupedStackframes(stackframes);
+      expect(result).toEqual([
+        {
+          isLibraryFrame: false,
+          stackframes: [
+            {
+              exclude_from_grouping: false,
+              filename: 'file-a.txt',
+              library_frame: false
+            }
+          ]
+        },
+        {
+          isLibraryFrame: false,
+          stackframes: [
+            {
+              exclude_from_grouping: true,
+              filename: 'file-b.txt',
+              library_frame: false
+            }
+          ]
+        }
+      ]);
+    });
+
+    it('should handle empty stackframes', () => {
+      const result = getGroupedStackframes([] as Stackframe[]);
+      expect(result).toHaveLength(0);
+    });
+
+    it('should handle one stackframe', () => {
+      const result = getGroupedStackframes([
+        stacktracesMock[0]
+      ] as Stackframe[]);
+      expect(result).toHaveLength(1);
+      expect(result[0].stackframes).toHaveLength(1);
     });
   });
 

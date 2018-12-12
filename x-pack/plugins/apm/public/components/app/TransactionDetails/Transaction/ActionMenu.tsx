@@ -11,29 +11,9 @@ import {
   EuiPopover
 } from '@elastic/eui';
 import React from 'react';
-import {
-  PROCESSOR_EVENT,
-  TRACE_ID,
-  TRANSACTION_ID
-} from 'x-pack/plugins/apm/common/constants';
 import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-
-function getDiscoverQuery(transactionId: string, traceId?: string) {
-  let query = `${PROCESSOR_EVENT}:"transaction" AND ${TRANSACTION_ID}:"${transactionId}"`;
-  if (traceId) {
-    query += ` AND ${TRACE_ID}:"${traceId}"`;
-  }
-  return {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query
-      }
-    }
-  };
-}
+import { DiscoverTransactionButton } from '../../../shared/DiscoverButtons/DiscoverTransactionButton';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -63,22 +43,6 @@ interface ActionMenuProps {
 interface ActionMenuState {
   readonly isOpen: boolean;
 }
-
-export const DiscoverTransactionLink: React.SFC<ActionMenuProps> = ({
-  transaction,
-  children
-}) => {
-  const traceId =
-    transaction.version === 'v2' ? transaction.trace.id : undefined;
-  return (
-    <KibanaLink
-      pathname="/app/kibana"
-      hash="/discover"
-      query={getDiscoverQuery(transaction.transaction.id, traceId)}
-      children={children}
-    />
-  );
-};
 
 export class ActionMenu extends React.Component<
   ActionMenuProps,
@@ -130,9 +94,9 @@ export class ActionMenu extends React.Component<
 
     const items = [
       <EuiContextMenuItem icon="discoverApp" key="discover-transaction">
-        <DiscoverTransactionLink transaction={transaction}>
+        <DiscoverTransactionButton transaction={transaction}>
           View sample document
-        </DiscoverTransactionLink>
+        </DiscoverTransactionButton>
       </EuiContextMenuItem>,
       ...this.getInfraActions(transaction)
     ];

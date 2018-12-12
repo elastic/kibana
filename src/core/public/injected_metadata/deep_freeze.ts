@@ -24,7 +24,9 @@ interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
 
 type RecursiveReadonly<T> = T extends any[]
   ? RecursiveReadonlyArray<T[number]>
-  : T extends object ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }> : T;
+  : T extends object
+  ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
+  : T;
 
 export function deepFreeze<T extends Freezable>(object: T) {
   // for any properties that reference an object, makes sure that object is

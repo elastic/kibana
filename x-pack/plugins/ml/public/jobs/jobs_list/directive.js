@@ -34,6 +34,7 @@ uiRoutes
   });
 
 import { JobsPage } from './jobs';
+import { I18nProvider } from '@kbn/i18n/react';
 
 module.directive('jobsPage', function () {
   return {
@@ -41,7 +42,7 @@ module.directive('jobsPage', function () {
     restrict: 'E',
     link: (scope, element) => {
       ReactDOM.render(
-        React.createElement(JobsPage),
+        <I18nProvider>{React.createElement(JobsPage)}</I18nProvider>,
         element[0]
       );
     }
