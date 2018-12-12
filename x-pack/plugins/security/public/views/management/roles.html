@@ -75,17 +75,17 @@
         </div>
 
         <!-- NoResults -->
-        <div class="kuiPanel kuiPanel--centered" ng-show="!(roles | filter:query).length">
+        <div class="kuiPanel kuiPanel--centered" ng-if="!(roles | filter:query).length">
           <div
             class="kuiNoItems"
           >
             <span
-              ng-show="query"
+              ng-if="query"
               i18n-id="xpack.security.management.roles.noMatchingResultsLabel"
               i18n-default-message="No matching roles found"
             ></span>
             <span
-              ng-show="!query"
+              ng-if="!query"
               i18n-id="xpack.security.management.roles.noResultsLabel"
               i18n-default-message="No roles found"
             ></span>
