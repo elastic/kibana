@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelizeKeys } from 'humps';
+import { ErrorDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/distribution/get_distribution';
+import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
+import { ErrorGroupListAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_groups';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
@@ -24,7 +26,7 @@ export async function loadErrorGroupList({
   sortField,
   sortDirection
 }: ErrorGroupListParams) {
-  return callApi({
+  return callApi<ErrorGroupListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/errors`,
     query: {
       start,
@@ -44,8 +46,7 @@ export async function loadErrorGroupDetails({
   kuery,
   errorGroupId
 }: IUrlParams) {
-  // TODO: add types when error section is converted to ts
-  const res = await callApi<any>(
+  return callApi<ErrorGroupAPIResponse>(
     {
       pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
       query: {
@@ -58,11 +59,6 @@ export async function loadErrorGroupDetails({
       camelcase: false
     }
   );
-  const camelizedRes: any = camelizeKeys(res);
-  if (res.error.context) {
-    camelizedRes.error.context = res.error.context;
-  }
-  return camelizedRes;
 }
 
 export async function loadErrorDistribution({
@@ -72,7 +68,7 @@ export async function loadErrorDistribution({
   kuery,
   errorGroupId
 }: IUrlParams) {
-  return callApi({
+  return callApi<ErrorDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`,
     query: {
       start,
