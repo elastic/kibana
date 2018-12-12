@@ -72,6 +72,9 @@ export class FeaturesPrivilegesBuilder {
       ),
       ...privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui)),
       ...(feature.navLinkId ? [this.actions.ui.get('navLinks', feature.navLinkId)] : []),
+      ...(privilegeDefinition.management
+        ? privilegeDefinition.management.map(item => this.actions.ui.get('management', item))
+        : []),
     ]);
   }
 }

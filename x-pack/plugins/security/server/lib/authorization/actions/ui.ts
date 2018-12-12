@@ -9,6 +9,7 @@ const prefix = 'ui:';
 export class UIActions {
   public all = `${prefix}*`;
   public allNavLinks = `${prefix}navLinks/*`;
+  public allManagementLinks = `${prefix}management/*`;
 
   public get(featureId: string, uiCapability: string) {
     if (!featureId || !isString(featureId)) {

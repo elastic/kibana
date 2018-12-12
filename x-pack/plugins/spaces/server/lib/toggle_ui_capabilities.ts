@@ -32,12 +32,24 @@ function toggleDisabledFeatures(
     .filter(feature => typeof feature !== 'undefined') as Feature[];
 
   const navLinks: Record<string, boolean> = uiCapabilities.navLinks as Record<string, boolean>;
+  const managementItems: Record<string, boolean> = uiCapabilities.management;
 
   for (const feature of disabledFeatures) {
     // Disable associated navLink, if one exists
     if (feature.navLinkId && uiCapabilities.navLinks.hasOwnProperty(feature.navLinkId)) {
       navLinks[feature.navLinkId] = false;
     }
+
+    // Disable associated management items
+    Object.values(feature.privileges).forEach(privilege => {
+      const privilegeManagementItems: string[] = privilege.management || [];
+
+      privilegeManagementItems.forEach(item => {
+        if (uiCapabilities.management.hasOwnProperty(item)) {
+          managementItems[item] = false;
+        }
+      });
+    });
 
     // Disable "sub features" that match the disabled feature
     if (uiCapabilities.hasOwnProperty(feature.id)) {

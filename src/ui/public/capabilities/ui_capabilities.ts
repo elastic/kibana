@@ -21,6 +21,7 @@ import { deepFreeze } from '../../../core/public/utils/deep_freeze';
 
 export interface UICapabilities {
   navLinks: Record<string, boolean>;
+  management: Record<string, boolean>;
   [key: string]: Record<string, boolean>;
 }
 

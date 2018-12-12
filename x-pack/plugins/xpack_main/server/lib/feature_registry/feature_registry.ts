@@ -12,6 +12,7 @@ export interface FeaturePrivilegeDefinition {
   metadata?: {
     tooltip?: string;
   };
+  management?: string[];
   api?: string[];
   app: string[];
   savedObject: {
@@ -51,6 +52,7 @@ const schema = Joi.object({
         metadata: Joi.object({
           tooltip: Joi.string(),
         }),
+        management: Joi.array().items(Joi.string()),
         api: Joi.array().items(Joi.string()),
         app: Joi.array()
           .items(Joi.string())

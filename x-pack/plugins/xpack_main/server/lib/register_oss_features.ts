@@ -107,14 +107,30 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'advancedSettings',
     name: 'Advanced Settings',
-    icon: 'managementApp',
-    navLinkId: 'kibana:management:advancedSettings',
+    icon: 'advancedSettingsApp',
     privileges: {
       all: {
+        management: ['kibanaSettings'],
         app: ['kibana'],
         savedObject: {
           all: ['config'],
           read: [],
+        },
+        ui: [],
+      },
+    },
+  },
+  {
+    id: 'indexPatterns',
+    name: 'Index Pattern Management',
+    icon: 'indexPatternApp',
+    privileges: {
+      all: {
+        management: ['kibanaIndices'],
+        app: ['kibana'],
+        savedObject: {
+          all: ['index-pattern'],
+          read: ['config'],
         },
         ui: [],
       },
