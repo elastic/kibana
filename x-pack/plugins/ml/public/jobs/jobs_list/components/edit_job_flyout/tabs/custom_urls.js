@@ -113,7 +113,7 @@ class CustomUrlsUI extends Component {
   }
 
   addNewCustomUrl = () => {
-    buildCustomUrlFromSettings(this.state.editorSettings, this.props.job)
+    buildCustomUrlFromSettings(this.state.editorSettings)
       .then((customUrl) => {
         const customUrls = [...this.state.customUrls, customUrl];
         this.setCustomUrls(customUrls);
@@ -131,7 +131,7 @@ class CustomUrlsUI extends Component {
   onTestButtonClick = () => {
     const job = this.props.job;
     const { intl } = this.props;
-    buildCustomUrlFromSettings(this.state.editorSettings, job)
+    buildCustomUrlFromSettings(this.state.editorSettings)
       .then((customUrl) => {
         getTestUrl(job, customUrl)
           .then((testUrl) => {
