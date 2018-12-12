@@ -11,6 +11,7 @@ import {
   EuiInMemoryTable,
   EuiButton,
 } from '@elastic/eui';
+import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
 import { getPrefixSuffixFromFollowPattern } from '../../../../../services/auto_follow_pattern';
 
@@ -147,14 +148,19 @@ export class AutoFollowPatternTableUI extends PureComponent {
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <EuiButton
-          iconType="minusInCircle"
-        >
-          <FormattedMessage
-            id="xpack.cross_cluster_replication.delete_autofollow_pattern_button_label"
-            defaultMessage="Delete auto-follow pattern"
-          />
-        </EuiButton>
+        <AutoFollowPatternDeleteProvider>
+          {(deleteAutoFollowPattern) => (
+            <EuiButton
+              iconType="minusInCircle"
+              onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
+            >
+              <FormattedMessage
+                id="xpack.cross_cluster_replication.delete_autofollow_pattern_button_label"
+                defaultMessage="Delete auto-follow pattern"
+              />
+            </EuiButton>
+          )}
+        </AutoFollowPatternDeleteProvider>
       ) : undefined,
       onChange: this.onSearch,
       box: {

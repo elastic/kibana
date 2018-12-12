@@ -6,8 +6,8 @@
 
 // Api
 export const API = 'API';
-export const API_START = 'API_START';
-export const API_END = 'API_END';
+export const API_REQUEST_START = 'API_START';
+export const API_REQUEST_END = 'API_END';
 export const API_ERROR_SET = 'API_ERROR_SET';
 
 // Auto Follow Pattern

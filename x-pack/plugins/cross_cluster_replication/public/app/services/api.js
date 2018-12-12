@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import { API_BASE_PATH, API_REMOTE_CLUSTERS_BASE_PATH } from '../../../common/constants';
+import { arrify } from '../../../common/services/utils';
 
 const apiPrefix = chrome.addBasePath(API_BASE_PATH);
 const apiPrefixRemoteClusters = chrome.addBasePath(API_REMOTE_CLUSTERS_BASE_PATH);
@@ -37,3 +38,9 @@ export const loadRemoteClusters = () => (
 export const saveAutoFollowPattern = (id, autoFollowPattern) => (
   httpClient.put(`${apiPrefix}/auto_follow_patterns/${id}`, autoFollowPattern).then(extractData)
 );
+
+export const deleteAutoFollowPattern = (id) => {
+  const ids = arrify(id);
+
+  return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids.join(',')}`).then(() => ({ ids }));
+};

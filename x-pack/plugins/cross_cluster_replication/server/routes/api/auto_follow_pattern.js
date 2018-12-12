@@ -113,15 +113,27 @@ export const registerAutoFollowPatternRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
+      const ids = id.split(',');
 
-      try {
-        return await callWithRequest('ccr.deleteAutoFollowPattern', { id });
-      } catch(err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-        throw wrapUnknownError(err);
-      }
+      const itemsDeleted = [];
+      const errors = [];
+
+      await Promise.all(ids.map((_id) => (
+        callWithRequest('ccr.deleteAutoFollowPattern', { id: _id })
+          .then(() => itemsDeleted.push(_id))
+          .catch(err => {
+            if (isEsError(err)) {
+              errors.push({ id: _id, error: wrapEsError(err) });
+            } else {
+              errors.push({ id: _id, error: wrapUnknownError(err) });
+            }
+          })
+      )));
+
+      return {
+        itemsDeleted,
+        errors
+      };
     },
   });
 };
