@@ -92,6 +92,7 @@ function getColumns(
       name: 'time',
       dataType: 'date',
       render: (date) => renderTime(date, interval),
+      textOnly: true,
       sortable: true
     },
     {
@@ -113,6 +114,7 @@ function getColumns(
           numberOfRules={item.rulesLength}
         />
       ),
+      textOnly: true,
       sortable: true
     }
   ];
@@ -128,6 +130,7 @@ function getColumns(
           filter={filter}
         />
       ),
+      textOnly: true,
       sortable: true
     });
   }
@@ -142,6 +145,7 @@ function getColumns(
           influencers={influencers}
         />
       ),
+      textOnly: true,
       sortable: true
     });
   }
@@ -188,6 +192,7 @@ function getColumns(
             typical={item.typical}
           />
         ),
+        textOnly: true,
         sortable: true
       });
     }
@@ -240,7 +245,8 @@ function getColumns(
             )}
           </EuiText>
         );
-      }
+      },
+      textOnly: true,
     });
   }
 
@@ -390,7 +396,7 @@ class AnomaliesTable extends Component {
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
         <EuiInMemoryTable
-          className="ml-anomalies-table eui-textBreakWord"
+          className="ml-anomalies-table eui-textOverflowWrap"
           items={tableData.anomalies}
           columns={columns}
           pagination={{
