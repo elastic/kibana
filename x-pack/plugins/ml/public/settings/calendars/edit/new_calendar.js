@@ -277,9 +277,9 @@ export class NewCalendar extends Component {
     }
 
     return (
-      <EuiPage className="mlCalendarEdit_form">
+      <EuiPage className="mlCalendarEditForm">
         <EuiPageContent
-          className="mlCalendarEdit_formContent"
+          className="mlCalendarEditForm__content"
           verticalPosition="center"
           horizontalPosition="center"
         >

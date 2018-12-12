@@ -21,7 +21,7 @@ import uiRoutes from 'ui/routes';
 
 const template = `
   <ml-nav-menu name="settings" />
-  <div class="mlCalendar_management">
+  <div class="mlCalendarManagement">
     <ml-new-calendar />
   </div>
 `;
