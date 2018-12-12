@@ -1,0 +1,67 @@
+[
+  {
+    "function": "<anonymous>",
+    "libraryFrame": false,
+    "excludeFromGrouping": false,
+    "context": {
+      "pre": ["", "app.get('/log-error', function (req, res) {"],
+      "post": [
+        "    if (err) {",
+        "      res.status(500).send('could not capture error: ' + err.message)"
+      ]
+    },
+    "line": {
+      "number": 17,
+      "context": "  apm.captureError(new Error('foo'), function (err) {"
+    },
+    "filename": "server/coffee.js",
+    "absPath": "/app/server/coffee.js"
+  },
+  {
+    "function": "get",
+    "libraryFrame": true,
+    "excludeFromGrouping": false,
+    "context": {},
+    "line": {
+      "number": 123,
+      "context": ""
+    },
+    "filename": "express/get.js",
+    "absPath": "/node_modules/express/get.js"
+  },
+  {
+    "function": "use",
+    "libraryFrame": true,
+    "excludeFromGrouping": false,
+    "context": {
+      "pre": ["", "app.use('/log-error', function (req, res) {"],
+      "post": [
+        "    if (err) {",
+        "      res.status(500).send('could not capture error: ' + err.message)"
+      ]
+    },
+    "line": {
+      "number": 234,
+      "context": "  apm.captureError(new Error('foo'), function (err) {"
+    },
+    "filename": "express/use.js",
+    "absPath": "/node_modules/express/use.js"
+  },
+  {
+    "function": "handleCoffee",
+    "libraryFrame": false,
+    "excludeFromGrouping": false,
+    "context": {
+      "pre": ["", ""],
+      "post": [
+        "    reply(getCoffee(req.id));"
+      ]
+    },
+    "line": {
+      "number": 45,
+      "context": "  handleCoffee(req => {"
+    },
+    "filename": "server/handleCoffee.js",
+    "absPath": "/app/server/handleCoffee.js"
+  }
+]

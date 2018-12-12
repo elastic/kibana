@@ -5,6 +5,8 @@
  */
 
 import {
+  EuiBasicTable,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -12,49 +14,36 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
+  // @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTabbedContent'"
+  EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
-import { get } from 'lodash';
-import React from 'react';
+import { get, keys } from 'lodash';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
-// @ts-ignore
-import {
-  SERVICE_LANGUAGE_NAME,
-  SPAN_HEX_ID,
-  SPAN_ID
-} from '../../../../../../../../common/constants';
+import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
 import { px, unit } from '../../../../../../../style/variables';
 
 // @ts-ignore
-import Stacktrace from '../../../../../../shared/Stacktrace';
+import { Stacktrace } from '../../../../../../shared/Stacktrace';
 
 import { DatabaseContext } from './DatabaseContext';
+import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
+import { DiscoverSpanButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverSpanButton';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { Span } from '../../../../../../../../typings/Span';
-import { DiscoverButton } from '../../../../../../shared/DiscoverButton';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
   margin-top: ${px(unit)};
 `;
 
-function getDiscoverQuery(span: Span) {
-  return {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query:
-          span.version === 'v2'
-            ? `${SPAN_HEX_ID}:"${span.span.hex_id}"`
-            : `${SPAN_ID}:"${span.span.id}"`
-      }
-    }
-  };
-}
+const TagName = styled.div`
+  font-weight: bold;
+`;
 
 interface Props {
   span?: Span;
@@ -75,6 +64,12 @@ export function SpanFlyout({
   const stackframes = span.span.stacktrace;
   const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
   const dbContext = span.context.db;
+  const httpContext = span.context.http;
+  const tagContext = span.context.tags;
+  const tags = keys(tagContext).map(key => ({
+    key,
+    value: get(tagContext, key)
+  }));
 
   return (
     <EuiPortal>
@@ -88,9 +83,11 @@ export function SpanFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverButton query={getDiscoverQuery(span)}>
-                {`View span in Discover`}
-              </DiscoverButton>
+              <DiscoverSpanButton span={span}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  {`View span in Discover`}
+                </EuiButtonEmpty>
+              </DiscoverSpanButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -99,10 +96,44 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <StickySpanProperties span={span} totalDuration={totalDuration} />
           <EuiHorizontalRule />
-          <DatabaseContext dbContext={dbContext} />
-          <StackTraceContainer>
-            <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
-          </StackTraceContainer>
+          <EuiTabbedContent
+            tabs={[
+              {
+                id: 'stack-trace',
+                name: 'Stack Trace',
+                content: (
+                  <Fragment>
+                    <HttpContext httpContext={httpContext} />
+                    <DatabaseContext dbContext={dbContext} />
+                    <StackTraceContainer>
+                      <Stacktrace
+                        stackframes={stackframes}
+                        codeLanguage={codeLanguage}
+                      />
+                    </StackTraceContainer>
+                  </Fragment>
+                )
+              },
+              {
+                id: 'tags',
+                name: 'Tags',
+                content: (
+                  <Fragment>
+                    <EuiBasicTable
+                      columns={[
+                        {
+                          field: 'key',
+                          render: (key: string) => <TagName>{key}</TagName>
+                        },
+                        { field: 'value' }
+                      ]}
+                      items={tags}
+                    />
+                  </Fragment>
+                )
+              }
+            ]}
+          />
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>

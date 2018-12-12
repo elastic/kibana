@@ -18,13 +18,13 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   describe('homepage app', function () {
     this.tags('ciGroup6');
 
     before(function () {
-      return remote.setWindowSize(1200, 800);
+      return browser.setWindowSize(1200, 800);
     });
 
     loadTestFile(require.resolve('./_home'));

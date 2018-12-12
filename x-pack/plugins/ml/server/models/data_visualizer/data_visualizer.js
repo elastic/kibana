@@ -319,7 +319,11 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const resp = await this.callWithRequest('search', { index, size, body });
+    const resp = await this.callWithRequest('search', {
+      index,
+      rest_total_hits_as_int: true,
+      size,
+      body });
     return (resp.hits.total > 0);
   }
 
@@ -710,7 +714,12 @@ export class DataVisualizer {
       }
     };
 
-    const resp = await this.callWithRequest('search', { index, size, body });
+    const resp = await this.callWithRequest('search', {
+      index,
+      rest_total_hits_as_int: true,
+      size,
+      body
+    });
     const stats = {
       fieldName: field,
       examples: []

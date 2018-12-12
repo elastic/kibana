@@ -18,7 +18,7 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -27,7 +27,7 @@ export default function ({ getService, loadTestFile }) {
   describe('visualize app', function () {
     before(async ()=> {
       log.debug('Starting visualize before method');
-      remote.setWindowSize(1280, 800);
+      browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });

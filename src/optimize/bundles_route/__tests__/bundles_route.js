@@ -42,7 +42,8 @@ describe('optimizer/bundle route', () => {
 
   function createServer(options = {}) {
     const {
-      bundlesPath = outputFixture,
+      regularBundlesPath = outputFixture,
+      dllBundlesPath = outputFixture,
       basePublicPath = ''
     } = options;
 
@@ -50,7 +51,8 @@ describe('optimizer/bundle route', () => {
     server.register([Inert]);
 
     server.route(createBundlesRoute({
-      bundlesPath,
+      regularBundlesPath,
+      dllBundlesPath,
       basePublicPath,
     }));
 
@@ -60,28 +62,32 @@ describe('optimizer/bundle route', () => {
   afterEach(() => sandbox.restore());
 
   describe('validation', () => {
-    it('validates that bundlesPath is an absolute path', () => {
+    it('validates that regularBundlesPath is an absolute path', () => {
       expect(() => {
         createBundlesRoute({
-          bundlesPath: null,
+          regularBundlesPath: null,
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: './relative',
+          regularBundlesPath: './relative',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: 1234,
+          regularBundlesPath: 1234,
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/absolute/path',
+          regularBundlesPath: '/absolute/path',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.not.throwError();
@@ -89,37 +95,43 @@ describe('optimizer/bundle route', () => {
     it('validates that basePublicPath is valid', () => {
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: 123
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: {}
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: '/a/'
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: 'a/'
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: '/a'
         });
       }).to.not.throwError();
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.not.throwError();
@@ -215,7 +227,7 @@ describe('optimizer/bundle route', () => {
     });
   });
 
-  describe('js file outside bundlesPath', () => {
+  describe('js file outside regularBundlesPath', () => {
     it('responds with a 404', async () => {
       const server = createServer();
 
@@ -249,10 +261,10 @@ describe('optimizer/bundle route', () => {
     });
   });
 
-  describe('missing bundlesPath', () => {
+  describe('missing regularBundlesPath', () => {
     it('responds with 404', async () => {
       const server = createServer({
-        bundlesPath: resolve(__dirname, 'fixtures/not_really_output')
+        regularBundlesPath: resolve(__dirname, 'fixtures/not_really_output')
       });
 
       const response = await server.inject({

@@ -17,14 +17,17 @@ describe('ML - Create Calendar Controller', () => {
   it('Initialize Create Calendar Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlCreateCalendar', {
-        $route: {
-          current: {
-            params: {}
-          }
-        },
-        $scope: scope
-      });
+
+      expect(() => {
+        $controller('MlCreateCalendar', {
+          $route: {
+            current: {
+              params: {}
+            }
+          },
+          $scope: scope
+        });
+      }).to.not.throwError();
 
       expect(scope.isNewCalendar).to.eql(true);
       done();

@@ -18,15 +18,10 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Env } from '../config';
 
 const pluginsSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
-  scanDirs: schema.arrayOf(schema.string(), {
-    defaultValue: [],
-  }),
-  paths: schema.arrayOf(schema.string(), {
-    defaultValue: [],
-  }),
 });
 
 type PluginsConfigType = TypeOf<typeof pluginsSchema>;
@@ -43,16 +38,10 @@ export class PluginsConfig {
   /**
    * Defines directories that we should scan for the plugin subdirectories.
    */
-  public readonly scanDirs: string[];
+  public readonly pluginSearchPaths: ReadonlyArray<string>;
 
-  /**
-   * Defines direct paths to specific plugin directories that we should initialize.
-   */
-  public readonly paths: string[];
-
-  constructor(config: PluginsConfigType) {
+  constructor(config: PluginsConfigType, env: Env) {
     this.initialize = config.initialize;
-    this.scanDirs = config.scanDirs;
-    this.paths = config.paths;
+    this.pluginSearchPaths = env.pluginSearchPaths;
   }
 }

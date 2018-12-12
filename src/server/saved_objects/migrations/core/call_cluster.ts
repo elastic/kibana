@@ -25,7 +25,7 @@
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
-  (path: 'count', opts: CountOpts): Promise<{ count: number }>;
+  (path: 'count', opts: CountOpts): Promise<{ count: number; _shards: ShardsInfo }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
@@ -41,7 +41,10 @@ export interface CallCluster {
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
-  (path: 'tasks.get', opts: { taskId: string }): Promise<{ completed: boolean }>;
+  (path: 'tasks.get', opts: { taskId: string }): Promise<{
+    completed: boolean;
+    error?: ErrorResponse;
+  }>;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -169,10 +172,23 @@ export interface SearchResults {
     hits: RawDoc[];
   };
   _scroll_id?: string;
+  _shards: ShardsInfo;
+}
+
+export interface ShardsInfo {
+  total: number;
+  successful: number;
+  skipped: number;
+  failed: number;
+}
+
+export interface ErrorResponse {
+  type: string;
+  reason: string;
 }
 
 export interface BulkResult {
-  items: Array<{ index: { error?: { type: string; reason: string } } }>;
+  items: Array<{ index: { error?: ErrorResponse } }>;
 }
 
 export interface IndexInfo {

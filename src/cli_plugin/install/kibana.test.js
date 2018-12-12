@@ -81,7 +81,7 @@ describe('kibana cli', function () {
         it('should throw an error if plugin kibanaVersion does not match kibana version', function () {
           settings.plugins[0].kibanaVersion = '1.2.3.4';
 
-          expect(() => assertVersion(settings)).toThrow(/incorrect kibana version/i);
+          expect(() => assertVersion(settings)).toThrow(/incompatible with Kibana/i);
         });
 
         it('should not throw an error if plugin kibanaVersion matches kibana version', function () {
@@ -99,7 +99,7 @@ describe('kibana cli', function () {
         it('should ignore version info after the dash in checks on invalid version', function () {
           settings.plugins[0].kibanaVersion = '2.0.0-foo-bar-version-1.2.3';
 
-          expect(() => assertVersion(settings)).toThrow(/incorrect kibana version/i);
+          expect(() => assertVersion(settings)).toThrow(/incompatible with Kibana/i);
         });
       });
 

@@ -22,8 +22,6 @@ import { buildQueryFromLucene } from '../from_lucene';
 import { decorateQuery } from '../decorate_query';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 
-const configStub = { get: () => ({}) };
-
 describe('build query', function () {
 
   describe('buildQueryFromLucene', function () {
@@ -47,11 +45,11 @@ describe('build query', function () {
 
       const expectedESQueries = queries.map(
         (query) => {
-          return decorateQuery(luceneStringToDsl(query.query), configStub);
+          return decorateQuery(luceneStringToDsl(query.query), {});
         }
       );
 
-      const result = buildQueryFromLucene(queries, configStub);
+      const result = buildQueryFromLucene(queries, {});
 
       expect(result.must).to.eql(expectedESQueries);
     });
@@ -61,7 +59,7 @@ describe('build query', function () {
         { query: { match_all: {} }, language: 'lucene' },
       ];
 
-      const result = buildQueryFromLucene(queries, configStub);
+      const result = buildQueryFromLucene(queries, {});
 
       expect(result.must).to.eql([queries[0].query]);
     });

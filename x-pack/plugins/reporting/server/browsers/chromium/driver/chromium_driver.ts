@@ -21,6 +21,10 @@ export interface ChromiumDriverOptions {
   logger: Logger;
 }
 
+interface WaitForSelectorOpts {
+  silent?: boolean;
+}
+
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
@@ -29,7 +33,7 @@ export class HeadlessChromiumDriver {
 
   constructor(page: Chrome.Page, { logger }: ChromiumDriverOptions) {
     this.page = page;
-    this.logger = logger;
+    this.logger = logger.clone(['headless-chromium-driver']);
   }
 
   public async open(
@@ -39,7 +43,7 @@ export class HeadlessChromiumDriver {
       waitForSelector,
     }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
   ) {
-    this.logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
+    this.logger.debug(`opening url ${url}`);
     await this.page.setRequestInterception(true);
     this.page.on('request', (interceptedRequest: any) => {
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
@@ -57,7 +61,7 @@ export class HeadlessChromiumDriver {
     });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-    await this.page.waitFor(waitForSelector);
+    await this.waitForSelector(waitForSelector);
   }
 
   public async screenshot(elementPosition: ElementPosition) {
@@ -84,8 +88,29 @@ export class HeadlessChromiumDriver {
     return result;
   }
 
-  public waitForSelector(selector: string) {
-    return this.page.waitFor(selector);
+  public async waitForSelector(selector: string, opts: WaitForSelectorOpts = {}) {
+    const { silent = false } = opts;
+    this.logger.debug(`waitForSelector ${selector}`);
+
+    let resp;
+    try {
+      resp = await this.page.waitFor(selector);
+    } catch (err) {
+      if (!silent) {
+        // Provide some troubleshooting info to see if we're on the login page,
+        // "Kibana could not load correctly", etc
+        this.logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
+        const pageText = await this.evaluate({
+          fn: () => document.querySelector('body')!.innerText,
+          args: [],
+        });
+        this.logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
+      }
+      throw err;
+    }
+
+    this.logger.debug(`waitForSelector ${selector} resolved`);
+    return resp;
   }
 
   public async waitFor<T>({ fn, args, toEqual }: { fn: EvalFn<T>; args: EvalArgs; toEqual: T }) {

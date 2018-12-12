@@ -41,6 +41,7 @@ const schema = {
       },
     }
   },
+  browser_type: { type: 'keyword' },
   jobtype: { type: 'keyword' },
   payload: { type: 'object', enabled: false },
   priority: { type: 'byte' },

@@ -21,7 +21,7 @@ import { BeatsLib } from '../beats';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-import { supportedConfigs } from '../../config_schemas';
+import { getSupportedConfig } from '../../config_schemas_translations_map';
 import { TagsLib } from '../tags';
 import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
 import { ElasticsearchLib } from './../elasticsearch';
@@ -36,7 +36,7 @@ export function compose(
     mockKueryToEsQuery,
     suggestions
   );
-  const tags = new TagsLib(new MemoryTagsAdapter([]), supportedConfigs);
+  const tags = new TagsLib(new MemoryTagsAdapter([]), getSupportedConfig());
   const tokens = new MemoryTokensAdapter();
   const beats = new BeatsLib(new MemoryBeatsAdapter([]), { tags });
 

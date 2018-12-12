@@ -22,7 +22,6 @@ import { uiModules } from '../modules';
 import { DocViewsRegistryProvider } from '../registry/doc_views';
 
 import '../render_directive';
-import './doc_viewer.less';
 
 uiModules.get('kibana')
   .directive('docViewer', function (config, Private) {
@@ -38,10 +37,10 @@ uiModules.get('kibana')
         onRemoveColumn: '=?',
       },
       template: function ($el) {
-        const $viewer = $('<div class="doc-viewer">');
+        const $viewer = $('<div class="kbnDocViewer">');
         $el.append($viewer);
         const $tabs = $('<ul class="nav nav-tabs" role="tablist">');
-        const $content = $('<div class="doc-viewer-content" role="tabpanel">');
+        const $content = $('<div class="kbnDocViewer__content" role="tabpanel">');
         $viewer.append($tabs);
         $viewer.append($content);
         docViews.inOrder.forEach(view => {

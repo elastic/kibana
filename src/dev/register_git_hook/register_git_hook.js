@@ -20,6 +20,7 @@
 import chalk from 'chalk';
 import { chmod, unlink, writeFile } from 'fs';
 import dedent from 'dedent';
+import normalizePath from 'normalize-path';
 import { resolve } from 'path';
 import { promisify } from 'util';
 import SimpleGit from 'simple-git';
@@ -40,7 +41,7 @@ async function getPrecommitGitHookScriptPath(rootPath) {
   return resolve(rootPath, gitDirPath, 'hooks/pre-commit');
 }
 
-function getKbnPrecommitGitHookScript(rootPath) {
+function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -61,8 +62,53 @@ function getKbnPrecommitGitHookScript(rootPath) {
     command -v node >/dev/null 2>&1
   }
   
+  has_nvm() {
+    command -v nvm >/dev/null 2>&1
+  }
+  
+  try_load_node_from_nvm_paths () {
+    # If nvm is not loaded, load it
+    has_node || {
+      NVM_SH="${nodeHome}/.nvm/nvm.sh"
+      
+      if [ "${platform}" == "darwin" ] && [ -s "$(brew --prefix nvm)/nvm.sh" ]; then
+        NVM_SH="$(brew --prefix nvm)/nvm.sh"
+      fi
+      
+      export NVM_DIR=${nodeHome}/.nvm
+      
+      [ -s "$NVM_SH" ] && \. "$NVM_SH"
+      
+      # If nvm has been loaded correctly, use project .nvmrc
+      has_nvm && nvm use
+    }
+  }
+  
+  extend_user_path() {
+    if [ "${platform}" == "win32" ]; then
+      export PATH="$PATH:/c/Program Files/nodejs"
+    else 
+      export PATH="$PATH:/usr/local/bin:/usr/local"
+      try_load_node_from_nvm_paths
+    fi
+  }
+  
+  # Extend path with common path locations for node
+  # in order to make the hook working on git GUI apps
+  extend_user_path
+  
   # Check if we have node js bin in path
-  has_node || { echo "Can't found node bin in the PATH. Please update the PATH to proceed"; exit 1; }
+  has_node || { 
+    echo "Can't found node bin in the PATH. Please update the PATH to proceed."
+    echo "If your PATH already has the node bin, maybe you are using some git GUI app."
+    echo "Can't found node bin in the PATH. Please update the PATH to proceed."
+    echo "If your PATH already has the node bin, maybe you are using some git GUI app not launched from the shell."
+    echo "In order to proceed, you need to config the PATH used by the application that are launching your git GUI app."
+    echo "If you are running macOS, you can do that using:"
+    echo "'sudo launchctl config user path /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'"
+     
+    exit 1
+  }
   
   npm run --silent precommit || { echo "Pre-commit hook failed (add --no-verify to bypass)"; exit 1; }
   
@@ -80,7 +126,11 @@ export async function registerPrecommitGitHook(log) {
   try {
     await writeGitHook(
       await getPrecommitGitHookScriptPath(REPO_ROOT),
-      getKbnPrecommitGitHookScript(REPO_ROOT)
+      getKbnPrecommitGitHookScript(
+        REPO_ROOT,
+        normalizePath(process.env.HOME.replace(/'/g, '\'')),
+        process.platform
+      )
     );
   } catch (e) {
     log.write(`${chalk.red('fail')} Kibana pre-commit git hook was not installed as an error occur.\n`);

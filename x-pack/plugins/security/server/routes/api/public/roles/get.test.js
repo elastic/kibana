@@ -376,6 +376,127 @@ describe('GET roles', () => {
         ],
       },
     });
+
+    getRolesTest(`returns a sorted list of roles`, {
+      callWithRequestImpl: async () => ({
+        z_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.another-kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        a_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.another-kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        b_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.another-kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'a_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: {
+              global: [],
+              space: {},
+            },
+            _unrecognized_applications: ['kibana-.another-kibana']
+          },
+          {
+            name: 'b_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: {
+              global: [],
+              space: {},
+            },
+            _unrecognized_applications: ['kibana-.another-kibana']
+          },
+          {
+            name: 'z_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: {
+              global: [],
+              space: {},
+            },
+            _unrecognized_applications: ['kibana-.another-kibana']
+          },
+        ],
+      },
+    });
   });
 });
 

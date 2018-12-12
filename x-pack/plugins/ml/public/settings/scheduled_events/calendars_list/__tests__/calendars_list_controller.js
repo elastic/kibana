@@ -17,7 +17,10 @@ describe('ML - Calendars List Controller', () => {
   it('Initialize Calendars List Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlCalendarsList', { $scope: scope });
+
+      expect(() => {
+        $controller('MlCalendarsList', { $scope: scope });
+      }).to.not.throwError();
 
       expect(scope.permissions.canCreateCalendar).to.eql(false);
       done();

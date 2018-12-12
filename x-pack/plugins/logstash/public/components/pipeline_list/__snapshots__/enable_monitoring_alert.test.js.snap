@@ -3,24 +3,31 @@
 exports[`EnableMonitoringAlert component renders expected component 1`] = `
 <p>
   <strong>
-    Enable monitoring. 
+    <FormattedMessage
+      defaultMessage="Enable monitoring."
+      id="xpack.logstash.enableMonitoringAlert.enableMonitoringTitle"
+      values={Object {}}
+    />
   </strong>
-  In the 
-  <EuiCode>
-    kibana.yml
-  </EuiCode>
-   file, set
-  <EuiCode>
-    xpack.monitoring.enabled
-  </EuiCode>
-   and
-  <EuiCode>
-    xpack.monitoring.ui.enabled
-  </EuiCode>
-   to
-  <EuiCode>
-    true
-  </EuiCode>
-  .
+  <FormattedMessage
+    defaultMessage="In the {configFileName} file, set {monitoringConfigParam} and {monitoringUiConfigParam} to {trueValue}."
+    id="xpack.logstash.enableMonitoringAlert.enableMonitoringDescription"
+    values={
+      Object {
+        "configFileName": <EuiCode>
+          kibana.yml
+        </EuiCode>,
+        "monitoringConfigParam": <EuiCode>
+          xpack.monitoring.enabled
+        </EuiCode>,
+        "monitoringUiConfigParam": <EuiCode>
+          xpack.monitoring.ui.enabled
+        </EuiCode>,
+        "trueValue": <EuiCode>
+          true
+        </EuiCode>,
+      }
+    }
+  />
 </p>
 `;

@@ -29,7 +29,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
@@ -91,9 +91,9 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       // Get rid of the timestamp added in this test, as well any global or app state.
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl.replace(/\?.*$/, '');
-      await remote.get(newUrl, false);
+      await browser.get(newUrl, false);
     });
 
     it('adding visualizations', async () => {
@@ -132,8 +132,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data rendered correctly when dashboard is hard refreshed', async () => {
-      const currentUrl = await remote.getCurrentUrl();
-      await remote.get(currentUrl, true);
+      const currentUrl = await browser.getCurrentUrl();
+      await browser.get(currentUrl, true);
 
       await expectAllDataRenders();
     });

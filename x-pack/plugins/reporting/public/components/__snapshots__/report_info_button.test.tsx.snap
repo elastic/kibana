@@ -1,0 +1,565 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReportInfoButton handles button click flyout on click 1`] = `
+<button
+  aria-label="Show report info"
+  className="euiButtonIcon euiButtonIcon--primary"
+  data-test-subj="reportInfoButton"
+  onClick={[Function]}
+  type="button"
+>
+  <EuiIcon
+    aria-hidden="true"
+    className="euiButtonIcon__icon"
+    size="m"
+    type="iInCircle"
+  >
+    <iInCircle
+      aria-hidden="true"
+      className="euiIcon euiIcon--medium euiButtonIcon__icon"
+      focusable="false"
+      height="16"
+      style={
+        Object {
+          "fill": undefined,
+        }
+      }
+      viewBox="0 0 16 16"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <svg
+        aria-hidden="true"
+        className="euiIcon euiIcon--medium euiButtonIcon__icon"
+        focusable="false"
+        height="16"
+        style={
+          Object {
+            "fill": undefined,
+          }
+        }
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8.3 10.717H6.7v-4h1.6v4zm-1.6-5.71a.83.83 0 0 1 .207-.578c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568zM7.5 13A5.506 5.506 0 0 1 2 7.5C2 4.467 4.467 2 7.5 2S13 4.467 13 7.5 10.533 13 7.5 13m0-12a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13"
+          fillRule="evenodd"
+        />
+      </svg>
+    </iInCircle>
+  </EuiIcon>
+</button>
+`;
+
+exports[`ReportInfoButton opens flyout with fetch error info 1`] = `
+Array [
+  <EuiFlyout
+    aria-labelledby="flyoutTitle"
+    closeButtonAriaLabel="Closes this dialog"
+    data-test-subj="reportInfoFlyout"
+    hideCloseButton={false}
+    maxWidth={false}
+    onClose={[Function]}
+    ownFocus={true}
+    size="s"
+  >
+    <span>
+      <WindowEvent
+        event="keydown"
+        handler={[Function]}
+      />
+      <EuiOverlayMask
+        onClick={[Function]}
+      />
+      <Component
+        focusTrapOptions={
+          Object {
+            "clickOutsideDeactivates": true,
+            "fallbackFocus": [Function],
+          }
+        }
+      >
+        <div>
+          <div
+            aria-labelledby="flyoutTitle"
+            className="euiFlyout euiFlyout--small"
+            data-test-subj="reportInfoFlyout"
+            role="dialog"
+            tabIndex={0}
+          >
+            <EuiButtonIcon
+              aria-label="Closes this dialog"
+              className="euiFlyout__closeButton"
+              color="text"
+              data-test-subj="euiFlyoutCloseButton"
+              iconSize="m"
+              iconType="cross"
+              onClick={[Function]}
+              type="button"
+            >
+              <button
+                aria-label="Closes this dialog"
+                className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                data-test-subj="euiFlyoutCloseButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <EuiIcon
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  size="m"
+                  type="cross"
+                >
+                  <cross
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    style={
+                      Object {
+                        "fill": undefined,
+                      }
+                    }
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      style={
+                        Object {
+                          "fill": undefined,
+                        }
+                      }
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                          id="cross-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        xlinkHref="#cross-a"
+                      />
+                    </svg>
+                  </cross>
+                </EuiIcon>
+              </button>
+            </EuiButtonIcon>
+            <EuiFlyoutHeader
+              hasBorder={true}
+            >
+              <div
+                className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+              >
+                <EuiTitle
+                  size="s"
+                  textTransform="none"
+                >
+                  <h2
+                    className="euiTitle euiTitle--small"
+                    id="flyoutTitle"
+                  >
+                    Unable to fetch report info
+                  </h2>
+                </EuiTitle>
+              </div>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <div
+                className="euiFlyoutBody"
+              >
+                <EuiText
+                  grow={true}
+                  size="m"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    Could not fetch the job info
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlyoutBody>
+          </div>
+        </div>
+      </Component>
+    </span>
+  </EuiFlyout>,
+  <div
+    aria-labelledby="flyoutTitle"
+    className="euiFlyout euiFlyout--small"
+    data-test-subj="reportInfoFlyout"
+    role="dialog"
+    tabIndex={0}
+  >
+    <EuiButtonIcon
+      aria-label="Closes this dialog"
+      className="euiFlyout__closeButton"
+      color="text"
+      data-test-subj="euiFlyoutCloseButton"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    >
+      <button
+        aria-label="Closes this dialog"
+        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
+      >
+        <EuiIcon
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          size="m"
+          type="cross"
+        >
+          <cross
+            aria-hidden="true"
+            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+            focusable="false"
+            height="16"
+            style={
+              Object {
+                "fill": undefined,
+              }
+            }
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+          >
+            <svg
+              aria-hidden="true"
+              className="euiIcon euiIcon--medium euiButtonIcon__icon"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                  id="cross-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                xlinkHref="#cross-a"
+              />
+            </svg>
+          </cross>
+        </EuiIcon>
+      </button>
+    </EuiButtonIcon>
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <div
+        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+      >
+        <EuiTitle
+          size="s"
+          textTransform="none"
+        >
+          <h2
+            className="euiTitle euiTitle--small"
+            id="flyoutTitle"
+          >
+            Unable to fetch report info
+          </h2>
+        </EuiTitle>
+      </div>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <div
+        className="euiFlyoutBody"
+      >
+        <EuiText
+          grow={true}
+          size="m"
+        >
+          <div
+            className="euiText euiText--medium"
+          >
+            Could not fetch the job info
+          </div>
+        </EuiText>
+      </div>
+    </EuiFlyoutBody>
+  </div>,
+]
+`;
+
+exports[`ReportInfoButton opens flyout with info 1`] = `
+Array [
+  <EuiFlyout
+    aria-labelledby="flyoutTitle"
+    closeButtonAriaLabel="Closes this dialog"
+    data-test-subj="reportInfoFlyout"
+    hideCloseButton={false}
+    maxWidth={false}
+    onClose={[Function]}
+    ownFocus={true}
+    size="s"
+  >
+    <span>
+      <WindowEvent
+        event="keydown"
+        handler={[Function]}
+      />
+      <EuiOverlayMask
+        onClick={[Function]}
+      />
+      <Component
+        focusTrapOptions={
+          Object {
+            "clickOutsideDeactivates": true,
+            "fallbackFocus": [Function],
+          }
+        }
+      >
+        <div>
+          <div
+            aria-labelledby="flyoutTitle"
+            className="euiFlyout euiFlyout--small"
+            data-test-subj="reportInfoFlyout"
+            role="dialog"
+            tabIndex={0}
+          >
+            <EuiButtonIcon
+              aria-label="Closes this dialog"
+              className="euiFlyout__closeButton"
+              color="text"
+              data-test-subj="euiFlyoutCloseButton"
+              iconSize="m"
+              iconType="cross"
+              onClick={[Function]}
+              type="button"
+            >
+              <button
+                aria-label="Closes this dialog"
+                className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                data-test-subj="euiFlyoutCloseButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <EuiIcon
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  size="m"
+                  type="cross"
+                >
+                  <cross
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    style={
+                      Object {
+                        "fill": undefined,
+                      }
+                    }
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      style={
+                        Object {
+                          "fill": undefined,
+                        }
+                      }
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                          id="cross-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        xlinkHref="#cross-a"
+                      />
+                    </svg>
+                  </cross>
+                </EuiIcon>
+              </button>
+            </EuiButtonIcon>
+            <EuiFlyoutHeader
+              hasBorder={true}
+            >
+              <div
+                className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+              >
+                <EuiTitle
+                  size="s"
+                  textTransform="none"
+                >
+                  <h2
+                    className="euiTitle euiTitle--small"
+                    id="flyoutTitle"
+                  >
+                    Job Info
+                  </h2>
+                </EuiTitle>
+              </div>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <div
+                className="euiFlyoutBody"
+              >
+                <EuiText
+                  grow={true}
+                  size="m"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                  />
+                </EuiText>
+              </div>
+            </EuiFlyoutBody>
+          </div>
+        </div>
+      </Component>
+    </span>
+  </EuiFlyout>,
+  <div
+    aria-labelledby="flyoutTitle"
+    className="euiFlyout euiFlyout--small"
+    data-test-subj="reportInfoFlyout"
+    role="dialog"
+    tabIndex={0}
+  >
+    <EuiButtonIcon
+      aria-label="Closes this dialog"
+      className="euiFlyout__closeButton"
+      color="text"
+      data-test-subj="euiFlyoutCloseButton"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    >
+      <button
+        aria-label="Closes this dialog"
+        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
+      >
+        <EuiIcon
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          size="m"
+          type="cross"
+        >
+          <cross
+            aria-hidden="true"
+            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+            focusable="false"
+            height="16"
+            style={
+              Object {
+                "fill": undefined,
+              }
+            }
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+          >
+            <svg
+              aria-hidden="true"
+              className="euiIcon euiIcon--medium euiButtonIcon__icon"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                  id="cross-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                xlinkHref="#cross-a"
+              />
+            </svg>
+          </cross>
+        </EuiIcon>
+      </button>
+    </EuiButtonIcon>
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <div
+        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+      >
+        <EuiTitle
+          size="s"
+          textTransform="none"
+        >
+          <h2
+            className="euiTitle euiTitle--small"
+            id="flyoutTitle"
+          >
+            Job Info
+          </h2>
+        </EuiTitle>
+      </div>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <div
+        className="euiFlyoutBody"
+      >
+        <EuiText
+          grow={true}
+          size="m"
+        >
+          <div
+            className="euiText euiText--medium"
+          />
+        </EuiText>
+      </div>
+    </EuiFlyoutBody>
+  </div>,
+]
+`;

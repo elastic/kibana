@@ -19,7 +19,7 @@
 
 import { getDefaultFormat } from '../get_default_format';
 import { FieldFormat } from '../../../../field_formats';
-import { createNumberFormat } from '../../../../../core_plugins/kibana/common/field_formats/types/number';
+import { createNumberFormat } from '../../../../../legacy/core_plugins/kibana/common/field_formats/types/number';
 
 const Format = createNumberFormat(FieldFormat);
 const getConfig = () => {

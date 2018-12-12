@@ -4,27 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
-import { loadCharts } from '../../services/rest/apm';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
+import { loadOverviewCharts } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams, IUrlParams } from '../urlParams';
 
 const ID = 'transactionOverviewCharts';
-const INITIAL_DATA = {
-  totalHits: 0,
-  dates: [],
-  responseTimes: {
-    avg: [],
-    p95: [],
-    p99: []
+const INITIAL_DATA: TimeSeriesAPIResponse = {
+  apmTimeseries: {
+    totalHits: 0,
+    responseTimes: {
+      avg: [],
+      p95: [],
+      p99: []
+    },
+    tpmBuckets: [],
+    overallAvgDuration: undefined
   },
-  tpmBuckets: [],
-  overallAvgDuration: undefined
+  anomalyTimeseries: undefined
 };
 
 export const getTransactionOverviewCharts = createSelector(
@@ -39,11 +41,8 @@ export const getTransactionOverviewCharts = createSelector(
 );
 
 export function hasDynamicBaseline(state: IReduxState) {
-  return !isEmpty(
-    get(
-      state,
-      `reactReduxRequest[${ID}].data.responseTimes.avgAnomalies.buckets`
-    )
+  return (
+    get(state, `reactReduxRequest[${ID}].data.anomalyTimeseries`) !== undefined
   );
 }
 
@@ -62,7 +61,7 @@ export function TransactionOverviewChartsRequest({ urlParams, render }: Props) {
   return (
     <Request
       id={ID}
-      fn={loadCharts}
+      fn={loadOverviewCharts}
       args={[{ serviceName, start, end, transactionType, kuery }]}
       selector={getTransactionOverviewCharts}
       render={render}

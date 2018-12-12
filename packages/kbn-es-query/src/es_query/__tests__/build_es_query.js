@@ -18,22 +18,14 @@
  */
 
 import expect from 'expect.js';
-import { BuildESQueryProvider } from '../build_es_query';
+import { buildEsQuery } from '../build_es_query';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 import { decorateQuery } from '../decorate_query';
 
-let buildEsQuery;
-
-const configStub = { get: () => ({}) };
-const privateStub = fn => fn(configStub);
-
 describe('build query', function () {
-  describe('buildESQuery', function () {
-    beforeEach(() => {
-      buildEsQuery = privateStub(BuildESQueryProvider);
-    });
+  describe('buildEsQuery', function () {
 
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildEsQuery();
@@ -59,11 +51,15 @@ describe('build query', function () {
           meta: { type: 'match_all' },
         },
       ];
+      const config = {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+      };
 
       const expectedResult = {
         bool: {
           must: [
-            decorateQuery(luceneStringToDsl('bar:baz'), configStub),
+            decorateQuery(luceneStringToDsl('bar:baz'), config.queryStringOptions),
             { match_all: {} },
           ],
           filter: [
@@ -74,7 +70,7 @@ describe('build query', function () {
         }
       };
 
-      const result = buildEsQuery(indexPattern, queries, filters);
+      const result = buildEsQuery(indexPattern, queries, filters, config);
 
       expect(result).to.eql(expectedResult);
     });
