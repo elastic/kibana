@@ -8,11 +8,12 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraMetricType, InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
+import { InfraMetricType, InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import {
   InfraFormatterType,
   InfraWaffleData,

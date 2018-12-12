@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraPathInput, InfraPathType } from '../../../../../common/graphql/types';
+import { InfraPathInput, InfraPathType } from '../../../../graphql/types';
 import { InfraGroupByFilters, InfraGroupByTerms } from '../adapter_types';
 
 export function isGroupByFilters(value: InfraPathInput): value is InfraGroupByFilters {

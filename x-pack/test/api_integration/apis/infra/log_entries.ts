@@ -8,7 +8,7 @@ import { ascending, pairs } from 'd3-array';
 import expect from 'expect.js';
 import gql from 'graphql-tag';
 
-import { InfraTimeKey } from '../../../../plugins/infra/common/graphql/types';
+import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const KEY_WITHIN_DATA_RANGE = {
