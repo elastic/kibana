@@ -395,6 +395,7 @@ export class RemoteClusterFormUi extends Component {
         fullWidth
       >
         <EuiFormRow
+          className="remoteClusterSkipIfUnavailableSwitch"
           hasEmptyLabelSpace
           fullWidth
           helpText={
