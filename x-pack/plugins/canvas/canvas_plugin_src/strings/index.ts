@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'babel-polyfill';
-import { applyElementStrings } from '../strings';
-import { elementSpecs } from './index';
-
-applyElementStrings(elementSpecs).forEach(canvas.register);
+export * from './apply_strings';
+export * from './element_strings';
