@@ -46,8 +46,8 @@ export const createSourcesResolvers = (
   };
 } => ({
   Query: {
-    async source(root, args) {
-      const requestedSourceConfiguration = await libs.sources.getConfiguration(args.id);
+    async source(root, args, { req }) {
+      const requestedSourceConfiguration = await libs.sources.getSourceConfiguration(req, args.id);
 
       return {
         id: args.id,
@@ -55,7 +55,7 @@ export const createSourcesResolvers = (
       };
     },
     async allSources() {
-      const sourceConfigurations = await libs.sources.getAllConfigurations();
+      const sourceConfigurations = await libs.sources.getAllSourceConfigurations();
 
       return Object.entries(sourceConfigurations).map(([sourceName, sourceConfiguration]) => ({
         id: sourceName,

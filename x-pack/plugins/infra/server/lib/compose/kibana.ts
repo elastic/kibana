@@ -14,7 +14,6 @@ import { ElasticsearchMetadataAdapter } from '../adapters/metadata/elasticsearch
 import { KibanaMetricsAdapter } from '../adapters/metrics/kibana_metrics_adapter';
 import { ElasticsearchNodesAdapter } from '../adapters/nodes/elasticsearch_nodes_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from '../adapters/source_status';
-import { InfraConfigurationSourcesAdapter } from '../adapters/sources/configuration_sources_adapter';
 import { InfraFieldsDomain } from '../domains/fields_domain';
 import { InfraLogEntriesDomain } from '../domains/log_entries_domain';
 import { InfraMetadataDomain } from '../domains/metadata_domain';
@@ -27,7 +26,7 @@ import { InfraSources } from '../sources';
 export function compose(server: Server): InfraBackendLibs {
   const configuration = new InfraKibanaConfigurationAdapter<InfraConfiguration>(server);
   const framework = new InfraKibanaBackendFrameworkAdapter(server);
-  const sources = new InfraSources(new InfraConfigurationSourcesAdapter(configuration));
+  const sources = new InfraSources(configuration);
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,
   });

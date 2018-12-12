@@ -20,7 +20,7 @@ export class InfraMetadataDomain {
     nodeId: string,
     nodeType: string
   ) {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(req, sourceId);
     const metricsPromise = this.adapter.getMetricMetadata(
       req,
       sourceConfiguration,

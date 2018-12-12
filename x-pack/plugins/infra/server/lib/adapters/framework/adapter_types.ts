@@ -51,6 +51,7 @@ export interface InfraBackendFrameworkAdapter {
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): InfraFrameworkIndexPatternsService;
+  getSavedObjectsClient(req: InfraFrameworkRequest<any>): SavedObjectsClient;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,

@@ -38,7 +38,7 @@ export class InfraLogEntriesDomain {
       };
     }
 
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const formattingRules = compileFormattingRules(builtinRules);
 
     const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
@@ -86,7 +86,7 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<InfraLogEntry[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const formattingRules = compileFormattingRules(builtinRules);
     const documents = await this.adapter.getContainedLogEntryDocuments(
       request,
@@ -109,7 +109,7 @@ export class InfraLogEntriesDomain {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogSummaryBucket[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       request,
       sourceConfiguration,

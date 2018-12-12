@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphQLSchema } from 'graphql';
-import { Legacy } from 'kibana';
-
 import { GenericParams } from 'elasticsearch';
+import { GraphQLSchema } from 'graphql';
+import { Request, ResponseToolkit, Server } from 'hapi';
+import * as runtimeTypes from 'io-ts';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter'
+import { Legacy } from 'kibana';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -32,6 +34,12 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
   constructor(hapiServer: Legacy.Server) {
     this.server = hapiServer;
+    // const kbnServer = KbnServerType.decode(hapiServer);
+    // if (kbnServer.isRight()) {
+    //   this.server = kbnServer
+    // } else {
+    //   kbnServer.value
+    // }
     this.version = hapiServer.plugins.kibana.status.plugin.version;
   }
 
@@ -117,6 +125,10 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     });
   }
 
+  public getSavedObjectsClient(request: InfraFrameworkRequest) {
+    return null;
+  }
+
   public async makeTSVBRequest(
     req: InfraFrameworkRequest<Legacy.Request>,
     model: InfraMetricModel,
@@ -168,3 +180,18 @@ const isServerWithIndexPatternsServiceFactory = (
   server: Legacy.Server
 ): server is ServerWithIndexPatternsServiceFactory =>
   typeof (server as any).indexPatternsServiceFactory === 'function';
+
+const KbnServerType = runtimeTypes.type({
+  indexPatternsServiceFactory: runtimeTypes.Function,
+  plugins: runtimeTypes.type({
+    kibana: runtimeTypes.type({
+      status: runtimeTypes.type({
+        plugin: runtimeTypes.type({
+          version: runtimeTypes.string,
+        }),
+      }),
+    }),
+  }),
+});
+
+type KbnServer = runtimeTypes.TypeOf<typeof KbnServerType>;

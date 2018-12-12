@@ -20,7 +20,7 @@ export class InfraFieldsDomain {
     sourceId: string,
     indexType: InfraIndexType
   ): Promise<InfraIndexField[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const includeMetricIndices = [InfraIndexType.ANY, InfraIndexType.METRICS].includes(indexType);
     const includeLogIndices = [InfraIndexType.ANY, InfraIndexType.LOGS].includes(indexType);
 
