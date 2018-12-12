@@ -2,11 +2,11 @@
 
 exports[`NewCalendar Renders new calendar form 1`] = `
 <EuiPage
-  className="mlCalendarEdit_form"
+  className="mlCalendarEditForm"
   restrictWidth={false}
 >
   <EuiPageContent
-    className="mlCalendarEdit_formContent"
+    className="mlCalendarEditForm__content"
     horizontalPosition="center"
     panelPaddingSize="l"
     verticalPosition="center"
