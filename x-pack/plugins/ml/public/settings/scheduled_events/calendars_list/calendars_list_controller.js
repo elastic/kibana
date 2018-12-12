@@ -13,6 +13,7 @@ import 'ui/pager';
 import 'ui/sortable_column';
 
 import uiRoutes from 'ui/routes';
+import { getCalendarManagementBreadcrumbs } from '../../breadcrumbs';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount, mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -27,6 +28,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/settings/calendars_list', {
     template,
+    k7Breadcrumbs: getCalendarManagementBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,

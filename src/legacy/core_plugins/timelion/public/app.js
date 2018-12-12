@@ -25,6 +25,7 @@ import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -57,6 +58,11 @@ require('ui/routes')
   .when('/:id?', {
     template: require('plugins/timelion/index.html'),
     reloadOnSearch: false,
+    k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+      $route.current.params.id
+        ? getSavedSheetBreadcrumbs
+        : getCreateBreadcrumbs
+    ),
     resolve: {
       savedSheet: function (redirectWhenMissing, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
@@ -73,6 +79,9 @@ require('ui/routes')
             'search': '/'
           }));
       }
+    },
+    controller($scope, config) {
+      config.bindToScope($scope, 'k7design');
     }
   });
 

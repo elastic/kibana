@@ -7,5 +7,6 @@
 export { PLUGIN } from './plugin';
 export { INDEX_NAMES } from './index_names';
 export { UNIQUENESS_ENFORCING_TYPES, ConfigurationBlockTypes } from './configuration_blocks';
-export const BASE_PATH = '/management/beats_management/';
+export const BASE_PATH = '/management/beats_management';
 export { TABLE_CONFIG } from './table';
+export { REQUIRED_ROLES, LICENSES, REQUIRED_LICENSES } from './security';

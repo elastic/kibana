@@ -4,110 +4,139 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPage, EuiPageBody, EuiPageSideBar } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { SidebarNav } from 'ui/management';
-import { Header } from './components/layouts/header';
-import { BreadcrumbConsumer, RouteWithBreadcrumb } from './components/route_with_breadcrumb';
-import { FrontendLibs } from './lib/lib';
-import { BeatDetailsPage } from './pages/beat';
-import { EnforceSecurityPage } from './pages/enforce_security';
-import { InvalidLicensePage } from './pages/invalid_license';
-import { MainPages } from './pages/main';
-import { NoAccessPage } from './pages/no_access';
-import { TagPage } from './pages/tag';
+import { get } from 'lodash';
+import React, { Component } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { Loading } from './components/loading';
+import { ChildRoutes } from './components/navigation/child_routes';
+import { BeatsContainer } from './containers/beats';
+import { TagsContainer } from './containers/tags';
+import { URLStateProps, WithURLState } from './containers/with_url_state';
+import { FrontendLibs } from './lib/types';
+import { RouteTreeBuilder } from './utils/page_loader/page_loader';
 
-export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
-  return (
-    <HashRouter basename="/management/beats_management">
-      <EuiPage>
-        <EuiPageSideBar>
-          <SidebarNav sections={libs.framework.management.items.inOrder} selectedId="beats" />
-        </EuiPageSideBar>
-        <EuiPageBody>
-          <BreadcrumbConsumer>
-            {({ breadcrumbs }) => (
-              <Header
-                breadcrumbs={[
-                  {
-                    href: '#/management',
-                    text: i18n.translate('xpack.beatsManagement.router.managementTitle', {
-                      defaultMessage: 'Management',
-                    }),
-                  },
-                  {
-                    href: '#/management/beats_management',
-                    text: i18n.translate('xpack.beatsManagement.router.beatsTitle', {
-                      defaultMessage: 'Beats',
-                    }),
-                  },
-                  ...breadcrumbs,
-                ]}
-              />
-            )}
-          </BreadcrumbConsumer>
-          <Switch>
-            {libs.framework.licenseExpired() && <Route render={() => <InvalidLicensePage />} />}
-            {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
-            {!libs.framework.getCurrentUser() ||
-              (!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
-                !libs.framework
-                  .getDefaultUserRoles()
-                  .some(r => libs.framework.getCurrentUser().roles.includes(r)) && (
-                  <Route render={() => <NoAccessPage />} />
-                ))}
+// See ./utils/page_loader/readme.md for details on how this works
+// suffice to to say it dynamicly creates routes and pages based on the filesystem
+// This is to ensure that the patterns are followed and types assured
+// @ts-ignore
+const requirePages = require.context('./pages', true, /\.tsx$/);
+const routeTreeBuilder = new RouteTreeBuilder(requirePages);
+const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
+  '/tag': ['action', 'tagid?'],
+  '/beat': ['beatId'],
+});
+
+interface RouterProps {
+  libs: FrontendLibs;
+  tagsContainer: TagsContainer;
+  beatsContainer: BeatsContainer;
+}
+interface RouterState {
+  loadingStatus: 'loading' | 'loaded:empty' | 'loaded';
+}
+
+export class AppRouter extends Component<RouterProps, RouterState> {
+  constructor(props: RouterProps) {
+    super(props);
+    this.state = {
+      loadingStatus: 'loading',
+    };
+  }
+
+  public async componentWillMount() {
+    if (this.state.loadingStatus === 'loading') {
+      try {
+        await this.props.beatsContainer.reload();
+        await this.props.tagsContainer.reload();
+      } catch (e) {
+        // TODO in a furture version we will better manage this "error" in a returned arg
+      }
+
+      const countOfEverything =
+        this.props.beatsContainer.state.list.length + this.props.tagsContainer.state.list.length;
+
+      this.setState({
+        loadingStatus: countOfEverything > 0 ? 'loaded' : 'loaded:empty',
+      });
+    }
+  }
+
+  public render() {
+    if (this.state.loadingStatus === 'loading') {
+      return <Loading />;
+    }
+
+    return (
+      <React.Fragment>
+        {/* Redirects mapping */}
+        <Switch>
+          {/* License check (UI displays when license exists but is expired) */}
+          {get(this.props.libs.framework.info, 'license.expired', true) && (
             <Route
-              path="/"
-              exact={true}
-              render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/invalid_license" />
+                ) : null
+              }
             />
-            <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
-            <RouteWithBreadcrumb
-              title={params => {
-                return i18n.translate('xpack.beatsManagement.router.beatTitle', {
-                  defaultMessage: 'Beats: {beatId}',
-                  values: { beatId: params.beatId },
-                });
-              }}
-              parentBreadcrumbs={[
-                {
-                  text: i18n.translate('xpack.beatsManagement.router.beatsListTitle', {
-                    defaultMessage: 'Beats List',
-                  }),
-                  href: '#/management/beats_management/overview/beats',
+          )}
+
+          {/* Ensure security is eanabled for elastic and kibana */}
+          {!get(this.props.libs.framework.info, 'security.enabled', true) && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/enforce_security" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* Make sure the user has correct permissions */}
+          {!this.props.libs.framework.currentUserHasOneOfRoles(
+            ['beats_admin'].concat(this.props.libs.framework.info.settings.defaultUserRoles)
+          ) && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/no_access" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* If there are no beats or tags yet, redirect to the walkthrough */}
+          {this.state.loadingStatus === 'loaded:empty' && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/walkthrough') ? (
+                  <Redirect to="/walkthrough/initial" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
+          <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_beats" />} />
+        </Switch>
+
+        {/* Render routes from the FS */}
+        <WithURLState>
+          {(URLProps: URLStateProps) => (
+            <ChildRoutes
+              routes={routesFromFilesystem}
+              {...URLProps}
+              {...{
+                libs: this.props.libs,
+                containers: {
+                  beats: this.props.beatsContainer,
+                  tags: this.props.tagsContainer,
                 },
-              ]}
-              path="/beat/:beatId"
-              render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
-            />
-            <RouteWithBreadcrumb
-              title={params => {
-                if (params.action === 'create') {
-                  return i18n.translate('xpack.beatsManagement.router.createTagTitle', {
-                    defaultMessage: 'Create Tag',
-                  });
-                }
-                return i18n.translate('xpack.beatsManagement.router.tagTitle', {
-                  defaultMessage: 'Tag: {tagId}',
-                  values: { tagId: params.tagid },
-                });
               }}
-              parentBreadcrumbs={[
-                {
-                  text: i18n.translate('xpack.beatsManagement.router.tagsListTitle', {
-                    defaultMessage: 'Tags List',
-                  }),
-                  href: '#/management/beats_management/overview/tags',
-                },
-              ]}
-              path="/tag/:action/:tagid?"
-              render={(props: any) => <TagPage {...props} libs={libs} />}
             />
-          </Switch>
-        </EuiPageBody>
-      </EuiPage>
-    </HashRouter>
-  );
-};
+          )}
+        </WithURLState>
+      </React.Fragment>
+    );
+  }
+}

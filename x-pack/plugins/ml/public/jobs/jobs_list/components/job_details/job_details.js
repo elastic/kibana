@@ -21,8 +21,9 @@ import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
+import { injectI18n } from '@kbn/i18n/react';
 
-export class JobDetails extends Component {
+class JobDetailsUI extends Component {
   constructor(props) {
     super(props);
 
@@ -63,38 +64,64 @@ export class JobDetails extends Component {
         modelSizeStats
       } = extractJobDetails(job);
 
+      const { intl } = this.props;
+
       const tabs = [{
         id: 'job-settings',
-        name: 'Job settings',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel',
+          defaultMessage: 'Job settings'
+        }),
         content: <JobDetailsPane sections={[general, customUrl, node]} />,
         time: job.open_time
       }, {
         id: 'job-config',
-        name: 'Job config',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jobConfigLabel',
+          defaultMessage: 'Job config'
+        }),
         content: <JobDetailsPane sections={[detectors, influencers, analysisConfig, analysisLimits, dataDescription]} />,
       }, {
         id: 'datafeed',
-        name: 'Datafeed',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedLabel',
+          defaultMessage: 'Datafeed'
+        }),
         content: <JobDetailsPane sections={[datafeed]} />,
       }, {
         id: 'counts',
-        name: 'Counts',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.countsLabel',
+          defaultMessage: 'Counts'
+        }),
         content: <JobDetailsPane sections={[counts, modelSizeStats]} />,
       }, {
         id: 'json',
-        name: 'JSON',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jsonLabel',
+          defaultMessage: 'JSON'
+        }),
         content: <JsonPane job={job} />,
       }, {
         id: 'job-messages',
-        name: 'Job messages',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel',
+          defaultMessage: 'Job messages'
+        }),
         content: <JobMessagesPane job={job} />,
       }, {
         id: 'datafeed-preview',
-        name: 'Datafeed preview',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
+          defaultMessage: 'Datafeed preview'
+        }),
         content: <DatafeedPreviewPane job={job} />,
       }, {
         id: 'forecasts',
-        name: 'Forecasts',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.tabs.forecastsLabel',
+          defaultMessage: 'Forecasts'
+        }),
         content: <ForecastsTable job={job} />,
       }
       ];
@@ -111,9 +138,11 @@ export class JobDetails extends Component {
     }
   }
 }
-JobDetails.propTypes = {
+JobDetailsUI.propTypes = {
   jobId: PropTypes.string.isRequired,
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
 };
+
+export const JobDetails = injectI18n(JobDetailsUI);

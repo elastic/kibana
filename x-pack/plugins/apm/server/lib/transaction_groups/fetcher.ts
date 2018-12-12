@@ -53,7 +53,7 @@ export function transactionGroupsFetcher(
           terms: {
             field: `${TRANSACTION_NAME}.keyword`,
             order: { sum: 'desc' },
-            size: 100
+            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
           aggs: {
             sample: {

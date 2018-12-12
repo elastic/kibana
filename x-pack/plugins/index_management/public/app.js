@@ -12,7 +12,8 @@ import { IndexList } from './sections/index_list';
 export const App = () => (
   <div>
     <Switch>
-      <Route path={BASE_PATH} component={IndexList} />
+      <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
+      <Route path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList}/>
     </Switch>
   </div>
 );

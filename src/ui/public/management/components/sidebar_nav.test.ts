@@ -17,40 +17,53 @@
  * under the License.
  */
 
+import { IndexedArray } from '../../indexed_array';
 import { sideNavItems } from '../components/sidebar_nav';
+
+const toIndexedArray = (initialSet: any[]) =>
+  new IndexedArray({
+    index: ['id'],
+    order: ['order'],
+    initialSet,
+  });
 
 const activeProps = { visible: true, disabled: false };
 const disabledProps = { visible: true, disabled: true };
 const notVisibleProps = { visible: false, disabled: false };
 
-const visibleItem = { display: 'item', id: 'item', items: [], ...activeProps };
+const visibleItem = { display: 'item', id: 'item', ...activeProps };
 
 const notVisibleSection = {
   display: 'Not visible',
   id: 'not-visible',
-  items: [visibleItem],
+  items: toIndexedArray([visibleItem]),
   ...notVisibleProps,
 };
 const disabledSection = {
   display: 'Disabled',
   id: 'disabled',
-  items: [visibleItem],
+  items: toIndexedArray([visibleItem]),
   ...disabledProps,
 };
-const noItemsSection = { display: 'No items', id: 'no-items', items: [], ...activeProps };
+const noItemsSection = {
+  display: 'No items',
+  id: 'no-items',
+  items: toIndexedArray([]),
+  ...activeProps,
+};
 const noActiveItemsSection = {
   display: 'No active items',
   id: 'no-active-items',
-  items: [
-    { display: 'disabled', id: 'disabled', items: [], ...disabledProps },
-    { display: 'notVisible', id: 'notVisible', items: [], ...notVisibleProps },
-  ],
+  items: toIndexedArray([
+    { display: 'disabled', id: 'disabled', ...disabledProps },
+    { display: 'notVisible', id: 'notVisible', ...notVisibleProps },
+  ]),
   ...activeProps,
 };
 const activeSection = {
   display: 'activeSection',
   id: 'activeSection',
-  items: [visibleItem],
+  items: toIndexedArray([visibleItem]),
   ...activeProps,
 };
 

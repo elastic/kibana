@@ -18,7 +18,12 @@
  */
 
 import { first } from 'rxjs/operators';
-import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from '../../../';
+import {
+  Logger,
+  PluginInitializerContext,
+  PluginName,
+  PluginStartContext,
+} from '../../type_exports';
 import { TestBedConfig } from './config';
 
 class Plugin {
