@@ -563,7 +563,11 @@ export default function SenseEditor($el) {
         const  esMethod = req.method;
         const  esData = req.data;
 
-        // TODO: set url from ui settings
+        // Kibana supports setting multiple hosts in kibana.yml
+        // instead of passing these with potential ambiguity,
+        // and accidentally including basic auth credentials,
+        // and exposing the es host url, we use the elasticsearch
+        // default until a more featured implementation is available
         const elasticsearchBaseUrl = 'http://localhost:9200';
         const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
 
