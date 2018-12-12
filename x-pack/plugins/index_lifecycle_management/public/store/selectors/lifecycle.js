@@ -60,8 +60,9 @@ export const validatePhase = (type, phase, errors) => {
 
   for (const numberedAttribute of PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE) {
     if (phase.hasOwnProperty(numberedAttribute)) {
-      // If WARM_PHASE_ON_ROLLOVER there is no need to validate this
-      if (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE && phase[WARM_PHASE_ON_ROLLOVER]) {
+      // If WARM_PHASE_ON_ROLLOVER or PHASE_HOT there is no need to validate this
+      if (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE
+          && (phase[WARM_PHASE_ON_ROLLOVER] || type === PHASE_HOT)) {
         continue;
       }
       // If shrink is disabled, there is no need to validate this
@@ -172,7 +173,7 @@ export const validateLifecycle = state => {
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
     errors[STRUCTURE_POLICY_NAME].push(policyNameMustBeDifferentErrorMessage);
-  } else {
+  } else if (getSelectedOriginalPolicyName(state) !== getSelectedPolicyName(state)) {
     const policyNames = getPolicies(state).map(policy => policy.name);
     if (policyNames.includes(getSelectedPolicyName(state))) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameAlreadyUsedErrorMessage);
