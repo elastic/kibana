@@ -234,7 +234,6 @@ class AnnotationsTable extends Component {
         dataType: 'date',
         render: renderDate,
         sortable: true,
-        width: '180px'
       },
       {
         field: 'end_timestamp',
@@ -242,7 +241,6 @@ class AnnotationsTable extends Component {
         dataType: 'date',
         render: renderDate,
         sortable: true,
-        width: '180px'
       },
       {
         field: 'create_time',
@@ -250,13 +248,11 @@ class AnnotationsTable extends Component {
         dataType: 'date',
         render: renderDate,
         sortable: true,
-        width: '180px'
       },
       {
         field: 'create_username',
         name: 'Created by',
         sortable: true,
-        width: '180px'
       },
       {
         field: 'modified_time',
@@ -264,13 +260,11 @@ class AnnotationsTable extends Component {
         dataType: 'date',
         render: renderDate,
         sortable: true,
-        width: '180px'
       },
       {
         field: 'modified_username',
         name: 'Last modified by',
         sortable: true,
-        width: '180px'
       },
     ];
 
@@ -319,7 +313,7 @@ class AnnotationsTable extends Component {
 
     return (
       <EuiInMemoryTable
-        className="annotations-table"
+        className="eui-textOverflowWrap"
         compressed={true}
         items={annotations}
         columns={columns}
