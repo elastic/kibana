@@ -10,7 +10,6 @@ import { injectI18nProvider } from '@kbn/i18n/react';
 
 import { uiModules } from 'ui/modules';
 
-import { injectI18nProvider } from '@kbn/i18n/react';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { getFileDataVisualizerBreadcrumbs } from './breadcrumbs';

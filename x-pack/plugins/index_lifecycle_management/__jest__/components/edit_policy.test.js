@@ -171,6 +171,50 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
     });
   });
+  describe('hot phase', () => {
+    test('should show errors when trying to save with no max size and no max age', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      save(rendered);
+      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage]);
+    });
+    test('should show number above 0 required error when trying to save with -1 for max size', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
+      maxSizeInput.simulate('change', { target: { value: -1 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+    test('should show number above 0 required error when trying to save with 0 for max size', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
+      maxSizeInput.simulate('change', { target: { value: 0 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+    test('should show number above 0 required error when trying to save with -1 for max age', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
+      maxSizeInput.simulate('change', { target: { value: -1 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+    test('should show number above 0 required error when trying to save with 0 for max age', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
+      maxSizeInput.simulate('change', { target: { value: 0 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+  });
   describe('warm phase', () => {
     test('should show number required error when trying to save empty warm phase', () => {
       const rendered = mountWithIntl(component);
