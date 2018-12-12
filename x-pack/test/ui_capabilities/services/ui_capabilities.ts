@@ -5,7 +5,7 @@
  */
 
 import cheerio from 'cheerio';
-import { format as formatUrl } from 'url';
+import { format as formatUrl, parse as parseUrl } from 'url';
 import Wreck from 'wreck';
 import { LogService, TestInvoker } from '../../common/types';
 
@@ -13,6 +13,11 @@ export interface UICapabilities {
   navLinks: {
     [navLinkId: string]: boolean;
   };
+}
+
+export interface BasicCredentials {
+  username: string;
+  password: string;
 }
 
 export class UICapabilitiesService {
@@ -23,13 +28,19 @@ export class UICapabilitiesService {
     this.log = log;
     this.wreck = Wreck.defaults({
       baseUrl: url,
-      redirects: 3,
+      redirects: 0,
     });
   }
 
-  public async get(): Promise<UICapabilities> {
+  public async get(credentials: BasicCredentials): Promise<UICapabilities | null> {
     this.log.debug('requesting /app/kibana to parse the uiCapabilities');
-    const { res, payload } = await this.wreck.get('/app/kibana');
+    const { res, payload } = await this.wreck.get('/app/kibana', {
+      headers: {
+        Authorization: `Basic ${Buffer.from(
+          `${credentials.username}:${credentials.password}`
+        ).toString('base64')}`,
+      },
+    });
 
     if (res.statusCode !== 200) {
       throw new Error(`Expected status code of 200, received ${res.statusCode}: ${payload}`);
@@ -37,6 +48,10 @@ export class UICapabilitiesService {
 
     const dom = cheerio.load(payload.toString());
     const element = dom('kbn-injected-metadata');
+    if (!element) {
+      return null;
+    }
+
     const json = element.attr('data');
     const data = JSON.parse(json);
     return data.vars.uiCapabilities as UICapabilities;
@@ -46,7 +61,10 @@ export class UICapabilitiesService {
 export function UICapabilitiesProvider({ getService }: TestInvoker) {
   const log = getService('log');
   const config = getService('config');
-  const url = formatUrl(config.get('servers.kibana'));
+  const noAuthUrl = formatUrl({
+    ...config.get('servers.kibana'),
+    auth: undefined,
+  });
 
-  return new UICapabilitiesService(url, log);
+  return new UICapabilitiesService(noAuthUrl, log);
 }

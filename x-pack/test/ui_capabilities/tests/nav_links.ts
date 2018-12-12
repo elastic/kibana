@@ -14,8 +14,13 @@ export default function navLinksTests({ getService }: TestInvoker) {
 
   describe('navLinks', () => {
     it('returns all nav links', async () => {
-      const uiCapabilities = await uiCapabilitiesService.get();
-      expect(uiCapabilities.navLinks).to.eql({
+      const superuser = {
+        username: 'elastic',
+        password: 'changeme',
+      };
+      const uiCapabilities = await uiCapabilitiesService.get(superuser);
+      expect(uiCapabilities).to.have.property('navLinks');
+      expect(uiCapabilities!.navLinks).to.eql({
         apm: true,
         canvas: true,
         graph: true,
