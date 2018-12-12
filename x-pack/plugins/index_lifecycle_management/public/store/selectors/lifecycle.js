@@ -101,6 +101,16 @@ export const validatePhase = (type, phase, errors) => {
         maximumSizeRequiredMessage
       ];
     }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_AGE]) && phase[PHASE_ROLLOVER_MAX_AGE] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
+        positiveNumbersAboveZeroErrorMessage
+      ];
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED]) && phase[PHASE_ROLLOVER_MAX_SIZE_STORED] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
+        positiveNumbersAboveZeroErrorMessage
+      ];
+    }
   }
   if (phase[PHASE_SHRINK_ENABLED]) {
     if (!isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
