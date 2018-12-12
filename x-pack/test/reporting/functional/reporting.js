@@ -273,13 +273,13 @@ export default function ({ getService, getPageObjects }) {
           await expectEnabledGenerateReportButton();
         });
 
-        it.skip('generates a report with data', async () => {
+        it('generates a report with data', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
           await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
 
-        it.skip('generates a report with no data', async () => {
+        it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
           await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
