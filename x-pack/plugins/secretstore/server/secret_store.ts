@@ -6,12 +6,14 @@
 
 import crypto from 'crypto';
 import Iron from 'iron';
+import { SavedObjectsClient } from 'src/server/saved_objects';
 
 export class SecretStore {
   public readonly hide: (deets: any) => any;
   public readonly unhide: (deets: any) => any;
+  public readonly hideInEs: (deets: any) => any;
 
-  constructor() {
+  constructor(savedObjectsClient: SavedObjectsClient) {
     const secretKey = crypto.randomBytes(32).toString('hex');
     const weakMap = new WeakMap();
     weakMap.set(this, {
@@ -22,6 +24,12 @@ export class SecretStore {
     };
     this.unhide = async (deets: any) => {
       return await Iron.unseal(deets, weakMap.get(this)[secretKey], Iron.defaults);
+    };
+    this.hideInEs = async (deets: any) => {
+      const hidden = await this.hide(deets);
+      savedObjectsClient.create('secretsauce', {
+        hidden,
+      });
     };
   }
 }
