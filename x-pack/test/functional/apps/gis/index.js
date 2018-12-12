@@ -10,6 +10,8 @@ export default function ({ loadTestFile, getService }) {
   const browser = getService('browser');
 
   describe('gis app', function () {
+    this.tags('ciGroup3');
+
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('gis/data');
