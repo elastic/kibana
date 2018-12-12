@@ -5,6 +5,7 @@
  */
 
 import { BucketAgg } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
 import { oc } from 'ts-optchain';
 import {
   SERVICE_AGENT_NAME,
@@ -25,6 +26,23 @@ export async function getService(
 ): Promise<ServiceAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
   const params = {
     index: [
       config.get<string>('apm_oss.errorIndices'),
@@ -34,18 +52,7 @@ export async function getService(
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       aggs: {
@@ -58,10 +65,6 @@ export async function getService(
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   interface Aggs {
     types: {

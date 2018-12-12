@@ -6,21 +6,13 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { Component } from 'react';
-import styled from 'styled-components';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
-import { px, units } from '../../../../style/variables';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';
-
-const ChartHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: ${px(units.half)};
-`;
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
@@ -51,7 +43,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public render() {
-    const { charts, urlParams, ChartHeaderContent = null } = this.props;
+    const { charts, urlParams } = this.props;
     const { noHits, responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
 

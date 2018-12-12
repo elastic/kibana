@@ -25,7 +25,7 @@ declare module 'elasticsearch' {
 
   export interface ESFilter {
     [key: string]: {
-      [key: string]: string | number | StringMap;
+      [key: string]: string | number | StringMap | ESFilter[];
     };
   }
 

@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-
 export const SERVICE_NAME = 'context.service.name';
 export const SERVICE_AGENT_NAME = 'context.service.agent.name';
 export const SERVICE_LANGUAGE_NAME = 'context.service.language.name';

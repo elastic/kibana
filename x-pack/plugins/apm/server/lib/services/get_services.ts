@@ -5,6 +5,7 @@
  */
 
 import { BucketAgg } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
 import { oc } from 'ts-optchain';
 import {
   PROCESSOR_EVENT,
@@ -29,6 +30,30 @@ export async function getServices(
 ): Promise<ServiceListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
+  const filter: ESFilter[] = [
+    {
+      bool: {
+        should: [
+          { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          { term: { [PROCESSOR_EVENT]: 'error' } }
+        ]
+      }
+    },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
   const params = {
     index: [
       config.get<string>('apm_oss.errorIndices'),
@@ -38,25 +63,7 @@ export async function getServices(
       size: 0,
       query: {
         bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
-                  { term: { [PROCESSOR_EVENT]: 'error' } }
-                ]
-              }
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       aggs: {
@@ -80,10 +87,6 @@ export async function getServices(
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   interface ServiceBucket extends BucketAgg {
     avg: {

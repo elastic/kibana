@@ -136,7 +136,7 @@ export function tpmUnit(type: string) {
 
 export function asPercent(
   numerator: number,
-  denominator: number,
+  denominator?: number,
   fallbackResult: string = ''
 ) {
   if (!denominator) {

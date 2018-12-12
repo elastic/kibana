@@ -19,13 +19,14 @@ import {
 } from '@elastic/eui';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-// @ts-ignore
 import {
   getMlJob,
   startMlJob
 } from 'x-pack/plugins/apm/public/services/rest/ml';
-// @ts-ignore
-import { getAPMIndexPattern } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
+import {
+  getAPMIndexPattern,
+  ISavedObject
+} from 'x-pack/plugins/apm/public/services/rest/savedObjects';
 import { KibanaLink, ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
 
 interface FlyoutProps {
@@ -50,8 +51,8 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public componentDidMount() {
-    getAPMIndexPattern().then((indexPattern: string | null) => {
-      this.setState({ hasIndexPattern: indexPattern != null });
+    getAPMIndexPattern().then((indexPattern?: ISavedObject) => {
+      this.setState({ hasIndexPattern: !!indexPattern });
     });
     this.checkForMlJob();
   }

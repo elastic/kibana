@@ -18,13 +18,7 @@ import {
   RectCoordinate
 } from 'x-pack/plugins/apm/typings/timeseries';
 import { colors } from '../../style/variables';
-import {
-  asDecimal,
-  asGB,
-  asMillis,
-  asPercent,
-  tpmUnit
-} from '../../utils/formatters';
+import { asDecimal, asGB, asMillis, tpmUnit } from '../../utils/formatters';
 import { IUrlParams } from '../urlParams';
 
 export const getEmptySerie = memoize(
