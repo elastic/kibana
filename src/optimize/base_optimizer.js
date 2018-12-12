@@ -195,7 +195,13 @@ export default class BaseOptimizer {
             }
           }
         },
-        noEmitOnErrors: true
+        noEmitOnErrors: true,
+        removeEmptyChunks: false,
+        mergeDuplicateChunks: false,
+        flagIncludedChunks: false,
+        occurrenceOrder: false,
+        sideEffects: false,
+        concatenateModules: false
       },
 
       plugins: [
