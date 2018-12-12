@@ -7,16 +7,14 @@
 import _ from 'lodash';
 
 import {
-  AssistanceAPIResponse,
   CallClusterWithRequest,
   DeprecationAPIResponse,
   DeprecationInfo,
   Request,
 } from 'src/core_plugins/elasticsearch';
 
-import { LAST_MAJOR_VERSION } from '../../common/version';
+import { CURRENT_MAJOR_VERSION } from '../../common/version';
 
-import fakeAssistance from './__fixtures__/fake_assistance.json';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
@@ -42,12 +40,10 @@ export async function getUpgradeAssistantStatus(
   basePath: string,
   useFakeData = false // TODO: remove
 ): Promise<UpgradeAssistantStatus> {
-  let migrationAssistance: AssistanceAPIResponse;
   let deprecations: DeprecationAPIResponse;
 
   // Fake data for now. TODO: remove this before merging.
   if (useFakeData) {
-    migrationAssistance = _.cloneDeep(fakeAssistance) as AssistanceAPIResponse;
     deprecations = _.cloneDeep(fakeDeprecations) as DeprecationAPIResponse;
 
     // trigger pagination on cluster tab
@@ -57,37 +53,23 @@ export async function getUpgradeAssistantStatus(
       );
     }
   } else {
-    const migrationAssistanceReq = callWithRequest(req, 'transport.request', {
-      path: '/_xpack/migration/assistance',
-      method: 'GET',
-    });
-
-    const deprecationsReq = callWithRequest(req, 'transport.request', {
+    deprecations = await callWithRequest(req, 'transport.request', {
       path: '/_xpack/migration/deprecations',
       method: 'GET',
     });
-
-    [migrationAssistance, deprecations] = await Promise.all([
-      migrationAssistanceReq,
-      deprecationsReq,
-    ]);
   }
 
   return {
     cluster: deprecations.cluster_settings,
     nodes: deprecations.node_settings,
-    indices: getCombinedIndexInfos(migrationAssistance, deprecations, basePath),
+    indices: getCombinedIndexInfos(deprecations, basePath),
   };
 }
 
 // Combines the information from the migration assistance api and the deprecation api into a single array.
 // Enhances with information about which index the deprecation applies to and adds buttons for accessing the
 // reindex UI.
-const getCombinedIndexInfos = (
-  migrationAssistance: AssistanceAPIResponse,
-  deprecations: DeprecationAPIResponse,
-  basePath: string
-) => {
+const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse, basePath: string) => {
   const combinedIndexInfo: EnrichedDeprecationInfo[] = [];
 
   Object.keys(deprecations.index_settings).forEach(indexName => {
@@ -95,7 +77,7 @@ const getCombinedIndexInfos = (
       .map(d => ({ ...d, index: indexName } as EnrichedDeprecationInfo))
       .map(d => {
         // Add reindexing action if it's the old index deprecation warning.
-        if (d.message === `Index created before ${LAST_MAJOR_VERSION}.0`) {
+        if (d.message === `Index created before ${CURRENT_MAJOR_VERSION}.0`) {
           d.actions = [
             {
               label: 'Reindex in Console',
@@ -108,38 +90,6 @@ const getCombinedIndexInfos = (
       })
       .forEach(d => combinedIndexInfo.push(d));
   });
-
-  // TODO: remove the entire usage of this API pending response to
-  // https://github.com/elastic/elasticsearch/issues/36024#issuecomment-446394345
-  for (const indexName of Object.keys(migrationAssistance.indices)) {
-    const actionRequired = migrationAssistance.indices[indexName].action_required;
-
-    // Add action required to index deprecations.
-    if (actionRequired === 'reindex') {
-      combinedIndexInfo.push({
-        index: indexName,
-        level: 'critical',
-        message: 'This index must be reindexed in order to upgrade the Elastic Stack.',
-        details: 'Reindexing is irreversible, so always back up your index before proceeding.',
-        actions: [
-          {
-            label: 'Reindex in Console',
-            url: consoleTemplateUrl(basePath, indexName),
-          },
-        ],
-        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html',
-      });
-    } else if (actionRequired === 'upgrade') {
-      combinedIndexInfo.push({
-        index: indexName,
-        level: 'critical',
-        message: 'This index must be upgraded in order to upgrade the Elastic Stack.',
-        details: 'Upgrading is irreversible, so always back up your index before proceeding.',
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-upgrade.html',
-      });
-    }
-  }
 
   return combinedIndexInfo;
 };

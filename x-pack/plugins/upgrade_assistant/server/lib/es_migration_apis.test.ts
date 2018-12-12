@@ -7,18 +7,15 @@
 import _ from 'lodash';
 import { getUpgradeAssistantStatus } from './es_migration_apis';
 
-import { AssistanceAPIResponse, DeprecationAPIResponse } from 'src/core_plugins/elasticsearch';
-import fakeAssistance from './__fixtures__/fake_assistance.json';
+import { DeprecationAPIResponse } from 'src/core_plugins/elasticsearch';
+import { CURRENT_MAJOR_VERSION } from '../../common/version';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 describe('getUpgradeAssistantStatus', () => {
-  let assistanceResponse: AssistanceAPIResponse;
   let deprecationsResponse: DeprecationAPIResponse;
 
   const callWithRequest = jest.fn().mockImplementation(async (req, api, { path }) => {
-    if (path === '/_xpack/migration/assistance') {
-      return assistanceResponse;
-    } else if (path === '/_xpack/migration/deprecations') {
+    if (path === '/_xpack/migration/deprecations') {
       return deprecationsResponse;
     } else {
       throw new Error(`Unexpected API call: ${path}`);
@@ -26,16 +23,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   beforeEach(() => {
-    assistanceResponse = _.cloneDeep(fakeAssistance);
     deprecationsResponse = _.cloneDeep(fakeDeprecations);
-  });
-
-  it('calls /_xpack/migration/assistance', async () => {
-    await getUpgradeAssistantStatus(callWithRequest, {} as any, '/');
-    expect(callWithRequest).toHaveBeenCalledWith({}, 'transport.request', {
-      path: '/_xpack/migration/assistance',
-      method: 'GET',
-    });
   });
 
   it('calls /_xpack/migration/deprecations', async () => {
@@ -51,55 +39,28 @@ describe('getUpgradeAssistantStatus', () => {
     expect(resp).toMatchSnapshot();
   });
 
-  it('appends deprecations for indices that need reindex', async () => {
-    assistanceResponse = { indices: { myIndex: { action_required: 'reindex' } } };
-    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/');
-    const reindexDeprecation = resp.indices.find(
-      i =>
-        i.index === 'myIndex' &&
-        i.message === 'This index must be reindexed in order to upgrade the Elastic Stack.'
-    );
-    expect(reindexDeprecation).toBeTruthy();
-  });
+  it('adds reindexing button with basePath', async () => {
+    deprecationsResponse = {
+      index_settings: {
+        myIndex: [
+          {
+            level: 'critical',
+            message: `Index created before ${CURRENT_MAJOR_VERSION}.0`,
+            url: '',
+          },
+        ],
+      },
+      cluster_settings: [],
+      node_settings: [],
+    };
+    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/mybasepath');
 
-  it('appends deprecations for indices that need upgrade', async () => {
-    assistanceResponse = { indices: { '.watches': { action_required: 'upgrade' } } };
-    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/');
-    const reindexDeprecation = resp.indices.find(
-      i =>
-        i.index === '.watches' &&
-        i.message === 'This index must be upgraded in order to upgrade the Elastic Stack.'
-    );
-    expect(reindexDeprecation).toBeTruthy();
-  });
-
-  describe('reindexing button', () => {
-    it('adds an action for reindexing in console app', async () => {
-      assistanceResponse = { indices: { myIndex: { action_required: 'reindex' } } };
-      deprecationsResponse = { index_settings: {}, cluster_settings: [], node_settings: [] };
-      const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '');
-
-      // Adds a uiButtons property with the documentation label.
-      expect(resp.indices[0].actions![0]).toMatchInlineSnapshot(`
-Object {
-  "label": "Reindex in Console",
-  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2FmyIndex.json",
-}
-`);
-    });
-
-    it('prepends basePath', async () => {
-      assistanceResponse = { indices: { myIndex: { action_required: 'reindex' } } };
-      deprecationsResponse = { index_settings: {}, cluster_settings: [], node_settings: [] };
-      const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/mybasepath');
-
-      // Adds a uiButtons property with the documentation label.
-      expect(resp.indices[0].actions![0]).toMatchInlineSnapshot(`
+    // Adds a uiButtons property with the documentation label.
+    expect(resp.indices[0].actions![0]).toMatchInlineSnapshot(`
 Object {
   "label": "Reindex in Console",
   "url": "/mybasepath/app/kibana#/dev_tools/console?load_from=%2Fmybasepath%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2FmyIndex.json",
 }
 `);
-    });
   });
 });
