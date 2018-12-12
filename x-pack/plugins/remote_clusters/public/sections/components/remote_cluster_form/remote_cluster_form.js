@@ -176,7 +176,7 @@ export class RemoteClusterFormUi extends Component {
     if (isPortInvalid) {
       errors.push(intl.formatMessage({
         id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidPortMessage',
-        defaultMessage: 'Seed node must define a numeric port.',
+        defaultMessage: 'A port is required.',
       }));
     }
 
@@ -290,7 +290,7 @@ export class RemoteClusterFormUi extends Component {
             <h4>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsTitle"
-                defaultMessage="Cluster discovery"
+                defaultMessage="Seed nodes for cluster discovery"
               />
             </h4>
           </EuiTitle>
@@ -300,10 +300,8 @@ export class RemoteClusterFormUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
-                defaultMessage={`The local cluster will request the cluster state from
-                  some of the remote cluster's nodes as part of the discovery process. These nodes
-                  are known as "seed nodes". Specify multiple seed nodes so that the discovery
-                  process won't fail if one of them is unavailable.`}
+                defaultMessage="The nodes to query to get the cluster state from the remote cluster.
+                  Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
               />
             </p>
           </Fragment>
@@ -320,8 +318,7 @@ export class RemoteClusterFormUi extends Component {
           helpText={(
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
-              defaultMessage="Seed nodes can be defined as IP addresses or host names, but they
-                must contain a port, e.g. 127.0.0.1:9400 or localhost:9400."
+              defaultMessage="An IP address or host name, followed by the port."
             />
           )}
           isInvalid={showErrors}
@@ -332,7 +329,7 @@ export class RemoteClusterFormUi extends Component {
             noSuggestions
             placeholder={intl.formatMessage({
               id: 'xpack.remoteClusters.remoteClusterForm.fieldSeedsPlaceholder',
-              defaultMessage: '127.0.0.1:9400',
+              defaultMessage: 'host:port',
             })}
             selectedOptions={formattedSeeds}
             onCreateOption={this.onCreateSeed}
@@ -360,7 +357,7 @@ export class RemoteClusterFormUi extends Component {
             <h4>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
-                defaultMessage="Making requests"
+                defaultMessage="Make remote cluster optional"
               />
             </h4>
           </EuiTitle>
@@ -370,15 +367,22 @@ export class RemoteClusterFormUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
-                defaultMessage="The local cluster will send requests to gateway nodes on the remote
-                  cluster. If the gateway nodes are unavailable, the request  will fail. Enable
-                  this option to skip the remote cluster and send the request to other remote
-                  clusters instead. {learnMoreLink}"
+                defaultMessage="By default, a request fails if any of the queried remote clusters
+                  are unavailable. To continue a sending request to other remote clusters if this
+                  cluster is unavailable, enable {optionName}. {learnMoreLink}"
                 values={{
+                  optionName: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel"
+                        defaultMessage="Skip if unavailable"
+                      />
+                    </strong>
+                  ),
                   learnMoreLink: (
                     <EuiLink href={skippingDisconnectedClustersUrl} target="_blank">
                       <FormattedMessage
-                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLink"
+                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
                         defaultMessage="Learn more."
                       />
                     </EuiLink>
@@ -406,7 +410,7 @@ export class RemoteClusterFormUi extends Component {
         >
           <EuiSwitch
             label={i18n.translate('xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableLabel', {
-              defaultMessage: 'Skip unavailable',
+              defaultMessage: 'Skip if unavailable',
             })}
             checked={skipUnavailable}
             onChange={this.onSkipUnavailableChange}
@@ -548,7 +552,7 @@ export class RemoteClusterFormUi extends Component {
           title={(
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-              defaultMessage="Fix errors before saving."
+              defaultMessage="Fix errors before continuing."
             />
           )}
           color="danger"
@@ -594,8 +598,7 @@ export class RemoteClusterFormUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
-                defaultMessage="Name this remote cluster so you can easily identify
-                it later."
+                defaultMessage="A unique name for the remote cluster."
               />
             )}
             fullWidth
