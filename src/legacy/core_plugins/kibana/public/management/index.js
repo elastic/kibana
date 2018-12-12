@@ -31,6 +31,7 @@ import landingTemplate from './landing.html';
 import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
+import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
 import 'ui/kbn_top_nav';
 
 const SIDENAV_ID = 'management-sidenav';
@@ -60,11 +61,28 @@ export function updateLandingPage(version) {
   }
 
   render(
-    <I18nProvider>
-      <div>
-        Kibana {version}
-      </div>
-    </I18nProvider>,
+    <EuiPageContent verticalPosition="center"  horizontalPosition="center">
+      <I18nProvider>
+        <div>
+          <div className="eui-textCenter">
+            <EuiIcon type="managementApp" size="xxl" />
+            <EuiSpacer />
+            <EuiTitle>
+              <h1>Kibana {version} management</h1>
+            </EuiTitle>
+            <EuiText>
+              <p>Manage your data, permissions, and content from an administrator level</p>
+            </EuiText>
+          </div>
+
+          <EuiHorizontalRule />
+
+          <EuiText color="subdued" size="s" textAlign="center">
+            <p>A full list of tools can be found in the left menu</p>
+          </EuiText>
+        </div>
+      </I18nProvider>
+    </EuiPageContent>,
     node,
   );
 }
