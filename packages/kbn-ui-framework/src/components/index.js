@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export { KuiActionItem } from './action_item';
-
 export {
   KuiBar,
   KuiBarSection,

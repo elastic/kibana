@@ -19,12 +19,6 @@
 
 import Slugify from '../string/slugify';
 
-import ActionItemExample
-  from '../../views/action_item/action_item_example';
-
-import BadgeExample
-  from '../../views/badge/badge_example';
-
 import BarExample
   from '../../views/bar/bar_example';
 
@@ -36,7 +30,6 @@ import CollapseButtonExample
 
 import ExpressionExample
   from '../../views/expression/expression_example';
-
 import FormExample
   from '../../views/form/form_example';
 
@@ -114,13 +107,6 @@ import ViewSandbox
 
 // Component route names should match the component name exactly.
 const components = [{
-  name: 'ActionItem',
-  component: ActionItemExample,
-  hasReact: true,
-}, {
-  name: 'Badge',
-  component: BadgeExample,
-}, {
   name: 'Bar',
   component: BarExample,
   hasReact: true,
