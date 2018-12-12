@@ -104,7 +104,6 @@ export default function (kibana) {
           category: ['timelion'],
         }
       },
-      translations: [],
     },
     init: require('./init.js'),
   });

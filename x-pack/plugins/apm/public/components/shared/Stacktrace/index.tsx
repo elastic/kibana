@@ -7,34 +7,29 @@
 import { EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { PureComponent } from 'react';
+import { Stackframe } from '../../../../typings/APMDoc';
 import { CodePreview } from '../../shared/CodePreview';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
 import { FrameHeading } from './FrameHeading';
-import { LibraryFrames } from './LibraryFrames';
-import {
-  getCollapsedLibraryFrames,
-  hasSourceLines,
-  StackframeCollapsed
-} from './stacktraceUtils';
+import { LibraryStackFrames } from './LibraryStackFrames';
+import { getGroupedStackframes, hasSourceLines } from './stacktraceUtils';
 
 interface Props {
-  stackframes?: StackframeCollapsed[];
+  stackframes?: Stackframe[];
   codeLanguage?: string;
 }
 
-interface StateLibraryframes {
-  [i: number]: boolean;
-}
-
 interface State {
-  libraryframes: StateLibraryframes;
+  visibilityMap: {
+    [i: number]: boolean;
+  };
 }
 
 export class Stacktrace extends PureComponent<Props, State> {
   public state = {
-    libraryframes: {}
+    visibilityMap: {}
   };
 
   public componentDidMount() {
@@ -44,23 +39,23 @@ export class Stacktrace extends PureComponent<Props, State> {
     }
 
     const hasAnyAppFrames = this.props.stackframes.some(
-      frame => !frame.libraryFrame
+      frame => !frame.library_frame
     );
 
     if (!hasAnyAppFrames) {
       // If there are no app frames available, always show the only existing group
-      this.setState({ libraryframes: { 0: true } });
+      this.setState({ visibilityMap: { 0: true } });
     }
   }
 
   public toggle = (i: number) =>
-    this.setState(({ libraryframes }) => {
-      return { libraryframes: { ...libraryframes, [i]: !libraryframes[i] } };
+    this.setState(({ visibilityMap }) => {
+      return { visibilityMap: { ...visibilityMap, [i]: !visibilityMap[i] } };
     });
 
   public render() {
     const { stackframes = [], codeLanguage } = this.props;
-    const { libraryframes } = this.state as State;
+    const { visibilityMap } = this.state as State;
 
     if (isEmpty(stackframes)) {
       return <EmptyMessage heading="No stacktrace available." hideSubheading />;
@@ -71,30 +66,32 @@ export class Stacktrace extends PureComponent<Props, State> {
         <EuiTitle size="xs">
           <h3>Stack traces</h3>
         </EuiTitle>
-        {getCollapsedLibraryFrames(stackframes).map((item, i) => {
-          if (!item.libraryFrame) {
-            if (hasSourceLines(item)) {
+        {getGroupedStackframes(stackframes).map(
+          ({ isLibraryFrame, stackframes: groupedStackframes }, i) => {
+            if (isLibraryFrame) {
               return (
-                <CodePreview
+                <LibraryStackFrames
                   key={i}
-                  stackframe={item}
+                  visible={visibilityMap[i]}
+                  stackframes={groupedStackframes}
                   codeLanguage={codeLanguage}
+                  onClick={() => this.toggle(i)}
                 />
               );
             }
-            return <FrameHeading key={i} stackframe={item} />;
+            return groupedStackframes.map((stackframe, idx) =>
+              hasSourceLines(stackframe) ? (
+                <CodePreview
+                  key={idx}
+                  stackframe={stackframe}
+                  codeLanguage={codeLanguage}
+                />
+              ) : (
+                <FrameHeading key={idx} stackframe={stackframe} />
+              )
+            );
           }
-
-          return (
-            <LibraryFrames
-              key={i}
-              visible={libraryframes[i]}
-              stackframes={item.stackframes || []}
-              codeLanguage={codeLanguage}
-              onClick={() => this.toggle(i)}
-            />
-          );
-        })}
+        )}
       </div>
     );
   }
