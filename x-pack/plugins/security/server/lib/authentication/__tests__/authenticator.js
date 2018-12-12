@@ -150,44 +150,56 @@ describe('Authenticator', () => {
       sinon.assert.calledWith(authorizationMode.initialize, request);
     });
 
-    it('creates session whenever authentication provider returns state to store.', async () => {
+    it('creates session whenever authentication provider returns state for system API requests', async () => {
       const user = { username: 'user' };
-      const systemAPIRequest = requestFixture({ headers: { authorization: 'Basic xxx' } });
-      const notSystemAPIRequest = requestFixture({ headers: { authorization: 'Basic yyy' } });
+      const request = requestFixture();
       const loginAttempt = new LoginAttempt();
+      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
       loginAttempt.setCredentials('foo', 'bar');
-      systemAPIRequest.loginAttempt.returns(loginAttempt);
-      notSystemAPIRequest.loginAttempt.returns(loginAttempt);
+      request.loginAttempt.returns(loginAttempt);
 
       server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(systemAPIRequest).returns(true)
-        .withArgs(notSystemAPIRequest).returns(false);
+        .withArgs(request).returns(true);
 
       cluster.callWithRequest
-        .withArgs(systemAPIRequest).returns(Promise.resolve(user))
-        .withArgs(notSystemAPIRequest).returns(Promise.resolve(user));
+        .withArgs(request).returns(Promise.resolve(user));
 
-      const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
+      const systemAPIAuthenticationResult = await authenticate(request);
       expect(systemAPIAuthenticationResult.succeeded()).to.be(true);
       expect(systemAPIAuthenticationResult.user).to.be.eql({
         ...user,
         scope: []
       });
       sinon.assert.calledOnce(session.set);
-      sinon.assert.calledWithExactly(session.set, systemAPIRequest, {
-        state: { authorization: systemAPIRequest.headers.authorization },
+      sinon.assert.calledWithExactly(session.set, request, {
+        state: { authorization },
         provider: 'basic'
       });
+    });
 
-      const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
+    it('creates session whenever authentication provider returns state for non-system API requests', async () => {
+      const user = { username: 'user' };
+      const request = requestFixture();
+      const loginAttempt = new LoginAttempt();
+      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+      loginAttempt.setCredentials('foo', 'bar');
+      request.loginAttempt.returns(loginAttempt);
+
+      server.plugins.kibana.systemApi.isSystemApiRequest
+        .withArgs(request).returns(false);
+
+      cluster.callWithRequest
+        .withArgs(request).returns(Promise.resolve(user));
+
+      const notSystemAPIAuthenticationResult = await authenticate(request);
       expect(notSystemAPIAuthenticationResult.succeeded()).to.be(true);
       expect(notSystemAPIAuthenticationResult.user).to.be.eql({
         ...user,
         scope: []
       });
-      sinon.assert.calledTwice(session.set);
-      sinon.assert.calledWithExactly(session.set, notSystemAPIRequest, {
-        state: { authorization: notSystemAPIRequest.headers.authorization },
+      sinon.assert.calledOnce(session.set);
+      sinon.assert.calledWithExactly(session.set, request, {
+        state: { authorization },
         provider: 'basic'
       });
     });
