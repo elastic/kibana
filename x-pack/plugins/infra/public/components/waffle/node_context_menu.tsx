@@ -6,7 +6,6 @@
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import moment from 'moment';
 import React from 'react';
 
 import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
@@ -38,9 +37,7 @@ export const NodeContextMenu = injectI18n(
       ? getNodeDetailUrl({
           nodeType,
           nodeName,
-          from: moment(timeRange.to)
-            .subtract(1, 'hour')
-            .valueOf(),
+          from: timeRange.from,
           to: timeRange.to,
         })
       : undefined;

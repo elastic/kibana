@@ -5,6 +5,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
@@ -40,6 +41,12 @@ export class Node extends React.PureComponent<Props, State> {
     const rawValue = (metric && metric.value) || 0;
     const color = colorFromValue(options.legend, rawValue, bounds);
     const value = formatter(rawValue);
+    const newTimerange = {
+      ...timeRange,
+      from: moment(timeRange.to)
+        .subtract(1, 'hour')
+        .valueOf(),
+    };
     return (
       <NodeContextMenu
         node={node}
@@ -47,7 +54,7 @@ export class Node extends React.PureComponent<Props, State> {
         isPopoverOpen={isPopoverOpen}
         closePopover={this.closePopover}
         options={options}
-        timeRange={timeRange}
+        timeRange={newTimerange}
       >
         <EuiToolTip position="top" content={`${node.name} | ${value}`}>
           <NodeContainer
