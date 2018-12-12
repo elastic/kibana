@@ -6,20 +6,20 @@
 
 import { reducer, initialState } from './api';
 import { API_STATUS } from '../../constants';
-import { apiStart, apiEnd, setApiError } from '../actions';
+import { apiRequestStart, apiRequestEnd, setApiError } from '../actions';
 
 describe('CCR Api reducers', () => {
   const scope = 'testSection';
 
-  it('API_START should set the Api status to "loading" on scope', () => {
-    const result = reducer(initialState, apiStart({ scope }));
+  it('API_REQUEST_START should set the Api status to "loading" on scope', () => {
+    const result = reducer(initialState, apiRequestStart({ scope }));
 
     expect(result.status[scope]).toEqual(API_STATUS.LOADING);
   });
 
   it('API_END should set the Api status to "idle" on scope', () => {
-    const updatedState = reducer(initialState, apiStart({ scope }));
-    const result = reducer(updatedState, apiEnd({ scope }));
+    const updatedState = reducer(initialState, apiRequestStart({ scope }));
+    const result = reducer(updatedState, apiRequestEnd({ scope }));
 
     expect(result.status[scope]).toEqual(API_STATUS.IDLE);
   });
