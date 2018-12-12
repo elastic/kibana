@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BucketAgg } from 'elasticsearch';
 import { oc } from 'ts-optchain';
-import { BucketAgg } from 'x-pack/plugins/apm/typings/elasticsearch';
 import {
   SERVICE_AGENT_NAME,
   SERVICE_NAME,

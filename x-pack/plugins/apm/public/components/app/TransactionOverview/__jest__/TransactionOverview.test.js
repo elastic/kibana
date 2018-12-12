@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import TransactionOverview from '../view';
+import { TransactionOverview } from '..';
 import { toJson } from '../../../../utils/testHelpers';
 
 jest.mock(

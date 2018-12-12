@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESQueryBody } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from 'x-pack/plugins/apm/common/constants';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+
 import { getTransactionGroups } from '../../transaction_groups';
 import { ITransactionGroup } from '../../transaction_groups/transform';
 
@@ -22,18 +23,6 @@ export interface IOptions {
 
 export type TransactionListAPIResponse = ITransactionGroup[];
 
-interface ESFilter {
-  [key: string]: {
-    [key: string]: string | number | StringMap;
-  };
-}
-
-interface Query {
-  bool: {
-    filter: ESFilter[];
-  };
-}
-
 export async function getTopTransactions({
   setup,
   transactionType,
@@ -41,8 +30,8 @@ export async function getTopTransactions({
 }: IOptions) {
   const { start, end } = setup;
 
-  // TODO: Find an ES type for this instead
-  const bodyQuery: Query = {
+  // TODO: Find an ES type for this instead?
+  const bodyQuery: ESQueryBody = {
     bool: {
       filter: [
         { term: { [SERVICE_NAME]: serviceName } },

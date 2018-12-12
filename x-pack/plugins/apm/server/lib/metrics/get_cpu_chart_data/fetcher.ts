@@ -29,7 +29,7 @@ export type ESResponse = AggregationSearchResponse<void, Aggs>;
 export async function fetch(args: MetricsRequestArgs) {
   return fetchMetrics<Aggs>({
     ...args,
-    timeseriesAggregates: {
+    timeseriesBucketAggregations: {
       systemCPUAverage: { avg: { field: 'system.cpu.total.norm.pct' } },
       systemCPUMax: { max: { field: 'system.cpu.total.norm.pct' } },
       processCPUAverage: {
@@ -37,7 +37,7 @@ export async function fetch(args: MetricsRequestArgs) {
       },
       processCPUMax: { max: { field: 'system.process.cpu.total.norm.pct' } }
     },
-    otherAggregates: {
+    totalAggregations: {
       systemCPUAverage: { avg: { field: 'system.cpu.total.norm.pct' } },
       systemCPUMax: { max: { field: 'system.cpu.total.norm.pct' } },
       processCPUAverage: {

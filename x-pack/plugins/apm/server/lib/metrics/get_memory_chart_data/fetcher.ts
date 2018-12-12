@@ -29,7 +29,7 @@ export type ESResponse = AggregationSearchResponse<void, Aggs>;
 export async function fetch(args: MetricsRequestArgs) {
   return fetchMetrics<Aggs>({
     ...args,
-    timeseriesAggregates: {
+    timeseriesBucketAggregations: {
       // TODO: constants
       freeMemory: { avg: { field: 'system.memory.actual.free' } },
       totalMemory: { avg: { field: 'system.memory.total' } },
@@ -38,7 +38,7 @@ export async function fetch(args: MetricsRequestArgs) {
         avg: { field: 'system.process.memory.rss.bytes' }
       }
     },
-    otherAggregates: {
+    totalAggregations: {
       // TODO: constants
       freeMemory: { avg: { field: 'system.memory.actual.free' } },
       totalMemory: { avg: { field: 'system.memory.total' } },

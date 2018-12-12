@@ -9,8 +9,8 @@ import { Setup } from '../helpers/setup_request';
 export interface MetricsRequestArgs {
   serviceName: string;
   setup: Setup;
-  timeseriesAggregates?: StringMap<any>;
-  otherAggregates?: StringMap<any>;
+  timeseriesBucketAggregations?: StringMap<any>;
+  totalAggregations?: StringMap<any>;
 }
 
 export interface AggValue {

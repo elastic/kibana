@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
-import { AggValue } from '../query_types';
 import { ESResponse } from './fetcher';
 
 export interface MemoryChartAPIResponse {
@@ -16,10 +15,10 @@ export interface MemoryChartAPIResponse {
   };
   // overall totals for the whole time range
   overallValues: {
-    totalMemory: AggValue['value'];
-    freeMemory: AggValue['value'];
-    processMemorySize: AggValue['value'];
-    processMemoryRss: AggValue['value'];
+    totalMemory: number | null;
+    freeMemory: number | null;
+    processMemorySize: number | null;
+    processMemoryRss: number | null;
   };
   totalHits: number;
 }

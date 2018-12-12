@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MetricsRequestArgs } from '../get_metrics_request_args';
+import { MetricsRequestArgs } from '../query_types';
 import { fetch } from './fetcher';
 import { MemoryChartAPIResponse, transform } from './transformer';
 

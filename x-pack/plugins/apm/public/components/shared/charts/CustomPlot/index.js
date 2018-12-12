@@ -37,6 +37,13 @@ export class InnerCustomPlot extends PureComponent {
       visibleSeries.filter((serie, i) => !seriesEnabledState[i])
   );
 
+  getOptions = createSelector(
+    state => state.width,
+    state => state.yMin,
+    state => state.yMax,
+    (width, yMin, yMax) => ({ width, yMin, yMax })
+  );
+
   getPlotValues = createSelector(
     state => state.visibleSeries,
     state => state.enabledSeries,
@@ -101,7 +108,7 @@ export class InnerCustomPlot extends PureComponent {
   };
 
   render() {
-    const { series, truncateLegends, noHits, width, yMin, yMax } = this.props;
+    const { series, truncateLegends, noHits, width } = this.props;
 
     if (_.isEmpty(series) || !width) {
       return null;
@@ -116,16 +123,14 @@ export class InnerCustomPlot extends PureComponent {
       visibleSeries,
       seriesEnabledState: this.state.seriesEnabledState
     });
+    const options = this.getOptions(this.props);
 
     const plotValues = this.getPlotValues({
       visibleSeries,
       enabledSeries,
-      options: {
-        width,
-        yMin,
-        yMax
-      }
+      options
     });
+
     if (_.isEmpty(plotValues)) {
       return null;
     }

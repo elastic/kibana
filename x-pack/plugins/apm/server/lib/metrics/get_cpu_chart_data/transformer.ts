@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
-import { AggValue } from '../query_types';
 import { ESResponse } from './fetcher';
 
 export interface CPUChartAPIResponse {
@@ -16,21 +15,21 @@ export interface CPUChartAPIResponse {
   };
   // overall totals for the whole time range
   overallValues: {
-    systemCPUAverage: AggValue['value'];
-    systemCPUMax: AggValue['value'];
-    processCPUAverage: AggValue['value'];
-    processCPUMax: AggValue['value'];
+    systemCPUAverage: number | null;
+    systemCPUMax: number | null;
+    processCPUAverage: number | null;
+    processCPUMax: number | null;
   };
   totalHits: number;
 }
 
-export type MemoryMetricName =
+export type CPUMetricName =
   | 'systemCPUAverage'
   | 'systemCPUMax'
   | 'processCPUAverage'
   | 'processCPUMax';
 
-const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
+const CPU_METRIC_NAMES: CPUMetricName[] = [
   'systemCPUAverage',
   'systemCPUMax',
   'processCPUAverage',
@@ -57,7 +56,7 @@ export function transform(result: ESResponse): CPUChartAPIResponse {
   // using forEach here to avoid looping over the entire dataset
   // 4 times or doing a complicated, memory-heavy map/reduce
   timeseriesData.buckets.forEach(({ key, ...bucket }) => {
-    MEMORY_METRIC_NAMES.forEach(name => {
+    CPU_METRIC_NAMES.forEach(name => {
       series[name].push({ x: key, y: bucket[name].value });
     });
   });
