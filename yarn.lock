@@ -803,10 +803,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.3.0":
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.3.0.tgz#6a871b209c757141ebe88f5c77393652cb43c24d"
-  integrity sha512-fvOSwZsdQHGpLUIPVLGZus+ty4hJtHVTGqhdwNIFyCt1/gha/S7nEN2Gsk442gfDbGE2girc6vhD3Bl1gzBYRA==
+"@elastic/eui@5.6.0":
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.0.tgz#5d58beff9a2b30ac38724c1704bbf807840f28ea"
+  integrity sha512-L5neMw4ejPtG+RNW48W3WVxlO8J5HIM2FAskuEERKH0nZWPQSk0wwXOvlegpd+RuHt4elfjTU+nrLvfB9cLKow==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -819,7 +819,6 @@
     prop-types "^15.6.0"
     react-ace "^5.5.0"
     react-color "^2.13.8"
-    react-datepicker v1.5.0
     react-input-autosize "^2.2.1"
     react-virtualized "^9.18.5"
     react-vis "1.10.2"
@@ -18044,11 +18043,6 @@ reselect@3.0.1, reselect@^3.0.1:
   resolved "https://registry.yarnpkg.com/reselect/-/reselect-3.0.1.tgz#efdaa98ea7451324d092b2b2163a6a1d7a9a2147"
   integrity sha1-79qpjqdFEyTQkrKyFjpqHXqaIUc=
 
-resize-observer-polyfill@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.2.1.tgz#55a4ff3e4f212a76470835fb7590dbb62a3e6542"
-  integrity sha1-VaT/Pk8hKnZHCDX7dZDbtio+ZUI=
-
 resize-observer-polyfill@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.0.tgz#660ff1d9712a2382baa2cad450a4716209f9ca69"
@@ -20151,10 +20145,10 @@ tinygradient@0.3.0:
   dependencies:
     tinycolor2 "~1.0.0"
 
-tinymath@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tinymath/-/tinymath-1.1.0.tgz#1d26f1c4c65d70f9c62563fa7cdab87d66e39eaa"
-  integrity sha512-v3PNQ6zGKAqlj4labyqeTzndakdc9ODccx8IgrX1f+yzPW9mY0nlhKTRAPYOjay8gdvTyEnl2bik7huffZ5f/g==
+tinymath@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/tinymath/-/tinymath-1.1.1.tgz#67f42ee0bb351508fe3a9ce4cb8db019ac4500ca"
+  integrity sha512-dpnNUQvyO3AKvgJ5AtblOYuM/SJoSyjvhM7pstKzkVKUBRPMaSOi0+8h/QXMlfnOVFWV0qSpfxSAUAHKZ3XN2g==
 
 title-case@^2.1.0:
   version "2.1.1"

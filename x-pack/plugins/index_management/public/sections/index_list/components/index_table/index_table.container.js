@@ -13,7 +13,8 @@ import {
   isDetailPanelOpen,
   showSystemIndices,
   getSortField,
-  isSortAscending
+  isSortAscending,
+  getIndicesAsArray,
 } from '../../../../store/selectors';
 import {
   filterChanged,
@@ -29,6 +30,7 @@ import { IndexTable as PresentationComponent } from './index_table';
 
 const mapStateToProps = (state) => {
   return {
+    allIndices: getIndicesAsArray(state),
     isDetailPanelOpen: isDetailPanelOpen(state),
     detailPanelIndexName: getDetailPanelIndexName(state),
     indices: getPageOfIndices(state),
