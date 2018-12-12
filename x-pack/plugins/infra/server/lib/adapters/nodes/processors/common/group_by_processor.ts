@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 
 import { InfraPathFilterInput, InfraPathInput } from '../../../../../graphql/types';
 import {
@@ -18,41 +18,45 @@ export const groupByProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     const { groupBy } = options.nodeOptions;
-    let aggs = {};
-    set(result, 'aggs.waffle.aggs.nodes.aggs', aggs);
-    groupBy.forEach((grouping: InfraPathInput, index: number) => {
-      if (isGroupByTerms(grouping)) {
-        const termsAgg = {
-          aggs: {},
-          terms: {
-            field: grouping.field,
-            size: 10,
-          },
-        };
-        set(aggs, `path_${index}`, termsAgg);
-        aggs = termsAgg.aggs;
-      }
+    const currentAggs = get(result, 'aggs.waffle.aggs.nodes.aggs', {});
+    set(
+      result,
+      'aggs.waffle.aggs.nodes.aggs',
+      groupBy.reduce((aggs: object, grouping: InfraPathInput, index: number) => {
+        if (isGroupByTerms(grouping)) {
+          const termsAgg = {
+            aggs: {},
+            terms: {
+              field: grouping.field,
+              size: 10,
+            },
+          };
+          set(aggs, `path_${index}`, termsAgg);
+          return termsAgg.aggs;
+        }
 
-      if (grouping && isGroupByFilters(grouping)) {
-        const filtersAgg = {
-          aggs: {},
-          filters: {
-            filters: grouping.filters!.map(
-              (filter: InfraPathFilterInput): InfraESQueryStringQuery => {
-                return {
-                  query_string: {
-                    analyze_wildcard: true,
-                    query: (filter && filter.query) || '*',
-                  },
-                };
-              }
-            ),
-          },
-        };
-        set(aggs, `${grouping.id}`, filtersAgg);
-        aggs = filtersAgg.aggs;
-      }
-    });
+        if (grouping && isGroupByFilters(grouping)) {
+          const filtersAgg = {
+            aggs: {},
+            filters: {
+              filters: grouping.filters!.map(
+                (filter: InfraPathFilterInput): InfraESQueryStringQuery => {
+                  return {
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: (filter && filter.query) || '*',
+                    },
+                  };
+                }
+              ),
+            },
+          };
+          set(aggs, `${grouping.id}`, filtersAgg);
+          return filtersAgg.aggs;
+        }
+        return aggs;
+      }, currentAggs)
+    );
     return result;
   };
 };

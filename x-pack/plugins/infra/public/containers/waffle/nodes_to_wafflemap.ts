@@ -84,10 +84,12 @@ function findOrCreateGroupWithGroups(
 }
 
 function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
+  const nodePathItem = last(node.path);
   return {
     id: node.path.map(p => p.value).join('/'),
     path: node.path,
-    name: last(node.path).value,
+    nodeId: nodePathItem.value,
+    name: nodePathItem.displayName || nodePathItem.value,
     metric: node.metric,
   };
 }

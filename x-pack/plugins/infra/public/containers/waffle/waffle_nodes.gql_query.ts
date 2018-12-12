@@ -20,6 +20,7 @@ export const waffleNodesQuery = gql`
         nodes(path: $path, metric: $metric) {
           path {
             value
+            displayName
           }
           metric {
             name

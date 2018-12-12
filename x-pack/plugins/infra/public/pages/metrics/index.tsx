@@ -87,34 +87,34 @@ export const MetricDetail = withTheme(
           );
         }
         const layouts = layoutCreator(this.props.theme);
-        const breadcrumbs = [{ text: nodeName }];
 
         return (
-          <ColumnarPage>
-            <Header
-              appendSections={<InfrastructureBetaBadgeHeaderSection />}
-              breadcrumbs={breadcrumbs}
-            />
-            <WithMetricsTimeUrlState />
-            <DetailPageContent>
-              <WithOptions>
-                {({ sourceId }) => (
-                  <WithMetricsTime resetOnUnmount>
-                    {({
-                      currentTimeRange,
-                      isAutoReloading,
-                      setRangeTime,
-                      startMetricsAutoReload,
-                      stopMetricsAutoReload,
-                    }) => (
-                      <WithMetadata
-                        layouts={layouts}
-                        sourceId={sourceId}
-                        nodeType={nodeType}
-                        nodeId={nodeName}
-                      >
-                        {({ name, filteredLayouts }) => {
-                          return (
+          <WithOptions>
+            {({ sourceId }) => (
+              <WithMetricsTime resetOnUnmount>
+                {({
+                  currentTimeRange,
+                  isAutoReloading,
+                  setRangeTime,
+                  startMetricsAutoReload,
+                  stopMetricsAutoReload,
+                }) => (
+                  <WithMetadata
+                    layouts={layouts}
+                    sourceId={sourceId}
+                    nodeType={nodeType}
+                    nodeId={nodeName}
+                  >
+                    {({ displayName, filteredLayouts }) => {
+                      const breadcrumbs = [{ text: displayName }];
+                      return (
+                        <ColumnarPage>
+                          <Header
+                            appendSections={<InfrastructureBetaBadgeHeaderSection />}
+                            breadcrumbs={breadcrumbs}
+                          />
+                          <WithMetricsTimeUrlState />
+                          <DetailPageContent>
                             <WithMetrics
                               layouts={filteredLayouts}
                               sourceId={sourceId}
@@ -148,7 +148,7 @@ export const MetricDetail = withTheme(
                                       <EuiShowFor sizes={['xs', 's']}>
                                         <EuiSideNav
                                           items={sideNav}
-                                          mobileTitle={name}
+                                          mobileTitle={displayName}
                                           toggleOpenOnMobile={this.toggleOpenOnMobile}
                                           isOpenOnMobile={this.state.isSideNavOpenOnMobile}
                                         />
@@ -164,7 +164,7 @@ export const MetricDetail = withTheme(
                                                   <MetricsTitleTimeRangeContainer>
                                                     <EuiHideFor sizes={['xs', 's']}>
                                                       <EuiTitle size="m">
-                                                        <h1>{name}</h1>
+                                                        <h1>{displayName}</h1>
                                                       </EuiTitle>
                                                     </EuiHideFor>
                                                     <MetricsTimeControls
@@ -180,6 +180,7 @@ export const MetricDetail = withTheme(
 
                                               <EuiPageContentWithRelative>
                                                 <Metrics
+                                                  displayName={displayName}
                                                   nodeName={nodeName}
                                                   layouts={filteredLayouts}
                                                   metrics={metrics}
@@ -200,15 +201,15 @@ export const MetricDetail = withTheme(
                                 );
                               }}
                             </WithMetrics>
-                          );
-                        }}
-                      </WithMetadata>
-                    )}
-                  </WithMetricsTime>
+                          </DetailPageContent>
+                        </ColumnarPage>
+                      );
+                    }}
+                  </WithMetadata>
                 )}
-              </WithOptions>
-            </DetailPageContent>
-          </ColumnarPage>
+              </WithMetricsTime>
+            )}
+          </WithOptions>
         );
       }
 

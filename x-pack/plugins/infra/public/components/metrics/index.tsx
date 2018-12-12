@@ -19,6 +19,7 @@ interface Props {
   layouts: InfraMetricLayout[];
   loading: boolean;
   nodeName: string;
+  displayName: string;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   intl: InjectedIntl;
 }
@@ -44,10 +45,10 @@ export const Metrics = injectI18n(
             text={intl.formatMessage(
               {
                 id: 'xpack.infra.metrics.loadingNodeDataText',
-                defaultMessage: 'Loading data for {nodeName}',
+                defaultMessage: 'Loading data for {displayName}',
               },
               {
-                nodeName: this.props.nodeName,
+                displayName: this.props.displayName,
               }
             )}
           />

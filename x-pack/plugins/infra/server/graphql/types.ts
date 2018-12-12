@@ -211,6 +211,8 @@ export interface InfraNode {
 
 export interface InfraNodePath {
   value: string;
+
+  displayName?: string | null;
 }
 
 export interface InfraNodeMetric {
@@ -1046,6 +1048,8 @@ export namespace InfraNodeResolvers {
 export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
+
+    displayName?: DisplayNameResolver<string | null, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
@@ -1053,6 +1057,11 @@ export namespace InfraNodePathResolvers {
     Parent,
     Context
   >;
+  export type DisplayNameResolver<
+    R = string | null,
+    Parent = InfraNodePath,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraNodeMetricResolvers {

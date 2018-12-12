@@ -11,14 +11,8 @@ import {
   InfraFrameworkRequest,
   InfraMetadataAggregationResponse,
 } from '../framework';
-import { InfraNodeType } from '../nodes/adapter_types';
+import { NAME_FIELDS } from '../nodes/constants';
 import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
-
-const NAME_FIELDS = {
-  [InfraNodeType.host]: 'host.name',
-  [InfraNodeType.pod]: 'kubernetes.pod.name',
-  [InfraNodeType.container]: 'docker.container.name',
-};
 
 export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   private framework: InfraBackendFrameworkAdapter;
