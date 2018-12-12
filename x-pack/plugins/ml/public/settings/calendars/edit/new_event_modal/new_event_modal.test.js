@@ -23,15 +23,7 @@ const stateTimestamps = {
 
 describe('NewEventModal', () => {
 
-  test('Renders NewEventModal', () => {
-    const wrapper = shallow(
-      <NewEventModal {...testProps} />
-    );
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  test('Add button disabled if description empty', () => {
+  it('Add button disabled if description empty', () => {
     const wrapper = shallow(
       <NewEventModal {...testProps} />
     );
