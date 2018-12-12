@@ -8,20 +8,20 @@ import { i18n } from '@kbn/i18n';
 import { BASE_PATH } from '../../../common/constants';
 
 export const listBreadcrumb = {
-  text: i18n.translate('xpack.ccr.homeBreadcrumbTitle', {
+  text: i18n.translate('xpack.crossClusterReplication.homeBreadcrumbTitle', {
     defaultMessage: 'Cross Cluster Replication',
   }),
   href: `#${BASE_PATH}`,
 };
 
 export const addBreadcrumb = {
-  text: i18n.translate('xpack.ccr.addBreadcrumbTitle', {
+  text: i18n.translate('xpack.crossClusterReplication.addBreadcrumbTitle', {
     defaultMessage: 'Add',
   }),
 };
 
 export const editBreadcrumb = {
-  text: i18n.translate('xpack.ccr.addBreadcrumbTitle', {
+  text: i18n.translate('xpack.crossClusterReplication.editBreadcrumbTitle', {
     defaultMessage: 'Edit',
   }),
 };

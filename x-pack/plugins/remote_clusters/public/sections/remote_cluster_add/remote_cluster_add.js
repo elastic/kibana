@@ -20,65 +20,65 @@ import { CRUD_APP_BASE_PATH } from '../../constants';
 import { listBreadcrumb, addBreadcrumb } from '../../services';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
-export class RemoteClusterAddUi extends Component {
-  static propTypes = {
-    addCluster: PropTypes.func,
-    isAddingCluster: PropTypes.bool,
-    addClusterError: PropTypes.object,
-    clearAddClusterErrors: PropTypes.func,
+export const RemoteClusterAdd = injectI18n(
+  class extends Component {
+    static propTypes = {
+      addCluster: PropTypes.func,
+      isAddingCluster: PropTypes.bool,
+      addClusterError: PropTypes.object,
+      clearAddClusterErrors: PropTypes.func,
+    }
+
+    constructor(props) {
+      super(props);
+      chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
+    }
+
+    componentWillUnmount() {
+      // Clean up after ourselves.
+      this.props.clearAddClusterErrors();
+    }
+
+    save = (clusterConfig) => {
+      this.props.addCluster(clusterConfig);
+    };
+
+    cancel = () => {
+      const { history } = this.props;
+      history.push(CRUD_APP_BASE_PATH);
+    };
+
+    render() {
+      const { isAddingCluster, addClusterError } = this.props;
+
+      return (
+        <Fragment>
+          <EuiPage>
+            <EuiPageBody>
+              <EuiPageContent
+                horizontalPosition="center"
+                className="remoteClusterAddPage"
+              >
+                <RemoteClusterPageTitle
+                  title={(
+                    <FormattedMessage
+                      id="xpack.remoteClusters.addTitle"
+                      defaultMessage="Add remote cluster"
+                    />
+                  )}
+                />
+
+                <RemoteClusterForm
+                  isSaving={isAddingCluster}
+                  saveError={addClusterError}
+                  save={this.save}
+                  cancel={this.cancel}
+                />
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>
+        </Fragment>
+      );
+    }
   }
-
-  constructor(props) {
-    super(props);
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
-  }
-
-  componentWillUnmount() {
-    // Clean up after ourselves.
-    this.props.clearAddClusterErrors();
-  }
-
-  save = (clusterConfig) => {
-    this.props.addCluster(clusterConfig);
-  };
-
-  cancel = () => {
-    const { history } = this.props;
-    history.push(CRUD_APP_BASE_PATH);
-  };
-
-  render() {
-    const { isAddingCluster, addClusterError } = this.props;
-
-    return (
-      <Fragment>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="remoteClusterAddPage"
-            >
-              <RemoteClusterPageTitle
-                title={(
-                  <FormattedMessage
-                    id="xpack.remoteClusters.addTitle"
-                    defaultMessage="Add remote cluster"
-                  />
-                )}
-              />
-
-              <RemoteClusterForm
-                isSaving={isAddingCluster}
-                saveError={addClusterError}
-                save={this.save}
-                cancel={this.cancel}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-      </Fragment>
-    );
-  }
-}
-
-export const RemoteClusterAdd = injectI18n(RemoteClusterAddUi);
+);

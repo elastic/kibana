@@ -18,7 +18,7 @@ Object {
   />,
   "followIndexPatternSuffix": <FormattedMessage
     defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the suffix."
-    id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
+    id="xpack.crossClusterReplication.autoFollowPattern.suffixValidation.illegalCharacters"
     values={
       Object {
         "characterList": <strong>

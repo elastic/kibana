@@ -32,373 +32,373 @@ import { CRUD_APP_BASE_PATH } from '../../../constants';
 
 import { ConnectionStatus, RemoveClusterButton } from '../components';
 
-export class DetailPanelUi extends Component {
-  static propTypes = {
-    isOpen: PropTypes.bool.isRequired,
-    isLoading: PropTypes.bool,
-    cluster: PropTypes.object,
-    closeDetailPanel: PropTypes.func.isRequired,
-    clusterName: PropTypes.string,
-    copyCluster: PropTypes.func.isRequired,
-  }
+export const DetailPanel = injectI18n(
+  class extends Component {
+    static propTypes = {
+      isOpen: PropTypes.bool.isRequired,
+      isLoading: PropTypes.bool,
+      cluster: PropTypes.object,
+      closeDetailPanel: PropTypes.func.isRequired,
+      clusterName: PropTypes.string,
+      copyCluster: PropTypes.func.isRequired,
+    }
 
-  copyCluster = () => {
-    const { copyCluster, cluster } = this.props;
-    const {
-      name,
-      seeds,
-      skipUnavailable,
-    } = cluster;
+    copyCluster = () => {
+      const { copyCluster, cluster } = this.props;
+      const {
+        name,
+        seeds,
+        skipUnavailable,
+      } = cluster;
 
-    const clusterConfig = {
-      name,
-      seeds,
-      skipUnavailable,
-    };
+      const clusterConfig = {
+        name,
+        seeds,
+        skipUnavailable,
+      };
 
-    copyCluster(clusterConfig);
-  }
+      copyCluster(clusterConfig);
+    }
 
-  renderSkipUnavailableValue(skipUnavailable) {
-    if(skipUnavailable === true) {
+    renderSkipUnavailableValue(skipUnavailable) {
+      if(skipUnavailable === true) {
+        return (
+          <FormattedMessage
+            id="xpack.remoteClusters.detailPanel.skipUnavailableTrueValue"
+            defaultMessage="Yes"
+          />
+        );
+      }
+
+      if(skipUnavailable === false) {
+        return (
+          <FormattedMessage
+            id="xpack.remoteClusters.detailPanel.skipUnavailableFalseValue"
+            defaultMessage="No"
+          />
+        );
+      }
+
       return (
         <FormattedMessage
-          id="xpack.remoteClusters.detailPanel.skipUnavailableTrueValue"
-          defaultMessage="Yes"
+          id="xpack.remoteClusters.detailPanel.skipUnavailableNullValue"
+          defaultMessage="Default"
         />
       );
     }
 
-    if(skipUnavailable === false) {
+    renderCluster() {
+      const {
+        cluster,
+      } = this.props;
+
+      const {
+        isConnected,
+        connectedNodesCount,
+        skipUnavailable,
+        seeds,
+        isConfiguredByNode,
+        maxConnectionsPerCluster,
+        initialConnectTimeout,
+      } = cluster;
+
+      let configuredByNodeWarning;
+
+      if (isConfiguredByNode) {
+        configuredByNodeWarning = (
+          <Fragment>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.configuredByNodeWarningTitle"
+                  defaultMessage="This remote cluster is defined in a node's elasticsearch.yml
+                    configuration file"
+                />
+              }
+              color="warning"
+              iconType="help"
+            >
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.detailPanel.configuredByNodeWarningMessage"
+                    defaultMessage="This can result in unexpected behavior if nodes have defined
+                      different remote clusters in their configuration files. You can fix this by
+                      manually removing this remote cluster from the configuration file or by
+                      creating a persistent copy of it."
+                  />
+                </p>
+
+                <EuiButton
+                  onClick={this.copyCluster}
+                  color="warning"
+                >
+                  <FormattedMessage
+                    id="xpack.remoteClusters.detailPanel.createPersistentCopyButtonLabel"
+                    defaultMessage="Create persistent copy"
+                  />
+                </EuiButton>
+              </Fragment>
+            </EuiCallOut>
+
+            <EuiSpacer size="l" />
+          </Fragment>
+        );
+      }
+
       return (
-        <FormattedMessage
-          id="xpack.remoteClusters.detailPanel.skipUnavailableFalseValue"
-          defaultMessage="No"
-        />
-      );
-    }
-
-    return (
-      <FormattedMessage
-        id="xpack.remoteClusters.detailPanel.skipUnavailableNullValue"
-        defaultMessage="Default"
-      />
-    );
-  }
-
-  renderCluster() {
-    const {
-      cluster,
-    } = this.props;
-
-    const {
-      isConnected,
-      connectedNodesCount,
-      skipUnavailable,
-      seeds,
-      isConfiguredByNode,
-      maxConnectionsPerCluster,
-      initialConnectTimeout,
-    } = cluster;
-
-    let configuredByNodeWarning;
-
-    if (isConfiguredByNode) {
-      configuredByNodeWarning = (
         <Fragment>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.remoteClusters.detailPanel.configuredByNodeWarningTitle"
-                defaultMessage="This remote cluster is defined in a node's elasticsearch.yml
-                  configuration file"
-              />
-            }
-            color="warning"
-            iconType="help"
-          >
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.configuredByNodeWarningMessage"
-                  defaultMessage="This can result in unexpected behavior if nodes have defined
-                    different remote clusters in their configuration files. You can fix this by
-                    manually removing this remote cluster from the configuration file or by
-                    creating a persistent copy of it."
-                />
-              </p>
+          <EuiFlyoutBody>
+            {configuredByNodeWarning}
 
-              <EuiButton
-                onClick={this.copyCluster}
-                color="warning"
-              >
+            <EuiTitle size="s">
+              <h3>
                 <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.editButtonLabel"
-                  defaultMessage="Create persistent copy"
+                  id="xpack.remoteClusters.detailPanel.statusTitle"
+                  defaultMessage="Status"
                 />
-              </EuiButton>
-            </Fragment>
-          </EuiCallOut>
+              </h3>
+            </EuiTitle>
 
-          <EuiSpacer size="l" />
+            <EuiSpacer size="s" />
+
+            <EuiDescriptionList>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    <EuiTitle size="xs">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.connectedLabel"
+                        defaultMessage="Connection"
+                      />
+                    </EuiTitle>
+                  </EuiDescriptionListTitle>
+
+                  <EuiDescriptionListDescription>
+                    <ConnectionStatus isConnected={isConnected} />
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    <EuiTitle size="xs">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.connectedNodesLabel"
+                        defaultMessage="Connected nodes"
+                      />
+                    </EuiTitle>
+                  </EuiDescriptionListTitle>
+
+                  <EuiDescriptionListDescription>
+                    {connectedNodesCount}
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    <EuiTitle size="xs">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.seedsLabel"
+                        defaultMessage="Seeds"
+                      />
+                    </EuiTitle>
+                  </EuiDescriptionListTitle>
+
+                  <EuiDescriptionListDescription>
+                    {seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>)}
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    <EuiTitle size="xs">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.skipUnavailableLabel"
+                        defaultMessage="Skip unavailable"
+                      />
+                    </EuiTitle>
+                  </EuiDescriptionListTitle>
+
+                  <EuiDescriptionListDescription>
+                    {this.renderSkipUnavailableValue(skipUnavailable)}
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    <EuiTitle size="xs">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
+                        defaultMessage="Maximum number of connections"
+                      />
+                    </EuiTitle>
+                  </EuiDescriptionListTitle>
+
+                  <EuiDescriptionListDescription>
+                    {maxConnectionsPerCluster}
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    <EuiTitle size="xs">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.initialConnectTimeoutLabel"
+                        defaultMessage="Initial connect timeout"
+                      />
+                    </EuiTitle>
+                  </EuiDescriptionListTitle>
+
+                  <EuiDescriptionListDescription>
+                    {initialConnectTimeout}
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiDescriptionList>
+          </EuiFlyoutBody>
         </Fragment>
       );
     }
 
-    return (
-      <Fragment>
-        <EuiFlyoutBody>
-          {configuredByNodeWarning}
+    renderContent() {
+      const {
+        isLoading,
+        cluster,
+      } = this.props;
 
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.remoteClusters.detailPanel.statusTitle"
-                defaultMessage="Status"
-              />
-            </h3>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          <EuiDescriptionList>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.connectedLabel"
-                      defaultMessage="Connection"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription>
-                  <ConnectionStatus isConnected={isConnected} />
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.connectedNodesLabel"
-                      defaultMessage="Connected nodes"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription>
-                  {connectedNodesCount}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.seedsLabel"
-                      defaultMessage="Seeds"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription>
-                  {seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>)}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.skipUnavailableLabel"
-                      defaultMessage="Skip unavailable"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription>
-                  {this.renderSkipUnavailableValue(skipUnavailable)}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
-                      defaultMessage="Maximum number of connections"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription>
-                  {maxConnectionsPerCluster}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.initialConnectTimeoutLabel"
-                      defaultMessage="Initial connect timeout"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription>
-                  {initialConnectTimeout}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiDescriptionList>
-        </EuiFlyoutBody>
-      </Fragment>
-    );
-  }
-
-  renderContent() {
-    const {
-      isLoading,
-      cluster,
-    } = this.props;
-
-    if (isLoading) {
-      return (
-        <EuiFlyoutBody>
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.loadingLabel"
-                    defaultMessage="Loading remote cluster..."
-                  />
-                </EuiTextColor>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutBody>
-      );
-    }
-
-    if (!cluster) {
-      return (
-        <EuiFlyoutBody>
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type="alert" color="danger" />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.notFoundLabel"
-                    defaultMessage="Remote cluster not found"
-                  />
-                </EuiTextColor>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutBody>
-      );
-    }
-
-    return this.renderCluster();
-  }
-
-  renderFooter() {
-    const {
-      cluster,
-      clusterName,
-    } = this.props;
-
-    // Remote clusters configured by a node's elasticsearch.yml file can't be edited or removeed.
-    if (!cluster || cluster.isConfiguredByNode) {
-      return null;
-    }
-
-    return (
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <RemoveClusterButton
-              clusterNames={[clusterName]}
-              isSmallButton={true}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
-              fill
-              color="primary"
+      if (isLoading) {
+        return (
+          <EuiFlyoutBody>
+            <EuiFlexGroup
+              justifyContent="flexStart"
+              alignItems="center"
+              gutterSize="s"
             >
-              <FormattedMessage
-                id="xpack.remoteClusters.detailPanel.editButtonLabel"
-                defaultMessage="Edit"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    );
-  }
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
 
-  render() {
-    const {
-      isOpen,
-      closeDetailPanel,
-      clusterName,
-    } = this.props;
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.loadingLabel"
+                      defaultMessage="Loading remote cluster..."
+                    />
+                  </EuiTextColor>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
+        );
+      }
 
-    if (!isOpen) {
-      return null;
+      if (!cluster) {
+        return (
+          <EuiFlyoutBody>
+            <EuiFlexGroup
+              justifyContent="flexStart"
+              alignItems="center"
+              gutterSize="s"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="m" type="alert" color="danger" />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.notFoundLabel"
+                      defaultMessage="Remote cluster not found"
+                    />
+                  </EuiTextColor>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
+        );
+      }
+
+      return this.renderCluster();
     }
 
-    return (
-      <EuiFlyout
-        data-test-subj="remoteClusterDetailFlyout"
-        onClose={closeDetailPanel}
-        aria-labelledby="remoteClusterDetailsFlyoutTitle"
-        size="m"
-        maxWidth={400}
-      >
-        <EuiFlyoutHeader>
-          <EuiTitle size="m" id="remoteClusterDetailsFlyoutTitle">
-            <h2>{clusterName}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
+    renderFooter() {
+      const {
+        cluster,
+        clusterName,
+      } = this.props;
 
-        {this.renderContent()}
+      // Remote clusters configured by a node's elasticsearch.yml file can't be edited or removeed.
+      if (!cluster || cluster.isConfiguredByNode) {
+        return null;
+      }
 
-        {this.renderFooter()}
-      </EuiFlyout>
-    );
+      return (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <RemoveClusterButton
+                clusterNames={[clusterName]}
+                isSmallButton={true}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
+                fill
+                color="primary"
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.editButtonLabel"
+                  defaultMessage="Edit"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      );
+    }
+
+    render() {
+      const {
+        isOpen,
+        closeDetailPanel,
+        clusterName,
+      } = this.props;
+
+      if (!isOpen) {
+        return null;
+      }
+
+      return (
+        <EuiFlyout
+          data-test-subj="remoteClusterDetailFlyout"
+          onClose={closeDetailPanel}
+          aria-labelledby="remoteClusterDetailsFlyoutTitle"
+          size="m"
+          maxWidth={400}
+        >
+          <EuiFlyoutHeader>
+            <EuiTitle size="m" id="remoteClusterDetailsFlyoutTitle">
+              <h2>{clusterName}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+
+          {this.renderContent()}
+
+          {this.renderFooter()}
+        </EuiFlyout>
+      );
+    }
   }
-}
-
-export const DetailPanel = injectI18n(DetailPanelUi);
+);

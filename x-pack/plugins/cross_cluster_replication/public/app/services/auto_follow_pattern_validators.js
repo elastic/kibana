@@ -37,14 +37,14 @@ export const validateName = (name = '') => {
 
     if (name[0] === '_') {
       errorMsg = i18n.translate(
-        'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorFirstChar',
+        'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorUnderscore',
         { defaultMessage: "Name can't begin with an underscore." }
       );
     }
 
     if (name.includes(',')) {
       errorMsg = i18n.translate(
-        'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorFirstChar',
+        'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorComma',
         { defaultMessage: "Commas are not allowed in the name." }
       );
     }
@@ -137,7 +137,7 @@ export const validateSuffix = (suffix) => {
   if (illegalCharacters.length) {
     return (
       <FormattedMessage
-        id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
+        id="xpack.crossClusterReplication.autoFollowPattern.suffixValidation.illegalCharacters"
         defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
           {characterList} from the suffix."
         values={{
