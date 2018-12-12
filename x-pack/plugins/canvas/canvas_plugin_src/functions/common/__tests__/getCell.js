@@ -7,10 +7,12 @@
 import expect from 'expect.js';
 import { getCell } from '../getCell';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 import { emptyTable, testTable } from './fixtures/test_tables';
 
 describe('getCell', () => {
   const fn = functionWrapper(getCell);
+  const functionErrors = getFunctionErrors();
 
   it('returns the value from the specified row and column', () => {
     const arbitraryRowIndex = 3;
@@ -44,7 +46,7 @@ describe('getCell', () => {
 
       it('throws when invalid column is provided', () => {
         expect(() => fn(testTable, { column: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be(`Column not found: 'foo'`);
+          expect(e.message).to.be(functionErrors.getCell.columnNotFound('foo').message);
         });
       });
     });
@@ -66,15 +68,15 @@ describe('getCell', () => {
         const invalidRow = testTable.rows.length;
 
         expect(() => fn(testTable, { column: 'name', row: invalidRow })).to.throwException(e => {
-          expect(e.message).to.be(`Row not found: '${invalidRow}'`);
+          expect(e.message).to.be(functionErrors.getCell.rowNotFound(invalidRow).message);
         });
 
         expect(() => fn(emptyTable, { column: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be(`Row not found: '0'`);
+          expect(e.message).to.be(functionErrors.getCell.rowNotFound('0').message);
         });
 
         expect(() => fn(emptyTable)).to.throwException(e => {
-          expect(e.message).to.be(`Row not found: '0'`);
+          expect(e.message).to.be(functionErrors.getCell.rowNotFound('0').message);
         });
       });
     });

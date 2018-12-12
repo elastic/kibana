@@ -11,6 +11,7 @@ export default function testTasks(gulp, { mocha }) {
   const canvasRoot = resolve(__dirname, '..');
 
   function runMocha(globs, { withEnzyme = false, withDOM = false } = {}) {
+    require('./mocks/canvas_i18n');
     const requires = [join(canvasRoot, 'tasks/helpers/babelhook')];
 
     if (withDOM) {

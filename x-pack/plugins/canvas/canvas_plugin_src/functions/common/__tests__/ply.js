@@ -7,6 +7,7 @@
 import expect from 'expect.js';
 import { ply } from '../ply';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 import { testTable } from './fixtures/test_tables';
 
 const averagePrice = datatable => {
@@ -64,6 +65,7 @@ describe('ply', () => {
   });
 
   describe('missing args', () => {
+    const functionErrors = getFunctionErrors();
     it('returns the original datatable if both args are missing', () => {
       return fn(testTable).then(result => expect(result).to.eql(testTable));
     });
@@ -82,18 +84,20 @@ describe('ply', () => {
       it('throws when by is an invalid column', () => {
         expect(() => fn(testTable, { by: [''], expression: [averagePrice] })).to.throwException(
           e => {
-            expect(e.message).to.be(`Column not found: ''`);
+            expect(e.message).to.be(functionErrors.ply.columnNotFound('').message);
           }
         );
         expect(() => fn(testTable, { by: ['foo'], expression: [averagePrice] })).to.throwException(
           e => {
-            expect(e.message).to.be(`Column not found: 'foo'`);
+            expect(e.message).to.be(functionErrors.ply.columnNotFound('foo').message);
           }
         );
       });
     });
 
     describe('expression', () => {
+      const functionErrors = getFunctionErrors();
+
       it('returns the original datatable grouped by the specified columns', () => {
         const arbitaryRowIndex = 6;
 
@@ -108,7 +112,7 @@ describe('ply', () => {
 
       it('throws when row counts do not match across resulting datatables', () => {
         return fn(testTable, { by: ['name'], expression: [doublePrice, rowCount] }).catch(e =>
-          expect(e.message).to.be('All expressions must return the same number of rows')
+          expect(e.message).to.be(functionErrors.ply.rowCountInvalid().message)
         );
       });
     });

@@ -7,10 +7,12 @@
 import expect from 'expect.js';
 import { math } from '../math';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 import { emptyTable, testTable } from './fixtures/test_tables';
 
 describe('math', () => {
   const fn = functionWrapper(math);
+  const functionErrors = getFunctionErrors();
 
   it('evaluates math expressions without reference to context', () => {
     expect(fn(null, { expression: '10.5345' })).to.be(10.5345);
@@ -52,9 +54,7 @@ describe('math', () => {
       expect(fn)
         .withArgs(testTable, { expression: 'multiply(price, 2)' })
         .to.throwException(e => {
-          expect(e.message).to.be(
-            'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
-          );
+          expect(e.message).to.be(functionErrors.math.resultLengthInvalid().message);
         });
     });
 
@@ -70,12 +70,12 @@ describe('math', () => {
       expect(fn)
         .withArgs(testTable, { expression: 'mean(name)' })
         .to.throwException(e => {
-          expect(e.message).to.be('Failed to execute math expression. Check your column names');
+          expect(e.message).to.be(functionErrors.math.executeFailure().message);
         });
       expect(fn)
         .withArgs(testTable, { expression: 'mean(in_stock)' })
         .to.throwException(e => {
-          expect(e.message).to.be('Failed to execute math expression. Check your column names');
+          expect(e.message).to.be(functionErrors.math.executeFailure().message);
         });
     });
 
@@ -83,17 +83,17 @@ describe('math', () => {
       expect(fn)
         .withArgs(testTable)
         .to.throwException(e => {
-          expect(e.message).to.be('Empty expression');
+          expect(e.message).to.be(functionErrors.math.expressionEmpty().message);
         });
       expect(fn)
         .withArgs(testTable, { expression: '' })
         .to.throwException(e => {
-          expect(e.message).to.be('Empty expression');
+          expect(e.message).to.be(functionErrors.math.expressionEmpty().message);
         });
       expect(fn)
         .withArgs(testTable, { expression: ' ' })
         .to.throwException(e => {
-          expect(e.message).to.be('Empty expression');
+          expect(e.message).to.be(functionErrors.math.expressionEmpty().message);
         });
     });
 
@@ -101,7 +101,7 @@ describe('math', () => {
       expect(fn)
         .withArgs(emptyTable, { expression: 'mean(foo)' })
         .to.throwException(e => {
-          expect(e.message).to.be('Empty datatable');
+          expect(e.message).to.be(functionErrors.math.datatableEmpty().message);
         });
     });
   });

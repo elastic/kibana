@@ -7,9 +7,11 @@
 import expect from 'expect.js';
 import { progress } from '../progress';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 import { fontStyle } from './fixtures/test_styles';
 
 describe('progress', () => {
+  const functionErrors = getFunctionErrors();
   const fn = functionWrapper(progress);
   const value = 0.33;
 
@@ -29,7 +31,7 @@ describe('progress', () => {
     expect(fn)
       .withArgs(3)
       .to.throwException(e => {
-        expect(e.message).to.be(`Invalid value: '3'. Value must be between 0 and 1`);
+        expect(e.message).to.be(functionErrors.progress.invalidContext('3').message);
       });
   });
 
@@ -65,7 +67,7 @@ describe('progress', () => {
         expect(fn)
           .withArgs(value, { max: -0.5 })
           .to.throwException(e => {
-            expect(e.message).to.be(`Invalid max value: '-0.5'. 'max' must be greater than 0`);
+            expect(e.message).to.be(functionErrors.progress.maxArgumentInvalid().message);
           });
       });
     });

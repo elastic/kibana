@@ -9,8 +9,10 @@ import { revealImage } from '../revealImage';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { elasticLogo } from '../../../lib/elastic_logo';
+import { getFunctionErrors } from '../../../errors';
 
 describe('revealImage', () => {
+  const functionErrors = getFunctionErrors();
   const fn = functionWrapper(revealImage);
 
   it('returns a render as revealImage', () => {
@@ -29,7 +31,7 @@ describe('revealImage', () => {
           origin: 'top',
         })
         .to.throwException(e => {
-          expect(e.message).to.be.equal(`Invalid value: '10'. Percentage must be between 0 and 1`);
+          expect(e.message).to.be.equal(functionErrors.revealImage.inputInvalid().message);
         });
 
       expect(fn)
@@ -39,9 +41,7 @@ describe('revealImage', () => {
           origin: 'top',
         })
         .to.throwException(e => {
-          expect(e.message).to.be.equal(
-            `Invalid value: '-0.1'. Percentage must be between 0 and 1`
-          );
+          expect(e.message).to.be.equal(functionErrors.revealImage.inputInvalid().message);
         });
     });
   });

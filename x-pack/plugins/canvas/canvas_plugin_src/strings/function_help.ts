@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { i18n } from './i18n';
+
+// @ts-ignore
+import { PROGRESS_SHAPES } from '../functions/common/progress';
 
 interface FunctionHelp {
   help: string;
@@ -372,6 +374,610 @@ export const getFunctionHelp = (): FunctionHelpDict => {
       help: i18n.translate('xpack.canvas.functions.plotHelpText', {
         defaultMessage: 'Configure a plot element',
       }),
+    },
+    font: {
+      args: {
+        align: i18n.translate('xpack.canvas.functions.font.args.alignHelpText', {
+          defaultMessage: 'Horizontal text alignment',
+        }),
+        color: i18n.translate('xpack.canvas.functions.font.args.colorHelpText', {
+          defaultMessage: 'Text color',
+        }),
+        family: i18n.translate('xpack.canvas.functions.font.args.familyHelpText', {
+          defaultMessage: 'An acceptable CSS web font string',
+        }),
+        italic: i18n.translate('xpack.canvas.functions.font.args.italicHelpText', {
+          defaultMessage: 'Italicize, true or false',
+        }),
+        lHeight: i18n.translate('xpack.canvas.functions.font.args.lHeightHelpText', {
+          defaultMessage: 'Line height (px)',
+        }),
+        size: i18n.translate('xpack.canvas.functions.font.args.sizeHelpText', {
+          defaultMessage: 'Font size (px)',
+        }),
+        underline: i18n.translate('xpack.canvas.functions.font.args.underlineHelpText', {
+          defaultMessage: 'Underline the text, true or false',
+        }),
+        weight: i18n.translate('xpack.canvas.functions.font.args.weightHelpText', {
+          defaultMessage: 'Set the font weight, e.g. {fontWeightValuesList}',
+          values: {
+            fontWeightValuesList:
+              'normal, bold, bolder, lighter, 100, 200, 300, 400, 500, 600, 700, 800, 900',
+          },
+        }),
+      },
+      help: i18n.translate('xpack.canvas.functions.fontHelpText', {
+        defaultMessage: 'Create a font style',
+      }),
+    },
+    formatdate: {
+      args: {
+        format: i18n.translate('xpack.canvas.functions.formatDate.argsFormatHelpText', {
+          defaultMessage: 'MomentJS Format with which to bucket (See {momentjsFormatDateLink})',
+          values: {
+            momentjsFormatDateLink: 'https://momentjs.com/docs/#/displaying/',
+          },
+        }),
+      },
+      help: i18n.translate('xpack.canvas.functions.formatDateHelpText', {
+        defaultMessage: 'Output a ms since epoch number as a formatted string',
+      }),
+    },
+    formatnumber: {
+      help: i18n.translate('xpack.canvas.functions.formatNumberHelpText', {
+        defaultMessage: 'Turn a number into a string using a NumberJS format',
+      }),
+      args: {
+        format: i18n.translate('xpack.canvas.functions.formatNumber.argsFormatHelpText', {
+          defaultMessage: 'NumeralJS format string {numeraljsFormatLink}',
+          values: {
+            numeraljsFormatLink: 'http://numeraljs.com/#format',
+          },
+        }),
+      },
+    },
+    getCell: {
+      help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
+        defaultMessage: 'Fetch a single cell in a table',
+      }),
+      args: {
+        column: i18n.translate('xpack.canvas.functions.getCell.args.columnHelpText', {
+          defaultMessage: 'The name of the column value to fetch',
+        }),
+        row: i18n.translate('xpack.canvas.functions.getCell.args.rowHelpText', {
+          defaultMessage: 'The row number, starting at 0',
+        }),
+      },
+    },
+    gt: {
+      help: i18n.translate('xpack.canvas.functions.gtHelpText', {
+        defaultMessage: 'Return if the context is greater than the argument',
+      }),
+      args: {
+        value: i18n.translate('xpack.canvas.functions.gt.args.valueHelpText', {
+          defaultMessage: 'The value to compare the context to',
+        }),
+      },
+    },
+    gte: {
+      help: i18n.translate('xpack.canvas.functions.gteHelpText', {
+        defaultMessage: 'Return if the context is greater than or equal to the argument',
+      }),
+      args: {
+        value: i18n.translate('xpack.canvas.functions.gte.args.valueHelpText', {
+          defaultMessage: 'The value to compare the context to',
+        }),
+      },
+    },
+    head: {
+      help: i18n.translate('xpack.canvas.functions.headHelpText', {
+        defaultMessage: 'Get the first N rows from the datatable. Also see `tail`',
+      }),
+      args: {
+        count: i18n.translate('xpack.canvas.functions.head.args.countHelpText', {
+          defaultMessage: 'Return this many rows from the beginning of the datatable',
+        }),
+      },
+    },
+    if: {
+      help: i18n.translate('xpack.canvas.functions.ifHelpText', {
+        defaultMessage: 'Perform conditional logic',
+      }),
+      args: {
+        condition: i18n.translate('xpack.canvas.functions.if.args.conditionHelpText', {
+          defaultMessage:
+            'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
+        }),
+        then: i18n.translate('xpack.canvas.functions.if.args.thenHelpText', {
+          defaultMessage: 'The return value if true',
+        }),
+        else: i18n.translate('xpack.canvas.functions.if.args.elseHelpText', {
+          defaultMessage:
+            'The return value if false. If else is not specified, and the condition is false then the input context to the function will be returned',
+        }),
+      },
+    },
+    image: {
+      help: i18n.translate('xpack.canvas.functions.imageHelpText', {
+        defaultMessage: 'Display an image',
+      }),
+      args: {
+        dataurl: i18n.translate('xpack.canvas.functions.image.args.dataurlHelpText', {
+          defaultMessage: 'The HTTP(S) URL or base64 data of an image.',
+        }),
+        mode: i18n.translate('xpack.canvas.functions.image.args.modeHelpText', {
+          defaultMessage:
+            '"{contain}" will show the entire image, scaled to fit. "{cover}" will fill the container with the image, cropping from the sides or bottom as needed. "{stretch}" will resize the height and width of the image to 100% of the container',
+          values: {
+            contain: 'contain',
+            cover: 'cover',
+            stretch: 'stretch',
+          },
+        }),
+      },
+    },
+    lt: {
+      help: i18n.translate('xpack.canvas.functions.ltHelpText', {
+        defaultMessage: 'Return if the context is less than the argument',
+      }),
+      args: {
+        value: i18n.translate('xpack.canvas.functions.lt.args.valueHelpText', {
+          defaultMessage: 'The value to compare the context to',
+        }),
+      },
+    },
+    lte: {
+      help: i18n.translate('xpack.canvas.functions.lteHelpText', {
+        defaultMessage: 'Return if the context is less than or equal to the argument',
+      }),
+      args: {
+        value: i18n.translate('xpack.canvas.functions.lte.args.valueHelpText', {
+          defaultMessage: 'The value to compare the context to',
+        }),
+      },
+    },
+    mapColumn: {
+      help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
+        defaultMessage: 'Add a column calculated as the result of other columns, or not',
+      }),
+      args: {
+        name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
+          defaultMessage: 'The name of the resulting column',
+        }),
+        expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
+          defaultMessage:
+            'A canvas expression which will be passed each row as a single row datatable',
+        }),
+      },
+    },
+    math: {
+      help: i18n.translate('xpack.canvas.functions.mathHelpText', {
+        defaultMessage:
+          'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. If you pass in a number it is available as "value" (without the quotes)',
+      }),
+      args: {
+        expression: i18n.translate('xpack.canvas.functions.math.args.expressionHelpText', {
+          defaultMessage:
+            'An evaluated TinyMath expression. (See [TinyMath Functions]({tinyMathFunctionsLink}))',
+          values: {
+            tinyMathFunctionsLink: 'http://canvas.elastic.co/reference/tinymath.html',
+          },
+        }),
+      },
+    },
+    metric: {
+      help: i18n.translate('xpack.canvas.functions.metricHelpText', {
+        defaultMessage: 'A number with a label',
+      }),
+      args: {
+        label: i18n.translate('xpack.canvas.functions.metric.args.labelHelpText', {
+          defaultMessage: 'Text describing the metric',
+        }),
+        metricFont: i18n.translate('xpack.canvas.functions.metric.args.metricFontHelpText', {
+          defaultMessage:
+            'Font settings for the metric. Technically you can stick other styles in here too!',
+        }),
+        labelFont: i18n.translate('xpack.canvas.functions.metric.args.labelFontHelpText', {
+          defaultMessage:
+            'Font settings for the label. Technically you can stick other styles in here too!',
+        }),
+      },
+    },
+    neq: {
+      help: i18n.translate('xpack.canvas.functions.neqHelpText', {
+        defaultMessage: 'Return if the context is not equal to the argument',
+      }),
+      args: {
+        value: i18n.translate('xpack.canvas.functions.neqHelpText', {
+          defaultMessage: 'Return if the context is not equal to the argument',
+        }),
+      },
+    },
+    palette: {
+      help: i18n.translate('xpack.canvas.functions.paletteHelpText', {
+        defaultMessage: 'Create a color palette',
+      }),
+      args: {
+        color: i18n.translate('xpack.canvas.functions.palette.args.colorHelpText', {
+          defaultMessage:
+            'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
+        }),
+        gradient: i18n.translate('xpack.canvas.functions.palette.args.gradientHelpText', {
+          defaultMessage: 'Prefer to make a gradient where supported and useful?',
+        }),
+        reverse: i18n.translate('xpack.canvas.functions.palette.args.reverseHelpText', {
+          defaultMessage: 'Reverse the palette',
+        }),
+      },
+    },
+    pie: {
+      help: i18n.translate('xpack.canvas.functions.pieHelpText', {
+        defaultMessage: 'Configure a pie chart element',
+      }),
+      args: {
+        palette: i18n.translate('xpack.canvas.functions.pie.args.paletteHelpText', {
+          defaultMessage: 'A palette object for describing the colors to use on this pie',
+        }),
+        seriesStyle: i18n.translate('xpack.canvas.functions.pie.args.seriesStyleHelpText', {
+          defaultMessage: 'A style of a specific series',
+        }),
+        radius: i18n.translate('xpack.canvas.functions.pie.args.radiusHelpText', {
+          defaultMessage:
+            "Radius of the pie as a percentage (between 0 and 1) of the available space. Set to 'auto' to automatically set radius",
+        }),
+        hole: i18n.translate('xpack.canvas.functions.pie.args.holeHelpText', {
+          defaultMessage: 'Draw a hole in the pie, 0-100, as a percentage of the pie radius',
+        }),
+        labels: i18n.translate('xpack.canvas.functions.pie.args.labelsHelpText', {
+          defaultMessage: 'Show pie labels',
+        }),
+        labelRadius: i18n.translate('xpack.canvas.functions.pie.args.labelRadiusHelpText', {
+          defaultMessage: 'Percentage of area of container to use as radius for the label circle',
+        }),
+        font: i18n.translate('xpack.canvas.functions.pie.args.fontHelpText', {
+          defaultMessage: 'Label font',
+        }),
+        legend: i18n.translate('xpack.canvas.functions.pie.args.legendHelpText', {
+          defaultMessage: 'Legend position, nw, sw, ne, se or false',
+        }),
+        tilt: i18n.translate('xpack.canvas.functions.pie.args.tiltHelpText', {
+          defaultMessage: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
+        }),
+      },
+    },
+    ply: {
+      help: i18n.translate('xpack.canvas.functions.plyHelpText', {
+        defaultMessage:
+          'Subdivide a datatable and pass the resulting tables into an expression, then merge the output',
+      }),
+      args: {
+        by: i18n.translate('xpack.canvas.functions.ply.args.byHelpText', {
+          defaultMessage: 'The column to subdivide on',
+        }),
+        expression: i18n.translate('xpack.canvas.functions.ply.args.expressionHelpText', {
+          defaultMessage:
+            'An expression to pass each resulting data table into. Tips: \n Expressions must return a datatable. Use `{asArgument}` to turn literals into datatables.\n Multiple expressions must return the same number of rows. If you need to return a differing row count, pipe into another instance of ply.\n If multiple expressions return the same columns, the last one wins.',
+          values: {
+            asArgument: 'as',
+          },
+        }),
+      },
+    },
+    progress: {
+      help: i18n.translate('xpack.canvas.functions.progressHelpText', {
+        defaultMessage: 'Configure a progress element',
+      }),
+      args: {
+        shape: i18n.translate('xpack.canvas.functions.progress.args.shapeHelpText', {
+          defaultMessage: 'Select {shapeNames}, or {shapeName}',
+          values: {
+            shapeNames: PROGRESS_SHAPES.slice(0, -1).join(', '),
+            shapeName: PROGRESS_SHAPES.slice(-1)[0],
+          },
+        }),
+        max: i18n.translate('xpack.canvas.functions.progress.args.maxHelpText', {
+          defaultMessage: 'Maximum value of the progress element',
+        }),
+        valueColor: i18n.translate('xpack.canvas.functions.progress.args.valueColorHelpText', {
+          defaultMessage: 'Color of the progress bar',
+        }),
+        barColor: i18n.translate('xpack.canvas.functions.progress.args.barColorHelpText', {
+          defaultMessage: 'Color of the background bar',
+        }),
+        valueWeight: i18n.translate('xpack.canvas.functions.progress.args.valueWeightHelpText', {
+          defaultMessage: 'Thickness of the progress bar',
+        }),
+        barWeight: i18n.translate('xpack.canvas.functions.progress.args.barWeightHelpText', {
+          defaultMessage: 'Thickness of the background bar',
+        }),
+        label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
+          defaultMessage:
+            'Set true/false to show/hide label or provide a string to display as the label',
+        }),
+        font: i18n.translate('xpack.canvas.functions.progress.args.fontHelpText', {
+          defaultMessage:
+            'Font settings for the label. Technically you can stick other styles in here too!',
+        }),
+      },
+    },
+    render: {
+      help: i18n.translate('xpack.canvas.functions.renderHelpText', {
+        defaultMessage:
+          'Render an input as a specific element and set element level options such as styling',
+      }),
+      args: {
+        as: i18n.translate('xpack.canvas.functions.render.args.asHelpText', {
+          defaultMessage:
+            'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+        }),
+        css: i18n.translate('xpack.canvas.functions.render.args.cssHelpText', {
+          defaultMessage: 'Any block of custom CSS to be scoped to this element.',
+        }),
+        containerStyle: i18n.translate(
+          'xpack.canvas.functions.render.args.containerStyleHelpText',
+          {
+            defaultMessage: 'Style for the container, including background, border, and opacity',
+          }
+        ),
+      },
+    },
+    repeatImage: {
+      help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
+        defaultMessage: 'Configure a repeating image element',
+      }),
+      args: {
+        image: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
+          defaultMessage: 'The image to repeat. Usually a dataURL or an asset',
+        }),
+        size: i18n.translate('xpack.canvas.functions.repeatImage.args.sizeHelpText', {
+          defaultMessage:
+            'The maximum height or width of the image, in pixels. Eg, if you images is taller than it is wide, this will limit its height',
+        }),
+        max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
+          defaultMessage: 'Maximum number of times the image may repeat',
+        }),
+        emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
+          defaultMessage:
+            'Fill the difference between the input and the `{maxParameter}` parameter with this image',
+          values: {
+            maxParameter: 'max=',
+          },
+        }),
+      },
+    },
+    replace: {
+      help: i18n.translate('xpack.canvas.functions.replaceHelpText', {
+        defaultMessage: 'Use a regular expression to replace parts of a string',
+      }),
+      args: {
+        pattern: i18n.translate('xpack.canvas.functions.replace.args.patternHelpText', {
+          defaultMessage:
+            'The text or pattern of a JavaScript regular expression, eg "[aeiou]". You can use capture groups here.',
+        }),
+        flags: i18n.translate('xpack.canvas.functions.replace.args.flagsHelpText', {
+          defaultMessage: 'Specify flags. See {globalObjectsRegExpLink} for reference.',
+          values: {
+            globalObjectsRegExpLink:
+              'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
+          },
+        }),
+        replacement: i18n.translate('xpack.canvas.functions.replace.args.replacementHelpText', {
+          defaultMessage:
+            'The replacement for the matching parts of string. Capture groups can be accessed by their index, eg $1',
+        }),
+      },
+    },
+    revealImage: {
+      help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
+        defaultMessage: 'Configure a image reveal element',
+      }),
+      args: {
+        image: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {
+          defaultMessage: 'The image to reveal',
+        }),
+        emptyImage: i18n.translate('xpack.canvas.functions.revealImage.args.emptyImageHelpText', {
+          defaultMessage: 'An optional background image to reveal over',
+        }),
+        origin: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {
+          defaultMessage: 'Where to start from. Eg, top, left, bottom or right',
+        }),
+      },
+    },
+    rounddate: {
+      help: i18n.translate('xpack.canvas.functions.rounddateHelpText', {
+        defaultMessage:
+          'Round ms since epoch using a moment formatting string. Returns ms since epoch',
+      }),
+      args: {
+        format: i18n.translate('xpack.canvas.functions.rounddate.args.formatHelpText', {
+          defaultMessage:
+            'MomentJS Format with which to bucket (See {momentjsFormatLink}). For example "{dateFormatExample}" would round to the month',
+          values: {
+            momentjsFormatLink: 'https://momentjs.com/docs/#/displaying/',
+            dateFormatExample: 'YYYY-MM',
+          },
+        }),
+      },
+    },
+    rowCount: {
+      help: i18n.translate('xpack.canvas.functions.rowCountHelpText', {
+        defaultMessage:
+          'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
+      }),
+    },
+    seriesStyle: {
+      help: i18n.translate('xpack.canvas.functions.seriesStyleHelpText', {
+        defaultMessage:
+          'Creates an object used for describing the properties of a series on a chart. You would usually use this inside of a charting function',
+      }),
+      args: {
+        label: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelHelpText', {
+          defaultMessage:
+            'The label of the line this style applies to, not the name you would like to give the line',
+        }),
+        color: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorHelpText', {
+          defaultMessage: 'Color to assign the line',
+        }),
+        lines: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesHelpText', {
+          defaultMessage: 'Width of the line',
+        }),
+        bars: i18n.translate('xpack.canvas.functions.seriesStyle.args.barsHelpText', {
+          defaultMessage: 'Width of bars',
+        }),
+        points: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsHelpText', {
+          defaultMessage: 'Size of points on line',
+        }),
+        fill: i18n.translate('xpack.canvas.functions.seriesStyle.args.fillHelpText', {
+          defaultMessage: 'Should we fill points?',
+        }),
+        stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
+          defaultMessage:
+            'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
+        }),
+        horizontalBars: i18n.translate(
+          'xpack.canvas.functions.seriesStyle.args.horizontalBarsOrientationHelpText',
+          {
+            defaultMessage: 'Sets the orientation of bars in the chart to horizontal',
+          }
+        ),
+      },
+    },
+    shape: {
+      help: i18n.translate('xpack.canvas.functions.shapeHelpText', {
+        defaultMessage: 'Create a shape',
+      }),
+      args: {
+        shape: i18n.translate('xpack.canvas.functions.shape.args.shapeHelpText', {
+          defaultMessage: 'Pick a shape',
+        }),
+        fill: i18n.translate('xpack.canvas.functions.shape.args.fillHelpText', {
+          defaultMessage: 'Valid CSS color string',
+        }),
+        border: i18n.translate('xpack.canvas.functions.shape.args.borderHelpText', {
+          defaultMessage: 'Valid CSS color string',
+        }),
+        borderWidth: i18n.translate('xpack.canvas.functions.shape.args.borderWidthHelpText', {
+          defaultMessage: 'Thickness of the border',
+        }),
+        maintainAspect: i18n.translate('xpack.canvas.functions.shape.args.maintainAspectHelpText', {
+          defaultMessage: 'Select true to maintain aspect ratio',
+        }),
+      },
+    },
+    sort: {
+      help: i18n.translate('xpack.canvas.functions.sortHelpText', {
+        defaultMessage: 'Sorts a datatable on a column',
+      }),
+      args: {
+        by: i18n.translate('xpack.canvas.functions.sort.args.byHelpText', {
+          defaultMessage:
+            'The column to sort on. If column is not specified, the datatable will be sorted on the first column.',
+        }),
+        reverse: i18n.translate('xpack.canvas.functions.sort.args.reverseHelpText', {
+          defaultMessage:
+            'Reverse the sort order. If reverse is not specified, the datatable will be sorted in ascending order.',
+        }),
+      },
+    },
+    staticColumn: {
+      help: i18n.translate('xpack.canvas.functions.staticColumnHelpText', {
+        defaultMessage: 'Add a column with a static value',
+      }),
+      args: {
+        name: i18n.translate('xpack.canvas.functions.staticColumn.args.nameHelpText', {
+          defaultMessage: 'The name of the new column column',
+        }),
+        value: i18n.translate('xpack.canvas.functions.staticColumn.args.valueHelpText', {
+          defaultMessage:
+            'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
+        }),
+      },
+    },
+    string: {
+      help: i18n.translate('xpack.canvas.functions.stringHelpText', {
+        defaultMessage:
+          'Output a string made of other strings. Mostly useful when combined with sub-expressions that output a string, or something castable to a string',
+      }),
+      args: {
+        value: i18n.translate('xpack.canvas.functions.string.args.valueHelpText', {
+          defaultMessage: "One or more strings to join together. Don't forget spaces where needed!",
+        }),
+      },
+    },
+    switch: {
+      help: i18n.translate('xpack.canvas.functions.switchFnHelpText', {
+        defaultMessage: 'Perform conditional logic with multiple conditions',
+      }),
+      args: {
+        case: i18n.translate('xpack.canvas.functions.switchFn.args.caseHelpText', {
+          defaultMessage: 'The list of conditions to check',
+        }),
+        default: i18n.translate('xpack.canvas.functions.switchFn.args.defaultHelpText', {
+          defaultMessage: 'The default case if no cases match',
+        }),
+      },
+    },
+    table: {
+      help: i18n.translate('xpack.canvas.functions.tableHelpText', {
+        defaultMessage: 'Configure a Data Table element',
+      }),
+      args: {
+        font: i18n.translate('xpack.canvas.functions.table.args.fontHelpText', {
+          defaultMessage: 'Font style',
+        }),
+        perPage: i18n.translate('xpack.canvas.functions.table.args.perPageHelpText', {
+          defaultMessage:
+            'Show this many rows per page. You probably want to raise this is disabling pagination',
+        }),
+        showHeader: i18n.translate('xpack.canvas.functions.table.args.showHeaderHelpText', {
+          defaultMessage: 'Show or hide the header row with titles for each column',
+        }),
+      },
+    },
+    tail: {
+      help: i18n.translate('xpack.canvas.functions.tailHelpText', {
+        defaultMessage: 'Get the last N rows from the end of a datatable. Also see `head`',
+      }),
+      args: {
+        count: i18n.translate('xpack.canvas.functions.tail.args.countHelpText', {
+          defaultMessage: 'Return this many rows from the end of the datatable',
+        }),
+      },
+    },
+    timefilter: {
+      help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {
+        defaultMessage: 'Create a timefilter for querying a source',
+      }),
+      args: {
+        column: i18n.translate('xpack.canvas.functions.timefilter.args.columnHelpText', {
+          defaultMessage: 'The column or field to attach the filter to',
+        }),
+        from: i18n.translate('xpack.canvas.functions.timefilter.args.fromHelpText', {
+          defaultMessage: 'Beginning of the range, in {isoFormat} or Elasticsearch datemath format',
+          values: {
+            isoFormat: 'ISO8601',
+          },
+        }),
+        to: i18n.translate('xpack.canvas.functions.timefilter.argsToHelpText', {
+          defaultMessage: 'End of the range, in {isoFormat} or Elasticsearch datemath format',
+          values: {
+            isoFormat: 'ISO8601',
+          },
+        }),
+      },
+    },
+    timefilterControl: {
+      help: i18n.translate('xpack.canvas.functions.timefilterControlHelpText', {
+        defaultMessage: 'Configure a time filter control element',
+      }),
+      args: {
+        column: i18n.translate('xpack.canvas.functions.timefilterControl.args.columnHelpText', {
+          defaultMessage: 'The column or field to attach the filter to',
+        }),
+        compact: i18n.translate('xpack.canvas.functions.timefilterControl.args.compactHelpText', {
+          defaultMessage: 'Show the time filter as a button that triggers a popover',
+        }),
+      },
     },
     urlparam: {
       args: {

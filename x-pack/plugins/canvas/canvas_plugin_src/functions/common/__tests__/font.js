@@ -8,9 +8,11 @@ import expect from 'expect.js';
 import { openSans } from '../../../../common/lib/fonts';
 import { font } from '../font';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 
 describe('font', () => {
   const fn = functionWrapper(font);
+  const functionErrors = getFunctionErrors();
 
   describe('default output', () => {
     const result = fn(null);
@@ -105,7 +107,7 @@ describe('font', () => {
 
       it('throws when provided an invalid weight', () => {
         expect(() => fn(null, { weight: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be(`Invalid font weight: 'foo'`);
+          expect(e.message).to.be(functionErrors.font.weightInvalid('foo').message);
         });
       });
     });
@@ -175,7 +177,7 @@ describe('font', () => {
         expect(fn)
           .withArgs(null, { align: 'foo' })
           .to.throwException(e => {
-            expect(e.message).to.be(`Invalid text alignment: 'foo'`);
+            expect(e.message).to.be(functionErrors.font.alignmentInvalid('foo').message);
           });
       });
     });

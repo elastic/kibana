@@ -4,38 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const getCell = () => ({
-  name: 'getCell',
-  help: 'Fetch a single cell in a table',
-  context: {
-    types: ['datatable'],
-  },
-  args: {
-    column: {
-      types: ['string'],
-      aliases: ['_', 'c'],
-      help: 'The name of the column value to fetch',
+import { getFunctionErrors } from '../../errors';
+
+export const getCell = () => {
+  const functionErrors = getFunctionErrors();
+
+  return {
+    name: 'getCell',
+    help: 'Fetch a single cell in a table',
+    context: {
+      types: ['datatable'],
     },
-    row: {
-      types: ['number'],
-      aliases: ['r'],
-      help: 'The row number, starting at 0',
-      default: 0,
+    args: {
+      column: {
+        types: ['string'],
+        aliases: ['_', 'c'],
+        help: 'The name of the column value to fetch',
+      },
+      row: {
+        types: ['number'],
+        aliases: ['r'],
+        help: 'The row number, starting at 0',
+        default: 0,
+      },
     },
-  },
-  fn: (context, args) => {
-    const row = context.rows[args.row];
-    if (!row) {
-      throw new Error(`Row not found: '${args.row}'`);
-    }
+    fn: (context, args) => {
+      const row = context.rows[args.row];
+      if (!row) {
+        throw functionErrors.getCell.rowNotFound(args.row);
+      }
 
-    const { column = context.columns[0].name } = args;
-    const value = row[column];
+      const { column = context.columns[0].name } = args;
+      const value = row[column];
 
-    if (typeof value === 'undefined') {
-      throw new Error(`Column not found: '${column}'`);
-    }
+      if (typeof value === 'undefined') {
+        throw functionErrors.getCell.columnNotFound(column);
+      }
 
-    return value;
-  },
-});
+      return value;
+    },
+  };
+};
