@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitoringViewBaseController } from './base_controller';
-export { MonitoringViewBaseTableController } from './base_table_controller';
-export { MonitoringViewBaseEuiTableController } from './base_eui_table_controller';
+export { ShardAllocation } from './shard_allocation';

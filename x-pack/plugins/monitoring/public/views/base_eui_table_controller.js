@@ -6,7 +6,7 @@
 
 import { MonitoringViewBaseController } from './';
 import { euiTableStorageGetter, euiTableStorageSetter } from 'plugins/monitoring/components/table';
-import { SORT_ASCENDING } from '../../common/constants';
+import { EUI_SORT_ASCENDING } from '../../common/constants';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -50,7 +50,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     this.sorting = sort || {
       sort: {
         field: 'name',
-        direction: SORT_ASCENDING
+        direction: EUI_SORT_ASCENDING
       }
     };
 

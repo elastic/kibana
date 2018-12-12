@@ -5,30 +5,40 @@
  */
 
 import React from 'react';
-import { ClusterStatus } from '../cluster_status';
-import { ShardActivity } from '../shard_activity';
+import {
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiSpacer,
+  EuiFlexGrid,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { NodeDetailStatus } from '../node_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { ShardAllocation } from '../shard_allocation/shard_allocation';
 
-export function ElasticsearchOverview({
-  clusterStatus,
+export const Node = ({
+  nodeSummary,
   metrics,
-  shardActivity,
+  scope,
+  kbnUrl,
   ...props
-}) {
+}) => {
   const metricsToShow = [
-    metrics.cluster_search_request_rate,
-    metrics.cluster_query_latency,
-    metrics.cluster_index_request_rate,
-    metrics.cluster_index_latency,
+    metrics.node_jvm_mem,
+    metrics.node_mem,
+    metrics.node_cpu_metric,
+    metrics.node_load_average,
+    metrics.node_latency,
+    metrics.node_segment_count,
   ];
 
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
-          <ClusterStatus stats={clusterStatus} />
-          <EuiSpacer/>
+          <NodeDetailStatus stats={nodeSummary} />
+          <EuiSpacer size="m"/>
           <EuiFlexGrid columns={2} gutterSize="none">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index} style={{ width: '50%' }}>
@@ -40,9 +50,10 @@ export function ElasticsearchOverview({
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-          <ShardActivity data={shardActivity} {...props} />
+          <EuiSpacer size="m"/>
+          <ShardAllocation scope={scope} kbnUrl={kbnUrl}/>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
-}
+};
