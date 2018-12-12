@@ -5,8 +5,9 @@
  */
 
 import expect from 'expect.js';
-import { MetadataQuery } from '../../../../plugins/infra/common/graphql/types';
+
 import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
+import { MetadataQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const metadataTests: KbnTestProvider = ({ getService }) => {
