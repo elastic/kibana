@@ -12,8 +12,11 @@ import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
 
 import '../../../../styles/table.less';
-
 import {
+  REFRESH_RATE_INDEX_LIST
+} from '../../../../constants';
+import {
+  EuiButton,
   EuiCallOut,
   EuiHealth,
   EuiLink,
@@ -93,6 +96,8 @@ export class IndexTableUi extends Component {
     };
   }
   componentDidMount() {
+    this.props.loadIndices();
+    this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
     const {
       filterChanged,
       filterFromURI
@@ -101,6 +106,9 @@ export class IndexTableUi extends Component {
       const decodedFilter = decodeURIComponent(filterFromURI);
       filterChanged(EuiSearchBar.Query.parse(decodedFilter));
     }
+  }
+  componentDidUnmount() {
+    clearInterval(this.interval);
   }
   onSort = column => {
     const { sortField, isSortAscending, sortChanged } = this.props;
@@ -326,6 +334,8 @@ export class IndexTableUi extends Component {
       showSystemIndicesChanged,
       indices,
       intl,
+      loadIndices,
+      filterChanged
     } = this.props;
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
@@ -405,6 +415,21 @@ export class IndexTableUi extends Component {
 
                   onChange={this.onFilterChanged}
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="secondary"
+                  onClick={() => {
+                    loadIndices();
+                    filterChanged(EuiSearchBar.Query.parse(''));
+                  }}
+                  iconType="refresh"
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexTable.reloadIndicesButton"
+                    defaultMessage="Reload indices"
+                  />
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
             {this.renderFilterError()}
