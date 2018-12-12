@@ -63,7 +63,7 @@ export class LspService {
     for (const path of this.workspaceHandler.listWorkspaceFolders(repoUri)) {
       await this.controller.unloadWorkspace(path);
     }
-    this.workspaceHandler.clearWorkspace(repoUri);
+    await this.workspaceHandler.clearWorkspace(repoUri);
   }
 
   /**
