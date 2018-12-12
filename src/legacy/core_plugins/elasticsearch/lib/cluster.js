@@ -83,8 +83,15 @@ export class Cluster {
     };
 
     const client = new elasticsearch.Client(parseConfig(config, parseOptions));
-    // client.on('request', console.log)
-    client.on('response', console.log)
+    // This is just for initial debugging
+    client.on('response', (err, meta) => {
+      console.log();
+      if (err) console.log('Error', err);
+      console.log('Connection ID:', meta.connection.id);
+      console.log('Request', meta.request);
+      console.log('Response', meta.response);
+      console.log();
+    });
     this._clients.add(client);
     return client;
   }
@@ -120,11 +127,14 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     throw new Error(`called with an invalid endpoint: ${endpoint}`);
   }
 
-  console.log(clientParams)
-  return Bluebird.resolve(api.call(apiContext, clientParams))
+  const requestOptions = {
+    requestTimeout: clientParams.requestTimeout,
+    ignore: clientParams.ignore,
+    maxRetries: clientParams.maxRetries
+  };
+  return Bluebird.resolve(api.call(apiContext, clientParams, requestOptions))
     .then((result) => result.body)
     .catch((err) => {
-    // return api.call(apiContext, clientParams).catch((err) => {
       if (!wrap401Errors || err.statusCode !== 401) {
         return Promise.reject(err);
       }

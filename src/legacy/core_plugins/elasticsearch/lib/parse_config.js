@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import util from 'util';
 import url from 'url';
 import { get, noop, size, pick } from 'lodash';
 import { readFileSync } from 'fs';
-import Bluebird from 'bluebird';
 
 const readFile = (file) => readFileSync(file, 'utf8');
 
@@ -47,15 +45,16 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
   //   headers: serverConfig.customHeaders
   // };
   config.node = {
-    url: new URL(serverConfig.url),
+    url: new url.URL(serverConfig.url),
+    id: serverConfig.id || null,
     headers: serverConfig.customHeaders
-  }
+  };
 
   // Auth
   if (serverConfig.auth !== false && serverConfig.username && serverConfig.password) {
     // config.host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
-    config.node.url.username = serverConfig.username
-    config.node.url.password = serverConfig.password
+    config.node.url.username = serverConfig.username;
+    config.node.url.password = serverConfig.password;
   }
 
   // SSL
