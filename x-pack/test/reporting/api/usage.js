@@ -88,7 +88,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('usage updated when new jobs are posted', async () => {
+    describe.skip('usage updated when new jobs are posted', async () => {
       it('post jobs', async () => {
         const reportPaths = [];
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3));

@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { deleteJobs } from '../utils';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class DeleteJobModal extends Component {
   constructor(props) {
@@ -79,10 +80,21 @@ export class DeleteJobModal extends Component {
       if (this.el && this.state.deleting === true) {
         // work around to disable the modal's buttons if the jobs are being deleted
         this.el.confirmButton.style.display = 'none';
-        this.el.cancelButton.textContent = 'Close';
+        this.el.cancelButton.textContent = (<FormattedMessage
+          id="xpack.ml.jobsList.deleteJobModal.closeButtonLabel"
+          defaultMessage="Close"
+        />);
       }
 
-      const title = `Delete ${(this.state.jobs.length > 1) ? `${this.state.jobs.length} jobs` : this.state.jobs[0].id}`;
+      const title = (
+        <FormattedMessage
+          id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
+          defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}"
+          values={{
+            jobsCount: this.state.jobs.length,
+            jobId: this.state.jobs[0].id
+          }}
+        />);
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -90,15 +102,24 @@ export class DeleteJobModal extends Component {
             title={title}
             onCancel={this.closeModal}
             onConfirm={this.deleteJob}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={(<FormattedMessage
+              id="xpack.ml.jobsList.deleteJobModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />)}
+            confirmButtonText={(<FormattedMessage
+              id="xpack.ml.jobsList.deleteJobModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />)}
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
             className="eui-textBreakWord"
           >
             {(this.state.deleting === true) &&
               <div>
-                Deleting jobs
+                <FormattedMessage
+                  id="xpack.ml.jobsList.deleteJobModal.deletingJobsStatusLabel"
+                  defaultMessage="Deleting jobs"
+                />
                 <EuiSpacer />
                 <div style={{ textAlign: 'center' }}>
                   <EuiLoadingSpinner size="l"/>
@@ -108,10 +129,22 @@ export class DeleteJobModal extends Component {
 
             {(this.state.deleting === false) &&
               <React.Fragment>
-                <p>Are you sure you want to delete {(this.state.jobs.length > 1) ? 'these jobs' : 'this job'}?</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.deleteJobModal.deleteJobsDescription"
+                    defaultMessage="Are you sure you want to delete {jobsCount, plural, one {this job} other {these jobs}}?"
+                    values={{
+                      jobsCount: this.state.jobs.length
+                    }}
+                  />
+                </p>
                 {(this.state.jobs.length > 1) &&
-                  <p>Deleting multiple jobs can be time consuming.
-                    They will be deleted in the background and may not disappear from the jobs list instantly
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
+                      defaultMessage="Deleting multiple jobs can be time consuming.
+                      They will be deleted in the background and may not disappear from the jobs list instantly"
+                    />
                   </p>
                 }
               </React.Fragment>

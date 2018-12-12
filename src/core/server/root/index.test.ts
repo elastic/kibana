@@ -22,7 +22,7 @@ jest.mock('../logging', () => ({
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 
-const mockConfigService = { atPath: jest.fn() };
+const mockConfigService = { atPath: jest.fn(), getConfig$: jest.fn() };
 jest.mock('../config/config_service', () => ({
   ConfigService: jest.fn(() => mockConfigService),
 }));
@@ -50,6 +50,7 @@ const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {
 
 beforeEach(() => {
   mockLoggingService.asLoggerFactory.mockReturnValue(logger);
+  mockConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
 });
 
@@ -61,6 +62,7 @@ afterEach(() => {
   mockLoggingService.stop.mockReset();
   mockLoggingService.asLoggerFactory.mockReset();
   mockConfigService.atPath.mockReset();
+  mockConfigService.getConfig$.mockReset();
   mockServer.start.mockReset();
   mockServer.stop.mockReset();
 });

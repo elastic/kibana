@@ -127,7 +127,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
                   ? intl.formatMessage({
                       id:
                         'xpack.security.management.editRoles.elasticSearchPrivileges.addUserTitle',
-                      defaultMessage: 'Add a user...',
+                      defaultMessage: 'Add a user…',
                     })
                   : undefined
               }

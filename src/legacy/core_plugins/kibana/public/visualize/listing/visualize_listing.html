@@ -1,16 +1,13 @@
 <!-- Local nav. -->
-<kbn-top-nav name="visualize">
+<kbn-top-nav name="visualize" ng-if="listingController.showPluginBreadcrumbs">
   <!-- Transcluded elements. -->
   <div data-transclude-slots>
     <!-- Title. -->
-    <div
-      data-transclude-slot="topLeftCorner"
-    >
+    <div data-transclude-slot="topLeftCorner">
       <div
         class="kuiLocalTitle"
         role="heading"
-        aria-level="1"
-        ng-if="listingController.showPluginBreadcrumbs">
+        aria-level="1">
         Visualize
       </div>
     </div>

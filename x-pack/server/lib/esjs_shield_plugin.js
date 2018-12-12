@@ -360,16 +360,36 @@
     });
 
     /**
-     * Refreshes SAML access token.
+     * Refreshes an access token.
      *
      * @param {string} grant_type Currently only "refresh_token" grant type is supported.
      * @param {string} refresh_token One-time refresh token that will be exchanged to the new access/refresh token pair.
      *
      * @returns {{access_token: string, type: string, expires_in: number, refresh_token: string}}
      */
-    shield.samlRefreshAccessToken = ca({
+    shield.getAccessToken = ca({
       method: 'POST',
       needBody: true,
+      url: {
+        fmt: '/_xpack/security/oauth2/token'
+      }
+    });
+
+    /**
+     * Invalidates an access token.
+     *
+     * @param {string} token The access token to invalidate
+     *
+     * @returns {{created: boolean}}
+     */
+    shield.deleteAccessToken = ca({
+      method: 'DELETE',
+      needBody: true,
+      params: {
+        token: {
+          type: 'string'
+        }
+      },
       url: {
         fmt: '/_xpack/security/oauth2/token'
       }

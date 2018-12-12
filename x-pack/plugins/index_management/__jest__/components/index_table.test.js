@@ -121,7 +121,7 @@ describe('index table', () => {
     store = indexManagementStore();
     component = (
       <Provider store={store}>
-        <MemoryRouter initialEntries={[BASE_PATH]}>
+        <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
           <App />
         </MemoryRouter>
       </Provider>
@@ -198,8 +198,9 @@ describe('index table', () => {
   });
   test('should filter based on content of search input', () => {
     const rendered = mountWithIntl(component);
-    const searchInput = findTestSubject(rendered, 'indexTableFilterInput');
-    searchInput.simulate('change', { target: { value: 'testy0' } });
+    const searchInput = rendered.find('.euiFieldSearch').first();
+    searchInput.instance().value = 'testy0';
+    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
     snapshot(namesText(rendered));
   });

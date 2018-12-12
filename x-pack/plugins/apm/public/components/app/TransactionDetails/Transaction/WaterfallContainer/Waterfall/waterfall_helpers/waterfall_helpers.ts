@@ -15,8 +15,8 @@ import {
   zipObject
 } from 'lodash';
 import { colors } from 'x-pack/plugins/apm/public/style/variables';
-import { Span } from '../../../../../../../../typings/Span';
-import { Transaction } from '../../../../../../../../typings/Transaction';
+import { Span } from '../../../../../../../../typings/es_schemas/Span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
 
 export interface IWaterfallIndex {
   [key: string]: IWaterfallItem;
@@ -287,9 +287,8 @@ export function getWaterfall(
       }
     });
 
-  const childrenByParentId = groupBy(
-    filteredHits,
-    hit => (hit.parentId ? hit.parentId : 'root')
+  const childrenByParentId = groupBy(filteredHits, hit =>
+    hit.parentId ? hit.parentId : 'root'
   );
   const entryTransactionItem = getTransactionItem(entryTransaction);
   const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');

@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -19,7 +20,12 @@ export function AnalysisSummary({ results }) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <h3>Summary</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.analysisSummary.summaryTitle"
+            defaultMessage="Summary"
+          />
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />
@@ -36,7 +42,12 @@ export function AnalysisSummary({ results }) {
 function createDisplayItems(results) {
   const items = [
     {
-      title: 'Number of lines analyzed',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.analysisSummary.analyzedLinesNumberTitle"
+          defaultMessage="Number of lines analyzed"
+        />
+      ),
       description: results.num_lines_analyzed,
     },
     // {
@@ -47,18 +58,33 @@ function createDisplayItems(results) {
 
   if (results.format !== undefined) {
     items.push({
-      title: 'Format',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.analysisSummary.formatTitle"
+          defaultMessage="Format"
+        />
+      ),
       description: results.format,
     });
 
     if (results.format === 'delimited') {
       items.push({
-        title: 'Delimiter',
+        title: (
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.analysisSummary.delimiterTitle"
+            defaultMessage="Delimiter"
+          />
+        ),
         description: results.delimiter,
       });
 
       items.push({
-        title: 'Has header row',
+        title: (
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.analysisSummary.hasHeaderRowTitle"
+            defaultMessage="Has header row"
+          />
+        ),
         description: `${results.has_header_row}`,
       });
 
@@ -67,22 +93,39 @@ function createDisplayItems(results) {
 
   if (results.grok_pattern !== undefined) {
     items.push({
-      title: 'Grok pattern',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.analysisSummary.grokPatternTitle"
+          defaultMessage="Grok pattern"
+        />
+      ),
       description: results.grok_pattern,
     });
   }
 
   if (results.timestamp_field !== undefined) {
     items.push({
-      title: 'Time field',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.analysisSummary.timeFieldTitle"
+          defaultMessage="Time field"
+        />
+      ),
       description: results.timestamp_field,
     });
   }
 
   if (results.joda_timestamp_formats !== undefined) {
-    const s = (results.joda_timestamp_formats.length > 1) ? 's' : '';
     items.push({
-      title: `Time format${s}`,
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.analysisSummary.timeFormatTitle"
+          defaultMessage="Time {timestampFormats, plural, zero {format} one {format} other {formats}}"
+          values={{
+            timestampFormats: results.joda_timestamp_formats.length,
+          }}
+        />
+      ),
       description: results.joda_timestamp_formats.join(', '),
     });
   }

@@ -32,6 +32,7 @@ export function getColumnData(req, panel, entities, client) {
     }
   }
   const params = {
+    rest_total_hits_as_int: true,
     body: getRequestParams(req, panel, entities)
   };
   return client('msearch', params)

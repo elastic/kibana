@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { AutocompleteField } from '../autocomplete_field/index';
-import { OptionControl } from '../table_controls';
+import { OptionControl } from './controls/index';
 import { AssignmentOptions as AssignmentOptionsType, KueryBarProps } from './table';
 
 interface ControlBarProps {

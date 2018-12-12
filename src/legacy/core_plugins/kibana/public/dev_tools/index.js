@@ -32,6 +32,15 @@ uiRoutes
     }
   });
 
+uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
+  k7Breadcrumbs: () => [
+    {
+      text: 'Dev Tools',
+      href: '#/dev_tools'
+    }
+  ]
+});
+
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'console',

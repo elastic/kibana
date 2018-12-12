@@ -21,7 +21,7 @@ import Color from 'color';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ReactText } from 'react';
-import { InfraDataSeries, InfraMetricData } from '../../../../common/graphql/types';
+import { InfraDataSeries, InfraMetricData } from '../../../graphql/types';
 import { InfraFormatter, InfraFormatterType } from '../../../lib/lib';
 import {
   InfraMetricLayoutSection,
