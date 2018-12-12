@@ -104,6 +104,9 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'visualization',
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+          migrationVersion: {
+            visualization: '7.0.0',
+          },
           version: 1,
           attributes: {
             title: 'Count of requests',
