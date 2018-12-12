@@ -19,9 +19,6 @@
 
 import Slugify from '../string/slugify';
 
-import AccessibilityExample
-  from '../../views/accessibility/accessibility_example';
-
 import ActionItemExample
   from '../../views/action_item/action_item_example';
 
@@ -34,29 +31,8 @@ import BarExample
 import ButtonExample
   from '../../views/button/button_example';
 
-import CardExample
-  from '../../views/card/card_example';
-
-import CodeEditor
-  from '../../views/code_editor/code_editor_example';
-
 import CollapseButtonExample
   from '../../views/collapse_button/collapse_button_example';
-
-import ColorPickerExample
-  from '../../views/color_picker/color_picker_example';
-
-import ColumnExample
-  from '../../views/column/column_example';
-
-import ContextMenuExample
-  from '../../views/context_menu/context_menu_example';
-
-import EventExample
-  from '../../views/event/event_example';
-
-import EventsSandbox
-  from '../../views/event/events_sandbox';
 
 import ExpressionExample
   from '../../views/expression/expression_example';
@@ -150,10 +126,6 @@ import ViewSandbox
 
 // Component route names should match the component name exactly.
 const components = [{
-  name: 'Accessibility',
-  component: AccessibilityExample,
-  hasReact: true,
-}, {
   name: 'ActionItem',
   component: ActionItemExample,
   hasReact: true,
@@ -169,39 +141,16 @@ const components = [{
   component: ButtonExample,
   hasReact: true,
 }, {
-  name: 'Card',
-  component: CardExample,
-  hasReact: true,
-}, {
-  name: 'CodeEditor',
-  component: CodeEditor,
-  hasReact: true,
-}, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
   hasReact: true,
 }, {
-  name: 'ColorPicker',
-  component: ColorPickerExample,
-  hasReact: true,
-}, {
-  name: 'Column',
-  component: ColumnExample,
-}, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
-  hasReact: true,
-}, {
-  name: 'ContextMenu',
-  component: ContextMenuExample,
   hasReact: true,
 }, {
   name: 'EmptyTablePrompt',
   component: EmptyTablePromptExample,
-  hasReact: true,
-}, {
-  name: 'Event',
-  component: EventExample,
   hasReact: true,
 }, {
   name: 'Expression',
@@ -298,9 +247,6 @@ const components = [{
 }];
 
 const sandboxes = [{
-  name: 'Events',
-  component: EventsSandbox,
-}, {
   name: 'HeaderBar with Table',
   component: HeaderBarSandbox,
 }, {
