@@ -51,7 +51,7 @@ export interface InfraSource {
   /** The status of the source */
   status: InfraSourceStatus;
   /** A hierarchy of metadata entries by node */
-  metadataByNode?: InfraNodeMetadata | null;
+  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -471,7 +471,7 @@ export namespace InfraSourceResolvers {
     /** The status of the source */
     status?: StatusResolver<InfraSourceStatus, TypeParent, Context>;
     /** A hierarchy of metadata entries by node */
-    metadataByNode?: MetadataByNodeResolver<InfraNodeMetadata | null, TypeParent, Context>;
+    metadataByNode?: MetadataByNodeResolver<InfraNodeMetadata, TypeParent, Context>;
     /** A consecutive span of log entries surrounding a point in time */
     logEntriesAround?: LogEntriesAroundResolver<InfraLogEntryInterval, TypeParent, Context>;
     /** A consecutive span of log entries within an interval */
@@ -500,7 +500,7 @@ export namespace InfraSourceResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
   export type MetadataByNodeResolver<
-    R = InfraNodeMetadata | null,
+    R = InfraNodeMetadata,
     Parent = InfraSource,
     Context = InfraContext
   > = Resolver<R, Parent, Context, MetadataByNodeArgs>;

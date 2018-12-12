@@ -23,7 +23,7 @@ export interface InfraSource {
   /** The status of the source */
   status: InfraSourceStatus;
   /** A hierarchy of metadata entries by node */
-  metadataByNode?: InfraNodeMetadata | null;
+  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -426,7 +426,7 @@ export namespace MetadataQuery {
 
     id: string;
 
-    metadataByNode?: MetadataByNode | null;
+    metadataByNode: MetadataByNode;
   };
 
   export type MetadataByNode = {

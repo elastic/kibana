@@ -134,7 +134,11 @@
                 "defaultValue": null
               }
             ],
-            "type": { "kind": "OBJECT", "name": "InfraNodeMetadata", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "InfraNodeMetadata", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
