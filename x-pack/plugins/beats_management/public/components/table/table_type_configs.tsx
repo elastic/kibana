@@ -164,7 +164,7 @@ export const BeatsTableType: TableType = {
       name: i18n.translate('xpack.beatsManagement.beatsTable.lastConfigUpdateTitle', {
         defaultMessage: 'Last config update',
       }),
-      render: (tags: BeatTag[]) =>
+      render: (tags?: BeatTag[]) =>
         tags && tags.length ? (
           <span>
             {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
