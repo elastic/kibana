@@ -10,13 +10,13 @@ import { Feature } from '../../types';
 
 export function populateUICapabilities(
   xpackMainPlugin: Record<string, any>,
-  injectedVars: Record<string, any>
+  uiCapabilities: UICapabilities
 ): UICapabilities {
   const features: Feature[] = xpackMainPlugin.getFeatures();
 
   const featureCapabilities: UICapabilities[] = features.map(getCapabilitiesFromFeature);
 
-  return mergeCapabilities(injectedVars.uiCapabilities || {}, ...featureCapabilities);
+  return mergeCapabilities(uiCapabilities || {}, ...featureCapabilities);
 }
 
 function getCapabilitiesFromFeature(feature: Feature): UICapabilities {
@@ -46,23 +46,21 @@ function getCapabilitiesFromFeature(feature: Feature): UICapabilities {
   return capabilities;
 }
 
-function mergeCapabilities(...allCapabilities: UICapabilities[]): UICapabilities {
-  return allCapabilities.reduce(
-    (acc, capabilities) => {
-      const featureCapabilities = Object.keys(capabilities).reduce((featureAcc, key) => {
-        return {
-          ...featureAcc,
-          [key]: capabilities[key],
-        };
-      }, {});
-
+function mergeCapabilities(
+  originalCapabilities: UICapabilities,
+  ...allFeatureCapabilities: UICapabilities[]
+): UICapabilities {
+  return allFeatureCapabilities.reduce((acc, capabilities) => {
+    const featureCapabilities = Object.keys(capabilities).reduce((featureAcc, key) => {
       return {
-        ...featureCapabilities,
-        ...acc,
+        ...featureAcc,
+        [key]: capabilities[key],
       };
-    },
-    {
-      navLinks: {},
-    }
-  );
+    }, {});
+
+    return {
+      ...featureCapabilities,
+      ...acc,
+    };
+  }, originalCapabilities);
 }

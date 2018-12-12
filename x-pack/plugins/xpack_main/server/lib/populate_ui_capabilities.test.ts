@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UICapabilities } from 'ui/capabilities';
 import { Feature } from './feature_registry';
 import { populateUICapabilities } from './populate_ui_capabilities';
 
@@ -44,9 +45,8 @@ function createFeaturePrivilege(key: string, capabilities: string[] = []) {
 describe('populateUICapabilities', () => {
   it('handles no original uiCapabilites and no registered features gracefully', () => {
     const xpackMainPlugin = getMockXpackMainPlugin([]);
-    const originalInjectedVars = {};
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+    expect(populateUICapabilities(xpackMainPlugin, {} as UICapabilities)).toEqual({
       navLinks: {},
     });
   });
@@ -55,7 +55,7 @@ describe('populateUICapabilities', () => {
     const xpackMainPlugin = getMockXpackMainPlugin([]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
       feature: {
         someCapability: true,
       },
@@ -76,7 +76,7 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
       feature: {
         someCapability: true,
       },
@@ -99,7 +99,7 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
       feature: {
         someCapability: true,
       },
@@ -127,7 +127,7 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
       feature: {
         someCapability: true,
       },
@@ -180,7 +180,7 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
       anotherNewFeature: {
         capability1: true,
         capability2: true,
