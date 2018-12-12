@@ -19,7 +19,6 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
-import v8 from 'v8';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -142,16 +141,19 @@ export default class BaseOptimizer {
     const currentAvailableOsCpus =  Math.max(0, cpus.length - 1) || 1;
     const calculatedCpus = currentAvailableOsCpus > 0 ? currentAvailableOsCpus : 4;
 
+    // Calculate the node options from the NODE_OPTIONS env var
+    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
+
     return {
       name: 'optimizer-thread-loader-main-pool',
       workers: calculatedCpus,
       workerParallelJobs: 20,
       // This is a safe check in order to set
-      // max_old_space_size in the workers
-      // accordingly to memory allowed in the main process.
-      // Otherwise, if the user sets max_old_space_size into
-      // NODE_OPTIONS, it won't affect the workers.
-      workerNodeArgs: [`--max_old_space_size=${Math.trunc(v8.getHeapStatistics().total_heap_size / 1000000)}`],
+      // the parent node options applied from
+      // the NODE_OPTIONS env var for every launched worker.
+      // Otherwise, if the user sets max_old_space_size, as they
+      // are used to, into NODE_OPTIONS, it won't affect the workers.
+      workerNodeArgs: parsedNodeOptions,
       poolParallelJobs: calculatedCpus * 20,
       poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 5000
     };
