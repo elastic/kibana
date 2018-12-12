@@ -47,17 +47,17 @@ run(async ({ flags: { path, output, 'output-format': outputFormat, include = [] 
 
     fullConfig.paths = {
       ...fullConfig.paths,
-      ...Object.entries(additionalConfig.paths).reduce((acc, [pluginNamespace, pluginPath]) => {
-        acc[pluginNamespace] = normalizePath(resolve(configPath, '..', pluginPath));
+      ...Object.entries(additionalConfig.paths).reduce((acc, [pluginNamespace, subPath]) => {
+        acc[pluginNamespace] = normalizePath(resolve(configPath, '..', subPath));
         return acc;
       }, {}),
     };
 
     fullConfig.exclude = [
-      ...fullConfig.exclude,
-      ...additionalConfig.exclude.map(excludePath => {
-        normalizePath(resolve(configPath, '..', excludePath));
-      }),
+      ...(fullConfig.exclude || []),
+      ...(additionalConfig.exclude || []).map(excludePath =>
+        normalizePath(resolve(configPath, '..', excludePath))
+      ),
     ];
   }
 
