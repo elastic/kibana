@@ -37,7 +37,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           <img
             src="../plugins/infra/images/hosts.svg"
             role="presentation"
-            alt="Hosts"
+            alt=""
             className="euiIcon euiIcon--large"
           />
         </EuiKeyPadMenuItem>
@@ -45,7 +45,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           <img
             src="../plugins/infra/images/k8.svg"
             role="presentation"
-            alt="Kubernetes Pods"
+            alt=""
             className="euiIcon euiIcon--large"
           />
         </EuiKeyPadMenuItem>
@@ -53,7 +53,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           <img
             src="../plugins/infra/images/docker.svg"
             role="presentation"
-            alt="Docker Containers"
+            alt=""
             className="euiIcon euiIcon--large"
           />
         </EuiKeyPadMenuItem>
