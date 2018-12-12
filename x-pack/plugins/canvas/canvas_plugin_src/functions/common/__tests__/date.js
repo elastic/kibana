@@ -8,9 +8,11 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import { date } from '../date';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 
 describe('date', () => {
   const fn = functionWrapper(date);
+  const functionErrors = getFunctionErrors();
 
   let clock;
   // stubbed date constructor to check current dates match when no args are passed in
@@ -48,7 +50,7 @@ describe('date', () => {
 
       it('throws when passing an invalid date string and format is not specified', () => {
         expect(() => fn(null, { value: '23/25/2014' })).to.throwException(e => {
-          expect(e.message).to.be('Invalid date input: 23/25/2014');
+          expect(e.message).to.be(functionErrors.date.dateInvalid('23/25/2014').message);
         });
       });
     });

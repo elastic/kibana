@@ -5,12 +5,15 @@
  */
 
 import expect from 'expect.js';
+
 import { alterColumn } from '../alterColumn';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../errors';
 import { emptyTable, testTable } from './fixtures/test_tables';
 
 describe('alterColumn', () => {
   const fn = functionWrapper(alterColumn);
+  const functionErrors = getFunctionErrors();
   const nameColumnIndex = testTable.columns.findIndex(({ name }) => name === 'name');
   const timeColumnIndex = testTable.columns.findIndex(({ name }) => name === 'time');
   const priceColumnIndex = testTable.columns.findIndex(({ name }) => name === 'price');
@@ -49,7 +52,7 @@ describe('alterColumn', () => {
 
       it('throws if column does not exists', () => {
         expect(() => fn(emptyTable, { column: 'foo', type: 'number' })).to.throwException(e => {
-          expect(e.message).to.be("Column not found: 'foo'");
+          expect(e.message).to.be(functionErrors.alterColumn.columnNotFound('foo').message);
         });
       });
     });
@@ -79,7 +82,7 @@ describe('alterColumn', () => {
 
       it('throws when converting to an invalid type', () => {
         expect(() => fn(testTable, { column: 'name', type: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be('Cannot convert to foo');
+          expect(e.message).to.be(functionErrors.alterColumn.typeConvertFailure('foo').message);
         });
       });
     });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18nProvider } from './i18n_provider';
+import { i18n } from './i18n';
 
 interface ElementStrings {
   displayName: string;
@@ -17,12 +17,9 @@ interface ElementStringDict {
 
 /**
  * This function will return a dictionary of strings, organized by Canvas
- * Element specification.  This function requires that `i18nProvider` be
- * properly initialized.
+ * Element specification.
  */
 export const getElementStrings = (): ElementStringDict => {
-  const i18n = i18nProvider.getInstance();
-
   return {
     areaChart: {
       displayName: i18n.translate('xpack.canvas.elements.areaChartDisplayName', {
