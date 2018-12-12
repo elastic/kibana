@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
+import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { setDocTitle } from '../../lib/doc_title';
@@ -75,7 +76,8 @@ export const Workpad = props => {
               : {};
 
             // NOTE: the data-shared-* attributes here are used for reporting
-            return (
+            return Style.it(
+              workpad.css,
               <div
                 className={`canvasWorkpad ${isFullscreen ? 'fullscreen' : ''}`}
                 style={fsStyle}
@@ -128,5 +130,5 @@ Workpad.propTypes = {
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   fetchAllRenderables: PropTypes.func.isRequired,
-  style: PropTypes.object,
+  css: PropTypes.object,
 };

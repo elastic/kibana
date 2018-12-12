@@ -11,12 +11,16 @@ import { bucketTransformer } from './transform';
 export async function getBuckets(
   serviceName: string,
   transactionName: string,
+  transactionType: string,
+  transactionId: string,
   bucketSize: number,
   setup: Setup
 ) {
   const response = await bucketFetcher(
     serviceName,
     transactionName,
+    transactionType,
+    transactionId,
     bucketSize,
     setup
   );

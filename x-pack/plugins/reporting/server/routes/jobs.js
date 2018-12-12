@@ -81,6 +81,36 @@ export function jobs(server) {
     config: getRouteConfig(),
   });
 
+  // return some info about the job
+  server.route({
+    path: `${mainEntry}/info/{docId}`,
+    method: 'GET',
+    handler: (request) => {
+      const { docId } = request.params;
+
+      return jobsQuery.get(request.pre.user, docId)
+        .then((doc) => {
+          if (!doc) {
+            return boom.notFound();
+          }
+
+          const { jobtype: jobType } = doc._source;
+          if (!request.pre.management.jobTypes.includes(jobType)) {
+            return boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+          }
+
+          const { payload } = doc._source;
+          payload.headers = 'not shown';
+
+          return {
+            ...doc._source,
+            payload
+          };
+        });
+    },
+    config: getRouteConfig(),
+  });
+
   // trigger a download of the output from a job
   // NOTE: We're disabling range request for downloading the PDF. There's a bug in Firefox's PDF.js viewer
   // (https://github.com/mozilla/pdf.js/issues/8958) where they're using a range request to retrieve the

@@ -19,11 +19,14 @@ describe('ML - New Event Modal Controller', () => {
   it('Initialize New Event Modal Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlNewEventModal', {
-        $scope: scope,
-        $modalInstance: mockModalInstance,
-        params: {}
-      });
+
+      expect(() => {
+        $controller('MlNewEventModal', {
+          $scope: scope,
+          $modalInstance: mockModalInstance,
+          params: {}
+        });
+      }).to.not.throwError();
 
       expect(scope.event.description).to.be('');
       done();

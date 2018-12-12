@@ -22,7 +22,7 @@ import { resolve } from 'path';
 
 const mockTemplate = `
 {{appId}}
-{{bundlePath}}
+{{regularBundlePath}}
 {{i18n 'foo' '{"defaultMessage": "bar"}'}}
 `;
 
@@ -102,7 +102,7 @@ describe('ui_render/AppBootstrap', () => {
         ...mockConfig(),
         templateData: {
           appId: 'not123',
-          bundlePath: 'not/foo/bar'
+          regularBundlePath: 'not/foo/bar'
         }
       };
       const bootstrap2 = new AppBootstrap(config2);
@@ -119,7 +119,7 @@ function mockConfig() {
   return {
     templateData: {
       appId: 123,
-      bundlePath: '/foo/bar'
+      regularBundlePath: '/foo/bar'
     }
   };
 }

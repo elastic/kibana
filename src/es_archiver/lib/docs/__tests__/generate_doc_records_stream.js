@@ -63,6 +63,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         expect(name).to.be('search');
         expect(params).to.have.property('index', 'logstash-*');
         expect(params).to.have.property('scroll', '1m');
+        expect(params).to.have.property('rest_total_hits_as_int', true);
         return {
           hits: {
             total: 0,

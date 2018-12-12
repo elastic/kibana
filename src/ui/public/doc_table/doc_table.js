@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
-import './doc_table.less';
 import '../directives/truncated';
 import '../directives/infinite_scroll';
 import './components/table_header';

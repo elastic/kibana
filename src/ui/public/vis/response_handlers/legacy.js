@@ -70,6 +70,11 @@ const LegacyResponseHandlerProvider = function () {
             }
 
             let previousSplitAgg = new AggConfigResult(splitAgg, null, splitValue, splitValue);
+            previousSplitAgg.rawData = {
+              table: table,
+              column: splitColumnIndex,
+              row: rowIndex,
+            };
             const tableIndex = splitMap[splitValue];
             const newRow = _.map(converted.tables[tableIndex].tables[0].columns, column => {
               const value = row[column.id];

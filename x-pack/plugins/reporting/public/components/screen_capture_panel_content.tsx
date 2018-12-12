@@ -5,6 +5,7 @@
  */
 
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { ReportingPanelContent } from './reporting_panel_content';
 
@@ -55,7 +56,12 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
       return (
         <Fragment>
           <EuiSwitch
-            label="Optimize for printing"
+            label={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                defaultMessage="Optimize for printing"
+              />
+            }
             checked={this.state.usePrintLayout}
             onChange={this.handlePrintLayoutChange}
             data-test-subj="usePrintLayout"

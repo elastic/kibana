@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { AlertCallOut } from './alert_call_out';
 
 describe('AlertCallOut component', () => {
   it('renders expected component', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AlertCallOut>
         <div>Some text</div>
       </AlertCallOut>

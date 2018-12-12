@@ -60,7 +60,7 @@ const loggingTimezone = (settings, log) => {
   if (_.has(settings, 'logging.useUTC')) {
     const timezone = settings.logging.useUTC ? 'UTC' : false;
     set('logging.timezone', timezone);
-    unset(settings, 'logging.UTC');
+    unset(settings, 'logging.useUTC');
     log(`Config key "logging.useUTC" is deprecated. It has been replaced with "logging.timezone"`);
   }
 };
@@ -75,6 +75,7 @@ const deprecations = [
   rename('optimize.lazyHost', 'optimize.watchHost'),
   rename('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
   rename('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
+  rename('i18n.defaultLocale', 'i18n.locale'),
   serverSslEnabled,
   savedObjectsIndexCheckTimeout,
   rewriteBasePath,

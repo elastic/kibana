@@ -21,13 +21,13 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
   describe('scripted fields preview', () => {
     before(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await PageObjects.settings.navigateTo();

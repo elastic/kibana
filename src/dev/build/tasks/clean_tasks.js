@@ -19,7 +19,7 @@
 
 import minimatch from 'minimatch';
 
-import { deleteAll, scanDelete } from '../lib';
+import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 
 export const CleanTask = {
   global: true,
@@ -231,5 +231,23 @@ export const CleanExtraBrowsersTask = {
         await deleteAll(log, getBrowserPaths({ windows: true, darwin: true }));
       }
     }
+  },
+};
+
+export const CleanEmptyFoldersTask = {
+  description: 'Cleaning all empty folders recursively',
+
+  async run(config, log, build) {
+    // Delete every single empty folder from
+    // the distributable except the plugins
+    // and data folder.
+    await deleteEmptyFolders(
+      log,
+      build.resolvePath('.'),
+      [
+        build.resolvePath('plugins'),
+        build.resolvePath('data')
+      ]
+    );
   },
 };

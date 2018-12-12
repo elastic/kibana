@@ -6,7 +6,7 @@
 import React from 'react';
 import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadLicense } from '../../services/rest/apm';
+import { loadLicense } from '../../services/rest/xpack';
 
 const ID = 'license';
 const INITIAL_DATA = {

@@ -14,7 +14,9 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
   this.logger = logger;
 
   const validateInstance = () => {
-    if (page === false || browser === false) throw new Error('Phantom instance is closed');
+    if (page === false || browser === false) {
+      throw new Error('Phantom instance is closed: ' + JSON.stringify({ page, browser }));
+    }
   };
 
   const configurePage = (pageOptions) => {
@@ -100,7 +102,9 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
         .then(() => fromCallback(cb => page.open(url, cb)))
         .then(status => {
           logger.debug(`Page opened with status ${status}`);
-          if (status !== 'success') throw new Error('URL open failed. Is the server running?');
+          if (status !== 'success') {
+            throw new Error(`URL open failed with status [${status}]. Is the server running?`);
+          }
           if (pageOptions.waitForSelector) {
             return this.waitForSelector(pageOptions.waitForSelector);
           }

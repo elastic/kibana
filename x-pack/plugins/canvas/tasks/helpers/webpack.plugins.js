@@ -15,6 +15,7 @@ export function getWebpackConfig({ devtool, watch } = {}) {
     watch,
     devtool,
 
+    mode: 'none',
     entry: {
       'elements/all': path.join(sourceDir, 'elements/register.js'),
       'renderers/all': path.join(sourceDir, 'renderers/register.js'),
@@ -36,6 +37,16 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       path: buildDir,
       filename: '[name].js', // Need long paths here.
       libraryTarget: 'umd',
+      // Note: this is needed due to a not yet resolved bug on
+      // webpack 4 with umd modules generation.
+      // For now we have 2 quick workarounds: one is what is implemented
+      // below another is to change the libraryTarget to commonjs
+      //
+      // The issues can be followed on:
+      // https://github.com/webpack/webpack/issues/6642
+      // https://github.com/webpack/webpack/issues/6525
+      // https://github.com/webpack/webpack/issues/6677
+      globalObject: `(typeof self !== 'undefined' ? self : this)`,
     },
 
     resolve: {
@@ -44,10 +55,10 @@ export function getWebpackConfig({ devtool, watch } = {}) {
     },
 
     plugins: [
-      function loaderFailHandler() {
+      function LoaderFailHandlerPlugin() {
         // bails on error, including loader errors
         // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
-        this.plugin('done', function(stats) {
+        this.hooks.done.tapPromise('LoaderFailHandlerPlugin', async stats => {
           if (!stats.hasErrors()) return;
           const errorMessage = stats.toString('errors-only');
           if (watch) console.error(errorMessage);

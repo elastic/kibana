@@ -5,11 +5,9 @@
  */
 
 export function GraphPageProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
-  const config = getService('config');
+  const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const defaultFindTimeout = config.get('timeouts.find');
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
   const retry = getService('retry');
 
@@ -17,23 +15,21 @@ export function GraphPageProvider({ getService, getPageObjects }) {
   class GraphPage {
 
     async selectIndexPattern(pattern) {
-      await remote.setFindTimeout(defaultFindTimeout).findDisplayedByCssSelector('.gphIndexSelect').click();
-      await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('.gphIndexSelect > option[label="' + pattern + '"]').click();
+      await find.clickDisplayedByCssSelector('.gphIndexSelect');
+      await find.clickByCssSelector('.gphIndexSelect > option[label="' + pattern + '"]');
     }
 
     async clickAddField() {
       await retry.try(async () => {
-        await remote.setFindTimeout(defaultFindTimeout).findById('addVertexFieldButton')
-          .click();
+        await find.clickByCssSelector('#addVertexFieldButton');
         // make sure the fieldSelectionList is not hidden
-        await remote.setFindTimeout(defaultFindTimeout).findDisplayedByCssSelector('[data-test-subj="fieldSelectionList"]');
+        await testSubjects.exists('fieldSelectionList');
       });
     }
 
     async selectField(field) {
-      await remote.setFindTimeout(defaultFindTimeout).findDisplayedByCssSelector('select[id="fieldList"] > option[label="' + field + '"]')
-        .click();
-      await remote.setFindTimeout(defaultFindTimeout).findDisplayedByCssSelector('button[ng-click="addFieldToSelection()"]').click();
+      await find.clickDisplayedByCssSelector('select[id="fieldList"] > option[label="' + field + '"]');
+      await find.clickDisplayedByCssSelector('button[ng-click="addFieldToSelection()"]');
     }
 
     async addField(field) {
@@ -44,14 +40,13 @@ export function GraphPageProvider({ getService, getPageObjects }) {
     }
 
     async query(str) {
-      await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('input.kuiLocalSearchInput').type(str);
-      await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('button.kuiLocalSearchButton').click();
+      await find.setValue('input.kuiLocalSearchInput', str);
+      await find.clickDisplayedByCssSelector('button.kuiLocalSearchButton');
     }
 
 
     async getGraphCircleText() {
-      const chartTypes = await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('text.gphNode__label');
+      const chartTypes = await find.allByCssSelector('text.gphNode__label');
 
       async function getCircleText(circle) {
         return circle.getVisibleText();
@@ -62,8 +57,7 @@ export function GraphPageProvider({ getService, getPageObjects }) {
     }
 
     async getGraphConnectingLines() {
-      const chartTypes = await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('line.edge');
+      const chartTypes = await find.allByCssSelector('line.edge');
 
       async function getLineStyle(line) {
         return line.getAttribute('style');
@@ -75,16 +69,14 @@ export function GraphPageProvider({ getService, getPageObjects }) {
 
     // click the line which matches the style
     async clickGraphConnectingLine(style) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('line.edge[style="' + style + '"]').click();
+      await find.clickByCssSelector('line.edge[style="' + style + '"]');
     }
 
     async newGraph() {
       log.debug('Click New Workspace');
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[aria-label="New Workspace"]').click();
+      await find.clickByCssSelector('[aria-label="New Workspace"]');
       await PageObjects.common.sleep(1000);
-      const modal = await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('#kibana-body');
+      const modal = await find.byCssSelector('#kibana-body');
       const page = await modal.getVisibleText();
       if (page.includes('This will clear the workspace - are you sure?')) {
         return testSubjects.click('confirmModalConfirmButton');
@@ -92,62 +84,55 @@ export function GraphPageProvider({ getService, getPageObjects }) {
     }
 
     async saveGraph(name) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[aria-label="Save Workspace"]').click();
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findById('workspaceTitle').type(name);
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('button[aria-label="Save workspace"]').click();
+      await find.clickByCssSelector('[aria-label="Save Workspace"]');
+      await find.setValue('#workspaceTitle', name);
+      await find.clickByCssSelector('button[aria-label="Save workspace"]');
 
       // Confirm that the Graph has been saved.
       return await testSubjects.exists('saveGraphSuccess');
     }
 
     async openGraph(name) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[aria-label="Load Saved Workspace"]').click();
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[name="filter"]').type(name);
+      await find.clickByCssSelector('[aria-label="Load Saved Workspace"]');
+      await find.setValue('input[name="filter"]', name);
       await PageObjects.common.sleep(1000);
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByLinkText(name).click();
+      await find.clickByLinkText(name);
       await PageObjects.common.sleep(5000);
     }
 
     async deleteGraph() {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[aria-label="Delete Saved Workspace"]').click();
+      await find.clickByCssSelector('[aria-label="Delete Saved Workspace"]');
       await testSubjects.click('confirmModalConfirmButton');
     }
 
 
-    getVennTerm1() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('span.vennTerm1').getVisibleText();
+    async getVennTerm1() {
+      const el = await find.byCssSelector('span.vennTerm1');
+      return await el.getVisibleText();
     }
 
-    getVennTerm2() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('span.vennTerm2').getVisibleText();
+    async getVennTerm2() {
+      const el = await find.byCssSelector('span.vennTerm2');
+      return await el.getVisibleText();
     }
 
-    getSmallVennTerm1() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('small.vennTerm1').getVisibleText();
+    async getSmallVennTerm1() {
+      const el = await find.byCssSelector('small.vennTerm1');
+      return await el.getVisibleText();
     }
 
-    getSmallVennTerm12() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('small.vennTerm12').getVisibleText();
+    async getSmallVennTerm12() {
+      const el = await find.byCssSelector('small.vennTerm12');
+      return await el.getVisibleText();
     }
 
-    getSmallVennTerm2() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('small.vennTerm2').getVisibleText();
+    async getSmallVennTerm2() {
+      const el = await find.byCssSelector('small.vennTerm2');
+      return await el.getVisibleText();
     }
 
     async getVennEllipse1() {
-      const el = await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('ellipse.venn1');
+      const el = await find.byCssSelector('ellipse.venn1');
       const cx = await el.getAttribute('cx');
       const cy = await el.getAttribute('cy');
       const rx = await el.getAttribute('rx');
@@ -155,7 +140,7 @@ export function GraphPageProvider({ getService, getPageObjects }) {
     }
 
     async getVennEllipse2() {
-      const el = await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('ellipse.venn2');
+      const el = await find.byCssSelector('ellipse.venn2');
       const cx = await el.getAttribute('cx');
       const cy = await el.getAttribute('cy');
       const rx = await el.getAttribute('rx');

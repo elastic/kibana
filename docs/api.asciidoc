@@ -24,6 +24,8 @@ wherever possible.
 have breaking changes in any version of Kibana, or it might even be removed
 entirely.
 
+NOTE: You cannot access these APIs via the Console in Kibana.
+
 [float]
 == APIs
 * <<spaces-api>>

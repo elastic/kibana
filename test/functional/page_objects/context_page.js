@@ -26,7 +26,7 @@ const DEFAULT_INITIAL_STATE = {
 };
 
 export function ContextPageProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const config = getService('config');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -44,7 +44,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
         hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorType}/${anchorId}?_a=${initialState}`,
       });
 
-      await remote.get(appUrl);
+      await browser.get(appUrl);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await this.waitUntilContextLoadingHasFinished();
       // For lack of a better way, using a sleep to ensure page is loaded before proceeding
