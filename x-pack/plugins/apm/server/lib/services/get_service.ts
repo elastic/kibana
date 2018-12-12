@@ -5,7 +5,7 @@
  */
 
 import { oc } from 'ts-optchain';
-import { TermsAggsBucket } from 'x-pack/plugins/apm/typings/elasticsearch';
+import { BucketAgg } from 'x-pack/plugins/apm/typings/elasticsearch';
 import {
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
@@ -65,10 +65,10 @@ export async function getService(
 
   interface Aggs {
     types: {
-      buckets: TermsAggsBucket[];
+      buckets: BucketAgg[];
     };
     agents: {
-      buckets: TermsAggsBucket[];
+      buckets: BucketAgg[];
     };
   }
 

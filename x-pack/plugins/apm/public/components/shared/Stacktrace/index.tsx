@@ -7,7 +7,7 @@
 import { EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { PureComponent } from 'react';
-import { Stackframe } from '../../../../typings/APMDoc';
+import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
 import { CodePreview } from '../../shared/CodePreview';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
