@@ -118,9 +118,8 @@ export const EditFilterList = injectI18n(class extends Component {
         toastNotifications.addDanger(intl.formatMessage({
           id: 'xpack.ml.settings.editFilterList.loadingDetailsOfFilterErrorMessage',
           defaultMessage: 'An error occurred loading details of filter {filterId}',
-          values: {
-            filterId,
-          },
+        }, {
+          filterId,
         }));
       });
   }
@@ -180,9 +179,8 @@ export const EditFilterList = injectI18n(class extends Component {
         toastNotifications.addWarning(intl.formatMessage({
           id: 'xpack.ml.settings.editFilterList.duplicatedItemsInFilterListWarningMessage',
           defaultMessage: 'The following items were already in the filter list: {alreadyInFilter}',
-          values: {
-            alreadyInFilter,
-          },
+        }, {
+          alreadyInFilter,
         }));
       }
 
@@ -285,9 +283,8 @@ export const EditFilterList = injectI18n(class extends Component {
         toastNotifications.addDanger(intl.formatMessage({
           id: 'xpack.ml.settings.editFilterList.savingFilterErrorMessage',
           defaultMessage: 'An error occurred saving filter {filterId}',
-          values: {
-            filterId,
-          },
+        }, {
+          filterId,
         }));
         this.setState({ saveInProgress: false });
       });
