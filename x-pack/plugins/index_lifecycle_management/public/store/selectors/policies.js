@@ -218,7 +218,6 @@ export const phaseToES = (state, phase) => {
   if (!phase[PHASE_ENABLED]) {
     return esPhase;
   }
-
   if (isNumber(phase[PHASE_ROLLOVER_MINIMUM_AGE])) {
     esPhase.min_age = `${phase[PHASE_ROLLOVER_MINIMUM_AGE]}${phase[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}`;
   }
@@ -269,5 +268,6 @@ export const phaseToES = (state, phase) => {
       number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
     };
   }
+  console.log("PHASE", phase);
   return esPhase;
 };

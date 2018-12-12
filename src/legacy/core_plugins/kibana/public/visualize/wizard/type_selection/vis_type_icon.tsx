@@ -42,7 +42,13 @@ export const VisTypeIcon = ({ visType }: VisTypeIconProps) => {
   return (
     <React.Fragment>
       {visType.image && (
-        <img src={visType.image} aria-hidden="true" className="visNewVisDialog__typeImage" />
+        <img
+          src={visType.image}
+          aria-hidden="true"
+          role="presentation"
+          alt=""
+          className="visNewVisDialog__typeImage"
+        />
       )}
       {!visType.image && visType.legacyIcon && <span className={legacyIconClass} />}
       {!visType.image && !visType.legacyIcon && (

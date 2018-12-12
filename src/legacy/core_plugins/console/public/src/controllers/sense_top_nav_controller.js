@@ -26,12 +26,18 @@ export function SenseTopNavController(Private, i18n) {
   const controller = new KbnTopNavController([
     {
       key: 'welcome',
+      label: i18n('console.topNav.welcomeTabLabel', {
+        defaultMessage: 'Welcome'
+      }),
       hideButton: true,
       template: `<sense-welcome></sense-welcome>`,
       testId: 'consoleWelcomeButton',
     },
     {
       key: 'history',
+      label: i18n('console.topNav.historyTabLabel', {
+        defaultMessage: 'History'
+      }),
       description: i18n('console.topNav.historyTabDescription', {
         defaultMessage: 'History',
       }),
@@ -40,6 +46,9 @@ export function SenseTopNavController(Private, i18n) {
     },
     {
       key: 'settings',
+      label: i18n('console.topNav.settingsTabLabel', {
+        defaultMessage: 'Settings'
+      }),
       description: i18n('console.topNav.settingsTabDescription', {
         defaultMessage: 'Settings',
       }),
@@ -48,6 +57,9 @@ export function SenseTopNavController(Private, i18n) {
     },
     {
       key: 'help',
+      label: i18n('console.topNav.helpTabLabel', {
+        defaultMessage: 'Help'
+      }),
       description: i18n('console.topNav.helpTabDescription', {
         defaultMessage: 'Help',
       }),
