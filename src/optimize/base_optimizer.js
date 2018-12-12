@@ -20,7 +20,6 @@
 import { writeFile } from 'fs';
 import os from 'os';
 import Boom from 'boom';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
@@ -40,7 +39,6 @@ const BABEL_EXCLUDE_RE = [
 ];
 const STATS_WARNINGS_FILTER = new RegExp([
   '(export .* was not found in)',
-  '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
 ].join(''));
 
 export default class BaseOptimizer {
@@ -103,12 +101,6 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
-    function getStyleLoaderExtractor() {
-      return [
-        MiniCssExtractPlugin.loader
-      ];
-    }
-
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
       return [
         ...postProcessors,
@@ -212,10 +204,6 @@ export default class BaseOptimizer {
           log: this.log
         }),
 
-        new MiniCssExtractPlugin({
-          filename: '[name].style.css',
-        }),
-
         // replace imports for `uiExports/*` modules with a synthetic module
         // created by create_ui_exports_module.js
         new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
@@ -249,14 +237,12 @@ export default class BaseOptimizer {
           {
             test: /\.less$/,
             use: [
-              ...getStyleLoaderExtractor(),
               ...getStyleLoaders(['less-loader'], maybeAddCacheLoader('less', []))
             ],
           },
           {
             test: /\.css$/,
             use: [
-              ...getStyleLoaderExtractor(),
               ...getStyleLoaders([], maybeAddCacheLoader('css', []))
             ],
           },
@@ -459,12 +445,6 @@ export default class BaseOptimizer {
     // the extraneous export should not be harmful, so we just suppress these warnings
     // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
     //
-    // 2 - Mini Css Extract plugin tracks the order for each css import we have
-    // through the project (and it's successive imports) since version 0.4.2.
-    // In case we have the same imports more than one time with different
-    // sequences, this plugin will throw a warning. This should not be harmful,
-    // but the an issue was opened and can be followed on:
-    // https://github.com/webpack-contrib/mini-css-extract-plugin/issues/250#issuecomment-415345126
     const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
 
     return filteredWarnings.length > 0;
