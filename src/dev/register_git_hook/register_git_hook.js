@@ -129,11 +129,12 @@ export async function registerPrecommitGitHook(log) {
   );
 
   try {
+    const homedir = process.env.HOME ? process.env.HOME.replace(/'/g, '\'') : '~';
     await writeGitHook(
       await getPrecommitGitHookScriptPath(REPO_ROOT),
       getKbnPrecommitGitHookScript(
         REPO_ROOT,
-        normalizePath(os.homedir()),
+        normalizePath(homedir),
         process.platform
       )
     );
