@@ -35,6 +35,7 @@ export const CopySourceTask = {
         '!src/legacy/core_plugins/tests_bundle/**',
         '!src/legacy/core_plugins/testbed/**',
         '!src/legacy/core_plugins/console/public/tests/**',
+        '!src/plugins/testbed/**',
         '!src/cli/cluster/**',
         '!src/cli/repl/**',
         '!src/es_archiver/**',

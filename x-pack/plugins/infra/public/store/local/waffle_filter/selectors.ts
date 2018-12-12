@@ -10,7 +10,11 @@ import { fromKueryExpression } from '@kbn/es-query';
 
 import { WaffleFilterState } from './reducer';
 
-export const selectWaffleFilterQuery = (state: WaffleFilterState) => state.filterQuery;
+export const selectWaffleFilterQuery = (state: WaffleFilterState) =>
+  state.filterQuery ? state.filterQuery.query : null;
+
+export const selectWaffleFilterQueryAsJson = (state: WaffleFilterState) =>
+  state.filterQuery ? state.filterQuery.serializedQuery : null;
 
 export const selectWaffleFilterQueryDraft = (state: WaffleFilterState) => state.filterQueryDraft;
 

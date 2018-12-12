@@ -17,11 +17,9 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  // @ts-ignore
   EuiHorizontalRule,
   // @ts-ignore
   EuiSearchBar,
-  // @ts-ignore
   EuiSelect,
   // @ts-ignore
   EuiTabbedContent,

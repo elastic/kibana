@@ -20,6 +20,7 @@ import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { getCreateSingleMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
@@ -48,6 +49,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/jobs/new_job/simple/single_metric', {
     template,
+    k7Breadcrumbs: getCreateSingleMetricJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,

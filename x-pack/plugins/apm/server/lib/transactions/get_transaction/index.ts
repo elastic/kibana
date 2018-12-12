@@ -6,7 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { oc } from 'ts-optchain';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
