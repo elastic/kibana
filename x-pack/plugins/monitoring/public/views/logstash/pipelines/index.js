@@ -67,7 +67,7 @@ uiRoutes
       pageData: getPageData
     },
     controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
-      constructor($injector, $scope) {
+      constructor($injector, $scope, i18n) {
         super({
           title: 'Logstash Pipelines',
           storageKey: 'logstash.pipelines',
@@ -96,7 +96,7 @@ uiRoutes
           }
 
           const upgradeMessage = pageData
-            ? makeUpgradeMessage(pageData.clusterStatus.versions)
+            ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
             : null;
 
           render(
