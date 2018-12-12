@@ -80,7 +80,7 @@ uiModules.get('kibana')
           }
 
           try {
-            const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
+            const response = await this._getManifest(mapConfig.manifestServiceUrl);
             return response;
           } catch (e) {
             if (!e) {
@@ -102,7 +102,7 @@ uiModules.get('kibana')
             return [];
           }
 
-          const manifest = await this._getManifest(fileService.manifest, this._queryParams);
+          const manifest = await this._getManifest(fileService.manifest);
           const layers = manifest.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
             layer.attribution = $sanitize(markdownIt.render(layer.attribution));
@@ -118,7 +118,7 @@ uiModules.get('kibana')
           if (!tmsService) {
             return [];
           }
-          const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
+          const tmsManifest = await this._getManifest(tmsService.manifest);
           const preppedTMSServices = tmsManifest
             ? tmsManifest.map((tmsService) => {
               const preppedService = _.cloneDeep(tmsService);
@@ -131,13 +131,48 @@ uiModules.get('kibana')
 
           return preppedTMSServices;
         });
-
       }
 
       _extendUrlWithParams(url) {
         return unescapeTemplateVars(extendUrl(url, {
           query: this._queryParams
         }));
+      }
+
+      _defaultLayerLoadWarning() {
+        toastNotifications.addDanger({
+          title: 'Unable to reach configured basemap layer',
+          text: (
+            <p>
+              <FormattedMessage
+                id="common.ui.vis.map.serviceSettings.emsManifestUnavailable"
+                defaultMessage="We are unable to reach your configured base
+                layer map. Please check your network settings and work with
+                your administrator to ensure the configuration is correct or
+                use the { defaultSettings } to enable the officially supported
+                { EMS }."
+                values={{
+                  defaultSettings: (
+                    <a
+                      target="_blank"
+                      href="https://www.elastic.co/guide/en/kibana/current/settings.html"
+                    >
+                      {'default settings'}
+                    </a>
+                  ),
+                  EMS: (
+                    <a
+                      target="_blank"
+                      href="https://www.elastic.co/elastic-maps-service"
+                    >
+                      {'Elastic Map Service'}
+                    </a>
+                  )
+                }}
+              />
+            </p>
+          )
+        });
       }
 
       /**
@@ -149,41 +184,7 @@ uiModules.get('kibana')
           method: 'GET',
           timeout: this.EMS_LOAD_TIMEOUT
         }).then(({ data }) => data.services)
-          .catch(() => {
-            toastNotifications.addDanger({
-              title: 'Unable to reach configured basemap layer',
-              text: (
-                <p>
-                  <FormattedMessage
-                    id="common.ui.vis.map.serviceSettings.emsManifestUnavailable"
-                    defaultMessage={`We are unable to reach your configured base
-                    layer map. Please check your network settings and work with
-                    your administrator to ensure the configuration is correct or
-                    use the { defaultSettings } to enable the officially supported
-                    { EMS }.`}
-                    values={{
-                      defaultSettings: (
-                        <a
-                          target="_blank"
-                          href="https://www.elastic.co/guide/en/kibana/current/settings.html"
-                        >
-                          {'default settings'}
-                        </a>
-                      ),
-                      EMS: (
-                        <a
-                          target="_blank"
-                          href="https://www.elastic.co/elastic-maps-service"
-                        >
-                          {'Elastic Map Service'}
-                        </a>
-                      )
-                    }}
-                  />
-                </p>
-              )
-            });
-          });
+          .catch(() => this._defaultLayerLoadWarning());
       }
 
 
@@ -212,7 +213,11 @@ uiModules.get('kibana')
           allServices.push(tmsService);
         }
 
+        const emsDefault = !allServices.length;
         const servicesFromManifest = await this._loadTMSServices();
+        if (emsDefault && !servicesFromManifest) {
+          this._defaultLayerLoadWarning();
+        }
 
         const strippedServiceFromManifest = servicesFromManifest.map((service) => {
           const strippedService = { ...service };
@@ -222,7 +227,8 @@ uiModules.get('kibana')
           return strippedService;
         });
 
-        return allServices.concat(strippedServiceFromManifest);
+        const tmsServices = allServices.concat(strippedServiceFromManifest);
+        return tmsServices;
       }
 
       /**
