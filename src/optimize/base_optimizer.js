@@ -132,9 +132,15 @@ export default class BaseOptimizer {
   getThreadLoaderPoolConfig() {
     // In some cases cpus() returns undefined
     // https://github.com/nodejs/node/issues/19022
-    const cpus = os.cpus() || { length: 1 };
-    const currentAvailableOsCpus =  Math.min(0, cpus.length - 1);
-    const calculatedCpus = currentAvailableOsCpus || 1;
+    //
+    // The logic to calculate the cpus is the following:
+    // - In case we can't calculate the number of cpus we will define it
+    // to be 4
+    // - Otherwise we will use the available number - 1 except for the cases where
+    // we only have 1 cpu. For those cases the final calculated cpus will also be 1
+    const cpus = os.cpus() || { length: 0 };
+    const currentAvailableOsCpus =  Math.max(0, cpus.length - 1) || 1;
+    const calculatedCpus = currentAvailableOsCpus > 0 ? currentAvailableOsCpus : 4;
 
     return {
       name: 'optimizer-thread-loader-main-pool',

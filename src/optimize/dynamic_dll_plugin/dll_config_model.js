@@ -80,13 +80,23 @@ function generateDLL(config) {
               exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
             }
           ],
-          use: [
-            {
-              loader: 'cache-loader',
-              options: {
-                cacheDirectory: babelLoaderCacheDir
-              }
-            },
+          // Self calling function with the equivalent logic
+          // from maybeAddCacheLoader one from base optimizer
+          use: ((babelLoaderCacheDirPath, loaders) => {
+            if (IS_KIBANA_DISTRIBUTABLE) {
+              return loaders;
+            }
+
+            return [
+              {
+                loader: 'cache-loader',
+                options: {
+                  cacheDirectory: babelLoaderCacheDirPath
+                }
+              },
+              ...loaders
+            ];
+          })(babelLoaderCacheDir, [
             {
               loader: 'thread-loader',
               options: threadLoaderPoolConfig
@@ -99,7 +109,8 @@ function generateDLL(config) {
                   BABEL_PRESET_PATH,
                 ],
               },
-            }]
+            }
+          ])
         },
         {
           test: /\.(html|tmpl)$/,
