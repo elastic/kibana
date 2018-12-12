@@ -46,14 +46,22 @@ describe('populateUICapabilities', () => {
     const xpackMainPlugin = getMockXpackMainPlugin([]);
     const originalInjectedVars = {};
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toMatchSnapshot();
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+      navLinks: {},
+    });
   });
 
   it('returns the original uiCapabilities untouched when no features are registered', () => {
     const xpackMainPlugin = getMockXpackMainPlugin([]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toMatchSnapshot();
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+      feature: {
+        someCapability: true,
+      },
+      navLinks: {},
+      otherFeature: {},
+    });
   });
 
   it('handles features with no registered capabilities', () => {
@@ -68,23 +76,14 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toMatchSnapshot();
-  });
-
-  it('handles features with only a navlink specified', () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([
-      {
-        id: 'newFeature',
-        name: 'my new feature',
-        navLinkId: 'newFeatureNavLink',
-        privileges: {
-          ...createFeaturePrivilege('all'),
-        },
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+      feature: {
+        someCapability: true,
       },
-    ]);
-    const originalInjectedVars = getMockOriginalInjectedVars();
-
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toMatchSnapshot();
+      navLinks: {},
+      newFeature: {},
+      otherFeature: {},
+    });
   });
 
   it('augments the original uiCapabilities with registered feature capabilities', () => {
@@ -100,7 +99,17 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toMatchSnapshot();
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+      feature: {
+        someCapability: true,
+      },
+      navLinks: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+      },
+      otherFeature: {},
+    });
   });
 
   it(`merges capabilities from all feature privileges`, () => {
@@ -118,7 +127,20 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toMatchSnapshot();
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+      feature: {
+        someCapability: true,
+      },
+      navLinks: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+        capability5: true,
+      },
+      otherFeature: {},
+    });
   });
 
   it('supports merging multiple features with multiple privileges each', () => {
@@ -158,6 +180,32 @@ describe('populateUICapabilities', () => {
     ]);
     const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toMatchSnapshot();
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars)).toEqual({
+      anotherNewFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+      },
+      feature: {
+        someCapability: true,
+      },
+      navLinks: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+        capability5: true,
+      },
+      otherFeature: {},
+      yetAnotherNewFeature: {
+        capability1: true,
+        capability2: true,
+        something1: true,
+        something2: true,
+        something3: true,
+      },
+    });
   });
 });

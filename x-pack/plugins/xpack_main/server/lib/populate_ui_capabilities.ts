@@ -25,10 +25,6 @@ function getCapabilitiesFromFeature(feature: Feature): UICapabilities {
     [feature.id]: {},
   };
 
-  if (feature.navLinkId) {
-    capabilities.navLinks[feature.navLinkId] = true;
-  }
-
   const featureCapabilities: Record<string, boolean> = Object.values(feature.privileges).reduce(
     (acc, privilege) => {
       return {
@@ -53,22 +49,16 @@ function getCapabilitiesFromFeature(feature: Feature): UICapabilities {
 function mergeCapabilities(...allCapabilities: UICapabilities[]): UICapabilities {
   return allCapabilities.reduce(
     (acc, capabilities) => {
-      const featureCapabilities = Object.keys(capabilities)
-        .filter(key => key !== 'navLinks')
-        .reduce((featureAcc, key) => {
-          return {
-            ...featureAcc,
-            [key]: capabilities[key],
-          };
-        }, {});
+      const featureCapabilities = Object.keys(capabilities).reduce((featureAcc, key) => {
+        return {
+          ...featureAcc,
+          [key]: capabilities[key],
+        };
+      }, {});
 
       return {
         ...featureCapabilities,
         ...acc,
-        navLinks: {
-          ...capabilities.navLinks,
-          ...acc.navLinks,
-        },
       };
     },
     {
