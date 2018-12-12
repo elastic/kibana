@@ -79,7 +79,7 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        await browser.moveMouseTo(element);
+        await element.moveMouseTo();
         await browser.doubleClick();
       });
     }

@@ -24,13 +24,14 @@ export class WebElementWrapper {
     }
 
     this._webElement = webElement;
+    this._webDriver = webDriver;
     this._driver = webDriver.driver;
     this._By = webDriver.By;
     this._defaultFindTimeout = timeout;
   }
 
   _wrap(otherWebElement) {
-    return new WebElementWrapper(otherWebElement, this._driver, this._defaultFindTimeout);
+    return new WebElementWrapper(otherWebElement, this._webDriver, this._defaultFindTimeout);
   }
 
   _wrapAll(otherWebElements) {
@@ -286,6 +287,30 @@ export class WebElementWrapper {
   async findAllByTagName(tagName) {
     return await this._wrapAll(
       await this._webElement.findElements(this._By.tagName(tagName))
+    );
+  }
+
+  /**
+   * Gets all element inside this element matching the given XPath selector.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   *
+   * @param {string} selector
+   * @return {Promise<WebElementWrapper>}
+   */
+  async findByXpath(selector) {
+    return this._wrap(await this._webElement.findElement(this._By.xpath(selector)));
+  }
+
+  /**
+   * Gets all elements inside this element matching the given XPath selector.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   *
+   * @param {string} selector
+   * @return {Promise<WebElementWrapper[]>}
+   */
+  async findAllByXpath(selector) {
+    return await this._wrapAll(
+      await this._webElement.findElements(this._By.xpath(selector))
     );
   }
 

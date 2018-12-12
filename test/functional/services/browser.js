@@ -18,6 +18,7 @@
  */
 
 import { modifyUrl } from '../../../src/core/utils';
+import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export async function BrowserProvider({ getService }) {
   const { driver, Key } = await getService('__webdriver__').init();
@@ -97,8 +98,8 @@ export async function BrowserProvider({ getService }) {
     async moveMouseTo(element, xOffset, yOffset) {
       const mouse = driver.actions().mouse();
       const actions = driver.actions({ bridge: true });
-      if (element) {
-        await actions.pause(mouse).move({ origin: element }).perform();
+      if (element instanceof WebElementWrapper) {
+        await actions.pause(mouse).move({ origin: element._webElement }).perform();
       } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
         await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
       } else {
@@ -127,8 +128,8 @@ export async function BrowserProvider({ getService }) {
     }
 
     /**
-     * Types into the focused window/frame/element.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#pressKeys
+     * Sends a sequance of keyboard keys. For each key, this will record a pair of keyDown and keyUp actions
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#sendKeys
      *
      * @param  {string|string[]} keys
      * @return {Promise<void>}
@@ -140,10 +141,10 @@ export async function BrowserProvider({ getService }) {
     }
 
     /**
-     * Clicks a mouse button at the point where the mouse cursor is currently positioned. This
-     * method may fail to execute with an error if the mouse has not been moved anywhere since
-     * the page was loaded.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#clickMouseButton
+     * Inserts an action for moving the mouse x and y pixels relative to the specified origin.
+     * The origin may be defined as the mouse's current position, the viewport, or the center
+     * of a specific WebElement. Then adds an action for left-click (down/up) with the mouse.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
      *
      * @param {Element} element Optional
      * @param {number} xOffset Optional
@@ -153,8 +154,8 @@ export async function BrowserProvider({ getService }) {
     async clickMouseButton(...args) {
       const mouse = driver.actions().mouse();
       const actions = driver.actions({ bridge: true });
-      if (args[0] instanceof Element) {
-        await actions.pause(mouse).move({ origin: args[0] }).click().perform();
+      if (args[0] instanceof WebElementWrapper) {
+        await actions.pause(mouse).move({ origin: args[0]._webElement }).click().perform();
       } else if (isNaN(args[1]) || isNaN(args[2]) === false) {
         await actions.pause(mouse).move({ origin: { x: args[1], y: args[2] } }).click().perform();
       } else {
@@ -220,17 +221,17 @@ export async function BrowserProvider({ getService }) {
     }
 
     /**
-     * Double-clicks the element.
+     * Inserts action for performing a double left-click with the mouse.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
      * @param {Element} element
      * @return {Promise<void>}
      */
-    async doubleClick(...args) {
-      if (args[0] instanceof Element) {
-        const actions = driver.actions({ bridge: true });
-        await actions.doubleClick(...args).perform();
+    async doubleClick(element) {
+      const actions = driver.actions({ bridge: true });
+      if (element instanceof WebElementWrapper) {
+        await actions.doubleClick(element._webElement).perform();
       } else {
-        throw new Error('Element object should be provided');
+        await actions.doubleClick().perform();
       }
     }
 
