@@ -147,7 +147,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
           icon: 'pencil',
           onClick: ({ name }) => {
             selectAutoFollowPattern(name);
-            routing.navigate(`/auto_follow_patterns/edit/${name}`);
+            routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
           },
           type: 'icon',
         },

@@ -45,7 +45,8 @@ class AutoFollowPatternEditUi extends PureComponent {
   componentDidMount() {
     const { autoFollowPattern, match: { params: { id } } } = this.props;
     if (!autoFollowPattern) {
-      this.props.getAutoFollowPattern(id);
+      const decodedId = decodeURIComponent(id);
+      this.props.getAutoFollowPattern(decodedId);
     }
 
     chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);

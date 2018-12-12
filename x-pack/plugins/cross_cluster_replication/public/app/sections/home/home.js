@@ -6,9 +6,11 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { Route, Switch } from 'react-router-dom';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { BASE_PATH } from '../../../../common/constants';
 
 import {
   EuiButton,
@@ -113,16 +115,6 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
     }
   }
 
-  getSection() {
-    const { match: { params: { section } } } = this.props;
-
-    switch(section) {
-      default: {
-        return <AutoFollowPatternList />;
-      }
-    }
-  }
-
   render() {
     return (
       <EuiPage>
@@ -130,7 +122,9 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
           <EuiPageContent>
             {this.getHeaderSection()}
             {this.getUnauthorizedSection()}
-            {this.getSection()}
+            <Switch>
+              <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+            </Switch>
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

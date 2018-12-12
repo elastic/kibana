@@ -28,7 +28,7 @@ export const loadAutoFollowPatterns = () => (
 );
 
 export const getAutoFollowPattern = (id) => (
-  httpClient.get(`${apiPrefix}/auto_follow_patterns/${id}`).then(extractData)
+  httpClient.get(`${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`).then(extractData)
 );
 
 export const loadRemoteClusters = () => (
@@ -36,11 +36,11 @@ export const loadRemoteClusters = () => (
 );
 
 export const saveAutoFollowPattern = (id, autoFollowPattern) => (
-  httpClient.put(`${apiPrefix}/auto_follow_patterns/${id}`, autoFollowPattern).then(extractData)
+  httpClient.put(`${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`, autoFollowPattern).then(extractData)
 );
 
 export const deleteAutoFollowPattern = (id) => {
-  const ids = arrify(id);
+  const ids = arrify(id).map(_id => encodeURIComponent(_id)).join(',');
 
-  return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids.join(',')}`).then(extractData);
+  return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids}`).then(extractData);
 };
