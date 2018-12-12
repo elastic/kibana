@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { get, omit } from 'lodash';
+import { cloneDeep, get, omit } from 'lodash';
 
-const migrations = {
+export const migrations = {
   visualization: {
     '7.0.0': (doc) => {
       try {
@@ -28,11 +28,11 @@ const migrations = {
           return doc; // do nothing; we only want to touch tables
         }
 
-        let splitFound = false;
+        let splitCount = 0;
         visState.aggs = visState.aggs.map(agg => {
           if (agg.schema === 'split') {
-            if (!splitFound) {
-              splitFound = true;
+            splitCount++;
+            if (splitCount === 1) {
               return agg; // leave the first split agg unchanged
             }
             agg.schema = 'bucket';
@@ -42,8 +42,13 @@ const migrations = {
           return agg;
         });
 
-        doc.attributes.visState = JSON.stringify(visState);
-        return doc;
+        if (splitCount <= 1) {
+          return doc; // do nothing; we only want to touch tables with multiple split aggs
+        }
+
+        const newDoc = cloneDeep(doc);
+        newDoc.attributes.visState = JSON.stringify(visState);
+        return newDoc;
       }
       catch (e) {
         // if anything goes wrong, do nothing and move on
@@ -52,5 +57,3 @@ const migrations = {
     }
   }
 };
-
-export default migrations;

@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import migrations from './migrations';
+import { migrations } from './migrations';
 
 export default function (kibana) {
 
