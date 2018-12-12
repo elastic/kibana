@@ -185,6 +185,7 @@ export const pingsSchema = gql`
     resolve: Resolve
     socks5: Socks5
     tags: String
+    tcp: TCP
     tls: TLS
   }
 `;

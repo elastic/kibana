@@ -13,6 +13,7 @@ import { CreateUMGraphQLResolvers } from '../types';
 interface UMLatestMonitorsArgs {
   dateRangeStart: number;
   dateRangeEnd: number;
+  monitorId?: string;
 }
 
 export type UMLatestMonitorsResolver = UMResolver<
@@ -34,8 +35,12 @@ export const createLatestMonitorsResolvers: CreateUMGraphQLResolvers = (
   };
 } => ({
   Query: {
-    async getLatestMonitors(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<Ping[]> {
-      return libs.pings.getLatestMonitorDocs(req, dateRangeStart, dateRangeEnd);
+    async getLatestMonitors(
+      resolver,
+      { dateRangeStart, dateRangeEnd, monitorId },
+      { req }
+    ): Promise<Ping[]> {
+      return libs.pings.getLatestMonitorDocs(req, dateRangeStart, dateRangeEnd, monitorId);
     },
   },
 });

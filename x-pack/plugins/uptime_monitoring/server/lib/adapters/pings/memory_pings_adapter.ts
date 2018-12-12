@@ -44,7 +44,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
   public async getLatestMonitorDocs(
     request: any,
     dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeEnd: number,
+    monitorId?: string
   ): Promise<Ping[]> {
     throw new Error('Method not implemented.');
   }

@@ -18,5 +18,10 @@ export interface UMPingsAdapter {
     size?: number
   ): Promise<Ping[]>;
 
-  getLatestMonitorDocs(request: any, dateRangeStart: number, dateRangeEnd: number): Promise<Ping[]>;
+  getLatestMonitorDocs(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    monitorId?: string
+  ): Promise<Ping[]>;
 }

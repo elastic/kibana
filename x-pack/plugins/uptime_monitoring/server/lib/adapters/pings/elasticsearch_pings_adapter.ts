@@ -60,13 +60,19 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   public async getLatestMonitorDocs(
     request: any,
     dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeEnd: number,
+    monitorId?: string
   ): Promise<Ping[]> {
+    const must: any[] = [];
+    if (monitorId) {
+      must.push({ term: { 'monitor.id': monitorId } });
+    }
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
           bool: {
+            must: must.length ? [...must] : undefined,
             filter: [
               {
                 range: {

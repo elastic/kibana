@@ -36,8 +36,9 @@ export class UMPingsDomain {
   public async getLatestMonitorDocs(
     request: any,
     dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeEnd: number,
+    monitorId?: string
   ): Promise<Ping[]> {
-    return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd);
+    return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd, monitorId);
   }
 }

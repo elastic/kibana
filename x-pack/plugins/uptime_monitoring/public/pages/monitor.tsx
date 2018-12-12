@@ -9,7 +9,6 @@ import {
   EuiAreaSeries,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   // @ts-ignore No typings for EuiLineSeries
   EuiLineSeries,
   EuiPanel,
@@ -23,10 +22,10 @@ import {
   EuiSuperSelect,
   EuiTitle,
 } from '@elastic/eui';
-import moment from 'moment';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { MonitorSelect } from '../components/queries/monitor_select';
+import { MonitorStatusBar } from '../components/queries/monitor_status_bar';
 import { Pings } from '../components/queries/ping_list';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 
@@ -104,25 +103,11 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        <EuiPanel>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>Status&#58;</EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiHealth color="success" style={{ lineHeight: 'inherit' }}>
-                    Up
-                  </EuiHealth>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>Last update: {moment([2018, 11, 11, 12, 35]).fromNow()}</EuiFlexItem>
-            <EuiFlexItem>Host: www.google.com</EuiFlexItem>
-            <EuiFlexItem>Port: 443</EuiFlexItem>
-            <EuiFlexItem>RTT: 3156992&mu;s</EuiFlexItem>
-            <EuiFlexItem>Scheme: HTTPS</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <MonitorStatusBar
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          monitorId={'http@https://www.google.com/'}
+        />
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
