@@ -79,17 +79,16 @@ export class Stacktrace extends PureComponent<Props, State> {
                 />
               );
             }
-            return groupedStackframes.map(
-              (stackframe, idx) =>
-                hasSourceLines(stackframe) ? (
-                  <CodePreview
-                    key={idx}
-                    stackframe={stackframe}
-                    codeLanguage={codeLanguage}
-                  />
-                ) : (
-                  <FrameHeading key={idx} stackframe={stackframe} />
-                )
+            return groupedStackframes.map((stackframe, idx) =>
+              hasSourceLines(stackframe) ? (
+                <CodePreview
+                  key={idx}
+                  stackframe={stackframe}
+                  codeLanguage={codeLanguage}
+                />
+              ) : (
+                <FrameHeading key={idx} stackframe={stackframe} />
+              )
             );
           }
         )}
