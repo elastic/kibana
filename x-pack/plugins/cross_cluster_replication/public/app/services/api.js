@@ -42,5 +42,5 @@ export const saveAutoFollowPattern = (id, autoFollowPattern) => (
 export const deleteAutoFollowPattern = (id) => {
   const ids = arrify(id);
 
-  return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids.join(',')}`).then(() => ({ ids }));
+  return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids.join(',')}`).then(extractData);
 };

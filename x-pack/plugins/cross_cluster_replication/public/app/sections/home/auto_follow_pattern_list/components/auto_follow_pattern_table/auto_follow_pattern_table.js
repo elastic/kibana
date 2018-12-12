@@ -156,7 +156,10 @@ export class AutoFollowPatternTableUI extends PureComponent {
             >
               <FormattedMessage
                 id="xpack.cross_cluster_replication.delete_autofollow_pattern_button_label"
-                defaultMessage="Delete auto-follow pattern"
+                defaultMessage="Delete auto-follow {total, plural, one {pattern} other {patterns}}"
+                values={{
+                  total: selectedItems.length
+                }}
               />
             </EuiButton>
           )}

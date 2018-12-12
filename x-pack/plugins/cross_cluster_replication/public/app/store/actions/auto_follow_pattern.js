@@ -104,7 +104,7 @@ export const deleteAutoFollowPattern = (id) => (
         const successMessage = hasMultipleDelete
           ? i18n.translate('xpack.crossClusterReplication.autoFollowPattern.removeAction.successMultipleNotificationTitle', {
             defaultMessage: `{count} auto-follow patterns were removeed`,
-            values: { count: response.errors.length },
+            values: { count: response.itemsDeleted.length },
           })
           : i18n.translate('xpack.crossClusterReplication.autoFollowPattern.removeAction.successSingleNotificationTitle', {
             defaultMessage: `Auto-follow pattern '{name}' was removeed`,

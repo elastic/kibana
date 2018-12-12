@@ -41,13 +41,15 @@ class Provider extends PureComponent {
     const { intl } = this.props;
     const { ids } = this.state;
     const isSingle = ids.length === 1;
-    const title = isSingle ? intl.formatMessage({
-      id: 'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.deleteSingleTitle',
-      defaultMessage: 'Remove auto-follow pattern \'{name}\'?',
-    }, { name: ids[0] }) : intl.formatMessage({
-      id: 'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.deleteMultipleTitle',
-      defaultMessage: 'Remove {count} auto-follow pattern?',
-    }, { count: ids.length });
+    const title = isSingle
+      ? intl.formatMessage({
+        id: 'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.deleteSingleTitle',
+        defaultMessage: 'Remove auto-follow pattern \'{name}\'?',
+      }, { name: ids[0] })
+      : intl.formatMessage({
+        id: 'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.deleteMultipleTitle',
+        defaultMessage: 'Remove {count} auto-follow patterns?',
+      }, { count: ids.length });
 
     return (
       <EuiOverlayMask>
