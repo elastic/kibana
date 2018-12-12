@@ -368,7 +368,7 @@ export class RemoteClusterFormUi extends Component {
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
                 defaultMessage="By default, a request fails if any of the queried remote clusters
-                  are unavailable. To continue a sending request to other remote clusters if this
+                  are unavailable. To continue sending a request to other remote clusters if this
                   cluster is unavailable, enable {optionName}. {learnMoreLink}"
                 values={{
                   optionName: (
