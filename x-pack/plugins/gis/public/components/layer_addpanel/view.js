@@ -152,6 +152,37 @@ export class AddLayerPanel extends React.Component {
   _renderSourceSelect() {
     const sourceOptions = [
       {
+        value: ESSearchSource.type,
+        inputDisplay: ESSearchSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{ESSearchSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">
+                Display documents from an elasticsearch index.
+              </p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
+        value: ESGeohashGridSource.type,
+        inputDisplay: ESGeohashGridSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{ESGeohashGridSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">
+                Group documents into grid cells and display metrics for each cell.
+                Great for displaying large datasets.
+              </p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
         value: EMSFileSource.type,
         inputDisplay: EMSFileSource.typeDisplayName,
         dropdownDisplay: (
@@ -159,7 +190,7 @@ export class AddLayerPanel extends React.Component {
             <strong>{EMSFileSource.typeDisplayName}</strong>
             <EuiSpacer size="xs" />
             <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">Political boundry vectors such as world countries and country regions.</p>
+              <p className="euiTextColor--subdued">Political boundry vectors hosted by EMS.</p>
             </EuiText>
           </Fragment>
         ),
@@ -205,41 +236,10 @@ export class AddLayerPanel extends React.Component {
           </Fragment>
         ),
       },
-      {
-        value: ESGeohashGridSource.type,
-        inputDisplay: ESGeohashGridSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{ESGeohashGridSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Elasticsearch GeoHash grid aggregation groups documents into buckets that represent cells in a grid.
-                Use this source with large indices and high zoom levels.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: ESSearchSource.type,
-        inputDisplay: ESSearchSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{ESSearchSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Vectors created from elasticsearch documents.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      }
     ];
 
     return (
-      <EuiFormRow label="Source">
+      <EuiFormRow label="Data source">
         <EuiSuperSelect
           itemClassName="sourceSelectItem"
           options={sourceOptions}
