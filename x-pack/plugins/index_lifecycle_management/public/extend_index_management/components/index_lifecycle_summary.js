@@ -195,8 +195,8 @@ export class IndexLifecycleSummary extends Component {
               color="primary"
               title={
                 <FormattedMessage
-                  defaultMessage="Index lifecycle step information"
-                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryStepInformationTitle"
+                  defaultMessage="Action status"
+                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.actionStatusTitle"
                 />
               }
             >
