@@ -103,11 +103,14 @@ uiModules.get('kibana')
           }
 
           const manifest = await this._getManifest(fileService.manifest);
-          const layers = manifest.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
-          layers.forEach((layer) => {
-            layer.attribution = $sanitize(markdownIt.render(layer.attribution));
-          });
-          return layers;
+          if (manifest) {
+            const layers = manifest.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
+            layers.forEach((layer) => {
+              layer.attribution = $sanitize(markdownIt.render(layer.attribution));
+            });
+            return layers;
+          }
+          return [];
         });
 
         this._loadTMSServices = _.once(async () => {
@@ -139,7 +142,7 @@ uiModules.get('kibana')
         }));
       }
 
-      _defaultLayerLoadWarning() {
+      _defaultLayerLoadWarning = _.once(() => {
         toastNotifications.addDanger({
           title: 'Unable to reach configured basemap layer',
           text: (
@@ -173,7 +176,7 @@ uiModules.get('kibana')
             </p>
           )
         });
-      }
+      });
 
       /**
        * this internal method is overridden by the tests to simulate custom manifest.
@@ -184,7 +187,7 @@ uiModules.get('kibana')
           method: 'GET',
           timeout: this.EMS_LOAD_TIMEOUT
         }).then(({ data }) => data.services)
-          .catch(() => this._defaultLayerLoadWarning());
+          .catch(() => null);
       }
 
 
@@ -215,7 +218,7 @@ uiModules.get('kibana')
 
         const emsDefault = !allServices.length;
         const servicesFromManifest = await this._loadTMSServices();
-        if (emsDefault && !servicesFromManifest) {
+        if (emsDefault && !servicesFromManifest.length) {
           this._defaultLayerLoadWarning();
         }
 
