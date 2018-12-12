@@ -11,7 +11,7 @@ jest.mock('ui/chrome', () => ({
 }));
 
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { CalendarForm } from './calendar_form';
 
@@ -48,23 +48,23 @@ describe('CalendarForm', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('CalendarId and description disabled with default value when editing', () => {
+  test('CalendarId shown as title when editing', () => {
     const editProps = {
       ...testProps,
       isEdit: true,
       calendarId: 'test-calendar',
       description: 'test description',
     };
-    const wrapper = shallow(
+    const wrapper = mount(
       <CalendarForm {...editProps} />
     );
-    const description = wrapper.find('[name="description"]');
-    const calendarId = wrapper.find('[name="calendarId"]');
+    const calendarId = wrapper.find('EuiTitle');
 
-    expect(description.prop('value')).toEqual(editProps.description);
-    expect(calendarId.prop('value')).toEqual(editProps.calendarId);
-    expect(description.prop('disabled')).toBe(true);
-    expect(calendarId.prop('disabled')).toBe(true);
+    expect(
+      calendarId.containsMatchingElement(
+        <h1>Calendar test-calendar</h1>
+      )
+    ).toBeTruthy();
   });
 
 });

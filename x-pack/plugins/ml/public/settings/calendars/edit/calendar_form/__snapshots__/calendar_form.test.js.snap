@@ -2,45 +2,47 @@
 
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm>
-  <EuiFormRow
-    describedByIds={Array []}
-    error={
-      Array [
-        "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;
+  <React.Fragment>
+    <EuiFormRow
+      describedByIds={Array []}
+      error={
+        Array [
+          "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;
     must start and end with an alphanumeric character",
-      ]
-    }
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    isInvalid={true}
-    label="Calendar ID"
-  >
-    <EuiFieldText
-      compressed={false}
-      disabled={false}
+        ]
+      }
       fullWidth={false}
-      isLoading={false}
-      name="calendarId"
-      onChange={[MockFunction]}
-      value=""
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    label="Description"
-  >
-    <EuiFieldText
-      compressed={false}
-      disabled={false}
+      hasEmptyLabelSpace={false}
+      isInvalid={true}
+      label="Calendar ID"
+    >
+      <EuiFieldText
+        compressed={false}
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        name="calendarId"
+        onChange={[MockFunction]}
+        value=""
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
       fullWidth={false}
-      isLoading={false}
-      name="description"
-      onChange={[MockFunction]}
-      value=""
-    />
-  </EuiFormRow>
+      hasEmptyLabelSpace={false}
+      label="Description"
+    >
+      <EuiFieldText
+        compressed={false}
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        name="description"
+        onChange={[MockFunction]}
+        value=""
+      />
+    </EuiFormRow>
+  </React.Fragment>
   <EuiFormRow
     describedByIds={Array []}
     fullWidth={false}

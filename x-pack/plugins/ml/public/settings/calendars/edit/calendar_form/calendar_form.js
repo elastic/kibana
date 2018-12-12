@@ -6,7 +6,7 @@
 
 
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
 import {
@@ -18,10 +18,32 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
 import { EventsTable } from '../events_table/';
+
+
+function EditHeader({
+  calendarId,
+  description
+}) {
+  return (
+    <Fragment>
+      <EuiTitle>
+        <h1>Calendar {calendarId}</h1>
+      </EuiTitle>
+      <EuiText>
+        <p>
+          {description}
+        </p>
+      </EuiText>
+      <EuiSpacer size="l"/>
+    </Fragment>
+  );
+}
 
 export function CalendarForm({
   calendarId,
@@ -52,32 +74,39 @@ export function CalendarForm({
 
   return (
     <EuiForm>
+      {!isEdit &&
+        <Fragment>
+          <EuiFormRow
+            label="Calendar ID"
+            helpText={helpText}
+            error={error}
+            isInvalid={!isNewCalendarIdValid}
+          >
+            <EuiFieldText
+              name="calendarId"
+              value={calendarId}
+              onChange={onCalendarIdChange}
+              disabled={isEdit === true || saving === true}
+            />
+          </EuiFormRow>
 
-      <EuiFormRow
-        label="Calendar ID"
-        helpText={helpText}
-        error={error}
-        isInvalid={!isNewCalendarIdValid}
-      >
-        <EuiFieldText
-          name="calendarId"
-          value={calendarId}
-          onChange={onCalendarIdChange}
-          disabled={isEdit === true || saving === true}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label="Description"
-      >
-        <EuiFieldText
-          name="description"
-          value={description}
-          onChange={onDescriptionChange}
-          disabled={isEdit === true || saving === true}
-        />
-      </EuiFormRow>
-
+          <EuiFormRow
+            label="Description"
+          >
+            <EuiFieldText
+              name="description"
+              value={description}
+              onChange={onDescriptionChange}
+              disabled={isEdit === true || saving === true}
+            />
+          </EuiFormRow>
+        </Fragment>
+      }
+      {isEdit &&
+        <EditHeader
+          calendarId={calendarId}
+          description={description}
+        />}
       <EuiFormRow
         label="Jobs"
       >
