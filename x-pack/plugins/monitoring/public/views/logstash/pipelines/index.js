@@ -46,16 +46,14 @@ const getPageData = ($injector) => {
     });
 };
 
-function makeUpgradeMessage(logstashVersions, i18n) {
+function makeUpgradeMessage(logstashVersions) {
   if (!Array.isArray(logstashVersions)
     || (logstashVersions.length === 0)
     || logstashVersions.some(isPipelineMonitoringSupportedInVersion)) {
     return null;
   }
 
-  return i18n('xpack.monitoring.logstash.pipelines.notAvalibleDescription', {
-    defaultMessage: 'Pipeline monitoring is only available in Logstash version 6.0.0 or higher.'
-  });
+  return 'Pipeline monitoring is only available in Logstash version 6.0.0 or higher.';
 }
 
 uiRoutes
