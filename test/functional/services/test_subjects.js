@@ -191,7 +191,7 @@ export function TestSubjectsProvider({ getService }) {
       // moveMouseTo function.
       await retry.try(async () => {
         const element = await this.find(selector);
-        await browser.moveMouseTo(element);
+        await element.moveMouseTo();
       });
     }
 
