@@ -16,7 +16,7 @@ const EXPECTED_JOIN_VALUES = {
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['gis']);
 
-  describe('joins', () => {
+  describe('layer with joins', () => {
     before(async () => {
       await PageObjects.gis.loadSavedMap('join example');
     });
@@ -35,6 +35,27 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    // TODO verify inspector gets shows right join request
+    describe('inspector', () => {
+      afterEach(async () => {
+        await PageObjects.gis.closeInspector();
+      });
+
+      it('should contain terms aggregation elasticsearch request', async () => {
+        await PageObjects.gis.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        const requestStats = await PageObjects.gis.getInspectorTableData();
+        const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+        expect(totalHits).to.equal('6');
+        const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+        expect(hits).to.equal('0'); // aggregation requests do not return any documents
+        const indexPatternName =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Index pattern');
+        expect(indexPatternName).to.equal('meta_for_geo_shapes*');
+      });
+
+      it('should not contain any elasticsearch request after layer is deleted', async () => {
+        await PageObjects.gis.removeLayer('geo_shapes*');
+        const noRequests = await PageObjects.gis.doesInspectorHaveRequests();
+        expect(noRequests).to.equal(true);
+      });
+    });
   });
 }

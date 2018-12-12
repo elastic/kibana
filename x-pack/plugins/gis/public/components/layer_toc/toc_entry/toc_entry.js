@@ -115,7 +115,10 @@ export class TOCEntry extends React.Component {
             {visibilityIndicator}
           </EuiFlexItem>
           <EuiFlexItem>
-            <button onClick={() => openLayerPanel(layer.getId())} >
+            <button
+              onClick={() => openLayerPanel(layer.getId())}
+              data-test-subj={`mapOpenLayerButton${this.state.displayName}`}
+            >
               <div style={{ width: 180 }} className="eui-textTruncate eui-textLeft">
                 {this.state.displayName}
               </div>

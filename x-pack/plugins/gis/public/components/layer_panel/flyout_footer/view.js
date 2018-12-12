@@ -23,6 +23,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
           color="danger"
           onClick={removeLayer}
           flush="right"
+          data-test-subj="mapRemoveLayerButton"
         >
           Remove layer
         </EuiButtonEmpty>

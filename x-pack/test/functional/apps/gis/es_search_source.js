@@ -9,7 +9,7 @@ import expect from 'expect.js';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['gis']);
 
-  describe('layer source is elasticsearch documents', () => {
+  describe('elasticsearch document layer', () => {
     before(async () => {
       await PageObjects.gis.loadSavedMap('logstash events');
     });
@@ -20,7 +20,9 @@ export default function ({ getPageObjects }) {
 
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
-        const hits = await PageObjects.gis.getInspectorRequestStat('Hits');
+        await PageObjects.gis.openInspectorRequestsView();
+        const requestStats = await PageObjects.gis.getInspectorTableData();
+        const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
         expect(hits).to.equal('2048');
       });
     });

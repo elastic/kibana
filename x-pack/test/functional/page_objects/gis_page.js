@@ -71,6 +71,28 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+
+    /*
+     * Layer TOC (table to contents) utility functions
+     */
+    async openLayerPanel(layerName) {
+      log.debug(`Open layer panel, layer: ${layerName}`);
+      await testSubjects.click(`mapOpenLayerButton${layerName}`);
+    }
+
+    /*
+     * Layer panel utility functions
+     */
+    async removeLayer(layerName) {
+      log.debug(`Remove layer ${layerName}`);
+      await this.openLayerPanel(layerName);
+      await testSubjects.click(`mapRemoveLayerButton`);
+    }
+
+
+    /*
+     * Inspector utility functions
+     */
     async openInspector() {
       log.debug('Open Inspector');
       const isOpen = await testSubjects.exists('inspectorPanel');
@@ -111,6 +133,20 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.openInspectorView('inspectorViewChooserRequests');
     }
 
+    // Method should only be used when multiple requests are expected
+    // RequestSelector will only display inspectorRequestChooser when there is more than one request
+    async openInspectorRequest(requestName) {
+      await this.openInspectorView('inspectorViewChooserRequests');
+      log.debug(`Open Inspector request ${requestName}`);
+      await testSubjects.click('inspectorRequestChooser');
+      await testSubjects.click(`inspectorRequestChooser${requestName}`);
+    }
+
+    async doesInspectorHaveRequests() {
+      await this.openInspectorRequestsView();
+      return await testSubjects.exists('inspectorNoRequestsMessage');
+    }
+
     async getMapboxStyle() {
       log.debug('getMapboxStyle');
       await this.openInspectorMapView();
@@ -138,13 +174,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }));
     }
 
-    async getInspectorRequestStat(statName) {
-      await this.openInspectorRequestsView();
-      const requestStats = await this.getInspectorTableData();
-      return this._getInspectorStatRowHit(requestStats, statName);
-    }
-
-    _getInspectorStatRowHit(stats, rowName) {
+    getInspectorStatRowHit(stats, rowName) {
       const STATS_ROW_NAME_INDEX = 0;
       const STATS_ROW_VALUE_INDEX = 1;
 
