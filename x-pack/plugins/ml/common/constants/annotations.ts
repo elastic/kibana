@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Contains values for ML job detector rules.
- */
-
 export enum ANNOTATION_TYPE {
   ANNOTATION = 'annotation',
   COMMENT = 'comment',
