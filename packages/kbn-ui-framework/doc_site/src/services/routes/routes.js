@@ -37,23 +37,11 @@ import CollapseButtonExample
 import ExpressionExample
   from '../../views/expression/expression_example';
 
-import FlexExample
-  from '../../views/flex/flex_example';
-
 import FormExample
   from '../../views/form/form_example';
 
 import FormLayoutExample
   from '../../views/form_layout/form_layout_example';
-
-import GalleryExample
-  from '../../views/gallery/gallery_example';
-
-import HeaderBarExample
-  from '../../views/header_bar/header_bar_example';
-
-import HeaderBarSandbox
-  from '../../views/header_bar/header_bar_sandbox';
 
 import IconExample
   from '../../views/icon/icon_example';
@@ -157,22 +145,11 @@ const components = [{
   component: ExpressionExample,
   hasReact: true,
 }, {
-  name: 'Flex',
-  component: FlexExample,
-}, {
   name: 'Form',
   component: FormExample,
 }, {
   name: 'FormLayout',
   component: FormLayoutExample,
-  hasReact: true,
-}, {
-  name: 'Gallery',
-  component: GalleryExample,
-  hasReact: true,
-}, {
-  name: 'HeaderBar',
-  component: HeaderBarExample,
   hasReact: true,
 }, {
   name: 'Icon',
@@ -247,9 +224,6 @@ const components = [{
 }];
 
 const sandboxes = [{
-  name: 'HeaderBar with Table',
-  component: HeaderBarSandbox,
-}, {
   name: 'Notice',
   component: NoticeSandbox,
 }, {

@@ -48,28 +48,9 @@ export {
 } from './expression';
 
 export {
-  KuiFlexGroup,
-  KuiFlexGrid,
-  KuiFlexItem,
-} from './flex';
-
-export {
   KuiFieldGroup,
   KuiFieldGroupSection,
 } from './form_layout';
-
-export {
-  KuiGallery,
-  KuiGalleryItem,
-  KuiGalleryItemIcon,
-  KuiGalleryItemImage,
-  KuiGalleryItemLabel,
-} from './gallery';
-
-export {
-  KuiHeaderBar,
-  KuiHeaderBarSection,
-} from './header_bar';
 
 export { KuiInfoButton } from './info_button';
 
