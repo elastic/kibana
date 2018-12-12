@@ -7,7 +7,7 @@
 import { EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { PureComponent } from 'react';
-import { Stackframe } from '../../../../typings/APMDoc';
+import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
 import { CodePreview } from '../../shared/CodePreview';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
@@ -79,16 +79,17 @@ export class Stacktrace extends PureComponent<Props, State> {
                 />
               );
             }
-            return groupedStackframes.map((stackframe, idx) =>
-              hasSourceLines(stackframe) ? (
-                <CodePreview
-                  key={idx}
-                  stackframe={stackframe}
-                  codeLanguage={codeLanguage}
-                />
-              ) : (
-                <FrameHeading key={idx} stackframe={stackframe} />
-              )
+            return groupedStackframes.map(
+              (stackframe, idx) =>
+                hasSourceLines(stackframe) ? (
+                  <CodePreview
+                    key={idx}
+                    stackframe={stackframe}
+                    codeLanguage={codeLanguage}
+                  />
+                ) : (
+                  <FrameHeading key={idx} stackframe={stackframe} />
+                )
             );
           }
         )}
