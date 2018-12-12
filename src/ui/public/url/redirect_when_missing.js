@@ -57,7 +57,7 @@ export function RedirectWhenMissingProvider($location, kbnUrl, Promise, i18n) {
       url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${error.savedObjectType}`;
 
       toastNotifications.addWarning({
-        title: i18n('common.ui.url.savedObjectsIsMissingNotificationMessage', {
+        title: i18n('common.ui.url.savedObjectIsMissingNotificationMessage', {
           defaultMessage: 'Saved object is missing'
         }),
         text: <MarkdownSimple>{error.message}</MarkdownSimple>,
