@@ -1302,7 +1302,7 @@ main {
   line-height: 20px; }
   .theme-dark .kuiLocalDropdown {
     background-color: #525252;
-    border-color: #1a1a1a; }
+    border-color: #090909; }
 
 .kuiLocalDropdownCloseButton {
   -webkit-appearance: none;
@@ -1505,7 +1505,7 @@ main {
       color: #ffffff; }
     .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
       background-color: #525252;
-      border-color: #1a1a1a;
+      border-color: #090909;
       color: #ffffff; }
     .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
       background-color: transparent;
@@ -1541,8 +1541,8 @@ main {
   border-bottom: solid 1px #D3DAE6; }
   .theme-dark .kuiLocalNav {
     color: #DDD;
-    background-color: #333333;
-    border-color: #1a1a1a; }
+    background-color: #222;
+    border-color: #090909; }
 
 /**
  * 1. Allow row to expand if the content is so long that it wraps.
@@ -1655,8 +1655,8 @@ main {
   border-left-width: 0; }
   .theme-dark .kuiLocalSearchInput--secondary {
     border-left-width: 1px;
-    border-left-color: #333333;
-    border-right-color: #333333; }
+    border-left-color: #222;
+    border-right-color: #222; }
 
 .kuiLocalSearchAssistedInput {
   display: -webkit-box;
@@ -1761,8 +1761,8 @@ main {
       /* 1 */
       outline: none !important;
       /* 2 */
-      -webkit-box-shadow: 0 0 0 1px #333333, 0 0 0 2px #006BB4;
-              box-shadow: 0 0 0 1px #333333, 0 0 0 2px #006BB4;
+      -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #006BB4;
+              box-shadow: 0 0 0 1px #222, 0 0 0 2px #006BB4;
       /* 3 */ }
 
 /**
