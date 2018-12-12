@@ -149,6 +149,7 @@
     "h2o2": "^8.1.2",
     "handlebars": "4.0.5",
     "hapi": "^17.5.3",
+    "hard-source-webpack-plugin": "^0.13.1",
     "hjson": "3.1.0",
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",

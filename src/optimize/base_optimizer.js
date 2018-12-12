@@ -25,6 +25,7 @@ import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
+import HardSourceWebpackPlugin from 'hard-source-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -209,7 +210,12 @@ export default class BaseOptimizer {
           uiBundles: this.uiBundles,
           log: this.log
         }),
-
+        new HardSourceWebpackPlugin({
+          configHash() {
+            // TODO: pkg.version + uiBundles.length
+            return '7.0.0';
+          }
+        }),
         // replace imports for `uiExports/*` modules with a synthetic module
         // created by create_ui_exports_module.js
         new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
@@ -389,36 +395,7 @@ export default class BaseOptimizer {
             parallel: true,
             sourceMap: false,
             uglifyOptions: {
-              compress: {
-                // The following is required for dead-code the removal
-                // check in React DevTools
-                //
-                // default
-                unused: true,
-                dead_code: true,
-                conditionals: true,
-                evaluate: true,
-
-                // changed
-                keep_fnames: true,
-                keep_infinity: true,
-                comparisons: false,
-                sequences: false,
-                properties: false,
-                drop_debugger: false,
-                booleans: false,
-                loops: false,
-                toplevel: false,
-                top_retain: false,
-                hoist_funs: false,
-                if_return: false,
-                join_vars: false,
-                collapse_vars: false,
-                reduce_vars: false,
-                warnings: false,
-                negate_iife: false,
-                side_effects: false
-              },
+              compress: false,
               mangle: false
             }
           }),
