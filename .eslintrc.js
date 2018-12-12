@@ -375,7 +375,6 @@ module.exports = {
         'no-multiple-empty-lines': [2, { max: 1, maxEOF: 1 }],
         'no-multi-spaces': 2,
         radix: 2,
-        curly: [2, 'multi-or-nest', 'consistent'],
 
         // annoying rules that conflict with prettier
         'space-before-function-paren': 0,
