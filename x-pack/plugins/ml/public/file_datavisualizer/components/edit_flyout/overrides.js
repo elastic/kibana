@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -176,7 +177,12 @@ export class Overrides extends Component {
 
       <EuiForm>
         <EuiFormRow
-          label="Data format"
+          label={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.editFlyout.overrides.dataFormatFormRowLabel"
+              defaultMessage="Data format"
+            />
+          }
         >
           <EuiSuperSelect
             options={formatOptions}
@@ -188,7 +194,12 @@ export class Overrides extends Component {
           (this.state.format === 'delimited') &&
           <React.Fragment>
             <EuiFormRow
-              label="Delimiter"
+              label={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.delimiterFormRowLabel"
+                  defaultMessage="Delimiter"
+                />
+              }
             >
               <EuiSuperSelect
                 options={delimiterOptions}
@@ -199,7 +210,12 @@ export class Overrides extends Component {
             {
               (delimiter === 'other') &&
               <EuiFormRow
-                label="Custom delimiter"
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.customDelimiterFormRowLabel"
+                    defaultMessage="Custom delimiter"
+                  />
+                }
               >
                 <EuiFieldText
                   value={customDelimiter}
@@ -209,7 +225,12 @@ export class Overrides extends Component {
             }
 
             <EuiFormRow
-              label="Quote character"
+              label={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.quoteCharacterFormRowLabel"
+                  defaultMessage="Quote character"
+                />
+              }
             >
               <EuiSuperSelect
                 options={quoteOptions}
@@ -222,7 +243,12 @@ export class Overrides extends Component {
             <EuiFormRow>
               <EuiCheckbox
                 id={'hasHeaderRow'}
-                label="Has header row"
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.hasHeaderRowLabel"
+                    defaultMessage="Has header row"
+                  />
+                }
                 checked={hasHeaderRow}
                 onChange={this.onHasHeaderRowChange}
               />
@@ -231,7 +257,12 @@ export class Overrides extends Component {
             <EuiFormRow>
               <EuiCheckbox
                 id={'shouldTrimFields'}
-                label="Should trim fields"
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.trimFieldsLabel"
+                    defaultMessage="Should trim fields"
+                  />
+                }
                 checked={shouldTrimFields}
                 onChange={this.onShouldTrimFieldsChange}
               />
@@ -243,7 +274,12 @@ export class Overrides extends Component {
           (this.state.format === 'semi_structured_text') &&
           <React.Fragment>
             <EuiFormRow
-              label="Grok pattern"
+              label={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.grokPatternFormRowLabel"
+                  defaultMessage="Grok pattern"
+                />
+              }
             >
               <EuiTextArea
                 placeholder={grokPattern}
@@ -254,7 +290,12 @@ export class Overrides extends Component {
           </React.Fragment>
         }
         <EuiFormRow
-          label="Timestamp format"
+          label={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
+              defaultMessage="Timestamp format"
+            />
+          }
         >
           <EuiSuperSelect
             options={timestampFormatOptions}
@@ -264,7 +305,12 @@ export class Overrides extends Component {
         </EuiFormRow>
 
         <EuiFormRow
-          label="Time field"
+          label={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timeFieldFormRowLabel"
+              defaultMessage="Time field"
+            />
+          }
         >
           <EuiSuperSelect
             options={fieldOptions}
@@ -288,7 +334,12 @@ export class Overrides extends Component {
           <React.Fragment>
             <EuiSpacer />
             <EuiTitle size="s">
-              <h3>Edit field names</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.editFieldNamesTitle"
+                  defaultMessage="Edit field names"
+                />
+              </h3>
             </EuiTitle>
 
             {

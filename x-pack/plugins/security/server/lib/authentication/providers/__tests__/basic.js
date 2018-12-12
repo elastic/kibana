@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { requestFixture } from '../../../__tests__/__fixtures__/request';
@@ -97,7 +96,7 @@ describe('BasicAuthenticationProvider', () => {
       sinon.assert.calledOnce(callWithRequest);
     });
 
-    it('fails if `authorization` header has unsupported schema even if state contains valid credentials.', async () => {
+    it('does not handle `authorization` header with unsupported schema even if state contains valid credentials.', async () => {
       const request = requestFixture({ headers: { authorization: 'Bearer ***' } });
       const authorization = generateAuthorizationHeader('user', 'password');
 
@@ -105,8 +104,7 @@ describe('BasicAuthenticationProvider', () => {
 
       sinon.assert.notCalled(callWithRequest);
       expect(request.headers.authorization).to.be('Bearer ***');
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.error).to.eql(Boom.badRequest('Unsupported authentication schema: Bearer'));
+      expect(authenticationResult.notHandled()).to.be(true);
     });
 
     it('fails if state contains invalid credentials.', async () => {

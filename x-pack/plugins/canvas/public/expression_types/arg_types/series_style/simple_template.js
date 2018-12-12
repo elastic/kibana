@@ -33,7 +33,7 @@ export const SimpleTemplate = props => {
       {!color || color.length === 0 ? (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <label>Color&nbsp;</label>
+            <span>Color&nbsp;</span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink onClick={() => handlePlain('color', '#000000')}>
@@ -44,11 +44,11 @@ export const SimpleTemplate = props => {
       ) : (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <label>Color&nbsp;</label>
+            <label htmlFor="series-style">Color&nbsp;</label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
             <ColorPickerMini
-              id={'series-style'}
+              id="series-style"
               value={color}
               onChange={val => handlePlain('color', val)}
               colors={workpad.colors}
