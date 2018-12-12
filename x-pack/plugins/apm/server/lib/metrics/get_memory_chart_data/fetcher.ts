@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AggregationSearchResponse } from 'elasticsearch';
+import {
+  METRIC_PROCESS_MEMORY_RSS,
+  METRIC_PROCESS_MEMORY_SIZE,
+  METRIC_SYSTEM_FREE_MEMORY,
+  METRIC_SYSTEM_TOTAL_MEMORY
+} from 'x-pack/plugins/apm/common/constants';
 import { fetchMetrics } from '../metricsFetcher';
 import { AggValue, MetricsRequestArgs, TimeSeriesBucket } from '../query_types';
 
@@ -30,20 +36,16 @@ export async function fetch(args: MetricsRequestArgs) {
   return fetchMetrics<Aggs>({
     ...args,
     timeseriesBucketAggregations: {
-      // TODO: constants
-      freeMemory: { avg: { field: 'system.memory.actual.free' } },
-      totalMemory: { avg: { field: 'system.memory.total' } },
-      processMemorySize: { avg: { field: 'system.process.memory.size' } },
-      processMemoryRss: {
-        avg: { field: 'system.process.memory.rss.bytes' }
-      }
+      freeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
+      totalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      processMemorySize: { avg: { field: METRIC_PROCESS_MEMORY_SIZE } },
+      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } }
     },
     totalAggregations: {
-      // TODO: constants
-      freeMemory: { avg: { field: 'system.memory.actual.free' } },
-      totalMemory: { avg: { field: 'system.memory.total' } },
-      processMemorySize: { avg: { field: 'system.process.memory.size' } },
-      processMemoryRss: { avg: { field: 'system.process.memory.rss.bytes' } }
+      freeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
+      totalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      processMemorySize: { avg: { field: METRIC_PROCESS_MEMORY_SIZE } },
+      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } }
     }
   });
 }
