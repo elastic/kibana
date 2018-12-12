@@ -190,12 +190,12 @@ export class VectorLayer extends ALayer {
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const tableSource = join.getTableSource();
+    const joinSource = join.getJoinSource();
     const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
     try {
-      const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId, dataFilters);
+      const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
       if (canSkip) {
         return {
           shouldJoin: false,
@@ -207,7 +207,7 @@ export class VectorLayer extends ALayer {
       const {
         rawData,
         propertiesMap
-      } = await tableSource.getTable(dataFilters, leftSourceName, join.getLeftFieldName());
+      } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
       stopLoading(sourceDataId, requestToken, rawData);
       return {
         shouldJoin: true,

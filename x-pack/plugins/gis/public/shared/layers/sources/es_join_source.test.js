@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESTableSource, extractPropertiesMap } from './es_table_source';
+import { ESJoinSource, extractPropertiesMap } from './es_join_source';
 
 jest.mock('../vector_layer', () => {});
 jest.mock('ui/vis/editors/default/schemas', () => ({
@@ -35,7 +35,7 @@ const metricExamples = [
 describe('getMetricFields', () => {
 
   it('should add default "count" metric when no metrics are provided', () => {
-    const source = new ESTableSource({
+    const source = new ESJoinSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
     });
@@ -49,7 +49,7 @@ describe('getMetricFields', () => {
   });
 
   it('should remove incomplete metric configurations', () => {
-    const source = new ESTableSource({
+    const source = new ESJoinSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
@@ -74,7 +74,7 @@ describe('_makeAggConfigs', () => {
   describe('no metrics', () => {
     let aggConfigs;
     beforeAll(() => {
-      const source = new ESTableSource({
+      const source = new ESJoinSource({
         indexPatternTitle: indexPatternTitle,
         term: termFieldName,
       });
@@ -110,7 +110,7 @@ describe('_makeAggConfigs', () => {
   describe('metrics', () => {
     let aggConfigs;
     beforeAll(() => {
-      const source = new ESTableSource({
+      const source = new ESJoinSource({
         indexPatternTitle: indexPatternTitle,
         term: 'myTermField',
         metrics: metricExamples

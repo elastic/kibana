@@ -59,9 +59,9 @@ export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
   return propertiesMap;
 }
 
-export class ESTableSource extends ASource {
+export class ESJoinSource extends ASource {
 
-  static type = 'ES_TABLE_SOURCE';
+  static type = 'ES_JOIN_SOURCE';
 
 
   static renderEditor({}) {
@@ -84,7 +84,7 @@ export class ESTableSource extends ASource {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
-  async getTable(searchFilters, leftSourceName, leftFieldName) {
+  async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
 
     if (!this.hasCompleteConfig()) {
       return [];

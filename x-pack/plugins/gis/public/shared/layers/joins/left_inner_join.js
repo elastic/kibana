@@ -5,7 +5,7 @@
  */
 
 
-import { ESTableSource } from '../sources/es_table_source';
+import { ESJoinSource } from '../sources/es_join_source';
 
 export class LeftInnerJoin {
 
@@ -15,7 +15,7 @@ export class LeftInnerJoin {
 
   constructor(joinDescriptor) {
     this._descriptor = joinDescriptor;
-    this._rightSource = new ESTableSource(joinDescriptor.right);
+    this._rightSource = new ESJoinSource(joinDescriptor.right);
   }
 
   destroy() {
@@ -56,7 +56,7 @@ export class LeftInnerJoin {
     });
   }
 
-  getTableSource() {
+  getJoinSource() {
     return this._rightSource;
   }
 
