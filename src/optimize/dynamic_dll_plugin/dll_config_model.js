@@ -35,7 +35,7 @@ function generateDLL(config) {
     dllBundleFilename,
     dllStyleFilename,
     dllManifestPath,
-    babelCacheDir,
+    babelLoaderCacheDir,
     threadLoaderPoolConfig
   } = config;
 
@@ -84,7 +84,7 @@ function generateDLL(config) {
             {
               loader: 'cache-loader',
               options: {
-                cacheDirectory: babelCacheDir
+                cacheDirectory: babelLoaderCacheDir
               }
             },
             {
@@ -161,7 +161,7 @@ function extendRawConfig(rawConfig) {
   const dllBundleFilename = `${dllBundleName}${dllBundleExt}`;
   const dllManifestPath = `${dllOutputPath}/${dllManifestName}${dllManifestExt}`;
   const dllStyleFilename = `${dllStyleName}${dllStyleExt}`;
-  const babelCacheDir = rawConfig.babelCacheDir;
+  const babelLoaderCacheDir = rawConfig.babelLoaderCacheDir;
   const threadLoaderPoolConfig = rawConfig.threadLoaderPoolConfig;
 
   // Create webpack entry object key with the provided dllEntryName
@@ -181,7 +181,7 @@ function extendRawConfig(rawConfig) {
     dllBundleFilename,
     dllStyleFilename,
     dllManifestPath,
-    babelCacheDir,
+    babelLoaderCacheDir,
     threadLoaderPoolConfig
   };
 }

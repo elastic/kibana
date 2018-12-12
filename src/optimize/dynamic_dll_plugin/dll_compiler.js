@@ -32,11 +32,11 @@ const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class DllCompiler {
-  static getRawDllConfig(alias = {}, noParseRules = [], babelCacheDir = '', threadLoaderPoolConfig = {}) {
+  static getRawDllConfig(alias = {}, noParseRules = [], babelLoaderCacheDir = '', threadLoaderPoolConfig = {}) {
     return {
       alias,
       noParseRules,
-      babelCacheDir,
+      babelLoaderCacheDir,
       threadLoaderPoolConfig,
       context: fromRoot('.'),
       entryName: 'vendors',
