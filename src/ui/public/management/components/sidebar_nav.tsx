@@ -39,7 +39,7 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Subsec
   name: display,
   icon: icon ? <EuiIcon type={icon} /> : null,
   isSelected: selectedId === id,
-  onClick: () => url && (window.location.href = url),
+  href: url,
   'data-test-subj': id,
 });
 
