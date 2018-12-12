@@ -16,11 +16,8 @@ export const selectIsAutoReloading = (state: WaffleTimeState) =>
 export const selectTimeUpdatePolicyInterval = (state: WaffleTimeState) =>
   state.updatePolicy.policy === 'interval' ? state.updatePolicy.interval : null;
 
-export const selectCurrentTimeRange = createSelector(
-  selectCurrentTime,
-  currentTime => ({
-    from: currentTime - 1000 * 60 * 5,
-    interval: '1m',
-    to: currentTime,
-  })
-);
+export const selectCurrentTimeRange = createSelector(selectCurrentTime, currentTime => ({
+  from: currentTime - 1000 * 60 * 5,
+  interval: '1m',
+  to: currentTime,
+}));
