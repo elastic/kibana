@@ -57,7 +57,7 @@ class BasicLoginFormUI extends Component<Props, State> {
                 onChange={this.onUsernameChange}
                 disabled={this.state.isLoading}
                 isInvalid={false}
-                aria-required
+                aria-required={true}
                 inputRef={this.setUsernameInputRef}
               />
             </EuiFormRow>
@@ -79,7 +79,7 @@ class BasicLoginFormUI extends Component<Props, State> {
                 onChange={this.onPasswordChange}
                 disabled={this.state.isLoading}
                 isInvalid={false}
-                aria-required
+                aria-required={true}
               />
             </EuiFormRow>
 
