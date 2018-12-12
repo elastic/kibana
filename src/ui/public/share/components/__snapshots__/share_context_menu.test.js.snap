@@ -1,5 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`shareContextMenuExtensions should sort ascending on sort order first and then ascending on name 1`] = `
+<EuiContextMenu
+  data-test-subj="shareContextMenu"
+  initialPanelId={4}
+  panels={
+    Array [
+      Object {
+        "content": <InjectIntl(UrlPanelContentUI)
+          getUnhashableStates={[Function]}
+          objectType="dashboard"
+        />,
+        "id": 1,
+        "title": "Permalink",
+      },
+      Object {
+        "content": <div>
+          panel content
+        </div>,
+        "id": 2,
+        "title": "AAA panel",
+      },
+      Object {
+        "content": <div>
+          panel content
+        </div>,
+        "id": 3,
+        "title": "ZZZ panel",
+      },
+      Object {
+        "id": 4,
+        "items": Array [
+          Object {
+            "data-test-subj": "sharePanel-Permalinks",
+            "icon": "link",
+            "name": "Permalinks",
+            "panel": 1,
+          },
+          Object {
+            "data-test-subj": "sharePanel-ZZZpanel",
+            "name": "ZZZ panel",
+            "panel": 3,
+          },
+          Object {
+            "data-test-subj": "sharePanel-AAApanel",
+            "name": "AAA panel",
+            "panel": 2,
+          },
+        ],
+        "title": "Share this dashboard",
+      },
+    ]
+  }
+/>
+`;
+
 exports[`should only render permalink panel when there are no other panels 1`] = `
 <EuiContextMenu
   data-test-subj="shareContextMenu"
@@ -7,7 +62,7 @@ exports[`should only render permalink panel when there are no other panels 1`] =
   panels={
     Array [
       Object {
-        "content": <UrlPanelContent
+        "content": <InjectIntl(UrlPanelContentUI)
           getUnhashableStates={[Function]}
           objectType="dashboard"
         />,
@@ -26,7 +81,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
   panels={
     Array [
       Object {
-        "content": <UrlPanelContent
+        "content": <InjectIntl(UrlPanelContentUI)
           getUnhashableStates={[Function]}
           objectType="dashboard"
         />,
@@ -34,7 +89,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
         "title": "Permalink",
       },
       Object {
-        "content": <UrlPanelContent
+        "content": <InjectIntl(UrlPanelContentUI)
           getUnhashableStates={[Function]}
           isEmbedded={true}
           objectType="dashboard"
@@ -50,14 +105,12 @@ exports[`should render context menu panel when there are more than one panel 1`]
             "icon": "console",
             "name": "Embed code",
             "panel": 2,
-            "sortOrder": 0,
           },
           Object {
             "data-test-subj": "sharePanel-Permalinks",
             "icon": "link",
             "name": "Permalinks",
             "panel": 1,
-            "sortOrder": 0,
           },
         ],
         "title": "Share this dashboard",

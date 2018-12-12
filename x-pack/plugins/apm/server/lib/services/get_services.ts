@@ -5,7 +5,7 @@
  */
 
 import { oc } from 'ts-optchain';
-import { TermsAggsBucket } from 'x-pack/plugins/apm/typings/elasticsearch';
+import { BucketAgg } from 'x-pack/plugins/apm/typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
@@ -85,19 +85,19 @@ export async function getServices(
     params.body.query.bool.filter.push(esFilterQuery);
   }
 
-  interface ServiceBucket extends TermsAggsBucket {
+  interface ServiceBucket extends BucketAgg {
     avg: {
       value: number;
     };
     agents: {
-      buckets: TermsAggsBucket[];
+      buckets: BucketAgg[];
     };
     events: {
-      buckets: TermsAggsBucket[];
+      buckets: BucketAgg[];
     };
   }
 
-  interface Aggs extends TermsAggsBucket {
+  interface Aggs extends BucketAgg {
     services: {
       buckets: ServiceBucket[];
     };
