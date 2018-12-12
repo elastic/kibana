@@ -14,6 +14,7 @@ interface ComponentProps extends ControlSchema {
   actionData?: {
     [key: string]: any;
   };
+  disabled: boolean;
   actionHandler(action: AssignmentActionType, payload?: any): void;
 }
 
@@ -32,6 +33,7 @@ export const OptionControl: React.SFC<ComponentProps> = (props: ComponentProps) 
           showWarning={props.showWarning}
           warningHeading={props.warningHeading}
           warningMessage={props.warningMessage}
+          disabled={props.disabled}
         />
       );
     case ActionComponentType.TagBadgeList:
@@ -47,6 +49,7 @@ export const OptionControl: React.SFC<ComponentProps> = (props: ComponentProps) 
           action={props.action}
           name={props.name}
           items={props.actionData[props.actionDataKey]}
+          disabled={props.disabled}
         />
       );
   }

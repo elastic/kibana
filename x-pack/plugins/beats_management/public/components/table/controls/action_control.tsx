@@ -11,6 +11,7 @@ import { AssignmentActionType } from '../table';
 
 interface ActionControlProps {
   action: AssignmentActionType;
+  disabled: boolean;
   danger?: boolean;
   name: string;
   showWarning?: boolean;
@@ -46,7 +47,9 @@ export class ActionControl extends React.PureComponent<ActionControlProps, Actio
     return (
       <div>
         <EuiButton
+          size="s"
           color={danger ? 'danger' : 'primary'}
+          disabled={this.props.disabled}
           onClick={
             showWarning ? () => this.setState({ showModal: true }) : () => actionHandler(action)
           }

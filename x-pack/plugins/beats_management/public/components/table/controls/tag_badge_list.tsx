@@ -18,6 +18,7 @@ import { AssignmentActionType } from '../index';
 
 interface TagBadgeListProps {
   items: any[];
+  disabled: boolean;
   name: string;
   action?: AssignmentActionType;
   actionHandler(action: AssignmentActionType, payload?: any): void;
@@ -38,7 +39,13 @@ export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentSt
 
   public render() {
     const button = (
-      <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={this.onButtonClick}>
+      <EuiButton
+        size="s"
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={this.onButtonClick}
+        disabled={this.props.disabled}
+      >
         {this.props.name}
       </EuiButton>
     );

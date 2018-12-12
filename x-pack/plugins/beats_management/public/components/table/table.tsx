@@ -80,11 +80,11 @@ export class Table extends React.Component<TableProps, TableState> {
     });
   };
 
-  public actionHandler(action: AssignmentActionType, payload?: any): void {
+  public actionHandler = (action: AssignmentActionType, payload?: any): void => {
     if (this.props.actionHandler) {
       this.props.actionHandler(action, payload);
     }
-  }
+  };
 
   public render() {
     const { actionData, actions, hideTableControls, items, kueryBarProps, type } = this.props;
@@ -109,17 +109,17 @@ export class Table extends React.Component<TableProps, TableState> {
     return (
       <TableContainer>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            {actions &&
-              actions.map(action => (
+          {actions &&
+            actions.map(action => (
+              <EuiFlexItem grow={false} key={action.name}>
                 <OptionControl
-                  key={action.name}
                   {...action}
                   actionData={actionData}
                   actionHandler={this.actionHandler}
+                  disabled={this.state.selection.length === 0}
                 />
-              ))}
-          </EuiFlexItem>
+              </EuiFlexItem>
+            ))}
 
           {kueryBarProps && (
             <EuiFlexItem>
