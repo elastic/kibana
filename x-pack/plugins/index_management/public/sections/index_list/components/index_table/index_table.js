@@ -10,6 +10,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
+import { toastNotifications } from 'ui/notify';
 
 import '../../../../styles/table.less';
 import {
@@ -107,7 +108,7 @@ export class IndexTableUi extends Component {
       filterChanged(EuiSearchBar.Query.parse(decodedFilter));
     }
   }
-  componentDidUnmount() {
+  componentWillUnmount() {
     clearInterval(this.interval);
   }
   onSort = column => {
@@ -335,7 +336,6 @@ export class IndexTableUi extends Component {
       indices,
       intl,
       loadIndices,
-      filterChanged
     } = this.props;
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
@@ -421,7 +421,10 @@ export class IndexTableUi extends Component {
                   color="secondary"
                   onClick={() => {
                     loadIndices();
-                    filterChanged(EuiSearchBar.Query.parse(''));
+                    toastNotifications.addSuccess(intl.formatMessage({
+                      id: 'xpack.idxMgmt.indexTable.reloadingIndicesMessage',
+                      defaultMessage: 'Reloading indices'
+                    }));
                   }}
                   iconType="refresh"
                 >
