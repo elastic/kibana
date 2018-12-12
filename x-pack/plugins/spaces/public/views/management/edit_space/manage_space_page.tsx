@@ -180,7 +180,14 @@ class ManageSpacePageUI extends Component<Props, State> {
           <Fragment>
             <EuiFlexGroup responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiFormRow label="Avatar">
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.spaces.management.manageSpacePage.avatarLabel"
+                      defaultMessage="Avatar"
+                    />
+                  }
+                >
                   <SpaceAvatar space={this.state.space} size="l" />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -213,7 +220,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             name="description"
             placeholder={intl.formatMessage({
               id: 'xpack.spaces.management.manageSpacePage.hereMagicHappensPlaceholder',
-              defaultMessage: 'This is where the magic happens',
+              defaultMessage: 'This is where the magic happens.',
             })}
             value={description}
             onChange={this.onDescriptionChange}
@@ -250,7 +257,7 @@ class ManageSpacePageUI extends Component<Props, State> {
     return (
       <FormattedMessage
         id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
-        defaultMessage="Create space"
+        defaultMessage="Create a space"
       />
     );
   };
@@ -406,7 +413,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             {
               id:
                 'xpack.spaces.management.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
-              defaultMessage: '{name} was saved',
+              defaultMessage: `Space {name} was saved.`,
             },
             {
               name: `'${name}'`,

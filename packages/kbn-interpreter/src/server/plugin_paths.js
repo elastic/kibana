@@ -30,4 +30,6 @@ export const pluginPaths = {
   modelUIs: ['uis', 'models'],
   viewUIs: ['uis', 'views'],
   argumentUIs: ['uis', 'arguments'],
+  templates: ['templates'],
+  tagUIs: ['uis', 'tags'],
 };

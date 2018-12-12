@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 import React from 'react';
