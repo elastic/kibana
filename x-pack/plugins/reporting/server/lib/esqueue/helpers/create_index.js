@@ -83,14 +83,22 @@ export function createIndex(client, indexName,
     index: indexName,
   })
     .then((exists) => {
-      console.log(`Tim special log: [${indexName}] exist? ${exists}`);
       if (!exists) {
         return client.indices.create({
           index: indexName,
           body: body
         })
           .then(() => true)
-          .catch(err => console.log(`Tim special error: ${err}`));
+          .catch(err => {
+            /* FIXME creating the index will fail if there were multiple jobs staged in parallel.
+             * Each staged job checks `client.indices.exists` and could each get `false` as a response.
+             * Only the first job in line can successfully create it though.
+             * The problem might only happen in automated tests, where the indices are deleted after each test run.
+             * This catch block is in place to not fail a job if the job runner hits this race condition.
+             * Unfortunately we don't have a logger in scope to log a warning.
+             */
+            err; // no-op
+          });
       }
       return exists;
     });
