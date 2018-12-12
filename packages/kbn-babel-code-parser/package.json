@@ -10,8 +10,8 @@
     "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-babel-code-parser"
   },
   "scripts": {
-    "build": "babel src --out-dir target --quiet",
-    "kbn:bootstrap": "yarn build",
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build --quiet",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {

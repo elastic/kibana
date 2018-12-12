@@ -14,7 +14,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('overview', () => {
+  describe.skip('overview', () => {
     describe('with green platinum cluster', () => {
       const archive = 'monitoring/singlecluster-green-platinum';
       const timeRange = {

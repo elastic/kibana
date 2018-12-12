@@ -41,6 +41,7 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
+*.sublime-*
 npm-debug.log*
 .tern-project
 **/public/index.css
