@@ -8,8 +8,9 @@ import { EuiToolTip } from '@elastic/eui';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraTimerangeInput } from 'x-pack/plugins/infra/common/graphql/types';
+
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+import { InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
