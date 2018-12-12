@@ -84,14 +84,14 @@
 
           <div
             class="ml-explorer-swimlane euiText"
-            ng-if="showViewBySwimlane()"
+            ng-if="showViewBySwimlane"
             ng-mouseenter="setSwimlaneSelectActive(true)"
             ng-mouseleave="setSwimlaneSelectActive(false)"
           >
             <ml-explorer-swimlane swimlane-type="viewBy" />
           </div>
 
-          <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
+          <div ng-if="!showViewBySwimlane" class="text-center visualize-error euiText">
             <div class="item top"></div>
             <div class="item">
               <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
