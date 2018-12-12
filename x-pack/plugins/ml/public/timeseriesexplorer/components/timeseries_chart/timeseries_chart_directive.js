@@ -106,7 +106,7 @@ module.directive('mlTimeseriesChart', function () {
 
     element.on('$destroy', () => {
       resizeChecker.destroy();
-      // unmountComponentAtNode() needs to be called so mlAnomaliesTableService listeners within
+      // unmountComponentAtNode() needs to be called so mlTableService listeners within
       // the TimeseriesChart component get unwatched properly.
       ReactDOM.unmountComponentAtNode(element[0]);
       scope.$destroy();

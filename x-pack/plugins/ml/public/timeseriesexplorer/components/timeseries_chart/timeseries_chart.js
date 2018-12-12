@@ -38,7 +38,7 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
-import { mlAnomaliesTableService } from '../../../components/anomalies_table/anomalies_table_service';
+import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
 import { mlEscape } from '../../../util/string_utils';
@@ -204,8 +204,8 @@ export class TimeseriesChart extends React.Component {
     const element = d3.select(this.rootNode);
     element.html('');
 
-    mlAnomaliesTableService.anomalyRecordMouseenter.unwatch(this.tableRecordMousenterListener);
-    mlAnomaliesTableService.anomalyRecordMouseleave.unwatch(this.tableRecordMouseleaveListener);
+    mlTableService.rowMouseenter.unwatch(this.tableRecordMousenterListener);
+    mlTableService.rowMouseleave.unwatch(this.tableRecordMouseleaveListener);
   }
 
   componentDidMount() {
@@ -273,8 +273,8 @@ export class TimeseriesChart extends React.Component {
       }
     };
 
-    mlAnomaliesTableService.anomalyRecordMouseenter.watch(this.tableRecordMousenterListener);
-    mlAnomaliesTableService.anomalyRecordMouseleave.watch(this.tableRecordMouseleaveListener);
+    mlTableService.rowMouseenter.watch(this.tableRecordMousenterListener);
+    mlTableService.rowMouseleave.watch(this.tableRecordMouseleaveListener);
 
     this.renderChart();
     this.drawContextChartSelection();

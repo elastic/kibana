@@ -38,7 +38,7 @@ import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { mlAnomaliesTableService } from '../anomalies_table/anomalies_table_service';
+import { mlTableService } from '../../services/table_service';
 import { DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -158,14 +158,14 @@ class AnnotationsTable extends Component {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
-        mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord, 'annotation');
+        mlTableService.rowMouseleave.changed(this.mouseOverRecord, 'annotation');
 
         // fire mouseenter on the new record.
-        mlAnomaliesTableService.anomalyRecordMouseenter.changed(record, 'annotation');
+        mlTableService.rowMouseenter.changed(record, 'annotation');
       }
     } else {
       // Mouse is now over a row, fire mouseenter on the record.
-      mlAnomaliesTableService.anomalyRecordMouseenter.changed(record, 'annotation');
+      mlTableService.rowMouseenter.changed(record, 'annotation');
     }
 
     this.mouseOverRecord = record;
@@ -173,7 +173,7 @@ class AnnotationsTable extends Component {
 
   onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
-      mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord, 'annotation');
+      mlTableService.rowMouseleave.changed(this.mouseOverRecord, 'annotation');
       this.mouseOverRecord = undefined;
     }
   };
