@@ -284,6 +284,18 @@ export const metrics = {
       defaultMessage: 'HTTP Requests rejected during server shutdown'
     })
   }),
+  apm_responses_errors_internal: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.server.response.errors.internal',
+    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.internalTitle', {
+      defaultMessage: 'Internal'
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.internalLabel', {
+      defaultMessage: 'Internal'
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.internalDescription', {
+      defaultMessage: 'HTTP Requests rejected due to a miscellaneous internal error'
+    })
+  }),
 
   apm_processor_transaction_transformations: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.processor.transaction.transformations',

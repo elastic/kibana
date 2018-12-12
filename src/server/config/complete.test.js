@@ -46,6 +46,7 @@ describe('server/config completeMixin()', function () {
     };
 
     const kbnServer = {
+      core: { handledConfigPaths: [] },
       settings,
       server,
       config,

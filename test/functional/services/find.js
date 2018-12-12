@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { LeadfootElementWrapper } from './lib/leadfoot_element_wrapper';
+
 // Many of our tests use the `exists` functions to determine where the user is. For
 // example, you'll see a lot of code like:
 // if (!testSubjects.exists('someElementOnPageA')) {
@@ -39,6 +41,14 @@ export function FindProvider({ getService }) {
   const retry = getService('retry');
 
   const defaultFindTimeout = config.get('timeouts.find');
+
+  const wrap = leadfootElement => (
+    new LeadfootElementWrapper(leadfootElement, leadfoot)
+  );
+
+  const wrapAll = leadfootElements => (
+    leadfootElements.map(wrap)
+  );
 
   class Find {
     async _withTimeout(timeout, block) {
@@ -76,26 +86,26 @@ export function FindProvider({ getService }) {
     async byName(selector, timeout = defaultFindTimeout) {
       log.debug(`find.byName(${selector})`);
       return await this._ensureElementWithTimeout(timeout, async leadfoot => {
-        return await leadfoot.findByName(selector);
+        return wrap(await leadfoot.findByName(selector));
       });
     }
 
     async byCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`findByCssSelector ${selector}`);
       return await this._ensureElementWithTimeout(timeout, async leadfoot => {
-        return await leadfoot.findByCssSelector(selector);
+        return wrap(await leadfoot.findByCssSelector(selector));
       });
     }
 
     async byClassName(selector, timeout = defaultFindTimeout) {
       log.debug(`findByCssSelector ${selector}`);
       return await this._ensureElementWithTimeout(timeout, async leadfoot => {
-        return await leadfoot.findByClassName(selector);
+        return wrap(await leadfoot.findByClassName(selector));
       });
     }
 
     async activeElement() {
-      return await leadfoot.getActiveElement();
+      return wrap(await leadfoot.getActiveElement());
     }
 
     async setValue(selector, text) {
@@ -126,57 +136,70 @@ export function FindProvider({ getService }) {
 
     async allByLinkText(selector, timeout = defaultFindTimeout) {
       log.debug('find.allByLinkText: ' + selector);
-      return await this.allByCustom(leadfoot => leadfoot.findAllByLinkText(selector), timeout);
+      return await this.allByCustom(
+        async leadfoot => wrapAll(await leadfoot.findAllByLinkText(selector)),
+        timeout
+      );
     }
 
     async allByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug('in findAllByCssSelector: ' + selector);
-      return await this.allByCustom(leadfoot => leadfoot.findAllByCssSelector(selector), timeout);
+      return await this.allByCustom(
+        async leadfoot => wrapAll(await leadfoot.findAllByCssSelector(selector)),
+        timeout
+      );
     }
 
     async descendantExistsByCssSelector(selector, parentElement, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug('Find.descendantExistsByCssSelector: ' + selector);
-      return await this.exists(async () => await parentElement.findDisplayedByCssSelector(selector), timeout);
+      return await this.exists(
+        async () => wrap(await parentElement.findDisplayedByCssSelector(selector)),
+        timeout
+      );
     }
 
     async descendantDisplayedByCssSelector(selector, parentElement) {
       log.debug('Find.descendantDisplayedByCssSelector: ' + selector);
-      return await this._ensureElement(async () => await parentElement.findDisplayedByCssSelector(selector));
+      return await this._ensureElement(
+        async () => wrap(await parentElement.findDisplayedByCssSelector(selector))
+      );
     }
 
     async allDescendantDisplayedByCssSelector(selector, parentElement) {
       log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
       const allElements = await parentElement.findAllByCssSelector(selector);
       return await Promise.all(
-        allElements.map((element) => this._ensureElement(async () => element))
+        allElements.map((element) => (
+          this._ensureElement(async () => wrap(element))
+        ))
       );
     }
 
-    async displayedByCssSelector(selector, timeout = defaultFindTimeout, parentElement) {
+    async displayedByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug('in displayedByCssSelector: ' + selector);
       return await this._ensureElementWithTimeout(timeout, async leadfoot => {
-        return await leadfoot.findDisplayedByCssSelector(selector);
-      }, parentElement);
+        return wrap(await leadfoot.findDisplayedByCssSelector(selector));
+      });
     }
 
     async byLinkText(selector, timeout = defaultFindTimeout) {
       log.debug('Find.byLinkText: ' + selector);
       return await this._ensureElementWithTimeout(timeout, async leadfoot => {
-        return await leadfoot.findByLinkText(selector);
+        return wrap(await leadfoot.findByLinkText(selector));
       });
     }
 
     async findDisplayedByLinkText(selector, timeout = defaultFindTimeout) {
       log.debug('Find.byLinkText: ' + selector);
       return await this._ensureElementWithTimeout(timeout, async leadfoot => {
-        return await leadfoot.findDisplayedByLinkText(selector);
+        return wrap(await leadfoot.findDisplayedByLinkText(selector));
       });
     }
 
     async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
       log.debug(`find.byPartialLinkText(${partialLinkText})`);
       return await this._ensureElementWithTimeout(timeout, async leadfoot => {
-        return await leadfoot.findByPartialLinkText(partialLinkText);
+        return wrap(await leadfoot.findByPartialLinkText(partialLinkText));
       });
     }
 
@@ -193,26 +216,27 @@ export function FindProvider({ getService }) {
 
     async existsByLinkText(linkText, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByLinkText ${linkText}`);
-      return await this.exists(async leadfoot => await leadfoot.findDisplayedByLinkText(linkText), timeout);
+      return await this.exists(async leadfoot => wrap(await leadfoot.findDisplayedByLinkText(linkText)), timeout);
     }
 
     async existsByDisplayedByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByDisplayedByCssSelector ${selector}`);
-      return await this.exists(async leadfoot => await leadfoot.findDisplayedByCssSelector(selector), timeout);
+      return await this.exists(async leadfoot => wrap(await leadfoot.findDisplayedByCssSelector(selector)), timeout);
     }
 
     async existsByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByCssSelector ${selector}`);
-      return await this.exists(async leadfoot => await leadfoot.findByCssSelector(selector), timeout);
+      return await this.exists(async leadfoot => wrap(await leadfoot.findByCssSelector(selector)), timeout);
     }
 
     async clickByCssSelectorWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
       log.debug(`Find.clickByCssSelectorWhenNotDisabled`);
+
       // Don't wrap this code in a retry, or stale element checks may get caught here and the element
       // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
       // it's gone.
       const element = await this.byCssSelector(selector, timeout);
-      await leadfoot.moveMouseTo(element);
+      await element.moveMouseTo();
 
       const clickIfNotDisabled = async (element, resolve) => {
         const disabled = await element.getProperty('disabled');
@@ -232,7 +256,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByPartialLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byPartialLinkText(linkText, timeout);
-        await leadfoot.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -241,7 +265,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byLinkText(linkText, timeout);
-        await leadfoot.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -257,7 +281,7 @@ export function FindProvider({ getService }) {
         if (index === -1) {
           throw new Error('Button not found');
         }
-        return allButtons[index];
+        return wrap(allButtons[index]);
       });
     }
 
@@ -273,7 +297,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
-        await leadfoot.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -281,14 +305,14 @@ export function FindProvider({ getService }) {
       log.debug(`clickByDisplayedLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.findDisplayedByLinkText(linkText, timeout);
-        await leadfoot.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
     async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
       await retry.try(async () => {
         const element = await this.findDisplayedByCssSelector(selector, timeout);
-        await leadfoot.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }

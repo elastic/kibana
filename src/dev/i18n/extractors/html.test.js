@@ -80,7 +80,7 @@ describe('dev/i18n/extractors/html', () => {
     expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
   });
 
-  test('throws on i18n filter usage in angular directive argument', () => {
+  test('throws on i18n filter usage in complex angular expression', () => {
     const source = Buffer.from(`\
 <div
   ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"
@@ -88,5 +88,18 @@ describe('dev/i18n/extractors/html', () => {
 `);
 
     expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('extracts message from i18n filter in interpolating directive', () => {
+    const source = Buffer.from(`
+<icon-tip
+  content="::'namespace.messageId' | i18n: {
+    defaultMessage: 'Message'
+  }"
+  position="'right'"
+></icon-tip>
+`);
+
+    expect(Array.from(extractHtmlMessages(source))).toMatchSnapshot();
   });
 });

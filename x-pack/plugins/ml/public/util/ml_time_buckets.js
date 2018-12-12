@@ -13,7 +13,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 
 import { TimeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
 import { inherits } from 'plugins/ml/util/inherits';

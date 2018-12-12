@@ -8,6 +8,8 @@
 import 'ngreact';
 
 import { uiModules } from 'ui/modules';
+
+import { injectI18nProvider } from '@kbn/i18n/react';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { checkBasicLicense } from 'plugins/ml/license/check_license';
@@ -43,5 +45,5 @@ module.directive('fileDatavisualizerPage', function ($injector) {
   const indexPatterns = $injector.get('indexPatterns');
   const kibanaConfig = $injector.get('config');
 
-  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
+  return reactDirective(injectI18nProvider(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
 });

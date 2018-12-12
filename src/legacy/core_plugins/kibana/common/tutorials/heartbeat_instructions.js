@@ -92,8 +92,8 @@ export const createHeartbeatInstructions = context => ({
         },
       }),
       commands: [
-        'PS > cd C:\\Program Files\\Heartbeat',
-        'PS C:\\Program Files\\Heartbeat> .\\install-service-heartbeat.ps1',
+        'cd "C:\\Program Files\\Heartbeat"',
+        '.\\install-service-heartbeat.ps1',
       ],
     }
   },
@@ -142,8 +142,8 @@ export const createHeartbeatInstructions = context => ({
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
-        'PS C:\\Program Files\\Heartbeat> .\\heartbeat.exe setup',
-        'PS C:\\Program Files\\Heartbeat> Start-Service heartbeat',
+        '.\\heartbeat.exe setup',
+        'Start-Service heartbeat',
       ],
     },
   },

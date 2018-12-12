@@ -93,8 +93,12 @@ export function BrowserProvider({ getService }) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    async moveMouseTo(...args) {
-      await leadfoot.moveMouseTo(...args);
+    async moveMouseTo(element, xOffset, yOffset) {
+      if (element) {
+        await element.moveMouseTo(xOffset, yOffset);
+      } else {
+        await leadfoot.moveMouseTo(null, xOffset, yOffset);
+      }
     }
 
     /**

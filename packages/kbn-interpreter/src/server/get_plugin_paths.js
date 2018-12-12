@@ -17,39 +17,92 @@
  * under the License.
  */
 
+import path from 'path';
 import fs from 'fs';
-import { resolve } from 'path';
 import { promisify } from 'util';
 import { flatten } from 'lodash';
-import { pathsRegistry } from '../common/lib/paths_registry';
+import { pluginPaths } from './plugin_paths';
 
 const lstat = promisify(fs.lstat);
 const readdir = promisify(fs.readdir);
+
+const canvasPluginDirectoryName = 'canvas_plugin';
 
 const isDirectory = path =>
   lstat(path)
     .then(stat => stat.isDirectory())
     .catch(() => false);
 
-export const getPluginPaths = type => {
-  const typePaths = pathsRegistry.get(type);
-  if (!typePaths) {
-    throw new Error(`Unknown type: ${type}`);
+const isDirname = (p, name) => path.basename(p) === name;
+
+const getPackagePluginPath = () => {
+  let basePluginPath = path.resolve(__dirname, '..');
+
+  if (isDirname(basePluginPath, 'target')) {
+    basePluginPath = path.join(basePluginPath, '..');
+  }
+  return basePluginPath;
+};
+
+const getKibanaPluginsPath = () => {
+  let kibanaPath = path.resolve(getPackagePluginPath(), '..', '..');
+
+  // in dev mode we are in kibana folder, else we are in node_modules
+  if (!isDirname(kibanaPath, 'kibana')) {
+    kibanaPath = path.join(kibanaPath, '..');
   }
 
-  return Promise.all(typePaths.map(async path => {
-    const isDir = await isDirectory(path);
-    if (!isDir) {
-      return;
-    }
-    // Get the full path of all js files in the directory
-    return readdir(path).then(files => {
-      return files.reduce((acc, file) => {
-        if (file.endsWith('.js')) {
-          acc.push(resolve(path, file));
-        }
-        return acc;
-      }, []);
-    }).catch();
-  })).then(flatten);
+  return path.join(kibanaPath, 'plugins');
+};
+
+const getXPackPluginsPath = () => {
+  const kibanaPath = path.resolve(getPackagePluginPath(), '..', '..');
+
+  // in dev mode we are in kibana folder, else we are in node_modules
+  return path.join(kibanaPath, 'x-pack/plugins');
+};
+
+// These must all exist
+const paths = [
+  getPackagePluginPath(),
+  getXPackPluginsPath(), // Canvas core plugins
+  getKibanaPluginsPath(), // Kibana plugin directory
+].filter(Boolean);
+
+export const getPluginPaths = type => {
+  const typePath = pluginPaths[type];
+  if (!typePath) throw new Error(`Unknown type: ${type}`);
+
+  async function findPlugins(directory) {
+    const isDir = await isDirectory(directory);
+    if (!isDir) return;
+
+    const names = await readdir(directory); // Get names of everything in the directory
+    return names
+      .filter(name => name[0] !== '.')
+      .map(name => path.resolve(directory, name, canvasPluginDirectoryName, ...typePath));
+  }
+
+  return Promise.all(paths.map(findPlugins))
+    .then(dirs =>
+      dirs.reduce((list, dir) => {
+        if (!dir) return list;
+        return list.concat(dir);
+      }, [])
+    )
+    .then(possibleCanvasPlugins => {
+      // Check how many are directories. If lstat fails it doesn't exist anyway.
+      return Promise.all(
+        // An array
+        possibleCanvasPlugins.map(pluginPath => isDirectory(pluginPath))
+      ).then(isDirectory => possibleCanvasPlugins.filter((pluginPath, i) => isDirectory[i]));
+    })
+    .then(canvasPluginDirectories => {
+      return Promise.all(
+        canvasPluginDirectories.map(dir =>
+          // Get the full path of all files in the directory
+          readdir(dir).then(files => files.map(file => path.resolve(dir, file)))
+        )
+      ).then(flatten);
+    });
 };

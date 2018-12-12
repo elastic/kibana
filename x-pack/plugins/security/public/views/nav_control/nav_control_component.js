@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -51,7 +52,12 @@ export class SecurityNavControl extends Component {
         aria-controls="headerUserMenu"
         aria-expanded={this.state.isOpen}
         aria-haspopup="true"
-        aria-label="Account menu"
+        aria-label={
+          <FormattedMessage
+            id="xpack.security.navControlComponent.accountMenuAriaLabel"
+            defaultMessage="Account menu"
+          />
+        }
         onClick={this.onMenuButtonClick}
       >
         <EuiAvatar name={name} size="s" />
@@ -86,11 +92,21 @@ export class SecurityNavControl extends Component {
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
-                      <EuiLink href={route}>Edit profile</EuiLink>
+                      <EuiLink href={route}>
+                        <FormattedMessage
+                          id="xpack.security.navControlComponent.editProfileLinkText"
+                          defaultMessage="Edit profile"
+                        />
+                      </EuiLink>
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiLink href="/logout">Log out</EuiLink>
+                      <EuiLink href="/logout">
+                        <FormattedMessage
+                          id="xpack.security.navControlComponent.logoutLinkText"
+                          defaultMessage="Log out"
+                        />
+                      </EuiLink>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

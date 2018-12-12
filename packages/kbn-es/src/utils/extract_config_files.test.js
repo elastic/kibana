@@ -17,21 +17,21 @@
  * under the License.
  */
 
+jest.mock('fs', () => ({
+  readFileSync: jest.fn(),
+  existsSync: jest.fn().mockImplementation(() => true),
+  writeFileSync: jest.fn(),
+}));
+
 const { extractConfigFiles } = require('./extract_config_files');
-const mockFs = require('mock-fs');
 const fs = require('fs');
 
-beforeEach(() => {
-  mockFs({
-    '/data': {
-      'foo.yml': '',
-    },
-    '/es': {},
-  });
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
-afterEach(() => {
-  mockFs.restore();
+afterAll(() => {
+  jest.restoreAllMocks();
 });
 
 test('returns config with local paths', () => {
@@ -43,8 +43,8 @@ test('returns config with local paths', () => {
 test('copies file', () => {
   extractConfigFiles(['path=/data/foo.yml'], '/es');
 
-  expect(fs.existsSync('/es/config/foo.yml')).toBe(true);
-  expect(fs.existsSync('/data/foo.yml')).toBe(true);
+  expect(fs.readFileSync.mock.calls[0][0]).toEqual('/data/foo.yml');
+  expect(fs.writeFileSync.mock.calls[0][0]).toEqual('/es/config/foo.yml');
 });
 
 test('ignores non-paths', () => {

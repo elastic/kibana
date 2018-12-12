@@ -23,6 +23,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
   const log = getService('log');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
@@ -63,9 +64,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all text
-      await input.session.pressKeys(Keys.NULL); // Release modifier keys
-      await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
+      if (process.platform === 'darwin') {
+        await browser.pressKeys([Keys.COMMAND, 'a']); // Select all Mac
+      } else {
+        await browser.pressKeys([Keys.CONTROL, 'a']); // Select all for everything else
+      }
+      await browser.pressKeys(Keys.NULL); // Release modifier keys
+      await browser.pressKeys(Keys.BACKSPACE); // Delete all content
       await input.type(markdown);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -100,7 +105,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getRhythmChartLegendValue() {
       const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
-      await metricValue.session.moveMouseTo(metricValue);
+      await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
 
@@ -204,7 +209,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const el = await testSubjects.find('comboBoxSearchInput');
       await el.clearValue();
       await el.type(timeField);
-      await el.session.pressKeys(Keys.RETURN);
+      await browser.pressKeys(Keys.RETURN);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
   }

@@ -5,7 +5,7 @@
  */
 
 declare module '@elastic/eui/lib/experimental' {
-  import { CommonProps } from '@elastic/eui';
+  import { CommonProps } from '@elastic/eui/src/components/common';
   export type EuiSeriesChartProps = CommonProps & {
     xType?: string;
     stackBy?: string;

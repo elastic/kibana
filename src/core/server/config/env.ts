@@ -29,18 +29,20 @@ export interface PackageInfo {
   buildSha: string;
 }
 
-interface EnvironmentMode {
+export interface EnvironmentMode {
   name: 'development' | 'production';
   dev: boolean;
   prod: boolean;
 }
 
+/** @internal */
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
   isDevClusterMaster: boolean;
 }
 
+/** @internal */
 export interface CliArgs {
   dev: boolean;
   envName?: string;
@@ -60,10 +62,16 @@ export class Env {
     return new Env(process.cwd(), options);
   }
 
+  /** @internal */
   public readonly configDir: string;
+  /** @internal */
   public readonly binDir: string;
+  /** @internal */
   public readonly logDir: string;
+  /** @internal */
   public readonly staticFilesDir: string;
+  /** @internal */
+  public readonly pluginSearchPaths: ReadonlyArray<string>;
 
   /**
    * Information about Kibana package (version, build number etc.).
@@ -77,16 +85,19 @@ export class Env {
 
   /**
    * Arguments provided through command line.
+   * @internal
    */
   public readonly cliArgs: Readonly<CliArgs>;
 
   /**
    * Paths to the configuration files.
+   * @internal
    */
   public readonly configs: ReadonlyArray<string>;
 
   /**
    * Indicates that this Kibana instance is run as development Node Cluster master.
+   * @internal
    */
   public readonly isDevClusterMaster: boolean;
 
@@ -98,6 +109,12 @@ export class Env {
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
+
+    this.pluginSearchPaths = [
+      resolve(this.homeDir, 'src', 'plugins'),
+      resolve(this.homeDir, 'plugins'),
+      resolve(this.homeDir, '..', 'kibana-extra'),
+    ];
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);

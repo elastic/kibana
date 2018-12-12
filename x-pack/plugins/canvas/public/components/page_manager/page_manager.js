@@ -109,7 +109,14 @@ export class PageManager extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { isWriteable, selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const {
+      isWriteable,
+      selectedPage,
+      workpadId,
+      movePage,
+      duplicatePage,
+      workpadCSS,
+    } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -139,16 +146,19 @@ export class PageManager extends React.PureComponent {
                   params={{ id: workpadId, page: pageNumber }}
                   aria-label={`Load page number ${pageNumber}`}
                 >
-                  <PagePreview
-                    isWriteable={isWriteable}
-                    page={page}
-                    height={100}
-                    pageNumber={pageNumber}
-                    movePage={movePage}
-                    selectedPage={selectedPage}
-                    duplicatePage={duplicatePage}
-                    confirmDelete={this.confirmDelete}
-                  />
+                  {Style.it(
+                    workpadCSS,
+                    <PagePreview
+                      isWriteable={isWriteable}
+                      page={page}
+                      height={100}
+                      pageNumber={pageNumber}
+                      movePage={movePage}
+                      selectedPage={selectedPage}
+                      duplicatePage={duplicatePage}
+                      confirmDelete={this.confirmDelete}
+                    />
+                  )}
                 </Link>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -159,7 +169,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId, isWriteable, workpadCSS } = this.props;
+    const { pages, addPage, deleteId, isWriteable } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -170,22 +180,16 @@ export class PageManager extends React.PureComponent {
               <Droppable droppableId="droppable-page-manager" direction="horizontal">
                 {provided => (
                   <div
+                    className={`canvasPageManager__pageList ${
+                      showTrayPop ? 'canvasPageManager--trayPop' : ''
+                    }`}
                     ref={el => {
                       this.pageListRef = el;
                       provided.innerRef(el);
                     }}
                     {...provided.droppableProps}
                   >
-                    {Style.it(
-                      workpadCSS,
-                      <div
-                        className={`canvasPageManager__pageList ${
-                          showTrayPop ? 'canvasPageManager--trayPop' : ''
-                        }`}
-                      >
-                        {pages.map(this.renderPage)}
-                      </div>
-                    )}
+                    {pages.map(this.renderPage)}
                     {provided.placeholder}
                   </div>
                 )}

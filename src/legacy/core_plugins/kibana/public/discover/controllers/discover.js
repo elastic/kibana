@@ -24,7 +24,7 @@ import chrome from 'ui/chrome';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import * as filterActions from 'ui/doc_table/actions/filter';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
