@@ -12,7 +12,7 @@ import { createSelector } from 'reselect';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { memoizeLast } from 'ui/utils/memoize';
-import { SourceQuery } from '../../../common/graphql/types';
+import { SourceQuery } from '../../graphql/types';
 import {
   createStatusActions,
   createStatusSelectors,
