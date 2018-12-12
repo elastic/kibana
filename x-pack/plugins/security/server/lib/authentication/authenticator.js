@@ -170,7 +170,6 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
-        console.log('THEY ARE AUTHENTICATED', request.url, request.headers);
         // we have to do this here, as the auth scope's could be dependent on this
         await this._authorizationMode.initialize(request);
         return AuthenticationResult.succeeded({

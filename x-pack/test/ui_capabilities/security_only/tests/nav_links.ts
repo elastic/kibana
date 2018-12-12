@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
-import { TestInvoker } from '../../common/types';
-import { UICapabilitiesService } from '../services/ui_capabilities';
+import { TestInvoker } from '../../../common/types';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: TestInvoker) {

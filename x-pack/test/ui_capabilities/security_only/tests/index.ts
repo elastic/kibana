@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestInvoker } from '../../common/types';
+import { TestInvoker } from '../../../common/types';
 
 // tslint:disable:no-default-export
 export default function uiCapabilitesTests({ loadTestFile }: TestInvoker) {
