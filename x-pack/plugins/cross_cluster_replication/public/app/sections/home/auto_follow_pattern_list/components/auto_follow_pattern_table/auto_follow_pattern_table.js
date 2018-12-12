@@ -6,10 +6,13 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiInMemoryTable,
   EuiButton,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
@@ -109,6 +112,31 @@ export class AutoFollowPatternTableUI extends PureComponent {
     }, {
       name: '',
       actions: [
+        {
+          render: ({ name }) => {
+            const label = i18n.translate('xpack.crossClusterReplication.autofollowPatternList.table.actionDeleteDescription', {
+              defaultMessage: 'Delete auto-follow pattern',
+            });
+
+            return (
+              <EuiToolTip
+                content={label}
+                delay="long"
+              >
+                <AutoFollowPatternDeleteProvider>
+                  {(deleteAutoFollowPattern) => (
+                    <EuiButtonIcon
+                      aria-label={label}
+                      iconType="trash"
+                      color="danger"
+                      onClick={() => deleteAutoFollowPattern(name)}
+                    />
+                  )}
+                </AutoFollowPatternDeleteProvider>
+              </EuiToolTip>
+            );
+          },
+        },
         {
           name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.editLabel', defaultMessage: 'Edit' }),
           description: intl.formatMessage({

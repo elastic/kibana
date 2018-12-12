@@ -159,7 +159,7 @@ export class RemoteClusterTableUi extends Component {
       width: '100px',
       actions: [{
         render: ({ name, isConfiguredByNode }) => {
-          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
+          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription', {
             defaultMessage: 'Delete remote cluster',
           });
 
