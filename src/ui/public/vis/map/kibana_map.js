@@ -23,6 +23,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
+import { defaultLayerLoadWarning } from './map_messages';
 
 
 function makeFitControl(fitContainer, kibanaMap) {
@@ -557,6 +558,15 @@ export class KibanaMap extends EventEmitter {
       baseLayer.on('tileload', () => this._updateDesaturation());
       baseLayer.on('load', () => {
         this.emit('baseLayer:loaded');
+
+        // Validate Tiles
+        const mapContainer = '.leaflet-tile-container';
+        const tileLoaded = 'leaflet-tile-loaded';
+        const imgTiles = Array.from(document.querySelector(mapContainer).children);
+
+        if (!imgTiles.some(imgTile => imgTile.className.includes(tileLoaded))) {
+          defaultLayerLoadWarning();
+        }
       });
       baseLayer.on('loading', () => {
         this.emit('baseLayer:loading');

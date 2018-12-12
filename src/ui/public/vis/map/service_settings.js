@@ -22,9 +22,7 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
 import { ORIGIN } from './origin';
-import { toastNotifications } from 'ui/notify';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { defaultLayerLoadWarning } from './map_messages';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -142,42 +140,6 @@ uiModules.get('kibana')
         }));
       }
 
-      _defaultLayerLoadWarning = _.once(() => {
-        toastNotifications.addDanger({
-          title: 'Unable to reach configured basemap layer',
-          text: (
-            <p>
-              <FormattedMessage
-                id="common.ui.vis.map.serviceSettings.emsManifestUnavailable"
-                defaultMessage="We are unable to reach your configured base
-                layer map. Please check your network settings and work with
-                your administrator to ensure the configuration is correct or
-                use the { defaultSettings } to enable the officially supported
-                { EMS }."
-                values={{
-                  defaultSettings: (
-                    <a
-                      target="_blank"
-                      href="https://www.elastic.co/guide/en/kibana/current/settings.html"
-                    >
-                      {'default settings'}
-                    </a>
-                  ),
-                  EMS: (
-                    <a
-                      target="_blank"
-                      href="https://www.elastic.co/elastic-maps-service"
-                    >
-                      {'Elastic Map Service'}
-                    </a>
-                  )
-                }}
-              />
-            </p>
-          )
-        });
-      });
-
       /**
        * this internal method is overridden by the tests to simulate custom manifest.
        */
@@ -219,7 +181,7 @@ uiModules.get('kibana')
         const emsDefault = !allServices.length;
         const servicesFromManifest = await this._loadTMSServices();
         if (emsDefault && !servicesFromManifest.length) {
-          this._defaultLayerLoadWarning();
+          defaultLayerLoadWarning();
         }
 
         const strippedServiceFromManifest = servicesFromManifest.map((service) => {
