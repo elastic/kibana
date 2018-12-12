@@ -18,45 +18,41 @@ export const groupByProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     const { groupBy } = options.nodeOptions;
-    const currentAggs = get(result, 'aggs.waffle.aggs.nodes.aggs', {});
-    set(
-      result,
-      'aggs.waffle.aggs.nodes.aggs',
-      groupBy.reduce((aggs: object, grouping: InfraPathInput, index: number) => {
-        if (isGroupByTerms(grouping)) {
-          const termsAgg = {
-            aggs: {},
-            terms: {
-              field: grouping.field,
-              size: 10,
-            },
-          };
-          set(aggs, `path_${index}`, termsAgg);
-          return termsAgg.aggs;
-        }
+    let aggs = get(result, 'aggs.waffle.aggs.nodes.aggs', {});
+    set(result, 'aggs.waffle.aggs.nodes.aggs', aggs);
+    groupBy.forEach((grouping: InfraPathInput, index: number) => {
+      if (isGroupByTerms(grouping)) {
+        const termsAgg = {
+          aggs: {},
+          terms: {
+            field: grouping.field,
+            size: 10,
+          },
+        };
+        set(aggs, `path_${index}`, termsAgg);
+        aggs = termsAgg.aggs;
+      }
 
-        if (grouping && isGroupByFilters(grouping)) {
-          const filtersAgg = {
-            aggs: {},
-            filters: {
-              filters: grouping.filters!.map(
-                (filter: InfraPathFilterInput): InfraESQueryStringQuery => {
-                  return {
-                    query_string: {
-                      analyze_wildcard: true,
-                      query: (filter && filter.query) || '*',
-                    },
-                  };
-                }
-              ),
-            },
-          };
-          set(aggs, `${grouping.id}`, filtersAgg);
-          return filtersAgg.aggs;
-        }
-        return aggs;
-      }, currentAggs)
-    );
+      if (grouping && isGroupByFilters(grouping)) {
+        const filtersAgg = {
+          aggs: {},
+          filters: {
+            filters: grouping.filters!.map(
+              (filter: InfraPathFilterInput): InfraESQueryStringQuery => {
+                return {
+                  query_string: {
+                    analyze_wildcard: true,
+                    query: (filter && filter.query) || '*',
+                  },
+                };
+              }
+            ),
+          },
+        };
+        set(aggs, `path_${index}`, filtersAgg);
+        aggs = filtersAgg.aggs;
+      }
+    });
     return result;
   };
 };
