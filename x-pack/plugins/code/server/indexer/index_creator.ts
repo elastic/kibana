@@ -6,8 +6,8 @@
 
 import { EsClient } from '@code/esqueue';
 
-import pkg from '../../package.json';
 import { IndexCreationRequest } from './index_creation_request';
+import pkg from './schema/version.json';
 
 /*
  * This IndexCreator deals with anything with elasticsearch index creation.
