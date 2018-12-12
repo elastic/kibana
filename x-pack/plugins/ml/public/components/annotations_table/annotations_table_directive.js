@@ -7,8 +7,7 @@
 
 
 /*
- * Chart plotting data from a single time series, with or without model plot enabled,
- * annotated with anomalies.
+ * angularjs wrapper directive for the AnnotationsTable React component.
  */
 
 import React from 'react';
