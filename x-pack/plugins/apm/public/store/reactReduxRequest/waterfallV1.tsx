@@ -17,7 +17,7 @@ import {
   getWaterfall,
   IWaterfall
 } from '../../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-import { loadSpans } from '../../services/rest/apm';
+import { loadSpans } from '../../services/rest/apm/transactions';
 import { IUrlParams } from '../urlParams';
 // @ts-ignore
 import { createInitialDataSelector } from './helpers';

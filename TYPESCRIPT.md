@@ -14,12 +14,20 @@ The first thing that will probably happen when you convert a `.js` file in our s
 #### EUI component is missing types
 
 1. Check https://github.com/elastic/eui/issues/256 to see if they know it’s missing, if it’s not on there, add it.
-2. Temporarily get around the issue by using a declared module and exporting the missing types with the most basic types available. Bonus points if you write a PR yourself to the EUI repo to add the types, but having them available back in Kibana will take some time, as a new EUI release will need to be generated, then that new release pointed to in Kibana.  Best, to make forward progress, to do a temporary workaround.
+2. Temporarily get around the issue by adding the missing type in the `typings/@elastic/eui/index.d.ts` file. Bonus points if you write a PR yourself to the EUI repo to add the types, but having them available back in Kibana will take some time, as a new EUI release will need to be generated, then that new release pointed to in Kibana.  Best, to make forward progress, to do a temporary workaround.
 
 ```ts
+// typings/@elastic/eui/index.d.ts
+
 declare module '@elastic/eui' {
-  export const EuiPopoverTitle: React.SFC<any>;
+  // Add your types here
+  export const EuiPopoverTitle: React.SFC<EuiPopoverTitleProps>;
+  ...
 }
+```
+
+```ts
+// you can now import it in <your-plugin-file.ts>
 
 import { EuiPopoverTitle } from '@elastic/eui';
 ```
@@ -36,7 +44,8 @@ A `.d.ts` file is treated as a module if it contains any top-level `import` or `
 Since `@elastic/eui` already ships with a module declaration, any local additions must be performed using module augmentation, e.g.
 
 ```typescript
-// file `my_plugin/types/eui.d.ts`
+// file `typings/@elastic/eui/index.d.ts`
+
 import { CommonProps } from '@elastic/eui';
 import { SFC } from 'react';
 

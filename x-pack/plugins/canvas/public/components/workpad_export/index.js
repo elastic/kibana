@@ -6,9 +6,9 @@
 
 /* eslint import/no-unresolved: 1 */
 // TODO: remove eslint rule when updating to use the linked kibana resolve package
-import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
+import { jobCompletionNotifications } from '../../../../reporting/public/lib/job_completion_notifications';
 import { getWorkpad, getPages } from '../../state/selectors/workpad';
 import { getReportingBrowserType } from '../../state/selectors/app';
 import { notify } from '../../lib/notify';

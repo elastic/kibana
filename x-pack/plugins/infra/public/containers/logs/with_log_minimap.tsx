@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -28,27 +29,39 @@ export const WithLogMinimap = asChildFunctionRenderer(withLogMinimap);
 
 export const availableIntervalSizes = [
   {
-    label: '1 Year',
+    label: i18n.translate('xpack.infra.mapLogs.oneYearLabel', {
+      defaultMessage: '1 Year',
+    }),
     intervalSize: 1000 * 60 * 60 * 24 * 365,
   },
   {
-    label: '1 Month',
+    label: i18n.translate('xpack.infra.mapLogs.oneMonthLabel', {
+      defaultMessage: '1 Month',
+    }),
     intervalSize: 1000 * 60 * 60 * 24 * 30,
   },
   {
-    label: '1 Week',
+    label: i18n.translate('xpack.infra.mapLogs.oneWeekLabel', {
+      defaultMessage: '1 Week',
+    }),
     intervalSize: 1000 * 60 * 60 * 24 * 7,
   },
   {
-    label: '1 Day',
+    label: i18n.translate('xpack.infra.mapLogs.oneDayLabel', {
+      defaultMessage: '1 Day',
+    }),
     intervalSize: 1000 * 60 * 60 * 24,
   },
   {
-    label: '1 Hour',
+    label: i18n.translate('xpack.infra.mapLogs.oneHourLabel', {
+      defaultMessage: '1 Hour',
+    }),
     intervalSize: 1000 * 60 * 60,
   },
   {
-    label: '1 Minute',
+    label: i18n.translate('xpack.infra.mapLogs.oneMinuteLabel', {
+      defaultMessage: '1 Minute',
+    }),
     intervalSize: 1000 * 60,
   },
 ];

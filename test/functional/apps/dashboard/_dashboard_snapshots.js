@@ -22,18 +22,18 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
-      await remote.setWindowSize(1000, 500);
+      await browser.setWindowSize(1000, 500);
     });
 
     after(async function () {
-      await remote.setWindowSize(1300, 900);
+      await browser.setWindowSize(1300, 900);
       const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
       await PageObjects.dashboard.deleteDashboard('area', id);
     });

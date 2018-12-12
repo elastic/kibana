@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { pathsRegistry } from './lib/paths_registry';
 export { functionsRegistry } from './lib/functions_registry';
 export { typesRegistry } from './lib/types_registry';
 export { createError } from './interpreter/create_error';

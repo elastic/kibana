@@ -20,10 +20,12 @@ describe('ML - Angular Bootstrap Patch - Dropdown Controller', () => {
 
       expect(scope.$$watchersCount).to.eql(0);
 
-      $controller('DropdownController', {
-        $attrs: [],
-        $scope: scope
-      });
+      expect(() => {
+        $controller('DropdownController', {
+          $attrs: [],
+          $scope: scope
+        });
+      }).to.not.throwError();
 
       expect(scope.$$watchersCount).to.eql(1);
       done();

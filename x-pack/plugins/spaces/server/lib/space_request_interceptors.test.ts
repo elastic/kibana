@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
+
 import { Server } from 'hapi';
 import sinon from 'sinon';
-import { SavedObject } from './saved_objects_client/saved_objects_client_types';
+
+import { SavedObject } from 'src/server/saved_objects';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
 
 describe('interceptors', () => {

@@ -15,8 +15,13 @@ export interface KueryFilterQuery {
 
 export type FilterQuery = KueryFilterQuery;
 
+export interface SerializedFilterQuery {
+  query: FilterQuery;
+  serializedQuery: string;
+}
+
 export interface LogFilterState {
-  filterQuery: KueryFilterQuery | null;
+  filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
 }
 
@@ -33,6 +38,6 @@ export const logFilterReducer = reducerWithInitialState(initialLogFilterState)
   .case(applyLogFilterQuery, (state, filterQuery) => ({
     ...state,
     filterQuery,
-    filterQueryDraft: filterQuery,
+    filterQueryDraft: filterQuery.query,
   }))
   .build();

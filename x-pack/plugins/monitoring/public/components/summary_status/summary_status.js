@@ -16,14 +16,12 @@ const wrapChild = ({ label, value, ...props }, index) => (
     grow={false}
     {...props}
   >
-    {/* <EuiPanel paddingSize="m"> */}
     <EuiStat
       title={value}
       titleSize="s"
       textAlign="left"
       description={label ? `${label}:` : ''}
     />
-    {/* </EuiPanel> */}
   </EuiFlexItem>
 );
 
@@ -45,7 +43,6 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
       key={`summary-status-item-status`}
       grow={false}
     >
-      {/* <EuiPanel paddingSize="m"> */}
       <EuiStat
         title={(
           <Fragment>
@@ -58,7 +55,6 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
         textAlign="left"
         description="Status:"
       />
-      {/* </EuiPanel> */}
     </EuiFlexItem>
   );
 };

@@ -15,9 +15,9 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       _archive = archive;
 
       const kibanaServer = getService('kibanaServer');
-      const remote = getService('remote');
+      const browser = getService('browser');
 
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await esArchiver.load(archive);
       await kibanaServer.uiSettings.replace({

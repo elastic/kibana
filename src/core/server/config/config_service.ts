@@ -25,6 +25,7 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
 
+/** @internal */
 export class ConfigService {
   private readonly log: Logger;
 
@@ -107,11 +108,18 @@ export class ConfigService {
     return true;
   }
 
-  public async getUnusedPaths(): Promise<string[]> {
+  public async getUnusedPaths() {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
     return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
+  }
+
+  public async getUsedPaths() {
+    const config = await this.config$.pipe(first()).toPromise();
+    const handledPaths = this.handledPaths.map(pathToString);
+
+    return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
   private createConfig<TSchema extends Type<any>, TConfig>(

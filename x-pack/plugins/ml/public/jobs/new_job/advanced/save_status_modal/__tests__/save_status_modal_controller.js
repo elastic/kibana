@@ -19,11 +19,14 @@ describe('ML - Save Status Modal Controller', () => {
   it('Initialize Save Status Modal Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlSaveStatusModal', {
-        $scope: scope,
-        $modalInstance: mockModalInstance,
-        params: {}
-      });
+
+      expect(() => {
+        $controller('MlSaveStatusModal', {
+          $scope: scope,
+          $modalInstance: mockModalInstance,
+          params: {}
+        });
+      }).to.not.throwError();
 
       expect(scope.ui.showTimepicker).to.eql(false);
       done();
