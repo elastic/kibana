@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg } from 'x-pack/plugins/apm/typings/elasticsearch';
+import { BucketAgg, ESFilter } from 'elasticsearch';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/constants';
 import { Setup } from '../../helpers/setup_request';
 
@@ -20,7 +20,7 @@ export async function getBuckets({
   setup: Setup;
 }) {
   const { start, end, esFilterQuery, client, config } = setup;
-  const filter = [
+  const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     {
       range: {
@@ -35,6 +35,10 @@ export async function getBuckets({
 
   if (groupId) {
     filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
+  }
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
   }
 
   const params = {
@@ -61,10 +65,6 @@ export async function getBuckets({
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   interface Aggs {
     distribution: {

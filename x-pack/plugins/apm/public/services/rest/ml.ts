@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESFilter } from 'elasticsearch';
 import chrome from 'ui/chrome';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/constants';
 import { callApi } from './callApi';
-
-interface Term {
-  term: {
-    [key: string]: string;
-  };
-}
-
-type TermFilterSet = Term[];
 
 export function getMlPrefix(serviceName: string, transactionType?: string) {
   return `${serviceName}-${
@@ -34,7 +27,7 @@ interface MlResponseItem {
   };
 }
 
-export interface StartMlJobApiResponse {
+interface StartMlJobApiResponse {
   datafeeds: MlResponseItem[];
   jobs: MlResponseItem[];
 }
@@ -48,7 +41,7 @@ export async function startMlJob({
 }) {
   const indexPatternName = chrome.getInjected('apmIndexPatternTitle');
   const groups = ['apm', serviceName.toLowerCase()];
-  const filter: TermFilterSet = [{ term: { [SERVICE_NAME]: serviceName } }];
+  const filter: ESFilter[] = [{ term: { [SERVICE_NAME]: serviceName } }];
   if (transactionType) {
     groups.push(transactionType.toLowerCase());
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
@@ -71,7 +64,7 @@ export async function startMlJob({
 }
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.5/ml-get-job.html
-export interface GetMlJobApiResponse {
+interface GetMlJobApiResponse {
   count: number;
   jobs: Array<{
     job_id: string;
