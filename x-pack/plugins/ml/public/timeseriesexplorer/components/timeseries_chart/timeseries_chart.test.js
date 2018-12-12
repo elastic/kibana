@@ -16,6 +16,8 @@ import { TimeseriesChart } from './timeseries_chart';
 // code which the jest setup isn't happy with.
 jest.mock('ui/chrome', () => ({
   getBasePath: path => path,
+  // returns false for mlAnnotationsEnabled
+  getInjected: () => false,
   getUiSettingsClient: () => ({
     get: jest.fn()
   }),
