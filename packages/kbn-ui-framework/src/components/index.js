@@ -50,8 +50,6 @@ export {
   KuiFieldGroupSection,
 } from './form_layout';
 
-export { KuiInfoButton } from './info_button';
-
 export {
   KuiLabel,
   KuiTextInput,

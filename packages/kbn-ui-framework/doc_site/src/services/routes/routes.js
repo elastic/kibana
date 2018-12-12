@@ -39,9 +39,6 @@ import FormLayoutExample
 import IconExample
   from '../../views/icon/icon_example';
 
-import InfoButtonExample
-  from '../../views/info_button/info_button_example';
-
 import InfoPanelExample
   from '../../views/info_panel/info_panel_example';
 
@@ -57,14 +54,8 @@ import MenuExample
 import MenuButtonExample
   from '../../views/menu_button/menu_button_example';
 
-import MicroButtonExample
-  from '../../views/micro_button/micro_button_example';
-
 import ModalExample
   from '../../views/modal/modal_example';
-
-import NoticeSandbox
-  from '../../views/notice/notice_sandbox';
 
 import PagerExample
   from '../../views/pager/pager_example';
@@ -141,10 +132,6 @@ const components = [{
   name: 'Icon',
   component: IconExample,
 }, {
-  name: 'InfoButton',
-  component: InfoButtonExample,
-  hasReact: true,
-}, {
   name: 'InfoPanel',
   component: InfoPanelExample,
 }, {
@@ -161,9 +148,6 @@ const components = [{
 }, {
   name: 'MenuButton',
   component: MenuButtonExample,
-}, {
-  name: 'MicroButton',
-  component: MicroButtonExample,
 }, {
   name: 'Modal',
   component: ModalExample,
@@ -210,9 +194,6 @@ const components = [{
 }];
 
 const sandboxes = [{
-  name: 'Notice',
-  component: NoticeSandbox,
-}, {
   name: 'View',
   component: ViewSandbox,
 }];

@@ -945,17 +945,6 @@ main {
   .kuiFieldGroupSection--wide > * {
     width: 100%; }
 
-.kuiInfoButton {
-  font-size: 16px;
-  line-height: 0;
-  background-color: transparent;
-  color: #006BB4;
-  cursor: pointer;
-  border: none;
-  padding: 0; }
-  .kuiInfoButton:hover, .kuiInfoButton:active {
-    color: #004d81; }
-
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
  *    from FontAwesome someday. When we do migrate away, we can just update this definition.
@@ -1980,31 +1969,6 @@ main {
       -ms-flex-pack: end;
           justify-content: flex-end; }
 
-.kuiMicroButton {
-  display: inline-block;
-  /* 1 */
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-  cursor: pointer;
-  padding: 2px 5px;
-  border: 1px solid transparent;
-  color: #69707D;
-  background-color: transparent;
-  line-height: 1;
-  /* 2 */
-  font-size: 12px; }
-  .kuiMicroButton:hover {
-    color: #2D2D2D; }
-
-.kuiMicroButtonGroup {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex; }
-  .kuiMicroButtonGroup .kuiMicroButton + .kuiMicroButton {
-    margin-left: 2px; }
-
 .kuiModalOverlay {
   position: fixed;
   z-index: 1000;
@@ -2129,12 +2093,6 @@ main {
     opacity: 1;
     -webkit-transform: translateY(0);
             transform: translateY(0); } }
-
-.kuiNotice {
-  padding: 40px 60px 48px;
-  margin: 20px;
-  background-color: #FFF;
-  line-height: 1.5; }
 
 /**
  * 1. Put 10px of space between each child.
