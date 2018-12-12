@@ -7,7 +7,8 @@
   width: 0;
   margin-left: -1px;
   margin-top: -12px;
-  border: 1px dashed #d9d9d9;
+  border-top: 1px dashed $euiColorLightShade;
+  border-left: 1px dashed $euiColorLightShade;
 }
 
 .canvasRotationHandle--handle {
@@ -15,10 +16,10 @@
   transform-style: preserve-3d;
   display: block;
   position: absolute;
-  height: 8px;
-  width: 8px;
-  margin-left: -4px;
+  height: 9px;
+  width: 9px;
+  margin-left: -5px;
   margin-top: -3px;
   border-radius: 50%;
-  background-color: #999;
+  background-color: $euiColorMediumShade;
 }

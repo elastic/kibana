@@ -49,23 +49,25 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]> {
     const beatIds = removals.map(r => r.beatId);
 
-    const response = this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
-      const tagData = removals.find(r => r.beatId === beat.id);
-      if (tagData) {
-        if (beat.tags) {
-          beat.tags = beat.tags.filter(tag => tag !== tagData.tag);
-        }
-      }
-      const removalsForBeat = removals.filter(r => r.beatId === beat.id);
-      if (removalsForBeat.length) {
-        removalsForBeat.forEach((assignment: BeatsTagAssignment) => {
+    const response = this.beatsDB
+      .filter(beat => beatIds.includes(beat.id))
+      .map(beat => {
+        const tagData = removals.find(r => r.beatId === beat.id);
+        if (tagData) {
           if (beat.tags) {
-            beat.tags = beat.tags.filter(tag => tag !== assignment.tag);
+            beat.tags = beat.tags.filter(tag => tag !== tagData.tag);
           }
-        });
-      }
-      return beat;
-    });
+        }
+        const removalsForBeat = removals.filter(r => r.beatId === beat.id);
+        if (removalsForBeat.length) {
+          removalsForBeat.forEach((assignment: BeatsTagAssignment) => {
+            if (beat.tags) {
+              beat.tags = beat.tags.filter(tag => tag !== assignment.tag);
+            }
+          });
+        }
+        return beat;
+      });
 
     return response.map<any>((item: CMBeat, resultIdx: number) => ({
       idxInRequest: removals[resultIdx].idxInRequest,
@@ -77,24 +79,26 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   public async assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]> {
     const beatIds = assignments.map(r => r.beatId);
 
-    this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
-      // get tags that need to be assigned to this beat
-      const tags = assignments
-        .filter(a => a.beatId === beat.id)
-        .map((t: BeatsTagAssignment) => t.tag);
+    this.beatsDB
+      .filter(beat => beatIds.includes(beat.id))
+      .map(beat => {
+        // get tags that need to be assigned to this beat
+        const tags = assignments
+          .filter(a => a.beatId === beat.id)
+          .map((t: BeatsTagAssignment) => t.tag);
 
-      if (tags.length > 0) {
-        if (!beat.tags) {
-          beat.tags = [];
-        }
-        const nonExistingTags = tags.filter((t: string) => beat.tags && !beat.tags.includes(t));
+        if (tags.length > 0) {
+          if (!beat.tags) {
+            beat.tags = [];
+          }
+          const nonExistingTags = tags.filter((t: string) => beat.tags && !beat.tags.includes(t));
 
-        if (nonExistingTags.length > 0) {
-          beat.tags = beat.tags.concat(nonExistingTags);
+          if (nonExistingTags.length > 0) {
+            beat.tags = beat.tags.concat(nonExistingTags);
+          }
         }
-      }
-      return beat;
-    });
+        return beat;
+      });
 
     return assignments.map<any>((item: BeatsTagAssignment, resultIdx: number) => ({
       idxInRequest: assignments[resultIdx].idxInRequest,

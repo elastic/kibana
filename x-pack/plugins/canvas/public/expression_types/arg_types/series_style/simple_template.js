@@ -65,16 +65,15 @@ export const SimpleTemplate = props => {
           </EuiFlexItem>
         </Fragment>
       )}
-      {name !== 'defaultStyle' &&
-        (!labels || labels.length === 0) && (
-          <EuiFlexItem grow={false}>
-            <TooltipIcon
-              position="left"
-              icon="warning"
-              content="Data has no series to style, add a color dimension"
-            />
-          </EuiFlexItem>
-        )}
+      {name !== 'defaultStyle' && (!labels || labels.length === 0) && (
+        <EuiFlexItem grow={false}>
+          <TooltipIcon
+            position="left"
+            icon="warning"
+            content="Data has no series to style, add a color dimension"
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

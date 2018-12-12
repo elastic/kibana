@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMServerLibs } from './lib/lib';
+import { CMServerLibs } from './lib/types';
 import { createGetBeatConfigurationRoute } from './rest_api/beats/configuration';
 import { createBeatEnrollmentRoute } from './rest_api/beats/enroll';
 import { createGetBeatRoute } from './rest_api/beats/get';

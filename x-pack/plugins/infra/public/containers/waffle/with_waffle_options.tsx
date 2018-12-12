@@ -7,8 +7,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { InfraMetricInput, InfraMetricType, InfraPathType } from '../../../common/graphql/types';
-import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+
+import {
+  InfraMetricInput,
+  InfraMetricType,
+  InfraNodeType,
+  InfraPathType,
+} from '../../graphql/types';
 import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
