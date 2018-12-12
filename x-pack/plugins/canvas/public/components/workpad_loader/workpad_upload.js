@@ -13,6 +13,7 @@ export const WorkpadUpload = ({ onUpload, ...rest }) => (
   <EuiFilePicker
     {...rest}
     compressed
+    className="canvasWorkpad__upload--compressed"
     initialPromptText="Import workpad JSON file"
     onChange={([file]) => uploadWorkpad(file, onUpload)}
   />

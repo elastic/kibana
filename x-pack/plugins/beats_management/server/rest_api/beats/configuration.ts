@@ -6,7 +6,7 @@
 import Joi from 'joi';
 import { omit } from 'lodash';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 import { ReturnedConfigurationBlock } from './../../../common/domain_types';
 

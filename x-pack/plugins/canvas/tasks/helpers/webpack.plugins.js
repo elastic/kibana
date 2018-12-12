@@ -26,6 +26,8 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
       'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
       'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
+      'templates/all': path.join(sourceDir, 'templates/register.js'),
+      'tags/all': path.join(sourceDir, 'uis/tags/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually

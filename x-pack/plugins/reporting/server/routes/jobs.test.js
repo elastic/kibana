@@ -200,7 +200,7 @@ describe(`when job is completed`, () => {
 
   test(`base64 encodes output content for configured jobTypes`, async () => {
     const { payload } = await getCompletedResponse({ jobType: 'base64EncodedJobType', outputContent: 'test' });
-    expect(payload).toBe(new Buffer('test', 'base64').toString());
+    expect(payload).toBe(Buffer.from('test', 'base64').toString());
   });
 
   test(`specifies text/csv; charset=utf-8 contentType header from the job output`, async () => {
