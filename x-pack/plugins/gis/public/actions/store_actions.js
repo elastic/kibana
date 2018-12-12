@@ -94,18 +94,19 @@ export function updateLayerOrder(newLayerOrder) {
 }
 
 export function addLayer(layer) {
-  return (dispatch, getState) => {
-    // Remove temporary layers
-    getLayerListRaw(getState()).forEach(({ temporary, id }) => {
-      if (temporary) {
-        dispatch(removeLayer(id));
-      }
-    });
+  return (dispatch) => {
+    dispatch(clearTemporaryLayers());
 
     dispatch({
       type: ADD_LAYER,
       layer,
     });
+  };
+}
+
+export function promoteTemporaryStyles() {
+  return {
+    type: PROMOTE_TEMPORARY_STYLES
   };
 }
 
@@ -115,9 +116,19 @@ export function promoteTemporaryLayers() {
   };
 }
 
-export function clearTemporaryLayers() {
+export function clearTemporaryStyles() {
   return {
-    type: CLEAR_TEMPORARY_LAYERS
+    type: CLEAR_TEMPORARY_STYLES
+  };
+}
+
+export function clearTemporaryLayers() {
+  return (dispatch, getState) => {
+    getLayerListRaw(getState()).forEach(({ temporary, id }) => {
+      if (temporary) {
+        dispatch(removeLayer(id));
+      }
+    });
   };
 }
 
@@ -324,19 +335,6 @@ export function updateLayerStyleForSelectedLayer(style, temporary = true) {
     await layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
-
-export function promoteTemporaryStyles() {
-  return {
-    type: PROMOTE_TEMPORARY_STYLES
-  };
-}
-
-export function clearTemporaryStyles() {
-  return {
-    type: CLEAR_TEMPORARY_STYLES
-  };
-}
-
 
 export function setJoinsForLayer(layer, joins) {
   return async (dispatch, getState) => {

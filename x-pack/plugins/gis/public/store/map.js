@@ -13,7 +13,6 @@ import {
   ADD_LAYER,
   REMOVE_LAYER,
   PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS,
   TOGGLE_LAYER_VISIBLE,
   MAP_EXTENT_CHANGED,
   MAP_READY,
@@ -143,11 +142,6 @@ export function map(state = INITIAL_STATE, action) {
       return tempLayer
         ? updateLayerInList(state, tempLayer.id, 'temporary', false)
         : state;
-    case CLEAR_TEMPORARY_LAYERS:
-      return {
-        ...state, layerList: [...state.layerList.filter(
-          ({ temporary }) => !temporary)]
-      };
     // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
