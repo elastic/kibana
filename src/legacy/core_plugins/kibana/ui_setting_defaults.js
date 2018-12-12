@@ -85,7 +85,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
         defaultMessage: 'Query language',
       }),
-      value: 'lucene',
+      value: 'kuery',
       description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
           'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
