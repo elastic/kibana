@@ -18,12 +18,12 @@
  */
 
 export default function ({ getService, loadTestFile, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard']);
 
   async function loadCurrentData() {
-    await remote.setWindowSize(1300, 900);
+    await browser.setWindowSize(1300, 900);
     await PageObjects.dashboard.initTests({
       kibanaIndex: 'dashboard/current/kibana',
       dataIndex: 'dashboard/current/data',
@@ -75,7 +75,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
       this.tags('ciGroup4');
-      before(() => remote.setWindowSize(1200, 900));
+      before(() => browser.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_time_picker'));
       loadTestFile(require.resolve('./_bwc_shared_urls'));
@@ -85,7 +85,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
     describe('using legacy data', function () {
       this.tags('ciGroup5');
-      before(() => remote.setWindowSize(1200, 900));
+      before(() => browser.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_save'));
       loadTestFile(require.resolve('./_dashboard_time'));

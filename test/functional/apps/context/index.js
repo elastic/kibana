@@ -18,7 +18,7 @@
  */
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
   const kibanaServer = getService('kibanaServer');
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
     this.tags('ciGroup1');
 
     before(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*',

@@ -1,0 +1,300 @@
+<div>
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="colorSchema"
+      i18n-id="kbnVislibVisTypes.controls.heatmapOptions.colorSchemaLabel"
+      i18n-default-message="Color Schema"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="colorSchema"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="editorState.params.colorSchema"
+        ng-options="mode.id as mode.label for mode in collections.colorSchemas"
+      ></select>
+    </div>
+    <div
+      class="text-info text-center"
+      ng-show="customColors"
+      ng-click="resetColors()"
+      kbn-accessible-click
+      i18n-id="kbnVislibVisTypes.controls.heatmapOptions.resetColorsTitle"
+      i18n-default-message="reset colors"
+    ></div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="invertColors"
+      i18n-id="kbnVislibVisTypes.controls.heatmapOptions.reverseColorSchemaLabel"
+      i18n-default-message="Reverse Color Schema"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="editorState.params.invertColors">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="axisScale"
+      i18n-id="kbnVislibVisTypes.controls.heatmapOptions.colorScaleLabel"
+      i18n-default-message="Color Scale"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="axisScale"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="editorState.params.valueAxes[0].scale.type"
+        ng-options="mode for mode in collections.scales"
+      ></select>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="defaultYExtents"
+      i18n-id="kbnVislibVisTypes.controls.heatmapOptions.scaleToDataBoundsLabel"
+      i18n-default-message="Scale to Data Bounds"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="defaultYExtents" type="checkbox" ng-model="editorState.params.valueAxes[0].scale.defaultYExtents">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-if="!editorState.params.setColorRange">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="percentageMode"
+      i18n-id="kbnVislibVisTypes.controls.heatmapOptions.percentageModeLabel"
+      i18n-default-message="Percentage Mode"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="editorState.params.percentageMode">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-if="!editorState.params.setColorRange">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="colorsNumber"
+      i18n-id="kbnVislibVisTypes.controls.heatmapOptions.colorsNumberLabel"
+      i18n-default-message="Number of colors"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input
+        data-test-subj="heatmapOptionsColorsNumberInput"
+        id="colorsNumber"
+        class="kuiSideBarInput"
+        ng-model="editorState.params.colorsNumber"
+        type="number"
+        greater-than="1"
+        less-than="11"
+      >
+    </div>
+  </div>
+
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="toggleColorRangeSection()"
+        kbn-accessible-click
+        aria-expanded="{{!!showColorRange}}"
+        aria-controls="heatmapOptionsRanges"
+        aria-label="Toggle custom ranges options"
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{ 'fa-caret-down': showColorRange, 'fa-caret-right': !showColorRange }"
+          class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span
+          class="kuiSideBarCollapsibleTitle__text"
+          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.customRangesTitle"
+          i18n-default-message="Custom Ranges"
+        ></span>
+      </div>
+      <input
+        data-test-subj="heatmapEnableCustomRanges"
+        aria-label="Enable custom ranges"
+        ng-model="editorState.params.setColorRange"
+        type="checkbox"
+        class="kuiSideBarSectionTitle__action"
+        ng-click="toggleColorRangeSection(true)"
+        kbn-accessible-click
+      >
+    </div>
+
+    <div
+      id="heatmapOptionsRanges"
+      ng-if="editorState.params.setColorRange"
+      ng-show="showColorRange"
+      class="kuiSideBarCollapsibleSection"
+    >
+      <div class="kuiSideBarSection">
+        <table
+          data-test-subj="heatmapCustomRangesTable"
+          class="visEditorAgg__rangesTable form-group"
+          ng-show="editorState.params.colorsRange.length">
+          <tr>
+            <th scope="col">
+              <label
+                id="heatmapCustomRangeFrom"
+                i18n-id="kbnVislibVisTypes.controls.heatmapOptions.fromLabel"
+                i18n-default-message="From"
+              ></label>
+            </th>
+            <th scope="col" colspan="2">
+              <label
+                id="heatmapCustomRangeTo"
+                i18n-id="kbnVislibVisTypes.controls.heatmapOptions.toLabel"
+                i18n-default-message="To"
+              ></label>
+            </th>
+          </tr>
+
+          <tr ng-repeat="range in editorState.params.colorsRange track by $index">
+            <td>
+              <input
+                aria-labelledby="heatmapCustomRangeFrom"
+                ng-model="range.from"
+                type="number"
+                class="form-control"
+                name="range.from"
+                greater-or-equal-than="{{getGreaterThan($index)}}"
+                step="any" />
+            </td>
+            <td>
+              <input
+                aria-labelledby="heatmapCustomRangeTo"
+                ng-model="range.to"
+                type="number"
+                class="form-control"
+                name="range.to"
+                greater-than="range.from"
+                step="any" />
+            </td>
+            <td>
+              <button
+                type="button"
+                ng-click="removeRange($index)"
+                class="kuiButton kuiButton--danger kuiButton--small"
+              >
+                <span class="kuiIcon fa-times"></span>
+              </button>
+            </td>
+          </tr>
+        </table>
+
+        <div class="hintbox" ng-show="!editorState.params.colorsRange.length">
+          <p
+            i18n-id="kbnVislibVisTypes.controls.heatmapOptions.specifiedRangeNumberWarningMessage"
+            i18n-default-message="{icon} {required} You must specify at least one range."
+            i18n-values="{
+              html_icon: '<span class=\'kuiIcon fa-danger text-danger\'></span>',
+              html_required: '<strong>' + requiredText + '</strong>'
+            }"
+          ></p>
+        </div>
+
+        <button
+          ng-click="addRange()"
+          class="kuiButton kuiButton--primary kuiButton--fullWidth"
+          data-test-subj="heatmapAddRangeButton"
+          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.addRangeButtonLabel"
+          i18n-default-message="Add Range"
+        ></button>
+        <div class="euiSpacer euiSpacer--s"></div>
+        <div
+          class="text text-center text-info"
+          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.howToChangeColorsDescription"
+          i18n-default-message="Note: colors can be changed in the legend"
+        ></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="toggleLabelSection()"
+        kbn-accessible-click
+        aria-expanded="{{!!showLabels}}"
+        aria-controls="heatmapOptionsLabels"
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{
+          'fa-caret-down': showLabels,
+          'fa-caret-right': !showLabels
+          }"
+          class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span
+          class="kuiSideBarCollapsibleTitle__text"
+          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.showLabelsTitle"
+          i18n-default-message="Show Labels"
+        ></span>
+      </div>
+      <input
+        aria-label="Show labels"
+        ng-model="editorState.params.valueAxes[0].labels.show"
+        type="checkbox"
+        class="kuiSideBarSectionTitle__action"
+      >
+    </div>
+    <div
+      id="heatmapOptionsLabels"
+      ng-if="editorState.params.valueAxes[0].labels.show"
+      ng-show="showLabels"
+      class="kuiSideBarCollapsibleSection"
+    >
+      <div class="kuiSideBarSection">
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="rotateLabels"
+            i18n-id="kbnVislibVisTypes.controls.heatmapOptions.rotateLabel"
+            i18n-default-message="Rotate"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="rotateLabels" type="checkbox" ng-model="options.rotateLabels">
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="overwriteColor"
+            i18n-id="kbnVislibVisTypes.controls.heatmapOptions.overwriteAutomaticColorLabel"
+            i18n-default-message="Overwrite automatic color"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="overwriteColor" type="checkbox" ng-model="editorState.params.valueAxes[0].labels.overwriteColor">
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow" ng-show="editorState.params.valueAxes[0].labels.overwriteColor">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="labelColor"
+            i18n-id="kbnVislibVisTypes.controls.heatmapOptions.colorLabel"
+            i18n-default-message="Color"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <input
+              id="labelColor"
+              class="kuiSideBarInput"
+              ng-model="editorState.params.valueAxes[0].labels.color"
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

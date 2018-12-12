@@ -132,7 +132,9 @@ export default function ({ getService }) {
           'roles',
           'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
 
         expect(apiResponse.body.username).to.be('a@b.c');
@@ -171,7 +173,9 @@ export default function ({ getService }) {
           'roles',
           'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
 
         expect(apiResponse.body.username).to.be('a@b.c');

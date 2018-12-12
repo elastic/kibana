@@ -90,7 +90,7 @@ export const WorkpadHeader = ({
               <WorkpadExport />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {!canUserWrite && (
+              {canUserWrite && (
                 <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
               )}
               <EuiToolTip position="bottom" content={readOnlyToolTip}>

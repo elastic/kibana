@@ -6,6 +6,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 The bulk-create saved object API enables you to persist multiple Kibana saved
 objects.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `POST /api/saved_objects/_bulk_create`

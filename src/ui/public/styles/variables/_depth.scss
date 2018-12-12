@@ -1,0 +1,13 @@
+/**
+ * 1. The local nav contains tooltips which should pop over the filter bar.
+ * 2. The filter and local nav components should always appear above the dashboard grid items.
+ * 3. The filter and local nav components should always appear above the discover content.
+ * 4. The sidebar collapser button should appear above the main Discover content but below the top elements.
+ * 5. Dragged panels in dashboard should always appear above other panels.
+ */
+$kbnFilterBarDepth: 4; /* 1 */
+$kbnLocalNavDepth: 5; /* 1 */
+$kbnDashboardGridDepth: 1; /* 2 */
+$kbnDashboardDraggingGridDepth: 2; /* 5 */
+$kbnDiscoverWrapperDepth: 1; /* 3 */
+$kbnDiscoverSidebarDepth: 2; /* 4 */

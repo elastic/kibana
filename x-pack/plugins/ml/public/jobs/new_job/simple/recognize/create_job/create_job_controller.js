@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
 import { SearchItemsProvider, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 

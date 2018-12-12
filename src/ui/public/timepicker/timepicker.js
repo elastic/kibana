@@ -25,7 +25,7 @@ import './absolute_panel';
 import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import './timepicker.less';
 import '../directives/input_datetime';

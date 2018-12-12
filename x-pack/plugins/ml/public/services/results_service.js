@@ -765,6 +765,7 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxResults !== undefined ? maxResults : 100,
+      rest_total_hits_as_int: true,
       body: {
         _source: ['job_id', 'detector_index', 'influencers', 'record_score'],
         query: {
@@ -887,6 +888,7 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxResults !== undefined ? maxResults : 100,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {
@@ -1013,6 +1015,7 @@ function getRecordsForDetector(
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxResults !== undefined ? maxResults : 100,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {
@@ -1116,6 +1119,7 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
 
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: maxResults !== undefined ? maxResults : 100,
       body: {
         query: {
@@ -1351,6 +1355,7 @@ function getEventRateData(
 
     ml.esSearch({
       index,
+      rest_total_hits_as_int: true,
       size: 0,
       body: {
         query: {

@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function UpgradeFailureActions({ onClose, onRetry, upgradeButtonText }) {
   return (
@@ -18,7 +19,10 @@ export function UpgradeFailureActions({ onClose, onRetry, upgradeButtonText }) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty color="primary" onClick={onClose}>
-          Go back
+          <FormattedMessage
+            id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+            defaultMessage="Go back"
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>

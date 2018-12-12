@@ -9,6 +9,7 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
@@ -92,7 +93,10 @@ export class Table extends React.Component<TableProps, TableState> {
       : {
           onSelectionChange: this.setSelection,
           selectable: () => true,
-          selectableMessage: () => 'Select this beat',
+          selectableMessage: () =>
+            i18n.translate('xpack.beatsManagement.table.selectThisBeatTooltip', {
+              defaultMessage: 'Select this beat',
+            }),
           selection: this.state.selection,
         };
 

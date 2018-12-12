@@ -28,6 +28,7 @@ module.exports = function ({ sourceMaps }, { watch }) {
   return {
     devtool: sourceMaps ? 'inline-cheap-module-source-map' : undefined,
 
+    mode: 'none',
     entry: {
       'types/all': resolve(PLUGIN_SOURCE_DIR, 'types/register.js'),
       'functions/common/all': resolve(PLUGIN_SOURCE_DIR, 'functions/common/register.js'),
@@ -42,6 +43,16 @@ module.exports = function ({ sourceMaps }, { watch }) {
       path: PLUGIN_BUILD_DIR,
       filename: '[name].js', // Need long paths here.
       libraryTarget: 'umd',
+      // Note: this is needed due to a not yet resolved bug on
+      // webpack 4 with umd modules generation.
+      // For now we have 2 quick workarounds: one is what is implemented
+      // below another is to change the libraryTarget to commonjs
+      //
+      // The issues can be followed on:
+      // https://github.com/webpack/webpack/issues/6642
+      // https://github.com/webpack/webpack/issues/6525
+      // https://github.com/webpack/webpack/issues/6677
+      globalObject: `(typeof self !== 'undefined' ? self : this)`,
     },
 
     resolve: {
@@ -84,7 +95,7 @@ module.exports = function ({ sourceMaps }, { watch }) {
     stats: 'errors-only',
 
     plugins: [
-      function loaderFailHandler() {
+      function LoaderFailHandlerPlugin() {
         if (!watch) {
           return;
         }
@@ -93,7 +104,7 @@ module.exports = function ({ sourceMaps }, { watch }) {
 
         // bails on error, including loader errors
         // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
-        this.plugin('done', function (stats) {
+        this.hooks.done.tapPromise('LoaderFailHandlerPlugin', async stats => {
           if (stats.hasErrors() || stats.hasWarnings()) {
             lastBuildFailed = true;
             return;

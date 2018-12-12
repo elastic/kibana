@@ -1,0 +1,462 @@
+// The MIT License (MIT)
+
+// Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+
+.kbnMarkdown__body {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  line-height: 1.5;
+  color: $euiTextColor;
+  word-wrap: break-word;
+
+  &::before {
+    display: table;
+    content: "";
+  }
+
+  &::after {
+    display: table;
+    clear: both;
+    content: "";
+  }
+
+  > *:first-child {
+    margin-top: 0 !important;
+  }
+
+  > *:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  a {
+    background-color: transparent;
+    -webkit-text-decoration-skip: objects;
+    color: $euiColorPrimary;
+    text-decoration: none;
+
+    &:active,
+    &:hover {
+      color: darken($euiColorPrimary, 10%);
+      text-decoration: underline;
+      outline-width: 0;
+    }
+
+    &:not([href]) {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  strong {
+    font-weight: $euiFontWeightBold;
+  }
+
+  img {
+    border-style: none;
+    max-width: 100%;
+    box-sizing: content-box;
+    background-color: $euiColorEmptyShade;
+  }
+
+  svg:not(:root) {
+    overflow: hidden;
+  }
+
+  hr {
+    box-sizing: content-box;
+    overflow: hidden;
+    background: transparent;
+    height: $euiSizeXS;
+    padding: 0;
+    margin: $euiSizeL 0;
+    background-color: $euiColorLightShade;
+    border: 0;
+
+    &::before {
+      display: table;
+      content: "";
+    }
+
+    &::after {
+      display: table;
+      clear: both;
+      content: "";
+    }
+  }
+
+  input {
+    font: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    margin: 0;
+    overflow: visible;
+  }
+
+  [type="checkbox"] {
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  table {
+    @include euiScrollBar;
+    border-spacing: 0;
+    border-collapse: collapse;
+    display: block;
+    width: 100%;
+    overflow: auto;
+    border-left: $euiBorderThin;
+
+    th {
+      font-weight: $euiFontWeightMedium;
+      color: $euiColorMediumShade;
+    }
+
+    td,
+    th {
+      padding: $euiSizeS $euiSizeM;
+      border-top: $euiBorderThin;
+      border-bottom: $euiBorderThin;
+
+      &:last-child {
+        border-right: $euiBorderThin;
+      }
+    }
+
+    tr {
+      background-color: transparent;
+      border-top: $euiBorderThin;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: $euiFontWeightBold;
+    margin-top: $euiSizeL;
+    margin-bottom: $euiSize;
+    line-height: 1.25;
+
+    &:hover .anchor {
+      text-decoration: none;
+    }
+  }
+
+  h1 {
+    font-size: 2em;
+    padding-bottom: 0.3em;
+    border-bottom: $euiBorderThin;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    padding-bottom: 0.3em;
+    border-bottom: $euiBorderThin;
+  }
+
+  h3 {
+    font-size: 1.25em;
+  }
+
+  h4 {
+    font-size: 1em;
+  }
+
+  h5 {
+    font-size: 0.875em;
+  }
+
+  h6 {
+    font-size: 0.8em;
+  }
+
+  p,
+  blockquote,
+  ul,
+  ol,
+  dl,
+  table,
+  pre {
+    margin-top: 0;
+    margin-bottom: $euiSize;
+  }
+
+  blockquote {
+    font-size: 1em;
+    padding: 0 1em;
+    color: $euiColorDarkShade;
+    border-left: $euiBorderThick;
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul,
+  ol {
+    padding-left: 2em;
+    margin-top: 0;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ol ol,
+  ul ol {
+    list-style-type: lower-roman;
+  }
+
+  ul ul ol,
+  ul ol ol,
+  ol ul ol,
+  ol ol ol {
+    list-style-type: lower-alpha;
+  }
+
+  ul ul,
+  ul ol,
+  ol ol,
+  ol ul {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  li > p {
+    margin-top: $euiSize;
+  }
+
+  li + li {
+    margin-top: 0.25em;
+  }
+
+  dd {
+    dt {
+      margin-top: $euiSize;
+      font-style: italic;
+      font-weight: $euiFontWeightBold;
+    }
+
+    dd {
+      padding: 0 $euiSize;
+      margin-bottom: $euiSize;
+    }
+  }
+
+  .anchor {
+    float: left;
+    padding-right: $euiSizeXS;
+    margin-left: -$euiSizeL;
+    line-height: 1;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  code,
+  kbd,
+  pre {
+    font-family: $euiCodeFontFamily;
+    font-size: .85em;
+    background-color: $euiCodeBlockBackgroundColor;
+    color: $euiCodeBlockColor;
+  }
+
+  kbd {
+    padding: 0.2em;
+    border: $euiBorderThin;
+    border-bottom-color: shadeOrTint($euiColorLightShade, 10%, 10%);
+    border-radius: $euiBorderRadius;
+    box-shadow: inset 0 -1px 0 $euiColorLightShade;
+  }
+
+  code {
+    padding: 0.2em 0;
+    margin: 0;
+    border-radius: $euiBorderRadius;
+
+    &::before,
+    &::after {
+      letter-spacing: -0.2em;
+      content: "\00a0";
+    }
+  }
+
+  pre {
+    @include euiScrollBar;
+    line-height: 1.45;
+    word-wrap: normal;
+    padding: $euiSize;
+    overflow: auto;
+    border-radius: $euiBorderRadius;
+
+    code {
+      font-size: 1em;
+      word-break: normal;
+      white-space: pre;
+      display: inline;
+      max-width: auto;
+      padding: 0;
+      margin: 0;
+      overflow: visible;
+      line-height: inherit;
+      word-wrap: normal;
+      background-color: transparent !important;
+      border: 0;
+
+      &::before,
+      &::after {
+        content: normal;
+      }
+    }
+  }
+
+  .highlight {
+    margin-bottom: 1em;
+
+    pre {
+      margin-bottom: 0;
+      word-break: normal;
+    }
+  }
+
+  :checked + .radio-label {
+    position: relative;
+    z-index: 1;
+    border-color: $euiColorPrimary;
+  }
+
+  .task-list-item {
+    list-style-type: none;
+
+    + .task-list-item {
+      margin-top: $euiSizeXS;
+    }
+
+    input {
+      margin: 0 0.2em 0.25em -1.6em;
+      vertical-align: middle;
+    }
+  }
+
+  .pl-0 {
+    padding-left: 0 !important;
+  }
+
+  .pl-1 {
+    padding-left: $euiSizeXS !important;
+  }
+
+  .pl-2 {
+    padding-left: $euiSizeS !important;
+  }
+
+  .pl-3 {
+    padding-left: $euiSize !important;
+  }
+
+  .pl-4 {
+    padding-left: $euiSizeL !important;
+  }
+
+  .pl-5 {
+    padding-left: $euiSizeXL !important;
+  }
+
+  .pl-6 {
+    padding-left: $euiSizeXXL !important;
+  }
+}
+
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
+
+  .kbnMarkdown__body {
+    color: $euiTextColor;
+
+    a {
+      -webkit-text-decoration-skip: objects;
+      color: $euiColorPrimary;
+
+      &:active,
+      &:hover {
+        color: darken($euiColorPrimary, 10%);
+      }
+    }
+
+    img {
+      background-color: $euiColorEmptyShade;
+    }
+
+    hr {
+      background-color: $euiColorLightShade;
+    }
+
+    table {
+      &,
+      td,
+      th,
+      tr {
+        border-color: $euiColorLightShade;
+      }
+    }
+
+    h1,
+    h2 {
+      border-color: $euiColorLightShade;
+    }
+
+    blockquote {
+      color: $euiColorDarkShade;
+      border-color: $euiColorLightShade;
+    }
+
+    code,
+    kbd,
+    pre {
+      background-color: $euiCodeBlockBackgroundColor;
+      color: $euiCodeBlockColor;
+    }
+
+    kbd {
+      border-color: $euiColorLightShade;
+      border-bottom-color: shadeOrTint($euiColorLightShade, 10%, 10%);
+      box-shadow: inset 0 -1px 0 $euiColorLightShade;
+    }
+
+    :checked + .radio-label {
+      border-color: $euiColorPrimary;
+    }
+  }
+}

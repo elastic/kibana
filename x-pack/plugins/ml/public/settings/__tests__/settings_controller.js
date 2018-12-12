@@ -17,7 +17,10 @@ describe('ML - Settings Controller', () => {
   it('Initialize Settings Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlSettings', { $scope: scope });
+
+      expect(() => {
+        $controller('MlSettings', { $scope: scope });
+      }).to.not.throwError();
 
       expect(scope.canCreateFilter).to.eql(false);
       done();

@@ -22,7 +22,7 @@ export default {
   roots: [
     '<rootDir>/src/ui',
     '<rootDir>/src/core',
-    '<rootDir>/src/core_plugins',
+    '<rootDir>/src/legacy/core_plugins',
     '<rootDir>/src/server',
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Unit } from '@kbn/datemath';
+import { Unit } from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
 export class InvalidEsCalendarIntervalError extends Error {

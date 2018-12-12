@@ -1,0 +1,262 @@
+<div class="kuiSideBarSection">
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="percentageMode"
+      i18n-id="metricVis.params.percentageModeLabel"
+      i18n-default-message="Percentage Mode"
+    >
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="editorState.params.metric.percentageMode">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="showLabels"
+      i18n-id="metricVis.params.showLabelsLabel"
+      i18n-default-message="Show Labels"
+    >
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="editorState.params.metric.labels.show">
+    </div>
+  </div>
+
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorRange}}"
+        aria-controls="metricOptionsRanges"
+        aria-label="{{::'metricVis.params.ranges.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle range options' } }}"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showColorRange = !showColorRange"
+      >
+      <span
+        aria-hidden="true"
+        ng-class="{ 'fa-caret-down': showColorRange, 'fa-caret-right': !showColorRange }"
+        class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+      ></span>
+        <span
+          class="kuiSideBarCollapsibleTitle__text"
+          i18n-id="metricVis.params.rangesTitle"
+          i18n-default-message="Ranges"
+        >
+      </span>
+      </div>
+    </div>
+
+    <div id="metricOptionsRanges" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <table class="visEditorAgg__rangesTable form-group" ng-show="editorState.params.metric.colorsRange.length">
+          <tr>
+            <th scope="col">
+              <label
+                id="metricOptionsCustomRangeFrom"
+                i18n-id="metricVis.params.ranges.fromLabel"
+                i18n-default-message="From"
+              >
+              </label>
+            </th>
+            <th scope="col" colspan="2">
+              <label
+                id="metricOptionsCustomRangeTo"
+                i18n-id="metricVis.params.ranges.toLabel"
+                i18n-default-message="To"
+              >
+              </label>
+            </th>
+          </tr>
+
+          <tr ng-repeat="range in editorState.params.metric.colorsRange track by $index">
+            <td>
+              <input
+                aria-labelledby="metricOptionsCustomRangeFrom"
+                ng-model="range.from"
+                type="number"
+                class="form-control"
+                name="range.from"
+                greater-or-equal-than="{{getGreaterThan($index)}}"
+                required
+                step="any" />
+            </td>
+            <td>
+              <input
+                aria-labelledby="metricOptionsCustomRangeTo"
+                ng-model="range.to"
+                type="number"
+                class="form-control"
+                name="range.to"
+                greater-or-equal-than="{{range.from}}"
+                required
+                step="any" />
+            </td>
+            <td>
+              <button
+                type="button"
+                ng-click="removeRange($index)"
+                ng-show="editorState.params.metric.colorsRange.length > 1"
+                class="kuiButton kuiButton--danger kuiButton--small">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        </table>
+
+        <div class="hintbox" ng-show="!editorState.params.metric.colorsRange.length">
+          <p>
+            <i class="fa fa-danger text-danger"></i>
+            <span
+              i18n-id="metricVis.params.ranges.warning.specifyRangeDescription"
+              i18n-default-message="{requiredDescription} You must specify at least one range."
+              i18n-values="{ html_requiredDescription: '<strong>' + editorState.requiredDescription + '</strong>' }"
+            >
+            </span>
+          </p>
+        </div>
+
+        <div
+          ng-click="addRange()"
+          class="kuiButton kuiButton--primary kuiButton--fullWidth"
+          i18n-id="metricVis.params.ranges.addRangeButtonLabel"
+          i18n-default-message="Add Range"
+        >
+        </div>
+      </div>
+    </div>
+  </div>
+  <div ng-show="editorState.params.metric.colorsRange.length > 1">
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorOptions}}"
+        aria-controls="metricOptionsColors"
+        aria-label="{{::'metricVis.params.color.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle color options' } }}"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showColorOptions = !showColorOptions"
+      >
+      <span
+        aria-hidden="true"
+        ng-class="{
+        'fa-caret-down': showColorOptions,
+        'fa-caret-right': !showColorOptions
+        }"
+        class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+      ></span>
+        <span
+          class="kuiSideBarCollapsibleTitle__text"
+          i18n-id="metricVis.params.color.colorOptionsTitle"
+          i18n-default-message="Color Options"
+        >
+      </span>
+      </div>
+    </div>
+    <div id="metricOptionsColors" ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <div class="kuiSideBarFormRow" ng-show="editorState.params.metric.colorsRange.length > 1">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="metricColorMode"
+            i18n-id="metricVis.params.color.useForLabel"
+            i18n-default-message="Use Color For"
+          >
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="metricColorMode"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="editorState.params.metric.metricColorMode"
+              ng-options="mode.id as mode.label for mode in collections.metricColorMode"
+            ></select>
+          </div>
+        </div>
+        <div class="kuiSideBarFormRow" ng-show="editorState.params.metric.metricColorMode !== 'None'">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="colorSchema"
+            i18n-id="metricVis.params.color.schemaLabel"
+            i18n-default-message="Color Schema"
+          >
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="colorSchema"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="editorState.params.metric.colorSchema"
+              ng-options="mode.id as mode.label for mode in collections.colorSchemas"
+            ></select>
+          </div>
+          <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()"
+            i18n-id="metricVis.params.color.resetColorDescription"
+            i18n-default-message="reset colors"
+          >
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow"  ng-show="editorState.params.metric.metricColorMode !== 'None'">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="invertColors"
+            i18n-id="metricVis.params.color.reverseSchemaLabel"
+            i18n-default-message="Reverse Color Schema"
+          >
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="editorState.params.metric.invertColors">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        kbn-accessible-click
+        aria-expanded="{{!!showStyle}}"
+        aria-controls="metricOptionsStyle"
+        aria-label="{{::'metricVis.params.style.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle style options' } }}"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showStyle = !showStyle"
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{
+          'fa-caret-down': showStyle,
+          'fa-caret-right': !showStyle
+          }"
+          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span
+          class="kuiSideBarCollapsibleTitle__text"
+          i18n-id="metricVis.params.style.styleTitle"
+          i18n-default-message="Style"
+        >
+        </span>
+      </div>
+    </div>
+    <div id="metricOptionsStyle" ng-if="showStyle" class="kuiSideBarCollapsibleSection">
+
+      <div class="kuiSideBarSection">
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="metricFontSize">
+            <span
+              i18n-id="metricVis.params.style.fontSizeLabel"
+              i18n-default-message="Font Size ({fontSize}pt)"
+              i18n-values="{ fontSize: editorState.params.metric.style.fontSize }"
+            >
+            </span>
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input id="metricFontSize" type="range" ng-model="editorState.params.metric.style.fontSize" class="form-control" min="12" max="120" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

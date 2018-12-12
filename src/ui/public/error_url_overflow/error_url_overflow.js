@@ -29,6 +29,7 @@ export * from './url_overflow_service';
 uiRoutes
   .when('/error/url-overflow', {
     template,
+    k7Breadcrumbs: () => [{ text: 'Error' }],
     controllerAs: 'controller',
     controller: class OverflowController {
       constructor(Private, config, $scope) {

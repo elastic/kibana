@@ -35,7 +35,7 @@ export async function createErrorGroupWatch({
   timeRange
 }) {
   const id = `apm-${uuid.v4()}`;
-  const apmIndexPattern = chrome.getInjected('apmIndexPattern');
+  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
 
   const slackUrlPath = getSlackPathUrl(slackUrl);
   const emailTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"
@@ -69,7 +69,7 @@ export async function createErrorGroupWatch({
     input: {
       search: {
         request: {
-          indices: [apmIndexPattern],
+          indices: [apmIndexPatternTitle],
           body: {
             size: 0,
             query: {

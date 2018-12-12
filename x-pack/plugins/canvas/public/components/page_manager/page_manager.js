@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import Style from 'style-it';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
@@ -25,6 +26,7 @@ export class PageManager extends React.PureComponent {
     selectedPage: PropTypes.string,
     deleteId: PropTypes.string,
     setDeleteId: PropTypes.func.isRequired,
+    workpadCSS: PropTypes.string,
   };
 
   state = {
@@ -157,7 +159,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId, isWriteable } = this.props;
+    const { pages, addPage, deleteId, isWriteable, workpadCSS } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -177,7 +179,7 @@ export class PageManager extends React.PureComponent {
                     }}
                     {...provided.droppableProps}
                   >
-                    {pages.map(this.renderPage)}
+                    {Style.it(workpadCSS, <div>{pages.map(this.renderPage)}</div>)}
                     {provided.placeholder}
                   </div>
                 )}

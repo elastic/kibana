@@ -6,25 +6,30 @@
 
 // @ts-ignore
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { ConfigurationBlock } from '../../common/domain_types';
-import { supportedConfigs } from '../config_schemas';
+import { getSupportedConfig } from '../config_schemas_translations_map';
 
 interface ComponentProps {
   configs: ConfigurationBlock[];
   onConfigClick: (action: 'edit' | 'delete', config: ConfigurationBlock) => any;
+  intl: InjectedIntl;
 }
 
-export const ConfigList: React.SFC<ComponentProps> = props => (
+const ConfigListUi: React.SFC<ComponentProps> = props => (
   <EuiBasicTable
     items={props.configs || []}
     columns={[
       {
         field: 'type',
-        name: 'Type',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.typeColumnName',
+          defaultMessage: 'Type',
+        }),
         truncateText: false,
         render: (value: string, config: ConfigurationBlock) => {
-          const type = supportedConfigs.find((sc: any) => sc.value === config.type);
+          const type = getSupportedConfig().find((sc: any) => sc.value === config.type);
 
           return (
             <EuiLink onClick={() => props.onConfigClick('edit', config)}>
@@ -35,22 +40,43 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
       },
       {
         field: 'module',
-        name: 'Module',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.moduleColumnName',
+          defaultMessage: 'Module',
+        }),
         truncateText: false,
         render: (value: string) => {
-          return value || 'N/A';
+          return (
+            value ||
+            props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tagTable.moduleColumn.notAvailibaleLabel',
+              defaultMessage: 'N/A',
+            })
+          );
         },
       },
       {
         field: 'description',
-        name: 'Description',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
       },
       {
-        name: 'Actions',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.actionsColumnName',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
-            name: 'Remove',
-            description: 'Remove this config from tag',
+            name: props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tagTable.actions.removeButtonAriaLabel',
+              defaultMessage: 'Remove',
+            }),
+            description: props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tagTable.actions.removeTooltip',
+              defaultMessage: 'Remove this config from tag',
+            }),
             type: 'icon',
             icon: 'trash',
             onClick: (item: ConfigurationBlock) => props.onConfigClick('delete', item),
@@ -60,3 +86,5 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
     ]}
   />
 );
+
+export const ConfigList = injectI18n(ConfigListUi);

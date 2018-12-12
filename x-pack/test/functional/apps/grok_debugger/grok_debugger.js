@@ -5,7 +5,7 @@
  */
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const grokDebugger = getService('grokDebugger');
   const esArchiver = getService('esArchiver');
 
@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
       // Increase window height to ensure "Simulate" button is shown above the
       // fold. Otherwise it can't be clicked by the browser driver.
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
 
       await PageObjects.grokDebugger.gotoGrokDebugger();
     });

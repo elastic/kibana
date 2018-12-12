@@ -11,11 +11,7 @@ Object {
   "fatal": Array [],
   "info": Array [],
   "log": Array [],
-  "trace": Array [
-    Array [
-      "some config paths are not handled by the core: [\\"some.path\\",\\"another.path\\"]",
-    ],
-  ],
+  "trace": Array [],
   "warn": Array [],
 }
 `;

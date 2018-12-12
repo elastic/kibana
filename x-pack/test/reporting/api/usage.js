@@ -29,10 +29,6 @@ export default function ({ getService }) {
         expect(usage.reporting.enabled).to.be(true);
       });
 
-      it('is using phantom browser', async () => {
-        expect(usage.reporting.browser_type).to.be('phantom');
-      });
-
       it('all counts are 0', async () => {
         reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 0);
         reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 0);

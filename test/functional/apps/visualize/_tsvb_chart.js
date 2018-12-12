@@ -211,7 +211,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('switch index patterns', () => {
+    describe.skip('switch index patterns', () => {
       before(async function () {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
