@@ -69,7 +69,7 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
           metricDerivNormalizedValue >= 0 &&
           metricDerivNormalizedValue !== null
         ) {
-          return metricDerivNormalizedValue / bucketSizeInMillis * 100;
+          return metricDerivNormalizedValue / bucketSizeInMillis * 1000;
         }
       }
       return null;
