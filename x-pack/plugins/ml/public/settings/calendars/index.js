@@ -6,6 +6,5 @@
 
 
 
-import './settings_controller';
-import './calendars';
-import './filter_lists';
+import './list';
+import './edit';
