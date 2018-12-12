@@ -25,6 +25,7 @@ const RowParser = require('./row_parser');
 const InputMode = require('./mode/input');
 const utils = require('../utils');
 const es = require('../es');
+const chrome = require('ui/chrome');
 
 const smartResize = require('../smart_resize');
 
@@ -563,12 +564,8 @@ export default function SenseEditor($el) {
         const  esMethod = req.method;
         const  esData = req.data;
 
-        // Kibana supports setting multiple hosts in kibana.yml
-        // instead of passing these with potential ambiguity,
-        // and accidentally including basic auth credentials,
-        // and exposing the es host url, we use the elasticsearch
-        // default until a more featured implementation is available
-        const elasticsearchBaseUrl = 'http://localhost:9200';
+        // this is the first url defined in elasticsearch.hosts
+        const elasticsearchBaseUrl = chrome.getInjected('elasticsearchUrl');
         const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
 
         let ret = 'curl -X' + esMethod + ' "' + url + '"';

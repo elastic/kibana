@@ -18,11 +18,13 @@
  */
 
 import Boom from 'boom';
-import { resolveApi } from './api_server/server';
 import { resolve, join, sep } from 'path';
+import url from 'url';
 import { has, isEmpty, head } from 'lodash';
-import setHeaders from '../elasticsearch/lib/set_headers';
+
+import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';
+import setHeaders from '../elasticsearch/lib/set_headers';
 
 import {
   ProxyConfigCollection,
@@ -37,7 +39,7 @@ export default function (kibana) {
   const apps = [];
   return new kibana.Plugin({
     id: 'console',
-    require: [ 'elasticsearch' ],
+    require: ['elasticsearch'],
 
     config: function (Joi) {
       return Joi.object({
@@ -129,6 +131,21 @@ export default function (kibana) {
       hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
+
+      injectDefaultVars(server) {
+        return {
+          elasticsearchUrl: url.format(
+            Object.assign(
+              url.parse(
+                head(
+                  server.config().get('elasticsearch.hosts')
+                )
+              ),
+              { auth: false }
+            )
+          )
+        };
+      },
 
       noParse: [
         join(modules, 'ace' + sep),
