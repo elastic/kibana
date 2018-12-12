@@ -130,12 +130,12 @@ export async function FindProvider({ getService }) {
     async descendantExistsByCssSelector(selector, parentElement, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug('Find.descendantExistsByCssSelector: ' + selector);
       await this._withTimeout(timeout);
-      return await this.exists(async () => wrapAll(await parentElement.findElements(By.css(selector)), timeout));
+      return await this.exists(async () => wrapAll(await parentElement._webElement.findElements(By.css(selector)), timeout));
     }
 
     async descendantDisplayedByCssSelector(selector, parentElement) {
       log.debug('Find.descendantDisplayedByCssSelector: ' + selector);
-      const descendant = wrap(await parentElement.findElement(By.css(selector)));
+      const descendant = wrap(await parentElement._webElement.findElement(By.css(selector)));
       const isDisplayed = await descendant.isDisplayed();
       if (isDisplayed) {
         return descendant;
@@ -146,7 +146,7 @@ export async function FindProvider({ getService }) {
 
     async allDescendantDisplayedByCssSelector(selector, parentElement) {
       log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
-      const allElements = await wrapAll(parentElement.findElements(By.css(selector)));
+      const allElements = await wrapAll(parentElement._webElement.findElements(By.css(selector)));
       return await Promise.all(
         allElements.map(async (element) => {return await element.isDisplayed(); })
       );
