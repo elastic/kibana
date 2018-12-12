@@ -17,6 +17,7 @@ import {
   EuiSteps,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { NEXT_MAJOR_VERSION } from '../../../../common/version';
@@ -27,6 +28,63 @@ import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 const EuiFormRowPrime: React.StatelessComponent<
   EuiFormRowProps & { describedByIds?: string[] }
 > = EuiFormRow;
+
+// Leaving these here even if unused so they are picked up for i18n static analysis
+// Keep this until last minor release (when next major is also released).
+const WAIT_FOR_RELEASE_STEP = {
+  title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepTitle', {
+    defaultMessage: 'Wait for the Elasticsearch {nextEsVersion} release.',
+    values: {
+      nextEsVersion: `${NEXT_MAJOR_VERSION}.0`,
+    },
+  }),
+  children: (
+    <Fragment>
+      <EuiText grow={false}>
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepDetail"
+            defaultMessage="Once the release is out, proceed with your upgrade."
+          />
+        </p>
+      </EuiText>
+    </Fragment>
+  ),
+};
+
+// Swap in this step for the one above it on the last minor release.
+// @ts-ignore
+const START_UPGRADE_STEP = {
+  title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.startUpgradeStep.stepTitle', {
+    defaultMessage: 'Start your upgrade',
+  }),
+  children: (
+    <Fragment>
+      <EuiText grow={false}>
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStep.stepDetail.followInstructionsDetail"
+            defaultMessage="Follow {instructionButton} to start your upgrade."
+            values={{
+              // TODO: swap out link if running on Cloud.
+              instructionButton: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStep.stepDetail.instructionButtonLabel"
+                    defaultMessage="these instructions"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
+    </Fragment>
+  ),
+};
 
 export const StepsUI: StatelessComponent<
   UpgradeAssistantTabProps & ReactIntl.InjectedIntlProps
@@ -45,10 +103,16 @@ export const StepsUI: StatelessComponent<
       headingElement="h2"
       steps={[
         {
-          title: intl.formatMessage({
-            id: 'xpack.upgradeAssistant.overviewTab.steps.clusterStep.stepTitle',
-            defaultMessage: 'Check for issues with your cluster',
-          }),
+          title: countByType.cluster
+            ? intl.formatMessage({
+                id: 'xpack.upgradeAssistant.overviewTab.steps.clusterStep.issuesRemainingStepTitle',
+                defaultMessage: 'Check for issues with your cluster',
+              })
+            : intl.formatMessage({
+                id:
+                  'xpack.upgradeAssistant.overviewTab.steps.clusterStep.noIssuesRemainingStepTitle',
+                defaultMessage: 'Your cluster settings are ready',
+              }),
           status: countByType.cluster ? 'warning' : 'complete',
           children: (
             <EuiText>
@@ -57,7 +121,7 @@ export const StepsUI: StatelessComponent<
                   <p>
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overviewTab.steps.clusterStep.todo.todoDetail"
-                      defaultMessage="Go to the {clusterTabButton} to update deprecated cluster settings."
+                      defaultMessage="Go to the {clusterTabButton} to update the deprecated settings."
                       values={{
                         clusterTabButton: (
                           <EuiLink onClick={() => setSelectedTabIndex(1)}>
@@ -86,7 +150,7 @@ export const StepsUI: StatelessComponent<
                 <p>
                   <FormattedMessage
                     id="xpack.upgradeAssistant.overviewTab.steps.clusterStep.noRemainingIssuesLabel"
-                    defaultMessage="There are no remaining deprecated cluster settings."
+                    defaultMessage="No remaining deprecated settings."
                   />
                 </p>
               )}
@@ -94,10 +158,16 @@ export const StepsUI: StatelessComponent<
           ),
         },
         {
-          title: intl.formatMessage({
-            id: 'xpack.upgradeAssistant.overviewTab.steps.indicesStep.stepTitle',
-            defaultMessage: 'Check for issues with your indices',
-          }),
+          title: countByType.indices
+            ? intl.formatMessage({
+                id: 'xpack.upgradeAssistant.overviewTab.steps.indicesStep.issuesRemainingStepTitle',
+                defaultMessage: 'Check for issues with your indices',
+              })
+            : intl.formatMessage({
+                id:
+                  'xpack.upgradeAssistant.overviewTab.steps.indicesStep.noIssuesRemainingStepTitle',
+                defaultMessage: 'Your index settings are ready',
+              }),
           status: countByType.indices ? 'warning' : 'complete',
           children: (
             <EuiText>
@@ -106,7 +176,7 @@ export const StepsUI: StatelessComponent<
                   <p>
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overviewTab.steps.indicesStep.todo.todoDetail"
-                      defaultMessage="Go to the {indicesTabButton} to update deprecated index settings."
+                      defaultMessage="Go to the {indicesTabButton} to update the deprecated settings."
                       values={{
                         indicesTabButton: (
                           <EuiLink onClick={() => setSelectedTabIndex(2)}>
@@ -135,7 +205,7 @@ export const StepsUI: StatelessComponent<
                 <p>
                   <FormattedMessage
                     id="xpack.upgradeAssistant.overviewTab.steps.indicesStep.noRemainingIssuesLabel"
-                    defaultMessage="There are no remaining deprecated index settings."
+                    defaultMessage="No remaining deprecated settings."
                   />
                 </p>
               )}
@@ -188,6 +258,9 @@ export const StepsUI: StatelessComponent<
             </Fragment>
           ),
         },
+
+        // Swap in START_UPGRADE_STEP on the last minor release.
+        WAIT_FOR_RELEASE_STEP,
       ]}
     />
   );
