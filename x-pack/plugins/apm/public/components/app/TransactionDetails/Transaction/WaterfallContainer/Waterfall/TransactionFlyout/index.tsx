@@ -23,7 +23,7 @@ import styled from 'styled-components';
 import { DiscoverTransactionButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverTransactionButton';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { APM_AGENT_DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/agents';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
