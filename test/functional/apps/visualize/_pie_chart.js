@@ -81,7 +81,6 @@ export default function ({ getService, getPageObjects }) {
         ['160,000', '44'], ['200,000', '40'], ['240,000', '46'], ['280,000', '39'], ['320,000', '40'], ['360,000', '47']
       ];
 
-
       await PageObjects.visualize.openInspector();
       await PageObjects.visualize.setInspectorTablePageSize(50);
       const data =  await PageObjects.visualize.getInspectorTableData();
@@ -118,8 +117,9 @@ export default function ({ getService, getPageObjects }) {
       it('should apply correct filter on other bucket', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
-        await PageObjects.visualize.filterPieSlice('Other');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.filterPieSlice('Other');
+        await PageObjects.visualize.waitForVisualization();
         const pieData = await PageObjects.visualize.getPieChartLabels();
         log.debug(`pieData.length = ${pieData.length}`);
         expect(pieData).to.eql(expectedTableData);
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.filterLegend('Other');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualization();
         const pieData = await PageObjects.visualize.getPieChartLabels();
         log.debug(`pieData.length = ${pieData.length}`);
         expect(pieData).to.eql(expectedTableData);
@@ -154,7 +154,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleMissingBucket();
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const pieData = await PageObjects.visualize.getPieChartLabels();
         log.debug(`pieData.length = ${pieData.length}`);
         expect(pieData).to.eql(expectedTableData);
