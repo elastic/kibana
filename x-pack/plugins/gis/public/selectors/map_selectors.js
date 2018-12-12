@@ -8,7 +8,7 @@ import { createSelector } from 'reselect';
 import _ from 'lodash';
 import { TileLayer } from '../shared/layers/tile_layer';
 import { VectorLayer } from '../shared/layers/vector_layer';
-import { GeohashGridLayer } from '../shared/layers/geohashgrid_layer';
+import { HeatmapLayer } from '../shared/layers/heatmap_layer';
 import { EMSFileSource } from '../shared/layers/sources/ems_file_source';
 import { KibanaRegionmapSource } from '../shared/layers/sources/kibana_regionmap_source';
 import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
@@ -30,8 +30,8 @@ function createLayerInstance(layerDescriptor, dataSources) {
       return new TileLayer({ layerDescriptor, source, style });
     case VectorLayer.type:
       return new VectorLayer({ layerDescriptor, source, style });
-    case GeohashGridLayer.type:
-      return new GeohashGridLayer({ layerDescriptor, source, style });
+    case HeatmapLayer.type:
+      return new HeatmapLayer({ layerDescriptor, source, style });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }

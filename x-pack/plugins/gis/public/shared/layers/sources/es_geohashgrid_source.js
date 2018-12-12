@@ -16,7 +16,7 @@ import {
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
 import { VectorSource } from './vector_source';
-import { GeohashGridLayer } from '../geohashgrid_layer';
+import { HeatmapLayer } from '../heatmap_layer';
 import { VectorLayer } from '../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
@@ -234,7 +234,7 @@ export class ESGeohashGridSource extends VectorSource {
   _createDefaultLayerDescriptor(options) {
 
     if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_HEATMAP) {
-      return GeohashGridLayer.createDescriptor({
+      return HeatmapLayer.createDescriptor({
         sourceDescriptor: this._descriptor,
         ...options
       });
@@ -275,7 +275,7 @@ export class ESGeohashGridSource extends VectorSource {
   createDefaultLayer(options) {
 
     if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_HEATMAP) {
-      return new GeohashGridLayer({
+      return new HeatmapLayer({
         layerDescriptor: this._createDefaultLayerDescriptor(options),
         source: this
       });

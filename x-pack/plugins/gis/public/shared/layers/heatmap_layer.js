@@ -11,13 +11,13 @@ import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
 import { ZOOM_TO_PRECISION } from '../utils/zoom_to_precision';
 
-export class GeohashGridLayer extends ALayer {
+export class HeatmapLayer extends ALayer {
 
-  static type = "GEOHASH_GRID";
+  static type = "HEATMAP";
 
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
-    heatmapLayerDescriptor.type = GeohashGridLayer.type;
+    heatmapLayerDescriptor.type = HeatmapLayer.type;
     const defaultStyle = HeatmapStyle.createDescriptor('coarse');
     heatmapLayerDescriptor.style = defaultStyle;
     return heatmapLayerDescriptor;
