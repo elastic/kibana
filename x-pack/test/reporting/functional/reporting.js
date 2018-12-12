@@ -261,20 +261,22 @@ export default function ({ getService, getPageObjects }) {
 
     describe('Discover', () => {
       describe('Generate CSV button', () => {
+        beforeEach(() => PageObjects.common.navigateToApp('discover'));
+
         it('is not available if new', async () => {
-          await PageObjects.common.navigateToApp('discover');
           await PageObjects.reporting.openCsvReportingPanel();
           await expectDisabledGenerateReportButton();
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.discover.saveSearch('my search');
+          await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
           await PageObjects.reporting.openCsvReportingPanel();
           await expectEnabledGenerateReportButton();
         });
 
         it('generates a report with data', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
+          await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
           await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
@@ -282,6 +284,7 @@ export default function ({ getService, getPageObjects }) {
         it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
           await PageObjects.reporting.openCsvReportingPanel();
+          await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
           await expectReportCanBeCreated();
         });
       });
