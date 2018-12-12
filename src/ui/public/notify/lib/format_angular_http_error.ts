@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { IHttpResponse } from 'angular';
 
 export type AngularHttpError = IHttpResponse<{ message: string }>;
@@ -35,12 +36,20 @@ export function formatAngularHttpError(error: AngularHttpError) {
   // is an Angular $http "error object"
   if (error.status === -1) {
     // status = -1 indicates that the request was failed to reach the server
-    return (
-      'An HTTP request has failed to connect. ' +
-      'Please check if the Kibana server is running and that your browser has a working connection, ' +
-      'or contact your system administrator.'
-    );
+    return i18n.translate('common.ui.notify.fatalError.unavailableServerErrorMessage', {
+      defaultMessage:
+        'An HTTP request has failed to connect. ' +
+        'Please check if the Kibana server is running and that your browser has a working connection, ' +
+        'or contact your system administrator.',
+    });
   }
 
-  return `Error ${error.status} ${error.statusText}: ${error.data.message}`;
+  return i18n.translate('common.ui.notify.fatalError.errorStatusMessage', {
+    defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
+    values: {
+      errStatus: error.status,
+      errStatusText: error.statusText,
+      errMessage: error.data.message,
+    },
+  });
 }

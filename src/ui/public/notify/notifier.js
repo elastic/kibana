@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import '../render_directive';
+import { i18n } from '@kbn/i18n';
 
 const notifs = [];
 
@@ -215,7 +216,9 @@ Notifier.prototype.error = function (err, opts, cb) {
     type: 'danger',
     content: formatMsg(err, this.from),
     icon: 'warning',
-    title: 'Error',
+    title: i18n.translate('common.ui.notify.toaster.errorTitle', {
+      defaultMessage: 'Error',
+    }),
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
