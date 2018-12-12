@@ -17,8 +17,18 @@
  * under the License.
  */
 
-import { flatConcatAtType } from './reduce';
-import { wrap, alias } from './modify_reduce';
+import { SearchSource } from 'ui/courier';
 
-// paths to translation files
-export const translations = wrap(alias('translationPaths'), flatConcatAtType);
+export interface SavedSearch {
+  readonly id: string;
+  title: string;
+  searchSource: SearchSource;
+  description?: string;
+  columns: string[];
+  sort: string[];
+  destroy: () => void;
+}
+
+export interface SavedSearchLoader {
+  get: (id: string) => SavedSearch;
+}

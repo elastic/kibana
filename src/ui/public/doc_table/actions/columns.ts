@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function addColumn(columns, columnName) {
+export function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
     return;
   }
@@ -25,7 +25,7 @@ export function addColumn(columns, columnName) {
   columns.push(columnName);
 }
 
-export function removeColumn(columns, columnName) {
+export function removeColumn(columns: string[], columnName: string) {
   if (!columns.includes(columnName)) {
     return;
   }
@@ -33,7 +33,7 @@ export function removeColumn(columns, columnName) {
   columns.splice(columns.indexOf(columnName), 1);
 }
 
-export function moveColumn(columns, columnName, newIndex) {
+export function moveColumn(columns: string[], columnName: string, newIndex: number) {
   if (newIndex < 0) {
     return;
   }
@@ -46,6 +46,6 @@ export function moveColumn(columns, columnName, newIndex) {
     return;
   }
 
-  columns.splice(columns.indexOf(columnName), 1);  // remove at old index
-  columns.splice(newIndex, 0, columnName);  // insert before new index
+  columns.splice(columns.indexOf(columnName), 1); // remove at old index
+  columns.splice(newIndex, 0, columnName); // insert before new index
 }

@@ -86,7 +86,7 @@ export class BasicAuthenticationProvider {
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     return DeauthenticationResult.redirectTo(
-      `${this._options.basePath}/login${request.url.search}`
+      `${this._options.basePath}/login${request.url.search || ''}`
     );
   }
 
