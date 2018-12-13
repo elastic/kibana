@@ -38,8 +38,7 @@
   }
 
   .kbnToast__message {
-    @include euiTextTruncate;
-
+    text-overflow: ellipsis;
     flex: 1 1 auto;
     line-height: normal;
     white-space: normal;
