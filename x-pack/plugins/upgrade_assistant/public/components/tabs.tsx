@@ -14,6 +14,7 @@ import { injectI18n } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
 import { UpgradeAssistantStatus } from '../../server/lib/es_migration_apis';
+import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
 import { LoadingState, UpgradeAssistantTabProps } from './types';
@@ -87,6 +88,8 @@ export class UpgradeAssistantTabsUI extends React.Component<
       loadingState,
       refreshCheckupData: this.loadData,
       setSelectedTabIndex: this.setSelectedTabIndex,
+      // Remove this in last minor of the current major (eg. 6.7)
+      alertBanner: <LatestMinorBanner />,
     };
 
     return [

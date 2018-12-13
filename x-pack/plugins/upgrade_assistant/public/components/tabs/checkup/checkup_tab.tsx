@@ -60,6 +60,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
 
   public render() {
     const {
+      alertBanner,
       checkupLabel,
       deprecations,
       loadingState,
@@ -84,9 +85,18 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
             />
           </p>
         </EuiText>
+
+        <EuiSpacer />
+
+        {alertBanner && (
+          <Fragment>
+            {alertBanner}
+            <EuiSpacer />
+          </Fragment>
+        )}
+
         {showBackupWarning && (
           <Fragment>
-            <EuiSpacer />
             <EuiCallOut
               title={
                 <FormattedMessage
@@ -117,9 +127,10 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
                 />
               </p>
             </EuiCallOut>
+            <EuiSpacer />
           </Fragment>
         )}
-        <EuiSpacer />
+
         <EuiPageContent>
           <EuiPageContentBody>
             {loadingState === LoadingState.Error ? (

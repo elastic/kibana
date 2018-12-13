@@ -11,6 +11,7 @@ import {
 } from '../../server/lib/es_migration_apis';
 
 export interface UpgradeAssistantTabProps {
+  alertBanner?: React.ReactNode;
   checkupData?: UpgradeAssistantStatus;
   deprecations?: EnrichedDeprecationInfo[];
   refreshCheckupData: () => Promise<void>;
