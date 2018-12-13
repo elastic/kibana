@@ -15,11 +15,15 @@ import {
 import { setPhaseData } from '../../../../store/actions';
 import {
   PHASE_COLD,
+  PHASE_HOT,
+  PHASE_ROLLOVER_ENABLED
 } from '../../../../store/constants';
 
 export const ColdPhase = connect(
   (state) => ({
     phaseData: getPhase(state, PHASE_COLD),
+    hotPhaseRolloverEnabled: getPhase(state, PHASE_HOT)[PHASE_ROLLOVER_ENABLED],
+
   }),
   {
     setPhaseData: (key, value) => setPhaseData(PHASE_COLD, key, value),

@@ -12,16 +12,28 @@ import {
 import { ErrableFormRow } from '../form_errors';
 import { injectI18n } from '@kbn/i18n/react';
 const MinAgeInputUi = props => {
-  const { errors, phaseData, phase, setPhaseData, isShowingErrors, intl } = props;
+  const { rolloverEnabled, errors, phaseData, phase, setPhaseData, isShowingErrors, intl } = props;
+  const fromMessage = rolloverEnabled
+    ? intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.editPolicy.fromRolloverMessage',
+      defaultMessage: 'from rollover',
+    })
+    : intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.editPolicy.fromIndexCreationMessage',
+      defaultMessage: 'from index creation',
+    });
   return (
     <EuiFlexGroup>
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <ErrableFormRow
           id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
-          label={intl.formatMessage({
-            id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
-            defaultMessage: 'Move to {phase} phase after',
-          }, { phase })}
+          label={intl.formatMessage(
+            {
+              id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
+              defaultMessage: 'Timing for {phase} phase',
+            },
+            { phase }
+          )}
           errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
           isShowingErrors={isShowingErrors}
           errors={errors}
@@ -39,26 +51,39 @@ const MinAgeInputUi = props => {
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiSelect
-            aria-label={intl.formatMessage({
-              id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeUnitsAriaLabel',
-              defaultMessage: '{phaseUpper} phase after units',
-            }, { phaseUpper: `${phase.charAt(0).toUpperCase()}${phase.slice(1)}` })}
+            aria-label={intl.formatMessage(
+              {
+                id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeUnitsAriaLabel',
+                defaultMessage: '{phaseUpper} phase after units',
+              },
+              { phaseUpper: `${phase.charAt(0).toUpperCase()}${phase.slice(1)}` }
+            )}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
             onChange={e => setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)}
             options={[
               {
                 value: 'd',
-                text: intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.editPolicy.daysLabel',
-                  defaultMessage: 'days',
-                }),
+                text: intl.formatMessage(
+                  {
+                    id: 'xpack.indexLifecycleMgmt.editPolicy.daysLabel',
+                    defaultMessage: 'days {fromMessage}',
+                  },
+                  {
+                    fromMessage,
+                  }
+                ),
               },
               {
                 value: 'h',
-                text: intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.editPolicy.hoursLabel',
-                  defaultMessage: 'hours',
-                }),
+                text: intl.formatMessage(
+                  {
+                    id: 'xpack.indexLifecycleMgmt.editPolicy.hoursLabel',
+                    defaultMessage: 'hours {fromMessage}',
+                  },
+                  {
+                    fromMessage,
+                  }
+                ),
               },
             ]}
           />

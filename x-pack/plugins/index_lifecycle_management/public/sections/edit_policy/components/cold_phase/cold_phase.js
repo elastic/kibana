@@ -55,7 +55,8 @@ class ColdPhaseUi extends PureComponent {
       phaseData,
       errors,
       isShowingErrors,
-      intl
+      intl,
+      hotPhaseRolloverEnabled
     } = this.props;
 
     return (
@@ -123,6 +124,7 @@ class ColdPhaseUi extends PureComponent {
                 phase={PHASE_COLD}
                 isShowingErrors={isShowingErrors}
                 setPhaseData={setPhaseData}
+                rolloverEnabled={hotPhaseRolloverEnabled}
               />
               <EuiSpacer />
 

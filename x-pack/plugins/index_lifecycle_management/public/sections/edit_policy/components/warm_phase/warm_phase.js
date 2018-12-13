@@ -164,6 +164,7 @@ class WarmPhaseUi extends PureComponent {
                       phase={PHASE_WARM}
                       isShowingErrors={isShowingErrors}
                       setPhaseData={setPhaseData}
+                      rolloverEnabled={hotPhaseRolloverEnabled}
                     />
                   ) : null}
 
