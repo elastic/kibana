@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`translateUsingPseudoLocale() shouldn't translate @I18N@ placeholders 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà @I18N@value@I18N@ þļààçéĥĥôļððéŕ."`;
