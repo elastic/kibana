@@ -80,7 +80,8 @@ uiModules.get('kibana')
             id: fileLayer.getId(),
             format: fileLayer.getDefaultFormatType(),
             created_at: fileLayer.getCreatedAt(),
-            attribution: fileLayer.getHTMLAttribution(),
+            // attribution: fileLayer.getHTMLAttribution(),
+            attribution: '<p>foobar</p>', //todo
             fields: fileLayer.getFieldsInLanguage()
           };
 
@@ -141,8 +142,7 @@ uiModules.get('kibana')
           const hasIdById =  fileLayer.hasId(fileLayerConfig.id);
           return hasIdByName || hasIdById;
         });
-
-        return layer.getEMSHotLink();
+        return layer.getEMSHotlink();
       }
 
 
