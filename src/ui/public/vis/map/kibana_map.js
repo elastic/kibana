@@ -558,15 +558,6 @@ export class KibanaMap extends EventEmitter {
       baseLayer.on('tileload', () => this._updateDesaturation());
       baseLayer.on('load', () => {
         this.emit('baseLayer:loaded');
-
-        // Validate Tiles
-        const mapContainer = '.leaflet-tile-container';
-        const tileLoaded = 'leaflet-tile-loaded';
-        const imgTiles = Array.from(document.querySelector(mapContainer).children);
-
-        if (!imgTiles.some(imgTile => imgTile.className.includes(tileLoaded))) {
-          defaultLayerLoadWarning();
-        }
       });
       baseLayer.on('loading', () => {
         this.emit('baseLayer:loading');
@@ -613,14 +604,38 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  _getTMSBaseLayer({ url, minZoom, maxZoom, subdomains }) {
-    const tmsBaseLayer = L.tileLayer(url, {
-      minZoom: minZoom,
-      maxZoom: maxZoom,
-      subdomains: subdomains || []
-    });
-    return tmsBaseLayer;
-  }
+  _getTMSBaseLayer = (function () {
+    let tilesCreated = 0;
+    let tilesLoaded = 0;
+    let tilesErrored = 0;
+    let tmsBaseLayer;
+    const checkIsValid = () => {
+      const loadingComplete = tilesCreated === tilesLoaded + tilesErrored;
+      if (loadingComplete) {
+        // If any tiles have loaded, is valid
+        tilesLoaded ? null : defaultLayerLoadWarning();
+      }
+    };
+    const { createTile } = L.TileLayer.prototype;
+
+    return ({ url, minZoom, maxZoom, subdomains }) => {
+      tmsBaseLayer = new (L.TileLayer.extend({
+        createTile: function (coords, done) {
+          tilesCreated++;
+          return createTile.call(this, coords, done);
+        }
+      }))(url, {
+        minZoom: minZoom,
+        maxZoom: maxZoom,
+        subdomains: subdomains || []
+      });
+      tmsBaseLayer.on('tileload', () => tilesLoaded++);
+      tmsBaseLayer.on('tileerror', () => tilesErrored++);
+      tmsBaseLayer.on('tileload tileerror', checkIsValid);
+
+      return tmsBaseLayer;
+    };
+  }());
 
   _getWMSBaseLayer(options) {
     const wmsOptions = {
