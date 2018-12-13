@@ -29,13 +29,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
 import { getInAppUrl } from './lib/get_in_app_url';
 import { I18nProvider } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, $injector) {
+function updateObjectsTable($scope, $injector, i18n) {
   const Private = $injector.get('Private');
   const indexPatterns = $injector.get('indexPatterns');
   const $http = $injector.get('$http');
@@ -71,7 +70,7 @@ function updateObjectsTable($scope, $injector) {
             }
             const serviceName = typeToServiceName(type);
             if (!serviceName) {
-              toastNotifications.addWarning(i18n.translate('kbn.management.objects.unknownSavedObjectTypeNotificationMessage', {
+              toastNotifications.addWarning(i18n('kbn.management.objects.unknownSavedObjectTypeNotificationMessage', {
                 defaultMessage: 'Unknown saved object type: {type}',
                 values: { type }
               }));
@@ -110,8 +109,8 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       controllerAs: 'managementObjectsController',
-      controller: function ($scope, $injector) {
-        updateObjectsTable($scope, $injector);
+      controller: function ($scope, $injector, i18n) {
+        updateObjectsTable($scope, $injector, i18n);
         $scope.$on('$destroy', destroyObjectsTable);
       }
     };

@@ -86,7 +86,7 @@ uiModules
     };
   });
 
-FeatureCatalogueRegistryProvider.register((i18n) => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'management',
     title: i18n('kbn.management.managementLabel', {

@@ -41,7 +41,7 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
   ]
 });
 
-FeatureCatalogueRegistryProvider.register((i18n) => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'console',
     title: i18n('kbn.devTools.consoleTitle', {
