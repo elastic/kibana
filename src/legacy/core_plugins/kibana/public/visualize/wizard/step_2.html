@@ -7,7 +7,7 @@
       data-transclude-slot="topLeftCorner"
       use-links="true"
       omit-current-page="true"
-      page-title="'Choose search source'"
+      page-title="::'kbn.visualize.newVisWizard.pageTitle' | i18n: { defaultMessage: 'Choose search source' }"
     ></bread-crumbs>
   </div>
 </kbn-top-nav>
@@ -15,9 +15,11 @@
 <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem" data-test-subj="visualizeSelectSearch">
   <div class="visWizard kuiViewContentItem">
     <div class="visWizard__column visWizard__column--small">
-      <h2 class="kuiTitle kuiVerticalRhythm">
-        From a New Search, Select Index
-      </h2>
+      <h2
+        class="kuiTitle kuiVerticalRhythm"
+        i18n-id="kbn.visualize.newVisWizard.createFromNewSearchTitle"
+        i18n-default-message="From a New Search, Select Index"
+      ></h2>
 
       <paginated-selectable-list
         per-page="20"
@@ -30,9 +32,11 @@
     </div>
 
     <div class="visWizard__column visWizard__column--large">
-      <h2 class="kuiTitle kuiVerticalRhythm">
-        Or, From a Saved Search
-      </h2>
+      <h2
+        class="kuiTitle kuiVerticalRhythm"
+        i18n-id="kbn.visualize.newVisWizard.createFromSavedSearchTitle"
+        i18n-default-message="Or, From a Saved Search"
+      ></h2>
 
       <!-- Saved searches -->
       <saved-object-finder
