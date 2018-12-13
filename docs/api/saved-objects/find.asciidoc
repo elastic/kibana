@@ -15,6 +15,7 @@ saved objects by various conditions.
   (array|string) The saved object type(s) that the response should be limited to
 `per_page` (optional)::
   (number) The number of objects to return per page
+  default value : 20
 `page` (optional)::
   (number) The page of objects to return
 `search` (optional)::
