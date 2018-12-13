@@ -50,7 +50,7 @@ export interface ContextService {
   [key: string]: unknown;
 }
 
-export interface Stackframe {
+export interface IStackframe {
   filename: string;
   line: {
     number: number;
@@ -72,7 +72,9 @@ export interface Stackframe {
     updated?: boolean;
     error?: string;
   };
-  vars?: unknown;
+  vars?: {
+    [key: string]: unknown;
+  };
   orig?: {
     filename?: string;
     abs_path?: string;

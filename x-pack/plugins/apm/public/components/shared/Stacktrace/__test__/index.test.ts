@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Stackframe } from '../../../../../typings/es_schemas/APMDoc';
-import { getGroupedStackframes, hasSourceLines } from '../stacktraceUtils';
+import { IStackframe } from '../../../../../typings/es_schemas/APMDoc';
+import { getGroupedStackframes } from '../index';
 import stacktracesMock from './stacktraces.json';
 
-const stackframeMockWithSource = stacktracesMock[0];
-const stackframeMockWithoutSource = stacktracesMock[1];
-
-describe('stactraceUtils', () => {
+describe('Stacktrace/index', () => {
   describe('getGroupedStackframes', () => {
     it('should collapse the library frames into a set of grouped stackframes', () => {
-      const result = getGroupedStackframes(stacktracesMock as Stackframe[]);
+      const result = getGroupedStackframes(stacktracesMock as IStackframe[]);
       expect(result).toMatchSnapshot();
     });
 
@@ -40,12 +37,13 @@ describe('stactraceUtils', () => {
           exclude_from_grouping: false,
           filename: 'file-d.txt'
         }
-      ] as Stackframe[];
+      ] as IStackframe[];
 
       const result = getGroupedStackframes(stackframes);
 
       expect(result).toEqual([
         {
+          excludeFromGrouping: false,
           isLibraryFrame: false,
           stackframes: [
             {
@@ -61,6 +59,7 @@ describe('stactraceUtils', () => {
           ]
         },
         {
+          excludeFromGrouping: false,
           isLibraryFrame: true,
           stackframes: [
             {
@@ -90,10 +89,11 @@ describe('stactraceUtils', () => {
           exclude_from_grouping: false,
           filename: 'file-b.txt'
         }
-      ] as Stackframe[];
+      ] as IStackframe[];
       const result = getGroupedStackframes(stackframes);
       expect(result).toEqual([
         {
+          excludeFromGrouping: false,
           isLibraryFrame: false,
           stackframes: [
             {
@@ -104,6 +104,7 @@ describe('stactraceUtils', () => {
           ]
         },
         {
+          excludeFromGrouping: false,
           isLibraryFrame: true,
           stackframes: [
             {
@@ -128,10 +129,11 @@ describe('stactraceUtils', () => {
           exclude_from_grouping: true,
           filename: 'file-b.txt'
         }
-      ] as Stackframe[];
+      ] as IStackframe[];
       const result = getGroupedStackframes(stackframes);
       expect(result).toEqual([
         {
+          excludeFromGrouping: false,
           isLibraryFrame: false,
           stackframes: [
             {
@@ -142,6 +144,7 @@ describe('stactraceUtils', () => {
           ]
         },
         {
+          excludeFromGrouping: true,
           isLibraryFrame: false,
           stackframes: [
             {
@@ -155,27 +158,16 @@ describe('stactraceUtils', () => {
     });
 
     it('should handle empty stackframes', () => {
-      const result = getGroupedStackframes([] as Stackframe[]);
+      const result = getGroupedStackframes([] as IStackframe[]);
       expect(result).toHaveLength(0);
     });
 
     it('should handle one stackframe', () => {
       const result = getGroupedStackframes([
         stacktracesMock[0]
-      ] as Stackframe[]);
+      ] as IStackframe[]);
       expect(result).toHaveLength(1);
       expect(result[0].stackframes).toHaveLength(1);
-    });
-  });
-
-  describe('hasSourceLines', () => {
-    it('should return true given a stackframe with a source context', () => {
-      const result = hasSourceLines(stackframeMockWithSource as Stackframe);
-      expect(result).toBe(true);
-    });
-    it('should return false given a stackframe with no source context', () => {
-      const result = hasSourceLines(stackframeMockWithoutSource as Stackframe);
-      expect(result).toBe(false);
     });
   });
 });

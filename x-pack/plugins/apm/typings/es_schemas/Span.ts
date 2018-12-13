@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2, ContextService, Stackframe } from './APMDoc';
+import { APMDocV1, APMDocV2, ContextService, IStackframe } from './APMDoc';
 
 export interface DbContext {
   instance?: string;
@@ -49,7 +49,7 @@ export interface SpanV1 extends APMDocV1 {
     type: string;
     id: number; // we are manually adding span.id
     parent?: string; // only v1
-    stacktrace?: Stackframe[];
+    stacktrace?: IStackframe[];
   };
   transaction: {
     id: string;
@@ -68,7 +68,7 @@ export interface SpanV2 extends APMDocV2 {
     type: string;
     id: number; // id will be derived from hex encoded 64 bit hex_id string in v2
     hex_id: string; // only v2
-    stacktrace?: Stackframe[];
+    stacktrace?: IStackframe[];
   };
   transaction: {
     id: string;

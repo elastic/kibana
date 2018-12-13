@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import {
   borderRadius,
@@ -13,8 +13,6 @@ import {
   px,
   units
 } from '../../../style/variables';
-
-import { isEmpty } from 'lodash';
 
 // TODO add dependency for @types/react-syntax-highlighter
 // @ts-ignore
@@ -25,7 +23,7 @@ import python from 'react-syntax-highlighter/dist/languages/python';
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 // @ts-ignore
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
+import { IStackframe } from '../../../../typings/es_schemas/APMDoc';
 import { FrameHeading } from '../Stacktrace/FrameHeading';
 // @ts-ignore
 import { Context } from './Context';
@@ -57,46 +55,27 @@ const Container = styled.div<ContainerProps>`
 interface Props {
   isLibraryFrame?: boolean;
   codeLanguage?: string;
-  stackframe: Stackframe;
+  stackframe: IStackframe;
 }
 
-export class CodePreview extends PureComponent<Props> {
-  public state = {
-    variablesVisible: false
-  };
+export function CodePreview({
+  stackframe,
+  codeLanguage,
+  isLibraryFrame
+}: Props) {
+  return (
+    <Container isLibraryFrame={isLibraryFrame}>
+      <CodeHeader>
+        <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+      </CodeHeader>
 
-  public toggleVariables = () =>
-    this.setState(() => {
-      return { variablesVisible: !this.state.variablesVisible };
-    });
+      <Context
+        stackframe={stackframe}
+        codeLanguage={codeLanguage}
+        isLibraryFrame={isLibraryFrame}
+      />
 
-  public render() {
-    const { stackframe, codeLanguage, isLibraryFrame } = this.props;
-    const hasVariables = !isEmpty(stackframe.vars);
-
-    return (
-      <Container isLibraryFrame={isLibraryFrame}>
-        <CodeHeader>
-          <FrameHeading
-            stackframe={stackframe}
-            isLibraryFrame={isLibraryFrame}
-          />
-        </CodeHeader>
-
-        <Context
-          stackframe={stackframe}
-          codeLanguage={codeLanguage}
-          isLibraryFrame={isLibraryFrame}
-        />
-
-        {hasVariables && (
-          <Variables
-            vars={stackframe.vars}
-            visible={this.state.variablesVisible}
-            onClick={this.toggleVariables}
-          />
-        )}
-      </Container>
-    );
-  }
+      <Variables vars={stackframe.vars} />
+    </Container>
+  );
 }

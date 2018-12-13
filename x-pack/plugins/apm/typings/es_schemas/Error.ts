@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2, ContextService, Stackframe } from './APMDoc';
+import { APMDocV1, APMDocV2, ContextService, IStackframe } from './APMDoc';
 
 interface Agent {
   hostname: string;
@@ -31,7 +31,7 @@ interface Exception {
   module?: string;
   attributes?: unknown;
   handled?: boolean;
-  stacktrace?: Stackframe[];
+  stacktrace?: IStackframe[];
 }
 
 interface Log {
@@ -39,7 +39,7 @@ interface Log {
   param_message?: string;
   logger_name?: string;
   level?: string;
-  stacktrace?: Stackframe[];
+  stacktrace?: IStackframe[];
 }
 
 interface ErrorV1 extends APMDocV1 {

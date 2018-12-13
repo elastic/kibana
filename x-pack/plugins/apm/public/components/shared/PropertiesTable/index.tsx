@@ -102,15 +102,13 @@ export function PropertiesTable({
   propKey,
   agentName
 }: {
-  propData: StringMap<any>;
+  propData?: StringMap<any>;
   propKey: string;
   agentName?: string;
 }) {
-  const hasPropData = !_.isEmpty(propData);
-
   return (
     <TableContainer>
-      {hasPropData ? (
+      {propData ? (
         <NestedKeyValueTable
           data={propData}
           parentKey={propKey}

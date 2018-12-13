@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Stackframe when stackframe does not have source lines should render FrameHeading 1`] = `
+<FrameHeading
+  isLibraryFrame={false}
+  stackframe={
+    Object {
+      "line": Object {},
+    }
+  }
+/>
+`;
+
+exports[`Stackframe when stackframe has source lines should render CodePreview 1`] = `
+<CodePreview
+  isLibraryFrame={false}
+  stackframe={
+    Object {
+      "line": Object {
+        "context": "this is line context",
+      },
+    }
+  }
+/>
+`;

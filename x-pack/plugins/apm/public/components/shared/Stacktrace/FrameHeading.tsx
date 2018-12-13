@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
+import { IStackframe } from '../../../../typings/es_schemas/APMDoc';
 import { colors, fontFamilyCode, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
@@ -24,7 +24,7 @@ const AppFrameFileDetail = styled.span`
 `;
 
 interface Props {
-  stackframe: Stackframe;
+  stackframe: IStackframe;
   isLibraryFrame?: boolean;
 }
 
