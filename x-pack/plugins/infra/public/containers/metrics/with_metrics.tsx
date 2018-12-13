@@ -12,7 +12,7 @@ import {
   InfraNodeType,
   InfraTimerangeInput,
   MetricsQuery,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metricsQuery } from './metrics.gql_query';
 

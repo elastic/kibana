@@ -9773,7 +9773,14 @@ graphql-codegen-introspection-template@^0.13.0:
   resolved "https://registry.yarnpkg.com/graphql-codegen-introspection-template/-/graphql-codegen-introspection-template-0.13.0.tgz#7bd4ae777f1a8d078a09974866fe27a0d928a040"
   integrity sha512-qYzupnNEr6EI3r0sHhEl0wvlgTpuzWx4MkVCY5rgeSweLOLKlmrwCySMZ8lxzFR9D1Y5alvW3C8LrWHPTuWIug==
 
-graphql-codegen-typescript-template@^0.13.0:
+graphql-codegen-typescript-resolvers-template@^0.13.0:
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/graphql-codegen-typescript-resolvers-template/-/graphql-codegen-typescript-resolvers-template-0.13.0.tgz#fd525e5199d15714f7cb079b7b7b44dd5ba3a531"
+  integrity sha512-guaQ+xbg+18TqiBSXWpgKf88tvoPaOtLkExhW5eMQnfBJ7PpX3AcOjExb+AKsQAH9DK6zL4n+txU7WeUfzGDbA==
+  dependencies:
+    graphql-codegen-typescript-template "0.13.0"
+
+graphql-codegen-typescript-template@0.13.0, graphql-codegen-typescript-template@^0.13.0:
   version "0.13.0"
   resolved "https://registry.yarnpkg.com/graphql-codegen-typescript-template/-/graphql-codegen-typescript-template-0.13.0.tgz#41398687cbf279f1d97d8cfb8aa7c412bf0e7192"
   integrity sha512-EYLd4v8toD+dpWHJsJliViaE52novhF9zbayFmY8IgLeHmYPVk2TfyS6CVvHmCoa0HTxOawvTY8a7UIgtnpw2w==

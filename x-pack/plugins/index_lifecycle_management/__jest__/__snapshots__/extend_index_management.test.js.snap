@@ -122,6 +122,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         "step": "ERROR",
         "step_info": Object {
           "reason": "setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined",
+          "stack_trace": "fakestacktrace",
           "type": "illegal_argument_exception",
         },
         "step_time_millis": 1544187776208,
