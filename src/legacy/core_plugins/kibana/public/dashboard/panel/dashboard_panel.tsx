@@ -17,34 +17,64 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import { EuiLoadingChart, EuiPanel } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
-
-import { PanelHeader } from './panel_header';
-import { PanelError } from './panel_error';
-
+import React from 'react';
 import {
-  EuiPanel,
-  EuiLoadingChart,
-} from '@elastic/eui';
+  ContainerState,
+  Embeddable,
+  EmbeddableFactory,
+  EmbeddableMetadata,
+  EmbeddableState,
+} from 'ui/embeddable';
+import { PanelState } from '../selectors';
+import { PanelError } from './panel_error';
+import { PanelHeader } from './panel_header';
 
-class DashboardPanelUi extends React.Component {
-  constructor(props) {
+interface DashboardPanelUiProps {
+  viewOnlyMode: boolean;
+  onPanelFocused?: (panel: string) => {};
+  onPanelBlurred?: (panel: string) => {};
+  error?: string | object;
+  destroy: () => void;
+  containerState: ContainerState;
+  embeddableFactory: EmbeddableFactory;
+  lastReloadRequestTime: number;
+  embeddableStateChanged: (embeddableStateChanges: EmbeddableState) => {};
+  embeddableIsInitialized: (embeddableIsInitializing: EmbeddableMetadata) => void;
+  embeddableError: (args0: string) => {};
+  embeddableIsInitializing: () => void;
+  initialized: boolean;
+  panel: PanelState;
+  intl: any;
+  className: string;
+}
+
+interface State {
+  error: string | null;
+}
+
+class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
+  [panel: string]: any;
+  public mounted: boolean;
+  public embeddable!: Embeddable;
+  constructor(props: DashboardPanelUiProps) {
     super(props);
     this.state = {
-      error: props.embeddableFactory ? null : props.intl.formatMessage({
-        id: 'kbn.dashboard.panel.noEmbeddableFactoryErrorMessage',
-        defaultMessage: 'No factory found for embeddable',
-      }),
+      error: props.embeddableFactory
+        ? null
+        : props.intl.formatMessage({
+            id: 'kbn.dashboard.panel.noEmbeddableFactoryErrorMessage',
+            defaultMessage: 'No factory found for embeddable',
+          }),
     };
 
     this.mounted = false;
   }
 
-  async componentDidMount() {
+  public async componentDidMount() {
     this.mounted = true;
     const {
       initialized,
@@ -58,8 +88,9 @@ class DashboardPanelUi extends React.Component {
 
     if (!initialized) {
       embeddableIsInitializing();
-      embeddableFactory.create(panel, embeddableStateChanged)
-        .then((embeddable) => {
+      embeddableFactory
+        .create(panel, embeddableStateChanged)
+        .then((embeddable: Embeddable) => {
           if (this.mounted) {
             this.embeddable = embeddable;
             embeddableIsInitialized(embeddable.metadata);
@@ -68,7 +99,7 @@ class DashboardPanelUi extends React.Component {
             embeddable.destroy();
           }
         })
-        .catch((error) => {
+        .catch((error: { message: string }) => {
           if (this.mounted) {
             embeddableError(error.message);
           }
@@ -76,7 +107,7 @@ class DashboardPanelUi extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.props.destroy();
     this.mounted = false;
     if (this.embeddable) {
@@ -84,21 +115,21 @@ class DashboardPanelUi extends React.Component {
     }
   }
 
-  onFocus = () => {
+  public onFocus = () => {
     const { onPanelFocused, panel } = this.props;
     if (onPanelFocused) {
-      onPanelFocused(panel.panelIndex);
+      return onPanelFocused(panel.panelIndex);
     }
   };
 
-  onBlur = () => {
+  public onBlur = () => {
     const { onPanelBlurred, panel } = this.props;
     if (onPanelBlurred) {
-      onPanelBlurred(panel.panelIndex);
+      return onPanelBlurred(panel.panelIndex);
     }
   };
 
-  renderEmbeddableViewport() {
+  public renderEmbeddableViewport() {
     const classes = classNames('panel-content', {
       'panel-content-isLoading': !this.props.initialized,
     });
@@ -107,16 +138,14 @@ class DashboardPanelUi extends React.Component {
       <div
         id="embeddedPanel"
         className={classes}
-        ref={panelElement => this.panelElement = panelElement}
+        ref={panelElement => (this.panelElement = panelElement)}
       >
-        {!this.props.initialized && (
-          <EuiLoadingChart size="l" mono/>
-        )}
+        {!this.props.initialized && <EuiLoadingChart size="l" mono />}
       </div>
     );
   }
 
-  shouldComponentUpdate(nextProps) {
+  public shouldComponentUpdate(nextProps: DashboardPanelUiProps) {
     if (this.embeddable && !_.isEqual(nextProps.containerState, this.props.containerState)) {
       this.embeddable.onContainerStateChanged(nextProps.containerState);
     }
@@ -125,27 +154,26 @@ class DashboardPanelUi extends React.Component {
       this.embeddable.reload();
     }
 
-    return nextProps.error !== this.props.error ||
-      nextProps.initialized !== this.props.initialized;
+    return nextProps.error !== this.props.error || nextProps.initialized !== this.props.initialized;
   }
 
-  renderEmbeddedError() {
+  public renderEmbeddedError() {
     return <PanelError error={this.props.error} />;
   }
 
-  renderContent() {
+  public renderContent() {
     const { error } = this.props;
     if (error) {
-      return this.renderEmbeddedError(error);
+      return this.renderEmbeddedError();
     } else {
       return this.renderEmbeddableViewport();
     }
   }
 
-  render() {
+  public render() {
     const { viewOnlyMode, panel } = this.props;
     const classes = classNames('dshPanel', this.props.className, {
-      'dshPanel--editing': !viewOnlyMode
+      'dshPanel--editing': !viewOnlyMode,
     });
     return (
       <EuiPanel
@@ -155,10 +183,7 @@ class DashboardPanelUi extends React.Component {
         onBlur={this.onBlur}
         paddingSize="none"
       >
-        <PanelHeader
-          panelId={panel.panelIndex}
-          embeddable={this.embeddable}
-        />
+        <PanelHeader panelId={panel.panelIndex} embeddable={this.embeddable} />
 
         {this.renderContent()}
       </EuiPanel>
@@ -166,6 +191,7 @@ class DashboardPanelUi extends React.Component {
   }
 }
 
+<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/dashboard/panel/dashboard_panel.js
 DashboardPanelUi.propTypes = {
   viewOnlyMode: PropTypes.bool.isRequired,
   onPanelFocused: PropTypes.func,
@@ -197,4 +223,6 @@ DashboardPanelUi.propTypes = {
   }).isRequired,
 };
 
+=======
+>>>>>>> typescript dashboard stuff:src/legacy/core_plugins/kibana/public/dashboard/panel/dashboard_panel.tsx
 export const DashboardPanel = injectI18n(DashboardPanelUi);

@@ -17,26 +17,59 @@
  * under the License.
  */
 
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-
-import { DashboardPanel } from './dashboard_panel';
+import { connect } from 'react-redux';
 import { DashboardViewMode } from '../dashboard_view_mode';
+import { DashboardPanel } from './dashboard_panel';
+
+import { ThunkDispatch } from 'redux-thunk';
 
 import {
-  deletePanel, embeddableError, embeddableIsInitialized, embeddableIsInitializing, embeddableStateChanged,
+  ContainerState,
+  EmbeddableFactory,
+  EmbeddableMetadata,
+  EmbeddableState,
+} from 'ui/embeddable';
+import { CoreKibanaState } from '../../selectors';
+
+import { Action } from 'redux-actions';
+import {
+  deletePanel,
+  embeddableError,
+  EmbeddableErrorAction,
+  embeddableIsInitialized,
+  embeddableIsInitializing,
+  embeddableStateChanged,
 } from '../actions';
-
 import {
+  getContainerState,
   getEmbeddable,
-  getFullScreenMode,
-  getViewMode,
   getEmbeddableError,
-  getPanelType, getContainerState, getPanel, getEmbeddableInitialized,
+  getEmbeddableInitialized,
+  getFullScreenMode,
+  getPanel,
+  getPanelType,
+  getViewMode,
+  PanelId,
+  PanelState,
 } from '../selectors';
 
-const mapStateToProps = ({ dashboard }, { embeddableFactory, panelId }) => {
+interface DashboardPanelContainerOwnProps {
+  panelId: string | PanelId;
+  embeddableFactory: EmbeddableFactory;
+  error: string | object;
+  viewOnlyMode: boolean;
+  containerState: ContainerState;
+  initialized: boolean;
+  panel: PanelState;
+  mounted: boolean;
+}
+
+const mapStateToProps = (
+  coreKibanaState: CoreKibanaState,
+  { embeddableFactory, panelId }: DashboardPanelContainerOwnProps
+) => {
+  const dashboard = coreKibanaState.dashboard;
   const embeddable = getEmbeddable(dashboard, panelId);
   let error = null;
   if (!embeddableFactory) {
@@ -60,35 +93,28 @@ const mapStateToProps = ({ dashboard }, { embeddableFactory, panelId }) => {
   };
 };
 
-const mapDispatchToProps = (dispatch, { panelId }) => ({
-  destroy: () => (
-    dispatch(deletePanel(panelId))
-  ),
-  embeddableIsInitializing: () => (
-    dispatch(embeddableIsInitializing(panelId))
-  ),
-  embeddableIsInitialized: (metadata) => (
-    dispatch(embeddableIsInitialized({ panelId, metadata }))
-  ),
-  embeddableStateChanged: (embeddableState) => (
-    dispatch(embeddableStateChanged({ panelId, embeddableState }))
-  ),
-  embeddableError: (errorMessage) => (
-    dispatch(embeddableError({ panelId, error: errorMessage }))
-  )
+const mapDispatchToProps = (
+  dispatch: ThunkDispatch<CoreKibanaState, {}, Action<any>>,
+  { panelId }: DashboardPanelContainerOwnProps,
+  {},
+  {}
+) => ({
+  destroy: () => dispatch(deletePanel(panelId)),
+  embeddableIsInitializing: () => dispatch(embeddableIsInitializing(panelId)),
+  embeddableIsInitialized: (metadata: EmbeddableMetadata) =>
+    dispatch(embeddableIsInitialized({ panelId, metadata })),
+  embeddableStateChanged: (embeddableState: EmbeddableState) =>
+    dispatch(embeddableStateChanged({ panelId, embeddableState })),
+  embeddableError: (errorMessage: EmbeddableErrorAction) =>
+    dispatch(embeddableError({ panelId, error: errorMessage })),
 });
 
-export const DashboardPanelContainer = connect(
+export const DashboardPanelContainer = connect<
+  {},
+  {},
+  DashboardPanelContainerOwnProps,
+  CoreKibanaState
+>(
   mapStateToProps,
   mapDispatchToProps
 )(DashboardPanel);
-
-DashboardPanelContainer.propTypes = {
-  panelId: PropTypes.string.isRequired,
-  /**
-   * @type {EmbeddableFactory}
-   */
-  embeddableFactory: PropTypes.shape({
-    create: PropTypes.func.isRequired,
-  }).isRequired,
-};
