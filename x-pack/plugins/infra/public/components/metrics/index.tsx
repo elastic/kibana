@@ -45,7 +45,7 @@ export const Metrics = injectI18n(
             text={intl.formatMessage(
               {
                 id: 'xpack.infra.metrics.loadingNodeDataText',
-                defaultMessage: 'Loading data for {displayName}',
+                defaultMessage: 'Loading data',
               },
               {
                 displayName: this.props.displayName,
