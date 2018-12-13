@@ -7,6 +7,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { requestFixture } from '../../../__tests__/__fixtures__/request';
+import { LoginAttempt } from '../../login_attempt';
 import { BasicAuthenticationProvider, BasicCredentials } from '../basic';
 
 function generateAuthorizationHeader(username, password) {
@@ -63,6 +64,26 @@ describe('BasicAuthenticationProvider', () => {
         expect(authenticationResult.notHandled()).to.be(true);
       });
 
+    it('succeeds with valid login attempt and stores in session', async () => {
+      const user = { username: 'user' };
+      const authorization = generateAuthorizationHeader('user', 'password');
+      const request = requestFixture();
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('user', 'password');
+      request.loginAttempt.returns(loginAttempt);
+
+      callWithRequest
+        .withArgs(request, 'shield.authenticate')
+        .returns(Promise.resolve(user));
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(user);
+      expect(authenticationResult.state).to.be.eql({ authorization });
+      sinon.assert.calledOnce(callWithRequest);
+    });
+
     it('succeeds if only `authorization` header is available.', async () => {
       const request = BasicCredentials.decorateRequest(requestFixture(), 'user', 'password');
       const user = { username: 'user' };
@@ -75,8 +96,20 @@ describe('BasicAuthenticationProvider', () => {
 
       expect(authenticationResult.succeeded()).to.be(true);
       expect(authenticationResult.user).to.be.eql(user);
-      expect(authenticationResult.state).to.be.eql({ authorization: request.headers.authorization });
       sinon.assert.calledOnce(callWithRequest);
+    });
+
+    it('does not return session state for header-based auth', async () => {
+      const request = BasicCredentials.decorateRequest(requestFixture(), 'user', 'password');
+      const user = { username: 'user' };
+
+      callWithRequest
+        .withArgs(request, 'shield.authenticate')
+        .returns(Promise.resolve(user));
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(authenticationResult.state).not.to.eql({ authorization: request.headers.authorization });
     });
 
     it('succeeds if only state is available.', async () => {
@@ -138,7 +171,7 @@ describe('BasicAuthenticationProvider', () => {
 
       expect(authenticationResult.succeeded()).to.be(true);
       expect(authenticationResult.user).to.be.eql(user);
-      expect(authenticationResult.state).to.be.eql({ authorization: request.headers.authorization });
+      expect(authenticationResult.state).not.to.eql({ authorization: request.headers.authorization });
       sinon.assert.calledOnce(callWithRequest);
     });
   });
