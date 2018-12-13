@@ -13,6 +13,7 @@ export default function ({ getService }) {
   const usageAPI = getService('usageAPI');
 
   describe('reporting usage', () => {
+    before(() => reportingAPI.deleteAllReportingIndexes());
     afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
     describe('initial state', () => {
