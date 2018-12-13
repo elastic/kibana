@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { LearnMoreLink } from '../../components';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+} from '@elastic/eui';
 import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
 } from '../../../store/constants';
 import { ErrableFormRow } from '../form_errors';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 const MinAgeInputUi = props => {
   const { rolloverEnabled, errors, phaseData, phase, setPhaseData, isShowingErrors, intl } = props;
   const fromMessage = rolloverEnabled
@@ -45,6 +53,16 @@ const MinAgeInputUi = props => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
             }}
             min={1}
+          />
+          <EuiSpacer size="s" />
+          <LearnMoreLink
+            docPath="_timing.html"
+            text={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                defaultMessage="Learn about timing"
+              />
+            }
           />
         </ErrableFormRow>
       </EuiFlexItem>
