@@ -6,7 +6,7 @@
 
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
-import { IStackframe } from '../../../../typings/es_schemas/APMDoc';
+import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';

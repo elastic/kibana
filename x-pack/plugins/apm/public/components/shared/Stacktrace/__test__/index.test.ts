@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IStackframe } from '../../../../../typings/es_schemas/APMDoc';
+import { IStackframe } from '../../../../../typings/es_schemas/Stackframe';
 import { getGroupedStackframes } from '../index';
 import stacktracesMock from './stacktraces.json';
 

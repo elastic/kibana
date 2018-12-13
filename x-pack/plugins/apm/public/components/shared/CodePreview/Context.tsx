@@ -12,7 +12,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
 
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
+import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import {
   borderRadius,
   colors,
@@ -91,17 +91,14 @@ const Code = styled.code`
   z-index: 2;
 `;
 
-function getStackframeLines(stackframe: IStackframe) {
-  if (!stackframe.line.context) {
-    return [];
-  }
-
-  const preContext: string[] = get(stackframe, 'context.pre', []);
-  const postContext: string[] = get(stackframe, 'context.post', []);
-  return [...preContext, stackframe.line.context, ...postContext];
+function getStackframeLines(stackframe: IStackframeWithLineContext) {
+  const line = stackframe.line.context;
+  const preLines: string[] = get(stackframe, 'context.pre', []);
+  const postLines: string[] = get(stackframe, 'context.post', []);
+  return [...preLines, line, ...postLines];
 }
 
-function getStartLineNumber(stackframe: IStackframe) {
+function getStartLineNumber(stackframe: IStackframeWithLineContext) {
   const preLines = size(get(stackframe, 'context.pre', []));
   return stackframe.line.number - preLines;
 }
@@ -109,7 +106,7 @@ function getStartLineNumber(stackframe: IStackframe) {
 interface Props {
   isLibraryFrame?: boolean;
   codeLanguage?: string;
-  stackframe: IStackframe;
+  stackframe: IStackframeWithLineContext;
 }
 
 export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {

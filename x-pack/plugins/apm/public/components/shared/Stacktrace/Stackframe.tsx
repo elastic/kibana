@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
+import {
+  IStackframe,
+  IStackframeWithLineContext
+} from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { CodePreview } from '../CodePreview';
 import { FrameHeading } from './FrameHeading';
 
@@ -34,11 +37,8 @@ export function Stackframe({
   );
 }
 
-export function hasSourceLines(stackframe: IStackframe) {
-  const hasLineContext = stackframe.line.context != null;
-  const hasPrePostLine =
-    stackframe.context &&
-    (stackframe.context.post != null || stackframe.context.pre != null);
-
-  return hasPrePostLine || hasLineContext;
+export function hasSourceLines(
+  stackframe: IStackframe
+): stackframe is IStackframeWithLineContext {
+  return stackframe.line.context != null;
 }

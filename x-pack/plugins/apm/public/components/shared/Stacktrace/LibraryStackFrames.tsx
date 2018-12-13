@@ -7,7 +7,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { px, units } from '../../../style/variables';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';

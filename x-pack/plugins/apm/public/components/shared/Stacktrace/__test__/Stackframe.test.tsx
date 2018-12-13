@@ -6,7 +6,7 @@
 
 import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc.js';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { hasSourceLines, Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 

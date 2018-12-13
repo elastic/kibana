@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2, IStackframe } from './APMDoc';
+import { APMDocV1, APMDocV2 } from './APMDoc';
 import {
   ContextProcess,
   ContextRequest,
   ContextService,
   ContextSystem
 } from './Context';
+import { IStackframe } from './Stackframe';
 
 interface Agent {
   hostname: string;

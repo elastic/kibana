@@ -23,7 +23,7 @@ import python from 'react-syntax-highlighter/dist/languages/python';
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 // @ts-ignore
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-import { IStackframe } from '../../../../typings/es_schemas/APMDoc';
+import { IStackframeWithLineContext } from '../../../../typings/es_schemas/Stackframe';
 import { FrameHeading } from '../Stacktrace/FrameHeading';
 // @ts-ignore
 import { Context } from './Context';
@@ -55,7 +55,7 @@ const Container = styled.div<ContainerProps>`
 interface Props {
   isLibraryFrame?: boolean;
   codeLanguage?: string;
-  stackframe: IStackframe;
+  stackframe: IStackframeWithLineContext;
 }
 
 export function CodePreview({

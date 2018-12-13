@@ -28,37 +28,3 @@ export interface APMDocV2 extends APMDocV1 {
     id: string;
   };
 }
-
-export interface IStackframe {
-  filename: string;
-  line: {
-    number: number;
-    column?: number;
-    context?: string;
-  };
-  abs_path?: string;
-  colno?: number;
-  context_line?: string;
-  function?: string;
-  library_frame?: boolean;
-  exclude_from_grouping?: boolean;
-  module?: string;
-  context?: {
-    post?: string[];
-    pre?: string[];
-  };
-  sourcemap?: {
-    updated?: boolean;
-    error?: string;
-  };
-  vars?: {
-    [key: string]: unknown;
-  };
-  orig?: {
-    filename?: string;
-    abs_path?: string;
-    function?: string;
-    lineno?: number;
-    colno?: number;
-  };
-}
