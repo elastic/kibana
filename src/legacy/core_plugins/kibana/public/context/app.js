@@ -67,7 +67,7 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private, i18n) {
+function ContextAppController($scope, config, Private) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
@@ -137,10 +137,6 @@ function ContextAppController($scope, config, Private, i18n) {
       _.assign(this, newParameters);
     },
   );
-
-  this.discoverLinkLabel = i18n('kbn.context.discoverLinkLabel', {
-    defaultMessage: 'Discover'
-  });
 }
 
 
