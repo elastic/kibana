@@ -33,9 +33,11 @@ uiRoutes
   });
 
 uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
-  k7Breadcrumbs: () => [
+  k7Breadcrumbs: (i18n) => [
     {
-      text: 'Dev Tools',
+      text: i18n('kbn.devTools.k7BreadcrumbsDevToolsLabel', {
+        defaultMessage: 'Dev Tools'
+      }),
       href: '#/dev_tools'
     }
   ]
