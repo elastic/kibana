@@ -10,20 +10,8 @@ import {
   DetailPanel,
   IndexTable,
 } from '../../components';
-import {
-  REFRESH_RATE_INDEX_LIST
-} from '../../../../constants';
 
 export class IndexList extends React.PureComponent {
-  componentDidMount() {
-    this.props.loadIndices();
-    this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
-
   render() {
     const {
       match: {
