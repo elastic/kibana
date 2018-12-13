@@ -20,6 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import { Pager } from 'ui/pager';
 import { NoVisualizationsPrompt } from './no_visualizations_prompt';
@@ -40,7 +41,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-export class VisualizeListingTable extends Component {
+class VisualizeListingTableUi extends Component {
 
   constructor(props) {
     super(props);
@@ -232,13 +233,27 @@ export class VisualizeListingTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Delete selected visualizations?"
+          title={this.props.intl.formatMessage({
+            id: 'kbn.visualize.listing.deleteVisualizations.confirmModalTitle',
+            defaultMessage: 'Delete selected visualizations?',
+          })}
           onCancel={this.closeModal}
           onConfirm={this.deleteSelectedItems}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={this.props.intl.formatMessage({
+            id: 'kbn.visualize.listing.deleteVisualizations.confirmModalCancelButtonText',
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={this.props.intl.formatMessage({
+            id: 'kbn.visualize.listing.deleteVisualizations.confirmModalConfirmButtonText',
+            defaultMessage: 'Delete',
+          })}
         >
-          <p>{`You can't recover deleted visualizations.`}</p>
+          <p>
+            <FormattedMessage
+              id="kbn.visualize.listing.deleteVisualizations.confirmModalText"
+              defaultMessage="You can't recover deleted visualizations."
+            />
+          </p>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
@@ -266,8 +281,21 @@ export class VisualizeListingTable extends Component {
 
   renderToolBarActions() {
     return this.state.selectedRowIds.length > 0 ?
-      <KuiListingTableDeleteButton onDelete={this.onDelete} aria-label="Delete selected visualizations"/> :
-      <KuiListingTableCreateButton onCreate={this.onCreate} data-test-subj="createNewVis" aria-label="Create new visualization"/>;
+      <KuiListingTableDeleteButton
+        onDelete={this.onDelete}
+        aria-label={this.props.intl.formatMessage({
+          id: 'kbn.visualize.listing.deleteVisualizationsButtonAriaLabel',
+          defaultMessage: 'Delete selected visualizations',
+        })}
+      /> :
+      <KuiListingTableCreateButton
+        onCreate={this.onCreate}
+        data-test-subj="createNewVis"
+        aria-label={this.props.intl.formatMessage({
+          id: 'kbn.visualize.listing.createVisualizationButtonAriaLabel',
+          defaultMessage: 'Create new visualization',
+        })}
+      />;
   }
 
   renderPager() {
@@ -320,8 +348,10 @@ export class VisualizeListingTable extends Component {
   }
 }
 
-VisualizeListingTable.propTypes = {
+VisualizeListingTableUi.propTypes = {
   deleteSelectedItems: PropTypes.func,
   fetchItems: PropTypes.func,
   onCreateVis: PropTypes.func.isRequired,
 };
+
+export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);
