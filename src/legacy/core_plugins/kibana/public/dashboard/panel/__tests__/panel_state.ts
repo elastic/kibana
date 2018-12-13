@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import expect from 'expect.js';
 import { createPanelState } from '../panel_state';
 
