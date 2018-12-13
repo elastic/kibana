@@ -6,13 +6,44 @@
 import React from 'react';
 
 import { EuiIcon, EuiSideNav } from '@elastic/eui';
+import classes from 'classnames';
 
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import styled from 'styled-components';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
+
+const FolderClosedTriangle = styled.span`
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 4px;
+  border: 6px solid transparent;
+  border-left: 6px solid grey;
+  border-right: 6px solid transparent;
+  vertical-align: middle;
+`;
+
+const FolderOpenTriangle = styled.span`
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 4px;
+  margin-top: 3px;
+  border: 6px solid transparent;
+  border-top: 6px solid grey;
+  border-bottom: none;
+  vertical-align: middle;
+`;
+
+const DirectoryNode = styled.span`
+  margin-left: 4px;
+  vertical-align: middle;
+`;
+
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
   closeTreePath: (path: string) => void;
@@ -69,8 +100,9 @@ export class CodeFileTree extends React.Component<Props> {
         };
         return (
           <div onClick={onFolderClick} className={className} role="button">
-            <EuiIcon type={forceOpen ? 'arrowDown' : 'arrowRight'} />
-            {`${node.name}/`}
+            {forceOpen ? <FolderOpenTriangle /> : <FolderClosedTriangle />}
+            <EuiIcon type={forceOpen ? 'folderClosed' : 'folderOpen'} />
+            <DirectoryNode>{`${node.name}/`}</DirectoryNode>
           </div>
         );
       }
@@ -83,8 +115,9 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.File: {
         return (
-          <div onClick={onClick} className={className} role="button">
-            {node.name}
+          <div onClick={onClick} className={classes(className, 'fileTreeFile')} role="button">
+            <EuiIcon type="document" />
+            <DirectoryNode>{node.name}</DirectoryNode>
           </div>
         );
       }

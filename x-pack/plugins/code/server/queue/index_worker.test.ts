@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
- import sinon from 'sinon';
+import sinon from 'sinon';
 import { IndexerFactory } from '../indexer';
 import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';

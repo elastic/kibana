@@ -1,7 +1,8 @@
 %fileNode {
-  padding: 4px;
+  padding: 4px 4px 4px 16px;
   cursor: pointer;
   white-space: nowrap;
+  margin-left: 5px;
 }
 
 .fileNode {
@@ -10,5 +11,9 @@
 
 .activeFileNode {
   @extend %fileNode;
-  background: #0079a5;
+  background: #D9D9D9;;
+}
+
+.fileTreeFile {
+  margin-left: 20px;
 }

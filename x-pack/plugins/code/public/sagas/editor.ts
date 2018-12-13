@@ -170,6 +170,7 @@ function* handleMainRouteChange(action: Action<Match>) {
       uri: repoUri,
       revision,
       path: file || '',
+      parents: true,
     })
   );
   if (file && pathType === PathTypes.blob) {
