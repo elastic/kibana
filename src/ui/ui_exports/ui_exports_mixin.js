@@ -24,6 +24,8 @@ export function uiExportsMixin(kbnServer) {
     kbnServer.pluginSpecs
   );
 
+  // Check here to see what saved objects we need to be concerned about
+  // console.log(JSON.stringify(kbnServer.uiExports.savedObjectMappings, null, 2));
   // check for unknown uiExport types
   const { unknown = [] } = kbnServer.uiExports;
   if (!unknown.length) {

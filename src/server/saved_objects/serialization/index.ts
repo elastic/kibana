@@ -62,6 +62,7 @@ export interface SavedObjectDoc {
   migrationVersion?: MigrationVersion;
   version?: number;
   updated_at?: Date;
+  references?: object;
 
   [rootProp: string]: any;
 }
@@ -108,6 +109,7 @@ export class SavedObjectsSerializer {
       attributes: _source[type],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
+      ...(_source.references && { references: _source.references }),
       ...(_version != null && { version: _version }),
     };
   }
@@ -118,13 +120,23 @@ export class SavedObjectsSerializer {
    * @param {SavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
    */
   public savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
-    const { id, type, namespace, attributes, migrationVersion, updated_at, version } = savedObj;
+    const {
+      id,
+      type,
+      namespace,
+      attributes,
+      migrationVersion,
+      updated_at,
+      version,
+      references,
+    } = savedObj;
     const source = {
       [type]: attributes,
       type,
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
+      ...(references && { references }),
     };
 
     return {

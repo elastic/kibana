@@ -77,6 +77,10 @@ function defaultMapping(): IndexMapping {
         updated_at: {
           type: 'date',
         },
+        references: {
+          type: 'object',
+          dynamic: true,
+        },
       },
     },
   };

@@ -40,6 +40,7 @@ export const createCreateRoute = prereqs => {
         payload: Joi.object({
           attributes: Joi.object().required(),
           migrationVersion: Joi.object().optional(),
+          references: Joi.object().optional(),
         }).required(),
       },
       handler(request) {

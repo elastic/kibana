@@ -20,11 +20,12 @@
 import _ from 'lodash';
 
 export class SavedObject {
-  constructor(client, { id, type, version, attributes, error, migrationVersion } = {}) {
+  constructor(client, { id, type, version, attributes, error, migrationVersion, references } = {}) {
     this._client = client;
     this.id = id;
     this.type = type;
     this.attributes = attributes || {};
+    this.references = references || {};
     this._version = version;
     this.migrationVersion = migrationVersion;
     if (error) {

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { pick, assign } from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../dashboard_constants';
@@ -37,6 +38,8 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
       type: SavedDashboard.type,
       mapping: SavedDashboard.mapping,
       searchSource: SavedDashboard.searchsource,
+      extractReferences: SavedDashboard.extractReferences,
+      injectReferences: SavedDashboard.injectReferences,
 
       // if this is null/undefined then the SavedObject will be assigned the defaults
       id: id,
@@ -102,6 +105,34 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
   SavedDashboard.fieldOrder = ['title', 'description'];
 
   SavedDashboard.searchsource = true;
+
+  SavedDashboard.extractReferences = function (source) {
+    // Extract references on save here
+    const references = _.clone(source.references) || {};
+    const panels = JSON.parse(source.panelsJSON);
+    panels.forEach((panel, i) => {
+      panel.panelReference = `panel_${i}`;
+      references[`panel_${i}`] = pick(panel, 'type', 'id');
+      delete panel.type;
+      delete panel.id;
+    });
+    return assign({}, source, {
+      references,
+      panelsJSON: JSON.stringify(panels)
+    });
+  };
+
+  SavedDashboard.injectReferences = function (references) {
+    // Inject references on read here
+    const panels = JSON.parse(this.panelsJSON);
+    panels.forEach((panel) => {
+      const reference = references[panel.panelReference];
+      panel.id = reference.id;
+      panel.type = reference.type;
+      delete panel.panelReference;
+    });
+    this.panelsJSON = JSON.stringify(panels);
+  };
 
   SavedDashboard.prototype.getFullPath = function () {
     return `/app/kibana#${createDashboardEditUrl(this.id)}`;

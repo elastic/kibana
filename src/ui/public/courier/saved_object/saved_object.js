@@ -103,6 +103,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
     const afterESResp = config.afterESResp || _.noop;
     const customInit = config.init || _.noop;
+    const extractReferences = config.extractReferences || _.identity;
+    const injectReferences = config.injectReferences || _.identity;
 
     // optional search source which this object configures
     this.searchSource = config.searchSource ? new SearchSource() : undefined;
@@ -117,7 +119,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     // in favor of a better rename/save flow.
     this.copyOnSave = false;
 
-    const parseSearchSource = (searchSourceJson) => {
+    const parseSearchSource = (searchSourceJson, references) => {
       if (!this.searchSource) return;
 
       // if we have a searchSource, set its values based on the searchSourceJson field
@@ -134,6 +136,12 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // (This happened in issue #20308)
       if (!searchSourceValues || typeof searchSourceValues !== 'object') {
         throw new InvalidJSONProperty(`Invalid searchSourceJSON in ${esType} "${this.id}".`);
+      }
+
+      // Somehow inject index id
+      if (searchSourceValues.indexReference) {
+        searchSourceValues.index = references[searchSourceValues.indexReference].id;
+        delete searchSourceValues.indexReference;
       }
 
       const searchSourceFields = this.searchSource.getFields();
@@ -213,6 +221,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
                 _id: resp.id,
                 _type: resp.type,
                 _source: _.cloneDeep(resp.attributes),
+                references: resp.references,
                 found: resp._version ? true : false
               };
             })
@@ -254,8 +263,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       this.lastSavedTitle = this.title;
 
       return Promise.try(() => {
-        parseSearchSource(meta.searchSourceJSON);
+        parseSearchSource(meta.searchSourceJSON, resp.references);
         return this.hydrateIndexPattern();
+      }).then(() => {
+        injectReferences.call(this, resp.references);
+        return this;
       }).then(() => {
         return Promise.cast(afterESResp.call(this, resp));
       });
@@ -279,6 +291,17 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       if (this.searchSource) {
         const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
+        if (searchSourceFields.index) {
+          const indexId = searchSourceFields.index;
+          delete searchSourceFields.index;
+          searchSourceFields.indexReference = 'indexPattern';
+          body.references = _.assign({}, body.references, {
+            indexPattern: {
+              type: 'index-pattern',
+              id: indexId,
+            },
+          });
+        }
         body.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(searchSourceFields)
         };
@@ -403,7 +426,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         this.id = null;
       }
 
-      const source = this.serialize();
+      // Here we want to extract references and set them within "references" attribute
+      const source = extractReferences(this.serialize());
 
       this.isSaving = true;
 

@@ -84,11 +84,14 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     try {
+      const references = attributes.references;
+      delete attributes.references;
       const migrated = this._migrator.migrateDocument({
         id,
         type,
         namespace,
         attributes,
+        references,
         migrationVersion,
         updated_at: time,
       });
@@ -140,6 +143,7 @@ export class SavedObjectsRepository {
         attributes: object.attributes,
         migrationVersion: object.migrationVersion,
         namespace,
+        references: object.references,
         updated_at: time,
       });
       const raw = this._serializer.savedObjectToRaw(migrated);
@@ -176,6 +180,7 @@ export class SavedObjectsRepository {
           id = responseId,
           type,
           attributes,
+          references,
         } = objects[i];
 
         if (error) {
@@ -200,7 +205,8 @@ export class SavedObjectsRepository {
           type,
           updated_at: time,
           version,
-          attributes
+          attributes,
+          references,
         };
       })
     };
@@ -409,6 +415,7 @@ export class SavedObjectsRepository {
           ...time && { updated_at: time },
           version: doc._version,
           attributes: doc._source[type],
+          references: doc._source.references,
           migrationVersion: doc._source.migrationVersion,
         };
       })
@@ -451,6 +458,7 @@ export class SavedObjectsRepository {
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
       attributes: response._source[type],
+      references: response._source.references,
       migrationVersion: response._source.migrationVersion,
     };
   }
@@ -483,6 +491,7 @@ export class SavedObjectsRepository {
         doc: {
           [type]: attributes,
           updated_at: time,
+          // TODO?
         }
       },
     });
@@ -496,6 +505,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
+      // TODO?
       version: response._version,
       attributes
     };
@@ -533,6 +543,7 @@ export class SavedObjectsRepository {
       attributes: { [counterFieldName]: 1 },
       migrationVersion,
       updated_at: time,
+      // TODO?
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated);
@@ -570,6 +581,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
+      // TODO?
       version: response._version,
       attributes: response.get._source[type],
     };
