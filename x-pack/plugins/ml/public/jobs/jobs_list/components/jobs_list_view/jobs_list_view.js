@@ -42,6 +42,7 @@ export class JobsListView extends Component {
 
     this.state = {
       isRefreshing: false,
+      loading: null,
       jobsSummaryList: [],
       filteredJobsSummaryList: [],
       fullJobsList: {},
@@ -247,7 +248,14 @@ export class JobsListView extends Component {
 
   refreshJobSummaryList(forceRefresh = false) {
     if (forceRefresh === true || this.blockRefresh === false) {
+
+      // Set loading to true for jobs_list table for initial job loading
+      if (this.state.loading === null) {
+        this.setState({ loading: true });
+      }
+
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
+
       ml.jobs.jobsSummary(expandedJobsIds)
         .then((jobs) => {
           const fullJobsList = {};
@@ -260,7 +268,7 @@ export class JobsListView extends Component {
             return job;
           });
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
-          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
+          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false }, () => {
             this.refreshSelectedJobs();
           });
 
@@ -272,12 +280,14 @@ export class JobsListView extends Component {
         })
         .catch((error) => {
           console.error(error);
+          this.setState({ loading: false });
         });
     }
   }
 
   renderJobsListComponents() {
-    const jobIds = this.state.jobsSummaryList.map(j => j.id);
+    const { loading, jobsSummaryList } = this.state;
+    const jobIds = jobsSummaryList.map(j => j.id);
     return (
       <div>
         <div className="actions-bar">
@@ -301,6 +311,7 @@ export class JobsListView extends Component {
           showStartDatafeedModal={this.showStartDatafeedModal}
           refreshJobs={() => this.refreshJobSummaryList(true)}
           selectedJobsCount={this.state.selectedJobs.length}
+          loading={loading}
         />
         <EditJobFlyout
           setShowFunction={this.setShowEditJobFlyoutFunction}
