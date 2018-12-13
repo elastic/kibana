@@ -319,6 +319,12 @@ export function FindProvider({ getService }) {
     async waitForDeletedByCssSelector(selector) {
       await leadfoot.waitForDeletedByCssSelector(selector);
     }
+    async waitForAttributeToChange(selector, attribute, value) {
+      const locator = `${selector}[${attribute}="${value}"]`;
+      await retry.try(async () => {
+        await this.byCssSelector(locator);
+      });
+    }
   }
 
   return new Find();

@@ -102,6 +102,22 @@ export function BrowserProvider({ getService }) {
     }
 
     /**
+     * Does a drag-and-drop action from one point to another
+     *
+     * @param {Element|{x: number, y: number}} from
+     * @param {Element|{x: number, y: number}} to
+     * @param {number} offset Optional
+     * @param {number} yOffset Optional
+     * @return {Promise<void>}
+     */
+    async dragAndDrop(from, to, xOffset, yOffset) {
+      await this.moveMouseTo(from, xOffset, yOffset);
+      await this.pressMouseButton();
+      await this.moveMouseTo(to, xOffset, yOffset);
+      await this.releaseMouseButton();
+    }
+
+    /**
      * Reloads the current browser window/frame.
      * https://theintern.io/leadfoot/module-leadfoot_Session.html#refresh
      *

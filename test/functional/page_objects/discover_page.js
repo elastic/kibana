@@ -113,17 +113,22 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
+    async waitVisualisationLoaded() {
+      await testSubjects.waitForAttributeToChange('visualizationLoader', 'data-render-complete', 'true');
+    }
+
     async clickHistogramBar(i) {
+      await this.waitVisualisationLoaded();
       const bars = await find.allByCssSelector(`.series.histogram rect`);
       await bars[i].click();
+      await this.waitVisualisationLoaded();
     }
 
     async brushHistogram(from, to) {
+      await this.waitVisualisationLoaded();
       const bars = await find.allByCssSelector('.series.histogram rect');
-      await browser.moveMouseTo(bars[from], 0, -5);
-      await browser.pressMouseButton();
-      await browser.moveMouseTo(bars[to], 0, -5);
-      await browser.releaseMouseButton();
+      await browser.dragAndDrop(bars[from], bars[to], 0, -5);
+      await this.waitVisualisationLoaded();
     }
 
     async getCurrentQueryName() {
