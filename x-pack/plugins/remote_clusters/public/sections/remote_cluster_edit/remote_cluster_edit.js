@@ -18,16 +18,13 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { buildListBreadcrumb, editBreadcrumb } from '../../services';
-import { RemoteClusterForm } from '../remote_cluster_form';
+import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
 const disabledFields = {
   name: true,
@@ -172,19 +169,15 @@ export class RemoteClusterEditUi extends Component {
               horizontalPosition="center"
               className="remoteClusterAddPage"
             >
-              <EuiSpacer size="xs" />
-
-              <EuiPageContentHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.remoteClusters.editTitle"
-                      defaultMessage="Edit {name}"
-                      values={{ name: clusterName }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeader>
+              <RemoteClusterPageTitle
+                title={(
+                  <FormattedMessage
+                    id="xpack.remoteClusters.editTitle"
+                    defaultMessage="Edit {name}"
+                    values={{ name: clusterName }}
+                  />
+                )}
+              />
 
               {this.renderContent()}
             </EuiPageContent>
