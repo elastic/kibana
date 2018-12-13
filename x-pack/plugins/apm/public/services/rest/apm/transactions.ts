@@ -6,7 +6,7 @@
 
 import { TransactionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
 import { SpanListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/spans/get_spans';
-import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
 import { addVersion, getEncodedEsQuery } from './apm';
