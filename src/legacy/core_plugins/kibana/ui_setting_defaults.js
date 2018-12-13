@@ -204,6 +204,14 @@ export function getUiSettingDefaults() {
         setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.`,
       category: ['search'],
     },
+    'search:includeFrozen': {
+      name: 'Search in frozen indices',
+      description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
+        target="_blank" rel="noopener noreferrer">frozen indices</a> in results if enabled. Searching through frozen indices
+        might increase the search time.`,
+      value: false,
+      category: ['search'],
+    },
     'fields:popularLimit': {
       name: 'Popular fields limit',
       value: 10,
