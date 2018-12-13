@@ -114,7 +114,7 @@ exports[`Filter Lists Header renders header 1`] = `
         <FormattedMessage
           defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
 You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
-          id="xpack.ml.settings.listHeader.refreshButtonLabel"
+          id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription"
           values={
             Object {
               "br": <br />,
@@ -126,7 +126,7 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
               >
                 <FormattedMessage
                   defaultMessage="Learn more"
-                  id="xpack.ml.settings.listHeader.refreshButtonLabel.learnMoreLinkText"
+                  id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
                   values={Object {}}
                 />
               </EuiLink>,

@@ -82,7 +82,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
         <p>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.ml.settings.listHeader.refreshButtonLabel"
+              id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription"
               defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
 You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
               values={{
@@ -90,7 +90,7 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
                 learnMoreLink: (
                   <EuiLink href={docsUrl} target="_blank">
                     <FormattedMessage
-                      id="xpack.ml.settings.listHeader.refreshButtonLabel.learnMoreLinkText"
+                      id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
                       defaultMessage="Learn more"
                     />
                   </EuiLink>
