@@ -25,11 +25,11 @@ export const CleanNodeBuildsTask = {
 
   async run(config, log, build) {
     for (const platform of config.getNodePlatforms()) {
-      await deleteAll(log, [
+      await deleteAll([
         build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
         build.resolvePathForPlatform(platform, 'node/bin/npm'),
         build.resolvePathForPlatform(platform, 'node/bin/npx'),
-      ]);
+      ], log);
     }
   },
 };

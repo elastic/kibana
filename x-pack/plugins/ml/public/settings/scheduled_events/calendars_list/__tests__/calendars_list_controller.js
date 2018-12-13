@@ -9,7 +9,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-describe('ML - Calendars List Controller', () => {
+xdescribe('ML - Calendars List Controller', () => {
   beforeEach(() => {
     ngMock.module('kibana');
   });
