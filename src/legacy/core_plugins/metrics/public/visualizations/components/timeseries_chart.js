@@ -24,6 +24,8 @@ import reactcss from 'reactcss';
 import FlotChart from './flot_chart';
 import Annotation from './annotation';
 import { EuiIcon } from '@elastic/eui';
+import { convertRgb2Hex, isRgbColor } from '../lib/colors';
+
 
 export function scaleUp(value) {
   return window.devicePixelRatio * value;
@@ -146,12 +148,16 @@ class TimeseriesChart extends Component {
       const metric = series.find(r => r.id === item.series.id);
       const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
       const value = item.datapoint[2] ? item.datapoint[1] - item.datapoint[2] : item.datapoint[1];
+      let color = item.series.color;
+      if (isRgbColor(item.series.color)) {
+        color = convertRgb2Hex(item.series.color);
+      }
       tooltip = (
         <div className={`tvbTooltip__container tvbTooltip__container--${right ? 'right' : 'left'}`} style={styles.tooltipContainer}>
           <span className="tvbTooltip__caret"/>
           <div className="tvbTooltip">
             <div className="tvbTooltip__item">
-              <EuiIcon className="tvbTooltip__icon" type="dot" color={item.series.color} />
+              <EuiIcon className="tvbTooltip__icon" type="dot" color={color} />
               <div className="tvbTooltip__label">{ item.series.label }</div>
               <div className="tvbTooltip__value">{ formatter(value) }</div>
             </div>

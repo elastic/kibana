@@ -20,6 +20,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
+import { convertRgb2Hex, isRgbColor } from './colors';
 
 export default props => (row) => {
 
@@ -32,6 +33,10 @@ export default props => (row) => {
   const value = formatter(props.seriesValues[row.id]);
   const classes = ['tvbLegend__item'];
   const key = row.id;
+  let color = row.color;
+  if (isRgbColor(row.color)) {
+    color = convertRgb2Hex(row.color);
+  }
   if (!_.includes(props.seriesFilter, row.id)) classes.push('disabled');
   if (row.label == null || row.legend === false) return (<div key={key} style={{ display: 'none' }}/>);
   return (
@@ -45,7 +50,7 @@ export default props => (row) => {
         className="tvbLegend__button"
       >
         <div className="tvbLegend__itemLabel" title={`${row.label}: ${value}`}>
-          <EuiIcon type="dot" color={row.color} />
+          <EuiIcon type="dot" color={color} />
           <span>{ row.label }</span>
         </div>
         <div className="tvbLegend__itemValue">{ value }</div>

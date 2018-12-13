@@ -25,3 +25,17 @@ export default {
   valueColor: 'rgba(0,0,0,0.7)',
   valueColorReversed: 'rgba(255,255,255,0.8)'
 };
+
+const RGBA_REGEX = /^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i;
+
+export function convertRgb2Hex(rgb) {
+  rgb = rgb.match(RGBA_REGEX);
+  return (rgb && rgb.length === 4) ? '#' +
+    ('0' + parseInt(rgb[1], 10).toString(16)).slice(-2) +
+    ('0' + parseInt(rgb[2], 10).toString(16)).slice(-2) +
+    ('0' + parseInt(rgb[3], 10).toString(16)).slice(-2) : undefined;
+}
+
+export function isRgbColor(color) {
+  return color.match(RGBA_REGEX) !== null;
+}
