@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import { hasPrimaryChildren } from '../lib/hasPrimaryChildren';
+import { hasPrimaryChildren } from '../lib/has_primary_children';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function nodesByIndices() {
