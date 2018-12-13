@@ -9,8 +9,9 @@ import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiSpacer } from '@elast
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
+import { injectI18n } from '@kbn/i18n/react';
 
-export class Listing extends PureComponent {
+class ListingUI extends PureComponent {
   getColumns() {
     const { kbnUrl, scope } = this.props.angular;
 
@@ -74,7 +75,7 @@ export class Listing extends PureComponent {
     ];
   }
   render() {
-    const { data, stats, sorting, pagination, onTableChange } = this.props;
+    const { data, stats, sorting, pagination, onTableChange, intl } = this.props;
     const columns = this.getColumns();
 
     return (
@@ -98,7 +99,10 @@ export class Listing extends PureComponent {
               search={{
                 box: {
                   incremental: true,
-                  placeholder: 'Filter Nodes...'
+                  placeholder: intl.formatMessage({
+                    id: 'xpack.monitoring.logstash.filterNodesPlaceholder',
+                    defaultMessage: 'Filter Nodes…'
+                  })
                 },
               }}
               onTableChange={onTableChange}
@@ -109,3 +113,5 @@ export class Listing extends PureComponent {
     );
   }
 }
+
+export const Listing = injectI18n(ListingUI);

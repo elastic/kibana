@@ -14,6 +14,7 @@ import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { EuiHealth, EuiIcon } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
 const linkToCategories = {
   'elasticsearch/nodes': 'Elasticsearch Nodes',
@@ -99,7 +100,7 @@ const getColumns = (kbnUrl, scope) => ([
   },
 ]);
 
-export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
+const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl }) => {
   return (
     <EuiMonitoringTable
       className="alertsTable"
@@ -117,10 +118,16 @@ export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) 
       search={{
         box: {
           incremental: true,
-          placeholder: 'Filter Alerts...'
+          placeholder: intl.formatMessage({
+            id: 'xpack.monitoring.alerts.filterAlertsPlaceholder',
+            defaultMessage: 'Filter Alerts…'
+          })
+
         },
       }}
       onTableChange={onTableChange}
     />
   );
 };
+
+export const Alerts = injectI18n(AlertsUI);
