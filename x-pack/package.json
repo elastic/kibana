@@ -186,7 +186,7 @@
     "dataloader": "^1.4.0",
     "dedent": "^0.7.0",
     "dragselect": "1.8.1",
-    "elastic-javascript-typescript-langserver": "0.1.4",
+    "elastic-javascript-typescript-langserver": "0.1.5",
     "elastic-lsp-extension": "^0.1.0",
     "elasticsearch": "^15.2.0",
     "extract-zip": "1.5.0",

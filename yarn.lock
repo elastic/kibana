@@ -7604,10 +7604,10 @@ ejs@^2.2.4, ejs@^2.3.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.7.tgz#cc872c168880ae3c7189762fd5ffc00896c9518a"
   integrity sha1-zIcsFoiArjxxiXYv1f/ACJbJUYo=
 
-elastic-javascript-typescript-langserver@0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/elastic-javascript-typescript-langserver/-/elastic-javascript-typescript-langserver-0.1.4.tgz#7999420e085add082b992933c29a15cc07816c31"
-  integrity sha512-NR1Vcz8M/1f5N0cunvuSIVhpBqRl/0c5Hiiu9nU9NbN93pjLuXNgS/BxbIJcwYoDqNWF+LvHQqmb8CZXnk5Wbw==
+elastic-javascript-typescript-langserver@0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/elastic-javascript-typescript-langserver/-/elastic-javascript-typescript-langserver-0.1.5.tgz#547027436ba8e9990c102476a2afe6012419ff98"
+  integrity sha512-mhlIK+A7M9Im23JdIGxN8TQkbc3e9qUexoStDMxd4QnfqqLP1u4yUc0kLO8vKM2VYftUF4MnbDUuogcg0X49fA==
   dependencies:
     elastic-lsp-extension "^0.1.0"
     javascript-typescript-langserver "^2.11.1"
