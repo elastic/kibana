@@ -108,6 +108,23 @@ export async function BrowserProvider({ getService }) {
     }
 
     /**
+     * Does a drag-and-drop action from one point to another
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
+     *
+     * @param {WebElementWrapper|{x: number, y: number}} from
+     * @param {WebElementWrapper|{x: number, y: number}} to
+     * @return {Promise<void>}
+     */
+    async dragAndDrop(from, to) {
+      const actions = driver.actions({ bridge: true });
+      const _from = (from instanceof WebElementWrapper) ? from._webElement : from;
+      const _to = (to instanceof WebElementWrapper) ? to._webElement : to;
+      await actions.dragAndDrop(_from, _to).perform();
+    }
+
+
+
+    /**
      * Reloads the current browser window/frame.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#refresh
      *

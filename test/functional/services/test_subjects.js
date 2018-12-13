@@ -205,6 +205,10 @@ export function TestSubjectsProvider({ getService }) {
     async waitForDeleted(selector) {
       await find.waitForDeletedByCssSelector(testSubjSelector(selector));
     }
+
+    async waitForAttributeToChange(selector, attribute, value) {
+      await find.waitForAttributeToChange(testSubjSelector(selector), attribute, value);
+    }
   }
 
   return new TestSubjects();

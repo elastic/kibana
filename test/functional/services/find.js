@@ -112,8 +112,12 @@ export async function FindProvider({ getService }) {
       try {
         await this.byLinkText(selector, timeout);
         return wrapAll(await driver.findElements(By.linkText(selector)));
-      } catch (err) {
-        return [];
+      } catch (error) {
+        if (error.NoSuchEementError) {
+          return [];
+        } else {
+          throw error;
+        }
       }
     }
 
@@ -122,8 +126,12 @@ export async function FindProvider({ getService }) {
       try {
         await this.byCssSelector(selector, timeout);
         return wrapAll(await driver.findElements(By.css(selector)));
-      } catch(err) {
-        return [];
+      } catch (error) {
+        if (error.NoSuchEementError) {
+          return [];
+        } else {
+          throw error;
+        }
       }
     }
 
@@ -154,18 +162,16 @@ export async function FindProvider({ getService }) {
 
     async displayedByLinkText(linkText, timeout = defaultFindTimeout) {
       log.debug(`Find.displayedByLinkText(${linkText})`);
-      await this._withTimeout(timeout);
-      const child = await driver.findElement(By.linkText(linkText));
-      await driver.wait(until.elementIsVisible(child), timeout);
-      return wrap(child);
+      const element = await driver.wait(until.elementLocated(By.linkText(linkText)), timeout);
+      await driver.wait(until.elementIsVisible(element), timeout);
+      return wrap(element);
     }
 
     async displayedByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`Find.displayedByCssSelector(${selector})`);
-      await this._withTimeout(timeout);
-      const child = await driver.findElement(By.css(selector));
-      await driver.wait(until.elementIsVisible(child), timeout);
-      return wrap(child);
+      const element = await driver.wait(until.elementLocated(By.css(selector)), timeout);
+      await driver.wait(until.elementIsVisible(element), timeout);
+      return wrap(element);
     }
 
     async byLinkText(selector, timeout = defaultFindTimeout) {
@@ -191,11 +197,20 @@ export async function FindProvider({ getService }) {
 
     async existsByDisplayedByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByDisplayedByCssSelector ${selector}`);
-      return await this.exists(async driver => {
+      return await this.exists(async (driver) => {
         const elements = wrapAll(await driver.findElements(By.css(selector)));
-        return await Promise.all(
-          elements.map(async (element) => {return await element.isDisplayed(); })
-        );
+        if (elements.length === 0) {
+          return [];
+        } else {
+          const displayed = [];
+          for (let i = 0; i < elements.length; i++) {
+            const isDisplayed = await elements[i].isDisplayed();
+            if (isDisplayed) {
+              displayed.push(elements[i]);
+            }
+          }
+          return displayed;
+        }
       }, timeout);
     }
 
@@ -261,36 +276,54 @@ export async function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
-        await element.moveMouseTo();
-        await element.click();
+        if (element) {
+          await element.moveMouseTo();
+          await element.click();
+        } else {
+          throw new Error(`Element with css='${selector}' is not found`);
+        }
       });
     }
     async clickByDisplayedLinkText(linkText, timeout = defaultFindTimeout) {
       log.debug(`clickByDisplayedLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.displayedByLinkText(linkText, timeout);
-        await element.moveMouseTo();
-        await element.click();
+        if (element) {
+          await element.moveMouseTo();
+          await element.click();
+        } else {
+          throw new Error(`Element with linkText='${linkText}' is not found`);
+        }
       });
     }
     async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
       await retry.try(async () => {
         const element = await this.displayedByCssSelector(selector, timeout);
-        await element.moveMouseTo();
-        await element.click();
+        if (element) {
+          await element.moveMouseTo();
+          await element.click();
+        } else {
+          throw new Error(`Element with css='${selector}' is not found`);
+        }
       });
     }
     async waitForDeletedByCssSelector(selector) {
       await driver.wait(() => {
-        return driver.findElements(selector).then((elements) => {
-          if (elements.length <= 0) {
-            return true;
-          }
-          return false;
+        return driver.findElements(By.css(selector)).then((elements) => {
+          return elements.length <= 0;
         });
       },
       defaultFindTimeout,
       `The element ${selector} was still present when it should have disappeared.`);
+    }
+    async waitForAttributeToChange(selector, attribute, value) {
+      await driver.wait(async () => {
+        const element = await driver.findElement(By.css(selector));
+        const attrValue = await element.getAttribute(attribute);
+        return attrValue === value;
+      },
+      defaultFindTimeout,
+      `The element '${selector}' attribute '${attribute}' has not become '${value}'`);
     }
   }
 
