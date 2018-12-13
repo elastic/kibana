@@ -52,7 +52,7 @@ for (let i = 0; i < 105; i++) {
     modified_date: moment()
       .subtract(i, 'days')
       .valueOf(),
-    coveredIndices: i % 2 === 0 ? [`index${i}`] : null,
+    linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
     name: `testy${i}`,
     policy: {
       ...policy

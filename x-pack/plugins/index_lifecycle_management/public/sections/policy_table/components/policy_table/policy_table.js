@@ -48,9 +48,9 @@ const COLUMNS = {
       defaultMessage: 'Name',
     }),
   },
-  coveredIndices: {
-    label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader', {
-      defaultMessage: 'Covered indices',
+  linkedIndices: {
+    label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader', {
+      defaultMessage: 'Linked indices',
     }),
     width: 120,
   },
@@ -180,7 +180,7 @@ export class PolicyTableUi extends Component {
           {value}
         </EuiLink>
       );
-    } else if (fieldName === 'coveredIndices') {
+    } else if (fieldName === 'linkedIndices') {
       return (
         <EuiText>
           <b>{value ? value.length : '0'}</b>
@@ -216,7 +216,7 @@ export class PolicyTableUi extends Component {
   }
   buildActionPanelTree(policy) {
     const { intl } = this.props;
-    const hasCoveredIndices = Boolean(policy.coveredIndices && policy.coveredIndices.length);
+    const hasLinkedIndices = Boolean(policy.linkedIndices && policy.linkedIndices.length);
 
     const viewIndicesLabel = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
@@ -230,14 +230,14 @@ export class PolicyTableUi extends Component {
       id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText',
       defaultMessage: 'Delete policy',
     });
-    const deletePolicyTooltip = hasCoveredIndices
+    const deletePolicyTooltip = hasLinkedIndices
       ? intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
         defaultMessage: 'You cannot delete a policy that is being used by an index',
       })
       : null;
     const items = [];
-    if (hasCoveredIndices) {
+    if (hasLinkedIndices) {
       items.push({
         name: viewIndicesLabel,
         icon: 'list',
@@ -257,7 +257,7 @@ export class PolicyTableUi extends Component {
     });
     items.push({
       name: deletePolicyLabel,
-      disabled: hasCoveredIndices,
+      disabled: hasLinkedIndices,
       icon: 'trash',
       toolTipContent: deletePolicyTooltip,
       onClick: () =>
