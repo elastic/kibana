@@ -271,7 +271,7 @@ class AnnotationsTable extends Component {
     if (isNumberBadgeVisible) {
       columns.unshift({
         field: 'key',
-        name: '#',
+        name: '',
         width: '50px',
         render: (key) => {
           return (
