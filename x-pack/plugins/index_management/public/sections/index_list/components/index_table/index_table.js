@@ -10,16 +10,21 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
+import { toastNotifications } from 'ui/notify';
 
 import '../../../../styles/table.less';
-
 import {
+  REFRESH_RATE_INDEX_LIST
+} from '../../../../constants';
+import {
+  EuiButton,
   EuiCallOut,
   EuiHealth,
   EuiLink,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
   EuiSpacer,
   EuiSearchBar,
   EuiSwitch,
@@ -34,6 +39,7 @@ import {
   EuiTableRowCellCheckbox,
   EuiTitle,
   EuiText,
+  EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
 
@@ -91,6 +97,8 @@ export class IndexTableUi extends Component {
     };
   }
   componentDidMount() {
+    this.props.loadIndices();
+    this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
     const {
       filterChanged,
       filterFromURI
@@ -99,6 +107,9 @@ export class IndexTableUi extends Component {
       const decodedFilter = decodeURIComponent(filterFromURI);
       filterChanged(EuiSearchBar.Query.parse(decodedFilter));
     }
+  }
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
   onSort = column => {
     const { sortField, isSortAscending, sortChanged } = this.props;
@@ -324,6 +335,7 @@ export class IndexTableUi extends Component {
       showSystemIndicesChanged,
       indices,
       intl,
+      loadIndices,
     } = this.props;
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
@@ -402,9 +414,28 @@ export class IndexTableUi extends Component {
               onChange={this.onFilterChanged}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="secondary"
+              onClick={() => {
+                loadIndices();
+                toastNotifications.addSuccess(intl.formatMessage({
+                  id: 'xpack.idxMgmt.indexTable.reloadingIndicesMessage',
+                  defaultMessage: 'Reloading indices'
+                }));
+              }}
+              iconType="refresh"
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.indexTable.reloadIndicesButton"
+                defaultMessage="Reload indices"
+              />
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
         {this.renderFilterError()}
         <EuiSpacer size="m" />
+
         {indices.length > 0 ? (
           <EuiTable>
             <EuiTableHeader>
@@ -426,6 +457,7 @@ export class IndexTableUi extends Component {
         <EuiSpacer size="m" />
         {indices.length > 0 ? this.renderPager() : null}
       </EuiPageContent>
+
     );
   }
 }
