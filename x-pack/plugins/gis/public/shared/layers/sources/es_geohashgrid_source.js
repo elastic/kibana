@@ -259,6 +259,18 @@ export class ESGeohashGridSource extends VectorSource {
             "color": "Blues"
           }
         },
+        "lineColor": {
+          "type": "STATIC",
+          "options": {
+            "color": "#cccccc"
+          }
+        },
+        "lineWidth": {
+          "type": "STATIC",
+          "options": {
+            "size": 1
+          }
+        },
         "iconSize": {
           "type": "STATIC",
           "options": {
