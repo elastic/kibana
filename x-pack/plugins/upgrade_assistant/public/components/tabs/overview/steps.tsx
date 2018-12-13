@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
-import { NEXT_MAJOR_VERSION } from '../../../../common/version';
+import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../../common/version';
 import { UpgradeAssistantTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
@@ -28,7 +28,7 @@ import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 // Keep this until last minor release (when next major is also released).
 const WAIT_FOR_RELEASE_STEP = {
   title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepTitle', {
-    defaultMessage: 'Wait for the Elasticsearch {nextEsVersion} release.',
+    defaultMessage: 'Wait for the Elasticsearch {nextEsVersion} release',
     values: {
       nextEsVersion: `${NEXT_MAJOR_VERSION}.0`,
     },
@@ -39,7 +39,12 @@ const WAIT_FOR_RELEASE_STEP = {
         <p>
           <FormattedMessage
             id="xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepDetail"
-            defaultMessage="Once the release is out, proceed with your upgrade."
+            defaultMessage="Once the release is out, upgrade to the latest {currentEsMajorVersion} version, and then
+              return here to proceed with your {nextEsMajorVersion} upgrade."
+            values={{
+              currentEsMajorVersion: `${CURRENT_MAJOR_VERSION}.x`, // use "0.x" notation to imply the last minor
+              nextEsMajorVersion: `${NEXT_MAJOR_VERSION}.0`,
+            }}
           />
         </p>
       </EuiText>
