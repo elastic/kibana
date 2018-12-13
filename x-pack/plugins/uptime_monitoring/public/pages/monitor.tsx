@@ -23,6 +23,8 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 
 interface MonitorPageProps {
   updateBreadcrumbs: UMUpdateBreadcrumbs;
+  history: { push: any };
+  location: { pathname: string };
   match: { params: { id: string } };
   dateRangeStart: number;
   dateRangeEnd: number;
@@ -40,8 +42,16 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
   }
 
   public render() {
-    const { autorefreshEnabled, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.props;
-    const id = decodeURIComponent(this.props.match.params.id);
+    const {
+      autorefreshEnabled,
+      autorefreshInterval,
+      dateRangeStart,
+      dateRangeEnd,
+      history,
+    } = this.props;
+    // TODO: this is a hack because the id field's characters mess up react router's
+    // inner params parsing, when we add a synthetic ID for monitors this problem should go away
+    const id = this.props.location.pathname.replace(/^(\/monitor\/)/, '');
     return (
       <Fragment>
         <EuiTitle>
@@ -59,6 +69,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
               valueOfSelectedMonitor={id}
               autorefreshEnabled={autorefreshEnabled}
               autorefreshInterval={autorefreshInterval}
+              onChange={history.push}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

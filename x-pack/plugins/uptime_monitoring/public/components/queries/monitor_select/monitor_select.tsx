@@ -17,6 +17,7 @@ interface MonitorSelectProps {
   valueOfSelectedMonitor?: string;
   autorefreshInterval: number;
   autorefreshEnabled: boolean;
+  onChange: (path: string, state: object) => void;
 }
 
 export const MonitorSelect = (props: MonitorSelectProps) => (
@@ -47,8 +48,7 @@ export const MonitorSelect = (props: MonitorSelectProps) => (
         <EuiSuperSelect
           options={options}
           valueOfSelected={props.valueOfSelectedMonitor}
-          // TODO: navigate page on change
-          // onChange={e => console.log(e)}
+          onChange={(e: string) => props.onChange(`/monitor/${e}`, {})}
         />
       );
     }}

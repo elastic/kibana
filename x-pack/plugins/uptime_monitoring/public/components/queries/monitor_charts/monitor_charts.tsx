@@ -92,8 +92,7 @@ export const MonitorCharts = (props: MonitorChartsProps) => (
               <EuiPanel>
                 <EuiSeriesChart
                   stackBy="y"
-                  margins={{ left: 60, right: 20, top: 10, bottom: 40 }}
-                  ypadding={20}
+                  margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
                   xType={EuiSeriesChartUtils.SCALE.TIME}
                   width={500}
                   height={200}
@@ -116,8 +115,7 @@ export const MonitorCharts = (props: MonitorChartsProps) => (
               </EuiTitle>
               <EuiPanel>
                 <EuiSeriesChart
-                  margins={{ left: 60, right: 20, top: 10, bottom: 40 }}
-                  yPadding={5}
+                  margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
                   width={500}
                   height={200}
                   xType={EuiSeriesChartUtils.SCALE.TIME}
@@ -134,8 +132,7 @@ export const MonitorCharts = (props: MonitorChartsProps) => (
           </EuiTitle>
           <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
             <EuiSeriesChart
-              margins={{ left: 60, right: 20, top: 10, bottom: 40 }}
-              yPadding={5}
+              margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
               width={500}
               height={200}
               xType={EuiSeriesChartUtils.SCALE.TIME}

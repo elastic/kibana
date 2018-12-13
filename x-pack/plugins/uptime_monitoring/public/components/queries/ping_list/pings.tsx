@@ -16,6 +16,7 @@ import {
   EuiInMemoryTable,
   EuiLoadingChart,
   EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment } from 'react';
@@ -91,57 +92,61 @@ export class Pings extends React.Component<PingListProps, PingListState> {
           }
           const { pings } = data;
           return (
-            // @ts-ignore no definition for prop in typings
-            <EuiPanel betaBadgeLabel="Ping List" paddingSize="l">
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFormRow label="Status">
-                    <EuiComboBox
-                      isClearable={false}
-                      singleSelection={{ asPlainText: true }}
-                      selectedOptions={[this.state.selectedOption]}
-                      options={statusOptions}
-                      onChange={selectedOptions => {
-                        if (selectedOptions[0]) {
-                          this.setState({ selectedOption: selectedOptions[0] });
-                        }
-                      }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiInMemoryTable
-                columns={[
-                  {
-                    field: 'monitor.status',
-                    name: 'Status',
-                    render: (pingStatus: string) => (
-                      <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
-                        {pingStatus === 'up' ? 'Up' : 'Down'}
-                      </EuiHealth>
-                    ),
-                  },
-                  {
-                    field: 'timestamp',
-                    name: 'Timestamp',
-                    sortable: true,
-                    render: (timestamp: string) =>
-                      moment(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS Z'),
-                  },
-                  {
-                    field: 'monitor.ip',
-                    name: 'IP',
-                  },
-                  {
-                    field: 'monitor.id',
-                    name: 'Id',
-                  },
-                ]}
-                items={pings}
-                pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
-                sorting={true}
-              />
-            </EuiPanel>
+            <Fragment>
+              <EuiTitle size="xs">
+                <h4>Check History</h4>
+              </EuiTitle>
+              <EuiPanel paddingSize="l">
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFormRow label="Status">
+                      <EuiComboBox
+                        isClearable={false}
+                        singleSelection={{ asPlainText: true }}
+                        selectedOptions={[this.state.selectedOption]}
+                        options={statusOptions}
+                        onChange={selectedOptions => {
+                          if (selectedOptions[0]) {
+                            this.setState({ selectedOption: selectedOptions[0] });
+                          }
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiInMemoryTable
+                  columns={[
+                    {
+                      field: 'monitor.status',
+                      name: 'Status',
+                      render: (pingStatus: string) => (
+                        <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
+                          {pingStatus === 'up' ? 'Up' : 'Down'}
+                        </EuiHealth>
+                      ),
+                    },
+                    {
+                      field: 'timestamp',
+                      name: 'Timestamp',
+                      sortable: true,
+                      render: (timestamp: string) =>
+                        moment(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS Z'),
+                    },
+                    {
+                      field: 'monitor.ip',
+                      name: 'IP',
+                    },
+                    {
+                      field: 'monitor.id',
+                      name: 'Id',
+                    },
+                  ]}
+                  items={pings}
+                  pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
+                  sorting={true}
+                />
+              </EuiPanel>
+            </Fragment>
           );
         }}
       </Query>
