@@ -20,6 +20,8 @@ import {
   ExitNotification,
   InitializedNotification,
   InitializeResult,
+  LogMessageNotification,
+  MessageType,
   WorkspaceFolder,
 } from 'vscode-languageserver-protocol/lib/main';
 import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
@@ -121,7 +123,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       if (this.logger) {
         this.logger.log('received request method: ' + method);
       }
-
       return this.connect().then(clientConn => {
         if (this.logger) {
           this.logger.log(`proxy method:${method} to Language Server `);
@@ -213,6 +214,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   public connect(): Promise<MessageConnection> {
     if (this.clientConnection) {
+      this.registerOnNotificationHandler(this.clientConnection);
       return Promise.resolve(this.clientConnection);
     }
     this.closed = false;
@@ -224,6 +226,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           const reader = new SocketMessageReader(this.socket);
           const writer = new SocketMessageWriter(this.socket);
           this.clientConnection = createMessageConnection(reader, writer, this.logger);
+          this.registerOnNotificationHandler(this.clientConnection);
           this.clientConnection.listen();
           resolve(this.clientConnection);
           this.eventEmitter.emit('connect');
@@ -258,5 +261,27 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     }
     this.clientConnection = null;
     this.eventEmitter.emit('close');
+  }
+
+  private registerOnNotificationHandler(clientConnection: MessageConnection) {
+    // @ts-ignore
+    clientConnection.onNotification(LogMessageNotification.type, notification => {
+      if (this.logger) {
+        switch (notification.type) {
+          case MessageType.Log:
+            this.logger.log(notification.message);
+            break;
+          case MessageType.Info:
+            this.logger.info(notification.message);
+            break;
+          case MessageType.Warning:
+            this.logger.warn(notification.message);
+            break;
+          case MessageType.Error:
+            this.logger.error(notification.message);
+            break;
+        }
+      }
+    });
   }
 }
