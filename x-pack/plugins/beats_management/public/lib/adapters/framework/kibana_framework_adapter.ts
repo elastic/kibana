@@ -127,13 +127,20 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public renderUIAtPath(path: string, component: React.ReactElement<any>) {
+  public renderUIAtPath(
+    path: string,
+    component: React.ReactElement<any>,
+    toController: 'management' | 'self' = 'self'
+  ) {
     const DOM_ELEMENT_NAME = this.PLUGIN_ID.replace('_', '-');
     const adapter = this;
     this.routes.when(
       `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
-        template: `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
+        template:
+          toController === 'self'
+            ? `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`
+            : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
                 <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
                 <div id="${DOM_ELEMENT_NAME}ReactRoot" />
                </kbn-management-app>`,

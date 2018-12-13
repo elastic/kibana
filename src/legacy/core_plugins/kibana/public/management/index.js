@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 
 import './sections';
 import 'ui/filters/start_from';
@@ -68,17 +68,31 @@ export function updateLandingPage(version) {
             <EuiIcon type="managementApp" size="xxl" />
             <EuiSpacer />
             <EuiTitle>
-              <h1>Kibana {version} management</h1>
+              <h1>
+                <FormattedMessage
+                  id="kbn.management.landing.header"
+                  defaultMessage="Kibana {version} management"
+                  values={{ version }}
+                />
+              </h1>
             </EuiTitle>
             <EuiText>
-              <p>Manage your data, permissions, and content from an administrator level</p>
+              <FormattedMessage
+                id="kbn.management.landing.subhead"
+                defaultMessage="Manage your data, permissions, and content from an administrator level"
+              />
             </EuiText>
           </div>
 
           <EuiHorizontalRule />
 
           <EuiText color="subdued" size="s" textAlign="center">
-            <p>A full list of tools can be found in the left menu</p>
+            <p>
+              <FormattedMessage
+                id="kbn.management.landing.text"
+                defaultMessage="A full list of tools can be found in the left menu"
+              />
+            </p>
           </EuiText>
         </div>
       </I18nProvider>
