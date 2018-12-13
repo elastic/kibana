@@ -61,8 +61,6 @@ export function createNodeItem(
   const nodeDoc = get(node, ['nodeDetails', 'hits', 'hits', 0]);
   return {
     metric: createNodeMetrics(options, node, bucket),
-    path: [
-      { value: node.key, displayName: get(nodeDoc, `_source.${NAME_FIELDS[options.nodeType]}`) },
-    ],
+    path: [{ value: node.key, label: get(nodeDoc, `_source.${NAME_FIELDS[options.nodeType]}`) }],
   } as InfraNode;
 }

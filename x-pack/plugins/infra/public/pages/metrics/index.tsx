@@ -105,8 +105,8 @@ export const MetricDetail = withTheme(
                     nodeType={nodeType}
                     nodeId={nodeId}
                   >
-                    {({ displayName, filteredLayouts }) => {
-                      const breadcrumbs = [{ text: displayName }];
+                    {({ name, filteredLayouts }) => {
+                      const breadcrumbs = [{ text: name }];
                       return (
                         <ColumnarPage>
                           <Header
@@ -148,7 +148,7 @@ export const MetricDetail = withTheme(
                                       <EuiShowFor sizes={['xs', 's']}>
                                         <EuiSideNav
                                           items={sideNav}
-                                          mobileTitle={displayName}
+                                          mobileTitle={name}
                                           toggleOpenOnMobile={this.toggleOpenOnMobile}
                                           isOpenOnMobile={this.state.isSideNavOpenOnMobile}
                                         />
@@ -164,7 +164,7 @@ export const MetricDetail = withTheme(
                                                   <MetricsTitleTimeRangeContainer>
                                                     <EuiHideFor sizes={['xs', 's']}>
                                                       <EuiTitle size="m">
-                                                        <h1>{displayName}</h1>
+                                                        <h1>{name}</h1>
                                                       </EuiTitle>
                                                     </EuiHideFor>
                                                     <MetricsTimeControls
@@ -180,7 +180,7 @@ export const MetricDetail = withTheme(
 
                                               <EuiPageContentWithRelative>
                                                 <Metrics
-                                                  displayName={displayName}
+                                                  label={name}
                                                   nodeId={nodeId}
                                                   layouts={filteredLayouts}
                                                   metrics={metrics}

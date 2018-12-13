@@ -212,7 +212,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  displayName: string;
+  label: string;
 }
 
 export interface InfraNodeMetric {
@@ -1049,7 +1049,7 @@ export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
 
-    displayName?: DisplayNameResolver<string, TypeParent, Context>;
+    label?: DisplayNameResolver<string, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<

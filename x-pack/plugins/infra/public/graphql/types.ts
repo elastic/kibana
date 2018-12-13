@@ -184,7 +184,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  displayName: string;
+  label: string;
 }
 
 export interface InfraNodeMetric {
@@ -536,7 +536,7 @@ export namespace WaffleNodesQuery {
 
     value: string;
 
-    displayName: string;
+    label: string;
   };
 
   export type Metric = {

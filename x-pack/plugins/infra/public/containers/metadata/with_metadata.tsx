@@ -21,7 +21,7 @@ interface WithMetadataProps {
 }
 
 interface WithMetadataArgs {
-  displayName: string;
+  name: string;
   filteredLayouts: InfraMetricLayout[];
   error?: string | undefined;
   loading: boolean;
@@ -48,7 +48,7 @@ export const WithMetadata = ({
         const metadata = data && data.source && data.source.metadataByNode;
         const filteredLayouts = (metadata && getFilteredLayouts(layouts, metadata.features)) || [];
         return children({
-          displayName: (metadata && metadata.name) || '',
+          name: (metadata && metadata.name) || '',
           filteredLayouts,
           error: error && error.message,
           loading,
