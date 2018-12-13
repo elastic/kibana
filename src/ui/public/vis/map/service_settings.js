@@ -93,35 +93,36 @@ uiModules.get('kibana')
 
 
         this._loadFileLayers = _.once(async () => {
-          const services = await this._loadCatalogue();
+          const catalogue = await this._loadCatalogue();
 
-          const fileService = services.find(service => service.type === 'file');
+          const fileService = catalogue.services
+            .find(service => service.type === 'file');
           if (!fileService) {
             return [];
           }
 
-          const manifest = await this._getManifest(fileService.manifest);
-          if (manifest) {
-            const layers = manifest.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
+          const { layers } = await this._getManifest(fileService.manifest);
+          if (layers) {
+            const fileLayers = layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
             layers.forEach((layer) => {
               layer.attribution = $sanitize(markdownIt.render(layer.attribution));
             });
-            return layers;
+            return fileLayers;
           }
           return [];
         });
 
         this._loadTMSServices = _.once(async () => {
 
-          const services = await this._loadCatalogue();
-          const tmsService = services.find(service =>
-            service.type === 'tms');
+          const catalogue = await this._loadCatalogue();
+          const tmsService = catalogue.services
+            .find(service => service.type === 'tms');
           if (!tmsService) {
             return [];
           }
-          const tmsManifest = await this._getManifest(tmsService.manifest);
-          const preppedTMSServices = tmsManifest
-            ? tmsManifest.map((tmsService) => {
+          const { services } = await this._getManifest(tmsService.manifest);
+          const preppedTMSServices = services
+            ? services.map((tmsService) => {
               const preppedService = _.cloneDeep(tmsService);
               preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
               preppedService.subdomains = preppedService.subdomains || [];
@@ -148,19 +149,19 @@ uiModules.get('kibana')
           url: extendUrl(manifestUrl, { query: this._queryParams }),
           method: 'GET',
           timeout: this.EMS_LOAD_TIMEOUT
-        }).then(({ data }) => data.services)
+        }).then(({ data }) => data)
           .catch(() => null);
       }
 
-
       async getFileLayers() {
         const fileLayers = await this._loadFileLayers();
-        return fileLayers.map(fileLayer => {
+        const massagedFileLayers = fileLayers.map(fileLayer => {
           const massagedFileLayer = { ...fileLayer };
           delete massagedFileLayer.url;
           massagedFileLayer.origin = ORIGIN.EMS;
           return massagedFileLayer;
         });
+        return massagedFileLayers;
       }
 
 
@@ -184,7 +185,7 @@ uiModules.get('kibana')
           defaultLayerLoadWarning();
         }
 
-        const strippedServiceFromManifest = servicesFromManifest.map((service) => {
+        const strippedServiceFromManifest = servicesFromManifest.map(service => {
           const strippedService = { ...service };
           //do not expose url. needs to be resolved dynamically
           delete strippedService.url;
@@ -284,8 +285,6 @@ uiModules.get('kibana')
         });
         return geojson.data;
       }
-
-
     }
 
     return new ServiceSettings();
