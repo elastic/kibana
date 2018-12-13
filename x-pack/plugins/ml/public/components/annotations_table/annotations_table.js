@@ -36,8 +36,8 @@ import {
 import { formatDate } from '@elastic/eui/lib/services/format';
 import chrome from 'ui/chrome';
 
-import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { ml } from '../../services/ml_api_service';
 import { mlTableService } from '../../services/table_service';
 import { DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 

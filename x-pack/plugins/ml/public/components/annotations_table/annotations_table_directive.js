@@ -51,7 +51,7 @@ module.directive('mlAnnotationTable', function () {
     });
 
     function renderFocusChart() {
-      renderReactComponent(true);
+      renderReactComponent();
     }
 
     if (mlAnnotationsEnabled) {

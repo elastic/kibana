@@ -14,7 +14,6 @@ import { drawLineChartDots } from '../../../util/chart_utils';
  * Creates a mask over sections of the context chart and swimlane
  * which fall outside the extent of the selection brush used for zooming.
  */
-// eslint-disable-next-line kibana-custom/no-default-export
 export function ContextChartMask(contextGroup, data, drawBounds, swimlaneHeight) {
   this.contextGroup = contextGroup;
   this.data = data;

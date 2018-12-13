@@ -127,12 +127,6 @@ export class TimeseriesChart extends React.Component {
     this.showFlyout = this.showFlyout.bind(this);
   }
 
-  onSwitchChange = () => {
-    this.setState({
-      isSwitchChecked: !this.state.isSwitchChecked,
-    });
-  };
-
   closeFlyout() {
     const chartElement = d3.select(this.rootNode);
     chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
