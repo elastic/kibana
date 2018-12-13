@@ -14,9 +14,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
   EuiSpacer,
-  EuiTitle,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
@@ -26,7 +24,13 @@ import {
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
-import { AutoFollowPatternForm, RemoteClustersProvider, SectionLoading, SectionError } from '../../components';
+import {
+  AutoFollowPatternForm,
+  AutoFollowPatternPageTitle,
+  RemoteClustersProvider,
+  SectionLoading,
+  SectionError,
+} from '../../components';
 import { API_STATUS } from '../../constants';
 
 class AutoFollowPatternEditUi extends PureComponent {
@@ -138,23 +142,18 @@ class AutoFollowPatternEditUi extends PureComponent {
             horizontalPosition="center"
             className="ccrPageContent"
           >
-            <EuiSpacer size="xs" />
-
-            <EuiPageContentHeader>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.editTitle"
-                    defaultMessage="Edit auto-follow pattern"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageContentHeader>
+            <AutoFollowPatternPageTitle
+              title={(
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPattern.editTitle"
+                  defaultMessage="Edit auto-follow pattern"
+                />
+              )}
+            />
 
             {apiStatus === API_STATUS.LOADING && this.renderLoadingAutoFollowPattern()}
 
             {apiError && this.renderApiError(apiError)}
-
 
             {autoFollowPattern && (
               <RemoteClustersProvider>
