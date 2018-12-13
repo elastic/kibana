@@ -48,7 +48,10 @@ import {
   SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE
 } from './explorer_constants';
-import { DEFAULT_QUERY_SIZE } from '../../common/constants/search';
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
 
 // TODO Fully support Annotations in Anomaly Explorer
 // import chrome from 'ui/chrome';
@@ -962,7 +965,7 @@ module.controller('MlExplorerController', function (
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
-        maxAnnotations: DEFAULT_QUERY_SIZE
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
       });
 
       $scope.$evalAsync(() => {
@@ -1000,7 +1003,7 @@ module.controller('MlExplorerController', function (
       timeRange.earliestMs,
       timeRange.latestMs,
       dateFormatTz,
-      DEFAULT_QUERY_SIZE,
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
       MAX_CATEGORY_EXAMPLES
     ).then((resp) => {
       const anomalies = resp.anomalies;

@@ -11,7 +11,7 @@ import moment from 'moment';
 
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import { DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 
 
 // Service for carrying out Elasticsearch queries to obtain data for the
@@ -36,7 +36,7 @@ export function resultsServiceProvider(callWithRequest) {
     earliestMs,
     latestMs,
     dateFormatTz,
-    maxRecords = DEFAULT_QUERY_SIZE,
+    maxRecords = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples = DEFAULT_MAX_EXAMPLES) {
 
     // Build the query to return the matching anomaly record results.
@@ -203,7 +203,7 @@ export function resultsServiceProvider(callWithRequest) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
-      size: DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
+      size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
       body: {
         query: {
           bool: {

@@ -51,7 +51,11 @@ import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import { initPromise } from 'plugins/ml/util/promise';
-import { DEFAULT_QUERY_SIZE } from '../../common/constants/search';
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
+
 
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
@@ -86,7 +90,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   timefilter.enableAutoRefreshSelector();
 
   const CHARTS_POINT_TARGET = 500;
-  const ANOMALIES_MAX_RESULTS = DEFAULT_QUERY_SIZE;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
@@ -428,7 +431,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       // Sort in descending time order before storing in scope.
       refreshFocusData.anomalyRecords = _.chain(resp.records)
@@ -460,7 +463,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         jobIds: [$scope.selectedJob.job_id],
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
-        maxAnnotations: DEFAULT_QUERY_SIZE
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
       }).then((resp) => {
         refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
           .sort((a, b) => {
@@ -741,7 +744,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       earliestMs,
       latestMs,
       dateFormatTz,
-      ANOMALIES_MAX_RESULTS
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
@@ -826,7 +829,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       bounds.min.valueOf(),
       bounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS)
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE)
       .then((resp) => {
         if (resp.records && resp.records.length > 0) {
           const firstRec = resp.records[0];

@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_QUERY_SIZE = 500;
+export const ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE = 500;
+export const ANOMALIES_TABLE_DEFAULT_QUERY_SIZE = 500;
