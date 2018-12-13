@@ -16,6 +16,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import {
   EuiBetaBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiLink,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -312,19 +313,17 @@ export class PolicyTableUi extends Component {
       );
     });
     const button = (
-      <EuiButton
+      <EuiButtonEmpty
         data-test-subj="policyActionsContextMenuButton"
-        iconSide="left"
         aria-label="Policy options"
         onClick={() => this.togglePolicyPopover(policy)}
-        iconType="arrowDown"
-        fill
+        color="blue"
       >
         {intl.formatMessage({
           id: 'xpack.indexLifecycleMgmt.policyTable.actionsButtonText',
           defaultMessage: 'Actions',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
     );
     cells.push(
       <EuiTableRowCell
