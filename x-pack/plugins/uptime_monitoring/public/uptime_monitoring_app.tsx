@@ -5,6 +5,10 @@
  */
 
 import {
+  EuiButton,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeader,
   EuiHeaderBreadcrumbs,
   // @ts-ignore missing typings for EuiHeaderLogo
@@ -14,6 +18,8 @@ import {
   EuiHeaderSectionItem,
   EuiPage,
   EuiPageContent,
+  EuiPopover,
+  EuiSwitch,
 } from '@elastic/eui';
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -24,6 +30,10 @@ import { MonitorPage, OverviewPage } from './pages';
 
 interface UptimeAppState {
   breadcrumbs: Breadcrumb[];
+  autorefresh: boolean;
+  popoverIsOpen: boolean;
+  selectedAutorefresh: any;
+  autorefreshOptions: any[];
 }
 
 class Application extends React.Component<UptimeAppProps, UptimeAppState> {
@@ -32,16 +42,33 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     super(props);
 
     const { isUsingK7Design, kibanaBreadcrumbs, updateBreadcrumbs } = this.props;
+    let initialBreadcrumbs: Breadcrumb[];
 
     if (isUsingK7Design) {
       this.setBreadcrumbs = updateBreadcrumbs;
-      this.state = { breadcrumbs: kibanaBreadcrumbs };
+      initialBreadcrumbs = kibanaBreadcrumbs;
     } else {
       this.setBreadcrumbs = (breadcrumbs: Breadcrumb[]) => this.setState({ breadcrumbs });
-      this.state = {
-        breadcrumbs: [overviewBreadcrumb],
-      };
+      initialBreadcrumbs = [overviewBreadcrumb];
     }
+
+    const minsToMillis = (mins: number) => mins * 60 * 1000;
+    const autorefreshOptions = [
+      { label: '5s', value: 5000 },
+      { label: '15s', value: 15000 },
+      { label: '30s', value: 30000 },
+      { label: '1m', value: minsToMillis(1) },
+      { label: '5m', value: minsToMillis(5) },
+      { label: '10m', value: minsToMillis(10) },
+      { label: '30m', value: minsToMillis(30) },
+    ];
+    this.state = {
+      autorefresh: false,
+      breadcrumbs: initialBreadcrumbs,
+      popoverIsOpen: false,
+      autorefreshOptions,
+      selectedAutorefresh: autorefreshOptions[0],
+    };
   }
 
   public componentWillMount() {
@@ -74,6 +101,46 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                   />
                 </EuiHeaderSectionItem>
               )}
+            </EuiHeaderSection>
+            <EuiHeaderSection side="right">
+              <EuiPopover
+                id="autorefresPopover"
+                button={
+                  <EuiButton
+                    iconType="arrowDown"
+                    iconSide="right"
+                    onClick={() => this.setState({ popoverIsOpen: true })}
+                  >
+                    {this.state.autorefresh
+                      ? 'Autorefresh every ' + this.state.selectedAutorefresh.label
+                      : 'Autorefresh Disabled'}
+                  </EuiButton>
+                }
+                closePopover={() => this.setState({ popoverIsOpen: false })}
+                isOpen={this.state.popoverIsOpen}
+                style={{ paddingTop: '10px', paddingRight: '8px' }}
+              >
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiSwitch
+                      label="Auto-refresh"
+                      checked={this.state.autorefresh}
+                      onChange={e => this.setState({ autorefresh: e.target.checked })}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiComboBox
+                      onChange={selectedOptions =>
+                        this.setState({ selectedAutorefresh: selectedOptions[0] })
+                      }
+                      options={this.state.autorefreshOptions}
+                      isClearable={false}
+                      singleSelection={{ asPlainText: true }}
+                      selectedOptions={[this.state.selectedAutorefresh]}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPopover>
             </EuiHeaderSection>
           </EuiHeader>
           <EuiPageContent>
