@@ -138,7 +138,7 @@ function ContextAppController($scope, config, Private, i18n) {
     },
   );
 
-  this.discover = i18n('kbn.context.discoverDescription', {
+  this.discoverLinkLabel = i18n('kbn.context.discoverLinkLabel', {
     defaultMessage: 'Discover'
   });
 }
