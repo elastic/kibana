@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const path = require('path');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+import path from 'path';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+
+import { ImportWhitelistPlugin } from './import_whitelist_plugin';
 
 const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
+const kbnPackagesDir = path.resolve(__dirname, '../../../../../packages');
 
 export function getWebpackConfig({ devtool, watch } = {}) {
   return {
@@ -54,6 +57,13 @@ export function getWebpackConfig({ devtool, watch } = {}) {
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.json'],
       mainFields: ['browser', 'main'],
+      plugins: [
+        // whitelist specific imports to ensure that the canvas_plugin bundle
+        // doesn't accidentally end up including unnecessary files.
+        new ImportWhitelistPlugin({
+          whitelist: [/[\/\\]node_modules[\/\\]/, sourceDir, kbnPackagesDir],
+        }),
+      ],
     },
 
     plugins: [
