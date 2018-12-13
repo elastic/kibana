@@ -10,7 +10,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
 } from '../../../common/constants';
-import { Transaction } from '../../../typings/Transaction';
+import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';
 
 interface Bucket {
@@ -53,7 +53,7 @@ export function transactionGroupsFetcher(
           terms: {
             field: `${TRANSACTION_NAME}.keyword`,
             order: { sum: 'desc' },
-            size: 100
+            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
           aggs: {
             sample: {

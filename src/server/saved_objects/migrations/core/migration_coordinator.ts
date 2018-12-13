@@ -32,7 +32,7 @@
  * just migrate data into an existing index. Such an action could result in data loss. Instead,
  * we should probably fail, and the Kibana sys-admin should clean things up before relaunching
  * Kibana.
-*/
+ */
 
 import _ from 'lodash';
 import { Logger } from './migration_logger';

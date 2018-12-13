@@ -18,10 +18,11 @@ import {
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobIcon } from '../job_message_icon';
+import { injectI18n } from '@kbn/i18n/react';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
-export class JobMessagesPane extends Component {
+class JobMessagesPaneUI extends Component {
 
   constructor(props) {
     super(props);
@@ -44,18 +45,28 @@ export class JobMessagesPane extends Component {
 
   render() {
     const { messages } = this.state;
+    const { intl } = this.props;
     const columns = [{
       name: '',
       render: item => (<JobIcon message={item} />)
     }, {
-      name: 'Time',
+      name: intl.formatMessage({
+        id: 'xpack.ml.jobsList.jobDetails.messagesPane.timeLabel',
+        defaultMessage: 'Time'
+      }),
       render: item => formatDate(item.timestamp, TIME_FORMAT)
     }, {
       field: 'node_name',
-      name: 'Node',
+      name: intl.formatMessage({
+        id: 'xpack.ml.jobsList.jobDetails.messagesPane.nodeLabel',
+        defaultMessage: 'Node'
+      }),
     }, {
       field: 'message',
-      name: 'Message',
+      name: intl.formatMessage({
+        id: 'xpack.ml.jobsList.jobDetails.messagesPane.messageLabel',
+        defaultMessage: 'Message'
+      }),
     }
     ];
     return (
@@ -71,7 +82,8 @@ export class JobMessagesPane extends Component {
     );
   }
 }
-JobMessagesPane.propTypes = {
+JobMessagesPaneUI.propTypes = {
   job: PropTypes.object.isRequired,
 };
 
+export const JobMessagesPane = injectI18n(JobMessagesPaneUI);

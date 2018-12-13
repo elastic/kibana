@@ -7,7 +7,7 @@
 import moment from 'moment';
 import React from 'react';
 
-import { InfraMetricType, InfraPathType } from '../../common/graphql/types';
+import { InfraMetricType, InfraPathType } from '../graphql/types';
 import {
   InfraFormatterType,
   InfraOptions,

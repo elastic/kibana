@@ -23,7 +23,7 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return true;
   }
 
-  public async getAll() {
+  public async getAll(ESQuery?: string) {
     return this.tagsDB;
   }
 
