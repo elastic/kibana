@@ -69,31 +69,31 @@ const jobStatusLabelsMap = new Map<JobStatuses, string>([
   [
     JobStatuses.PENDING,
     i18n.translate('xpack.reporting.jobStatuses.pendingText', {
-      defaultMessage: 'pending',
+      defaultMessage: 'Pending',
     }),
   ],
   [
     JobStatuses.PROCESSING,
     i18n.translate('xpack.reporting.jobStatuses.processingText', {
-      defaultMessage: 'processing',
+      defaultMessage: 'Processing',
     }),
   ],
   [
     JobStatuses.COMPLETED,
     i18n.translate('xpack.reporting.jobStatuses.completedText', {
-      defaultMessage: 'completed',
+      defaultMessage: 'Completed',
     }),
   ],
   [
     JobStatuses.FAILED,
     i18n.translate('xpack.reporting.jobStatuses.failedText', {
-      defaultMessage: 'failed',
+      defaultMessage: 'Failed',
     }),
   ],
   [
     JobStatuses.CANCELLED,
     i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
-      defaultMessage: 'cancelled',
+      defaultMessage: 'Cancelled',
     }),
   ],
 ]);
@@ -207,7 +207,7 @@ class ReportListingUi extends Component<Props, State> {
               <div>
                 <FormattedMessage
                   id="xpack.reporting.listing.tableValue.createdAtDetail.pendingStatusReachedText"
-                  defaultMessage="pending - waiting for job to be processed"
+                  defaultMessage="Pending - waiting for job to be processed"
                 />
               </div>
             );
@@ -219,7 +219,7 @@ class ReportListingUi extends Component<Props, State> {
               <span>
                 <FormattedMessage
                   id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
-                  defaultMessage=" - max size reached"
+                  defaultMessage=" - Max size reached"
                 />
               </span>
             );
@@ -238,7 +238,7 @@ class ReportListingUi extends Component<Props, State> {
           let statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
 
           if (status === JobStatuses.PROCESSING) {
-            statusLabel = statusLabel + ` (Attempt ${record.attempts} of ${record.max_attempts})`;
+            statusLabel = statusLabel + ` (attempt ${record.attempts} of ${record.max_attempts})`;
           }
 
           if (statusTimestamp) {
