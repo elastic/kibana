@@ -11,7 +11,7 @@ import { ImportWhitelistPlugin } from './import_whitelist_plugin';
 
 const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
-const kbnPackagesDir = path.resolve(__dirname, '../../../../../packages');
+const sharedDir = path.resolve(__dirname, '../../shared');
 
 export function getWebpackConfig({ devtool, watch } = {}) {
   return {
@@ -61,7 +61,12 @@ export function getWebpackConfig({ devtool, watch } = {}) {
         // whitelist specific imports to ensure that the canvas_plugin bundle
         // doesn't accidentally end up including unnecessary files.
         new ImportWhitelistPlugin({
-          whitelist: [/[\/\\]node_modules[\/\\]/, sourceDir, kbnPackagesDir],
+          from: sourceDir,
+          whitelist: [/[\/\\]node_modules[\/\\]/, sourceDir, sharedDir],
+        }),
+        new ImportWhitelistPlugin({
+          from: sharedDir,
+          whitelist: [/[\/\\]node_modules[\/\\]/, sharedDir],
         }),
       ],
     },
