@@ -5,7 +5,7 @@
  */
 
 import { isEmpty, last } from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/APMDoc';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
@@ -24,29 +24,33 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   }
 
   const groups = getGroupedStackframes(stackframes);
-  return groups.map((group, i) => {
-    // library frame
-    if (group.isLibraryFrame) {
-      const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
-      return (
-        <LibraryStackFrames
-          key={i}
-          initialVisiblity={initialVisiblity}
-          stackframes={group.stackframes}
-          codeLanguage={codeLanguage}
-        />
-      );
-    }
+  return (
+    <Fragment>
+      {groups.map((group, i) => {
+        // library frame
+        if (group.isLibraryFrame) {
+          const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
+          return (
+            <LibraryStackFrames
+              key={i}
+              initialVisiblity={initialVisiblity}
+              stackframes={group.stackframes}
+              codeLanguage={codeLanguage}
+            />
+          );
+        }
 
-    // non-library frame
-    return group.stackframes.map((stackframe, idx) => (
-      <Stackframe
-        key={idx}
-        codeLanguage={codeLanguage}
-        stackframe={stackframe}
-      />
-    ));
-  });
+        // non-library frame
+        return group.stackframes.map((stackframe, idx) => (
+          <Stackframe
+            key={idx}
+            codeLanguage={codeLanguage}
+            stackframe={stackframe}
+          />
+        ));
+      })}
+    </Fragment>
+  );
 }
 
 interface StackframesGroup {

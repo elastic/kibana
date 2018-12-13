@@ -29,27 +29,6 @@ export interface APMDocV2 extends APMDocV1 {
   };
 }
 
-export interface ContextService {
-  name: string;
-  agent: {
-    name: string;
-    version: string;
-  };
-  framework?: {
-    name: string;
-    version: string;
-  };
-  runtime?: {
-    name: string;
-    version: string;
-  };
-  language?: {
-    name: string;
-    version?: string;
-  };
-  [key: string]: unknown;
-}
-
 export interface IStackframe {
   filename: string;
   line: {

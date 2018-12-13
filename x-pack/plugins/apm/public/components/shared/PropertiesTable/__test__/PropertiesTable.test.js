@@ -56,7 +56,7 @@ describe('PropertiesTable component', () => {
     expect(
       shallow(
         <PropertiesTable
-          propData={{}}
+          propData={null}
           propKey="testPropKey"
           agentName="testAgentName"
         />
