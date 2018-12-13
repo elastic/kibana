@@ -64,8 +64,6 @@ Install with all default options
 
 The functional version of the reporting tests create a few pdf reports and do a snapshot comparison against a couple baselines.  The baseline images are stored in `./functional/reports/baseline`.
 
-**Note:** The snapshot comparisons use a threshold due to expected visual difference when running on different browsers and different Operating Systems. This threshold is currently very high because of differences between Chromium and Phantom versions, and also because of some slight bugs with the Phantom version. The bug is [here](https://github.com/elastic/kibana/issues/21485), the issue tracking this very high threshold is [here](https://github.com/elastic/kibana/issues/21486). Once we remove Phantom support in 7.0, we can drop this threshold and hopefully catch more bugs!
-
 #### Updating the baselines
 
 Every now and then visual changes will be made that will require the snapshots to be updated.  This is how you go about updating it.  I will discuss generating snapshots from chromium since that is the way of the future.
