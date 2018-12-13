@@ -11,8 +11,8 @@ import {
   SERVICE_NAME,
   TRANSACTION_ID
 } from 'x-pack/plugins/apm/common/constants';
-import { Span } from 'x-pack/plugins/apm/typings/Span';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   getWaterfall,
   IWaterfall

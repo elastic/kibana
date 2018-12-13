@@ -5,10 +5,10 @@
  */
 
 import _ from 'lodash';
-
 import React from 'react';
 import { Query } from 'react-apollo';
-import { InfraNodeType, MetadataQuery } from '../../../common/graphql/types';
+
+import { InfraNodeType, MetadataQuery } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metadataQuery } from './metadata.gql_query';
 

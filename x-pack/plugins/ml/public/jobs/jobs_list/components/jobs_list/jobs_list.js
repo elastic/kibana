@@ -153,7 +153,8 @@ class JobsListUI extends Component {
         field: 'description',
         render: (description, item) => (
           <JobDescription job={item} />
-        )
+        ),
+        textOnly: true,
       }, {
         field: 'processed_record_count',
         name: intl.formatMessage({
