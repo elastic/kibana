@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { errors } from 'elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { isKnownError, handleKnownError } from '../known_errors';
 
 describe('Error handling for 503 errors', () => {

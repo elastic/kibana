@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { errors } from 'elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { forbidden, unauthorized } from 'boom';
 import { isAuthError, handleAuthError } from '../auth_errors';
 
