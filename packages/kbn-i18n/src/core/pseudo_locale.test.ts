@@ -25,4 +25,16 @@ describe('translateUsingPseudoLocale()', () => {
 
     expect(translateUsingPseudoLocale(message)).toMatchSnapshot();
   });
+
+  it(`shouldn't translate @I18N@ placeholders with underscore`, () => {
+    const message = 'Message with a @I18N@snake_case_value@I18N@ placeholder.';
+
+    expect(translateUsingPseudoLocale(message)).toMatchSnapshot();
+  });
+
+  it(`should translate @I18N@ placeholders with wrong reference name`, () => {
+    const message = 'Message with a @I18N@non-single-word@I18N@ placeholder.';
+
+    expect(translateUsingPseudoLocale(message)).toMatchSnapshot();
+  });
 });
