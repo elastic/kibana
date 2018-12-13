@@ -143,11 +143,13 @@ export default function (kibana) {
             },
             management: {
               /*
-               * Management settings correspond to management section ids, and should not be changed
-               * without also updating those sections.
+               * Management settings correspond to management section/link ids, and should not be changed
+               * without also updating those definitions.
                */
-              kibanaSettings: true,
-              kibanaIndices: true,
+              kibana: {
+                settings: true,
+                indices: true,
+              },
             }
           }
         };

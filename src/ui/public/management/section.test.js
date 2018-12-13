@@ -22,8 +22,10 @@ jest.mock('ui/chrome', () => ({
       return {
         navLinks: {},
         management: {
-          kibanaSampleFeature1: true,
-          kibanaSampleFeature2: false,
+          kibana: {
+            sampleFeature1: true,
+            sampleFeature2: false,
+          }
         }
       };
     }

@@ -12,6 +12,7 @@ describe('ManageSpacesButton', () => {
   it('renders as expected', () => {
     setMockCapabilities({
       navLinks: {},
+      management: {},
       spaces: {
         manage: true,
       },
@@ -24,6 +25,7 @@ describe('ManageSpacesButton', () => {
   it(`doesn't render if user profile forbids managing spaces`, () => {
     setMockCapabilities({
       navLinks: {},
+      management: {},
       spaces: {
         manage: false,
       },

@@ -19,7 +19,7 @@ const kibanaFeatures: Feature[] = [
           all: ['search'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['kibana:discover'],
+        ui: [],
       },
       read: {
         app: ['kibana'],
@@ -43,7 +43,7 @@ const kibanaFeatures: Feature[] = [
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['kibana:visualize'],
+        ui: [],
       },
       read: {
         app: ['kibana'],
@@ -67,7 +67,7 @@ const kibanaFeatures: Feature[] = [
           all: ['dashboard'],
           read: ['config', 'index-pattern', 'search', 'visualization', 'timelion', 'canvas'],
         },
-        ui: ['kibana:dashboard'],
+        ui: [],
       },
       read: {
         app: ['kibana'],
@@ -110,7 +110,9 @@ const kibanaFeatures: Feature[] = [
     icon: 'advancedSettingsApp',
     privileges: {
       all: {
-        management: ['kibanaSettings'],
+        management: {
+          kibana: ['settings'],
+        },
         app: ['kibana'],
         savedObject: {
           all: ['config'],
@@ -126,7 +128,9 @@ const kibanaFeatures: Feature[] = [
     icon: 'indexPatternApp',
     privileges: {
       all: {
-        management: ['kibanaIndices'],
+        management: {
+          kibana: ['indices'],
+        },
         app: ['kibana'],
         savedObject: {
           all: ['index-pattern'],

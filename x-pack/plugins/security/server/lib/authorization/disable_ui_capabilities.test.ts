@@ -83,6 +83,11 @@ describe('usingPrivileges', () => {
             foo: true,
             bar: true,
           },
+          management: {
+            kibana: {
+              indices: true,
+            },
+          },
           fooFeature: {
             foo: true,
             bar: true,
@@ -98,6 +103,11 @@ describe('usingPrivileges', () => {
         navLinks: {
           foo: false,
           bar: true,
+        },
+        management: {
+          kibana: {
+            indices: false,
+          },
         },
         fooFeature: {
           foo: false,
@@ -154,6 +164,11 @@ describe('usingPrivileges', () => {
             foo: true,
             bar: true,
           },
+          management: {
+            kibana: {
+              indices: true,
+            },
+          },
           fooFeature: {
             foo: true,
             bar: true,
@@ -169,6 +184,11 @@ describe('usingPrivileges', () => {
         navLinks: {
           foo: false,
           bar: true,
+        },
+        management: {
+          kibana: {
+            indices: false,
+          },
         },
         fooFeature: {
           foo: false,
@@ -214,6 +234,11 @@ describe('usingPrivileges', () => {
             foo: true,
             bar: false,
           },
+          management: {
+            kibana: {
+              indices: true,
+            },
+          },
         })
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(mockServer.log).not.toHaveBeenCalled();
@@ -228,6 +253,8 @@ describe('usingPrivileges', () => {
             [actions.ui.get('navLinks', 'foo')]: true,
             [actions.ui.get('navLinks', 'bar')]: false,
             [actions.ui.get('navLinks', 'quz')]: false,
+            [actions.ui.get('management', 'kibana', 'indices')]: true,
+            [actions.ui.get('management', 'kibana', 'settings')]: false,
             [actions.ui.get('fooFeature', 'foo')]: true,
             [actions.ui.get('fooFeature', 'bar')]: false,
             [actions.ui.get('barFeature', 'foo')]: true,
@@ -258,6 +285,12 @@ describe('usingPrivileges', () => {
           bar: true,
           quz: true,
         },
+        management: {
+          kibana: {
+            indices: true,
+            settings: false,
+          },
+        },
         fooFeature: {
           foo: true,
           bar: true,
@@ -274,6 +307,12 @@ describe('usingPrivileges', () => {
         foo: true,
         bar: false,
         quz: true,
+      },
+      management: {
+        kibana: {
+          indices: true,
+          settings: false,
+        },
       },
       fooFeature: {
         foo: true,
@@ -293,6 +332,7 @@ describe('usingPrivileges', () => {
           privileges: {
             [actions.ui.get('navLinks', 'foo')]: true,
             [actions.ui.get('navLinks', 'bar')]: true,
+            [actions.ui.get('management', 'kibana', 'indices')]: true,
             [actions.ui.get('fooFeature', 'foo')]: true,
             [actions.ui.get('fooFeature', 'bar')]: true,
             [actions.ui.get('barFeature', 'foo')]: true,
@@ -322,6 +362,11 @@ describe('usingPrivileges', () => {
           foo: false,
           bar: false,
         },
+        management: {
+          kibana: {
+            indices: false,
+          },
+        },
         fooFeature: {
           foo: false,
           bar: false,
@@ -337,6 +382,11 @@ describe('usingPrivileges', () => {
       navLinks: {
         foo: false,
         bar: false,
+      },
+      management: {
+        kibana: {
+          indices: false,
+        },
       },
       fooFeature: {
         foo: false,
@@ -372,6 +422,11 @@ describe('all', () => {
           foo: true,
           bar: true,
         },
+        management: {
+          kibana: {
+            indices: true,
+          },
+        },
         fooFeature: {
           foo: true,
           bar: true,
@@ -386,6 +441,11 @@ describe('all', () => {
       navLinks: {
         foo: false,
         bar: true,
+      },
+      management: {
+        kibana: {
+          indices: false,
+        },
       },
       fooFeature: {
         foo: false,

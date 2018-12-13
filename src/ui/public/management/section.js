@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assign, camelCase } from 'lodash';
+import { assign } from 'lodash';
 import { IndexedArray } from '../indexed_array';
 import { uiCapabilities } from '../capabilities';
 
@@ -51,16 +51,14 @@ export class ManagementSection {
 
     assign(this, options);
 
-    if (this.parent) {
-      this.capabilityId = camelCase(`${this.parent.id} ${this.id}`);
-    } else {
-      this.capabilityId = null;
-    }
   }
 
   get visibleItems() {
     return this.items.inOrder.filter(item => {
-      return item.visible && uiCapabilities.management[item.capabilityId] !== false;
+      const capabilityManagementSection = uiCapabilities.management[this.id];
+      const itemCapability = capabilityManagementSection ? capabilityManagementSection[item.id] : null;
+
+      return item.visible && itemCapability !== false;
     });
   }
 

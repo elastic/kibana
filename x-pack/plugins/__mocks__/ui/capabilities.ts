@@ -8,6 +8,7 @@ import { UICapabilities } from 'ui/capabilities';
 
 let internals: UICapabilities = {
   navLinks: {},
+  management: {},
   spaces: {
     manage: true,
   },

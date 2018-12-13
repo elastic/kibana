@@ -12,6 +12,7 @@ describe('SecureSpaceMessage', () => {
   it(`doesn't render if UI Capabilities does not allow security to be managed`, () => {
     setMockCapabilities({
       navLinks: {},
+      management: {},
       spaces: { manage: false },
     });
     expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
@@ -20,6 +21,7 @@ describe('SecureSpaceMessage', () => {
   it(`renders if user profile allows security to be managed`, () => {
     setMockCapabilities({
       navLinks: {},
+      management: {},
       spaces: { manage: true },
     });
     expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();

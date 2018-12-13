@@ -12,7 +12,9 @@ export interface FeaturePrivilegeDefinition {
   metadata?: {
     tooltip?: string;
   };
-  management?: string[];
+  management?: {
+    [sectionId: string]: string[];
+  };
   api?: string[];
   app: string[];
   savedObject: {
@@ -34,7 +36,9 @@ export interface Feature {
   };
 }
 
+const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
+export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const schema = Joi.object({
   id: Joi.string()
@@ -52,7 +56,7 @@ const schema = Joi.object({
         metadata: Joi.object({
           tooltip: Joi.string(),
         }),
-        management: Joi.array().items(Joi.string()),
+        management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
         api: Joi.array().items(Joi.string()),
         app: Joi.array()
           .items(Joi.string())
@@ -66,7 +70,7 @@ const schema = Joi.object({
             .required(),
         }).required(),
         ui: Joi.array()
-          .items(Joi.string())
+          .items(Joi.string().regex(uiCapabilitiesRegex))
           .required(),
       })
     )

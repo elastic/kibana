@@ -28,7 +28,7 @@ describe('#get', () => {
     });
   });
 
-  [null, undefined, '', 1, true, {}].forEach((uiCapability: any) => {
+  [null, undefined, '', 1, true, '!'].forEach((uiCapability: any) => {
     test(`uiCapability of ${JSON.stringify(uiCapability)} throws error`, () => {
       const uiActions = new UIActions();
       expect(() => uiActions.get('foo', uiCapability)).toThrowErrorMatchingSnapshot();
@@ -38,5 +38,10 @@ describe('#get', () => {
   test('returns `ui:${featureId}/${uiCapaility}`', () => {
     const uiActions = new UIActions();
     expect(uiActions.get('foo', 'foo-capability')).toBe('ui:foo/foo-capability');
+  });
+
+  test('returns `ui:${featureId}/${uiCapabilityPart}/${uiCapabilitySubPart}', () => {
+    const uiActions = new UIActions();
+    expect(uiActions.get('foo', 'fooCapability', 'subFoo')).toBe('ui:foo/fooCapability/subFoo');
   });
 });
