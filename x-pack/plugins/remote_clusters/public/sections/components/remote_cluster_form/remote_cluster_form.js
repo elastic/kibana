@@ -301,7 +301,7 @@ export class RemoteClusterFormUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
-                defaultMessage="The nodes to query to get the cluster state from the remote cluster.
+                defaultMessage="A list of remote cluster nodes to query for the cluster state.
                   Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
               />
             </p>
