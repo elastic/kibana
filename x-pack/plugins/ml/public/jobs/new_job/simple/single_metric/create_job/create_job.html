@@ -108,7 +108,7 @@
           </ml-bucket-span-estimator>
 
           <button class="euiButton euiButton--primary euiButton--small euiButton--fill navbar-btn-link btn-load-vis"
-            aria-label="Run search"
+            aria-label="{{:: 'xpack.ml.newJob.simple.singleMetric.runSearchAriaLabel' | i18n: { defaultMessage: 'Run search' } }}"
             ng-click="loadVis()"
             ng-disabled="ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED" >
             <i class="fa fa-play" ></i>
@@ -164,12 +164,12 @@
                   class="euiTitle euiTitle--small"
                   i18n-id="xpack.ml.newJob.simple.singleMetric.noResultsFoundTitle"
                   i18n-default-message="{infoIcon} No results found"
-                  i18n-values="{ infoIcon: '<i class=\'fa fa-info-circle\'></i>' }"
+                  i18n-values="{ html_infoIcon: '<i class=\'fa fa-info-circle\'></i>' }"
                 ></h4>
                 <span
                   i18n-id="xpack.ml.newJob.simple.singleMetric.noResultsFoundDescription"
                   i18n-default-message="Consider using the {indexPatternLink}"
-                  i18n-values="{ indexPatternLink: '<a ng-click=\'setFullTimeRange()\'>' + indexPatternLinkText + '</a>' }"
+                  i18n-values="{ html_indexPatternLink: '<a ng-click=\'setFullTimeRange()\'>' + indexPatternLinkText + '</a>' }"
                 ></span>
               </div>
             </div>
@@ -341,7 +341,7 @@
           i18n-default-message="Analysis stopping"
         ></span>
         <span
-          ng-if="!(jobState === JOB_STATE.STOPPING)"
+          ng-if="jobState !== JOB_STATE.STOPPING"
           class="euiButton__content"
           i18n-id="xpack.ml.newJob.simple.singleMetric.stopAnalysisButtonLabel"
           i18n-default-message="Stop analysis"
