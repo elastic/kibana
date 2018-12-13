@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getAutocompleteProvider } from 'ui/autocomplete_providers';
 // @ts-ignore
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { getAPMIndexPattern } from './rest/savedObjects';
 
