@@ -119,7 +119,7 @@ export class NewCalendar extends Component {
     const { formCalendarId } = this.state;
 
     if (this.isDuplicateId()) {
-      toastNotifications.addWarning(`Cannot create calendar with id [${formCalendarId}] as it already exists.`);
+      toastNotifications.addDanger(`Cannot create calendar with id [${formCalendarId}] as it already exists.`);
     } else {
       const calendar = this.setUpCalendarForApi();
       this.setState({ saving: true });
