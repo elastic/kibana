@@ -23,8 +23,9 @@ const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs
     if (
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state)))) &&
       value === prevValue
-    )
+    ) {
       return mappedValue;
+    }
 
     prevValue = value;
     value = fun(prevValue, ...argumentValues);
@@ -45,8 +46,9 @@ const select = (fun, logFun) => (...inputs) => {
     if (
       actionId === lastActionId ||
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
-    )
+    ) {
       return value;
+    }
 
     value = fun(...argumentValues);
     actionId = lastActionId;

@@ -85,8 +85,9 @@ export const WorkpadPage = compose(
         let element = null;
         if (elementLookup.has(shape.id)) {
           element = elementLookup.get(shape.id);
-          if (selectedElementIds.indexOf(shape.id) > -1)
+          if (selectedElementIds.indexOf(shape.id) > -1) {
             selectedElements.push({ ...element, id: shape.id });
+          }
         }
         // instead of just combining `element` with `shape`, we make property transfer explicit
         return element ? { ...shape, filter: element.filter } : shape;

@@ -39,8 +39,9 @@ export const WorkpadExport = compose(
       throw new Error(`Unknown export type: ${type}`);
     },
     onCopy: type => {
-      if (type === 'pdf')
+      if (type === 'pdf') {
         return notify.info('The PDF generation URL was copied to your clipboard.');
+      }
 
       throw new Error(`Unknown export type: ${type}`);
     },

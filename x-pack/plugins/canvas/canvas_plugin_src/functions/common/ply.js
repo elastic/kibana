@@ -27,8 +27,9 @@ function combineAcross(datatableArray) {
 
   // Sanity check
   datatableArray.forEach(datatable => {
-    if (datatable.rows.length !== targetRowLength)
+    if (datatable.rows.length !== targetRowLength) {
       throw new Error('All expressions must return the same number of rows');
+    }
   });
 
   // Merge columns and rows.
@@ -103,9 +104,9 @@ export const ply = () => ({
     const datatablePromises = originalDatatables.map(originalDatatable => {
       let expressionResultPromises = [];
 
-      if (args.expression)
+      if (args.expression) {
         expressionResultPromises = args.expression.map(expression => expression(originalDatatable));
-      else expressionResultPromises.push(Promise.resolve(originalDatatable));
+      } else expressionResultPromises.push(Promise.resolve(originalDatatable));
 
       return Promise.all(expressionResultPromises).then(combineAcross);
     });

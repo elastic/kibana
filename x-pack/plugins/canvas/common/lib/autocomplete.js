@@ -67,8 +67,9 @@ function getFnArgAtPosition(ast, position) {
     for (let argIndex = 0; argIndex < argValues.length; argIndex++) {
       const value = argValues[argIndex];
       if (value.start <= position && position <= value.end) {
-        if (value.node !== null && value.node.type === 'expression')
+        if (value.node !== null && value.node.type === 'expression') {
           return getFnArgAtPosition(value, position);
+        }
         return { ast, fnIndex, argName, argIndex };
       }
     }

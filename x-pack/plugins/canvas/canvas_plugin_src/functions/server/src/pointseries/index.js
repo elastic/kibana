@@ -147,8 +147,9 @@ export const pointseries = () => ({
       const measureValues = measureNames.map(measure => {
         try {
           const ev = evaluate(args[measure], subScope);
-          if (Array.isArray(ev))
+          if (Array.isArray(ev)) {
             throw new Error('Expressions must be wrapped in a function such as sum()');
+          }
 
           return ev;
         } catch (e) {

@@ -96,8 +96,9 @@ export class DatasourceComponent extends PureComponent {
       setInvalid,
     } = this.props;
 
-    if (selecting)
+    if (selecting) {
       return <DatasourceSelector datasources={datasources} onSelect={this.setSelectedDatasource} />;
+    }
 
     const datasourcePreview = previewing ? (
       <DatasourcePreview

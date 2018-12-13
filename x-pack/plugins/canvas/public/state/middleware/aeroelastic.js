@@ -130,8 +130,9 @@ export const aeroelastic = ({ dispatch, getState }) => {
     // set the selected element on the global store, if one element is selected
     const selectedShape = nextScene.selectedPrimaryShapes[0];
     if (nextScene.selectedShapes.length === 1) {
-      if (selectedShape && selectedShape !== selectedElement)
+      if (selectedShape && selectedShape !== selectedElement) {
         dispatch(selectElement(selectedShape));
+      }
     } else {
       // otherwise, clear the selected element state
       dispatch(selectElement(null));

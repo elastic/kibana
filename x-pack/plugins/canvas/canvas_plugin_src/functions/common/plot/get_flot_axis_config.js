@@ -28,8 +28,9 @@ export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {})
     if (tickSize && axisType === 'number') config.tickSize = tickSize;
   }
 
-  if (axisType === 'string')
+  if (axisType === 'string') {
     config.ticks = map(ticks[axis].hash, (position, name) => [position, name]);
+  }
 
   if (axisType === 'date') config.mode = 'time';
 

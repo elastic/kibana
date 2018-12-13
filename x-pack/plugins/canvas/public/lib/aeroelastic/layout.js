@@ -685,8 +685,9 @@ const alignmentGuides = (shapes, guidedShapes, draggedShape) => {
               // moved midpoint on vertical border
               (extremeVertical === 0 && l !== 0 && extremeHorizontal === k)
             )
-          )
+          ) {
             continue;
+          }
           const D = landmarkPoint(d, k, l);
           for (let m = -1; m < 2; m++) {
             for (let n = -1; n < 2; n++) {
@@ -906,8 +907,9 @@ function resizeAnnotation(shapes, selectedShapes, shape) {
       : [];
     return result;
   }
-  if (foundShape.type === 'annotation')
+  if (foundShape.type === 'annotation') {
     return resizeAnnotation(shapes, selectedShapes, shapes.find(s => foundShape.parent === s.id));
+  }
 
   // fixme left active: snap wobble. right active: opposite side wobble.
   const a = snappedA(properShape);
@@ -1057,8 +1059,9 @@ const snappedShapes = select(
     const subtype = draggedShape && draggedShape.subtype;
     // snapping doesn't come into play if there's no dragging, or it's not a resize drag or translate drag on a
     // leaf element or a group element:
-    if (subtype && [config.resizeHandleName, config.adHocGroupName].indexOf(subtype) === -1)
+    if (subtype && [config.resizeHandleName, config.adHocGroupName].indexOf(subtype) === -1) {
       return contentShapes;
+    }
     const constraints = alignmentGuideAnnotations; // fixme split concept of snap constraints and their annotations
     const relaxed = alterSnapGesture.indexOf('relax') !== -1;
     const constrained = config.snapConstraint && !relaxed;

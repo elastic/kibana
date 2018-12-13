@@ -72,10 +72,12 @@ export const progress = () => ({
         text.textContent = label;
         text.setAttribute('className', 'canvasProgress__label');
 
-        if (shape === 'horizontalPill')
+        if (shape === 'horizontalPill') {
           text.setAttribute('x', parseInt(text.getAttribute('x'), 10) + offset / 2);
-        if (shape === 'verticalPill')
+        }
+        if (shape === 'verticalPill') {
           text.setAttribute('y', parseInt(text.getAttribute('y'), 10) - offset / 2);
+        }
 
         Object.assign(text.style, font.spec);
         shapeSvg.appendChild(text);

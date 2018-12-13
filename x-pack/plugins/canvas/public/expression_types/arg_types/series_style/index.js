@@ -22,8 +22,9 @@ const EnhancedExtendedTemplate = lifecycle({
   },
   componentWillReceiveProps(newProps) {
     const newLabel = get(newProps.argValue, 'chain.0.arguments.label.0', '');
-    if (newLabel && this.props.label !== this.formatLabel(newLabel))
+    if (newLabel && this.props.label !== this.formatLabel(newLabel)) {
       this.props.setLabel(this.formatLabel(newLabel));
+    }
   },
 })(ExtendedTemplate);
 

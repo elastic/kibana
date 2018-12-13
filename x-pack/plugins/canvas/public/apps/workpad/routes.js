@@ -72,8 +72,9 @@ export const routes = [
           const pageNumber = parseInt(params.page, 10);
 
           // no page provided, append current page to url
-          if (isNaN(pageNumber))
+          if (isNaN(pageNumber)) {
             return router.redirectTo('loadWorkpad', { id: workpad.id, page: workpad.page + 1 });
+          }
 
           // set the active page using the number provided in the url
           const pageIndex = pageNumber - 1;

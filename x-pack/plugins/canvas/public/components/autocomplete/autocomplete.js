@@ -56,8 +56,9 @@ export class Autocomplete extends React.Component {
       prevProps.items !== this.props.items &&
       this.props.items.length === 1 &&
       this.state.selectedIndex !== 0
-    )
+    ) {
       this.selectFirst();
+    }
 
     if (prevState.selectedIndex !== this.state.selectedIndex) this.scrollIntoView();
   }
@@ -93,9 +94,9 @@ export class Autocomplete extends React.Component {
   selectNext() {
     const { items } = this.props;
     const { selectedIndex } = this.state;
-    if (selectedIndex >= 0 && selectedIndex < items.length - 1)
+    if (selectedIndex >= 0 && selectedIndex < items.length - 1) {
       this.setState({ selectedIndex: selectedIndex + 1 });
-    else this.setState({ selectedIndex: 0 });
+    } else this.setState({ selectedIndex: 0 });
   }
 
   scrollIntoView() {

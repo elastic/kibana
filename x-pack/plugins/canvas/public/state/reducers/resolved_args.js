@@ -112,8 +112,9 @@ export const resolvedArgsReducer = handleActions(
 
       return Object.keys(expressionContext).reduce((state, indexKey) => {
         const indexAsNum = parseInt(indexKey, 10);
-        if (indexAsNum >= index)
+        if (indexAsNum >= index) {
           return del(state, getFullPath([elementId, 'expressionContext', indexKey]));
+        }
 
         return state;
       }, transientState);

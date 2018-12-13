@@ -51,8 +51,9 @@ export function routerProvider(routes) {
       updateLocation(name, params, state, true);
     },
     onPathChange(fn) {
-      if (componentListener != null)
+      if (componentListener != null) {
         throw new Error('Only one route component listener is allowed');
+      }
 
       const execOnMatch = location => {
         const { pathname } = location;

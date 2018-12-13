@@ -20,8 +20,9 @@ export function workpad(server) {
 
     if (resp instanceof esErrors['401']) return boom.unauthorized();
 
-    if (resp instanceof esErrors['403'])
+    if (resp instanceof esErrors['403']) {
       return boom.forbidden("Sorry, you don't have access to that");
+    }
 
     if (resp instanceof esErrors['404']) return boom.boomify(resp, { statusCode: 404 });
 

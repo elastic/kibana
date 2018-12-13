@@ -331,8 +331,9 @@ function init(plot) {
         radius >= canvasWidth / 2 - shadowLeft ||
         radius * options.series.pie.tilt >= canvasHeight / 2 - shadowTop ||
         radius <= edge
-      )
-        return; // shadow would be outside canvas, so don't draw it
+      ) {
+        return;
+      } // shadow would be outside canvas, so don't draw it
 
       ctx.save();
       ctx.translate(shadowLeft, shadowTop);
@@ -386,8 +387,9 @@ function init(plot) {
         ctx.save();
         ctx.lineWidth = options.series.pie.stroke.width;
         currentAngle = startAngle;
-        for (let i = 0; i < slices.length; ++i)
+        for (let i = 0; i < slices.length; ++i) {
           drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
+        }
 
         ctx.restore();
       }
@@ -435,8 +437,9 @@ function init(plot) {
             : maxRadius * options.series.pie.label.radius;
 
         for (let i = 0; i < slices.length; ++i) {
-          if (slices[i].percent >= options.series.pie.label.threshold * 100)
+          if (slices[i].percent >= options.series.pie.label.threshold * 100) {
             if (!drawLabel(slices[i], currentAngle, i)) return false;
+          }
 
           currentAngle += slices[i].angle;
         }
@@ -487,8 +490,9 @@ function init(plot) {
             0 - labelLeft > 0 ||
             canvasHeight - (labelTop + label.height()) < 0 ||
             canvasWidth - (labelLeft + label.width()) < 0
-          )
+          ) {
             return false;
+          }
 
           if (options.series.pie.label.background.opacity !== 0) {
             // put in the transparent background separately to avoid blended labels and label boxes
