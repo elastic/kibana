@@ -81,7 +81,7 @@ class EditRolePageUI extends Component<Props, State> {
     );
 
     return (
-      <div className="editRolePage FIXME-restrictWidth">
+      <div className="editRolePage">
         <EuiForm {...this.state.formError}>
           {this.getFormTitle()}
 
