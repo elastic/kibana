@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { LearnMoreLink } from '../../components';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
-  EuiSpacer,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
@@ -36,27 +35,13 @@ const MinAgeInputUi = props => {
         <ErrableFormRow
           id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
           label={
-            <Fragment>
+            intl.formatMessage(
               {
-                intl.formatMessage(
-                  {
-                    id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
-                    defaultMessage: 'Timing for {phase} phase',
-                  },
-                  { phase }
-                )
-              }
-              <EuiSpacer size="s" />
-              <LearnMoreLink
-                docPath="_timing.html"
-                text={
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
-                    defaultMessage="Learn about timing"
-                  />
-                }
-              />
-            </Fragment>
+                id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
+                defaultMessage: 'Timing for {phase} phase',
+              },
+              { phase }
+            )
           }
           errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
           isShowingErrors={isShowingErrors}
@@ -72,8 +57,20 @@ const MinAgeInputUi = props => {
           />
         </ErrableFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ maxWidth: 188 }}>
-        <EuiFormRow hasEmptyLabelSpace>
+      <EuiFlexItem style={{ maxWidth: 220 }}>
+        <EuiFormRow
+          label={
+            <LearnMoreLink
+              docPath="_timing.html"
+              text={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                  defaultMessage="Learn about timing"
+                />
+              }
+            />
+          }
+        >
           <EuiSelect
             aria-label={intl.formatMessage(
               {
