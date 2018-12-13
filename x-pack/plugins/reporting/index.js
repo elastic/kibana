@@ -16,7 +16,7 @@ import { checkLicenseFactory } from './server/lib/check_license';
 import { validateConfig } from './server/lib/validate_config';
 import { validateMaxContentLength } from './server/lib/validate_max_content_length';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
-import { createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
+import { CHROMIUM, createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
 import { getReportingUsageCollector } from './server/usage';
@@ -93,7 +93,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('chromium').default('chromium'),
+            type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
             autoDownload: Joi.boolean().when('$dev', {
               is: true,
               then: Joi.default(true),
