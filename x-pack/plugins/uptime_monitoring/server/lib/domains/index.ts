@@ -6,3 +6,4 @@
 
 export { UMAuthDomain } from './auth';
 export { UMPingsDomain } from './pings';
+export { UMMonitorsDomain } from './monitors';

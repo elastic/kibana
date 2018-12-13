@@ -5,6 +5,7 @@
  */
 
 import { createLatestMonitorsResolvers, latestMonitorsSchema } from './latest_monitors';
+import { createMonitorsResolvers, monitorsSchema } from './monitor_charts';
 import { createPingsResolvers, pingsSchema } from './pings';
 import { CreateUMGraphQLResolvers } from './types';
 import { unsignedIntegerResolverFunctions, unsignedIntegerSchema } from './unsigned_int_scalar';
@@ -14,5 +15,11 @@ export const resolvers: CreateUMGraphQLResolvers[] = [
   createLatestMonitorsResolvers,
   createPingsResolvers,
   unsignedIntegerResolverFunctions,
+  createMonitorsResolvers,
 ];
-export const typeDefs: any[] = [latestMonitorsSchema, pingsSchema, unsignedIntegerSchema];
+export const typeDefs: any[] = [
+  latestMonitorsSchema,
+  pingsSchema,
+  unsignedIntegerSchema,
+  monitorsSchema,
+];
