@@ -29,10 +29,15 @@ interface MonitorChartsProps {
   dateRangeStart: number;
   dateRangeEnd: number;
   monitorId: string;
+  autorefreshInterval: number;
+  autorefreshEnabled: boolean;
 }
 
 export const MonitorCharts = (props: MonitorChartsProps) => (
-  <Query pollInterval={1000} query={createGetMonitorChartsQuery({ ...props })}>
+  <Query
+    pollInterval={props.autorefreshEnabled ? props.autorefreshInterval : undefined}
+    query={createGetMonitorChartsQuery({ ...props })}
+  >
     {({ loading, error, data }) => {
       if (loading) {
         return 'Loading...';

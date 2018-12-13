@@ -26,6 +26,8 @@ interface MonitorPageProps {
   match: { params: { id: string } };
   dateRangeStart: number;
   dateRangeEnd: number;
+  autorefreshEnabled: boolean;
+  autorefreshInterval: number;
 }
 
 export class MonitorPage extends React.Component<MonitorPageProps> {
@@ -38,7 +40,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
   }
 
   public render() {
-    const { dateRangeStart, dateRangeEnd } = this.props;
+    const { autorefreshEnabled, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.props;
     const id = decodeURIComponent(this.props.match.params.id);
     return (
       <Fragment>
@@ -55,6 +57,8 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
               dateRangeStart={dateRangeStart}
               dateRangeEnd={dateRangeEnd}
               valueOfSelectedMonitor={id}
+              autorefreshEnabled={autorefreshEnabled}
+              autorefreshInterval={autorefreshInterval}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -63,14 +67,24 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
           dateRangeStart={dateRangeStart}
           dateRangeEnd={dateRangeEnd}
           monitorId={id}
+          autorefreshEnabled={autorefreshEnabled}
+          autorefreshInterval={autorefreshInterval}
         />
         <EuiSpacer />
-        <MonitorCharts monitorId={id} dateRangeStart={dateRangeStart} dateRangeEnd={dateRangeEnd} />
+        <MonitorCharts
+          monitorId={id}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          autorefreshEnabled={autorefreshEnabled}
+          autorefreshInterval={autorefreshInterval}
+        />
         <EuiSpacer />
         <Pings
           dateRangeStart={this.props.dateRangeStart}
           dateRangeEnd={this.props.dateRangeEnd}
           monitorId={id}
+          autorefreshEnabled={autorefreshEnabled}
+          autorefreshInterval={autorefreshInterval}
         />
       </Fragment>
     );

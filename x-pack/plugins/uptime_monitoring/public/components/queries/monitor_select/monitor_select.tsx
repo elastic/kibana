@@ -15,10 +15,15 @@ interface MonitorSelectProps {
   dateRangeStart: number;
   dateRangeEnd: number;
   valueOfSelectedMonitor?: string;
+  autorefreshInterval: number;
+  autorefreshEnabled: boolean;
 }
 
 export const MonitorSelect = (props: MonitorSelectProps) => (
-  <Query pollInterval={1000} query={createGetLatestMonitorsQuery({ ...props })}>
+  <Query
+    pollInterval={props.autorefreshEnabled ? props.autorefreshInterval : undefined}
+    query={createGetLatestMonitorsQuery({ ...props })}
+  >
     {({ loading, error, data }) => {
       if (loading) {
         return 'Loading...';

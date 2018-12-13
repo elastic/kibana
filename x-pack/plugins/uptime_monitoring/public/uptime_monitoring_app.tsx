@@ -32,7 +32,7 @@ import { MonitorPage, OverviewPage } from './pages';
 
 interface UptimeAppState {
   breadcrumbs: Breadcrumb[];
-  autorefresh: boolean;
+  autorefreshEnabled: boolean;
   popoverIsOpen: boolean;
   selectedAutorefresh: any;
   autorefreshOptions: any[];
@@ -47,7 +47,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
     const { isUsingK7Design, kibanaBreadcrumbs, updateBreadcrumbs } = this.props;
     let initialBreadcrumbs: Breadcrumb[];
-    const dateRangeEnd = moment.now();
+    const dateRangeEnd = moment()
+      .add(2, 'hours')
+      .valueOf();
     const dateRangeStart = moment()
       .subtract(1, 'day')
       .valueOf();
@@ -70,7 +72,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       { label: '30m', value: minsToMillis(30) },
     ];
     this.state = {
-      autorefresh: false,
+      autorefreshEnabled: false,
       breadcrumbs: initialBreadcrumbs,
       popoverIsOpen: false,
       autorefreshOptions,
@@ -113,7 +115,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 )}
               </EuiHeaderSection>
               <EuiHeaderSection side="right">
-                <EuiHeaderSectionItem>
+                <EuiHeaderSectionItem border="none">
                   <EuiPopover
                     id="autorefresPopover"
                     button={
@@ -122,21 +124,21 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         iconSide="right"
                         onClick={() => this.setState({ popoverIsOpen: true })}
                       >
-                        {this.state.autorefresh
+                        {this.state.autorefreshEnabled
                           ? 'Autorefresh every ' + this.state.selectedAutorefresh.label
                           : 'Autorefresh Disabled'}
                       </EuiButton>
                     }
                     closePopover={() => this.setState({ popoverIsOpen: false })}
                     isOpen={this.state.popoverIsOpen}
-                    style={{ paddingTop: '10px', paddingRight: '8px' }}
+                    style={{ paddingLeft: '8px', paddingTop: '10px', paddingRight: '8px' }}
                   >
                     <EuiFlexGroup direction="column">
                       <EuiFlexItem>
                         <EuiSwitch
                           label="Auto-refresh"
-                          checked={this.state.autorefresh}
-                          onChange={e => this.setState({ autorefresh: e.target.checked })}
+                          checked={this.state.autorefreshEnabled}
+                          onChange={e => this.setState({ autorefreshEnabled: e.target.checked })}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
@@ -170,6 +172,8 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       dateRangeStart={this.state.dateRangeStart}
                       dateRangeEnd={this.state.dateRangeEnd}
                       updateBreadcrumbs={this.setBreadcrumbs}
+                      autorefreshEnabled={this.state.autorefreshEnabled}
+                      autorefreshInterval={this.state.selectedAutorefresh.value}
                     />
                   )}
                 />

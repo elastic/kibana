@@ -14,10 +14,15 @@ interface MonitorStatusBarProps {
   dateRangeStart: number;
   dateRangeEnd: number;
   monitorId: string;
+  autorefreshInterval: number;
+  autorefreshEnabled: boolean;
 }
 
 export const MonitorStatusBar = (props: MonitorStatusBarProps) => (
-  <Query pollInterval={1000} query={createGetMonitorStatusBarQuery({ ...props })}>
+  <Query
+    pollInterval={props.autorefreshEnabled ? props.autorefreshInterval : undefined}
+    query={createGetMonitorStatusBarQuery({ ...props })}
+  >
     {({ loading, error, data }) => {
       if (loading) {
         return 'Loading...';

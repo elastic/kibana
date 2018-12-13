@@ -26,6 +26,8 @@ interface PingListProps {
   monitorId?: string;
   dateRangeStart: number;
   dateRangeEnd: number;
+  autorefreshInterval: number;
+  autorefreshEnabled: boolean;
 }
 
 interface PingListState {
@@ -48,11 +50,17 @@ export class Pings extends React.Component<PingListProps, PingListState> {
     };
   }
   public render() {
-    const { monitorId, dateRangeStart, dateRangeEnd } = this.props;
+    const {
+      monitorId,
+      dateRangeStart,
+      dateRangeEnd,
+      autorefreshEnabled,
+      autorefreshInterval,
+    } = this.props;
     const { statusOptions, selectedOption } = this.state;
     return (
       <Query
-        pollInterval={1000}
+        pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
         query={createGetPingsQuery({
           monitorId,
           dateRangeStart,
