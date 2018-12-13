@@ -24,7 +24,6 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiSpacer,
   EuiSearchBar,
   EuiSwitch,
@@ -39,7 +38,6 @@ import {
   EuiTableRowCellCheckbox,
   EuiTitle,
   EuiText,
-  EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
 
