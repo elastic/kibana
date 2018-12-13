@@ -13,12 +13,7 @@ import {
   addPreviewLayer,
   removeLayer,
   clearTemporaryLayers,
-  updateLayerLabel,
-  // updateLayerShowAtAllZoomLevels,
-  updateLayerMinZoom,
-  updateLayerMaxZoom,
   setSelectedLayer,
-  updateLayerAlphaValue
 } from "../../actions/store_actions";
 import _ from 'lodash';
 
@@ -51,10 +46,6 @@ function mapDispatchToProps(dispatch) {
       dispatch(setSelectedLayer(id));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
-    updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
-    updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
-    updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
-    updateAlphaValue: (id, alphaValue) => dispatch(updateLayerAlphaValue(id, alphaValue))
   };
 }
 

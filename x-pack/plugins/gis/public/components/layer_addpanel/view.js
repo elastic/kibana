@@ -23,10 +23,7 @@ import {
   EuiTitle,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiSuperSelect,
-  // EuiSwitch,
-  EuiRange,
   EuiPanel,
 } from '@elastic/eui';
 export class AddLayerPanel extends React.Component {
@@ -63,59 +60,6 @@ export class AddLayerPanel extends React.Component {
     });
     this.props.previewLayer(this.layer);
   };
-
-  _onLabelChange = (label) => {
-    this.setState({ label });
-
-    if (this.layer) {
-      this.props.updateLabel(this.layer.getId(), label);
-    }
-  };
-
-  _onZoomRangeChange = () => {
-    if (this.layer) {
-      this.props.updateMinZoom(this.layer.getId(), this.state.minZoom);
-      this.props.updateMaxZoom(this.layer.getId(), this.state.maxZoom);
-    }
-  }
-
-  _onMinZoomChange = (sanitizedValue) => {
-    // const sanitizedValue = parseInt(event.target.value, 10);
-    const minZoom = sanitizedValue >= 24 ? 23 : sanitizedValue;
-    this.setState((prevState) => {
-      if (minZoom >= prevState.maxZoom) {
-        return {
-          minZoom,
-          maxZoom: minZoom + 1,
-        };
-      }
-
-      return { minZoom };
-    }, this._onZoomRangeChange);
-  };
-
-  _onMaxZoomChange = (sanitizedValue) => {
-    // const sanitizedValue = parseInt(event.target.value, 10);
-    const maxZoom = sanitizedValue <= 0 ? 1 : sanitizedValue;
-    this.setState((prevState) => {
-      if (maxZoom <= prevState.minZoom) {
-        return {
-          minZoom: maxZoom - 1,
-          maxZoom
-        };
-      }
-
-      return { maxZoom };
-    }, this._onZoomRangeChange);
-  };
-
-  _onAlphaValueChange = alphaValue => {
-    this.setState({ alphaValue }, () => {
-      if (this.layer) {
-        this.props.updateAlphaValue(this.layer.getId(), this.state.alphaValue);
-      }
-    });
-  }
 
   _onSourceTypeChange = (sourceType) => {
     this.setState({
@@ -278,53 +222,6 @@ export class AddLayerPanel extends React.Component {
       default:
         throw new Error(`Unexepected source type: ${this.state.sourceType}`);
     }
-  }
-
-  _renderZoomSliders() {
-    return (
-      <Fragment>
-        <EuiFormRow
-          label="Min zoom"
-          compressed
-        >
-          <EuiRange
-            min={0}
-            max={24}
-            value={this.state.minZoom.toString()}
-            onChange={this._onMinZoomChange}
-            showInput
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label="Max zoom"
-          compressed
-        >
-          <EuiRange
-            min={0}
-            max={24}
-            value={this.state.maxZoom.toString()}
-            onChange={this._onMaxZoomChange}
-            showInput
-          />
-        </EuiFormRow>
-      </Fragment>
-    );
-  }
-
-  _renderLabel() {
-    return (
-      <EuiFormRow
-        label="Label"
-        compressed
-      >
-        <EuiFieldText
-          value={this.state.label}
-          onChange={this._onLabelChange}
-          aria-label="layer display name"
-        />
-      </EuiFormRow>
-    );
   }
 
   _renderAddLayerForm() {
