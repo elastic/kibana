@@ -31,19 +31,9 @@ import {
   createJavaClientInstructions,
 } from '../instructions/apm_client_instructions';
 
-const createServerUrlInstruction = () => ({
-  title: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.title', {
-    defaultMessage: 'APM Server endpoint',
-  }),
-  textPre: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.textPre', {
-    defaultMessage:
-      'Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard. \
-You will also need the APM Server secret token, which was generated on deployment.',
-  }),
-});
-
-export function createElasticCloudInstructions() {
-  const SERVER_URL_INSTRUCTION = createServerUrlInstruction();
+export function createElasticCloudInstructions(config) {
+  const apmServerUrl = config.get('xpack.cloud.apm.url');
+  const secretToken = config.get('xpack.cloud.apm.secret_token');
 
   return {
     instructionSets: [
@@ -54,35 +44,35 @@ export function createElasticCloudInstructions() {
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.NODE,
-            instructions: [SERVER_URL_INSTRUCTION, ...createNodeClientInstructions()],
+            instructions: createNodeClientInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.DJANGO,
-            instructions: [SERVER_URL_INSTRUCTION, ...createDjangoClientInstructions()],
+            instructions: createDjangoClientInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.FLASK,
-            instructions: [SERVER_URL_INSTRUCTION, ...createFlaskClientInstructions()],
+            instructions: createFlaskClientInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.RAILS,
-            instructions: [SERVER_URL_INSTRUCTION, ...createRailsClientInstructions()],
+            instructions: createRailsClientInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.RACK,
-            instructions: [SERVER_URL_INSTRUCTION, ...createRackClientInstructions()],
+            instructions: createRackClientInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.JS,
-            instructions: [SERVER_URL_INSTRUCTION, ...createJsClientInstructions()],
+            instructions: createJsClientInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.GO,
-            instructions: [SERVER_URL_INSTRUCTION, ...createGoClientInstructions()],
+            instructions: createGoClientInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.JAVA,
-            instructions: [SERVER_URL_INSTRUCTION, ...createJavaClientInstructions()],
+            instructions: createJavaClientInstructions(apmServerUrl, secretToken),
           },
         ],
       },
