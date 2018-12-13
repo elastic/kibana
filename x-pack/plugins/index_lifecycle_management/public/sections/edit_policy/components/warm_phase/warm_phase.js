@@ -202,6 +202,12 @@ class WarmPhaseUi extends PureComponent {
                             await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                           }}
                           min={0}
+                          placeholder={
+                            intl.formatMessage({
+                              id: 'xpack.indexLifecycleMgmt.warmPhase.keepSamePlaceholder',
+                              defaultMessage: 'Keep same'
+                            })
+                          }
                         />
                       </ErrableFormRow>
                     </EuiFlexItem>

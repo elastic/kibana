@@ -12,9 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiFormRow,
   EuiFieldNumber,
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiButton,
 } from '@elastic/eui';
@@ -55,9 +53,9 @@ class ColdPhaseUi extends PureComponent {
       setPhaseData,
       showNodeDetailsFlyout,
       phaseData,
-      warmPhaseReplicaCount,
       errors,
       isShowingErrors,
+      intl
     } = this.props;
 
     return (
@@ -161,18 +159,14 @@ class ColdPhaseUi extends PureComponent {
                         await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                       }}
                       min={0}
+                      placeholder={
+                        intl.formatMessage({
+                          id: 'xpack.indexLifecycleMgmt.coldPhase.keepSamePlaceholder',
+                          defaultMessage: 'Keep same'
+                        })
+                      }
                     />
                   </ErrableFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiButtonEmpty
-                      flush="left"
-                      onClick={() => setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)}
-                    >
-                    Set to same number as warm phase
-                    </EuiButtonEmpty>
-                  </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </Fragment>
