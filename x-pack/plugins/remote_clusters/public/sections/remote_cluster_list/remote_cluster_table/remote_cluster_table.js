@@ -19,6 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { CRUD_APP_BASE_PATH } from '../../../constants';
 import { ConnectionStatus, RemoveClusterButton } from '../components';
 
 export class RemoteClusterTableUi extends Component {
@@ -52,7 +53,7 @@ export class RemoteClusterTableUi extends Component {
     const { clusters } = this.props;
     const { queryText } = this.state;
 
-    if(queryText) {
+    if (queryText) {
       return clusters.filter(cluster => {
         const { name, seeds } = cluster;
         const normalizedName = name.toLowerCase();
@@ -159,7 +160,7 @@ export class RemoteClusterTableUi extends Component {
       width: '100px',
       actions: [{
         render: ({ name, isConfiguredByNode }) => {
-          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
+          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription', {
             defaultMessage: 'Delete remote cluster',
           });
 
@@ -180,19 +181,27 @@ export class RemoteClusterTableUi extends Component {
           );
         },
       }, {
-        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditAriaLabel', {
-          defaultMessage: 'Edit remote cluster',
-        }),
-        description: i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
-          defaultMessage: 'Edit remote cluster',
-        }),
-        color: 'primary',
-        icon: 'pencil',
-        type: 'icon',
-        onClick: () => {},
-        // Implmenet this once EUI supports it.
-        // href: `#${CRUD_APP_BASE_PATH}/edit/${name}`,
-        enabled: ({ isConfiguredByNode }) => !isConfiguredByNode,
+        render: ({ name, isConfiguredByNode }) => {
+          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
+            defaultMessage: 'Edit remote cluster',
+          });
+
+          return (
+            <EuiToolTip
+              content={isConfiguredByNode ? undefined : label}
+              delay="long"
+            >
+              <EuiButtonIcon
+                aria-label={label}
+                iconType="pencil"
+                color="primary"
+                isDisabled={isConfiguredByNode}
+                href={`#${CRUD_APP_BASE_PATH}/edit/${name}`}
+                disabled={isConfiguredByNode}
+              />
+            </EuiToolTip>
+          );
+        },
       }],
     }];
 
