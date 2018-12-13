@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, get, last } from 'lodash';
+import { get, last } from 'lodash';
 import { isNumber } from 'lodash';
 import moment from 'moment';
 
@@ -58,7 +58,7 @@ export function createNodeItem(
   node: InfraBucket,
   bucket: InfraBucket
 ): InfraNode {
-  const nodeDoc = first(get(node, 'nodeDetails.hits.hits'));
+  const nodeDoc = get(node, ['nodeDetails', 'hits', 'hits', 0]);
   return {
     metric: createNodeMetrics(options, node, bucket),
     path: [

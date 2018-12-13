@@ -114,7 +114,7 @@
             "description": "A hierarchy of metadata entries by node",
             "args": [
               {
-                "name": "nodeName",
+                "name": "nodeId",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
@@ -806,7 +806,11 @@
               "ofType": {
                 "kind": "LIST",
                 "name": null,
-                "ofType": { "kind": "OBJECT", "name": "InfraNodeFeature", "ofType": null }
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "InfraNodeFeature", "ofType": null }
+                }
               }
             },
             "isDeprecated": false,
@@ -1594,7 +1598,11 @@
             "name": "displayName",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }

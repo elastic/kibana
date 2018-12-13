@@ -11,7 +11,7 @@ export const metadataSchema = gql`
   type InfraNodeMetadata {
     id: ID!
     name: String!
-    features: [InfraNodeFeature]!
+    features: [InfraNodeFeature!]!
   }
 
   type InfraNodeFeature {
@@ -21,6 +21,6 @@ export const metadataSchema = gql`
 
   extend type InfraSource {
     "A hierarchy of metadata entries by node"
-    metadataByNode(nodeName: String!, nodeType: InfraNodeType!): InfraNodeMetadata!
+    metadataByNode(nodeId: String!, nodeType: InfraNodeType!): InfraNodeMetadata!
   }
 `;

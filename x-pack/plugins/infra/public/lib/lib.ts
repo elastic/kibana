@@ -100,8 +100,8 @@ export interface InfraField {
 export type InfraWaffleData = InfraWaffleMapGroup[];
 
 export interface InfraWaffleMapNode {
+  pathId: string;
   id: string;
-  nodeId: string;
   name: string;
   path: InfraNodePath[];
   metric: InfraNodeMetric;

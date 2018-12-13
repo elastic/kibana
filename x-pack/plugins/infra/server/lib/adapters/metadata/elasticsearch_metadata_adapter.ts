@@ -23,7 +23,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   public async getMetricMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: 'host' | 'container' | 'pod'
   ): Promise<InfraMetricsAdapterResponse> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
@@ -33,7 +33,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         query: {
           bool: {
             filter: {
-              term: { [idFieldName]: nodeName },
+              term: { [idFieldName]: nodeId },
             },
           },
         },
@@ -71,7 +71,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     const sampleDoc = first(response.hits.hits);
 
     return {
-      id: nodeName,
+      id: nodeId,
       name: get(sampleDoc, `_source.${NAME_FIELDS[nodeType]}`),
       buckets,
     };
@@ -80,7 +80,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   public async getLogMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: 'host' | 'container' | 'pod'
   ): Promise<InfraMetricsAdapterResponse> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
@@ -90,7 +90,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         query: {
           bool: {
             filter: {
-              term: { [idFieldName]: nodeName },
+              term: { [idFieldName]: nodeId },
             },
           },
         },
@@ -128,7 +128,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     const sampleDoc = first(response.hits.hits);
 
     return {
-      id: nodeName,
+      id: nodeId,
       name: get(sampleDoc, `_source.${NAME_FIELDS[nodeType]}`),
       buckets,
     };

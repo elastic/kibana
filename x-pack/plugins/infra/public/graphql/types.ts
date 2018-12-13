@@ -93,7 +93,7 @@ export interface InfraNodeMetadata {
 
   name: string;
 
-  features: (InfraNodeFeature | null)[];
+  features: InfraNodeFeature[];
 }
 
 export interface InfraNodeFeature {
@@ -184,7 +184,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  displayName?: string | null;
+  displayName: string;
 }
 
 export interface InfraNodeMetric {
@@ -262,7 +262,7 @@ export interface SourceQueryArgs {
   id: string;
 }
 export interface MetadataByNodeInfraSourceArgs {
-  nodeName: string;
+  nodeId: string;
 
   nodeType: InfraNodeType;
 }
@@ -434,7 +434,7 @@ export namespace MetadataQuery {
 
     name: string;
 
-    features: (Features | null)[];
+    features: Features[];
   };
 
   export type Features = {
@@ -536,7 +536,7 @@ export namespace WaffleNodesQuery {
 
     value: string;
 
-    displayName?: string | null;
+    displayName: string;
   };
 
   export type Metric = {

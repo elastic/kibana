@@ -14,7 +14,7 @@ export const nodesSchema: any = gql`
 
   type InfraNodePath {
     value: String!
-    displayName: String
+    displayName: String!
   }
 
   type InfraNode {

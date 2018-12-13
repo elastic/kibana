@@ -17,17 +17,17 @@ export class InfraMetadataDomain {
   public async getMetadata(
     req: InfraFrameworkRequest,
     sourceId: string,
-    nodeName: string,
+    nodeId: string,
     nodeType: string
   ) {
     const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
     const metricsPromise = this.adapter.getMetricMetadata(
       req,
       sourceConfiguration,
-      nodeName,
+      nodeId,
       nodeType
     );
-    const logsPromise = this.adapter.getLogMetadata(req, sourceConfiguration, nodeName, nodeType);
+    const logsPromise = this.adapter.getLogMetadata(req, sourceConfiguration, nodeId, nodeType);
 
     const metrics = await metricsPromise;
     const logs = await logsPromise;
@@ -41,7 +41,7 @@ export class InfraMetadataDomain {
     });
 
     const id = metrics.id || logs.id;
-    const name = metrics.name || logs.name;
+    const name = metrics.name || logs.name || id;
     return { id, name, features: metricMetadata.concat(logMetadata) };
   }
 }

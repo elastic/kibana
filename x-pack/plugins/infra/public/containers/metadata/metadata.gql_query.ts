@@ -10,7 +10,7 @@ export const metadataQuery = gql`
   query MetadataQuery($sourceId: ID!, $nodeId: String!, $nodeType: InfraNodeType!) {
     source(id: $sourceId) {
       id
-      metadataByNode(nodeName: $nodeId, nodeType: $nodeType) {
+      metadataByNode(nodeId: $nodeId, nodeType: $nodeType) {
         name
         features {
           name

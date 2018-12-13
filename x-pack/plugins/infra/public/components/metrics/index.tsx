@@ -18,7 +18,7 @@ interface Props {
   metrics: InfraMetricData[];
   layouts: InfraMetricLayout[];
   loading: boolean;
-  nodeName: string;
+  nodeId: string;
   displayName: string;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   intl: InjectedIntl;

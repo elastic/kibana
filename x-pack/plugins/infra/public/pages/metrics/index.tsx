@@ -68,7 +68,7 @@ export const MetricDetail = withTheme(
 
       public render() {
         const { intl } = this.props;
-        const nodeName = this.props.match.params.node;
+        const nodeId = this.props.match.params.node;
         const nodeType = this.props.match.params.type as InfraNodeType;
         const layoutCreator = layoutCreators[nodeType];
         if (!layoutCreator) {
@@ -103,7 +103,7 @@ export const MetricDetail = withTheme(
                     layouts={layouts}
                     sourceId={sourceId}
                     nodeType={nodeType}
-                    nodeId={nodeName}
+                    nodeId={nodeId}
                   >
                     {({ displayName, filteredLayouts }) => {
                       const breadcrumbs = [{ text: displayName }];
@@ -120,7 +120,7 @@ export const MetricDetail = withTheme(
                               sourceId={sourceId}
                               timerange={currentTimeRange as InfraTimerangeInput}
                               nodeType={nodeType}
-                              nodeId={nodeName}
+                              nodeId={nodeId}
                             >
                               {({ metrics, error, loading }) => {
                                 if (error) {
@@ -181,7 +181,7 @@ export const MetricDetail = withTheme(
                                               <EuiPageContentWithRelative>
                                                 <Metrics
                                                   displayName={displayName}
-                                                  nodeName={nodeName}
+                                                  nodeId={nodeId}
                                                   layouts={filteredLayouts}
                                                   metrics={metrics}
                                                   loading={

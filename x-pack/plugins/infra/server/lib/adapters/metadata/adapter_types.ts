@@ -17,13 +17,13 @@ export interface InfraMetadataAdapter {
   getMetricMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: string
   ): Promise<InfraMetricsAdapterResponse>;
   getLogMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: string
   ): Promise<InfraMetricsAdapterResponse>;
 }

@@ -121,7 +121,7 @@ export interface InfraNodeMetadata {
 
   name: string;
 
-  features: (InfraNodeFeature | null)[];
+  features: InfraNodeFeature[];
 }
 
 export interface InfraNodeFeature {
@@ -212,7 +212,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  displayName?: string | null;
+  displayName: string;
 }
 
 export interface InfraNodeMetric {
@@ -290,7 +290,7 @@ export interface SourceQueryArgs {
   id: string;
 }
 export interface MetadataByNodeInfraSourceArgs {
-  nodeName: string;
+  nodeId: string;
 
   nodeType: InfraNodeType;
 }
@@ -505,7 +505,7 @@ export namespace InfraSourceResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context, MetadataByNodeArgs>;
   export interface MetadataByNodeArgs {
-    nodeName: string;
+    nodeId: string;
 
     nodeType: InfraNodeType;
   }
@@ -760,7 +760,7 @@ export namespace InfraNodeMetadataResolvers {
 
     name?: NameResolver<string, TypeParent, Context>;
 
-    features?: FeaturesResolver<(InfraNodeFeature | null)[], TypeParent, Context>;
+    features?: FeaturesResolver<InfraNodeFeature[], TypeParent, Context>;
   }
 
   export type IdResolver<R = string, Parent = InfraNodeMetadata, Context = InfraContext> = Resolver<
@@ -774,7 +774,7 @@ export namespace InfraNodeMetadataResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
   export type FeaturesResolver<
-    R = (InfraNodeFeature | null)[],
+    R = InfraNodeFeature[],
     Parent = InfraNodeMetadata,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
@@ -1049,7 +1049,7 @@ export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
 
-    displayName?: DisplayNameResolver<string | null, TypeParent, Context>;
+    displayName?: DisplayNameResolver<string, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
@@ -1058,7 +1058,7 @@ export namespace InfraNodePathResolvers {
     Context
   >;
   export type DisplayNameResolver<
-    R = string | null,
+    R = string,
     Parent = InfraNodePath,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
