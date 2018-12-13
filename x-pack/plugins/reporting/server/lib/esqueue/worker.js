@@ -350,17 +350,20 @@ export class Worker extends events.EventEmitter {
         excludes: [ 'output.content' ]
       },
       query: {
-        constant_score: {
+        bool: {
           filter: {
             bool: {
-              filter: { term: { jobtype: this.jobtype } },
+              minimum_should_match: 1,
+              must: { term: { jobtype: this.jobtype } },
               should: [
                 { term: { status: 'pending' } },
-                { bool: {
-                  filter: [
-                    { term: { status: 'processing' } },
-                    { range: { process_expiration: { lte: nowTime } } }
-                  ] }
+                {
+                  bool: {
+                    must: [
+                      { term: { status: 'processing' } },
+                      { range: { process_expiration: { lte: nowTime } } }
+                    ]
+                  }
                 }
               ]
             }

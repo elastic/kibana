@@ -10,7 +10,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID
 } from 'x-pack/plugins/apm/common/constants';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { DiscoverButton } from './DiscoverButton';
 
 function getDiscoverQuery(transaction: Transaction) {
