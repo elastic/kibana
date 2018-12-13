@@ -246,7 +246,7 @@ export class JobsListView extends Component {
     this.setState({ isRefreshing: false });
   }
 
-  refreshJobSummaryList(forceRefresh = false) {
+  async refreshJobSummaryList(forceRefresh = false) {
     if (forceRefresh === true || this.blockRefresh === false) {
 
       // Set loading to true for jobs_list table for initial job loading
@@ -255,33 +255,31 @@ export class JobsListView extends Component {
       }
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
-
-      ml.jobs.jobsSummary(expandedJobsIds)
-        .then((jobs) => {
-          const fullJobsList = {};
-          const jobsSummaryList = jobs.map((job) => {
-            if (job.fullJob !== undefined) {
-              fullJobsList[job.id] = job.fullJob;
-              delete job.fullJob;
-            }
-            job.latestTimestampSortValue = (job.latestTimestampMs || 0);
-            return job;
-          });
-          const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
-          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false }, () => {
-            this.refreshSelectedJobs();
-          });
-
-          Object.keys(this.updateFunctions).forEach((j) => {
-            this.updateFunctions[j].setState({ job: fullJobsList[j] });
-          });
-
-          this.isDoneRefreshing();
-        })
-        .catch((error) => {
-          console.error(error);
-          this.setState({ loading: false });
+      try {
+        const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
+        const fullJobsList = {};
+        const jobsSummaryList = jobs.map((job) => {
+          if (job.fullJob !== undefined) {
+            fullJobsList[job.id] = job.fullJob;
+            delete job.fullJob;
+          }
+          job.latestTimestampSortValue = (job.latestTimestampMs || 0);
+          return job;
         });
+        const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
+        this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false }, () => {
+          this.refreshSelectedJobs();
+        });
+
+        Object.keys(this.updateFunctions).forEach((j) => {
+          this.updateFunctions[j].setState({ job: fullJobsList[j] });
+        });
+
+        this.isDoneRefreshing();
+      } catch (error) {
+        console.error(error);
+        this.setState({ loading: false });
+      }
     }
   }
 
