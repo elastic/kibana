@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import { SECTIONS, API_STATUS } from '../../constants';
 import {
   loadAutoFollowPatterns as loadAutoFollowPatternsRequest,
@@ -12,7 +13,6 @@ import {
   deleteAutoFollowPattern as deleteAutoFollowPatternRequest,
 } from '../../services/api';
 import routing from '../../services/routing';
-import { showApiSuccess, showApiError } from '../../services/api_notifications';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
 
@@ -65,7 +65,7 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isEditing = false) 
           values: { name: id },
         });
 
-      showApiSuccess(successMessage);
+      toastNotifications.addSuccess(successMessage);
       routing.navigate('/home');
     },
   })
@@ -75,6 +75,7 @@ export const deleteAutoFollowPattern = (id) => (
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_DELETE,
     scope: `${scope}-delete`,
+    status: API_STATUS.DELETING,
     handler: async () => (
       deleteAutoFollowPatternRequest(id)
     ),
@@ -95,7 +96,7 @@ export const deleteAutoFollowPattern = (id) => (
             values: { name: response.errors[0].id },
           });
 
-        showApiError(errorMessage);
+        toastNotifications.addDanger(errorMessage);
       }
 
       if (response.itemsDeleted.length) {
@@ -111,7 +112,7 @@ export const deleteAutoFollowPattern = (id) => (
             values: { name: response.itemsDeleted[0] },
           });
 
-        showApiSuccess(successMessage);
+        toastNotifications.addSuccess(successMessage);
       }
     }
   })

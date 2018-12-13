@@ -22,6 +22,12 @@ class Provider extends PureComponent {
     ids: null
   }
 
+  onMouseOverModal = (event) => {
+    // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
+    // the modal can trigger the tooltip. Stopping propagation prevents this.
+    event.stopPropagation();
+  };
+
   deleteAutoFollowPattern = (id) => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
@@ -71,6 +77,7 @@ class Provider extends PureComponent {
               defaultMessage: 'Remove',
             })
           }
+          onMouseOver={this.onMouseOverModal}
         >
           <Fragment>
             <p>

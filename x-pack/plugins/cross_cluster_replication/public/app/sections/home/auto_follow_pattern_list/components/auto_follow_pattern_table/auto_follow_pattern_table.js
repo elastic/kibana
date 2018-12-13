@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -13,7 +13,10 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiToolTip,
+  EuiOverlayMask,
+  EuiLoadingKibana
 } from '@elastic/eui';
+import { API_STATUS } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
 import { getPrefixSuffixFromFollowPattern } from '../../../../../services/auto_follow_pattern';
@@ -153,6 +156,19 @@ export class AutoFollowPatternTableUI extends PureComponent {
     }];
   }
 
+  renderLoading = () => {
+    const { apiStatusDelete } = this.props;
+
+    if (apiStatusDelete === API_STATUS.DELETING) {
+      return (
+        <EuiOverlayMask>
+          <EuiLoadingKibana size="xl"/>
+        </EuiOverlayMask>
+      );
+    }
+    return null;
+  }
+
   render() {
     const {
       selectedItems,
@@ -179,7 +195,8 @@ export class AutoFollowPatternTableUI extends PureComponent {
         <AutoFollowPatternDeleteProvider>
           {(deleteAutoFollowPattern) => (
             <EuiButton
-              iconType="minusInCircle"
+              iconType="trash"
+              color="danger"
               onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
             >
               <FormattedMessage
@@ -200,16 +217,19 @@ export class AutoFollowPatternTableUI extends PureComponent {
     };
 
     return (
-      <EuiInMemoryTable
-        items={this.getFilteredPatterns()}
-        itemId="name"
-        columns={this.getTableColumns()}
-        search={search}
-        pagination={pagination}
-        sorting={sorting}
-        selection={selection}
-        isSelectable={true}
-      />
+      <Fragment>
+        <EuiInMemoryTable
+          items={this.getFilteredPatterns()}
+          itemId="name"
+          columns={this.getTableColumns()}
+          search={search}
+          pagination={pagination}
+          sorting={sorting}
+          selection={selection}
+          isSelectable={true}
+        />
+        {this.renderLoading()}
+      </Fragment>
     );
   }
 }
