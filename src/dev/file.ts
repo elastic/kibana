@@ -45,7 +45,7 @@ export class File {
   }
 
   public isTypescript() {
-    return this.ext === '.ts' || this.ext === '.tsx';
+    return this.ext === '.ts' || this.ext === '.tsx' || this.ext === '.d.ts';
   }
 
   public isFixture() {

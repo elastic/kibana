@@ -6,8 +6,6 @@ rulesDirectory:
   - tslint-plugin-prettier
   - src/dev/tslint/rules
 
-ignoreDefinitionFiles: false
-
 rules:
   prettier: true
   object-literal-sort-keys: false
