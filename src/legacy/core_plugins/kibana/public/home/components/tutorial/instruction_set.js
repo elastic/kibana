@@ -132,7 +132,7 @@ class InstructionSetUi extends React.Component {
         return 'danger';
       default:
         throw new Error(this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.unexpextedStatusCheckStateErrorDescription',
+          id: 'kbn.home.tutorial.unexpectedStatusCheckStateErrorDescription',
           defaultMessage: 'Unexpected status check state {statusCheckState}'
         }, {
           statusCheckState
