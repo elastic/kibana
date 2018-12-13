@@ -74,6 +74,7 @@ export const esaggs = () => ({
     // we should move searchSource creation inside courier request handler
     const searchSource = new SearchSource();
     searchSource.setField('index', indexPattern);
+    searchSource.setField('size', 0);
 
     const response = await courierRequestHandler({
       searchSource: searchSource,
