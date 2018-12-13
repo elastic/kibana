@@ -34,7 +34,8 @@ function executeJobFn(server) {
       }),
       map(buffer => ({
         content_type: 'application/pdf',
-        content: buffer.toString('base64')
+        content: buffer.toString('base64'),
+        size: buffer.byteLength,
       }))
     );
 

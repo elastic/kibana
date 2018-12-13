@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 import 'plugins/spaces/views/management/page_routes';
 import React from 'react';
 import {
@@ -37,7 +38,9 @@ routes.defaults(/\/management/, {
           kibanaSection.register(MANAGE_SPACES_KEY, {
             name: 'spacesManagementLink',
             order: 10,
-            display: 'Spaces',
+            display: i18n.translate('xpack.spaces.displayName', {
+              defaultMessage: 'Spaces',
+            }),
             url: `#/management/spaces/list`,
           });
         }

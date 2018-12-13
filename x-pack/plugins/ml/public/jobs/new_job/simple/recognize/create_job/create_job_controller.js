@@ -10,6 +10,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import dateMath from '@elastic/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
+import { getCreateRecognizerJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { SearchItemsProvider, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 
 
@@ -29,6 +30,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/jobs/new_job/simple/recognize', {
     template,
+    k7Breadcrumbs: getCreateRecognizerJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,

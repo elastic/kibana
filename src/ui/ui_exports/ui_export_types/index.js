@@ -62,10 +62,6 @@ export {
 } from './ui_app_extensions';
 
 export {
-  translations,
-} from './ui_i18n';
-
-export {
   link,
   links,
 } from './ui_nav_links';

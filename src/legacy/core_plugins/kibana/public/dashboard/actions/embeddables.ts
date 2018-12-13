@@ -44,9 +44,9 @@ export interface EmbeddableIsInitializedActionPayload {
 
 export interface EmbeddableIsInitializedAction
   extends KibanaAction<
-      EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED,
-      EmbeddableIsInitializedActionPayload
-    > {}
+    EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED,
+    EmbeddableIsInitializedActionPayload
+  > {}
 
 export interface SetStagedFilterActionPayload {
   panelId: PanelId;
