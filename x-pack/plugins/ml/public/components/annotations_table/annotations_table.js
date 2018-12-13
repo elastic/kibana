@@ -214,7 +214,7 @@ class AnnotationsTable extends Component {
         >
           <p>
             To create an annotation,
-            open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
+            open the <EuiLink onClick={this.openSingleMetricView}>Single Metric Viewer</EuiLink>
           </p>
         </EuiCallOut>
       );

@@ -122,22 +122,19 @@ export class TimeseriesChart extends React.Component {
       isFlyoutVisible: false,
       isSwitchChecked: true,
     };
-
-    this.closeFlyout = this.closeFlyout.bind(this);
-    this.showFlyout = this.showFlyout.bind(this);
   }
 
-  closeFlyout() {
+  closeFlyout = () => {
     const chartElement = d3.select(this.rootNode);
     chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
     this.setState({ isFlyoutVisible: false, annotation: {} });
   }
 
-  showFlyout(annotation) {
+  showFlyout = (annotation) => {
     this.setState({ isFlyoutVisible: true, annotation });
   }
 
-  handleAnnotationChange(e) {
+  handleAnnotationChange = (e) => {
     // e is a React Syntethic Event, we need to cast it to
     // a placeholder variable so it's still valid in the
     // setState() asynchronous callback
@@ -148,7 +145,7 @@ export class TimeseriesChart extends React.Component {
     });
   }
 
-  deleteAnnotation(annotation) {
+  deleteAnnotation = (annotation) => {
     const {
       deleteAnnotation,
       refresh,
@@ -168,7 +165,7 @@ export class TimeseriesChart extends React.Component {
       });
   }
 
-  indexAnnotation(annotation) {
+  indexAnnotation = (annotation) => {
     const {
       indexAnnotation,
       refresh,
@@ -1404,21 +1401,16 @@ export class TimeseriesChart extends React.Component {
   render() {
     const { annotation, isFlyoutVisible } = this.state;
 
-    const closeFlyout = this.closeFlyout.bind(this);
-    const deleteAnnotation = this.deleteAnnotation.bind(this);
-    const handleAnnotationChange = this.handleAnnotationChange.bind(this);
-    const indexAnnotation = this.indexAnnotation.bind(this);
-
     return (
       <React.Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
         {mlAnnotationsEnabled && isFlyoutVisible &&
           <AnnotationFlyout
             annotation={annotation}
-            cancelAction={closeFlyout}
-            controlFunc={handleAnnotationChange}
-            deleteAction={deleteAnnotation}
-            saveAction={indexAnnotation}
+            cancelAction={this.closeFlyout}
+            controlFunc={this.handleAnnotationChange}
+            deleteAction={this.deleteAnnotation}
+            saveAction={this.indexAnnotation}
           />
         }
       </React.Fragment>
