@@ -19,7 +19,8 @@
 
 import React, { ChangeEvent, KeyboardEvent } from 'react';
 
-import { EuiButtonEmpty, EuiFieldText, EuiFormRow, keyCodes } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { keyCodes } from '@elastic/eui/src/services/key_codes';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 export interface PanelOptionsMenuFormProps {
