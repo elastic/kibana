@@ -31,11 +31,11 @@ const getHeaders = () => {
     phase: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader', {
       defaultMessage: 'Current phase',
     }),
-    action: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionHeader', {
-      defaultMessage: 'Next action',
+    action: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.currentActionHeader', {
+      defaultMessage: 'Current action',
     }),
-    action_time_millis: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionTimeHeader', {
-      defaultMessage: 'Next action time',
+    action_time_millis: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeHeader', {
+      defaultMessage: 'Current action time',
     }),
     failed_step: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader', {
       defaultMessage: 'Failed step',
