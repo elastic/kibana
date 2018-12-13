@@ -8,7 +8,7 @@ Reporting tests have their own top level test folder because:
 
   ### Running the tests
 
-  There is more information on running x-pack tests here: https://github.com/elastic/kibana/blob/master/x-pack/README.md#running-functional-tests. Similar to running the API tests, you need to specify a reporting configuration file. Reporting currently has configuration files you can point to:
+  There is more information on running x-pack tests here: https://github.com/elastic/kibana/blob/master/x-pack/README.md#running-functional-tests. Similar to running the API tests, you need to specify a reporting configuration file. Reporting currently has two configuration files you can point to:
   - test/reporting/configs/chromium_api.js 
   - test/reporting/configs/chromium_functional.js 
 
