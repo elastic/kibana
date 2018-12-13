@@ -25,14 +25,12 @@ import { tabifyGetColumns } from './_get_columns';
  * produces a table, or a series of tables.
  *
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
- * @param {boolean} isHierarchical - vis.isHierarchical(): used to figure out if we need to build a request with metrics on every level
- * @param {boolean} columnsForAllBuckets - used to figure out if we need to return columns for each bucket/metric
- * @param {boolean} partialRows - reflects the value of vis.params.showPartialRows
+ * @param {boolean} minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
+ * @param {boolean} partialRows - vis.params.showPartialRows: determines whether to return rows with incomplete data
  * @param {Object} timeRange - time range object, if provided
  */
 function TabbedAggResponseWriter(aggs, {
-  isHierarchical = false, // eslint-disable-line no-unused-vars
-  columnsForAllBuckets,
+  minimalColumns,
   partialRows = false,
   timeRange
 } = {}) {
@@ -42,7 +40,7 @@ function TabbedAggResponseWriter(aggs, {
 
   this.aggs = aggs;
   this.removePartialRows = !partialRows;
-  this.removeColumnsForAllBuckets = !columnsForAllBuckets;
+  this.removeColumnsForAllBuckets = minimalColumns;
 
   this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.removeColumnsForAllBuckets);
   this.aggStack = [...this.columns];

@@ -27,9 +27,8 @@ import { TabifyBuckets } from './_buckets';
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {Object} esResponse - response that came back from Elasticsearch
  * @param {Object} respOpts - options object for the ResponseWriter with params set by Courier
- * @param {boolean} respOpts.isHierarchical - vis.isHierarchical(): used to figure out if we need to build a request with metrics on every level
- * @param {boolean} respOpts.columnsForAllBuckets - used to figure out if we need to return columns for each bucket/metric
- * @param {boolean} respOpts.partialRows - reflects the value of vis.params.showPartialRows
+ * @param {boolean} respOpts.minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
+ * @param {boolean} respOpts.partialRows - vis.params.showPartialRows: determines whether to return rows with incomplete data
  * @param {Object} respOpts.timeRange - time range object, if provided
  */
 export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {

@@ -49,8 +49,7 @@ describe('tabifyAggResponse Integration', function () {
     normalizeIds(vis);
 
     const resp = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly, {
-      isHierarchical: vis.isHierarchical(),
-      columnsForAllBuckets: vis.isHierarchical(),
+      minimalColumns: !vis.isHierarchical(),
     });
 
     expect(resp).to.have.property('rows').and.property('columns');
@@ -140,8 +139,7 @@ describe('tabifyAggResponse Integration', function () {
       // only complete rows, and only put the metrics at the end.
 
       const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, {
-        isHierarchical: false,
-        columnsForAllBuckets: false,
+        minimalColumns: true,
       });
 
       expectColumns(tabbed, [ext, src, os, avg]);
@@ -164,8 +162,7 @@ describe('tabifyAggResponse Integration', function () {
 
       vis.isHierarchical = _.constant(true);
       const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, {
-        isHierarchical: true,
-        columnsForAllBuckets: true,
+        minimalColumns: false,
       });
 
       expectColumns(tabbed, [ext, avg, src, avg, os, avg]);

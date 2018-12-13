@@ -129,12 +129,10 @@ describe('No global chart settings', function () {
 
   beforeEach(async () => {
     const table1 = tabifyAggResponse(stubVis1.aggs, fixtures.threeTermBuckets, {
-      isHierarchical: true,
-      columnsForAllBuckets: true,
+      minimalColumns: false,
     });
     const table2 = tabifyAggResponse(stubVis2.aggs, fixtures.threeTermBuckets, {
-      isHierarchical: true,
-      columnsForAllBuckets: true,
+      minimalColumns: false,
     });
     data1 = await responseHandler(table1);
     data2 = await responseHandler(table2);
@@ -226,8 +224,7 @@ describe('Vislib PieChart Class Test Suite', function () {
 
       beforeEach(async () => {
         const table = tabifyAggResponse(stubVis.aggs, fixtures.threeTermBuckets, {
-          isHierarchical: true,
-          columnsForAllBuckets: true,
+          minimalColumns: false,
         });
         data = await responseHandler(table);
         vis.render(data, persistedState);
