@@ -9,6 +9,37 @@ import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
 /**
+ * Utility class that knows how to decorate request with proper Basic authentication headers.
+ */
+export class BasicCredentials {
+  /**
+   * Takes provided `username` and `password`, transforms them into proper `Basic ***` authorization
+   * header and decorates passed request with it.
+   * @param {Hapi.Request} request HapiJS request instance.
+   * @param {string} username User name.
+   * @param {string} password User password.
+   * @returns {Hapi.Request} HapiJS request instance decorated with the proper header.
+   */
+  static decorateRequest(request, username, password) {
+    if (!request || typeof request !== 'object') {
+      throw new Error('Request should be a valid object.');
+    }
+
+    if (!username || typeof username !== 'string') {
+      throw new Error('Username should be a valid non-empty string.');
+    }
+
+    if (!password || typeof password !== 'string') {
+      throw new Error('Password should be a valid non-empty string.');
+    }
+
+    const basicCredentials = Buffer.from(`${username}:${password}`).toString('base64');
+    request.headers.authorization = `Basic ${basicCredentials}`;
+    return request;
+  }
+}
+
+/**
  * Object that represents available provider options.
  * @typedef {{
  *  protocol: string,
@@ -56,12 +87,19 @@ export class BasicAuthenticationProvider {
   async authenticate(request, state) {
     this._options.log(['debug', 'security', 'basic'], `Trying to authenticate user request to ${request.url.path}.`);
 
-    let {
-      authenticationResult,
-      headerNotRecognized, // eslint-disable-line prefer-const
-    } = await this._authenticateViaHeader(request);
-    if (headerNotRecognized) {
-      return authenticationResult;
+    // first try from login payload
+    let authenticationResult = await this._authenticateViaLoginAttempt(request);
+
+    // if there isn't a payload, try header-based auth
+    if (authenticationResult.notHandled()) {
+      const {
+        authenticationResult: headerAuthResult,
+        headerNotRecognized,
+      } = await this._authenticateViaHeader(request);
+      if (headerNotRecognized) {
+        return headerAuthResult;
+      }
+      authenticationResult = headerAuthResult;
     }
 
     if (authenticationResult.notHandled() && state) {
@@ -88,6 +126,38 @@ export class BasicAuthenticationProvider {
     return DeauthenticationResult.redirectTo(
       `${this._options.basePath}/login${request.url.search || ''}`
     );
+  }
+
+  /**
+   * Validates whether request contains a login payload and authenticates the
+   * user if necessary.
+   * @param {Hapi.Request} request HapiJS request instance.
+   * @returns {Promise.<AuthenticationResult>}
+   * @private
+   */
+  async _authenticateViaLoginAttempt(request) {
+    this._options.log(['debug', 'security', 'basic'], 'Trying to authenticate via login attempt.');
+    const credentials = request.loginAttempt(request).getCredentials();
+    if (!credentials) {
+      this._options.log(['debug', 'security', 'basic'], 'Username and password not found in payload.');
+      return AuthenticationResult.notHandled();
+    }
+    try {
+      const { username, password } = credentials;
+      BasicCredentials.decorateRequest(request, username, password);
+      const user = await this._options.client.callWithRequest(request, 'shield.authenticate');
+      this._options.log(['debug', 'security', 'basic'], 'Request has been authenticated via login attempt.');
+      return AuthenticationResult.succeeded(user, { authorization: request.headers.authorization });
+    } catch(err) {
+      this._options.log(['debug', 'security', 'basic'], `Failed to authenticate request via login attempt: ${err.message}`);
+      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
+      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
+      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
+      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
+      // it's called with this request once again down the line (e.g. in the next authentication provider).
+      delete request.headers.authorization;
+      return AuthenticationResult.failed(err);
+    }
   }
 
   /**
@@ -123,7 +193,7 @@ export class BasicAuthenticationProvider {
       this._options.log(['debug', 'security', 'basic'], 'Request has been authenticated via header.');
 
       return {
-        authenticationResult: AuthenticationResult.succeeded(user, { authorization })
+        authenticationResult: AuthenticationResult.succeeded(user)
       };
     } catch(err) {
       this._options.log(['debug', 'security', 'basic'], `Failed to authenticate request via header: ${err.message}`);
@@ -169,36 +239,5 @@ export class BasicAuthenticationProvider {
 
       return AuthenticationResult.failed(err);
     }
-  }
-}
-
-/**
- * Utility class that knows how to decorate request with proper Basic authentication headers.
- */
-export class BasicCredentials {
-  /**
-   * Takes provided `username` and `password`, transforms them into proper `Basic ***` authorization
-   * header and decorates passed request with it.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @param {string} username User name.
-   * @param {string} password User password.
-   * @returns {Hapi.Request} HapiJS request instance decorated with the proper header.
-   */
-  static decorateRequest(request, username, password) {
-    if (!request || typeof request !== 'object') {
-      throw new Error('Request should be a valid object.');
-    }
-
-    if (!username || typeof username !== 'string') {
-      throw new Error('Username should be a valid non-empty string.');
-    }
-
-    if (!password || typeof password !== 'string') {
-      throw new Error('Password should be a valid non-empty string.');
-    }
-
-    const basicCredentials = Buffer.from(`${username}:${password}`).toString('base64');
-    request.headers.authorization = `Basic ${basicCredentials}`;
-    return request;
   }
 }

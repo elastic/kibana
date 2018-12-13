@@ -24,6 +24,8 @@ import {
   pageSizeChanged,
   sortChanged,
   showSystemIndicesChanged,
+  loadIndices,
+  reloadIndices
 } from '../../../../store/actions';
 
 import { IndexTable as PresentationComponent } from './index_table';
@@ -64,6 +66,12 @@ const mapDispatchToProps = (dispatch) => {
     },
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
+    },
+    loadIndices: () => {
+      dispatch(loadIndices());
+    },
+    reloadIndices: () => {
+      dispatch(reloadIndices());
     }
   };
 };
