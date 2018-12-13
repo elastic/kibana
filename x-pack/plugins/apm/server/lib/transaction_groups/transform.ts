@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { oc } from 'ts-optchain';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { ESResponse } from './fetcher';
 
 export interface ITransactionGroup {
