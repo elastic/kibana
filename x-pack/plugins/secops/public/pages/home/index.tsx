@@ -5,7 +5,8 @@
  */
 
 import {
-  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
@@ -16,12 +17,12 @@ import { defaultTo, noop } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import { ThemeProvider } from 'styled-components';
+import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
-import { pure } from 'recompose';
-import styled from 'styled-components';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
@@ -33,12 +34,10 @@ import {
   Pane,
   PaneHeader,
   PaneScrollContainer,
-  SubHeader,
-  SubHeaderDatePicker,
 } from '../../components/page';
-import { DatePicker } from '../../components/page/date_picker';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
+import { RangeDatePicker } from '../../components/range_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { themeSelector } from '../../store/local/app';
@@ -107,17 +106,15 @@ const HomePageComponent = pure<Props>(({ theme }) => (
                   headers={headers}
                 />
               </Flyout>
+              <MyEuiFlexGroup justifyContent="flexEnd" alignItems="center">
+                <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
+                  <RangeDatePicker id="global" />
+                </EuiFlexItem>
+              </MyEuiFlexGroup>
               <PageHeader data-test-subj="pageHeader">
                 <Navigation data-test-subj="navigation" />
               </PageHeader>
               <PageContent data-test-subj="pageContent">
-                <SubHeader data-test-subj="subHeader">
-                  <SubHeaderDatePicker data-test-subj="datePickerContainer">
-                    <DatePicker />
-                  </SubHeaderDatePicker>
-                  <EuiHorizontalRule margin="none" />
-                </SubHeader>
-
                 <Pane data-test-subj="pane">
                   <PaneHeader data-test-subj="paneHeader">
                     <EuiSearchBar onChange={noop} />
@@ -148,3 +145,7 @@ const mapStateToProps = (state: State) => ({
 });
 
 export const HomePage = connect(mapStateToProps)(HomePageComponent);
+
+const MyEuiFlexGroup = styled(EuiFlexGroup)`
+  margin: 2px 0px;
+`;

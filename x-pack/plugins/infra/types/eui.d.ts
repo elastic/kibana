@@ -164,6 +164,7 @@ declare module '@elastic/eui' {
     disabled?: boolean;
     isLoading?: boolean;
     dateFormat?: string;
+    isCustom?: boolean;
   };
 
   export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
