@@ -14,8 +14,11 @@
     aria-label="{{::label}}"
   >
     <div class="global-nav-link__icon">
+
+      <icon ng-if="euiIconType" type="'{{ euiIconType }}'" size="'l'" color="'ghost'" class="global-nav-link__euiIcon"></icon>
+
       <img
-        ng-if="icon"
+        ng-if="!euiIconType"
         class="global-nav-link__icon-image"
         kbn-src="{{ '/' + icon }}"
         aria-hidden="true"
