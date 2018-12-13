@@ -130,23 +130,23 @@ export function renderAnnotations(
   const levels = getAnnotationLevels(focusAnnotationData);
 
   const annotations = focusChart
-    .select('.ml-annotations')
-    .selectAll('g.ml-annotation')
+    .select('.mlAnnotations')
+    .selectAll('g.mlAnnotation')
     .data(focusAnnotationData || [], (d: Annotation) => d._id || '');
 
   annotations
     .enter()
     .append('g')
-    .classed('ml-annotation', true);
+    .classed('mlAnnotation', true);
 
-  const rects = annotations.selectAll('.ml-annotation-rect').data((d: Annotation) => [d]);
+  const rects = annotations.selectAll('.mlAnnotationRect').data((d: Annotation) => [d]);
 
   rects
     .enter()
     .append('rect')
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
-    .classed('ml-annotation-rect', true)
+    .classed('mlAnnotationRect', true)
     .on('mouseover', function(this: object, d: Annotation) {
       showFocusChartTooltip(d, this);
     })
@@ -180,20 +180,20 @@ export function renderAnnotations(
 
   rects.exit().remove();
 
-  const textRects = annotations.selectAll('.ml-annotation-text-rect').data(d => [d]);
-  const texts = annotations.selectAll('.ml-annotation-text').data(d => [d]);
+  const textRects = annotations.selectAll('.mlAnnotationTextRect').data(d => [d]);
+  const texts = annotations.selectAll('.mlAnnotationText').data(d => [d]);
 
   textRects
     .enter()
     .append('rect')
-    .classed('ml-annotation-text-rect', true)
+    .classed('mlAnnotationTextRect', true)
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS);
 
   texts
     .enter()
     .append('text')
-    .classed('ml-annotation-text', true);
+    .classed('mlAnnotationText', true);
 
   texts
     .attr('x', (d: Annotation) => {
@@ -231,49 +231,39 @@ export function renderAnnotations(
   textRects.exit().remove();
   texts.exit().remove();
 
-  annotations.classed('ml-annotation-hidden', !showAnnotations);
+  annotations.classed('mlAnnotationHidden', !showAnnotations);
   annotations.exit().remove();
 }
 
 export function highlightFocusChartAnnotation(annotation: Annotation) {
-  const annotations = d3.selectAll('.ml-annotation');
+  const annotations = d3.selectAll('.mlAnnotation');
 
   annotations.each(function(d) {
     // @ts-ignore
     const element = d3.select(this);
 
     if (d._id === annotation._id) {
-      element
-        .selectAll('.ml-annotation-text-rect')
-        .classed('ml-annotation-text-rect-highlight', true);
-      element.selectAll('.ml-annotation-text').classed('ml-annotation-text-highlight', true);
-      element.selectAll('.ml-annotation-rect').classed('ml-annotation-rect-highlight', true);
+      element.selectAll('.mlAnnotationRect').classed('mlAnnotationRect-isHighlight', true);
     } else {
-      element.selectAll('.ml-annotation-text-rect').classed('ml-annotation-text-rect-blur', true);
-      element.selectAll('.ml-annotation-text').classed('ml-annotation-text-blur', true);
-      element.selectAll('.ml-annotation-rect').classed('ml-annotation-rect-blur', true);
+      element.selectAll('.mlAnnotationTextRect').classed('mlAnnotationTextRect-isBlur', true);
+      element.selectAll('.mlAnnotationText').classed('mlAnnotationText-isBlur', true);
+      element.selectAll('.mlAnnotationRect').classed('mlAnnotationRect-isBlur', true);
     }
   });
 }
 
 export function unhighlightFocusChartAnnotation() {
-  const annotations = d3.selectAll('.ml-annotation');
+  const annotations = d3.selectAll('.mlAnnotation');
 
   annotations.each(function() {
     // @ts-ignore
     const element = d3.select(this);
 
+    element.selectAll('.mlAnnotationTextRect').classed('mlAnnotationTextRect-isBlur', false);
     element
-      .selectAll('.ml-annotation-text-rect')
-      .classed('ml-annotation-text-rect-highlight', false)
-      .classed('ml-annotation-text-rect-blur', false);
-    element
-      .selectAll('.ml-annotation-rect')
-      .classed('ml-annotation-rect-highlight', false)
-      .classed('ml-annotation-rect-blur', false);
-    element
-      .selectAll('.ml-annotation-text')
-      .classed('ml-annotation-text-highlight', false)
-      .classed('ml-annotation-text-blur', false);
+      .selectAll('.mlAnnotationRect')
+      .classed('mlAnnotationRect-isHighlight', false)
+      .classed('mlAnnotationRect-isBlur', false);
+    element.selectAll('.mlAnnotationText').classed('mlAnnotationText-isBlur', false);
   });
 }

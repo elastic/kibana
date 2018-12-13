@@ -1,69 +1,82 @@
 // SASS TODO: This uses non-BEM styles to be in line with the existing
 // legacy Time Series Viewer style. Where applicable it tries to avoid
 // overrides. The one override with `.extent` is because of d3.
-.ml-annotation-brush .extent {
-  stroke: #999;
-  stroke-width: 2px;
-  stroke-dasharray: 2 5;
-  fill-opacity: .05;
+
+$mlAnnotationBorderWidth: 2px;
+
+// Replicates $euiBorderEditable for SVG
+.mlAnnotationBrush .extent {
+  stroke: $euiColorLightShade;
+  stroke-width: $mlAnnotationBorderWidth;
+  stroke-dasharray: 2 2;
+  fill: $euiColorLightestShade;
   shape-rendering: geometricPrecision;
 }
 
-.ml-annotation-rect {
-  stroke: #000;
-  stroke-width: 1.5;
-  transition: stroke-width 125ms;
-  stroke-opacity: 0.2;
-  fill: #000;
-  transition: fill 125ms;
-  fill-opacity: 0.05;
-  transition: fill-opacity 125ms;
+// Instead of different EUI colors we use opacity settings
+// here to avoid opaque layers on top of existing chart elements.
+$mlAnnotationRectDefaultStrokeOpacity: 0.2;
+$mlAnnotationRectDefaultFillOpacity: 0.05;
+
+.mlAnnotationRect {
+  stroke: $euiColorFullShade;
+  stroke-width: $mlAnnotationBorderWidth;
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity;
+  transition: stroke-opacity $euiAnimSpeedFast;
+
+  fill: $euiColorFullShade;
+  fill-opacity: $mlAnnotationRectDefaultFillOpacity;
+  transition: fill-opacity $euiAnimSpeedFast;
+
   shape-rendering: geometricPrecision;
-  border-radius: 5px 5px 0 0;
 }
 
-.ml-annotation-rect-highlight {
-  fill: #000;
-  transition: fill 125ms;
-  fill-opacity: 0.1;
-  transition: fill-opacity 125ms;
-  stroke-opacity: 0.3;
-  transition: stroke-opacity 125ms;
+.mlAnnotationRect-isHighlight {
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity * 2;;
+  transition: stroke-opacity $euiAnimSpeedFast;
+
+  fill-opacity: $mlAnnotationRectDefaultFillOpacity * 2;
+  transition: fill-opacity $euiAnimSpeedFast;
 }
 
-.ml-annotation-rect-blur {
-  fill-opacity: 0.03;
-  transition: fill-opacity 125ms;
-  stroke-opacity: 0.1;
-  transition: stroke-opacity 125ms;
+.mlAnnotationRect-isBlur {
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity / 2;
+  transition: stroke-opacity $euiAnimSpeedFast;
+
+  fill-opacity: $mlAnnotationRectDefaultFillOpacity / 2;
+  transition: fill-opacity $euiAnimSpeedFast;
 }
 
-.ml-annotation-text {
+// Replace the EuiBadge text style for SVG
+.mlAnnotationText {
   text-anchor: middle;
-  font-size: 12px;
-  font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  font-weight: 600;  
-  fill: #000;
-  transition: fill 125ms;
+  font-size: $euiFontSizeXS;
+  font-family: $euiFontFamily;
+  font-weight: 600;
+
+  fill: $euiColorFullShade;
+  transition: fill $euiAnimSpeedFast;
 }
 
-.ml-annotation-text-blur {
-  fill: #999;
-  transition: fill 125ms;
+.mlAnnotationText-isBlur {
+  fill: $euiColorMediumShade;
+  transition: fill $euiAnimSpeedFast;
 }
 
-.ml-annotation-text-rect {
-  fill: rgb(217, 217, 217);
-  transition: fill 125ms;
+.mlAnnotationTextRect {
+  fill: $euiColorLightShade;
+  transition: fill $euiAnimSpeedFast;
+  // TODO This is hard-coded for now for labels A-Z
+  // Needs to support dynamic SVG width.
   width: 25px;
   height: 20px;
 }
 
-.ml-annotation-text-rect-blur {
-  fill: rgb(232, 232, 232);
-  transition: fill 125ms;
+.mlAnnotationTextRect-isBlur {
+  fill: $euiColorLightestShade;
+  transition: fill $euiAnimSpeedFast;
 }
 
-.ml-annotation-hidden {
+.mlAnnotationHidden {
   display: none;
 }

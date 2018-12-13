@@ -135,7 +135,7 @@ export class TimeseriesChart extends React.Component {
 
   closeFlyout() {
     const chartElement = d3.select(this.rootNode);
-    chartElement.select('g.ml-annotation-brush').call(this.annotateBrush.extent([0, 0]));
+    chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
     this.setState({ isFlyoutVisible: false, annotation: {} });
   }
 
@@ -473,7 +473,7 @@ export class TimeseriesChart extends React.Component {
       const annotateBrush = this.annotateBrush.bind(this);
 
       fcsGroup.append('g')
-        .attr('class', 'ml-annotation-brush')
+        .attr('class', 'mlAnnotationBrush')
         .call(annotateBrush)
         .selectAll('rect')
         .attr('x', 0)
@@ -541,7 +541,7 @@ export class TimeseriesChart extends React.Component {
 
     // Create the elements for annotations
     if (mlAnnotationsEnabled) {
-      fcsGroup.append('g').classed('ml-annotations', true);
+      fcsGroup.append('g').classed('mlAnnotations', true);
     }
 
     fcsGroup.append('rect')
@@ -690,7 +690,7 @@ export class TimeseriesChart extends React.Component {
       );
 
       // disable brushing (creation of annotations) when annotations aren't shown
-      focusChart.select('.ml-annotation-brush')
+      focusChart.select('.mlAnnotationBrush')
         .style('pointer-events', (showAnnotations) ? 'all' : 'none');
     }
 
