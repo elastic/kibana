@@ -328,6 +328,12 @@ export async function FindProvider({ getService }) {
       defaultFindTimeout,
       `The element '${selector}' attribute '${attribute}' has not become '${value}'`);
     }
+    async waitForAttributeToChange(selector, attribute, value) {
+      const locator = `${selector}[${attribute}="${value}"]`;
+      await retry.try(async () => {
+        await this.byCssSelector(locator);
+      });
+    }
   }
 
   return new Find();
