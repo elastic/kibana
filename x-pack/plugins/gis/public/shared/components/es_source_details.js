@@ -4,35 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
+import React, { Component } from 'react';
 
 import {
   EuiText,
 } from '@elastic/eui';
 
-export class ESSourceDetails extends React.Component {
+export class ESSourceDetails extends Component {
 
-  constructor() {
-    super();
-    this.state = {
-      indexPatternTitle: ""
-    };
+  state = {
+    indexPatternTitle: null
   }
 
   componentDidMount() {
     this._isMounted = true;
-    this.props.source.getDisplayName().then((name) => {
-      if (this._isMounted) {
-        this.setState({
-          indexPatternTitle: name
-        });
-      }
-    });
+    this.loadDisplayName();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  loadDisplayName = async () => {
+    const indexPatternTitle = await this.props.source.getDisplayName();
+    if (this._isMounted) {
+      this.setState({ indexPatternTitle });
+    }
   }
 
   render() {
@@ -45,6 +42,5 @@ export class ESSourceDetails extends React.Component {
         </p>
       </EuiText>
     );
-
   }
 }

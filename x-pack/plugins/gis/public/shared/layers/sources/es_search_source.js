@@ -25,7 +25,7 @@ import {
 } from '../../../kibana_services';
 import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
-import { ESSourceDetails } from './es_geohashgrid_sourcedetails';
+import { ESSourceDetails } from '../../components/es_source_details';
 
 const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends VectorSource {
