@@ -37,7 +37,7 @@ export interface GridData {
   readonly h: number;
   readonly x: number;
   readonly y: number;
-  readonly i: string;
+  readonly id: string;
 }
 
 export type PanelId = string;
@@ -47,8 +47,8 @@ export interface PanelState {
   readonly id: SavedObjectId;
   readonly version: string;
   readonly type: string;
-  readonly panelIndex: PanelId;
-  readonly embeddableConfig: any;
+  panelIndex: PanelId;
+  readonly embeddableConfig?: any;
   readonly gridData: GridData;
   readonly title?: string;
 }

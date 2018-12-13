@@ -26,7 +26,7 @@ beforeAll(() => {
     embeddableConfig: {},
     gridData: {
       h: 0,
-      i: '0',
+      id: '0',
       w: 0,
       x: 0,
       y: 0,
@@ -43,11 +43,11 @@ describe('embeddableIsInitializing', () => {
   test('clears the error', () => {
     store.dispatch(embeddableIsInitializing('foo1'));
     const initialized = getEmbeddableInitialized(store.getState(), 'foo1');
-    expect(initialized).toBe(false);
+    expect(initialized).toEqual(false);
   });
 
   test('and clears the error', () => {
     const error = getEmbeddableError(store.getState(), 'foo1');
-    expect(error).toBe(undefined);
+    expect(error).toEqual(undefined);
   });
 });
