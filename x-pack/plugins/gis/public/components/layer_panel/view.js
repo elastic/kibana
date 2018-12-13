@@ -32,22 +32,24 @@ export class LayerPanel  extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
+    this.loadDisplayName();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
+  loadDisplayName = async () => {
+    const displayName = await this.props.selectedLayer.getDisplayName();
+    if (this._isMounted) {
+      this.setState({ displayName });
+    }
+  }
 
   _renderGlobalSettings() {
-
     if (!this.props.selectedLayer) {
       return null;
     }
-
-    // if (this.state.displayName === null) {
-    //   return null;
-    // }
 
     const layerSettings =  ALayer.renderGlobalSettings({
       label: this.props.selectedLayer.getLabel(),
@@ -91,18 +93,6 @@ export class LayerPanel  extends React.Component {
   }
 
   render() {
-
-    const displayName = this.props.selectedLayer.getDisplayName();
-    Promise.all([displayName]).then(labels => {
-      if (this._isMounted) {
-        if (labels[0] !== this.state.displayName) {
-          this.setState({
-            displayName: labels[0]
-          });
-        }
-      }
-    });
-
     const { selectedLayer } = this.props;
     if (!selectedLayer) {
       //todo: temp placeholder to bypass state-bug
