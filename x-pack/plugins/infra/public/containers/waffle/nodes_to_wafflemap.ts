@@ -51,7 +51,7 @@ function findOrCreateGroupWithNodes(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithNodes.allName', {
             defaultMessage: 'All',
           })
-        : last(path).value,
+        : last(path).label,
     count: 0,
     width: 0,
     squareSize: 0,
@@ -75,7 +75,7 @@ function findOrCreateGroupWithGroups(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithGroups.allName', {
             defaultMessage: 'All',
           })
-        : last(path).value,
+        : last(path).label,
     count: 0,
     width: 0,
     squareSize: 0,
