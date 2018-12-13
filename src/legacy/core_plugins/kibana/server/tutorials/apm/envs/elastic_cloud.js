@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
+import { INSTRUCTION_VARIANT } from '../../../../common/tutorials/instruction_variant';
 
 import {
   createNodeClientInstructions,
@@ -29,14 +29,15 @@ import {
   createJsClientInstructions,
   createGoClientInstructions,
   createJavaClientInstructions,
-} from './apm_client_instructions';
+} from '../instructions/apm_client_instructions';
 
 const createServerUrlInstruction = () => ({
   title: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.title', {
     defaultMessage: 'APM Server endpoint',
   }),
   textPre: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.textPre', {
-    defaultMessage: 'Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard. \
+    defaultMessage:
+      'Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard. \
 You will also need the APM Server secret token, which was generated on deployment.',
   }),
 });

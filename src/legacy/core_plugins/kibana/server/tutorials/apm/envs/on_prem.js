@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
+import { INSTRUCTION_VARIANT } from '../../../../common/tutorials/instruction_variant';
 import {
   createWindowsServerInstructions,
   createEditConfig,
@@ -27,7 +27,7 @@ import {
   createDownloadServerRpm,
   createDownloadServerDeb,
   createDownloadServerOsx,
-} from './apm_server_instructions';
+} from '../instructions/apm_server_instructions';
 import {
   createNodeClientInstructions,
   createDjangoClientInstructions,
@@ -37,7 +37,7 @@ import {
   createJsClientInstructions,
   createGoClientInstructions,
   createJavaClientInstructions,
-} from './apm_client_instructions';
+} from '../instructions/apm_client_instructions';
 
 export function onPremInstructions(apmIndexPattern) {
   const EDIT_CONFIG = createEditConfig();
@@ -73,7 +73,8 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'APM Server status',
           }),
           text: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.text', {
-            defaultMessage: 'Make sure APM Server is running before you start implementing the APM agents.',
+            defaultMessage:
+              'Make sure APM Server is running before you start implementing the APM agents.',
           }),
           btnLabel: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.btnLabel', {
             defaultMessage: 'Check APM Server status',
@@ -141,7 +142,8 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'Agent status',
           }),
           text: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.text', {
-            defaultMessage: 'Make sure your application is running and the agents are sending data.',
+            defaultMessage:
+              'Make sure your application is running and the agents are sending data.',
           }),
           btnLabel: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.btnLabel', {
             defaultMessage: 'Check agent status',
