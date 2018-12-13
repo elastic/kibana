@@ -7,8 +7,8 @@
 
 
 import React from 'react';
-import { TableHead } from './tableHead';
-import { TableBody } from './tableBody';
+import { TableHead } from './table_head';
+import { TableBody } from './table_body';
 import { i18n } from '@kbn/i18n';
 
 export class ClusterView extends React.Component {
@@ -24,7 +24,7 @@ export class ClusterView extends React.Component {
     this.state = {
       labels: props.scope.labels || [],
       showing: props.scope.showing || [],
-      shardStats: props.shardStats,
+      shardStats: props.scope.pageData.shardStats,
       showSystemIndices: props.showSystemIndices,
       toggleShowSystemIndices: props.toggleShowSystemIndices,
       angularChangeUrl: (url) => {
@@ -45,7 +45,7 @@ export class ClusterView extends React.Component {
 
   componentWillMount() {
     this.props.scope.$watch('showing', this.setShowing);
-    this.props.scope.$watch('shardStats', this.setShardStats);
+    this.props.scope.$watch(() => this.props.scope.pageData.shardStats, this.setShardStats);
   }
 
   hasUnassigned = () => {

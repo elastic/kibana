@@ -7,9 +7,32 @@
 
 
 import React from 'react';
-import { calculateClass } from '../lib/calculateClass';
+import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
 import { i18n } from '@kbn/i18n';
+import { EuiTextColor } from '@elastic/eui';
+
+function getColor(classes) {
+  return classes.split(' ').reduce((color, cls) => {
+    if (color) {
+      return color;
+    }
+
+    switch (cls) {
+      case 'primary':
+        return 'ghost';
+      case 'replica':
+        return 'secondary';
+      case 'relocation':
+        return 'accent';
+      case 'initializing':
+        return 'default';
+      case 'emergency':
+      case 'unassigned':
+        return 'danger';
+    }
+  }, null);
+}
 
 export class Shard extends React.Component {
   static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName', {
@@ -71,6 +94,7 @@ export class Shard extends React.Component {
     }
 
     const classes = calculateClass(shard);
+    const color = getColor(classes);
     const classification = classes + ' ' + shard.shard;
 
     // data attrs for automated testing verification
@@ -83,7 +107,9 @@ export class Shard extends React.Component {
         data-shard-classification={classification}
         data-test-subj="shardIcon"
       >
-        {tooltip}{shard.shard}
+        <EuiTextColor color={color}>
+          {tooltip}{shard.shard}
+        </EuiTextColor>
       </div>
     );
   }
