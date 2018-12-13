@@ -51,15 +51,8 @@ function mergeCapabilities(
   ...allFeatureCapabilities: UICapabilities[]
 ): UICapabilities {
   return allFeatureCapabilities.reduce((acc, capabilities) => {
-    const featureCapabilities = Object.keys(capabilities).reduce((featureAcc, key) => {
-      return {
-        ...featureAcc,
-        [key]: capabilities[key],
-      };
-    }, {});
-
     return {
-      ...featureCapabilities,
+      ...capabilities,
       ...acc,
     };
   }, originalCapabilities);

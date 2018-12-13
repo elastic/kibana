@@ -46,9 +46,7 @@ describe('populateUICapabilities', () => {
   it('handles no original uiCapabilites and no registered features gracefully', () => {
     const xpackMainPlugin = getMockXpackMainPlugin([]);
 
-    expect(populateUICapabilities(xpackMainPlugin, {} as UICapabilities)).toEqual({
-      navLinks: {},
-    });
+    expect(populateUICapabilities(xpackMainPlugin, {} as UICapabilities)).toEqual({});
   });
 
   it('returns the original uiCapabilities untouched when no features are registered', () => {
@@ -59,7 +57,10 @@ describe('populateUICapabilities', () => {
       feature: {
         someCapability: true,
       },
-      navLinks: {},
+      navLinks: {
+        foo: true,
+        bar: true,
+      },
       otherFeature: {},
     });
   });
@@ -80,7 +81,10 @@ describe('populateUICapabilities', () => {
       feature: {
         someCapability: true,
       },
-      navLinks: {},
+      navLinks: {
+        foo: true,
+        bar: true,
+      },
       newFeature: {},
       otherFeature: {},
     });
@@ -103,7 +107,10 @@ describe('populateUICapabilities', () => {
       feature: {
         someCapability: true,
       },
-      navLinks: {},
+      navLinks: {
+        foo: true,
+        bar: true,
+      },
       newFeature: {
         capability1: true,
         capability2: true,
@@ -131,7 +138,10 @@ describe('populateUICapabilities', () => {
       feature: {
         someCapability: true,
       },
-      navLinks: {},
+      navLinks: {
+        foo: true,
+        bar: true,
+      },
       newFeature: {
         capability1: true,
         capability2: true,
@@ -190,7 +200,10 @@ describe('populateUICapabilities', () => {
       feature: {
         someCapability: true,
       },
-      navLinks: {},
+      navLinks: {
+        foo: true,
+        bar: true,
+      },
       newFeature: {
         capability1: true,
         capability2: true,
