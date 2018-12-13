@@ -56,7 +56,7 @@ const initialState = {
         rules: [
           {
             value: 0,
-            color: '#D9D9D9',
+            color: '#D3DAE6',
           },
           {
             value: 0.65,

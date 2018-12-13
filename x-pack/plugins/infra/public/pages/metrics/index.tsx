@@ -232,7 +232,7 @@ const EuiSideNavContainer = styled.div`
   position: fixed;
   z-index: 1;
   height: 88vh;
-  background-color: #f5f5f5;
+  background-color: #f5f7fa;
   padding-left: 16px;
   margin-left: -16px;
   overflow-y: auto;

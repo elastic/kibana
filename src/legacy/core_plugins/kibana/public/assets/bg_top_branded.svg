@@ -2,7 +2,7 @@
   <defs>
     <linearGradient id="bg_top_branded-a" x1="10.793%" y1="50%" y2="50%">
       <stop offset="0%" stop-color="#FFF" stop-opacity=".5"/>
-      <stop offset="100%" stop-color="#E2E2E2" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#E6EBF2" stop-opacity="0"/>
     </linearGradient>
     <radialGradient id="bg_top_branded-c" cx="0%" cy="0%" r="146.629%" fx="0%" fy="0%" gradientTransform="matrix(.68199 .682 -.63596 .73135 0 0)">
       <stop offset="0%" stop-color="#FFF" stop-opacity=".5"/>
