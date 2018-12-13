@@ -100,8 +100,8 @@ export class Plugin<
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredDependencies: PluginManifest['requiredPlugins'];
   public readonly optionalDependencies: PluginManifest['optionalPlugins'];
-  public readonly hasServerSide: PluginManifest['server'];
-  public readonly hasUISide: PluginManifest['ui'];
+  public readonly includesServerPlugin: PluginManifest['server'];
+  public readonly includesUiPlugin: PluginManifest['ui'];
 
   private readonly log: Logger;
 
@@ -117,8 +117,8 @@ export class Plugin<
     this.configPath = manifest.configPath;
     this.requiredDependencies = manifest.requiredPlugins;
     this.optionalDependencies = manifest.optionalPlugins;
-    this.hasServerSide = manifest.server;
-    this.hasUISide = manifest.ui;
+    this.includesServerPlugin = manifest.server;
+    this.includesUiPlugin = manifest.ui;
   }
 
   /**

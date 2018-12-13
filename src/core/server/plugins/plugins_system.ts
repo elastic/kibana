@@ -47,7 +47,7 @@ export class PluginsSystem {
 
     for (const pluginName of sortedPlugins) {
       const plugin = this.plugins.get(pluginName)!;
-      if (!plugin.hasServerSide) {
+      if (!plugin.includesServerPlugin) {
         continue;
       }
 
