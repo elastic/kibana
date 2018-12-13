@@ -7,18 +7,6 @@ import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import React, { Fragment } from 'react';
-import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiRange,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormHelpText,
-  EuiSpacer,
-} from '@elastic/eui';
-import { AlphaSelection } from
-  '../../shared/layers/styles/components/vector/color/alpha_selection';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -37,82 +25,9 @@ export class ALayer {
     }
   }
 
-  static _sanitizeSliderValue(event) {
-    return parseInt(event.target.value, 10);
-  }
-
   static getBoundDataForSource(mbMap, sourceId) {
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
-  }
-
-  static _renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange) {
-    return (
-      <Fragment>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Min zoom"
-              compressed
-            >
-              <EuiRange
-                min={0}
-                max={24}
-                value={minZoom.toString()}
-                onChange={(event) => onMinZoomChange(ALayer._sanitizeSliderValue(event))}
-                showInput
-                showRange
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Max zoom"
-              compressed
-            >
-              <EuiRange
-                min={0}
-                max={24}
-                value={maxZoom.toString()}
-                onChange={(event) => onMaxZoomChange(ALayer._sanitizeSliderValue(event))}
-                showInput
-                showRange
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFormHelpText>Something here about what the numbers mean.</EuiFormHelpText>
-      </Fragment>
-    );
-  }
-
-  static _renderLabel(seedLabel, onLabelChange) {
-    return (
-      <EuiFormRow
-        label="Layer display name"
-      >
-        <EuiFieldText
-          value={seedLabel}
-          onChange={(event) => {onLabelChange(event.target.value);}}
-        />
-      </EuiFormRow>
-    );
-  }
-  static renderGlobalSettings({ label, onLabelChange, minZoom, maxZoom,
-    alphaValue, onMinZoomChange, onMaxZoomChange, onAlphaValueChange }) {
-    return (
-      <Fragment>
-        {ALayer._renderLabel(label, onLabelChange)}
-        {ALayer._renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange)}
-
-        <EuiSpacer size="m"/>
-
-        <AlphaSelection
-          alphaValue={alphaValue}
-          onAlphaValueChange={onAlphaValueChange}
-        />
-      </Fragment>
-    );
   }
 
   static createDescriptor(options) {

@@ -9,6 +9,7 @@ import React from 'react';
 import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
+import { LayerSettingsPanel } from './layer_settings_panel';
 
 import {
   EuiHorizontalRule,
@@ -18,16 +19,11 @@ import {
   EuiPanel,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { ALayer } from '../../shared/layers/layer';
-import _ from 'lodash';
 
 export class LayerPanel  extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      displayName: null
-    };
+  state = {
+    displayName: null
   }
 
   componentDidMount() {
@@ -46,61 +42,20 @@ export class LayerPanel  extends React.Component {
     }
   }
 
-  _renderGlobalSettings() {
-    if (!this.props.selectedLayer) {
+  _renderJoinSection() {
+    if (!this.props.selectedLayer.isJoinable()) {
       return null;
     }
 
-    const layerSettings =  ALayer.renderGlobalSettings({
-      label: this.props.selectedLayer.getLabel(),
-      onLabelChange: (label) => {
-        this.props.updateLabel(this.props.selectedLayer.getId(), label);
-      },
-      minZoom: this.props.selectedLayer.getMinZoom(),
-      maxZoom: this.props.selectedLayer.getMaxZoom(),
-      alphaValue: _.get(this.props.selectedLayer.getCurrentStyle(),
-        '_descriptor.properties.alphaValue', 0.5),
-      onMinZoomChange: (zoom) => {
-        this.props.updateMinZoom(this.props.selectedLayer.getId(), zoom);
-      },
-      onMaxZoomChange: (zoom) => {
-        this.props.updateMaxZoom(this.props.selectedLayer.getId(), zoom);
-      },
-      onAlphaValueChange:
-        alphaValue => this.props.updateAlphaValue(
-          this.props.selectedLayer.getId(), alphaValue
-        )
-    });
-
-    const frags = (
+    return (
       <EuiPanel>
-        <EuiTitle size="xs"><h5>Layer settings</h5></EuiTitle>
-        <EuiSpacer margin="m"/>
-        {layerSettings}
-      </EuiPanel>);
-
-    return frags;
-
-  }
-
-  _renderJoinSection() {
-    return this.props.selectedLayer.isJoinable() ?
-      (
-        <EuiPanel>
-          <JoinEditor layer={this.props.selectedLayer}/>
-        </EuiPanel>
-      ) : null;
+        <JoinEditor layer={this.props.selectedLayer}/>
+      </EuiPanel>
+    );
   }
 
   render() {
     const { selectedLayer } = this.props;
-    if (!selectedLayer) {
-      //todo: temp placeholder to bypass state-bug
-      return (<div/>);
-    }
-
-    const globalLayerSettings = this._renderGlobalSettings();
-    const joinSection = this._renderJoinSection();
 
     return (
       <EuiFlexGroup
@@ -119,8 +74,8 @@ export class LayerPanel  extends React.Component {
         </EuiFlexItem>
 
         <EuiFlexItem className="gisViewPanel__body">
-          {globalLayerSettings}
-          {joinSection}
+          <LayerSettingsPanel/>
+          {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
           {selectedLayer.renderSourceDetails()}
         </EuiFlexItem>
