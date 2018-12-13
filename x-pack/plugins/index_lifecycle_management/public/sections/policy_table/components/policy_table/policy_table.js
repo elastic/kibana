@@ -317,7 +317,7 @@ export class PolicyTableUi extends Component {
         data-test-subj="policyActionsContextMenuButton"
         aria-label="Policy options"
         onClick={() => this.togglePolicyPopover(policy)}
-        color="blue"
+        color="primary"
       >
         {intl.formatMessage({
           id: 'xpack.indexLifecycleMgmt.policyTable.actionsButtonText',
