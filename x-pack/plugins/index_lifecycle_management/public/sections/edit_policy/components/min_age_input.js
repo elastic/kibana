@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
 import { LearnMoreLink } from '../../components';
 import {
   EuiFieldNumber,
@@ -35,13 +35,29 @@ const MinAgeInputUi = props => {
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <ErrableFormRow
           id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
-          label={intl.formatMessage(
-            {
-              id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
-              defaultMessage: 'Timing for {phase} phase',
-            },
-            { phase }
-          )}
+          label={
+            <Fragment>
+              {
+                intl.formatMessage(
+                  {
+                    id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
+                    defaultMessage: 'Timing for {phase} phase',
+                  },
+                  { phase }
+                )
+              }
+              <EuiSpacer size="s" />
+              <LearnMoreLink
+                docPath="_timing.html"
+                text={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                    defaultMessage="Learn about timing"
+                  />
+                }
+              />
+            </Fragment>
+          }
           errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
           isShowingErrors={isShowingErrors}
           errors={errors}
@@ -53,16 +69,6 @@ const MinAgeInputUi = props => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
             }}
             min={1}
-          />
-          <EuiSpacer size="s" />
-          <LearnMoreLink
-            docPath="_timing.html"
-            text={
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
-                defaultMessage="Learn about timing"
-              />
-            }
           />
         </ErrableFormRow>
       </EuiFlexItem>

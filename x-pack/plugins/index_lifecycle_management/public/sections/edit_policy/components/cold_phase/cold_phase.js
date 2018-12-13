@@ -46,7 +46,6 @@ class ColdPhaseUi extends PureComponent {
       [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
       [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     }).isRequired,
-    warmPhaseReplicaCount: PropTypes.number.isRequired,
   };
   render() {
     const {

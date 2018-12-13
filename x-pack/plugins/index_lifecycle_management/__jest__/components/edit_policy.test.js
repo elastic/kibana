@@ -124,8 +124,6 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [
         policyNameRequiredMessage,
-        maximumSizeRequiredMessage,
-        maximumAgeRequiredMessage,
       ]);
     });
     test('should show error when trying to save policy name with space', () => {
@@ -175,6 +173,11 @@ describe('edit policy', () => {
     test('should show errors when trying to save with no max size and no max age', () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
+      maxSizeInput.simulate('change', { target: { value: '' } });
+      const maxAgeInput = rendered.find(`input#hot-selectedMaxAge`);
+      maxAgeInput.simulate('change', { target: { value: '' } });
+      rendered.update();
       save(rendered);
       expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage]);
     });
