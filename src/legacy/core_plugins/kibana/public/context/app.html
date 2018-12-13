@@ -47,7 +47,7 @@
         i18n-default-message="No searchable tiebreaker field could be found in the index pattern {indexPatternId}. Please change the advanced setting {tieBreakerFields} to include a valid field for this index pattern."
         i18n-values="{
           indexPatternId: contextApp.state.queryParameters.indexPatternId,
-          tieBreakerFields: '<code>context:tieBreakerFields</code>'
+          html_tieBreakerFields: '<code>context:tieBreakerFields</code>'
         }"
       >
       </div>
@@ -57,7 +57,7 @@
         i18n-id="kbn.context.pleaseReloadPageDescription"
         i18n-default-message="Please reload or visit {navigationLink} to select a valid anchor document."
         i18n-values="{
-          navigationLink: '<a ng-href=\'{{ contextApp.state.navigation.discover.url }}\'>' + contextApp.discover + '</a>'
+          html_navigationLink: '<a ng-href=\'{{ contextApp.state.navigation.discover.url }}\'>' + contextApp.discover + '</a>'
         }"
       ></div>
     </div>
