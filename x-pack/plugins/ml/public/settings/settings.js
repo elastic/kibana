@@ -24,7 +24,6 @@ import chrome from 'ui/chrome';
 
 
 export function Settings({ canCreateFilter }) {
-  console.log('create filter?', canCreateFilter);
   return (
     <EuiPage className="mlSettingsPage">
       <EuiPageBody className="mlSettingsPage__body">
@@ -51,6 +50,7 @@ export function Settings({ canCreateFilter }) {
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-testid="ml_filter_lists_button"
                 size="l"
                 color="primary"
                 href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists`}
