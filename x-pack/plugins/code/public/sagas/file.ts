@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { some } from 'lodash';
 import { Action } from 'redux-actions';
-import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { FileTree } from '../../model';
 import {
@@ -37,13 +38,18 @@ import {
   openTreePath,
   setNotFound,
 } from '../actions';
+import { requestedPathsSelector } from '../selectors';
 import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
     const { uri, revision, path } = action.payload!;
     if (path) {
-      yield call(fetchPath, { uri, revision, path });
+      const requestedPaths: string[] = yield select(requestedPathsSelector);
+      const shouldFetch = !some(requestedPaths, p => p.startsWith(path));
+      if (shouldFetch) {
+        yield call(fetchPath, { uri, revision, path });
+      }
       const pathSegments = path.split('/');
       let currentPath = '';
       // open all directories on the path
@@ -74,10 +80,26 @@ function* fetchPath(payload: FetchRepoTreePayload) {
   return update;
 }
 
-function requestRepoTree({ uri, revision, path, limit = 50 }: FetchRepoTreePayload) {
+interface FileTreeQuery {
+  parents?: boolean;
+  limit: number;
+  flatten: boolean;
+}
+
+function requestRepoTree({
+  uri,
+  revision,
+  path,
+  limit = 50,
+  parents = false,
+}: FetchRepoTreePayload) {
+  const query: FileTreeQuery = { limit, flatten: true };
+  if (parents) {
+    query.parents = true;
+  }
   return kfetch({
     pathname: `../api/code/repo/${uri}/tree/${revision}/${path}`,
-    query: { parents: true, limit, flatten: true },
+    query,
   });
 }
 

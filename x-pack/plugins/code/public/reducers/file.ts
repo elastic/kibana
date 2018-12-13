@@ -42,6 +42,7 @@ export interface FileState {
   isNotFound: boolean;
   treeCommits: { [path: string]: CommitInfo[] };
   currentPath: string;
+  requestedPaths: string[];
 }
 
 const initialState: FileState = {
@@ -59,19 +60,18 @@ const initialState: FileState = {
   treeCommits: {},
   isNotFound: false,
   currentPath: '',
+  requestedPaths: [],
 };
 
 function mergeTree(draft: FileState, tree: FileTree, path: string) {
   const pathSegments = path.split('/');
   let current = draft.tree;
-  let node = tree;
+  const node = tree;
   if (path && current.children != null) {
     const pLastIndex = pathSegments.length - 1;
-    pathSegments.forEach((p, pidx, arr) => {
+    pathSegments.forEach((p, pidx) => {
       const idx = current.children!.findIndex(child => child.name === p);
-      const index = node.children!.findIndex(child => child.name === p);
-      if (idx >= 0 && index >= 0) {
-        node = node.children![index];
+      if (idx >= 0) {
         if (pidx === pLastIndex) {
           current.children![idx!] = node;
         }
@@ -99,6 +99,7 @@ export const file = handleActions(
         if (draft.openedPaths.indexOf(path) < 0) {
           draft.openedPaths.push(path);
         }
+        draft.requestedPaths.push(path);
       }),
     [String(resetRepoTree)]: (state: FileState) =>
       produce<FileState>(state, draft => {
