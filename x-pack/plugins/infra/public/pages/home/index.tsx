@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
@@ -19,30 +20,43 @@ import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_fi
 import { WithWaffleOptionsUrlState } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
-import { WithSource } from '../../containers/with_source';
+import { SourceErrorPage, SourceLoadingPage, WithSource } from '../../containers/with_source';
 
 interface HomePageProps {
   intl: InjectedIntl;
 }
 
 export const HomePage = injectI18n(
-  class extends React.PureComponent<HomePageProps, {}> {
+  class extends React.Component<HomePageProps, {}> {
     public static displayName = 'HomePage';
+
     public render() {
       const { intl } = this.props;
+
       return (
         <ColumnarPage>
+          <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
           <WithSource>
-            {({ metricIndicesExist }) =>
-              metricIndicesExist || metricIndicesExist === null ? (
+            {({
+              derivedIndexPattern,
+              hasFailed,
+              isLoading,
+              lastFailureMessage,
+              load,
+              metricIndicesExist,
+            }) =>
+              metricIndicesExist ? (
                 <>
                   <WithWaffleTimeUrlState />
-                  <WithWaffleFilterUrlState />
+                  <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
                   <WithWaffleOptionsUrlState />
-                  <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
                   <HomeToolbar />
                   <HomePageContent />
                 </>
+              ) : isLoading ? (
+                <SourceLoadingPage />
+              ) : hasFailed ? (
+                <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
               ) : (
                 <WithKibanaChrome>
                   {({ basePath }) => (

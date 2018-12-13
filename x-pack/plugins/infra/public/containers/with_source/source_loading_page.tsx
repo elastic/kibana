@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadSourceActionCreators } from './operations/load';
+import React from 'react';
 
-export const loadSource = loadSourceActionCreators.resolve;
+import { LoadingPage } from '../../components/loading_page';
+
+export const SourceLoadingPage: React.SFC = () => <LoadingPage message="Loading data sources" />;

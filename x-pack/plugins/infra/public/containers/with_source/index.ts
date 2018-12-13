@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { logEntriesActions } from './log_entries';
-export { logSummaryActions } from './log_summary';
+export { SourceErrorPage } from './source_error_page';
+export { SourceLoadingPage } from './source_loading_page';
+export { WithSource } from './with_source';

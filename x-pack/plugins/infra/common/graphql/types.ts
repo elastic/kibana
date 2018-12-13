@@ -705,6 +705,52 @@ export namespace WaffleNodesQuery {
     value: number;
   };
 }
+export namespace SourceQuery {
+  export type Variables = {
+    sourceId?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    configuration: Configuration;
+    status: Status;
+  };
+
+  export type Configuration = {
+    __typename?: 'InfraSourceConfiguration';
+    metricAlias: string;
+    logAlias: string;
+    fields: Fields;
+  };
+
+  export type Fields = {
+    __typename?: 'InfraSourceFields';
+    container: string;
+    host: string;
+    pod: string;
+  };
+
+  export type Status = {
+    __typename?: 'InfraSourceStatus';
+    indexFields: IndexFields[];
+    logIndicesExist: boolean;
+    metricIndicesExist: boolean;
+  };
+
+  export type IndexFields = {
+    __typename?: 'InfraIndexField';
+    name: string;
+    type: string;
+    searchable: boolean;
+    aggregatable: boolean;
+  };
+}
 export namespace LogEntries {
   export type Variables = {
     sourceId?: string | null;
@@ -798,52 +844,6 @@ export namespace LogSummary {
     start: number;
     end: number;
     entriesCount: number;
-  };
-}
-export namespace SourceQuery {
-  export type Variables = {
-    sourceId?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-    id: string;
-    configuration: Configuration;
-    status: Status;
-  };
-
-  export type Configuration = {
-    __typename?: 'InfraSourceConfiguration';
-    metricAlias: string;
-    logAlias: string;
-    fields: Fields;
-  };
-
-  export type Fields = {
-    __typename?: 'InfraSourceFields';
-    container: string;
-    host: string;
-    pod: string;
-  };
-
-  export type Status = {
-    __typename?: 'InfraSourceStatus';
-    indexFields: IndexFields[];
-    logIndicesExist: boolean;
-    metricIndicesExist: boolean;
-  };
-
-  export type IndexFields = {
-    __typename?: 'InfraIndexField';
-    name: string;
-    type: string;
-    searchable: boolean;
-    aggregatable: boolean;
   };
 }
 
