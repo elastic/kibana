@@ -217,18 +217,6 @@ export const topHitMetricAgg = new MetricAggType({
           ];
         }
       }
-    },
-    {
-      name: 'aggregate_with_tooltip',
-      default: i18n.translate('common.ui.aggTypes.aggregateWithTooltip', {
-        defaultMessage: 'Choose a strategy for combining multiple hits or a multi-valued field into a single metric',
-      }),
-    },
-    {
-      name: 'size_tooltip',
-      default: i18n.translate('common.ui.aggTypes.sizeTooltip', {
-        defaultMessage: `Request top-K hits. Multiple hits will be combined via 'aggregate with'.`,
-      }),
     }
   ],
   getValue(agg, bucket) {

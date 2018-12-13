@@ -121,13 +121,6 @@ export const geoHashBucketAgg = new BucketAggType({
         output.params.precision = aggConfig.params.autoPrecision ?
           autoPrecisionVal : getPrecision(aggConfig.params.precision);
       }
-    },
-    {
-      name: 'only_request_data_around_map_extent_tooltip',
-      default: i18n.translate('common.ui.aggTypes.onlyRequestDataAroundMapExtentTooltip', {
-        defaultMessage: 'Apply {geoBoundingBox} filter aggregation to narrow the subject area to the map view box with collar',
-        values: { geoBoundingBox: 'geo_bounding_box' }
-      }),
     }
   ],
   getRequestAggs: function (agg) {

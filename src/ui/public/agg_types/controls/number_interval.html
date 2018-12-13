@@ -9,7 +9,9 @@
     &nbsp;
     <icon-tip
       position="'right'"
-      content="agg.params.minimum_interval_tooltip"
+      content="::'common.ui.aggTypes.minimumIntervalTooltip' | i18n: {
+        defaultMessage: 'Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting\'s {histogramMaxBars}',
+        values: { histogramMaxBars: 'histogram:maxBars'} }"
     ></icon-tip>
   </label>
   <input
