@@ -238,6 +238,12 @@ class EditPolicyUi extends Component {
                     }
                     titleSize="s"
                     fullWidth
+                    description={
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage"
+                        defaultMessage="A policy name cannot start with an underscore and cannot contain a question mark or a space."
+                      />
+                    }
                   >
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
