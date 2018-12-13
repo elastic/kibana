@@ -195,6 +195,12 @@ class WarmPhaseUi extends PureComponent {
                         errorKey={PHASE_REPLICA_COUNT}
                         isShowingErrors={isShowingErrors}
                         errors={errors}
+                        helpText={
+                          intl.formatMessage({
+                            id: 'xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText',
+                            defaultMessage: 'By default, the number of replicas remains the same.'
+                          })
+                        }
                       >
                         <EuiFieldNumber
                           id={`${PHASE_WARM}-${PHASE_REPLICA_COUNT}`}
@@ -203,12 +209,6 @@ class WarmPhaseUi extends PureComponent {
                             await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                           }}
                           min={0}
-                          placeholder={
-                            intl.formatMessage({
-                              id: 'xpack.indexLifecycleMgmt.warmPhase.keepSamePlaceholder',
-                              defaultMessage: 'Keep same'
-                            })
-                          }
                         />
                       </ErrableFormRow>
                     </EuiFlexItem>

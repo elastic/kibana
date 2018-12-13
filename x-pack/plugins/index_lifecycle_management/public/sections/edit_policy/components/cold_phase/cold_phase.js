@@ -152,6 +152,12 @@ class ColdPhaseUi extends PureComponent {
                     errorKey={PHASE_REPLICA_COUNT}
                     isShowingErrors={isShowingErrors}
                     errors={errors}
+                    helpText={
+                      intl.formatMessage({
+                        id: 'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
+                        defaultMessage: 'By default, the number of replicas remains the same.'
+                      })
+                    }
                   >
                     <EuiFieldNumber
                       id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
@@ -160,12 +166,6 @@ class ColdPhaseUi extends PureComponent {
                         await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                       }}
                       min={0}
-                      placeholder={
-                        intl.formatMessage({
-                          id: 'xpack.indexLifecycleMgmt.coldPhase.keepSamePlaceholder',
-                          defaultMessage: 'Keep same'
-                        })
-                      }
                     />
                   </ErrableFormRow>
                 </EuiFlexItem>

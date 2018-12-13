@@ -46,6 +46,17 @@ const MinAgeInputUi = props => {
           errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
           isShowingErrors={isShowingErrors}
           errors={errors}
+          helpText={
+            <LearnMoreLink
+              docPath="_timing.html"
+              text={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                  defaultMessage="Learn about timing"
+                />
+              }
+            />
+          }
         >
           <EuiFieldNumber
             id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
@@ -58,19 +69,7 @@ const MinAgeInputUi = props => {
         </ErrableFormRow>
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 220 }}>
-        <EuiFormRow
-          label={
-            <LearnMoreLink
-              docPath="_timing.html"
-              text={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
-                  defaultMessage="Learn about timing"
-                />
-              }
-            />
-          }
-        >
+        <EuiFormRow hasEmptyLabelSpace >
           <EuiSelect
             aria-label={intl.formatMessage(
               {
