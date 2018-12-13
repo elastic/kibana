@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { RRRRender } from 'react-redux-request';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { IWaterfall } from '../../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { IUrlParams } from '../urlParams';
 import { WaterfallV1Request } from './waterfallV1';

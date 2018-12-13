@@ -52,7 +52,7 @@ export class AutoFollowPatternListUI extends PureComponent {
             <p>
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptDescription"
-                defaultMessage="Auto-follow patterns replicate leader indices from a remote cluster to follower indices on the local cluster." //eslint-disable-line max-len
+                defaultMessage="Use an auto-follow pattern to automatically replicate indices from a remote cluster."
               />
             </p>
           </Fragment>

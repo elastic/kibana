@@ -25,7 +25,7 @@ import python from 'react-syntax-highlighter/dist/languages/python';
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 // @ts-ignore
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-import { Stackframe } from '../../../../typings/APMDoc';
+import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
 import { FrameHeading } from '../Stacktrace/FrameHeading';
 // @ts-ignore
 import { Context } from './Context';
