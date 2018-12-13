@@ -58,12 +58,17 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       extensions: ['.ts', '.tsx', '.js', '.json'],
       mainFields: ['browser', 'main'],
       plugins: [
-        // whitelist specific imports to ensure that the canvas_plugin bundle
-        // doesn't accidentally end up including unnecessary files.
+        // whitelist imports from the canvas_plugin_src directory
+        // to ensure that only modules in its own directory and node_modules
+        // are included in the canvas_plugin bundle. An additional /shared/
+        // directory at the root of canvas is included so that code can be shared
+        // with the rest of the canvas app
         new ImportWhitelistPlugin({
           from: sourceDir,
           whitelist: [/[\/\\]node_modules[\/\\]/, sourceDir, sharedDir],
         }),
+        // only whitelist node_modules and code within the shared directory so that
+        // they can safely be imported by the canvas_plugin_src or the canvas app
         new ImportWhitelistPlugin({
           from: sharedDir,
           whitelist: [/[\/\\]node_modules[\/\\]/, sharedDir],

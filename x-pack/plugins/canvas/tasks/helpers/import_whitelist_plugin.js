@@ -11,8 +11,8 @@ import chalk from 'chalk';
 
 const KIBANA_ROOT = resolve(__dirname, '../../../../..');
 
-function matchesSomeCondition(pathsOrRegexps, path) {
-  return pathsOrRegexps.some(pathOrRegexp => {
+function match(path, pathsOrRegexps) {
+  return [].concat(pathsOrRegexps).some(pathOrRegexp => {
     if (pathOrRegexp instanceof RegExp) return pathOrRegexp.test(path);
     return path === pathOrRegexp || isPathInside(path, pathOrRegexp);
   });
@@ -31,13 +31,13 @@ export class ImportWhitelistPlugin {
         return;
       }
 
-      if (!matchesSomeCondition([this.from], request.context.issuer)) {
+      if (!match(request.context.issuer, this.from)) {
         // request is not filtered by this whitelist unless it comes
-        // from a module matching the from conditions
+        // from a module matching the from directory/regex
         return;
       }
 
-      if (!matchesSomeCondition(this.whitelist, request.path)) {
+      if (!match(request.path, this.whitelist)) {
         throw new Error(
           `Attempted to import "${chalk.yellow(relative(KIBANA_ROOT, request.path))}" which ` +
             `is not in the whitelist for the ${chalk.cyan(relative(KIBANA_ROOT, this.from))} ` +
