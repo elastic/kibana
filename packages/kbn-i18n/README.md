@@ -209,7 +209,7 @@ ReactDOM.render(
 ```
 
 After that we can use `FormattedMessage` components inside `RootComponent`:
-```js
+```jsx
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -233,10 +233,10 @@ class RootComponent extends Component {
       <p>
         <FormattedMessage
           id="welcome"
-          defaultMessage={`Hello {name}, you have {unreadCount, number} {unreadCount, plural,
+          defaultMessage="Hello {name}, you have {unreadCount, number} {unreadCount, plural,
             one {message}
             other {messages}
-          }`}
+          }"
           values={{name: <b>{name}</b>, unreadCount}}
         />
         ...
