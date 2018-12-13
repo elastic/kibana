@@ -7,10 +7,15 @@
 import { withHandlers } from 'recompose';
 
 const ancestorElement = element => {
-  if (!element) return element;
+  if (!element) {
+    return element;
+  }
   // IE11 has no classList on SVG elements, but we're not interested in SVG elements
-  do if (element.classList && element.classList.contains('canvasPage')) return element;
-  while ((element = element.parentElement || element.parentNode)); // no IE11 SVG parentElement
+  do {
+    if (element.classList && element.classList.contains('canvasPage')) {
+      return element;
+    }
+  } while ((element = element.parentElement || element.parentNode)); // no IE11 SVG parentElement
 };
 
 const localMousePosition = (box, clientX, clientY) => {
@@ -29,7 +34,9 @@ const setupHandler = (commit, target) => {
   // Ancestor has to be identified on setup, rather than 1st interaction, otherwise events may be triggered on
   // DOM elements that had been removed: kibana-canvas github issue #1093
   const canvasPage = ancestorElement(target);
-  if (!canvasPage) return;
+  if (!canvasPage) {
+    return;
+  }
   const canvasOrigin = canvasPage.getBoundingClientRect();
   window.onmousemove = ({ clientX, clientY, altKey, metaKey, shiftKey, ctrlKey }) => {
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
@@ -65,7 +72,9 @@ const handleMouseDown = (commit, e, isEditable) => {
     return; // left-click and edit mode only
   }
   const ancestor = ancestorElement(target);
-  if (!ancestor) return;
+  if (!ancestor) {
+    return;
+  }
   const { x, y } = localMousePosition(ancestor, clientX, clientY);
   setupHandler(commit, ancestor);
   commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey });

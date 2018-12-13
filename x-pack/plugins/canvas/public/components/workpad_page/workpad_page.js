@@ -123,7 +123,9 @@ export class WorkpadPage extends PureComponent {
         {elements
           .map(element => {
             if (element.type === 'annotation') {
-              if (!isEditable) return;
+              if (!isEditable) {
+                return;
+              }
               const props = {
                 key: element.id,
                 type: element.type,

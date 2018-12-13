@@ -32,7 +32,9 @@ class ImageUpload extends React.Component {
 
     let urlType = Object.keys(props.assets).length ? 'asset' : 'file';
     // if not a valid base64 string, will show as missing asset icon
-    if (isValidHttpUrl(url)) urlType = 'link';
+    if (isValidHttpUrl(url)) {
+      urlType = 'link';
+    }
 
     this.inputRefs = {};
 

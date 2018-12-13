@@ -38,7 +38,9 @@ export class DomPreview extends React.Component {
   }
 
   update = original => () => {
-    if (!this.content || !this.container) return;
+    if (!this.content || !this.container) {
+      return;
+    }
 
     const thumb = original.cloneNode(true);
 
@@ -50,7 +52,9 @@ export class DomPreview extends React.Component {
     const scale = thumbHeight / originalHeight;
     const thumbWidth = originalWidth * scale;
 
-    if (this.content.hasChildNodes()) this.content.removeChild(this.content.firstChild);
+    if (this.content.hasChildNodes()) {
+      this.content.removeChild(this.content.firstChild);
+    }
     this.content.appendChild(thumb);
 
     this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
