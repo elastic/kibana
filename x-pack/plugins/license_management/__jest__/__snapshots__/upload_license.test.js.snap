@@ -226,11 +226,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     className="euiIcon euiIcon--medium euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -241,11 +237,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                       className="euiIcon euiIcon--medium euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -509,11 +501,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     className="euiIcon euiIcon--large euiFilePicker__icon"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -523,11 +511,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -957,11 +941,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                     className="euiIcon euiIcon--large euiFilePicker__icon"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -971,11 +951,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -1431,11 +1407,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                     className="euiIcon euiIcon--large euiFilePicker__icon"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -1445,11 +1417,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -1905,11 +1873,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                     className="euiIcon euiIcon--large euiFilePicker__icon"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -1919,11 +1883,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -2379,11 +2339,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                     className="euiIcon euiIcon--large euiFilePicker__icon"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -2393,11 +2349,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
