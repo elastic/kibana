@@ -30,23 +30,23 @@ import { tabifyGetColumns } from './_get_columns';
  * @param {Object} timeRange - time range object, if provided
  */
 function TabbedAggResponseWriter(aggs, {
-  minimalColumns,
+  minimalColumns = true,
   partialRows = false,
   timeRange
 } = {}) {
+  // Private
+  this._removePartialRows = !partialRows;
+  this._minimalColumns = minimalColumns;
+
+  // Public
   this.rowBuffer = {};
   this.bucketBuffer = [];
   this.metricBuffer = [];
-
   this.aggs = aggs;
-  this.removePartialRows = !partialRows;
-  this.removeColumnsForAllBuckets = minimalColumns;
-
-  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.removeColumnsForAllBuckets);
+  this.partialRows = partialRows;
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this._minimalColumns);
   this.aggStack = [...this.columns];
-
   this.rows = [];
-
   // Extract the time range object if provided
   if (timeRange) {
     const timeRangeKey = Object.keys(timeRange)[0];
@@ -73,7 +73,7 @@ TabbedAggResponseWriter.prototype.row = function () {
     this.rowBuffer[metric.id] = metric.value;
   });
 
-  if (!toArray(this.rowBuffer).length || (this.removePartialRows && this.isPartialRow(this.rowBuffer))) {
+  if (!toArray(this.rowBuffer).length || (this._removePartialRows && this.isPartialRow(this.rowBuffer))) {
     return;
   }
 
