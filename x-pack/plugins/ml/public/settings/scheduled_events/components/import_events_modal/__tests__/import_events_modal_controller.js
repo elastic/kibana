@@ -11,7 +11,7 @@ import expect from 'expect.js';
 
 const mockModalInstance = { close: function () { }, dismiss: function () { } };
 
-describe('ML - Import Events Modal Controller', () => {
+xdescribe('ML - Import Events Modal Controller', () => {
   beforeEach(() => {
     ngMock.module('kibana');
   });
