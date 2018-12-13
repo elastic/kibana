@@ -24,6 +24,9 @@ test(`builds privileges correctly`, () => {
       privileges: {
         all: {
           app: ['foo-app'],
+          management: {
+            foo: ['fooManagementLink'],
+          },
           savedObject: {
             all: ['foo-saved-object-type'],
             read: ['bad-saved-object-type'],
@@ -33,6 +36,9 @@ test(`builds privileges correctly`, () => {
         read: {
           app: ['foo-app'],
           api: ['foo/read/api'],
+          management: {
+            foo: ['anotherFooManagementLink'],
+          },
           savedObject: {
             all: [],
             read: ['foo-saved-object-type', 'bar-saved-object-type'],
@@ -130,6 +136,7 @@ test(`builds privileges correctly`, () => {
           'ui:foo-feature/showSaveButton',
           'ui:foo-feature/showCreateButton',
           'ui:navLinks/kibana:foo-feature',
+          'ui:management/foo/fooManagementLink',
         ],
         read: [
           'login:',
@@ -144,6 +151,7 @@ test(`builds privileges correctly`, () => {
           'saved_object:bar-saved-object-type/find',
           'ui:foo-feature/show',
           'ui:navLinks/kibana:foo-feature',
+          'ui:management/foo/anotherFooManagementLink',
         ],
       },
     },
@@ -171,6 +179,7 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:management/foo/anotherFooManagementLink',
         'ui:navLinks/*',
       ],
     },
