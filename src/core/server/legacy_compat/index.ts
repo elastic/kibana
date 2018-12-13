@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { ConfigService, Env } from '../config';
-import { LoggerFactory } from '../logging';
+import { CoreContext } from '../../types';
 import { LegacyService } from './legacy_service';
 
+/** @internal */
 export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
+/** @internal */
 export { LegacyService } from './legacy_service';
 
+/** @internal */
 export class LegacyCompatModule {
   public readonly service: LegacyService;
 
-  constructor(private readonly configService: ConfigService, logger: LoggerFactory, env: Env) {
-    this.service = new LegacyService(env, logger, this.configService);
+  constructor(coreContext: CoreContext) {
+    this.service = new LegacyService(coreContext);
   }
 }

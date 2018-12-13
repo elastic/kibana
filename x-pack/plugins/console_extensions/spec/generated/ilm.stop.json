@@ -1,0 +1,11 @@
+{
+  "ilm.stop": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ilm/stop"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-stop.html"
+  }
+}

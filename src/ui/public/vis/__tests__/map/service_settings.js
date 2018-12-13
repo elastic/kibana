@@ -321,5 +321,13 @@ describe('service_settings (FKA tilemaptest)', function () {
       expect(fileLayers).to.eql(expected);
     });
 
+    it ('should get hotlink', async () => {
+      mapConfig.emsLandingPageUrl = 'https://foo/bar';
+      const fileLayers = await serviceSettings.getFileLayers();
+      const hotlink = serviceSettings.getEMSHotLink(fileLayers[0]);
+      expect(hotlink).to.eql('https://foo/bar#file/US States');
+
+    });
+
   });
 });

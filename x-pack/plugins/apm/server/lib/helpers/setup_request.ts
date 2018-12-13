@@ -63,7 +63,12 @@ export function setupRequest(req: Request): Setup {
       console.log(`GET ${params.index}/_search`);
       console.log(JSON.stringify(params.body, null, 4));
     }
-    return cluster.callWithRequest(req, type, params);
+
+    const nextParams = {
+      ...params,
+      rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+    };
+    return cluster.callWithRequest(req, type, nextParams);
   };
 
   return {

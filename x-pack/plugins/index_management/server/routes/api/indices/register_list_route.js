@@ -7,8 +7,9 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 import { fetchAliases } from './fetch_aliases';
+import { enrichResponse } from '../../../lib/enrich_response';
 
 function formatHits(hits, aliases) {
   return hits.map(hit => {
@@ -49,7 +50,8 @@ export function registerListRoute(server) {
       try {
         const aliases = await fetchAliases(callWithRequest);
         const hits = await fetchIndices(callWithRequest);
-        const response = formatHits(hits, aliases);
+        let response = formatHits(hits, aliases);
+        response = await enrichResponse(response, callWithRequest);
         return response;
       } catch (err) {
         if (isEsError(err)) {

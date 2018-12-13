@@ -21,8 +21,9 @@ jest.mock('../../../ui_setting_defaults', () => ({
   getUiSettingDefaults: () => ({ 'search:queryLanguage': { value: 'lucene' } }),
 }));
 
-import { fetch } from './fetch';
+import { fetchProvider } from './fetch';
 
+let fetch;
 let callCluster;
 
 function setupMockCallCluster(optCount, language) {
@@ -74,6 +75,10 @@ function setupMockCallCluster(optCount, language) {
 
 describe('makeKQLUsageCollector', () => {
   describe('fetch method', () => {
+    beforeEach(() => {
+      fetch = fetchProvider('.kibana');
+    });
+
     it('should return opt in data from the .kibana/kql-telemetry doc', async () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       const fetchResponse = await fetch(callCluster);

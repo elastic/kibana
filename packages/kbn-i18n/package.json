@@ -21,7 +21,6 @@
     "@babel/preset-typescript": "^7.1.0",
     "@kbn/dev-utils": "1.0.0",
     "@types/intl-relativeformat": "^2.1.0",
-    "@types/json5": "^0.0.30",
     "@types/react-intl": "^2.3.11",
     "del": "^3.0.0",
     "getopts": "^2.2.3",
@@ -32,7 +31,6 @@
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
-    "json5": "^2.0.1",
     "prop-types": "^15.6.2",
     "react": "^16.3.0",
     "react-intl": "^2.7.0"

@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { fetch } from './fetch';
+import { fetchProvider } from './fetch';
 
 export function makeKQLUsageCollector(server) {
+  const index = server.config().get('kibana.index');
+  const fetch = fetchProvider(index);
   const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'kql',
     fetch,

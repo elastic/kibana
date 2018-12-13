@@ -5,53 +5,40 @@
  */
 
 import {
-  EuiSpacer,
-  // @ts-ignore types for EuiTab not currently available
+  EuiFlexGroup,
+  EuiFlexItem,
+  // @ts-ignore
   EuiTab,
-  // @ts-ignore types for EuiTabs not currently available
+  // @ts-ignore
   EuiTabs,
+  EuiText,
 } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { first, sortByOrder } from 'lodash';
+import moment from 'moment';
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
-import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
-import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
-import { BeatDetailsActionSection } from './action_section';
-import { BeatActivityPage } from './activity';
-import { BeatDetailPage } from './detail';
-import { BeatTagsPage } from './tags';
+import { Breadcrumb } from '../../components/navigation/breadcrumb';
+import { ChildRoutes } from '../../components/navigation/child_routes';
+import { AppPageProps } from '../../frontend_types';
 
-interface Match {
-  params: any;
-}
-
-interface BeatDetailsPageProps extends URLStateProps<AppURLState> {
-  location: any;
-  history: any;
-  libs: FrontendLibs;
-  match: Match;
+interface PageProps extends AppPageProps {
   intl: InjectedIntl;
 }
-
-interface BeatDetailsPageState {
+interface PageState {
   beat: CMPopulatedBeat | undefined;
   beatId: string;
   isLoading: boolean;
 }
 
-class BeatDetailsPageComponent extends React.PureComponent<
-  BeatDetailsPageProps,
-  BeatDetailsPageState
-> {
-  constructor(props: BeatDetailsPageProps) {
+class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState> {
+  constructor(props: PageProps) {
     super(props);
-
     this.state = {
       beat: undefined,
-      beatId: this.props.match.params.beatId,
+      beatId: props.match.params.beatId,
       isLoading: true,
     };
     this.loadBeat();
@@ -64,16 +51,66 @@ class BeatDetailsPageComponent extends React.PureComponent<
     });
   };
 
+  public renderActionSection(beat?: CMPopulatedBeat) {
+    return beat ? (
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionTypeLabel"
+              defaultMessage="Type: {beatType}."
+              values={{ beatType: <strong>{beat.type}</strong> }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionVersionLabel"
+              defaultMessage="Version: {beatVersion}."
+              values={{ beatVersion: <strong>{beat.version}</strong> }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {beat.full_tags && beat.full_tags.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
+                defaultMessage="Last Config Update: {lastUpdateTime}."
+                values={{
+                  lastUpdateTime: (
+                    <strong>
+                      {moment(
+                        first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
+                      ).fromNow()}
+                    </strong>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ) : (
+      <FormattedMessage
+        id="xpack.beatsManagement.beat.beatNotFoundMessage"
+        defaultMessage="Beat not found"
+      />
+    );
+  }
+
   public render() {
     const { intl } = this.props;
     const { beat } = this.state;
-    let id;
+    let id: string | undefined;
     let name;
 
     if (beat) {
       id = beat.id;
       name = beat.name;
     }
+
     const title = this.state.isLoading
       ? intl.formatMessage({
           id: 'xpack.beatsManagement.beat.loadingTitle',
@@ -95,76 +132,56 @@ class BeatDetailsPageComponent extends React.PureComponent<
           }
         );
 
-    const tabs = [
-      {
-        id: `/beat/${id}`,
-        name: intl.formatMessage({
-          id: 'xpack.beatsManagement.beat.configTabLabel',
-          defaultMessage: 'Config',
-        }),
-        disabled: false,
-      },
-      // {
-      //   id: `/beat/${id}/activity`,
-      //   name: 'Beat Activity',
-      //   disabled: false,
-      // },
-      {
-        id: `/beat/${id}/tags`,
-        name: intl.formatMessage({
-          id: 'xpack.beatsManagement.beat.configurationTagsTabLabel',
-          defaultMessage: 'Configuration Tags',
-        }),
-        disabled: false,
-      },
-    ];
-
     return (
-      <PrimaryLayout title={title} actionSection={<BeatDetailsActionSection beat={beat} />}>
-        <EuiTabs>
-          {tabs.map((tab, index) => (
+      <PrimaryLayout
+        title={title}
+        actionSection={this.renderActionSection(beat)}
+        hideBreadcrumbs={this.props.libs.framework.info.k7Design}
+      >
+        <React.Fragment>
+          <Breadcrumb title={`Enrolled Beats`} path={`/overview/enrolled_beats`} />
+          <EuiTabs>
             <EuiTab
-              disabled={tab.disabled}
-              key={index}
-              isSelected={tab.id === this.props.history.location.pathname}
-              onClick={() => {
-                this.props.history.push({
-                  pathname: tab.id,
-                  search: this.props.location.search,
-                });
-              }}
+              isSelected={`/beat/${id}/details` === this.props.history.location.pathname}
+              onClick={this.onTabClicked(`/beat/${id}/details`)}
             >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        <EuiSpacer size="l" />
-        <Switch>
-          <Route
-            path="/beat/:beatId/activity"
-            render={(props: any) => <BeatActivityPage libs={this.props.libs} {...props} />}
-          />
-          <Route
-            path="/beat/:beatId/tags"
-            render={(props: any) => (
-              <BeatTagsPage
-                beatId={this.state.beatId}
-                libs={this.props.libs}
-                refreshBeat={() => this.loadBeat()}
-                {...props}
+              <FormattedMessage
+                id="xpack.beatsManagement.beat.configTabLabel"
+                defaultMessage="Config"
               />
-            )}
-          />
-          <Route
-            path="/beat/:beatId"
-            render={(props: any) => (
-              <BeatDetailPage beat={this.state.beat} libs={this.props.libs} {...props} />
-            )}
-          />
-        </Switch>
+            </EuiTab>
+            <EuiTab
+              isSelected={`/beat/${id}/tags` === this.props.history.location.pathname}
+              onClick={this.onTabClicked(`/beat/${id}/tags`)}
+            >
+              <FormattedMessage
+                id="xpack.beatsManagement.beat.configurationTagsTabLabel"
+                defaultMessage="Configuration tags"
+              />
+            </EuiTab>
+          </EuiTabs>
+          {!this.state.beat && <div>Beat not found</div>}
+          {this.state.beat && (
+            <Switch>
+              <ChildRoutes
+                routes={this.props.routes}
+                {...this.props}
+                beat={this.state.beat}
+                useSwitch={false}
+              />
+              {id && <Route render={() => <Redirect to={`/beat/${id}/details`} />} />}
+            </Switch>
+          )}
+        </React.Fragment>
       </PrimaryLayout>
     );
   }
+
+  private onTabClicked = (path: string) => {
+    return () => {
+      this.props.goTo(path);
+    };
+  };
 
   private async loadBeat() {
     const { intl } = this.props;
@@ -186,6 +203,5 @@ class BeatDetailsPageComponent extends React.PureComponent<
     this.setState({ beat, isLoading: false });
   }
 }
-const BeatDetailsPageUi = withUrlState<BeatDetailsPageProps>(BeatDetailsPageComponent);
 
-export const BeatDetailsPage = injectI18n(BeatDetailsPageUi);
+export const BeatDetailsPage = injectI18n(BeatDetailsPageComponent);

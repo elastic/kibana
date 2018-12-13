@@ -20,6 +20,8 @@
 import { Embeddable } from './embeddable';
 import { EmbeddableState } from './types';
 
+export type OnEmbeddableStateChanged = (embeddableStateChanges: EmbeddableState) => void;
+
 /**
  * The EmbeddableFactory creates and initializes an embeddable instance
  */
@@ -35,6 +37,6 @@ export abstract class EmbeddableFactory {
    */
   public abstract create(
     containerMetadata: { id: string },
-    onEmbeddableStateChanged: (embeddableStateChanges: EmbeddableState) => void
+    onEmbeddableStateChanged: OnEmbeddableStateChanged
   ): Promise<Embeddable>;
 }

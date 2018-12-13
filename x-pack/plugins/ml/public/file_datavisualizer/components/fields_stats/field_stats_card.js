@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -38,19 +39,49 @@ export function FieldStatsCard({ field }) {
               <React.Fragment>
                 <div className="stats">
                   <div className="stat">
-                    <i className="fa fa-files-o" aria-hidden="true" /> {field.count} document{(field.count > 1) ? 's' : ''} ({percent}%)
+                    <i className="fa fa-files-o" aria-hidden="true" />
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.fieldStatsCard.documentsCountDescription"
+                      defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
+                      values={{
+                        fieldCount: field.count,
+                        fieldPercent: percent,
+                      }}
+                    />
                   </div>
                   <div className="stat">
-                    <i className="fa fa-cubes" aria-hidden="true" /> {field.cardinality} distinct value{(field.cardinality > 1) ? 's' : ''}
+                    <i className="fa fa-cubes" aria-hidden="true" />
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.fieldStatsCard.distinctCountDescription"
+                      defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, zero {value} one {value} other {values}}"
+                      values={{
+                        fieldCardinality: field.cardinality,
+                      }}
+                    />
                   </div>
 
                   {
                     (field.mean_value) &&
                     <React.Fragment>
                       <div>
-                        <div className="stat min heading">min</div>
-                        <div className="stat median heading">median</div>
-                        <div className="stat max heading">max</div>
+                        <div className="stat min heading">
+                          <FormattedMessage
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.minTitle"
+                            defaultMessage="min"
+                          />
+                        </div>
+                        <div className="stat median heading">
+                          <FormattedMessage
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.medianTitle"
+                            defaultMessage="median"
+                          />
+                        </div>
+                        <div className="stat max heading">
+                          <FormattedMessage
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.maxTitle"
+                            defaultMessage="max"
+                          />
+                        </div>
                       </div>
                       <div>
                         <div className="stat min heading">{field.min_value}</div>
@@ -68,7 +99,12 @@ export function FieldStatsCard({ field }) {
                     <EuiSpacer size="s" />
 
                     <div className="stats">
-                      <div className="stat">top values</div>
+                      <div className="stat">
+                        <FormattedMessage
+                          id="xpack.ml.fileDatavisualizer.fieldStatsCard.topStatsValuesDescription"
+                          defaultMessage="top values"
+                        />
+                      </div>
                       {field.top_hits.map(({ count, value }) => {
                         const pcnt = Math.round(((count / field.count) * 100) * 100) / 100;
                         return (
@@ -93,7 +129,10 @@ export function FieldStatsCard({ field }) {
             {(field.count === 0) &&
               <div className="stats">
                 <div className="stat">
-                  No field information available
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.fieldStatsCard.noFieldInformationAvailableDescription"
+                    defaultMessage="No field information available"
+                  />
                 </div>
               </div>
             }
