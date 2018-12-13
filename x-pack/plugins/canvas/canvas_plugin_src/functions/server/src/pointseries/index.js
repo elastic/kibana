@@ -21,7 +21,7 @@ export const pointseries = () => ({
   name: 'pointseries',
   type: 'pointseries',
   help:
-    'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](http://canvas.elastic.co/reference/tinymath.html). ' +
+    'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html). ' +
     'If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
     'keys. Measures are then deduplicated by those keys using the specified TinyMath function',
   context: {

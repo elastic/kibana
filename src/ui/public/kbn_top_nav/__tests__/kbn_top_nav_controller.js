@@ -67,7 +67,7 @@ describe('KbnTopNavController', function () {
     });
 
     describe('description:', function () {
-      it('defaults to "Toggle ${key} view" when using templates', function () {
+      it('defaults to "Toggle ${label} view" when using templates', function () {
         const controller = new KbnTopNavController([
           { key: 'foo', template: '<h1></h1>' },
           { key: 'Bar', description: 'not the default' },
@@ -75,7 +75,7 @@ describe('KbnTopNavController', function () {
         ]);
 
         expect(pluck(controller.opts, 'description')).to.eql([
-          'Toggle foo view',
+          'Toggle Foo view',
           'not the default',
           '1234',
         ]);

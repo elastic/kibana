@@ -6,16 +6,16 @@
 
 import Joi from 'joi';
 import { get, values } from 'lodash';
-import { ConfigurationBlockTypes } from '../../../common/constants';
+import { ConfigurationBlockTypes, REQUIRED_LICENSES } from '../../../common/constants';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file
 export const createSetTagRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
   path: '/api/beats/tag/{tag}',
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   requiredRoles: ['beats_admin'],
   config: {
     validate: {

@@ -10,7 +10,7 @@ import { first, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { ConnectedLink } from '../connected_link';
+import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
 export interface ColumnDefinition {
@@ -61,7 +61,7 @@ export const BeatsTableType: TableType = {
         defaultMessage: 'Beat name',
       }),
       render: (name: string, beat: CMPopulatedBeat) => (
-        <ConnectedLink path={`/beat/${beat.id}`}>{name}</ConnectedLink>
+        <ConnectedLink path={`/beat/${beat.id}/details`}>{name}</ConnectedLink>
       ),
       sortable: true,
     },
@@ -91,7 +91,6 @@ export const BeatsTableType: TableType = {
       sortable: false,
     },
     {
-      // TODO: update to use actual metadata field
       field: 'config_status',
       name: i18n.translate('xpack.beatsManagement.beatsTable.configStatusTitle', {
         defaultMessage: 'Config Status',
@@ -178,7 +177,7 @@ export const BeatsTableType: TableType = {
     actions: [
       {
         name: i18n.translate('xpack.beatsManagement.beatsTable.disenrollSelectedLabel', {
-          defaultMessage: 'Disenroll Selected',
+          defaultMessage: 'Unenroll Selected',
         }),
         action: 'delete',
         danger: true,

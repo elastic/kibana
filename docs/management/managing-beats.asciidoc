@@ -1,5 +1,8 @@
 [[managing-beats]]
+[role="xpack"]
 == Managing {beats}
+
+beta[]
 
 Use the Central Management UI under *Management > {beats}* to define and
 manage configurations in a central location in {kib} and quickly deploy

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -18,15 +19,13 @@ import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
 import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
-import { DiscoverButton } from '../../../shared/DiscoverButton';
+import { DiscoverErrorButton } from '../../../shared/DiscoverButtons/DiscoverErrorButton';
 import {
   PropertiesTable,
   getPropertyTabNames
 } from '../../../shared/PropertiesTable';
-import Stacktrace from '../../../shared/Stacktrace';
+import { Stacktrace } from '../../../shared/Stacktrace';
 import {
-  SERVICE_NAME,
-  ERROR_GROUP_ID,
   SERVICE_AGENT_NAME,
   SERVICE_LANGUAGE_NAME,
   USER_ID,
@@ -88,7 +87,6 @@ function DetailView({ errorGroup, urlParams, location }) {
     return null;
   }
 
-  const { serviceName } = urlParams;
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -130,20 +128,7 @@ function DetailView({ errorGroup, urlParams, location }) {
   const tabs = getTabs(context, logStackframes);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
   const occurencesCount = errorGroup.data.occurrencesCount;
-  const groupId = errorGroup.data.groupId;
   const agentName = get(errorGroup.data.error, SERVICE_AGENT_NAME);
-  const discoverQuery = {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query: `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:"${groupId}"${
-          urlParams.kuery ? ` AND ${urlParams.kuery}` : ``
-        }`
-      },
-      sort: { '@timestamp': 'desc' }
-    }
-  };
 
   return (
     <Container>
@@ -155,9 +140,14 @@ function DetailView({ errorGroup, urlParams, location }) {
         >
           Error occurrence
         </HeaderMedium>
-        <DiscoverButton query={discoverQuery}>
-          {`View ${occurencesCount} occurences in Discover`}
-        </DiscoverButton>
+        <DiscoverErrorButton
+          error={errorGroup.data.error}
+          kuery={urlParams.kuery}
+        >
+          <EuiButtonEmpty iconType="discoverApp">
+            {`View ${occurencesCount} occurences in Discover`}
+          </EuiButtonEmpty>
+        </DiscoverErrorButton>
       </HeaderContainer>
 
       <TabContentContainer>
