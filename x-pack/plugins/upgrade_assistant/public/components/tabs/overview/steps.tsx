@@ -8,7 +8,6 @@ import React, { Fragment, StatelessComponent } from 'react';
 
 import {
   EuiFormRow,
-  EuiFormRowProps,
   EuiLink,
   EuiNotificationBadge,
   EuiSpacer,
@@ -24,11 +23,6 @@ import chrome from 'ui/chrome';
 import { NEXT_MAJOR_VERSION } from '../../../../common/version';
 import { UpgradeAssistantTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
-
-// Eui's types don't have this prop
-const EuiFormRowPrime: React.StatelessComponent<
-  EuiFormRowProps & { describedByIds?: string[] }
-> = EuiFormRow;
 
 // Leaving these here even if unused so they are picked up for i18n static analysis
 // Keep this until last minor release (when next major is also released).
@@ -252,7 +246,7 @@ export const StepsUI: StatelessComponent<
 
               <EuiSpacer />
 
-              <EuiFormRowPrime
+              <EuiFormRow
                 label={intl.formatMessage({
                   id:
                     'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingLabel',
@@ -261,7 +255,7 @@ export const StepsUI: StatelessComponent<
                 describedByIds={['deprecation-logging']}
               >
                 <DeprecationLoggingToggle />
-              </EuiFormRowPrime>
+              </EuiFormRow>
             </Fragment>
           ),
         },
