@@ -13,8 +13,8 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
-import { setTimeFilters, mapExtentChanged, replaceLayerList } from '../actions/store_actions';
-import { getIsDarkTheme } from '../store/ui';
+import { setSelectedLayer, setTimeFilters, mapExtentChanged, replaceLayerList } from '../actions/store_actions';
+import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -37,6 +37,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
   inspectorAdapters.requests.reset();
 
   getStore().then(store => {
+
+    // clear old UI state
+    store.dispatch(setSelectedLayer(null));
+    store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {
       handleStoreChanges(store);
