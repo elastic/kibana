@@ -2,7 +2,7 @@
 
 exports[`CodePreview should render with data 1`] = `
 .c2 {
-  color: #999999;
+  color: #98A2B3;
   padding: 8px;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
 }
@@ -31,7 +31,7 @@ exports[`CodePreview should render with data 1`] = `
   top: 0;
   left: 0;
   border-radius: 0 0 0 5px;
-  background: #f5f5f5;
+  background: #F5F7FA;
 }
 
 .c7 {
@@ -39,10 +39,10 @@ exports[`CodePreview should render with data 1`] = `
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: #999999;
+  color: #98A2B3;
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid #d9d9d9;
+  border-right: 1px solid #D3DAE6;
 }
 
 .c7:last-of-type {
@@ -54,10 +54,10 @@ exports[`CodePreview should render with data 1`] = `
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: #999999;
+  color: #98A2B3;
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid #d9d9d9;
+  border-right: 1px solid #D3DAE6;
   background-color: #FCF2E6;
 }
 
@@ -96,7 +96,7 @@ exports[`CodePreview should render with data 1`] = `
 }
 
 .c1 {
-  border-bottom: 1px solid #d9d9d9;
+  border-bottom: 1px solid #D3DAE6;
   border-radius: 5px 5px 0 0;
 }
 
@@ -104,9 +104,9 @@ exports[`CodePreview should render with data 1`] = `
   margin: 0 0 24px 0;
   position: relative;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-  border: 1px solid #d9d9d9;
+  border: 1px solid #D3DAE6;
   border-radius: 5px;
-  background: #f5f5f5;
+  background: #F5F7FA;
 }
 
 <div
