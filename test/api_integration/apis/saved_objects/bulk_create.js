@@ -97,9 +97,6 @@ export default function ({ getService }) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  migrationVersion: {
-                    visualization: '7.0.0',
-                  },
                   updated_at: resp.body.saved_objects[0].updated_at,
                   version: 1,
                   attributes: {
