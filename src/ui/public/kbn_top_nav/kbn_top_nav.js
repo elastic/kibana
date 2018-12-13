@@ -21,9 +21,10 @@
  * A configuration object for a top nav component.
  * @typedef {Object} KbnTopNavConfig
  * @type Object
- * @property {string} key - A display string which will be shown in the top nav for this option.
+ * @property {string} key - identifier of menu item.
+ * @property {string} label - A display string which will be shown in the top nav for this option.
  * @property {string} [description] - optional, used for the screen-reader description of this
- *  menu. Defaults to "Toggle ${key} view" for templated menu items and just "${key}" for
+ *  menu. Defaults to "Toggle ${label} view" for templated menu items and just "${label}" for
  *  programmatic menu items
  * @property {string} testId - for testing purposes, can be used to retrieve this item.
  * @property {Object} [template] - an html template that will be shown when this item is clicked.

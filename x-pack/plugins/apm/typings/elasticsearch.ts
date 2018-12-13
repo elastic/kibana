@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-
-export interface TermsAggsBucket {
-  key: string;
+export interface BucketAgg<T = string> {
+  key: T;
   doc_count: number;
 }
-
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
-export type TopHits<T> = Omit<
-  SearchResponse<T>,
-  'took' | 'timed_out' | '_shards'
->;
 
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
