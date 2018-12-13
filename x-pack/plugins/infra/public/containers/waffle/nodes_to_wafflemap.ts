@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
-import { InfraNode, InfraNodePath } from '../../../common/graphql/types';
+
+import { InfraNode, InfraNodePath } from '../../graphql/types';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,

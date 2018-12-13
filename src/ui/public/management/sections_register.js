@@ -18,13 +18,18 @@
  */
 
 import { ManagementSection } from './section';
+import { i18n } from '@kbn/i18n';
 
 export const management = new ManagementSection('management', {
-  display: 'Management'
+  display: i18n.translate('common.ui.management.displayName', {
+    defaultMessage: 'Management'
+  })
 });
 
 management.register('data', {
-  display: 'Connect Data',
+  display: i18n.translate('common.ui.management.connectDataDisplayName', {
+    defaultMessage: 'Connect Data'
+  }),
   order: 0
 });
 

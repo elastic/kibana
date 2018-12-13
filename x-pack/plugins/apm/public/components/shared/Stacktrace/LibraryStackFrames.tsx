@@ -7,7 +7,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { Stackframe } from '../../../../typings/APMDoc';
+import { Stackframe } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
 import { px, units } from '../../../style/variables';
 import { CodePreview } from '../../shared/CodePreview';
 // @ts-ignore

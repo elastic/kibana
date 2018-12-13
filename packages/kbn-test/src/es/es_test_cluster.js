@@ -42,6 +42,7 @@ export function createEsTestCluster(options = {}) {
     .toString(36)
     .substring(2);
   const clusterName = `test-${randomHash}`;
+  const nodeName = `node-${randomHash}`;
   const config = {
     version: esTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
@@ -78,7 +79,9 @@ export function createEsTestCluster(options = {}) {
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
+          `node.name=${nodeName}`,
           `discovery.zen.ping.unicast.hosts=localhost:${port}`,
+          `cluster.initial_master_nodes=${nodeName}`,
           ...esArgs,
         ],
       });

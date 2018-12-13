@@ -268,6 +268,5 @@ export const phaseToES = (state, phase) => {
       number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
     };
   }
-  console.log("PHASE", phase);
   return esPhase;
 };
