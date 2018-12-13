@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
 import { DetailSymbolInformation } from 'elastic-lsp-extension';
 
 import { SymbolSearchRequest, SymbolSearchResult } from '../../model';
 import { SymbolIndexNamePrefix } from '../indexer/schema';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { AbstractSearchClient } from './abstract_search_client';
 

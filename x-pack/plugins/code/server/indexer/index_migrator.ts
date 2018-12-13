@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import {
   getDocumentIndexCreationRequest,
   getReferenceIndexCreationRequest,
@@ -14,8 +12,9 @@ import {
   IndexVersionController,
 } from '.';
 import { Repository } from '../../model';
-import { Log } from '../../server/log';
-import { RepositoryObjectClient } from '../../server/search';
+import { EsClient } from '../lib/esqueue';
+import { Log } from '../log';
+import { RepositoryObjectClient } from '../search';
 import pkg from './schema/version.json';
 
 export class IndexMigrator {

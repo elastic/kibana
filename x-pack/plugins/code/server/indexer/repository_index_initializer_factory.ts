@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import { Indexer, IndexerFactory, RepositoryIndexInitializer } from '.';
 import { RepositoryUri } from '../../model';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 
 export class RepositoryIndexInitializerFactory implements IndexerFactory {

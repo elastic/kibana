@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient, Esqueue } from '@code/esqueue';
 import { Server } from 'hapi';
 import moment from 'moment';
 import { resolve } from 'path';
@@ -14,6 +13,7 @@ import {
   RepositoryIndexInitializerFactory,
   tryMigrateIndices,
 } from './server/indexer';
+import { EsClient, Esqueue } from './server/lib/esqueue';
 import { Log } from './server/log';
 import { InstallManager } from './server/lsp/install_manager';
 import { LspService } from './server/lsp/lsp_service';

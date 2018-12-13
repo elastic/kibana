@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient, Esqueue } from '@code/esqueue';
-
 import { RepositoryUtils } from '../../common/repository_utils';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
+import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { AbstractWorker } from './abstract_worker';

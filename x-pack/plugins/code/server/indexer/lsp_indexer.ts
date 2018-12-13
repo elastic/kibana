@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
 import fs from 'fs';
 import util from 'util';
 
@@ -13,6 +12,7 @@ import { RepositoryUtils } from '../../common/repository_utils';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';

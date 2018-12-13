@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '@code/esqueue';
-
 import { RepositoryUri } from '../../model';
+import { CancellationToken } from '../lib/esqueue';
 
 export class CancellationSerivce {
   // TODO: Add clone/update cancellation map.
