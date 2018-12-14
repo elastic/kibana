@@ -204,8 +204,9 @@ function discoverController(
 
   const getTopNavLinks = () => {
     const newSearch = {
-      key: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
-        defaultMessage: 'new',
+      key: 'new',
+      label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
+        defaultMessage: 'New',
       }),
       description: i18n('kbn.discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
@@ -215,8 +216,9 @@ function discoverController(
     };
 
     const saveSearch = {
-      key: i18n('kbn.discover.localMenu.saveTitle', {
-        defaultMessage: 'save',
+      key: 'save',
+      label: i18n('kbn.discover.localMenu.saveTitle', {
+        defaultMessage: 'Save',
       }),
       description: i18n('kbn.discover.localMenu.saveSearchDescription', {
         defaultMessage: 'Save Search',
@@ -253,8 +255,9 @@ function discoverController(
       }
     };
     const openSearch = {
-      key: i18n('kbn.discover.localMenu.openTitle', {
-        defaultMessage: 'open',
+      key: 'open',
+      label: i18n('kbn.discover.localMenu.openTitle', {
+        defaultMessage: 'Open',
       }),
       description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
         defaultMessage: 'Open Saved Search',
@@ -270,8 +273,9 @@ function discoverController(
     };
 
     const shareSearch = {
-      key: i18n('kbn.discover.localMenu.shareTitle', {
-        defaultMessage: 'share',
+      key: 'share',
+      label: i18n('kbn.discover.localMenu.shareTitle', {
+        defaultMessage: 'Share',
       }),
       description: i18n('kbn.discover.localMenu.shareSearchDescription', {
         defaultMessage: 'Share Search',
@@ -296,8 +300,9 @@ function discoverController(
     };
 
     const inspectSearch = {
-      key: i18n('kbn.discover.localMenu.inspectTitle', {
-        defaultMessage: 'inspect',
+      key: 'inspect',
+      label: i18n('kbn.discover.localMenu.inspectTitle', {
+        defaultMessage: 'Inspect',
       }),
       description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
         defaultMessage: 'Open Inspector for search',

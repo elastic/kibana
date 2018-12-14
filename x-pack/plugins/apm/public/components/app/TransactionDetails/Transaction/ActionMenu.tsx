@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { DiscoverTransactionButton } from '../../../shared/DiscoverButtons/DiscoverTransactionButton';
 
 function getInfraMetricsQuery(transaction: Transaction) {
