@@ -7,21 +7,26 @@
 import { CloneWorkerResult } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
-import { RepositoryService } from '../repository_service';
+import { RepositoryServiceFactory } from '../repository_service_factory';
 import { AbstractGitWorker } from './abstract_git_worker';
 import { Job } from './job';
 
 export class UpdateWorker extends AbstractGitWorker {
   public id: string = 'update';
 
-  constructor(queue: Esqueue, protected readonly log: Log, client: EsClient) {
+  constructor(
+    queue: Esqueue,
+    protected readonly log: Log,
+    protected readonly client: EsClient,
+    protected readonly repoServiceFactory: RepositoryServiceFactory
+  ) {
     super(queue, log, client);
   }
 
   public async executeJob(job: Job) {
     const { uri, dataPath } = job.payload;
     this.log.info(`Execute update job for ${uri}`);
-    const repoService = new RepositoryService(dataPath, this.log);
+    const repoService = this.repoServiceFactory.newInstance(dataPath, this.log);
     return await repoService.update(uri);
   }
 
