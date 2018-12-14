@@ -110,7 +110,10 @@ export class MonitoringViewBaseController {
         .then(pageData => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result
-          // this.updatingData = false;
+          this.updatingData = false;
+        })
+        .catch(() => {
+          this.updatingData = false;
         });
     };
     this.updateData();
