@@ -759,6 +759,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.topNavMenu = [];
   $scope.topNavMenu.push({
     key: 'new',
+    label: i18n('xpack.graph.topNavMenu.newWorkspaceLabel', {
+      defaultMessage: 'New',
+    }),
     description: i18n('xpack.graph.topNavMenu.newWorkspaceAriaLabel', {
       defaultMessage: 'New Workspace',
     }),
@@ -770,6 +773,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   if (!$scope.allSavingDisabled) {
     $scope.topNavMenu.push({
       key: 'save',
+      label: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledLabel', {
+        defaultMessage: 'Save',
+      }),
       description: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
         defaultMessage: 'Save Workspace',
       }),
@@ -782,6 +788,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   }else {
     $scope.topNavMenu.push({
       key: 'save',
+      label: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledLabel', {
+        defaultMessage: 'Save',
+      }),
       description: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel', {
         defaultMessage: 'Save Workspace',
       }),
@@ -793,6 +802,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   }
   $scope.topNavMenu.push({
     key: 'open',
+    label: i18n('xpack.graph.topNavMenu.loadWorkspaceLabel', {
+      defaultMessage: 'Open',
+    }),
     description: i18n('xpack.graph.topNavMenu.loadWorkspaceAriaLabel', {
       defaultMessage: 'Load Saved Workspace',
     }),
@@ -807,6 +819,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       disableButton: function () {
         return $route.current.locals === undefined || $route.current.locals.savedWorkspace === undefined;
       },
+      label: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledLabel', {
+        defaultMessage: 'Delete',
+      }),
       description: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaLabel', {
         defaultMessage: 'Delete Saved Workspace',
       }),
@@ -845,6 +860,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     $scope.topNavMenu.push({
       key: 'delete',
       disableButton: true,
+      label: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledLabel', {
+        defaultMessage: 'Delete',
+      }),
       description: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledAriaLabel', {
         defaultMessage: 'Delete Saved Workspace',
       }),
@@ -856,6 +874,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.topNavMenu.push({
     key: 'settings',
     disableButton: function () { return $scope.selectedIndex === null; },
+    label: i18n('xpack.graph.topNavMenu.settingsLabel', {
+      defaultMessage: 'Settings',
+    }),
     description: i18n('xpack.graph.topNavMenu.settingsAriaLabel', {
       defaultMessage: 'Settings',
     }),
