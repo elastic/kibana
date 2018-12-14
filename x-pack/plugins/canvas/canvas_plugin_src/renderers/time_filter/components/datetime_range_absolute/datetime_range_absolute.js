@@ -19,7 +19,7 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         endDate={to}
         onValueChange={val => onSelect(val, to)}
         onSelect={val => {
-          // if only the date was selected, set the time to start of day
+          // sets the time to start of day if only the date was selected
           if (moment(from).format('hh:mm:ss a') === val.format('hh:mm:ss a'))
             onSelect(val.startOf('day'), to);
           else onSelect(val, to);
@@ -33,7 +33,7 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         endDate={to}
         onValueChange={val => onSelect(from, val)}
         onSelect={val => {
-          // if only the date was selected, set the time to end of day
+          // set the time to end of day if only the date was selected
           if (moment(to).format('hh:mm:ss a') === val.format('hh:mm:ss a'))
             onSelect(from, moment(val).endOf('day'));
           else onSelect(from, val);
