@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { DatetimeCalendar } from '../datetime_calendar';
 import './datetime_range_absolute.scss';
 
@@ -16,7 +17,8 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         value={from}
         startDate={from}
         endDate={to}
-        onSelect={val => onSelect(val, to)}
+        onValueChange={val => onSelect(val, to)}
+        onSelect={val => onSelect(moment(val).startOf('day'), to)}
       />
     </div>
     <div>
@@ -24,7 +26,8 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         value={to}
         startDate={from}
         endDate={to}
-        onSelect={val => onSelect(from, val)}
+        onValueChange={val => onSelect(from, val)}
+        onSelect={val => onSelect(from, moment(val).endOf('day'))}
       />
     </div>
   </div>
