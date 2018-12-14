@@ -75,7 +75,7 @@ export const esdocs = () => ({
 
     return queryEsSQL(handlers.elasticsearchClient, {
       count: args.count,
-      query,
+      query: query.toString(),
       filter: context.and,
     });
   },

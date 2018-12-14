@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNode, InfraPathInput } from '../../../../../common/graphql/types';
+import { InfraNode, InfraPathInput } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { createNodeItem } from './create_node_item';
 

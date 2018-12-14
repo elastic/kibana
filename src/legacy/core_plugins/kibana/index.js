@@ -145,8 +145,6 @@ export default function (kibana) {
         };
       },
 
-      translations: [],
-
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),
     },
