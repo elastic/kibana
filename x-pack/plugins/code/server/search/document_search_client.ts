@@ -212,16 +212,17 @@ export class DocumentSearchClient extends AbstractSearchClient {
       };
       return item;
     });
+    const total = rawRes.hits.total.value;
     return {
       query: req.query,
       from,
       page: req.page,
-      totalPage: Math.ceil(rawRes.hits.total / resultsPerPage),
+      totalPage: Math.ceil(total / resultsPerPage),
       results,
       repoAggregations: aggregations.repoUri.buckets,
       langAggregations: aggregations.language.buckets,
       took: rawRes.took,
-      total: rawRes.hits.total,
+      total,
     };
   }
 
@@ -281,14 +282,15 @@ export class DocumentSearchClient extends AbstractSearchClient {
       };
       return item;
     });
+    const total = rawRes.hits.total.value;
     return {
       query: req.query,
       from,
       page: req.page,
-      totalPage: Math.ceil(rawRes.hits.total / resultsPerPage),
+      totalPage: Math.ceil(total / resultsPerPage),
       results,
       took: rawRes.took,
-      total: rawRes.hits.total,
+      total,
     };
   }
 

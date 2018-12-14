@@ -69,7 +69,7 @@ export class RepositorySearchClient extends AbstractSearchClient {
     const result: RepositorySearchResult = {
       repositories: repos,
       took: rawRes.took,
-      total: rawRes.hits.total,
+      total: rawRes.hits.total.value,
     };
     return result;
   }
