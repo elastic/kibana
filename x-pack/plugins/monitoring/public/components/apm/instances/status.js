@@ -29,7 +29,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: 'Servers',
       }),
       value: total,
-      dataTestSubj: 'total'
+      'data-test-subj': 'total'
     },
     {
       label: intl.formatMessage({
@@ -37,7 +37,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: 'Total Events',
       }),
       value: formatMetric(totalEvents, '0.[0]a'),
-      dataTestSubj: 'totalEvents'
+      'data-test-subj': 'totalEvents'
     },
     {
       label: intl.formatMessage({
@@ -49,7 +49,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: '{timeOfLastEvent} ago' }, {
         timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
       }),
-      dataTestSubj: 'timeOfLastEvent',
+      'data-test-subj': 'timeOfLastEvent',
     }
   ];
 

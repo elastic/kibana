@@ -470,7 +470,13 @@ exports[`Field for boolean setting should render as read only with help text if 
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={true}
-          label="Off"
+          label={
+            <FormattedMessage
+              defaultMessage="Off"
+              id="kbn.management.settings.field.offLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -552,7 +558,13 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label="On"
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="kbn.management.settings.field.onLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -623,7 +635,13 @@ exports[`Field for boolean setting should render default value if there is no us
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label="On"
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="kbn.management.settings.field.onLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -736,7 +754,13 @@ exports[`Field for boolean setting should render user value if there is user val
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label="Off"
+          label={
+            <FormattedMessage
+              defaultMessage="Off"
+              id="kbn.management.settings.field.offLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
