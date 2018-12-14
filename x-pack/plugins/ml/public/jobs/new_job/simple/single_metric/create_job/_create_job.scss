@@ -205,6 +205,6 @@
 
 // hide the default es loading indicator bar as it can't be switched off
 // for standard es searches using the http header.
-.loadingIndicator__bar {
+.kbnLoadingIndicator__bar {
   display: none;
 }
