@@ -14,9 +14,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiSpacer,
-  EuiTitle,
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
@@ -24,7 +21,13 @@ import {
 import { listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
-import { AutoFollowPatternForm, RemoteClustersProvider, SectionLoading, SectionError } from '../../components';
+import {
+  AutoFollowPatternForm,
+  AutoFollowPatternPageTitle,
+  RemoteClustersProvider,
+  SectionLoading,
+  SectionError,
+} from '../../components';
 
 class AutoFollowPatternAddUi extends PureComponent {
   static propTypes = {
@@ -59,7 +62,8 @@ class AutoFollowPatternAddUi extends PureComponent {
           <p>
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutDescription"
-              defaultMessage="Auto-follow patterns capture indices on remote clusters. Add a remote cluster before you create an auto-follow pattern." //eslint-disable-line max-len
+              defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add
+                a remote cluster."
             />
           </p>
 
@@ -122,18 +126,14 @@ class AutoFollowPatternAddUi extends PureComponent {
             horizontalPosition="center"
             className="ccrPageContent"
           >
-            <EuiSpacer size="xs" />
-
-            <EuiPageContentHeader>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
-                    defaultMessage="Add auto-follow pattern"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageContentHeader>
+            <AutoFollowPatternPageTitle
+              title={(
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
+                  defaultMessage="Add auto-follow pattern"
+                />
+              )}
+            />
 
             <RemoteClustersProvider>
               {({ isLoading, error, remoteClusters }) => {

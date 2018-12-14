@@ -585,6 +585,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
      */
     const renderActions = () => {
       const { apiStatus } = this.props;
+      const { areErrorsVisible } = this.state;
 
       if (apiStatus === API_STATUS.SAVING) {
         return (
@@ -605,6 +606,8 @@ export class AutoFollowPatternFormUI extends PureComponent {
         );
       }
 
+      const isSaveDisabled = areErrorsVisible && !this.isFormValid();
+
       return (
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -613,6 +616,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               iconType="check"
               onClick={this.sendForm}
               fill
+              disabled={isSaveDisabled}
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternForm.saveButtonLabel"

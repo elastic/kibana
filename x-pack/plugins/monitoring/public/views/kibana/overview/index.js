@@ -7,12 +7,18 @@
 /**
  * Kibana Overview
  */
+import React from 'react';
+import { render } from 'react-dom';
 import { find } from 'lodash';
 import uiRoutes from'ui/routes';
+import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ClusterStatus } from '../../../components/kibana/cluster_status';
+import { I18nProvider } from '@kbn/i18n/react';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -44,7 +50,7 @@ uiRoutes.when('/kibana', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope, i18n) {
+  controller($injector, $scope) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -54,11 +60,7 @@ uiRoutes.when('/kibana', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    const routeTitle = i18n('xpack.monitoring.kibana.overview.routeTitle', {
-      defaultMessage: 'Kibana'
-    });
-
-    title($scope.cluster, routeTitle);
+    title($scope.cluster, 'Kibana');
 
     const $executor = $injector.get('$executor');
     $executor.register({
@@ -69,5 +71,43 @@ uiRoutes.when('/kibana', {
     $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
+
+    $scope.$watch('pageData', renderReact);
+    renderReact();
+
+    function renderReact() {
+      const app =  document.getElementById('monitoringKibanaOverviewApp');
+      if (!app) {
+        return;
+      }
+
+      const overviewPage = (
+        <I18nProvider>
+          <EuiPage>
+            <EuiPageBody>
+              <EuiPageContent>
+                <ClusterStatus stats={$scope.pageData.clusterStatus} />
+                <EuiSpacer size="m"/>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={true}>
+                    <MonitoringTimeseriesContainer
+                      series={$scope.pageData.metrics.kibana_cluster_requests}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={true}>
+                    <MonitoringTimeseriesContainer
+                      series={$scope.pageData.metrics.kibana_cluster_response_times}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>
+        </I18nProvider>
+      );
+
+      render(overviewPage, app);
+    }
   }
 });

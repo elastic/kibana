@@ -43,7 +43,7 @@ export class AutoFollowPatternListUI extends PureComponent {
           <h1>
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
-              defaultMessage="Cross Cluster Replication"
+              defaultMessage="Create your first auto-follow pattern"
             />
           </h1>
         )}
