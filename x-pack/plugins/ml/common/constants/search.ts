@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-export const ML_RESULTS_INDEX_PATTERN = '.ml-anomalies-*';
-export const ML_NOTIFICATION_INDEX_PATTERN = '.ml-notifications';
+export const ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE = 500;
+export const ANOMALIES_TABLE_DEFAULT_QUERY_SIZE = 500;

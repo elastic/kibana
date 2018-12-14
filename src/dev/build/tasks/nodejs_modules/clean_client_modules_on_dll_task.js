@@ -46,7 +46,7 @@ export const CleanClientModulesOnDLLTask = {
       `!${baseDir}/src/legacy/core_plugins/**/public`
     ]);
     const discoveredPluginEntries = await globby([
-      `${baseDir}/src/plugins/*/index.js`,
+      `${baseDir}/src/plugins/*/server/index.js`,
       `!${baseDir}/src/plugins/**/public`
     ]);
 
