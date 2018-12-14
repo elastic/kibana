@@ -179,6 +179,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         const reader = new SocketMessageReader(socket);
         const writer = new SocketMessageWriter(socket);
         this.clientConnection = createMessageConnection(reader, writer, this.logger);
+        this.registerOnNotificationHandler(this.clientConnection);
         this.clientConnection.listen();
         res(this.clientConnection);
       });
@@ -214,7 +215,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   public connect(): Promise<MessageConnection> {
     if (this.clientConnection) {
-      this.registerOnNotificationHandler(this.clientConnection);
       return Promise.resolve(this.clientConnection);
     }
     this.closed = false;
