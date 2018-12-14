@@ -137,7 +137,7 @@ export function tpmUnit(type: string) {
 export function asPercent(
   numerator: number,
   denominator?: number,
-  fallbackResult: string = ''
+  fallbackResult = ''
 ) {
   if (!denominator) {
     return fallbackResult;
@@ -145,6 +145,6 @@ export function asPercent(
   return numeral(numerator / denominator).format('0.00%');
 }
 
-export function asGB(bytes: number | null, places: number = 1) {
+export function asGB(bytes: number | null, places = 1) {
   return ((bytes || 0) / 1e9).toFixed(places) + ' GB';
 }

@@ -7,9 +7,9 @@
 import { Setup } from '../lib/helpers/setup_request';
 
 interface TestSetup extends Setup {
-  client: any; // tried to use jest's Mock type here but it wouldn't import
+  client: jest.Mock;
   config: {
-    get: any; // tried to use jest's Mock type here but it wouldn't import
+    get: jest.Mock;
   };
 }
 

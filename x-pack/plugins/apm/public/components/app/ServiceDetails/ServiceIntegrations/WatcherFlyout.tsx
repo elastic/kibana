@@ -32,13 +32,9 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
 import { UnconnectedKibanaLink } from '../../../../utils/url';
-import { createErrorGroupWatch } from './createErrorGroupWatch';
+import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
-interface DOMEvent {
-  target: {
-    value: string;
-  };
-}
+type ScheduleKey = keyof Schedule;
 
 const getUserTimezone = _.memoize(() => {
   const uiSettings = chrome.getUiSettingsClient();
@@ -63,11 +59,10 @@ interface WatcherFlyoutProps {
   isOpen: boolean;
 }
 
-type Schedule = 'interval' | 'daily';
 type IntervalUnit = 'm' | 'h';
 
 interface WatcherFlyoutState {
-  schedule: Schedule;
+  schedule: ScheduleKey;
   threshold: number;
   actions: {
     slack: boolean;
@@ -102,23 +97,25 @@ export class WatcherFlyout extends Component<
     slackUrl: ''
   };
 
-  public onChangeSchedule = (schedule: Schedule) => {
+  public onChangeSchedule = (schedule: ScheduleKey) => {
     this.setState({ schedule });
   };
 
-  public onChangeThreshold = (event: DOMEvent) => {
+  public onChangeThreshold = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
       threshold: parseInt(event.target.value, 10)
     });
   };
 
-  public onChangeDailyUnit = (event: DOMEvent) => {
+  public onChangeDailyUnit = (event: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({
       daily: event.target.value
     });
   };
 
-  public onChangeIntervalValue = (event: DOMEvent) => {
+  public onChangeIntervalValue = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     this.setState({
       interval: {
         value: parseInt(event.target.value, 10),
@@ -127,7 +124,9 @@ export class WatcherFlyout extends Component<
     });
   };
 
-  public onChangeIntervalUnit = (event: DOMEvent) => {
+  public onChangeIntervalUnit = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     this.setState({
       interval: {
         value: this.state.interval.value,
@@ -145,11 +144,11 @@ export class WatcherFlyout extends Component<
     });
   };
 
-  public onChangeEmails = (event: DOMEvent) => {
+  public onChangeEmails = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ emails: event.target.value });
   };
 
-  public onChangeSlackUrl = (event: DOMEvent) => {
+  public onChangeSlackUrl = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ slackUrl: event.target.value });
   };
 
@@ -191,7 +190,7 @@ export class WatcherFlyout extends Component<
       threshold: this.state.threshold,
       timeRange
     })
-      .then(id => {
+      .then((id: string) => {
         this.props.onClose();
         this.addSuccessToast(id);
       })

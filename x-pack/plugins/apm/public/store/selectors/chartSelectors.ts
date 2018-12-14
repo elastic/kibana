@@ -40,16 +40,13 @@ export const getEmptySerie = memoize(
   (start: number, end: number) => [start, end].join('_')
 );
 
-export interface IEmptySeries {
-  data: Array<{
-    x: number;
-    y: number;
-  }>;
+interface IEmptySeries {
+  data: Coordinate[];
 }
 
 export interface ITpmBucket {
   title: string;
-  data: any;
+  data: Coordinate[];
   legendValue: string;
   type: string;
   color: string;

@@ -16,7 +16,6 @@ import React from 'react';
 // @ts-ignore
 import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
-// @ts-ignore
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
 import { MetricsChartDataRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceMetricsCharts';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
@@ -51,7 +50,7 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
           <EuiPanel>
             <ErrorDistributionRequest
               urlParams={params}
-              render={({ data }: { data: any }) => (
+              render={({ data }) => (
                 <Distribution
                   distribution={data}
                   title={
@@ -69,8 +68,6 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
       <MetricsChartDataRequest
         urlParams={params}
         render={({ data }) => {
-          // console.log('metrics request data??', data);
-          // return null;
           return (
             <EuiFlexGrid columns={2}>
               <EuiFlexItem>

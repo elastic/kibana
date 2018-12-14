@@ -20,23 +20,36 @@ import {
 // @ts-ignore
 import { createWatch } from '../../../../services/rest/watcher';
 
-function getSlackPathUrl(slackUrl?: string | null) {
+function getSlackPathUrl(slackUrl?: string) {
   if (slackUrl) {
     const { path } = url.parse(slackUrl);
     return path;
   }
 }
 
+export interface Schedule {
+  interval?: string;
+  daily?: {
+    at: string;
+  };
+}
+
 interface Arguments {
   emails: string[];
-  schedule: any; // TODO: what is this type?
+  schedule: Schedule;
   serviceName: string;
-  slackUrl?: string | null;
-  threshold: any; // TODO: what is this type?
+  slackUrl?: string;
+  threshold: number;
   timeRange: {
-    value: number; // TODO: is this right?
-    unit: string; // TODO: is this right?
+    value: number;
+    unit: string;
   };
+}
+
+interface Actions {
+  log_error: { logging: { text: string } };
+  slack_webhook?: { [key: string]: any };
+  email?: { [key: string]: any };
 }
 
 export async function createErrorGroupWatch({
@@ -66,11 +79,7 @@ export async function createErrorGroupWatch({
 >{{doc_count}} occurrences
 {{/ctx.payload.aggregations.error_groups.buckets}}`;
 
-  const actions: {
-    log_error: { logging: { text: string } };
-    slack_webhook?: { [key: string]: any };
-    email?: { [key: string]: any };
-  } = {
+  const actions: Actions = {
     log_error: { logging: { text: emailTemplate } }
   };
 
