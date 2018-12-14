@@ -89,7 +89,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         license: {
           type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
           expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
-          expiry_date_in_millis: xpackInfo ? xpackInfo.getLicense().expiryDateInMillis : 0,
+          expiry_date_in_millis:
+            xpackInfo.getLicense().expiryDateInMillis !== undefined
+              ? xpackInfo.getLicense().expiryDateInMillis
+              : -1,
         },
         security: {
           enabled: xpackInfo

@@ -31,7 +31,7 @@ exports[`LoadingIndices should render normally 1`] = `
         component="span"
       >
         <FormattedMessage
-          defaultMessage="Looking for matching indices..."
+          defaultMessage="Looking for matching indices…"
           id="kbn.management.createIndexPattern.step.loadingHeader"
           values={Object {}}
         />
@@ -51,7 +51,7 @@ exports[`LoadingIndices should render normally 1`] = `
         component="span"
       >
         <FormattedMessage
-          defaultMessage="Just a sec..."
+          defaultMessage="Just a sec…"
           id="kbn.management.createIndexPattern.step.loadingLabel"
           values={Object {}}
         />
