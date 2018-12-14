@@ -23,7 +23,7 @@ import {
 import chrome from 'ui/chrome';
 
 
-export function Settings({ canCreateFilter }) {
+export function Settings({ canCreateFilter, canCreateCalendar }) {
   return (
     <EuiPage className="mlSettingsPage">
       <EuiPageBody className="mlSettingsPage__body">
@@ -43,6 +43,7 @@ export function Settings({ canCreateFilter }) {
                 size="l"
                 color="primary"
                 href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
+                isDisabled={canCreateCalendar === false}
               >
                 Calendar management
               </EuiButtonEmpty>

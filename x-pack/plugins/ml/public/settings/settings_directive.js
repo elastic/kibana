@@ -49,6 +49,7 @@ module.directive('mlSettings', function () {
   timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
 
   const canCreateFilter = checkPermission('canCreateFilter');
+  const canCreateCalendar = checkPermission('canCreateCalendar');
 
   return {
     restrict: 'E',
@@ -56,7 +57,7 @@ module.directive('mlSettings', function () {
     scope: {},
     link: function (scope, element) {
       ReactDOM.render(
-        React.createElement(Settings, { canCreateFilter }),
+        React.createElement(Settings, { canCreateFilter, canCreateCalendar }),
         element[0]
       );
     }
