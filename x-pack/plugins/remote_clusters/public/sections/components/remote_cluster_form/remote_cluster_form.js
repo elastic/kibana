@@ -67,6 +67,7 @@ export class RemoteClusterFormUi extends Component {
 
     this.state = {
       localSeedErrors: [],
+      seedInput: '',
       fields: fieldsState,
       disabledFields,
       fieldsErrors: this.getFieldsErrors(fieldsState),
@@ -74,9 +75,8 @@ export class RemoteClusterFormUi extends Component {
     };
   }
 
-  getFieldsErrors(fields) {
+  getFieldsErrors(fields, seedInput = '') {
     const { name, seeds } = fields;
-
     const errors = {};
 
     if (!name || !name.trim()) {
@@ -90,25 +90,30 @@ export class RemoteClusterFormUi extends Component {
       errors.name = (
         <FormattedMessage
           id="xpack.remoteClusters.form.errors.illegalCharacters"
-          defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
+          defaultMessage="Name contains invalid characters."
         />
       );
     }
 
     if (!seeds.some(seed => Boolean(seed.trim()))) {
-      errors.seeds = (
-        <FormattedMessage
-          id="xpack.remoteClusters.form.errors.seedMissing"
-          defaultMessage="At least one seed node is required."
-        />
-      );
+      // If the user hasn't entered any seeds then we only want to prompt them for some if they
+      // aren't already in the process of entering one in. In this case, we'll just show the
+      // combobox-specific validation.
+      if (!seedInput) {
+        errors.seeds = (
+          <FormattedMessage
+            id="xpack.remoteClusters.form.errors.seedMissing"
+            defaultMessage="At least one seed node is required."
+          />
+        );
+      }
     }
 
     return errors;
   }
 
   onFieldsChange = (changedFields) => {
-    const { fields: prevFields } = this.state;
+    const { fields: prevFields, seedInput } = this.state;
 
     const newFields = {
       ...prevFields,
@@ -117,8 +122,7 @@ export class RemoteClusterFormUi extends Component {
 
     this.setState({
       fields: newFields,
-      fieldsErrors: this.getFieldsErrors(newFields),
-      // areErrorsVisible: false,
+      fieldsErrors: this.getFieldsErrors(newFields, seedInput),
     });
   };
 
@@ -166,8 +170,8 @@ export class RemoteClusterFormUi extends Component {
     if (isInvalid) {
       errors.push(intl.formatMessage({
         id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage',
-        defaultMessage: `Seed nodes must consist of valid characters, with optional parts separated
-        by periods. Valid characters are lowercase letters, numbers, and dashes.`,
+        defaultMessage: `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400.
+          Hosts can only consist of letters, numbers, and dashes.`,
       }));
     }
 
@@ -213,13 +217,8 @@ export class RemoteClusterFormUi extends Component {
 
   onSeedsInputChange = (seedInput) => {
     const { intl } = this.props;
-
-    const {
-      fields: {
-        seeds,
-      },
-      localSeedErrors,
-    } = this.state;
+    const { fields, localSeedErrors } = this.state;
+    const { seeds } = fields;
 
     // Allow typing to clear the errors, but not to add new ones.
     const errors = (!seedInput || this.getLocalSeedErrors(seedInput).length === 0) ? [] : localSeedErrors;
@@ -237,6 +236,8 @@ export class RemoteClusterFormUi extends Component {
 
     this.setState({
       localSeedErrors: errors,
+      fieldsErrors: this.getFieldsErrors(fields, seedInput),
+      seedInput,
     });
   };
 
@@ -300,7 +301,7 @@ export class RemoteClusterFormUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
-                defaultMessage="The nodes to query to get the cluster state from the remote cluster.
+                defaultMessage="A list of remote cluster nodes to query for the cluster state.
                   Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
               />
             </p>
