@@ -16,7 +16,7 @@ import {
 } from '../../../../../../../style/variables';
 
 import { EuiTitle } from '@elastic/eui';
-import { HttpContext } from '../../../../../../../../typings/Span';
+import { HttpContext } from '../../../../../../../../typings/es_schemas/Span';
 
 const DatabaseStatement = styled.div`
   margin-top: ${px(unit)};

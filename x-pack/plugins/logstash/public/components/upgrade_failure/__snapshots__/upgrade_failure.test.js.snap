@@ -190,11 +190,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -203,11 +199,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                       className="euiIcon euiIcon--xLarge"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -580,11 +572,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -593,11 +581,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                       className="euiIcon euiIcon--xLarge"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -970,11 +954,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -983,11 +963,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                       className="euiIcon euiIcon--xLarge"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"

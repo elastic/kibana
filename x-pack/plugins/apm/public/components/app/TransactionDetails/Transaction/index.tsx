@@ -15,7 +15,7 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import React from 'react';
-import { Transaction as ITransaction } from '../../../../../typings/Transaction';
+import { Transaction as ITransaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { DiscoverTransactionButton } from '../../../shared/DiscoverButtons/DiscoverTransactionButton';
 import { TransactionLink } from '../../../shared/TransactionLink';

@@ -83,7 +83,7 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
     `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
     `!${modulePkgPath}`,
   ]);
-  await deleteAll(logger, deletePatterns);
+  await deleteAll(deletePatterns);
 
   // Mark this module as cleaned
   modulePkg.cleaned = true;

@@ -37,6 +37,7 @@ function getTimeseriesChartPropsMock() {
   return {
     contextChartSelected: jest.fn(),
     modelPlotEnabled: false,
+    renderFocusChartOnly: false,
     showForecast: true,
     showModelBounds: true,
     svgWidth: 1600,

@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -63,7 +64,10 @@ export class EditFlyout extends Component {
             <EuiFlyoutHeader>
               <EuiTitle>
                 <h2>
-                  Override settings
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrideSettingsTitle"
+                    defaultMessage="Override settings"
+                  />
                 </h2>
               </EuiTitle>
             </EuiFlyoutHeader>
@@ -92,7 +96,10 @@ export class EditFlyout extends Component {
                     onClick={closeEditFlyout}
                     flush="left"
                   >
-                    Close
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.editFlyout.closeOverrideSettingsButtonLabel"
+                      defaultMessage="Close"
+                    />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -101,7 +108,10 @@ export class EditFlyout extends Component {
                     fill
                     // isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
                   >
-                    Apply
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.editFlyout.applyOverrideSettingsButtonLabel"
+                      defaultMessage="Apply"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
