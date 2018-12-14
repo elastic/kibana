@@ -6,6 +6,12 @@ We want to test for all combinations of the following...
 
 ## Users
 superuser
+global read
+global all
+default space read
+default space all
+space_1 read
+space_1 all
 global discover read
 default space discover read
 space_1 discover read

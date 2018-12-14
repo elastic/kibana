@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createTestConfig } from '../common/config';
-
-// tslint:disable:no-default-export
-export default createTestConfig('security_only', { disabledPlugins: ['spaces'], license: 'trial' });
+export interface LogService {
+  debug: (message: string) => void;
+}

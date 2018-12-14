@@ -17,7 +17,3 @@ export interface TestInvoker {
   loadTestFile: LoadTestFileFn;
   readConfigFile: ReadConfigFileFn;
 }
-
-export interface LogService {
-  debug: (message: string) => void;
-}

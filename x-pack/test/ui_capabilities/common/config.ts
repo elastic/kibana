@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 import { TestInvoker } from '../../common/types';
 import { UICapabilitiesProvider } from './services';
 
@@ -25,6 +26,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers: xPackFunctionalTestsConfig.get('servers'),
       services: {
+        security: SecurityServiceProvider,
+        spaces: SpacesServiceProvider,
         uiCapabilities: UICapabilitiesProvider,
       },
       junit: {

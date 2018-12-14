@@ -4,28 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Wreck from 'wreck';
+import { LogService } from '../../../types/services';
 
 export class Role {
-  constructor(url, log) {
-    this._log = log;
-    this._wreck = Wreck.defaults({
+  private log: LogService;
+  private wreck: any;
+
+  constructor(url: string, log: LogService) {
+    this.log = log;
+    this.wreck = Wreck.defaults({
       headers: { 'kbn-xsrf': 'ftr/services/uiSettings' },
       baseUrl: url,
-      json: true,
       redirects: 3,
     });
   }
 
-  async create(name, role) {
-    this._log.debug(`creating role ${name}`);
-    const { res, payload } = await this._wreck.put(`/api/security/role/${name}`, { payload: role });
+  public async create(name: string, role: any) {
+    this.log.debug(`creating role ${name}`);
+    const { res, payload } = await this.wreck.put(`/api/security/role/${name}`, { payload: role });
     if (res.statusCode !== 204) {
       throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
     }
   }
 
-  async delete(name) {
-    const { res, payload } = await this._wreck.delete(`/api/security/role/${name}`);
+  public async delete(name: string) {
+    this.log.debug(`deleting role ${name}`);
+    const { res, payload } = await this.wreck.delete(`/api/security/role/${name}`);
     if (res.statusCode !== 204) {
       throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
     }

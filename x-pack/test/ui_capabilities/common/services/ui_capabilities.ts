@@ -7,7 +7,8 @@
 import cheerio from 'cheerio';
 import { format as formatUrl } from 'url';
 import Wreck from 'wreck';
-import { LogService, TestInvoker } from '../../../common/types';
+import { TestInvoker } from '../../../common/types';
+import { LogService } from '../../../types/services';
 
 export interface UICapabilities {
   navLinks: {

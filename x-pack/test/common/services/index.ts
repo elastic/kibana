@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export { SecurityProvider } from './security';
-export { SpacesProvider } from './spaces';
+export { SecurityServiceProvider, SecurityService } from './security';
+export { SpacesServiceProvider, SpacesService } from './spaces';
