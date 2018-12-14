@@ -20,7 +20,7 @@ describe('Settings', () => {
 
   test('Renders settings page', () => {
     const wrapper = shallow(
-      <Settings canCreateFilter={true}/>
+      <Settings canCreateFilter={true} canCreateCalendar={true}/>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -28,12 +28,22 @@ describe('Settings', () => {
 
   test('Filter Lists button disabled if canCreateFilter is false', () => {
     const wrapper = mount(
-      <Settings canCreateFilter={false}/>
+      <Settings canCreateFilter={false} canCreateCalendar={true}/>
     );
 
     const button = wrapper.find('[data-testid="ml_filter_lists_button"]');
     const filterButton = button.find('EuiButtonEmpty');
     expect(filterButton.prop('isDisabled')).toBe(true);
+  });
+
+  test('Calendar management button disabled if canCreateCalendar is false', () => {
+    const wrapper = mount(
+      <Settings canCreateFilter={true} canCreateCalendar={false} />
+    );
+
+    const button = wrapper.find('[data-testid="ml_calendar_mng_button"]');
+    const calendarButton = button.find('EuiButtonEmpty');
+    expect(calendarButton.prop('isDisabled')).toBe(true);
   });
 
 });

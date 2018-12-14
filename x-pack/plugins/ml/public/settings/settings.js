@@ -40,6 +40,7 @@ export function Settings({ canCreateFilter, canCreateCalendar }) {
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-testid="ml_calendar_mng_button"
                 size="l"
                 color="primary"
                 href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
@@ -70,4 +71,5 @@ export function Settings({ canCreateFilter, canCreateCalendar }) {
 
 Settings.propTypes = {
   canCreateFilter: PropTypes.bool.isRequired,
+  canCreateCalendar: PropTypes.bool.isRequired,
 };

@@ -41,8 +41,10 @@ exports[`Settings Renders settings page 1`] = `
         >
           <EuiButtonEmpty
             color="primary"
+            data-testid="ml_calendar_mng_button"
             href="undefined/app/ml#/settings/calendars_list"
             iconSide="left"
+            isDisabled={false}
             size="l"
             type="button"
           >
