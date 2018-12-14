@@ -57,6 +57,19 @@ const handleMouseMove = (
   }
 };
 
+const handleWheel = (
+  commit,
+  { target, clientX, clientY, altKey, metaKey, shiftKey, ctrlKey },
+  isEditable
+) => {
+  // new mouse position must be registered when page scrolls
+  if (isEditable) {
+    const { x, y } = localMousePosition(target, clientX, clientY);
+    setupHandler(commit, target);
+    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+  }
+};
+
 const handleMouseDown = (commit, e, isEditable) => {
   e.stopPropagation();
   const { target, clientX, clientY, button, altKey, metaKey, shiftKey, ctrlKey } = e;
@@ -129,5 +142,6 @@ export const withEventHandlers = withHandlers({
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
   onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable, props.remove),
   onKeyUp: props => e => handleKeyUp(props.commit, e, props.isEditable),
+  onWheel: props => e => handleWheel(props.commit, e, props.isEditable),
   resetHandler: () => () => resetHandler(),
 });
