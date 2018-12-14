@@ -7,12 +7,17 @@
 /**
  * Controller for Advanced Index Detail
  */
+import React from 'react';
+import { render } from 'react-dom';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { AdvancedIndex } from '../../../../components/elasticsearch/index/advanced';
+import { I18nProvider } from '@kbn/i18n/react';
+import moment from 'moment';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
@@ -75,5 +80,28 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
+
+    function onBrush({ xaxis }) {
+      timefilter.setTime({
+        from: moment(xaxis.from),
+        to: moment(xaxis.to),
+        mode: 'absolute',
+      });
+    }
+
+    this.renderReact = () => {
+      render(
+        <I18nProvider>
+          <AdvancedIndex
+            indexSummary={$scope.pageData.indexSummary}
+            metrics={$scope.pageData.metrics}
+            onBrush={onBrush}
+          />
+        </I18nProvider>,
+        document.getElementById('monitoringElasticsearchAdvancedIndexApp')
+      );
+    };
+
+    $scope.$watch('pageData', this.renderReact);
   }
 });

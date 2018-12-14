@@ -5,6 +5,7 @@
  */
 
 import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
+import moment from 'moment-timezone';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -92,6 +93,7 @@ const indexWithLifecycleError = {
     },
   },
 };
+moment.tz.setDefault('utc');
 describe('retry lifecycle action extension', () => {
   test('should return null when no indices have index lifecycle policy', () => {
     const extension = retryLifecycleActionExtension([indexWithoutLifecyclePolicy]);
