@@ -24,10 +24,10 @@ exports[`CheckupTab render with deprecations 1`] = `
       />
     </p>
   </EuiText>
+  <EuiSpacer
+    size="l"
+  />
   <React.Fragment>
-    <EuiSpacer
-      size="l"
-    />
     <EuiCallOut
       color="warning"
       iconType="help"
@@ -63,10 +63,10 @@ exports[`CheckupTab render with deprecations 1`] = `
         />
       </p>
     </EuiCallOut>
+    <EuiSpacer
+      size="l"
+    />
   </React.Fragment>
-  <EuiSpacer
-    size="l"
-  />
   <EuiPageContent
     panelPaddingSize="l"
   >
@@ -324,10 +324,10 @@ exports[`CheckupTab render with error 1`] = `
       />
     </p>
   </EuiText>
+  <EuiSpacer
+    size="l"
+  />
   <React.Fragment>
-    <EuiSpacer
-      size="l"
-    />
     <EuiCallOut
       color="warning"
       iconType="help"
@@ -363,10 +363,10 @@ exports[`CheckupTab render with error 1`] = `
         />
       </p>
     </EuiCallOut>
+    <EuiSpacer
+      size="l"
+    />
   </React.Fragment>
-  <EuiSpacer
-    size="l"
-  />
   <EuiPageContent
     panelPaddingSize="l"
   >
@@ -412,10 +412,10 @@ exports[`CheckupTab render without deprecations 1`] = `
       />
     </p>
   </EuiText>
+  <EuiSpacer
+    size="l"
+  />
   <React.Fragment>
-    <EuiSpacer
-      size="l"
-    />
     <EuiCallOut
       color="warning"
       iconType="help"
@@ -451,10 +451,10 @@ exports[`CheckupTab render without deprecations 1`] = `
         />
       </p>
     </EuiCallOut>
+    <EuiSpacer
+      size="l"
+    />
   </React.Fragment>
-  <EuiSpacer
-    size="l"
-  />
   <EuiPageContent
     panelPaddingSize="l"
   >
