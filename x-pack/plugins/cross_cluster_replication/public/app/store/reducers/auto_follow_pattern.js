@@ -25,6 +25,12 @@ export const reducer = (state = initialState, action) => {
     case t.AUTO_FOLLOW_PATTERN_SELECT: {
       return { ...state, selectedId: action.payload };
     }
+    case success(t.AUTO_FOLLOW_PATTERN_DELETE): {
+      const byId = { ...state.byId };
+      const { itemsDeleted } = action.payload;
+      itemsDeleted.forEach(id => delete byId[id]);
+      return { ...state, byId };
+    }
     default:
       return state;
   }

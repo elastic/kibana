@@ -8,5 +8,6 @@ export const API_STATUS = {
   IDLE: 'idle',
   LOADING: 'loading',
   UPDATING: 'updating',
-  SAVING: 'saving'
+  SAVING: 'saving',
+  DELETING: 'deleting'
 };

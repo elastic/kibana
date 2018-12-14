@@ -5,7 +5,7 @@
  */
 
 import * as t from './action_types';
-import { apiEnd, setApiError, apiStart, clearApiError }  from './actions/api';
+import { apiRequestStart, apiRequestEnd, setApiError, clearApiError }  from './actions/api';
 
 export const apiMiddleware = ({ dispatch }) => next => async (action) => {
   next(action);
@@ -14,30 +14,24 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     return;
   }
 
-  const { label, scope, status, handler } = action.payload;
+  const { label, scope, status, handler, onSuccess, onError } = action.payload;
 
-  dispatch(apiStart({ label, scope, status }));
   dispatch(clearApiError(scope));
-
-  let response;
+  dispatch(apiRequestStart({ label, scope, status }));
 
   try {
-    response = await handler(dispatch);
+    const response = await handler(dispatch);
+
+    dispatch(apiRequestEnd({ label, scope }));
+    dispatch({ type: `${label}_SUCCESS`, payload: response });
+
+    onSuccess(response, dispatch);
+
   } catch (error) {
+    dispatch(apiRequestEnd({ label, scope }));
     dispatch(setApiError({ error, scope }));
-    dispatch(apiEnd({ label, scope }));
+    dispatch({ type: `${label}_FAILURE`, payload: error });
 
-    dispatch({
-      type: `${label}_FAILURE`,
-      payload: error,
-    });
-    return;
+    onError(error, dispatch);
   }
-
-  dispatch({
-    type: `${label}_SUCCESS`,
-    payload: response,
-  });
-
-  dispatch(apiEnd({ label, scope }));
 };
