@@ -160,13 +160,16 @@ export class RemoteClusterTableUi extends Component {
       width: '100px',
       actions: [{
         render: ({ name, isConfiguredByNode }) => {
-          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription', {
-            defaultMessage: 'Delete remote cluster',
-          });
+          const label = isConfiguredByNode
+            ? i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionBlockedDeleteDescription', {
+              defaultMessage: `Remote clusters defined in elasticsearch.yml can't be deleted`,
+            }) : i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription', {
+              defaultMessage: 'Delete remote cluster',
+            });
 
           return (
             <EuiToolTip
-              content={isConfiguredByNode ? undefined : label}
+              content={label}
               delay="long"
             >
               <RemoveClusterButton clusterNames={[name]}>
@@ -182,13 +185,16 @@ export class RemoteClusterTableUi extends Component {
         },
       }, {
         render: ({ name, isConfiguredByNode }) => {
-          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
-            defaultMessage: 'Edit remote cluster',
-          });
+          const label = isConfiguredByNode
+            ? i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription', {
+              defaultMessage: `Remote clusters defined in elasticsearch.yml can't be edited`,
+            }) : i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
+              defaultMessage: 'Edit remote cluster',
+            });
 
           return (
             <EuiToolTip
-              content={isConfiguredByNode ? undefined : label}
+              content={label}
               delay="long"
             >
               <EuiButtonIcon
