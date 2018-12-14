@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { InfraNodeType } from 'x-pack/plugins/infra/common/graphql/types';
+
 import { replaceMetricTimeInQueryString } from '../../containers/metrics/with_metrics_time';
+import { InfraNodeType } from '../../graphql/types';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 
 type RedirectToNodeDetailProps = RouteComponentProps<{

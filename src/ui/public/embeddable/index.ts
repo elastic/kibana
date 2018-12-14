@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { EmbeddableFactory } from './embeddable_factory';
+export { EmbeddableFactory, OnEmbeddableStateChanged } from './embeddable_factory';
 export * from './embeddable';
 export * from './context_menu_actions';
 export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';

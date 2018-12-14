@@ -42,7 +42,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
     this.state = {
       enrolledBeat: null,
       hasPolledForBeat: false,
-      command: 'sudo filebeat',
+      command: 'sudo {{beatType}}',
       beatType: 'filebeat',
     };
   }
@@ -144,17 +144,15 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                   value={this.state.command}
                   options={[
                     {
-                      value: `sudo ${this.state.beatType}`,
+                      value: `sudo {{beatType}}`,
                       text: 'DEB / RPM',
                     },
                     {
-                      value: `PS C:\\Program Files\\${capitalize(this.state.beatType)}> ${
-                        this.state.beatType
-                      }.exe`,
+                      value: `PS C:\\Program Files\\{{beatTypeInCaps}}> {{beatType}}.exe`,
                       text: 'Windows',
                     },
                     {
-                      value: `./${this.state.beatType}`,
+                      value: `./{{beatType}}`,
                       text: 'MacOS',
                     },
                   ]}
@@ -188,17 +186,13 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                       className="euiFieldText euiFieldText--fullWidth"
                       style={{ textAlign: 'left' }}
                     >
-                      <FormattedMessage
-                        id="xpack.beatsManagement.enrollBeat.stateCommandEnrollLocationProtocolTitle"
-                        defaultMessage="$ {stateCommand} enroll {locationProtocol}"
-                        values={{
-                          stateCommand: this.state.command,
-                          locationProtocol: window.location.protocol,
-                        }}
-                      />
-                      {`//`}
-                      {window.location.host}
-                      {this.props.frameworkBasePath} {this.props.enrollmentToken}
+                      {`$ ${this.state.command
+                        .replace('{{beatType}}', this.state.beatType)
+                        .replace('{{beatTypeInCaps}}', capitalize(this.state.beatType))} enroll ${
+                        window.location.protocol
+                      }://${window.location.host} ${this.props.frameworkBasePath} ${
+                        this.props.enrollmentToken
+                      }`}
                     </div>
                   </div>
                   <br />
