@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '@code/esqueue';
+import { CancellationToken } from '../lib/esqueue';
 
 export interface Job {
   payload: any;

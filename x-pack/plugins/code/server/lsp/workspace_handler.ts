@@ -12,7 +12,6 @@ import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
-import { EsClient } from '@code/esqueue';
 import { Full } from 'elastic-lsp-extension';
 import { DetailSymbolInformation } from 'elastic-lsp-extension';
 
@@ -20,6 +19,7 @@ import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
 import { LspRequest } from '../../model';
 import { getDefaultBranch, GitOperations } from '../git_operations';
+import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { LoggerFactory } from '../utils/log_factory';

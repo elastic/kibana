@@ -138,7 +138,6 @@
     "yargs": "4.8.1"
   },
   "dependencies": {
-    "@code/esqueue": "link:plugins/code/packages/esqueue",
     "@elastic/datemath": "5.0.1",
     "@elastic/eui": "5.6.0",
     "@elastic/node-crypto": "0.1.2",

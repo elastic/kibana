@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
 import Boom from 'boom';
 import hapi, { RequestQuery } from 'hapi';
 
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';

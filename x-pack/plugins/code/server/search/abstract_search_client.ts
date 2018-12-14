@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import { SearchRequest, SearchResult } from '../../model';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { SearchClient } from './search_client';
 

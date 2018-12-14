@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import { LanguageServerStatus } from '../../common/language_server';
+import { EsClient } from '../lib/esqueue';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { LanguageServerController } from './controller';

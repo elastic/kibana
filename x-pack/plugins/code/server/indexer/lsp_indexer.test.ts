@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyObject, EsClient } from '@code/esqueue';
 import fs from 'fs';
 import Git from 'nodegit';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 
+import { AnyObject, EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';

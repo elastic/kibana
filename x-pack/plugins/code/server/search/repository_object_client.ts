@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import {
   CloneWorkerProgress,
   Repository,
@@ -23,6 +21,7 @@ import {
   RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
+import { EsClient } from '../lib/esqueue';
 
 /*
  * This RepositoryObjectClient is dedicated to manipulate resository related objects

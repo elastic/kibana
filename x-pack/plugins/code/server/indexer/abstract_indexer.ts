@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import { Indexer, IndexProgress, ProgressReporter } from '.';
 import { IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { IndexCreationRequest } from './index_creation_request';

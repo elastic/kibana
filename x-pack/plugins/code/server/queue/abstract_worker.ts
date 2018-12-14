@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
+
+import { WorkerResult } from '../../model';
 import {
   CancellationToken,
   Esqueue,
   events as esqueueEvents,
   Job as JobInternal,
-} from '@code/esqueue';
-import moment from 'moment';
-
-import { WorkerResult } from '../../model';
+} from '../lib/esqueue';
 import { Log } from '../log';
 import { Job } from './job';
 import { Worker } from './worker';
