@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { find } from 'lodash';
+import { render } from 'react-dom';
 import uiRoutes from 'ui/routes';
+import moment from 'moment';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import {
@@ -13,6 +16,9 @@ import {
 } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { I18nProvider } from '@kbn/i18n/react';
+import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
+import { MonitoringViewBaseEuiTableController } from '../..';
 
 /*
  * Logstash Pipelines Listing page
@@ -40,16 +46,14 @@ const getPageData = ($injector) => {
     });
 };
 
-function makeUpgradeMessage(logstashVersions, i18n) {
+function makeUpgradeMessage(logstashVersions) {
   if (!Array.isArray(logstashVersions)
     || (logstashVersions.length === 0)
     || logstashVersions.some(isPipelineMonitoringSupportedInVersion)) {
     return null;
   }
 
-  return i18n('xpack.monitoring.logstash.pipelines.notAvalibleDescription', {
-    defaultMessage: 'Pipeline monitoring is only available in Logstash version 6.0.0 or higher.'
-  });
+  return 'Pipeline monitoring is only available in Logstash version 6.0.0 or higher.';
 }
 
 uiRoutes
@@ -62,30 +66,63 @@ uiRoutes
       },
       pageData: getPageData
     },
-    controller($injector, $scope, i18n) {
-      const $route = $injector.get('$route');
-      const globalState = $injector.get('globalState');
-      const title = $injector.get('title');
-      const $executor = $injector.get('$executor');
+    controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
+      constructor($injector, $scope, i18n) {
+        super({
+          title: 'Logstash Pipelines',
+          storageKey: 'logstash.pipelines',
+          getPageData,
+          $scope,
+          $injector
+        });
 
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-      $scope.pageData = $route.current.locals.pageData;
+        const $route = $injector.get('$route');
+        const kbnUrl = $injector.get('kbnUrl');
+        this.data = $route.current.locals.pageData;
+        const globalState = $injector.get('globalState');
+        $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
-      $scope.upgradeMessage = makeUpgradeMessage($scope.pageData.clusterStatus.versions, i18n);
-      timefilter.enableTimeRangeSelector();
-      timefilter.enableAutoRefreshSelector();
+        function onBrush(xaxis) {
+          timefilter.setTime({
+            from: moment(xaxis.from),
+            to: moment(xaxis.to),
+            mode: 'absolute'
+          });
+        }
 
-      title($scope.cluster, i18n('xpack.monitoring.logstash.pipelines.routeTitle', {
-        defaultMessage: 'Logstash Pipelines'
-      }));
+        const renderReact = (pageData) => {
+          if (!pageData) {
+            return;
+          }
 
-      $executor.register({
-        execute: () => getPageData($injector),
-        handleResponse: (response) => $scope.pageData = response
-      });
+          const upgradeMessage = pageData
+            ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
+            : null;
 
-      $executor.start($scope);
+          render(
+            <I18nProvider>
+              <PipelineListing
+                className="monitoringLogstashPipelinesTable"
+                onBrush={onBrush}
+                stats={pageData.clusterStatus}
+                data={pageData.pipelines}
+                sorting={this.sorting}
+                pagination={this.pagination}
+                onTableChange={this.onTableChange}
+                upgradeMessage={upgradeMessage}
+                angular={{
+                  kbnUrl,
+                  scope: $scope,
+                }}
+              />
+            </I18nProvider>,
+            document.getElementById('monitoringLogstashPipelinesApp')
+          );
+        };
 
-      $scope.$on('$destroy', $executor.destroy);
+        $scope.$watch(() => this.data, pageData => {
+          renderReact(pageData);
+        });
+      }
     }
   });

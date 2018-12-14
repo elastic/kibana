@@ -16,6 +16,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import {
   EuiBetaBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiLink,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -48,9 +49,9 @@ const COLUMNS = {
       defaultMessage: 'Name',
     }),
   },
-  coveredIndices: {
-    label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader', {
-      defaultMessage: 'Covered indices',
+  linkedIndices: {
+    label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader', {
+      defaultMessage: 'Linked indices',
     }),
     width: 120,
   },
@@ -180,7 +181,7 @@ export class PolicyTableUi extends Component {
           {value}
         </EuiLink>
       );
-    } else if (fieldName === 'coveredIndices') {
+    } else if (fieldName === 'linkedIndices') {
       return (
         <EuiText>
           <b>{value ? value.length : '0'}</b>
@@ -216,7 +217,7 @@ export class PolicyTableUi extends Component {
   }
   buildActionPanelTree(policy) {
     const { intl } = this.props;
-    const hasCoveredIndices = Boolean(policy.coveredIndices && policy.coveredIndices.length);
+    const hasLinkedIndices = Boolean(policy.linkedIndices && policy.linkedIndices.length);
 
     const viewIndicesLabel = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
@@ -230,14 +231,14 @@ export class PolicyTableUi extends Component {
       id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText',
       defaultMessage: 'Delete policy',
     });
-    const deletePolicyTooltip = hasCoveredIndices
+    const deletePolicyTooltip = hasLinkedIndices
       ? intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
         defaultMessage: 'You cannot delete a policy that is being used by an index',
       })
       : null;
     const items = [];
-    if (hasCoveredIndices) {
+    if (hasLinkedIndices) {
       items.push({
         name: viewIndicesLabel,
         icon: 'list',
@@ -257,7 +258,7 @@ export class PolicyTableUi extends Component {
     });
     items.push({
       name: deletePolicyLabel,
-      disabled: hasCoveredIndices,
+      disabled: hasLinkedIndices,
       icon: 'trash',
       toolTipContent: deletePolicyTooltip,
       onClick: () =>
@@ -312,19 +313,17 @@ export class PolicyTableUi extends Component {
       );
     });
     const button = (
-      <EuiButton
+      <EuiButtonEmpty
         data-test-subj="policyActionsContextMenuButton"
-        iconSide="left"
         aria-label="Policy options"
         onClick={() => this.togglePolicyPopover(policy)}
-        iconType="arrowDown"
-        fill
+        color="primary"
       >
         {intl.formatMessage({
           id: 'xpack.indexLifecycleMgmt.policyTable.actionsButtonText',
           defaultMessage: 'Actions',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
     );
     cells.push(
       <EuiTableRowCell
@@ -477,7 +476,8 @@ export class PolicyTableUi extends Component {
                     <p>
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                        defaultMessage="Create, update, and delete your index lifecycle policies."
+                        defaultMessage="Manage your indices as they age.  Attach a policy to automate
+                          when and how to transition an index through its lifecycle."
                       />
                     </p>
                   </EuiText>
