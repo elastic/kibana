@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyObject, EsClient } from '@code/esqueue';
 import sinon from 'sinon';
 
 import { CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
@@ -17,6 +16,7 @@ import {
   RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
+import { AnyObject, EsClient } from '../lib/esqueue';
 import { RepositoryObjectClient } from './repository_object_client';
 
 const esClient = {

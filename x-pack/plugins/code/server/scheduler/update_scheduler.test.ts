@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyObject, EsClient } from '@code/esqueue';
 import moment from 'moment';
 import sinon from 'sinon';
 
 import { CloneProgress, CloneWorkerProgress, Repository } from '../../model';
 import { RepositoryGitStatusReservedField, RepositoryReservedField } from '../indexer/schema';
+import { AnyObject, EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { UpdateWorker } from '../queue/update_worker';
 import { ServerOptions } from '../server_options';

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyObject, EsClient } from '@code/esqueue';
 import sinon from 'sinon';
 
+import { AnyObject, EsClient } from '../lib/esqueue';
 import { IndexCreationRequest } from './index_creation_request';
 import { IndexCreator } from './index_creator';
 

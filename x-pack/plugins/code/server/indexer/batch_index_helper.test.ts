@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyObject, EsClient } from '@code/esqueue';
 import sinon from 'sinon';
 
+import { AnyObject, EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { BatchIndexHelper } from './batch_index_helper';

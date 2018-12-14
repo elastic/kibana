@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
 import _ from 'lodash';
 
 import { IndexMigrator } from '.';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { IndexCreationRequest } from './index_creation_request';
 import pkg from './schema/version.json';
