@@ -21,7 +21,7 @@ import { Server } from 'hapi';
 import { ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
 
 export interface KibanaConfig {
-  get<T = any>(key: string): T;
+  get<T>(key: string): T;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -37,12 +37,9 @@ declare module 'hapi' {
   }
 }
 
-type KbnMixinFunc = (kibana: any, server: Server, config: any) => Promise<any> | void;
+type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
 
 export default class KbnServer {
-  public static mock: any;
-  public static mockClear: () => void;
-
   public server: Server;
   public inject: Server['inject'];
 

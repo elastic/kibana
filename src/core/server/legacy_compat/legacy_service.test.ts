@@ -27,14 +27,14 @@ import { first } from 'rxjs/operators';
 import { LegacyService } from '.';
 // @ts-ignore: implicit any for JS file
 import MockClusterManager from '../../../cli/cluster/cluster_manager';
-// @ts-ignore: implicit any for JS file
-import MockKbnServer from '../../../server/kbn_server';
+import KbnServer from '../../../server/kbn_server';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { logger } from '../logging/__mocks__';
 import { PluginsServiceStartContract } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
+const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 const MockLegacyPlatformProxy: jest.Mock<LegacyPlatformProxy> = LegacyPlatformProxy as any;
 
 let legacyService: LegacyService;
@@ -190,9 +190,7 @@ describe('once LegacyService is started with connection info', () => {
 
   test('creates legacy kbnServer and closes it if `listen` fails.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
-    const listen = (MockKbnServer.prototype.listen as unknown) as jest.MockInstance<
-      MockKbnServer['listen']
-    >;
+    const listen = MockKbnServer.prototype.listen;
     listen.mockRejectedValue(new Error('something failed'));
 
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
@@ -214,7 +212,7 @@ describe('once LegacyService is started with connection info', () => {
   test('reconfigures logging configuration if new config is received.', async () => {
     await legacyService.start(startDeps);
 
-    const [mockKbnServer] = MockKbnServer.mock.instances;
+    const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
 
     config$.next(new ObjectToConfigAdapter({ logging: { verbose: true } }));
@@ -227,7 +225,7 @@ describe('once LegacyService is started with connection info', () => {
   test('logs error if re-configuring fails.', async () => {
     await legacyService.start(startDeps);
 
-    const [mockKbnServer] = MockKbnServer.mock.instances;
+    const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
     expect(logger.mockCollect().error).toEqual([]);
 
@@ -295,7 +293,7 @@ describe('once LegacyService is started without connection info', () => {
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
-    const [mockKbnServer] = MockKbnServer.mock.instances;
+    const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
 
     config$.next(new ObjectToConfigAdapter({ logging: { verbose: true } }));
