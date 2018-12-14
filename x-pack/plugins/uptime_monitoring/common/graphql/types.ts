@@ -281,16 +281,20 @@ export interface Snapshot {
 
   total?: number | null;
 
-  histogram?: SnapshotHistogram | null;
+  histogram?: (HistogramSeries | null)[] | null;
 }
 
-export interface SnapshotHistogram {
-  upSeries?: (HistogramDataPoint | null)[] | null;
+export interface HistogramSeries {
+  monitorId?: string | null;
 
-  downSeries?: (HistogramDataPoint | null)[] | null;
+  data?: (HistogramDataPoint | null)[] | null;
 }
 
 export interface HistogramDataPoint {
+  upCount?: number | null;
+
+  downCount?: number | null;
+
   x?: UnsignedInteger | null;
 
   x0?: UnsignedInteger | null;
@@ -334,10 +338,6 @@ export interface StatusData {
   down?: number | null;
 
   total?: number | null;
-}
-
-export interface HistogramSeries {
-  series?: (HistogramDataPoint | null)[] | null;
 }
 
 // ====================================================

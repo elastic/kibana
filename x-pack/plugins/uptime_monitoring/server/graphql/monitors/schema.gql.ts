@@ -8,18 +8,16 @@ import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
   type HistogramDataPoint {
+    upCount: Int
+    downCount: Int
     x: UnsignedInteger
     x0: UnsignedInteger
     y: UnsignedInteger
   }
 
   type HistogramSeries {
-    series: [HistogramDataPoint]
-  }
-
-  type SnapshotHistogram {
-    upSeries: [HistogramDataPoint]
-    downSeries: [HistogramDataPoint]
+    monitorId: String
+    data: [HistogramDataPoint]
   }
 
   type Snapshot {
@@ -27,7 +25,7 @@ export const monitorsSchema = gql`
     down: Int
     trouble: Int
     total: Int
-    histogram: SnapshotHistogram
+    histogram: [HistogramSeries]
   }
 
   type DataPoint {

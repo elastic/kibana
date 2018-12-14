@@ -1340,7 +1340,11 @@
             "name": "histogram",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "SnapshotHistogram", "ofType": null },
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramSeries", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1352,23 +1356,19 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SnapshotHistogram",
+        "name": "HistogramSeries",
         "description": "",
         "fields": [
           {
-            "name": "upSeries",
+            "name": "monitorId",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramDataPoint", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "downSeries",
+            "name": "data",
             "description": "",
             "args": [],
             "type": {
@@ -1390,6 +1390,22 @@
         "name": "HistogramDataPoint",
         "description": "",
         "fields": [
+          {
+            "name": "upCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "downCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "x",
             "description": "",
@@ -2289,29 +2305,6 @@
             "deprecationReason": null
           }
         ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "HistogramSeries",
-        "description": "",
-        "fields": [
-          {
-            "name": "series",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramDataPoint", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
         "possibleTypes": null
       }
     ],

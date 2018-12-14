@@ -24,12 +24,10 @@ export const getSnapshotQuery = gql`
       trouble
       total
       histogram {
-        upSeries {
-          x
-          x0
-          y
-        }
-        downSeries {
+        monitorId
+        data {
+          upCount
+          downCount
           x
           x0
           y

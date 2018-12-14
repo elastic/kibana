@@ -78,6 +78,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         downCount,
         windowSize
       );
+
       return {
         up,
         down,

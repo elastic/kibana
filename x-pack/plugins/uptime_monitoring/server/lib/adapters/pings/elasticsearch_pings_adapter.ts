@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { HistogramDataPoint, Ping, SnapshotHistogram } from '../../../../common/graphql/types';
+import { Ping } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -115,7 +114,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     }));
   }
 
-  public async getPingHistogram(request: any, range: UMGqlRange): Promise<SnapshotHistogram> {
+  public async getPingHistogram(request: any, range: UMGqlRange): Promise<any> {
     const { start, end } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -129,26 +128,22 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
           },
         },
         aggs: {
-          status: {
-            terms: {
-              field: 'monitor.status',
-            },
-          },
-          latest: {
-            max: {
-              field: '@timestamp',
-            },
-          },
-          hist: {
+          timeseries: {
             auto_date_histogram: {
               field: '@timestamp',
-              buckets: 50,
+              buckets: 20,
             },
             aggs: {
-              status: {
+              by_id: {
                 terms: {
-                  field: 'monitor.status',
-                  size: 10,
+                  field: 'monitor.id',
+                },
+                aggs: {
+                  status: {
+                    terms: {
+                      field: 'monitor.status',
+                    },
+                  },
                 },
               },
             },
@@ -156,13 +151,26 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
-    const res = await this.database.search(request, params);
+    const {
+      aggregations: {
+        timeseries: { buckets },
+      },
+    } = await this.database.search(request, params);
 
-    const aggregations: any[] = get(res, 'aggregations.hist.buckets', []);
-    const upSeries: HistogramDataPoint[] = [];
-    const downSeries: HistogramDataPoint[] = [];
-    const defaultBucketSize = Math.abs(aggregations[0].key - aggregations[1].key);
-    aggregations.forEach((bucket, index: number, array: any[]) => {
+    if (buckets.length === 0) {
+      return null;
+    }
+    const defaultBucketSize = Math.abs(buckets[0].key - buckets[1].key);
+    const ret: Array<{ monitorId: string; data: any[] }> = [];
+    const upsertHash = (key: string, value: object) => {
+      const fa = ret.find(f => f.monitorId === key);
+      if (fa) {
+        fa.data.push(value);
+      } else {
+        ret.push({ monitorId: key, data: [value] });
+      }
+    };
+    buckets.forEach((bucket: any, index: number, array: any[]) => {
       const nextPoint = array[index + 1];
       let bucketSize = 0;
       if (nextPoint) {
@@ -170,26 +178,29 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       } else {
         bucketSize = defaultBucketSize;
       }
-      const statusCounts: any[] = get(bucket, 'status.buckets', []);
-      if (statusCounts) {
-        const upCount = statusCounts.find(count => count.key === 'up');
-        const downCount = statusCounts.find(count => count.key === 'down');
-        upSeries.push({
-          x: bucket.key + bucketSize,
-          x0: bucket.key,
-          y: get(upCount, 'doc_count', 0),
-        });
-        downSeries.push({
-          x: bucket.key + bucketSize,
-          x0: bucket.key,
-          y: get(downCount, 'doc_count', 0),
-        });
-      }
+      const { buckets: idBuckets } = bucket.by_id;
+      idBuckets.forEach(
+        ({ key: monitorId, status }: { key: string; status: { buckets: any[] } }) => {
+          let upCount = null;
+          let downCount = null;
+          status.buckets.forEach(({ key, doc_count }: { key: string; doc_count: number }) => {
+            if (key === 'up') {
+              upCount = doc_count;
+            } else if (key === 'down') {
+              downCount = doc_count;
+            }
+          });
+          upsertHash(monitorId, {
+            upCount,
+            downCount,
+            x: bucket.key + bucketSize,
+            x0: bucket.key,
+            y: 1,
+          });
+        }
+      );
     });
 
-    return {
-      upSeries,
-      downSeries,
-    };
+    return ret;
   }
 }

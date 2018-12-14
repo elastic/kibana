@@ -7,6 +7,7 @@
 import {
   // @ts-ignore missing type
   EuiAreaSeries,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore missing type
@@ -19,6 +20,7 @@ import {
   EuiSeriesChartUtils,
   // @ts-ignore missing type
   EuiStat,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -30,6 +32,34 @@ interface SnapshotProps {
   autorefreshEnabled: boolean;
   autorefreshInterval: number;
 }
+
+const formatHistogramData = (histogram: any) => {
+  const a: { up: any[]; down: any[] } = {
+    up: [],
+    down: [],
+  };
+  histogram.forEach(({ data }: { data: any }) => {
+    data.forEach(({ x, x0, downCount }: { x: any; x0: any; downCount: any }) => {
+      const upEntry = a.up.find(f => f.x === x && f.x0 === x0);
+      const downEntry = a.down.find(f => f.x === x && f.x0 === x0);
+      if (downCount) {
+        if (downEntry) {
+          downEntry.y += 1;
+        } else {
+          const vvv = { x, x0, y: 1 };
+          a.down.push(vvv);
+        }
+      } else {
+        if (upEntry) {
+          upEntry.y += 1;
+        } else {
+          a.up.push({ x, x0, y: 1 });
+        }
+      }
+    });
+  });
+  return a;
+};
 
 export const Snapshot = ({
   dateRangeStart,
@@ -51,14 +81,11 @@ export const Snapshot = ({
         return `Error ${error.message}`;
       }
       const {
-        snapshot: {
-          up,
-          down,
-          trouble,
-          total,
-          histogram: { upSeries, downSeries },
-        },
+        snapshot: { up, down, trouble, total, histogram },
       } = data;
+
+      const { up: histUp, down: histDown } = formatHistogramData(histogram);
+
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xl">
           <EuiFlexItem>
@@ -104,15 +131,28 @@ export const Snapshot = ({
           </EuiFlexItem>
           <EuiFlexItem style={{ paddingTop: '12px' }}>
             <EuiPanel paddingSize="s">
-              <EuiSeriesChart
-                width={600}
-                height={155}
-                stackBy="y"
-                xType={EuiSeriesChartUtils.SCALE.TIME}
-              >
-                <EuiHistogramSeries data={upSeries} name="Up" color="green" />
-                <EuiHistogramSeries data={downSeries} name="Down" color="red" />
-              </EuiSeriesChart>
+              {histogram && (
+                <EuiSeriesChart
+                  width={600}
+                  height={155}
+                  stackBy="y"
+                  xType={EuiSeriesChartUtils.SCALE.TIME}
+                >
+                  {}
+                  <EuiHistogramSeries data={histUp} name="Up" color="green" />
+                  <EuiHistogramSeries data={histDown} name="Down" color="red" />
+                </EuiSeriesChart>
+              )}
+              {!histogram && (
+                <EuiEmptyPrompt
+                  title={
+                    <EuiTitle>
+                      <h5>No Histogram Data Available</h5>
+                    </EuiTitle>
+                  }
+                  body={<p>Sorry, there is no data available for the histogram</p>}
+                />
+              )}
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
