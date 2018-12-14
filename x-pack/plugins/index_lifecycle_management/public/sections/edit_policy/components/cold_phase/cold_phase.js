@@ -12,9 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiFormRow,
   EuiFieldNumber,
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiButton,
 } from '@elastic/eui';
@@ -48,16 +46,16 @@ class ColdPhaseUi extends PureComponent {
       [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
       [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     }).isRequired,
-    warmPhaseReplicaCount: PropTypes.number.isRequired,
   };
   render() {
     const {
       setPhaseData,
       showNodeDetailsFlyout,
       phaseData,
-      warmPhaseReplicaCount,
       errors,
       isShowingErrors,
+      intl,
+      hotPhaseRolloverEnabled
     } = this.props;
 
     return (
@@ -125,6 +123,7 @@ class ColdPhaseUi extends PureComponent {
                 phase={PHASE_COLD}
                 isShowingErrors={isShowingErrors}
                 setPhaseData={setPhaseData}
+                rolloverEnabled={hotPhaseRolloverEnabled}
               />
               <EuiSpacer />
 
@@ -153,6 +152,12 @@ class ColdPhaseUi extends PureComponent {
                     errorKey={PHASE_REPLICA_COUNT}
                     isShowingErrors={isShowingErrors}
                     errors={errors}
+                    helpText={
+                      intl.formatMessage({
+                        id: 'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
+                        defaultMessage: 'By default, the number of replicas remains the same.'
+                      })
+                    }
                   >
                     <EuiFieldNumber
                       id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
@@ -163,16 +168,6 @@ class ColdPhaseUi extends PureComponent {
                       min={0}
                     />
                   </ErrableFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiButtonEmpty
-                      flush="left"
-                      onClick={() => setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)}
-                    >
-                    Set to same number as warm phase
-                    </EuiButtonEmpty>
-                  </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </Fragment>

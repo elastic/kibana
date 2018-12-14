@@ -175,7 +175,7 @@ class EditPolicyUi extends Component {
                     text={
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexLifecycleManagementLinkText"
-                        defaultMessage="Learn about the index lifecycle"
+                        defaultMessage="Learn about the index lifecycle."
                       />
                     }
                   />
@@ -248,6 +248,12 @@ class EditPolicyUi extends Component {
                       errorKey={STRUCTURE_POLICY_NAME}
                       isShowingErrors={isShowingErrors}
                       errors={errors}
+                      helpText={
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage"
+                          defaultMessage="A policy name cannot start with an underscore and cannot contain a question mark or a space."
+                        />
+                      }
                     >
                       <EuiFieldText
                         data-test-subj="policyNameField"
