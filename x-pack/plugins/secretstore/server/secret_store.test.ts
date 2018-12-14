@@ -5,37 +5,20 @@
  */
 import * as Iron from 'iron';
 import * as sinon from 'sinon';
-import {
-  BaseOptions,
-  BulkCreateObject,
-  BulkCreateResponse,
-  BulkGetObject,
-  BulkGetResponse,
-  CreateOptions,
-  FindOptions,
-  FindResponse,
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClient
-} from '../../../../src/server/saved_objects/service/saved_objects_client.d';
 import { SecretStore } from './secret_store';
 
 describe('The Secret Secret Store', function TestSecretStoreObject() {
   const savedObjectsClient = {
-    create: (
-      type: string,
-      attributes: SavedObjectAttributes,
-      options?: CreateOptions | undefined
-    ): Promise<SavedObject> => void,
-    errors: {},
-    bulkCreate: (objects: BulkCreateObject[], options?: CreateOptions | undefined): Promise<BulkCreateResponse> => void,
-    bulkGet: (objects: BulkGetObject[], options?: BaseOptions): Promise<BulkGetResponse> => void,
-    delete: (type: string, id: string, options?: BaseOptions | undefined): Promise<{}> => void,
-    find: ( options?: FindOptions): Promise<FindResponse> => void,
-    get: (type: string, id: string, options?: BaseOptions | undefined): Promise<SavedObject> => void,
-    update: (type: string, id: string, attributes: SavedObjectAttributes, options?: CreateOptions | undefined): Promisee<SavedObject> => void,
-  } as SavedObjectsClient;
-  const subject = new SecretStore(savedObjectsClient);
+    create: sinon.stub(),
+    errors: sinon.stub(),
+    bulkCreate: sinon.stub(),
+    bulkGet: sinon.stub(),
+    delete: sinon.stub(),
+    find: sinon.stub(),
+    get: sinon.stub(),
+    update: sinon.stub(),
+  };
+  const subject = new SecretStore(savedObjectsClient, 'testSecretType');
   it('should be secretive', async () => {
     const hideMe = { message: 'secret message' };
     const hidden = await subject.hide(hideMe);
@@ -68,8 +51,8 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
   });
 
   it('should not allow objects hidden from different stores to be unhiddable', async () => {
-    const storeOne = new SecretStore(savedObjectsClient);
-    const storeTwo = new SecretStore(savedObjectsClient);
+    const storeOne = new SecretStore(savedObjectsClient, 'testSecretType');
+    const storeTwo = new SecretStore(savedObjectsClient, 'testSecretType');
     const hideMe = { message: 'a very secret message' };
     const storeOneHidden = await storeOne.hide(hideMe);
     try {
@@ -81,11 +64,75 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
   });
 
   it('should hide values using the saved object client', async () => {
-    const hideMe = { message: 'my secret message' };
-    const socSpy = sinon.spy(savedObjectsClient, 'create');
-    expect(socSpy.calledOnce).toBeTruthy();
-    const hidden = await subject.hideInEs(hideMe);
+    const hideMe = { message: 'my secret message', nonSecret: 'this is unhidden' };
+    let insideJob: any = null;
+    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+      insideJob = {
+        id: 'testId',
+        type: 'testSecretType',
+        attributes,
+      };
+      return insideJob;
+    });
+    savedObjectsClient.update.callsFake(
+      (type: string, id: string, attributes: any, options?: any) => {
+        return {
+          id,
+          type,
+          attributes: {
+            ...attributes,
+            ...insideJob.attributes,
+          },
+        };
+      }
+    );
+    const hidden = await subject.hideAttribute(hideMe, 'message');
+    sinon.assert.calledOnce(savedObjectsClient.create);
+    sinon.assert.calledOnce(savedObjectsClient.update);
     expect(hidden).toBeDefined();
+    expect(hidden.attributes.message).toBeUndefined();
+    expect(hidden.attributes.secret).toBeDefined();
+    expect(hidden.attributes.secret).not.toContain('my secret message');
+    expect(hidden.attributes.nonSecret).toEqual('this is unhidden');
     expect(subject);
+  });
+
+  it('should be able to unhide values from saved objects', async () => {
+    const hideMe = {
+      message: 'my secret message',
+      nonSecret: 'this is unhidden',
+      someOtherProp: 'check me',
+    };
+    let insideJob: any = null;
+    let internalSavedObject: any = null;
+    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+      insideJob = {
+        id: 'testId',
+        type: 'testSecretType',
+        attributes,
+      };
+      return insideJob;
+    });
+    savedObjectsClient.update.callsFake(
+      (type: string, id: string, attributes: any, options?: any) => {
+        return (internalSavedObject = {
+          id,
+          type,
+          attributes: {
+            ...attributes,
+            ...insideJob.attributes,
+          },
+        });
+      }
+    );
+    savedObjectsClient.get.callsFake((type: string, id: string, options?: any) => {
+      return internalSavedObject;
+    });
+    const hidden = await subject.hideAttribute(hideMe, 'message');
+    const unhidden = await subject.unhideAttribute(hidden.id);
+    expect(unhidden.id).toEqual(hidden.id);
+    expect(unhidden.type).toEqual(hidden.type);
+    expect(unhidden.version).toEqual(hidden.version);
+    expect(unhidden.attributes).toMatchObject(hideMe);
   });
 });
