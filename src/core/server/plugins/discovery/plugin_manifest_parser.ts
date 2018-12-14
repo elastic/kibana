@@ -142,9 +142,9 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
-  const hasServerSide = typeof manifest.server === 'boolean' ? manifest.server : false;
-  const hasUISide = typeof manifest.ui === 'boolean' ? manifest.ui : false;
-  if (!hasServerSide && !hasUISide) {
+  const includesServerPlugin = typeof manifest.server === 'boolean' ? manifest.server : false;
+  const includesUiPlugin = typeof manifest.ui === 'boolean' ? manifest.ui : false;
+  if (!includesServerPlugin && !includesUiPlugin) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
@@ -174,8 +174,8 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     configPath: manifest.configPath || manifest.id,
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
-    ui: hasUISide,
-    server: hasServerSide,
+    ui: includesUiPlugin,
+    server: includesServerPlugin,
   };
 }
 
