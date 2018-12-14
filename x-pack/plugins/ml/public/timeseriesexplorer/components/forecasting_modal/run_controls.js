@@ -28,7 +28,7 @@ import {
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
-import { JOB_STATE } from '../../../common/constants/states';
+import { JOB_STATE } from '../../../../common/constants/states';
 import { ForecastProgress } from './forecast_progress';
 import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { checkPermission, createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
@@ -171,4 +171,3 @@ RunControls.propType = {
   jobOpeningState: PropTypes.number,
   jobClosingState: PropTypes.number,
 };
-

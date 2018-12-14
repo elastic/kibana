@@ -28,6 +28,7 @@ import template from './partials/toaster.html';
 import './notify.less';
 import '../filters/markdown';
 import '../directives/truncated';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCallOut,
@@ -102,7 +103,12 @@ function applyConfig(config) {
 
     const banner = (
       <EuiCallOut
-        title="Attention"
+        title={(
+          <FormattedMessage
+            id="common.ui.notify.banner.attentionTitle"
+            defaultMessage="Attention"
+          />
+        )}
         iconType="help"
       >
         <MarkdownSimple data-test-subj="userDefinedBanner">
@@ -110,7 +116,10 @@ function applyConfig(config) {
         </MarkdownSimple>
 
         <EuiButton type="primary" size="s" onClick={dismissBanner}>
-          Close
+          <FormattedMessage
+            id="common.ui.notify.banner.closeButtonLabel"
+            defaultMessage="Close"
+          />
         </EuiButton>
       </EuiCallOut>
     );

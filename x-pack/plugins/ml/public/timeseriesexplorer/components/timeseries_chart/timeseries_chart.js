@@ -19,11 +19,14 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
+import chrome from 'ui/chrome';
+
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
-} from '../../common/util/anomaly_utils';
-import { formatValue } from '../formatters/format_value';
+} from '../../../../common/util/anomaly_utils';
+import { AnnotationFlyout } from '../annotation_flyout';
+import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -33,14 +36,24 @@ import {
   numTicksForDateFormat,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
-} from '../util/chart_utils';
+} from '../../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
-import { mlAnomaliesTableService } from '../components/anomalies_table/anomalies_table_service';
-import ContextChartMask from './context_chart_mask';
-import { findChartPointForAnomalyTime } from './timeseriesexplorer_utils';
-import { mlEscape } from '../util/string_utils';
-import { mlFieldFormatService } from '../services/field_format_service';
-import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { mlTableService } from '../../../services/table_service';
+import { ContextChartMask } from '../context_chart_mask';
+import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
+import { mlEscape } from '../../../util/string_utils';
+import { mlFieldFormatService } from '../../../services/field_format_service';
+import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
+import {
+  getAnnotationBrush,
+  getAnnotationLevels,
+  renderAnnotations,
+
+  highlightFocusChartAnnotation,
+  unhighlightFocusChartAnnotation
+} from './timeseries_chart_annotations';
+
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -75,16 +88,20 @@ function getSvgHeight() {
 
 export class TimeseriesChart extends React.Component {
   static propTypes = {
+    indexAnnotation: PropTypes.func,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
     contextChartData: PropTypes.array,
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
+    deleteAnnotation: PropTypes.func,
     detectorIndex: PropTypes.string,
     focusAggregationInterval: PropTypes.object,
+    focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool.isRequired,
+    refresh: PropTypes.func,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
@@ -92,16 +109,94 @@ export class TimeseriesChart extends React.Component {
     svgWidth: PropTypes.number.isRequired,
     swimlaneData: PropTypes.array,
     timefilter: PropTypes.object.isRequired,
+    toastNotifications: PropTypes.object,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object
+  };
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      annotation: {},
+      isFlyoutVisible: false,
+      isSwitchChecked: true,
+    };
+  }
+
+  closeFlyout = () => {
+    const chartElement = d3.select(this.rootNode);
+    chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
+    this.setState({ isFlyoutVisible: false, annotation: {} });
+  }
+
+  showFlyout = (annotation) => {
+    this.setState({ isFlyoutVisible: true, annotation });
+  }
+
+  handleAnnotationChange = (e) => {
+    // e is a React Syntethic Event, we need to cast it to
+    // a placeholder variable so it's still valid in the
+    // setState() asynchronous callback
+    const annotation = e.target.value;
+    this.setState((state) => {
+      state.annotation.annotation = annotation;
+      return state;
+    });
+  }
+
+  deleteAnnotation = (annotation) => {
+    const {
+      deleteAnnotation,
+      refresh,
+      toastNotifications
+    } = this.props;
+
+    this.closeFlyout();
+
+    deleteAnnotation(annotation._id)
+      .then(() => {
+        refresh();
+        toastNotifications.addSuccess(`Deleted annotation for job with ID ${annotation.job_id}.`);
+      })
+      .catch((resp) => {
+        toastNotifications
+          .addDanger(`An error occured deleting the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
+      });
+  }
+
+  indexAnnotation = (annotation) => {
+    const {
+      indexAnnotation,
+      refresh,
+      toastNotifications
+    } = this.props;
+
+    this.closeFlyout();
+
+    indexAnnotation(annotation)
+      .then(() => {
+        refresh();
+        const action = (typeof annotation._id === 'undefined') ? 'Added an' : 'Updated';
+        if (typeof annotation._id === 'undefined') {
+          toastNotifications.addSuccess(`${action} annotation for job with ID ${annotation.job_id}.`);
+        } else {
+          toastNotifications.addSuccess(`${action} annotation for job with ID ${annotation.job_id}.`);
+        }
+      })
+      .catch((resp) => {
+        const action = (typeof annotation._id === 'undefined') ? 'creating' : 'updating';
+        toastNotifications
+          .addDanger(`An error occured ${action} the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
+      });
   }
 
   componentWillUnmount() {
     const element = d3.select(this.rootNode);
     element.html('');
 
-    mlAnomaliesTableService.anomalyRecordMouseenter.unwatch(this.tableRecordMousenterListener);
-    mlAnomaliesTableService.anomalyRecordMouseleave.unwatch(this.tableRecordMouseleaveListener);
+    mlTableService.rowMouseenter.unwatch(this.tableRecordMousenterListener);
+    mlTableService.rowMouseleave.unwatch(this.tableRecordMouseleaveListener);
   }
 
   componentDidMount() {
@@ -137,6 +232,12 @@ export class TimeseriesChart extends React.Component {
 
     this.fieldFormat = undefined;
 
+    // Annotations Brush
+    if (mlAnnotationsEnabled) {
+      this.annotateBrush = getAnnotationBrush.call(this);
+    }
+
+    // brush for focus brushing
     this.brush = d3.svg.brush();
 
     this.mask = undefined;
@@ -144,17 +245,27 @@ export class TimeseriesChart extends React.Component {
     // Listeners for mouseenter/leave events for rows in the table
     // to highlight the corresponding anomaly mark in the focus chart.
     const highlightFocusChartAnomaly = this.highlightFocusChartAnomaly.bind(this);
-    this.tableRecordMousenterListener = function (record) {
-      highlightFocusChartAnomaly(record);
+    const boundHighlightFocusChartAnnotation = highlightFocusChartAnnotation.bind(this);
+    this.tableRecordMousenterListener = function (record, type = 'anomaly') {
+      if (type === 'anomaly') {
+        highlightFocusChartAnomaly(record);
+      } else if (type === 'annotation') {
+        boundHighlightFocusChartAnnotation(record);
+      }
     };
 
     const unhighlightFocusChartAnomaly = this.unhighlightFocusChartAnomaly.bind(this);
-    this.tableRecordMouseleaveListener = function (record) {
-      unhighlightFocusChartAnomaly(record);
+    const boundUnhighlightFocusChartAnnotation = unhighlightFocusChartAnnotation.bind(this);
+    this.tableRecordMouseleaveListener = function (record, type = 'anomaly') {
+      if (type === 'anomaly') {
+        unhighlightFocusChartAnomaly(record);
+      } else {
+        boundUnhighlightFocusChartAnnotation(record);
+      }
     };
 
-    mlAnomaliesTableService.anomalyRecordMouseenter.watch(this.tableRecordMousenterListener);
-    mlAnomaliesTableService.anomalyRecordMouseleave.watch(this.tableRecordMouseleaveListener);
+    mlTableService.rowMouseenter.watch(this.tableRecordMousenterListener);
+    mlTableService.rowMouseleave.watch(this.tableRecordMouseleaveListener);
 
     this.renderChart();
     this.drawContextChartSelection();
@@ -349,6 +460,18 @@ export class TimeseriesChart extends React.Component {
       .attr('class', 'chart-border');
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
+    if (mlAnnotationsEnabled) {
+      const annotateBrush = this.annotateBrush.bind(this);
+
+      fcsGroup.append('g')
+        .attr('class', 'mlAnnotationBrush')
+        .call(annotateBrush)
+        .selectAll('rect')
+        .attr('x', 0)
+        .attr('y', focusZoomPanelHeight)
+        .attr('height', focusChartHeight);
+    }
+
     // Add border round plot area.
     fcsGroup.append('rect')
       .attr('x', 0)
@@ -407,6 +530,11 @@ export class TimeseriesChart extends React.Component {
         .attr('class', 'focus-chart-markers forecast');
     }
 
+    // Create the elements for annotations
+    if (mlAnnotationsEnabled) {
+      fcsGroup.append('g').classed('mlAnnotations', true);
+    }
+
     fcsGroup.append('rect')
       .attr('x', 0)
       .attr('y', 0)
@@ -418,10 +546,12 @@ export class TimeseriesChart extends React.Component {
   renderFocusChart() {
     const {
       focusAggregationInterval,
+      focusAnnotationData,
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
       selectedJob,
+      showAnnotations,
       showForecast,
       showModelBounds
     } = this.props;
@@ -433,6 +563,7 @@ export class TimeseriesChart extends React.Component {
     const data = focusChartData;
 
     const contextYScale = this.contextYScale;
+    const showFlyout = this.showFlyout.bind(this);
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
 
     const focusChart = d3.select('.focus-chart');
@@ -499,6 +630,14 @@ export class TimeseriesChart extends React.Component {
         }
       }
 
+      // if annotations are present, we extend yMax to avoid overlap
+      // between annotation labels, chart lines and anomalies.
+      if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
+        const levels = getAnnotationLevels(focusAnnotationData);
+        const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
+        // TODO needs revisting to be a more robust normalization
+        yMax = yMax * (1 + (maxLevel + 1) / 5);
+      }
       this.focusYScale.domain([yMin, yMax]);
 
     } else {
@@ -527,6 +666,23 @@ export class TimeseriesChart extends React.Component {
       focusChart.select('.area.bounds')
         .attr('d', this.focusBoundedArea(data))
         .classed('hidden', !showModelBounds);
+    }
+
+    if (mlAnnotationsEnabled) {
+      renderAnnotations(
+        focusChart,
+        focusAnnotationData,
+        focusZoomPanelHeight,
+        focusChartHeight,
+        this.focusXScale,
+        showAnnotations,
+        showFocusChartTooltip,
+        showFlyout
+      );
+
+      // disable brushing (creation of annotations) when annotations aren't shown
+      focusChart.select('.mlAnnotationBrush')
+        .style('pointer-events', (showAnnotations) ? 'all' : 'none');
     }
 
     focusChart.select('.values-line')
@@ -1167,6 +1323,15 @@ export class TimeseriesChart extends React.Component {
       contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
     }
 
+    if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
+      contents = marker.annotation;
+      contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
+
+      if (typeof marker.end_timestamp !== 'undefined') {
+        contents += ` - ${moment(marker.end_timestamp).format('MMMM Do YYYY, HH:mm')}`;
+      }
+    }
+
     mlChartTooltipService.show(contents, circle, {
       x: LINE_CHART_ANOMALY_RADIUS * 2,
       y: 0
@@ -1234,6 +1399,21 @@ export class TimeseriesChart extends React.Component {
   }
 
   render() {
-    return <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />;
+    const { annotation, isFlyoutVisible } = this.state;
+
+    return (
+      <React.Fragment>
+        <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
+        {mlAnnotationsEnabled && isFlyoutVisible &&
+          <AnnotationFlyout
+            annotation={annotation}
+            cancelAction={this.closeFlyout}
+            controlFunc={this.handleAnnotationChange}
+            deleteAction={this.deleteAnnotation}
+            saveAction={this.indexAnnotation}
+          />
+        }
+      </React.Fragment>
+    );
   }
 }
