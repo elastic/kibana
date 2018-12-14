@@ -16,6 +16,7 @@ import {
   EuiHeaderSection,
   // @ts-ignore missing typings for EuiHeaderSectionItem
   EuiHeaderSectionItem,
+  EuiIcon,
   EuiPage,
   EuiPageContent,
   EuiPopover,
@@ -102,6 +103,12 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     iconTitle="Uptime Monitoring"
                   >
                     Uptime Monitoring
+                    <EuiIcon
+                      style={{ paddingLeft: '8px' }}
+                      size="xl"
+                      // @ts-ignore missing typings for beaker icon
+                      type="beaker"
+                    />
                   </EuiHeaderLogo>
                 </EuiHeaderSectionItem>
                 {!isUsingK7Design && (
