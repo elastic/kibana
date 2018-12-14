@@ -75,7 +75,12 @@ export function createEsTestCluster(options = {}) {
       }
 
       await cluster.start(installPath, {
-        esArgs: [`cluster.name=${clusterName}`, `http.port=${port}`, ...esArgs],
+        esArgs: [
+          `cluster.name=${clusterName}`,
+          `http.port=${port}`,
+          'discovery.type=single-node',
+          ...esArgs,
+        ],
       });
     }
 
