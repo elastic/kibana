@@ -6,4 +6,3 @@
 
 
 import './anomalies_table_directive';
-import './anomalies_table_service.js';

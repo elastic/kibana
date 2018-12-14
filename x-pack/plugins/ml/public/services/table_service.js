@@ -8,17 +8,17 @@
 
 /*
  * Service for firing and registering for events in the
- * anomalies table component.
+ * anomalies or annotations table component.
  */
 
-import { listenerFactoryProvider } from '../../factories/listener_factory';
+import { listenerFactoryProvider } from '../factories/listener_factory';
 
-class AnomaliesTableService {
+class TableService {
   constructor() {
     const listenerFactory = listenerFactoryProvider();
-    this.anomalyRecordMouseenter = listenerFactory();
-    this.anomalyRecordMouseleave = listenerFactory();
+    this.rowMouseenter = listenerFactory();
+    this.rowMouseleave = listenerFactory();
   }
 }
 
-export const mlAnomaliesTableService = new AnomaliesTableService();
+export const mlTableService = new TableService();
