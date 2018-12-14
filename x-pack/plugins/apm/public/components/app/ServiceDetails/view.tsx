@@ -27,9 +27,11 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
     const { urlParams, match, location } = this.props;
     const { serviceName } = match.params;
 
+    const params = { ...urlParams, serviceName };
+
     return (
       <ServiceDetailsRequest
-        urlParams={urlParams}
+        urlParams={params}
         render={({ data }) =>
           // don't want to let stale data cause UI flashes, so
           // we wait until the request has returned before rendering
@@ -45,7 +47,8 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
                   <ServiceIntegrations
                     location={this.props.location}
                     serviceName={serviceName}
-                    transactionType={urlParams.transactionType}
+                    // TODO fix url params : transaction type to read from qs too
+                    transactionType={params.transactionType}
                     serviceTransactionTypes={data.types}
                   />
                 </EuiFlexItem>
@@ -58,7 +61,7 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
               <Tabs
                 serviceName={serviceName}
                 location={location}
-                urlParams={urlParams}
+                urlParams={params}
                 transactionTypes={data.types}
               />
             </React.Fragment>

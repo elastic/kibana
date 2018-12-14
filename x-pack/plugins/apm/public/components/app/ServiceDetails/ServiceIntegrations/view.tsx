@@ -145,6 +145,7 @@ export class ServiceIntegrationsView extends React.Component<
           onClose={this.closeFlyouts}
           serviceName={this.props.serviceName}
           transactionType={this.props.transactionType}
+          serviceTransactionTypes={this.props.serviceTransactionTypes}
         />
         <WatcherFlyout
           location={this.props.location}

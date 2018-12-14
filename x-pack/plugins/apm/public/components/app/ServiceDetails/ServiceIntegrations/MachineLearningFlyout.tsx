@@ -35,6 +35,7 @@ interface FlyoutProps {
   serviceName: string;
   transactionType?: string;
   location: any;
+  serviceTransactionTypes: string[];
 }
 
 interface FlyoutState {
@@ -96,18 +97,13 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public addErrorToast = () => {
-    const {
-      serviceName,
-      transactionType = 'all transactions',
-      location
-    } = this.props;
+    const { serviceName, transactionType, location } = this.props;
     toastNotifications.addWarning({
       title: 'Job already exists',
       text: (
         <p>
           There&apos;s already a job running for anomaly detection on{' '}
-          {serviceName} ({transactionType}
-          ).{' '}
+          {serviceName} ({transactionType}).{' '}
           <ViewMLJob
             serviceName={serviceName}
             transactionType={transactionType}
@@ -157,7 +153,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
       <EuiFlyout onClose={onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>Enable anomaly detection on response times</h2>
+            <h2>Enable anomaly detection</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
         </EuiFlyoutHeader>
@@ -171,7 +167,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
               >
                 <p>
                   There is currently a job running for {serviceName} (
-                  {transactionType || 'all types'}
+                  {transactionType}
                   ).{' '}
                   <ViewMLJob
                     serviceName={serviceName}
@@ -209,24 +205,38 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
           )}
 
           <EuiText>
+            <div>
+              <p>EUI Combo box here, with:</p>
+              <ul>
+                {this.props.serviceTransactionTypes.map(t => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </div>
+          </EuiText>
+
+          <EuiText>
             <p>
-              This integration will start a new Machine Learning job that is
-              predefined to calculate anomaly scores on response times on APM
-              transactions for the {serviceName} service ($
-              {transactionType || 'all'} transactions). Once enabled,{' '}
-              <b>the response time graph</b> will show the expected bounds from
-              the Machine Learning job and annotate the graph once the anomaly
+              Here you can create a machine learning job to calculate anomaly
+              scores on durations for APM transactions within the {serviceName}{' '}
+              service. Once enabled, <b>the transaction duration graph</b> will
+              show the expected bounds and annotate the graph once the anomaly
               score is &gt;=75.
             </p>
             <p>
-              Jobs can be created per transaction type and based on the average
-              response time. Once a job is created, you can manage it and see
-              more details in the{' '}
+              Jobs can be created for each service + transaction type
+              combination. Once a job is created, you can manage it and see more
+              details in the{' '}
               <KibanaLink pathname={'/app/ml'}>
                 Machine Learning jobs management page
               </KibanaLink>
-              . It might take some time for the job to calculate the results.
-              Please refresh the graph a few minutes after creating the job.
+              .{' '}
+            </p>
+            <p>
+              <em>
+                Note: It might take a few minutes for the job to begin
+                calculating results.
+              </em>
             </p>
           </EuiText>
         </EuiFlyoutBody>
@@ -238,8 +248,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                 fill
                 disabled={isLoading || hasMlJob || !hasIndexPattern}
               >
-                Create new job for this service ({transactionType || 'all'}{' '}
-                transactions)
+                Create new job
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

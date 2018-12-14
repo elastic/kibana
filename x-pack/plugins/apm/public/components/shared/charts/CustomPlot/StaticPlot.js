@@ -100,7 +100,7 @@ class StaticPlot extends PureComponent {
         />
 
         {noHits ? (
-          <StatusText text="No data within this time range." />
+          <StatusText marginLeft={30} text="No data within this time range." />
         ) : (
           this.getVisSeries(series, plotValues)
         )}

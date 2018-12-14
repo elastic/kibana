@@ -139,10 +139,13 @@ export function asPercent(
   denominator?: number,
   fallbackResult = ''
 ) {
-  if (!denominator) {
+  if (denominator === 0) {
     return fallbackResult;
   }
-  return numeral(numerator / denominator).format('0.00%');
+
+  const decimal = denominator ? numerator / denominator : numerator;
+
+  return numeral(decimal).format('0.00%');
 }
 
 export function asGB(bytes: number | null, places = 1) {
