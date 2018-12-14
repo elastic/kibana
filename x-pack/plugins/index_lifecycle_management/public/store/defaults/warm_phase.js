@@ -28,5 +28,5 @@ export const defaultWarmPhase = {
   [PHASE_SHRINK_ENABLED]: false,
   [PHASE_PRIMARY_SHARD_COUNT]: '',
   [PHASE_REPLICA_COUNT]: '',
-  [WARM_PHASE_ON_ROLLOVER]: false
+  [WARM_PHASE_ON_ROLLOVER]: true
 };

@@ -23,8 +23,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
   const SUBJ_OVERVIEW_ACTIONS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} alertAction`;
   const SUBJ_OVERVIEW_VIEW_ALL = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} viewAllAlerts`;
 
-  const SUBJ_LISTING_PAGE  = 'clusterAlertsListingPage';
-  const SUBJ_TABLE_BODY    = 'alertsTableBody';
+  const SUBJ_TABLE_BODY    = 'alertsTableContainer';
   const SUBJ_TABLE_ICONS   = `${SUBJ_TABLE_BODY} alertIcon`;
   const SUBJ_TABLE_TEXTS   = `${SUBJ_TABLE_BODY} alertText`;
   const SUBJ_TABLE_ACTIONS = `${SUBJ_TABLE_BODY} alertAction`;
@@ -91,12 +90,12 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
      */
 
     async isOnListingPage() {
-      const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
+      const pageId = await retry.try(() => testSubjects.find(SUBJ_TABLE_BODY));
       return pageId !== null;
     }
 
     getTableAlerts() {
-      return PageObjects.monitoring.tableGetRows(SUBJ_TABLE_BODY);
+      return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_BODY);
     }
 
     async getTableAlertsAll() {
