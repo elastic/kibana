@@ -18,42 +18,31 @@
  */
 
 /**
- * All exports from TS source files (where the implementation is actualy done in TS).
- */
+* All exports from TS source files (where the implementation is actually done in TS).
+*/
 export * from './target/types/type_exports';
-
 /**
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
-import {
-  CallClusterOptions as ESCallClusterOptions,
-  Cluster as ESCluster,
-  ClusterConfig as ESClusterConfig,
-  ElasticsearchPlugin as ESPlugin,
-} from './src/legacy/core_plugins/elasticsearch';
-import {
-  KibanaConfig as LegKibanaConfig,
-  Request as LegRequest,
-  ResponseToolkit as LegResponseToolkit,
-  Server as LegServer,
-} from './src/server/kbn_server';
+import * as LegacyElasticsearch from './src/legacy/core_plugins/elasticsearch';
+import * as LegacyKibanaServer from './src/server/kbn_server';
 
-// Workaround for re-exporting types under a namespace.
-// https://github.com/Microsoft/TypeScript/issues/4336#issuecomment-309282591
+/**
+ *  Re-export legacy types under a namespace.
+ */
 // tslint:disable:no-namespace
-// tslint:disable:no-empty-interface
 export namespace Legacy {
-  export interface KibanaConfig extends LegKibanaConfig {}
-  export interface Request extends LegRequest {}
-  export interface ResponseToolkit extends LegResponseToolkit {}
-  export interface Server extends LegServer {}
+  export type KibanaConfig = LegacyKibanaServer.KibanaConfig;
+  export type Request = LegacyKibanaServer.Request;
+  export type ResponseToolkit = LegacyKibanaServer.ResponseToolkit;
+  export type Server = LegacyKibanaServer.Server;
 
   export namespace Plugins {
     export namespace elasticsearch {
-      export interface Plugin extends ESPlugin {}
-      export interface Cluster extends ESCluster {}
-      export interface ClusterConfig extends ESClusterConfig {}
-      export interface CallClusterOptions extends ESCallClusterOptions {}
+      export type Plugin = LegacyElasticsearch.ElasticsearchPlugin;
+      export type Cluster = LegacyElasticsearch.Cluster;
+      export type ClusterConfig = LegacyElasticsearch.ClusterConfig;
+      export type CallClusterOptions = LegacyElasticsearch.CallClusterOptions;
     }
   }
 }

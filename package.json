@@ -13,7 +13,7 @@
   "private": true,
   "version": "7.0.0",
   "branch": "master",
-  "types": "./index.d.ts",
+  "types": "./kibana.d.ts",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"

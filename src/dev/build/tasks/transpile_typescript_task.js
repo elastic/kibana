@@ -24,6 +24,10 @@ export const TranspileTypescriptTask = {
   description: 'Transpiling sources with typescript compiler',
 
   async run(config, log, build) {
+    // the types project is built inside the repo so x-pack can use it for it's in-repo build.
+    const typesProject = new Project(config.resolveFromRepo('tsconfig.types.json'));
+
+    // these projects are built in the build folder
     const defaultProject = new Project(build.resolvePath('tsconfig.json'));
     const browserProject = new Project(build.resolvePath('tsconfig.browser.json'));
 
@@ -47,7 +51,7 @@ export const TranspileTypescriptTask = {
     }));
 
     // compile each typescript config file
-    for (const tsConfigPath of [defaultProject.tsConfigPath, browserProject.tsConfigPath]) {
+    for (const tsConfigPath of [typesProject.tsConfigPath, defaultProject.tsConfigPath, browserProject.tsConfigPath]) {
       log.info(`Compiling`, tsConfigPath, 'project');
       await exec(
         log,

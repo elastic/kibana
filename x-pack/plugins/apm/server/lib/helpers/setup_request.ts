@@ -6,8 +6,8 @@
 
 /* tslint:disable no-console */
 import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
+import { Legacy } from 'kibana';
 import moment from 'moment';
-import { KibanaConfig, Request } from 'src/server/kbn_server';
 
 function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
@@ -23,7 +23,7 @@ export interface Setup {
   end: number;
   esFilterQuery?: any;
   client: ESClient;
-  config: KibanaConfig;
+  config: Legacy.KibanaConfig;
 }
 
 interface APMRequestQuery {
@@ -33,7 +33,7 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-export function setupRequest(req: Request): Setup {
+export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
