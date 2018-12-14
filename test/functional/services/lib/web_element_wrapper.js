@@ -267,7 +267,7 @@ export class WebElementWrapper {
   }
 
   /**
-   * Gets all element inside this element matching the given tag name.
+   * Gets the first element inside this element matching the given tag name.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} tagName
@@ -291,7 +291,7 @@ export class WebElementWrapper {
   }
 
   /**
-   * Gets all element inside this element matching the given XPath selector.
+   * Gets the first element inside this element matching the given XPath selector.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} selector
@@ -311,6 +311,30 @@ export class WebElementWrapper {
   async findAllByXpath(selector) {
     return await this._wrapAll(
       await this._webElement.findElements(this._By.xpath(selector))
+    );
+  }
+
+  /**
+   * Gets the first element inside this element matching the given partial link text.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   *
+   * @param {string} selector
+   * @return {Promise<WebElementWrapper[]>}
+   */
+  async findByPartialLinkText(linkText) {
+    return await this._wrap(await this._webElement.findElement(this._By.partialLinkText(linkText)));
+  }
+
+  /**
+   * Gets all elements inside this element matching the given partial link text.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   *
+   * @param {string} selector
+   * @return {Promise<WebElementWrapper[]>}
+   */
+  async findAllByPartialLinkText(linkText) {
+    return await this._wrapAll(
+      await this._webElement.findElements(this._By.partialLinkText(linkText))
     );
   }
 
