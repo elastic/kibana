@@ -20,8 +20,6 @@ import {
 import moment from 'moment';
 import React from 'react';
 import { MonitorList } from './queries/monitor_list';
-import { Pings } from './queries/ping_list';
-import { Snapshot } from './queries/snapshot';
 import { DateSelection, UMDateRangePicker } from './utility/date_range';
 
 interface UptimeOverviewProps {
@@ -105,11 +103,9 @@ export class UptimeOverview extends React.Component<UptimeOverviewProps, UptimeO
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <Snapshot start={rangeStart} end={rangeEnd} />
               <EuiSpacer size="xl" />
               <MonitorList start={rangeStart} end={rangeEnd} />
               <EuiSpacer size="xl" />
-              <Pings />
             </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>

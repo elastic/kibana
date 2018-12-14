@@ -8,9 +8,14 @@ import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
+import { Snapshot } from '../components/queries/snapshot';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 
 interface OverviewPageProps {
+  autorefreshInterval: number;
+  autorefreshEnabled: boolean;
+  dateRangeStart: number;
+  dateRangeEnd: number;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -24,11 +29,18 @@ export class OverviewPage extends React.Component<OverviewPageProps> {
   }
 
   public render() {
+    const { autorefreshEnabled, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.props;
     return (
       <div>
         <EuiTitle>
-          <h4>Overview</h4>
+          <h2>Overview</h2>
         </EuiTitle>
+        <Snapshot
+          autorefreshEnabled={autorefreshEnabled}
+          autorefreshInterval={autorefreshInterval}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+        />
         <Link to="/monitor/http@https://www.google.com/">A monitor&#8217;s ID</Link>
         <p>This is where the Uptime app will live.</p>
       </div>

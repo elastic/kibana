@@ -25,15 +25,23 @@ import { Query } from 'react-apollo';
 import { getSnapshotQuery } from './get_snapshot';
 
 interface SnapshotProps {
-  start: number;
-  end: number;
+  dateRangeStart: number;
+  dateRangeEnd: number;
+  autorefreshEnabled: boolean;
+  autorefreshInterval: number;
 }
 
-export const Snapshot = ({ start, end }: SnapshotProps) => (
+export const Snapshot = ({
+  dateRangeStart,
+  dateRangeEnd,
+  autorefreshEnabled,
+  autorefreshInterval,
+}: SnapshotProps) => (
   <Query
-    pollInterval={1000}
+    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
     query={getSnapshotQuery}
-    variables={{ start, end, downCount: 3, windowSize: 5 }}
+    // TODO downCount and windowSize aren't needed for MVP
+    variables={{ dateRangeStart, dateRangeEnd, downCount: 1, windowSize: 1 }}
   >
     {({ loading, error, data }) => {
       if (loading) {
@@ -54,10 +62,7 @@ export const Snapshot = ({ start, end }: SnapshotProps) => (
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xl">
           <EuiFlexItem>
-            <EuiPanel
-              // @ts-ignore missing definition for prop in typings
-              betaBadgeLabel="Monitor Status"
-            >
+            <EuiPanel>
               <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="xl">
                 <EuiFlexItem grow={false}>
                   <EuiPanel grow={false} style={{ minWidth: '100px' }}>
@@ -98,11 +103,7 @@ export const Snapshot = ({ start, end }: SnapshotProps) => (
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem style={{ paddingTop: '12px' }}>
-            <EuiPanel
-              // @ts-ignore missing definition for prop in typings
-              betaBadgeLabel="Total Pings"
-              paddingSize="s"
-            >
+            <EuiPanel paddingSize="s">
               <EuiSeriesChart
                 width={600}
                 height={155}

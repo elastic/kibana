@@ -35,6 +35,8 @@ interface UptimeAppState {
   breadcrumbs: Breadcrumb[];
   autorefreshEnabled: boolean;
   popoverIsOpen: boolean;
+  // TODO: these get passed as props to most components in this plugin,
+  // they can probably be globalized in a context
   selectedAutorefresh: any;
   autorefreshOptions: any[];
   dateRangeStart: number;
@@ -167,7 +169,16 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 <Route
                   exact
                   path="/"
-                  render={props => <OverviewPage {...props} setBreadcrumbs={this.setBreadcrumbs} />}
+                  render={props => (
+                    <OverviewPage
+                      {...props}
+                      autorefreshEnabled={this.state.autorefreshEnabled}
+                      autorefreshInterval={this.state.selectedAutorefresh.value}
+                      dateRangeStart={this.state.dateRangeStart}
+                      dateRangeEnd={this.state.dateRangeEnd}
+                      setBreadcrumbs={this.setBreadcrumbs}
+                    />
+                  )}
                 />
                 <Route
                   path="/monitor/:id"
