@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map, first } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from '../../../../';
 import { TestBedConfig } from './config';
 
