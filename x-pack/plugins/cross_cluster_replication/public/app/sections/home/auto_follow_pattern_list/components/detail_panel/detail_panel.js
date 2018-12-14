@@ -276,14 +276,14 @@ export class DetailPanelUi extends Component {
 
     return (
       <EuiFlyout
-        data-test-subj="remoteClusterDetailFlyout"
+        data-test-subj="autoFollowPatternDetailsFlyout"
         onClose={closeDetailPanel}
-        aria-labelledby="remoteClusterDetailsFlyoutTitle"
+        aria-labelledby="autoFollowPatternDetailsFlyoutTitle"
         size="m"
         maxWidth={400}
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m" id="remoteClusterDetailsFlyoutTitle">
+          <EuiTitle size="m" id="autoFollowPatternDetailsFlyoutTitle">
             <h2>{autoFollowPattern.name}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
