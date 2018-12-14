@@ -5,6 +5,7 @@
  */
 
 import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
+import moment from 'moment-timezone';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -82,6 +83,7 @@ const indexWithLifecycleError = {
     step_info: {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
+      stack_trace: 'fakestacktrace'
     },
     phase_execution: {
       policy: 'testy',
@@ -91,6 +93,7 @@ const indexWithLifecycleError = {
     },
   },
 };
+moment.tz.setDefault('utc');
 describe('retry lifecycle action extension', () => {
   test('should return null when no indices have index lifecycle policy', () => {
     const extension = retryLifecycleActionExtension([indexWithoutLifecyclePolicy]);
