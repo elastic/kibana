@@ -16,7 +16,6 @@ import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { initPromise } from '../util/promise';
-import { getSettingsBreadcrumbs } from './breadcrumbs';
 
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
@@ -31,7 +30,6 @@ const template = `
 uiRoutes
   .when('/settings', {
     template,
-    k7Breadcrumbs: getSettingsBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
