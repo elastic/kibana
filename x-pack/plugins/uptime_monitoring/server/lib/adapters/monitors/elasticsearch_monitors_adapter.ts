@@ -282,9 +282,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         // @ts-ignore TODO update typings and remove this comment
         const down = status.find(f => f.key === 'down');
         // @ts-ignore TODO update typings and remove this comment
-        upSeries.push({ x: bucket.key, y: up ? up.doc_count : 0 });
+        upSeries.push({ x: bucket.key, y: up ? up.doc_count : null });
         // @ts-ignore TODO update typings and remove this comment
-        downSeries.push({ x: bucket.key, y: down ? down.doc_count : 0 });
+        downSeries.push({ x: bucket.key, y: down ? down.doc_count : null });
       });
       return {
         key,
