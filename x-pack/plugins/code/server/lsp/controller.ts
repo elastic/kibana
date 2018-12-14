@@ -232,7 +232,10 @@ export class LanguageServerController implements ILanguageServerHandler {
   private findLanguageServer(lang: string) {
     const ls = this.languageServerMap[lang];
     if (ls) {
-      if (this.installManager.status(ls.definition) !== LanguageServerStatus.READY) {
+      if (
+        !this.detach &&
+        this.installManager.status(ls.definition) !== LanguageServerStatus.READY
+      ) {
         throw new ResponseError(
           LanguageServerNotInstalled,
           `language server ${lang} not installed`
