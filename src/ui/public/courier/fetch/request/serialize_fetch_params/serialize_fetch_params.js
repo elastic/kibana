@@ -73,9 +73,11 @@ export function serializeFetchParams(
       })
       .then(function (indexList) {
         let body = {
-          timeout: `${esShardTimeout}ms`,
           ...fetchParams.body || {},
         };
+        if (esShardTimeout > 0) {
+          body.timeout = `${esShardTimeout}ms`;
+        }
         let index = [];
         // If we've reached this point and there are no indexes in the
         // index list at all, it means that we shouldn't expect any indexes
