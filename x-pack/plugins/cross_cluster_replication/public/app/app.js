@@ -45,12 +45,13 @@ export class App extends Component {
     return (
       <div>
         <Switch>
-          <Redirect exact from={`${BASE_PATH}/:section`} to={`${BASE_PATH}`} />
+          <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/auto_follow_patterns`} />
           <Route exact path={`${BASE_PATH}/auto_follow_patterns/add`} component={AutoFollowPatternAdd} />
           <Route exact path={`${BASE_PATH}/auto_follow_patterns/edit/:id`} component={AutoFollowPatternEdit} />
-          <Route path={`${BASE_PATH}`} component={CrossClusterReplicationHome} />
+          <Route exact path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
         </Switch>
       </div>
     );
   }
 }
+

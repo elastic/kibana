@@ -68,7 +68,7 @@ class Routing {
       : undefined;
 
     this._reactRouter.history.push({
-      pathname: appToBasePathMap[app] + route,
+      pathname: encodeURI(appToBasePathMap[app] + route),
       search,
     });
   }

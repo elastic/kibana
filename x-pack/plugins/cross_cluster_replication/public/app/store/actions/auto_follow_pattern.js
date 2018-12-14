@@ -66,7 +66,7 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isEditing = false) 
         });
 
       toastNotifications.addSuccess(successMessage);
-      routing.navigate('/home');
+      routing.navigate('/auto_follow_patterns');
     },
   })
 );
