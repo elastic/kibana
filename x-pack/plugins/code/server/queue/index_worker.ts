@@ -5,7 +5,7 @@
  */
 
 import { EsClient, Esqueue } from '@code/esqueue';
-import moment = require('moment');
+import moment from 'moment';
 
 import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';

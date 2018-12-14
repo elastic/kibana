@@ -12,7 +12,7 @@ import { WorkerProgress, WorkerResult } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
-import { RepositoryService } from '../repository_service';
+import { RepositoryServiceFactory } from '../repository_service_factory';
 import { RepositoryObjectClient } from '../search';
 import { SocketService } from '../socket_service';
 import { AbstractWorker } from './abstract_worker';
@@ -29,6 +29,7 @@ export class DeleteWorker extends AbstractWorker {
     protected readonly client: EsClient,
     private readonly cancellationService: CancellationSerivce,
     private readonly lspService: LspService,
+    private readonly repoServiceFactory: RepositoryServiceFactory,
     private readonly socketService: SocketService
   ) {
     super(queue, log);
@@ -46,7 +47,7 @@ export class DeleteWorker extends AbstractWorker {
     this.cancellationService.cancelIndexJob(uri);
 
     // 3. Delete repository on local fs.
-    const repoService = new RepositoryService(dataPath, this.log);
+    const repoService = this.repoServiceFactory.newInstance(dataPath, this.log);
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
     // 4. Delete ES indices and aliases
