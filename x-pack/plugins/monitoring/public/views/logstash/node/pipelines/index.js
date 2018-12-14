@@ -8,7 +8,7 @@
  * Logstash Node Pipelines Listing
  */
 
-import React from 'react';
+import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -17,9 +17,6 @@ import {
 } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { MonitoringViewBaseEuiTableController } from '../../../';
-import { I18nProvider } from '@kbn/i18n/react';
-import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
 
 const getPageData = ($injector) => {
   const $route = $injector.get('$route');
@@ -69,49 +66,34 @@ uiRoutes
       },
       pageData: getPageData
     },
-    controller: class extends MonitoringViewBaseEuiTableController {
-      constructor($injector, $scope, i18n) {
-        const kbnUrl = $injector.get('kbnUrl');
+    controller($injector, $scope, i18n) {
+      const $route = $injector.get('$route');
+      const globalState = $injector.get('globalState');
+      const title = $injector.get('title');
+      const $executor = $injector.get('$executor');
 
-        super({
-          defaultData: {},
-          getPageData,
-          reactNodeId: 'monitoringLogstashNodePipelinesApp',
-          $scope,
-          $injector
-        });
+      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      $scope.pageData = $route.current.locals.pageData;
 
-        $scope.$watch(() => this.data, data => {
-          if (!data || !data.nodeSummary) {
-            return;
-          }
+      $scope.upgradeMessage = makeUpgradeMessage($scope.pageData.nodeSummary.version, i18n);
+      timefilter.enableTimeRangeSelector();
+      timefilter.enableAutoRefreshSelector();
 
-          this.setTitle(i18n('xpack.monitoring.logstash.node.pipelines.routeTitle', {
-            defaultMessage: 'Logstash - {nodeName} - Pipelines',
-            values: {
-              nodeName: data.nodeSummary.name
-            }
-          }));
+      const routeTitle = i18n('xpack.monitoring.logstash.node.pipelines.routeTitle', {
+        defaultMessage: 'Logstash - {nodeName} - Pipelines',
+        values: {
+          nodeName: $scope.pageData.nodeSummary.name
+        }
+      });
+      title($scope.cluster, routeTitle);
 
-          this.renderReact(
-            <I18nProvider>
-              <PipelineListing
-                className="monitoringLogstashPipelinesTable"
-                onBrush={this.onBrush}
-                stats={data.nodeSummary}
-                data={data.pipelines}
-                sorting={this.sorting}
-                pagination={this.pagination}
-                onTableChange={this.onTableChange}
-                upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
-                angular={{
-                  kbnUrl,
-                  scope: $scope,
-                }}
-              />
-            </I18nProvider>
-          );
-        });
-      }
+      $executor.register({
+        execute: () => getPageData($injector),
+        handleResponse: (response) => $scope.pageData = response
+      });
+
+      $executor.start($scope);
+
+      $scope.$on('$destroy', $executor.destroy);
     }
   });
