@@ -36,4 +36,5 @@ export function DashboardViewportProvider(props) {
 
 DashboardViewportProvider.propTypes = {
   getEmbeddableFactory: PropTypes.func.isRequired,
+  getReloadProvider: PropTypes.func.isRequired,
 };

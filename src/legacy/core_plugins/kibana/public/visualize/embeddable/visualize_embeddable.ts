@@ -192,6 +192,12 @@ export class VisualizeEmbeddable extends Embeddable {
     }
   }
 
+  public reload() {
+    if (this.handler) {
+      this.handler.reload();
+    }
+  }
+
   /**
    * Retrieve the panel title for this panel from the container state.
    * This will either return the overwritten panel title or the visualization title.

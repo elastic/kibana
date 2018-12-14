@@ -25,6 +25,7 @@ import { ExitFullScreenButton } from '../components/exit_full_screen_button';
 export function DashboardViewport({
   maximizedPanelId,
   getEmbeddableFactory,
+  getReloadProvider,
   panelCount,
   title,
   description,
@@ -43,6 +44,7 @@ export function DashboardViewport({
       { isFullScreenMode && <ExitFullScreenButton onExitFullScreenMode={onExitFullScreenMode} /> }
       <DashboardGrid
         getEmbeddableFactory={getEmbeddableFactory}
+        getReloadProvider={getReloadProvider}
         maximizedPanelId={maximizedPanelId}
       />
     </div>
@@ -51,6 +53,7 @@ export function DashboardViewport({
 
 DashboardViewport.propTypes = {
   getEmbeddableFactory: PropTypes.func,
+  getReloadProvider: PropTypes.func.isRequired,
   maximizedPanelId: PropTypes.string,
   panelCount: PropTypes.number,
   title: PropTypes.string,
