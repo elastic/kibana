@@ -95,7 +95,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 title={<h2>Loading Ping History</h2>}
                 body={
                   <Fragment>
-                    <p>Fetching the latest list of pings</p>
+                    <p>Fetching the latest list of checks</p>
                     <EuiLoadingChart size="xl" />
                   </Fragment>
                 }
@@ -200,7 +200,9 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                         onBlur={e => {
                           const sanitizedValue = parseInt(e.target.value, 10);
                           if (!isNaN(sanitizedValue)) {
-                            this.setState({ maxSearchSize: sanitizedValue });
+                            this.setState({
+                              maxSearchSize: sanitizedValue >= 10000 ? 10000 : sanitizedValue,
+                            });
                           }
                         }}
                       />
