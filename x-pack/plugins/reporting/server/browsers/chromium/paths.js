@@ -10,7 +10,7 @@ export const paths = {
   archivesPath: path.resolve(__dirname, '../../../.chromium'),
   baseUrl: 'https://s3.amazonaws.com/headless-shell/',
   packages: [{
-    platforms: ['darwin', 'freebsd', 'openbsd'],
+    platforms: ['darwin'],
     archiveFilename: 'chromium-04c5a83-darwin.zip',
     archiveChecksum: '89a98bfa6454bec550f196232d1faeb3',
     rawChecksum: '413bbd646a4862a136bc0852ab6f41c5',
