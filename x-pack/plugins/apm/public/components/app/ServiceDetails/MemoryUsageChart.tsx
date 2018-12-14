@@ -28,7 +28,9 @@ const MemoryUsageChart: React.SFC<Props> = ({ data }) => (
           {...syncProps}
           noHits={data.totalHits === 0}
           series={data.series}
-          tickFormatY={asGB}
+          tickFormatY={(y: number | null) =>
+            data.totalHits === 0 ? '- GB' : asGB(y)
+          }
           formatTooltipValue={(c: Coordinate) => asGB(c.y)}
         />
       </React.Fragment>

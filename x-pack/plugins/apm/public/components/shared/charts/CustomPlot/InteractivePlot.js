@@ -34,16 +34,21 @@ class InteractivePlot extends PureComponent {
   };
 
   getTooltipPoints = hoverX => {
-    return this.props.series
+    const points = this.props.series
       .filter(series => !series.hideTooltipValue)
       .map(serie => {
         const point = getPointByX(serie, hoverX) || {};
         return {
           color: serie.color,
           value: this.props.formatTooltipValue(point),
-          text: serie.titleShort || serie.title
+          text: serie.titleShort || serie.title,
+          point
         };
       });
+
+    // sort tooltip values in DESC order so they match the series
+    points.sort((a, b) => (a.point.y < b.point.y ? 1 : -1));
+    return points;
   };
 
   render() {

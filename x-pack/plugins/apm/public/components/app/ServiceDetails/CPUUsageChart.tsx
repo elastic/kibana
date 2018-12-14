@@ -9,6 +9,7 @@ import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
 import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
+import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
 import { CPUChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_cpu_chart_data/transformer';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 
@@ -27,11 +28,11 @@ const CPUUsageChart: React.SFC<Props> = ({ data }) => (
           {...syncProps}
           noHits={data.totalHits === 0}
           series={data.series}
-          tickFormatY={(y: number | null) => `${y}%`}
+          tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
           formatTooltipValue={(c: Coordinate) => {
-            return (c.y || 0).toFixed(2) + '%';
+            return asPercent(c.y || 0);
           }}
-          yMax={100}
+          yMax={1}
         />
       </React.Fragment>
     )}
