@@ -32,11 +32,15 @@ uiRoutes
     }
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'console',
-    title: 'Console',
-    description: 'Skip cURL and use this JSON interface to work with your data directly.',
+    title: i18n('kbn.devTools.consoleTitle', {
+      defaultMessage: 'Console'
+    }),
+    description: i18n('kbn.devTools.consoleDescription', {
+      defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.'
+    }),
     icon: 'consoleApp',
     path: '/app/kibana#/dev_tools/console',
     showOnHomePage: true,
