@@ -109,18 +109,8 @@ function parseIdExpression(expression) {
 }
 
 function trimCurlyBraces(string) {
-  return string.slice(2, -2).trim();
-}
-
-/**
- * Removes parentheses from the start and the end of a string.
- *
- * Example: `('id' | i18n: { defaultMessage: 'Message' })`
- * @param {string} string string to trim
- */
-function trimParentheses(string) {
-  if (string.startsWith('(') && string.endsWith(')')) {
-    return string.slice(1, -1);
+  if (string.startsWith('{{') && string.endsWith('}}')) {
+    return string.slice(2, -2).trim();
   }
 
   return string;
@@ -140,54 +130,37 @@ function trimOneTimeBindingOperator(string) {
   return string;
 }
 
-/**
- * Remove interpolation expressions from angular and throw on `| i18n:` substring.
- *
- * Correct usage: `<p aria-label="{{ ::'namespace.id' | i18n: { defaultMessage: 'Message' } }}"></p>`.
- *
- * Incorrect usage: `ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"`
- *
- * @param {string} string html content
- */
-function validateI18nFilterUsage(string) {
-  const stringWithoutExpressions = string.replace(ANGULAR_EXPRESSION_REGEX, '');
-  const i18nMarkerPosition = stringWithoutExpressions.indexOf(I18N_FILTER_MARKER);
+function* extractExpressions(htmlContent) {
+  const elements = cheerio
+    .load(htmlContent)('*')
+    .toArray();
 
-  if (i18nMarkerPosition === -1) {
-    return;
+  for (const element of elements) {
+    for (const node of element.children) {
+      if (node.type === 'text') {
+        yield* (node.data.match(ANGULAR_EXPRESSION_REGEX) || [])
+          .filter(expression => expression.includes(I18N_FILTER_MARKER))
+          .map(trimCurlyBraces);
+      }
+    }
+
+    for (const attribute of Object.values(element.attribs)) {
+      if (attribute.includes(I18N_FILTER_MARKER)) {
+        yield trimCurlyBraces(attribute);
+      }
+    }
   }
-
-  const linesCount = (stringWithoutExpressions.slice(0, i18nMarkerPosition).match(/\n/g) || [])
-    .length;
-
-  const errorWithContext = createParserErrorMessage(string, {
-    loc: {
-      line: linesCount + 1,
-      column: 0,
-    },
-    message: 'I18n filter can be used only in interpolation expressions',
-  });
-
-  throw createFailError(errorWithContext);
 }
 
 function* getFilterMessages(htmlContent) {
-  validateI18nFilterUsage(htmlContent);
-
-  const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
-    .filter(expression => expression.includes(I18N_FILTER_MARKER))
-    .map(trimCurlyBraces);
-
-  for (const expression of expressions) {
+  for (const expression of extractExpressions(htmlContent)) {
     const filterStart = expression.indexOf(I18N_FILTER_MARKER);
-    const idExpression = trimParentheses(
-      trimOneTimeBindingOperator(expression.slice(0, filterStart).trim())
-    );
 
+    const idExpression = trimOneTimeBindingOperator(expression.slice(0, filterStart).trim());
     const filterObjectExpression = expression.slice(filterStart + I18N_FILTER_MARKER.length).trim();
 
     if (!filterObjectExpression || !idExpression) {
-      throw createFailError(`Cannot parse i18n filter expression: {{ ${expression} }}`);
+      throw createFailError(`Cannot parse i18n filter expression: ${expression}`);
     }
 
     const messageId = parseIdExpression(idExpression);
@@ -217,8 +190,9 @@ function* getDirectiveMessages(htmlContent) {
   const $ = cheerio.load(htmlContent);
 
   const elements = $('[i18n-id]')
-    .map(function (idx, el) {
+    .map((idx, el) => {
       const $el = $(el);
+
       return {
         id: $el.attr('i18n-id'),
         defaultMessage: $el.attr('i18n-default-message'),

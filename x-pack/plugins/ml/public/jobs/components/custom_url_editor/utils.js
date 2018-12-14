@@ -113,13 +113,13 @@ export function isValidCustomUrlSettings(settings, savedCustomUrls) {
   return isValid;
 }
 
-export function buildCustomUrlFromSettings(settings, job) {
+export function buildCustomUrlFromSettings(settings) {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
     return buildDashboardUrlFromSettings(settings);
   } else if (settings.type === URL_TYPE.KIBANA_DISCOVER) {
-    return Promise.resolve(buildDiscoverUrlFromSettings(settings, job));
+    return Promise.resolve(buildDiscoverUrlFromSettings(settings));
   } else {
     const urlToAdd = {
       url_name: settings.label,
@@ -219,7 +219,7 @@ function buildDashboardUrlFromSettings(settings) {
 
 }
 
-function buildDiscoverUrlFromSettings(settings, job) {
+function buildDiscoverUrlFromSettings(settings) {
   const { discoverIndexPatternId, queryFieldNames } = settings.kibanaSettings;
 
   // Add time settings to the global state URL parameter with $earliest$ and
@@ -238,10 +238,10 @@ function buildDiscoverUrlFromSettings(settings, job) {
     index: discoverIndexPatternId
   };
 
-  // Use the query from the datafeed only if no job entities are selected.
-  let query = job.datafeed_config.query;
+  // If partitioning field entities have been configured add tokens
+  // to the URL to use in the Discover page search.
 
-  // To put entities in filters section would involve creating parameters of the form
+  // Ideally we would put entities in the filters section, but currently this involves creating parameters of the form
   // filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:b30fd340-efb4-11e7-a600-0f58b1422b87,
   // key:airline,negate:!f,params:(query:AAL,type:phrase),type:phrase,value:AAL),query:(match:(airline:(query:AAL,type:phrase)))))
   // which includes the ID of the index holding the field used in the filter.
@@ -257,14 +257,10 @@ function buildDiscoverUrlFromSettings(settings, job) {
       queryString += `${escapeForElasticsearchQuery(fieldName)}:"$${fieldName}$"`;
     });
 
-    query = {
+    appState.query = {
       language: 'lucene',
       query: queryString
     };
-  }
-
-  if (query !== undefined) {
-    appState.query = query;
   }
 
   const _a = rison.encode(appState);

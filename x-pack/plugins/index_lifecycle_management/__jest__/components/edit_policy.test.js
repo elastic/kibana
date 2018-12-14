@@ -52,7 +52,7 @@ for (let i = 0; i < 105; i++) {
     modified_date: moment()
       .subtract(i, 'days')
       .valueOf(),
-    coveredIndices: i % 2 === 0 ? [`index${i}`] : null,
+    linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
     name: `testy${i}`,
     policy: {
       ...policy
@@ -124,8 +124,6 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [
         policyNameRequiredMessage,
-        maximumSizeRequiredMessage,
-        maximumAgeRequiredMessage,
       ]);
     });
     test('should show error when trying to save policy name with space', () => {
@@ -169,6 +167,55 @@ describe('edit policy', () => {
       setPolicyName(rendered, '_mypolicy');
       save(rendered);
       expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
+    });
+  });
+  describe('hot phase', () => {
+    test('should show errors when trying to save with no max size and no max age', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
+      maxSizeInput.simulate('change', { target: { value: '' } });
+      const maxAgeInput = rendered.find(`input#hot-selectedMaxAge`);
+      maxAgeInput.simulate('change', { target: { value: '' } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage]);
+    });
+    test('should show number above 0 required error when trying to save with -1 for max size', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
+      maxSizeInput.simulate('change', { target: { value: -1 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+    test('should show number above 0 required error when trying to save with 0 for max size', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
+      maxSizeInput.simulate('change', { target: { value: 0 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+    test('should show number above 0 required error when trying to save with -1 for max age', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
+      maxSizeInput.simulate('change', { target: { value: -1 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+    test('should show number above 0 required error when trying to save with 0 for max age', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
+      maxSizeInput.simulate('change', { target: { value: 0 } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
   });
   describe('warm phase', () => {

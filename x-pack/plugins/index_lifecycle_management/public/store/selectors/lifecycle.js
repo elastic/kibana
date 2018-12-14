@@ -60,8 +60,9 @@ export const validatePhase = (type, phase, errors) => {
 
   for (const numberedAttribute of PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE) {
     if (phase.hasOwnProperty(numberedAttribute)) {
-      // If WARM_PHASE_ON_ROLLOVER there is no need to validate this
-      if (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE && phase[WARM_PHASE_ON_ROLLOVER]) {
+      // If WARM_PHASE_ON_ROLLOVER or PHASE_HOT there is no need to validate this
+      if (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE
+          && (phase[WARM_PHASE_ON_ROLLOVER] || type === PHASE_HOT)) {
         continue;
       }
       // If shrink is disabled, there is no need to validate this
@@ -98,6 +99,16 @@ export const validatePhase = (type, phase, errors) => {
       ];
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
         maximumSizeRequiredMessage
+      ];
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_AGE]) && phase[PHASE_ROLLOVER_MAX_AGE] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
+        positiveNumbersAboveZeroErrorMessage
+      ];
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED]) && phase[PHASE_ROLLOVER_MAX_SIZE_STORED] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
+        positiveNumbersAboveZeroErrorMessage
       ];
     }
   }
@@ -165,14 +176,14 @@ export const validateLifecycle = state => {
     if (policyName.includes(' ')) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameContainsSpaceErrorMessage);
     }
-    if (TextEncoder && new TextEncoder('utf-8').encode(policyName).length > 255) {
+    if (window.TextEncoder && new window.TextEncoder('utf-8').encode(policyName).length > 255) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameTooLongErrorMessage);
     }
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
     errors[STRUCTURE_POLICY_NAME].push(policyNameMustBeDifferentErrorMessage);
-  } else {
+  } else if (getSelectedOriginalPolicyName(state) !== getSelectedPolicyName(state)) {
     const policyNames = getPolicies(state).map(policy => policy.name);
     if (policyNames.includes(getSelectedPolicyName(state))) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameAlreadyUsedErrorMessage);
@@ -204,11 +215,6 @@ export const getLifecycle = state => {
         accum[phaseName] = phaseToES(state, phase);
 
         // These seem to be constants
-        // TODO: verify this assumption
-        if (phaseName === PHASE_HOT) {
-          accum[phaseName].min_age = '0s';
-        }
-
         if (phaseName === PHASE_DELETE) {
           accum[phaseName].actions = {
             ...accum[phaseName].actions,
