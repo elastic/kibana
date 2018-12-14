@@ -10,8 +10,6 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
-import { toastNotifications } from 'ui/notify';
-
 import '../../../../styles/table.less';
 import {
   REFRESH_RATE_INDEX_LIST
@@ -24,6 +22,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPage,
   EuiSpacer,
   EuiSearchBar,
@@ -336,7 +335,13 @@ export class IndexTableUi extends Component {
       indices,
       intl,
       loadIndices,
+      indicesLoading
     } = this.props;
+    const emptyState = indicesLoading ? (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}><EuiLoadingSpinner size="xl" /></EuiFlexItem>
+      </EuiFlexGroup>
+    ) : <NoMatch />;
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
     return (
@@ -418,13 +423,10 @@ export class IndexTableUi extends Component {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  isLoading={indicesLoading}
                   color="secondary"
                   onClick={() => {
                     loadIndices();
-                    toastNotifications.addSuccess(intl.formatMessage({
-                      id: 'xpack.idxMgmt.indexTable.reloadingIndicesMessage',
-                      defaultMessage: 'Reloading indices'
-                    }));
                   }}
                   iconType="refresh"
                 >
@@ -454,7 +456,7 @@ export class IndexTableUi extends Component {
                 <EuiTableBody>{this.buildRows()}</EuiTableBody>
               </EuiTable>
             ) : (
-              <NoMatch />
+              emptyState
             )}
             <EuiSpacer size="m" />
             {indices.length > 0 ? this.renderPager() : null}
