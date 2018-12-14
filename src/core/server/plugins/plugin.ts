@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { join } from 'path';
 import typeDetect from 'type-detect';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
@@ -72,6 +73,11 @@ export interface PluginManifest {
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */
   readonly ui: boolean;
+
+  /**
+   * Specifies whether plugin includes some server-side specific functionality.
+   */
+  readonly server: boolean;
 }
 
 type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName, unknown>> = (
@@ -94,6 +100,8 @@ export class Plugin<
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredDependencies: PluginManifest['requiredPlugins'];
   public readonly optionalDependencies: PluginManifest['optionalPlugins'];
+  public readonly includesServerPlugin: PluginManifest['server'];
+  public readonly includesUiPlugin: PluginManifest['ui'];
 
   private readonly log: Logger;
 
@@ -109,6 +117,8 @@ export class Plugin<
     this.configPath = manifest.configPath;
     this.requiredDependencies = manifest.requiredPlugins;
     this.optionalDependencies = manifest.optionalPlugins;
+    this.includesServerPlugin = manifest.server;
+    this.includesUiPlugin = manifest.ui;
   }
 
   /**
@@ -146,7 +156,7 @@ export class Plugin<
   private createPluginInstance() {
     this.log.debug('Initializing plugin');
 
-    const pluginDefinition = require(this.path);
+    const pluginDefinition = require(join(this.path, 'server'));
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
     }
