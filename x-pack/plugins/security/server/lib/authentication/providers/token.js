@@ -11,9 +11,6 @@ import { DeauthenticationResult } from '../deauthentication_result';
 /**
  * Object that represents available provider options.
  * @typedef {{
- *  protocol: string,
- *  hostname: string,
- *  port: string,
  *  basePath: string,
  *  client: Client,
  *  log: Function
