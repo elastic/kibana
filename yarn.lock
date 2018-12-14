@@ -15636,9 +15636,9 @@ nodegit-promise@~4.0.0:
   dependencies:
     asap "~2.0.3"
 
-"nodegit@git+https://github.com/elastic/nodegit.git#6d5c2050426716127f602d2b07d885fef9b8dadb":
-  version "0.24.0-alpha.1"
-  resolved "git+https://github.com/elastic/nodegit.git#6d5c2050426716127f602d2b07d885fef9b8dadb"
+"nodegit@git+https://github.com/elastic/nodegit.git#v0.24.0-alpha.6":
+  version "0.24.0-alpha.6"
+  resolved "git+https://github.com/elastic/nodegit.git#a997b5adc28b89386d325c56993030acc7ca8c40"
   dependencies:
     babel-cli "^6.7.7"
     babel-preset-es2015 "^6.6.0"
