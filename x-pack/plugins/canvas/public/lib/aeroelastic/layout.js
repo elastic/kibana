@@ -1237,9 +1237,7 @@ const resizeChild = groupScale => s => {
 
 const resizeGroup = (shapes, rootElement) => {
   const idMap = {};
-  for (let i = 0; i < shapes.length; i++) {
-    idMap[shapes[i].id] = shapes[i];
-  }
+  for (let i = 0; i < shapes.length; i++) idMap[shapes[i].id] = shapes[i];
 
   const depths = {};
   const ancestorsLength = shape => (shape.parent ? ancestorsLength(idMap[shape.parent]) + 1 : 0);
