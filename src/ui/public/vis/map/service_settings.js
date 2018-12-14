@@ -74,7 +74,7 @@ uiModules.get('kibana')
         this._loadCatalogue = _.once(async () => {
 
           if (!mapConfig.includeElasticMapsService) {
-            return [];
+            return { services: [] };
           }
 
           try {
