@@ -21,7 +21,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
-import './kbn_chrome.less';
 import { uiModules } from '../../modules';
 import {
   getUnhashableStatesProvider,

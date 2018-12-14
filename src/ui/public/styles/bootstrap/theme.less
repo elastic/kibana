@@ -121,6 +121,15 @@
 .alert-warning    { .alert-styles(@alert-warning-bg); }
 .alert-danger     { .alert-styles(@alert-danger-bg); }
 
+.alert-info .badge {
+  background: darken(@alert-info-bg, 25%);
+}
+.alert-warning .badge {
+  background: darken(@alert-warning-bg, 25%);
+}
+.alert-danger .badge {
+  background: darken(@alert-danger-bg, 25%);
+}
 
 //
 // Progress bars
