@@ -58,10 +58,10 @@ export class SecretStore {
     };
 
     this.unhideAttribute = async (id: string) => {
+      const encKey = 'secret';
+
       // retrieve the saved object by id.
       const savedObject: any = await savedObjectsClient.get(this.type, id);
-
-      const encKey = 'secret';
 
       // extract the hidden secret value
       const toDecrypt = savedObject.attributes[encKey];
