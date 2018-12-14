@@ -121,7 +121,7 @@ export function getUiSettingDefaults() {
       }),
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',
       description: i18n.translate('kbn.advancedSettings.dateFormatText', {
-        defaultMessage: `When displaying a pretty formatted date, use this {formatLink}`,
+        defaultMessage: 'When displaying a pretty formatted date, use this {formatLink}',
         description: 'Part of composite text: kbn.advancedSettings.dateFormatText + ' +
                      'kbn.advancedSettings.dateFormat.optionsLinkText',
         values: {
