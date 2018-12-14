@@ -29,6 +29,7 @@ export function NumberParameter({ id, label, value, setParameter }) {
     <div className="kuiSideBarFormRow">
       <label
         className="kuiSideBarFormRow__label"
+        htmlFor={id}
       >
         {label}
       </label>
@@ -38,6 +39,7 @@ export function NumberParameter({ id, label, value, setParameter }) {
           type="number"
           value={value}
           onChange={handleChange}
+          id={id}
         />
       </div>
     </div>

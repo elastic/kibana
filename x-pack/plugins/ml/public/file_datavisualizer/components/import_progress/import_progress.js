@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -19,7 +19,7 @@ export const IMPORT_STATUS = {
   FAILED: 'danger',
 };
 
-export function ImportProgress({ statuses }) {
+export const ImportProgress = injectI18n(function ({ statuses, intl }) {
 
   const {
     reading,
@@ -60,43 +60,115 @@ export function ImportProgress({ statuses }) {
     completedStep = 5;
   }
 
-
-  let processFileTitle = 'Process file';
-  let createIndexTitle = 'Create index';
-  let createIngestPipelineTitle = 'Create ingest pipeline';
-  let uploadingDataTitle = 'Upload data';
-  let createIndexPatternTitle = 'Create index pattern';
+  let processFileTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.processFileTitle',
+    defaultMessage: 'Process file'
+  });
+  let createIndexTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.createIndexTitle',
+    defaultMessage: 'Create index'
+  });
+  let createIngestPipelineTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.createIngestPipelineTitle',
+    defaultMessage: 'Create ingest pipeline'
+  });
+  let uploadingDataTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.uploadDataTitle',
+    defaultMessage: 'Upload data'
+  });
+  let createIndexPatternTitle = intl.formatMessage({
+    id: 'xpack.ml.fileDatavisualizer.importProgress.createIndexPatternTitle',
+    defaultMessage: 'Create index pattern'
+  });
 
   if (completedStep >= 0) {
-    processFileTitle = 'Processing file';
-    statusInfo = (<p>Processing file for import</p>);
+    processFileTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.processingFileTitle',
+      defaultMessage: 'Processing file'
+    });
+    statusInfo = (
+      <p>
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importProgress.processingImportedFileDescription"
+          defaultMessage="Processing file for import"
+        />
+      </p>
+    );
   }
   if (completedStep >= 1) {
-    processFileTitle = 'File processed';
-    createIndexTitle = 'Creating index';
-    statusInfo = (<p>Creating index and ingest pipeline</p>);
+    processFileTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.fileProcessedTitle',
+      defaultMessage: 'File processed'
+    });
+    createIndexTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIndexTitle',
+      defaultMessage: 'Creating index'
+    });
+    statusInfo = (
+      <p>
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importProgress.stepTwoCreatingIndexIngestPipelineDescription"
+          defaultMessage="Creating index and ingest pipeline"
+        />
+      </p>
+    );
   }
   if (completedStep >= 2) {
-    createIndexTitle = 'Index created';
-    createIngestPipelineTitle = 'Creating ingest pipeline';
-    statusInfo = (<p>Creating index and ingest pipeline</p>);
+    createIndexTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.indexCreatedTitle',
+      defaultMessage: 'Index created'
+    });
+    createIngestPipelineTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIngestPipelineTitle',
+      defaultMessage: 'Creating ingest pipeline'
+    });
+    statusInfo = (
+      <p>
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importProgress.stepThreeCreatingIndexIngestPipelineDescription"
+          defaultMessage="Creating index and ingest pipeline"
+        />
+      </p>
+    );
   }
   if (completedStep >= 3) {
-    createIngestPipelineTitle = 'Ingest pipeline created';
-    uploadingDataTitle = 'Uploading data';
+    createIngestPipelineTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.ingestPipelineCreatedTitle',
+      defaultMessage: 'Ingest pipeline created'
+    });
+    uploadingDataTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.uploadingDataTitle',
+      defaultMessage: 'Uploading data'
+    });
     statusInfo = (<UploadFunctionProgress progress={uploadProgress} />);
   }
   if (completedStep >= 4) {
-    uploadingDataTitle = 'Data uploaded';
+    uploadingDataTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.dataUploadedTitle',
+      defaultMessage: 'Data uploaded'
+    });
     if (createIndexPattern === true) {
-      createIndexPatternTitle = 'Creating index pattern';
-      statusInfo = (<p>Creating index pattern</p>);
+      createIndexPatternTitle = intl.formatMessage({
+        id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIndexPatternTitle',
+        defaultMessage: 'Creating index pattern'
+      });
+      statusInfo = (
+        <p>
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.importProgress.creatingIndexPatternDescription"
+            defaultMessage="Creating index pattern"
+          />
+        </p>
+      );
     } else {
       statusInfo = null;
     }
   }
   if (completedStep >= 5) {
-    createIndexPatternTitle = 'Index pattern created';
+    createIndexPatternTitle = intl.formatMessage({
+      id: 'xpack.ml.fileDatavisualizer.importProgress.indexPatternCreatedTitle',
+      defaultMessage: 'Index pattern created'
+    });
     statusInfo = null;
   }
 
@@ -159,12 +231,17 @@ export function ImportProgress({ statuses }) {
       }
     </React.Fragment>
   );
-}
+});
 
 function UploadFunctionProgress({ progress }) {
   return (
     <React.Fragment>
-      <p>Uploading data</p>
+      <p>
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importProgress.uploadingDataDescription"
+          defaultMessage="Uploading data"
+        />
+      </p>
       {(progress < 100) &&
         <React.Fragment>
           <EuiSpacer size="s" />
