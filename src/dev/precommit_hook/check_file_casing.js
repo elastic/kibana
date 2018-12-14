@@ -67,7 +67,7 @@ function getPathWithoutIgnoredParents(file) {
 /**
  * Check for directories in the passed File objects which match the
  * KEBAB_CASE_DIRECTORY_GLOBS and ensure that those directories use
- * keban case
+ * kebab case
  *
  * @param  {ToolingLog} log
  * @param  {Array<File>} files
