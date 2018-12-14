@@ -272,10 +272,15 @@ class PipelineListUi extends React.Component {
       <div data-test-subj="pipelineList">
         <EuiPageContent horizontalPosition="center">
           <EuiTitle size="m">
-            <h1>Pipelines</h1>
+            <h1><FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" /></h1>
           </EuiTitle>
           <EuiText color="subdued">
-            <p>Manage logstash event processing and see the result visually</p>
+            <p>
+              <FormattedMessage
+                id="xpack.logstash.pipelineList.subhead"
+                defaultMessage="Manage logstash event processing and see the result visually"
+              />
+            </p>
           </EuiText>
           <EuiSpacer />
           {this.renderNoPermissionCallOut()}

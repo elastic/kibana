@@ -92,7 +92,12 @@ class SpacesGridPageUI extends Component<Props, State> {
               </h1>
             </EuiTitle>
             <EuiText color="subdued">
-              <p>Spaces allow you to silo content into meaningful categories</p>
+              <p>
+                <FormattedMessage
+                  id="xpack.spaces.management.spacesGridPage.spacesSubtitle"
+                  defaultMessage="Spaces allow you to silo content into meaningful categories"
+                />
+              </p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
