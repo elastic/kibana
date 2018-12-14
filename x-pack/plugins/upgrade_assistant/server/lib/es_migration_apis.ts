@@ -16,8 +16,6 @@ import {
 
 import { CURRENT_MAJOR_VERSION } from '../../common/version';
 
-import fakeDeprecations from './__fixtures__/fake_deprecations.json';
-
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
@@ -38,27 +36,12 @@ export interface UpgradeAssistantStatus {
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
   req: Request,
-  basePath: string,
-  useFakeData = false // TODO: remove
+  basePath: string
 ): Promise<UpgradeAssistantStatus> {
-  let deprecations: DeprecationAPIResponse;
-
-  // Fake data for now. TODO: remove this before merging.
-  if (useFakeData) {
-    deprecations = _.cloneDeep(fakeDeprecations) as DeprecationAPIResponse;
-
-    // trigger pagination on cluster tab
-    for (let i = 0; i < 6; i++) {
-      deprecations.cluster_settings = deprecations.cluster_settings.concat(
-        deprecations.cluster_settings.map(cs => ({ ...cs, message: `${cs.message} ${i}` }))
-      );
-    }
-  } else {
-    deprecations = await callWithRequest(req, 'transport.request', {
-      path: '/_xpack/migration/deprecations',
-      method: 'GET',
-    });
-  }
+  const deprecations = await callWithRequest(req, 'transport.request', {
+    path: '/_xpack/migration/deprecations',
+    method: 'GET',
+  });
 
   return {
     cluster: deprecations.cluster_settings,

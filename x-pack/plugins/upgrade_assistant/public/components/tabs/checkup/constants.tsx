@@ -10,8 +10,6 @@ import { invert } from 'lodash';
 import { MIGRATION_DEPRECATION_LEVEL as LEVEL } from 'src/core_plugins/elasticsearch';
 
 export const LEVEL_MAP = {
-  none: 0,
-  info: 1,
   warning: 2,
   critical: 3,
 };

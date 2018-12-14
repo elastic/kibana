@@ -22,7 +22,7 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
     async navigateToPage() {
       return await retry.try(async () => {
         await PageObjects.common.navigateToApp('settings');
-        await PageObjects.settings.clickElasticsearchUpgradeAssistant();
+        await testSubjects.click('upgrade_assistant');
       });
     }
 

@@ -18,12 +18,7 @@ export function registerClusterCheckupRoutes(server: Server) {
     method: 'GET',
     async handler(request) {
       try {
-        return await getUpgradeAssistantStatus(
-          callWithRequest,
-          request,
-          basePath,
-          process.env.NODE_ENV !== 'production'
-        );
+        return await getUpgradeAssistantStatus(callWithRequest, request, basePath);
       } catch (e) {
         if (e.status === 403) {
           return Boom.forbidden(e.message);
