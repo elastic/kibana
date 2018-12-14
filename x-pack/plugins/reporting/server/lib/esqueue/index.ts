@@ -4,19 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Client } from 'elasticsearch';
 import { EventEmitter } from 'events';
-import { Job } from './job';
-import { Worker } from './worker';
+import { omit } from 'lodash';
+import { unitOfTime } from 'moment';
 import { constants } from './constants';
 import { createClient } from './helpers/create_client';
 import { indexTimestamp } from './helpers/index_timestamp';
-import { omit } from 'lodash';
+import { Job } from './job';
+import { Worker, WorkerFunc, WorkerOptions } from './worker';
 
 export { events } from './constants/events';
 
+export type Logger = (...rest: any[]) => any;
+
+interface EsqueueSettings {
+  interval: unitOfTime.StartOf;
+  timeout: number;
+  doctype: string;
+  dateSeparator: string;
+  indexSettings: any;
+}
+
+interface EsqueueOptions {
+  interval?: unitOfTime.StartOf;
+  timeout?: number;
+  doctype?: string;
+  dateSeparator?: string;
+  client?: Client;
+  logger?: Logger;
+}
+
+// tslint:disable-next-line
+function noop() {}
+
 export class Esqueue extends EventEmitter {
-  constructor(index, options = {}) {
-    if (!index) throw new Error('Must specify an index to write to');
+  public readonly index: string;
+  public readonly settings: EsqueueSettings;
+  public readonly client: Client;
+
+  private readonly logger: Logger;
+  private workers: Worker[];
+
+  constructor(index: string, options: EsqueueOptions = {}) {
+    if (!index) {
+      throw new Error('Must specify an index to write to');
+    }
 
     super();
     this.index = index;
@@ -25,26 +58,15 @@ export class Esqueue extends EventEmitter {
       timeout: constants.DEFAULT_SETTING_TIMEOUT,
       doctype: constants.DEFAULT_SETTING_DOCTYPE,
       dateSeparator: constants.DEFAULT_SETTING_DATE_SEPARATOR,
-      ...omit(options, [ 'client' ])
+      ...omit(options, ['client']),
     };
     this.client = createClient(options.client || {});
-    this._logger = options.logger || function () {};
-    this._workers = [];
-    this._initTasks().catch((err) => this.emit(constants.EVENT_QUEUE_ERROR, err));
+    this.logger = options.logger || noop;
+    this.workers = [];
+    this._initTasks().catch(err => this.emit(constants.EVENT_QUEUE_ERROR, err));
   }
 
-  _initTasks() {
-    const initTasks = [
-      this.client.ping(),
-    ];
-
-    return Promise.all(initTasks).catch((err) => {
-      this._logger(['initTasks', 'error'], err);
-      throw err;
-    });
-  }
-
-  addJob(type, payload, opts = {}) {
+  public addJob(type: string, payload: any, opts = {}) {
     const timestamp = indexTimestamp(this.settings.interval, this.settings.dateSeparator);
     const index = `${this.index}-${timestamp}`;
     const defaults = {
@@ -54,24 +76,33 @@ export class Esqueue extends EventEmitter {
     const options = Object.assign(defaults, opts, {
       doctype: this.settings.doctype,
       indexSettings: this.settings.indexSettings,
-      logger: this._logger
+      logger: this.logger,
     });
 
     return new Job(this, index, type, payload, options);
   }
 
-  registerWorker(type, workerFn, opts) {
-    const worker = new Worker(this, type, workerFn, { ...opts, logger: this._logger });
-    this._workers.push(worker);
+  public registerWorker(type: string, workerFn: WorkerFunc, opts: WorkerOptions) {
+    const worker = new Worker(this, type, workerFn, { ...opts, logger: this.logger });
+    this.workers.push(worker);
     return worker;
   }
 
-  getWorkers() {
-    return this._workers.map((fn) => fn);
+  public getWorkers() {
+    return this.workers.map(fn => fn);
   }
 
-  destroy() {
-    const workers = this._workers.filter((worker) => worker.destroy());
-    this._workers = workers;
+  public destroy() {
+    const workers = this.workers.filter(worker => worker.destroy());
+    this.workers = workers;
+  }
+
+  private _initTasks() {
+    const initTasks = [this.client.ping({})];
+
+    return Promise.all(initTasks).catch(err => {
+      this.logger(['initTasks', 'error'], err);
+      throw err;
+    });
   }
 }

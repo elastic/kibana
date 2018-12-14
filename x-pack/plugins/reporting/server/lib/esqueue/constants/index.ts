@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultSettings } from './default_settings';
 import { events } from './events';
 import { statuses } from './statuses';
-import { defaultSettings } from './default_settings';
 
 export const constants = {
   ...events,
   ...statuses,
-  ...defaultSettings
+  ...defaultSettings,
 };

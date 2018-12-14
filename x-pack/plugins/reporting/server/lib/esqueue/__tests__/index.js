@@ -164,7 +164,7 @@ describe('Esqueue class', function () {
     it('should destroy workers', function () {
       const queue = new Esqueue('esqueue', { client });
       const stubs = times(3, () => { return { destroy: sinon.stub() }; });
-      stubs.forEach((stub) => queue._workers.push(stub));
+      stubs.forEach((stub) => queue.workers.push(stub));
       expect(queue.getWorkers()).to.have.length(3);
 
       queue.destroy();

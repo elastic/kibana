@@ -678,7 +678,7 @@ describe('Worker class', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
 
-      worker.on(constants.EVENT_WORKER_FAIL_UPDATE_ERROR, function (err) {
+      worker.on(constants.EVENT_WORKER_JOB_UPDATE_ERROR, function (err) {
         try {
           expect(err).to.have.property('error');
           expect(err).to.have.property('job');

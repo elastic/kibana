@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
+import moment, { unitOfTime } from 'moment';
 
-export const intervals = [
-  'year',
-  'month',
-  'week',
-  'day',
-  'hour',
-  'minute'
-];
+export const intervals: unitOfTime.StartOf[] = ['year', 'month', 'week', 'day', 'hour', 'minute'];
 
-export function indexTimestamp(intervalStr, separator = '-') {
-  if (separator.match(/[a-z]/i)) throw new Error('Interval separator can not be a letter');
+export function indexTimestamp(intervalStr: unitOfTime.StartOf, separator = '-') {
+  if (separator.match(/[a-z]/i)) {
+    throw new Error('Interval separator can not be a letter');
+  }
 
   const index = intervals.indexOf(intervalStr);
-  if (index === -1) throw new Error('Invalid index interval: ', intervalStr);
+  if (index === -1) {
+    throw new Error(`Invalid index interval: ${intervalStr}`);
+  }
 
   const m = moment();
   m.startOf(intervalStr);
