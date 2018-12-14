@@ -27,6 +27,7 @@ import { UserProfile } from '../../../../../xpack_main/public/services/user_prof
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
+import { getSpacesFeatureDescription } from '../../../lib/constants';
 import { SpacesManager } from '../../../lib/spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
@@ -92,12 +93,7 @@ class SpacesGridPageUI extends Component<Props, State> {
               </h1>
             </EuiTitle>
             <EuiText color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.spaces.management.spacesGridPage.spacesSubtitle"
-                  defaultMessage="Spaces allow you to silo content into meaningful categories"
-                />
-              </p>
+              <p>{getSpacesFeatureDescription()}</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
