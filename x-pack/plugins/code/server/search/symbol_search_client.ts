@@ -91,7 +91,7 @@ export class SymbolSearchClient extends AbstractSearchClient {
     const result: SymbolSearchResult = {
       symbols,
       took: rawRes.took,
-      total: rawRes.hits.total,
+      total: rawRes.hits.total.value,
     };
     return result;
   }
