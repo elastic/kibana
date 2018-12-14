@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import sinon from 'sinon';
-import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 
 import { IndexerFactory } from '../indexer';
+import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { SocketService } from '../socket_service';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
