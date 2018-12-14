@@ -87,40 +87,36 @@ export const Snapshot = ({
       const { up: histUp, down: histDown } = formatHistogramData(histogram);
 
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="xl">
+        <EuiFlexGroup alignItems="baseline" gutterSize="xl">
           <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h5>Endpoint status</h5>
+            </EuiTitle>
             <EuiPanel>
               <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="xl">
-                <EuiFlexItem grow={false}>
-                  <EuiPanel grow={false} style={{ minWidth: '100px' }}>
+                <EuiFlexItem>
+                  {/* TODO: this is a UI hack that needs to be replaced */}
+                  <EuiPanel style={{ minWidth: '150px', minHeight: '150px' }}>
                     <EuiStat description="Up" textAlign="center" title={up} titleColor="primary" />
                   </EuiPanel>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiPanel grow={false} style={{ minWidth: '100px' }}>
+                <EuiFlexItem>
+                  <EuiPanel style={{ minWidth: '150px' }}>
                     <EuiStat
                       description="Down"
                       textAlign="center"
+                      textSize="xl"
                       title={down}
                       titleColor="danger"
                     />
                   </EuiPanel>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiPanel grow={false} style={{ minWidth: '100px' }}>
-                    <EuiStat
-                      description="Jitter"
-                      textAlign="center"
-                      title={trouble}
-                      titleColor="secondary"
-                    />
-                  </EuiPanel>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiPanel grow={false} style={{ minWidth: '100px' }}>
+                <EuiFlexItem>
+                  <EuiPanel style={{ minWidth: '150px' }}>
                     <EuiStat
                       description="Total"
                       textAlign="center"
+                      textSize="xl"
                       title={total}
                       titleColor="subdued"
                     />
@@ -130,7 +126,11 @@ export const Snapshot = ({
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem style={{ paddingTop: '12px' }}>
-            <EuiPanel paddingSize="s">
+            <EuiTitle size="xs">
+              <h5>Status over time</h5>
+            </EuiTitle>
+            {/* TODO: this is a UI hack that should be replaced */}
+            <EuiPanel style={{ minHeight: '150px' }} paddingSize="s">
               {histogram && (
                 <EuiSeriesChart
                   width={600}

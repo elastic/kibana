@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
-import { MonitorList } from './queries/monitor_list';
 import { DateSelection, UMDateRangePicker } from './utility/date_range';
 
 interface UptimeOverviewProps {
@@ -103,8 +102,6 @@ export class UptimeOverview extends React.Component<UptimeOverviewProps, UptimeO
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiSpacer size="xl" />
-              <MonitorList start={rangeStart} end={rangeEnd} />
               <EuiSpacer size="xl" />
             </EuiPageContentBody>
           </EuiPageContent>

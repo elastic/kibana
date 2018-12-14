@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
+import { MonitorList } from '../components/queries/monitor_list';
 import { Snapshot } from '../components/queries/snapshot';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 
@@ -35,12 +36,15 @@ export class OverviewPage extends React.Component<OverviewPageProps> {
         <EuiTitle>
           <h2>Overview</h2>
         </EuiTitle>
+        <EuiSpacer />
         <Snapshot
           autorefreshEnabled={autorefreshEnabled}
           autorefreshInterval={autorefreshInterval}
           dateRangeStart={dateRangeStart}
           dateRangeEnd={dateRangeEnd}
         />
+        <EuiSpacer size="xl" />
+        <MonitorList start={dateRangeStart} end={dateRangeEnd} />
         <Link to="/monitor/http@https://www.google.com/">A monitor&#8217;s ID</Link>
         <p>This is where the Uptime app will live.</p>
       </div>
