@@ -113,7 +113,7 @@ export async function FindProvider({ getService }) {
         await this.byLinkText(selector, timeout);
         return wrapAll(await driver.findElements(By.linkText(selector)));
       } catch (error) {
-        if (error.NoSuchEementError) {
+        if (error.name === 'TimeoutError') {
           return [];
         } else {
           throw error;
@@ -127,7 +127,7 @@ export async function FindProvider({ getService }) {
         await this.byCssSelector(selector, timeout);
         return wrapAll(await driver.findElements(By.css(selector)));
       } catch (error) {
-        if (error.NoSuchEementError) {
+        if (error.name === 'TimeoutError') {
           return [];
         } else {
           throw error;
@@ -154,7 +154,7 @@ export async function FindProvider({ getService }) {
 
     async allDescendantDisplayedByCssSelector(selector, parentElement) {
       log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
-      const allElements = await wrapAll(parentElement._webElement.findElements(By.css(selector)));
+      const allElements = await wrapAll(await parentElement._webElement.findElements(By.css(selector)));
       return await Promise.all(
         allElements.map(async (element) => {return await element.isDisplayed(); })
       );
@@ -252,9 +252,10 @@ export async function FindProvider({ getService }) {
     async byButtonText(buttonText, element = driver, timeout = defaultFindTimeout) {
       log.debug(`byButtonText(${buttonText})`);
       return await retry.tryForTime(timeout, async () => {
-        const allButtons = wrapAll(await element.findElements(By.tagName('button')));
+        const _element = (element instanceof WebElementWrapper) ? element._webElement : element;
+        const allButtons = wrapAll(await _element.findElements(By.tagName('button')));
         const buttonTexts = await Promise.all(allButtons.map(async (el) => {
-          return el.getText();
+          return el.getVisibleText();
         }));
         const index = buttonTexts.findIndex(text => text.trim() === buttonText.trim());
         if (index === -1) {
@@ -277,7 +278,7 @@ export async function FindProvider({ getService }) {
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
         if (element) {
-          await element.moveMouseTo();
+          //await element.moveMouseTo();
           await element.click();
         } else {
           throw new Error(`Element with css='${selector}' is not found`);
