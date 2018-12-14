@@ -95,7 +95,9 @@ export class SslConfig {
    * Options that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options.
    */
   public getSecureOptions() {
-    if (this.supportedProtocols === undefined || this.supportedProtocols.length === 0) {
+    // our validation should ensure that this.supportedProtocols is at least an empty array,
+    // which the following logic depends upon.
+    if (this.supportedProtocols == null) {
       throw new Error(`supportedProtocols should be specified`);
     }
 
