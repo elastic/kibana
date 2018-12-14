@@ -4,53 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraIndexType, InfraSourceStatusResolvers } from '../../../common/graphql/types';
-import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
+import { InfraIndexType, InfraSourceStatusResolvers } from '../../graphql/types';
 import { InfraFieldsDomain } from '../../lib/domains/fields_domain';
-import { InfraContext } from '../../lib/infra_types';
 import { InfraSourceStatus } from '../../lib/source_status';
+import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-export type InfraSourceStatusMetricAliasExistsResolver = InfraResolverOf<
-  InfraSourceStatusResolvers.MetricAliasExistsResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceStatusMetricAliasExistsResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceStatusResolvers.MetricAliasExistsResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceStatusMetricIndicesExistResolver = InfraResolverOf<
-  InfraSourceStatusResolvers.MetricIndicesExistResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceStatusMetricIndicesExistResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceStatusResolvers.MetricIndicesExistResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceStatusMetricIndicesResolver = InfraResolverOf<
-  InfraSourceStatusResolvers.MetricIndicesResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceStatusMetricIndicesResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceStatusResolvers.MetricIndicesResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceStatusLogAliasExistsResolver = InfraResolverOf<
-  InfraSourceStatusResolvers.LogAliasExistsResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceStatusLogAliasExistsResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceStatusResolvers.LogAliasExistsResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceStatusLogIndicesExistResolver = InfraResolverOf<
-  InfraSourceStatusResolvers.LogIndicesExistResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceStatusLogIndicesExistResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceStatusResolvers.LogIndicesExistResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceStatusLogIndicesResolver = InfraResolverOf<
-  InfraSourceStatusResolvers.LogIndicesResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceStatusLogIndicesResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceStatusResolvers.LogIndicesResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceStatusIndexFieldsResolver = InfraResolverOf<
-  InfraSourceStatusResolvers.IndexFieldsResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceStatusIndexFieldsResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceStatusResolvers.IndexFieldsResolver>,
+  QuerySourceResolver
 >;
 
 export const createSourceStatusResolvers = (libs: {

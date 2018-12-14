@@ -45,6 +45,7 @@ export class DeletePhase extends PureComponent {
       phaseData,
       errors,
       isShowingErrors,
+      hotPhaseRolloverEnabled
     } = this.props;
 
     return (
@@ -112,6 +113,7 @@ export class DeletePhase extends PureComponent {
               phase={PHASE_DELETE}
               isShowingErrors={isShowingErrors}
               setPhaseData={setPhaseData}
+              rolloverEnabled={hotPhaseRolloverEnabled}
             />
           ) : <div />}
         </div>

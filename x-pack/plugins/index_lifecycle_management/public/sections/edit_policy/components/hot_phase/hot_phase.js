@@ -59,7 +59,8 @@ class HotPhaseUi extends PureComponent {
       phaseData,
       isShowingErrors,
       errors,
-      intl
+      intl,
+      setWarmPhaseOnRollover
     } = this.props;
 
     return (
@@ -119,7 +120,9 @@ class HotPhaseUi extends PureComponent {
             data-test-subj="rolloverSwitch"
             checked={phaseData[PHASE_ROLLOVER_ENABLED]}
             onChange={async e => {
-              await setPhaseData(PHASE_ROLLOVER_ENABLED, e.target.checked);
+              const { checked } = e.target;
+              setPhaseData(PHASE_ROLLOVER_ENABLED, checked);
+              setWarmPhaseOnRollover(checked);
             }}
             label={intl.formatMessage({
               id: 'xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel',

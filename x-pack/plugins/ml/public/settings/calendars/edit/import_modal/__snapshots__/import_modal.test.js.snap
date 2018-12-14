@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportModal Renders import modal 1`] = `
+<React.Fragment>
+  <EuiModal
+    maxWidth={true}
+    onClose={[MockFunction]}
+  >
+    <EuiModalHeader>
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="column"
+        gutterSize="none"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiModalHeaderTitle>
+            Import events
+          </EuiModalHeaderTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <p>
+            Import events from an ICS file.
+          </p>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="column"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiFilePicker
+            compressed={true}
+            disabled={false}
+            initialPromptText="Select or drag and drop a file"
+            onChange={[Function]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton
+        color="primary"
+        disabled={true}
+        fill={true}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
+      >
+        Import
+      </EuiButton>
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        onClick={[MockFunction]}
+        type="button"
+      >
+        Cancel
+      </EuiButtonEmpty>
+    </EuiModalFooter>
+  </EuiModal>
+</React.Fragment>
+`;
