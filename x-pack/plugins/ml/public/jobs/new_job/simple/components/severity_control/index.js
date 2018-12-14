@@ -5,7 +5,4 @@
  */
 
 
-
-import './create_watch_directive.js';
-import './create_watch_service.js';
-import '../severity_control';
+import './severity_control_directive.js';
