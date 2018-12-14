@@ -9,7 +9,7 @@ import path from 'path';
 export const paths = {
   archivesPath: path.resolve(__dirname, '../../../.phantom'),
   baseUrl: 'https://github.com/Medium/phantomjs/releases/download/v2.1.1/',
-  packages: [ {
+  packages: [{
     platforms: ['darwin'],
     archiveFilename: 'phantomjs-2.1.1-macosx.zip',
     archiveChecksum: 'b0c038bd139b9ecaad8fd321070c1651',
