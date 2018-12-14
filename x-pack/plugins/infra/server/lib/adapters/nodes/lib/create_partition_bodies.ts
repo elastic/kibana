@@ -6,7 +6,7 @@
 
 import { times } from 'lodash';
 
-import { InfraMetricType } from '../../../../../common/graphql/types';
+import { InfraMetricType } from '../../../../graphql/types';
 import {
   InfraESMSearchBody,
   InfraNodeRequestOptions,

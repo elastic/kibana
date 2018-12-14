@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraNodeType, InfraPathInput, InfraPathType } from '../../../common/graphql/types';
+import { InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
 
 interface Props {
   nodeType: InfraNodeType;

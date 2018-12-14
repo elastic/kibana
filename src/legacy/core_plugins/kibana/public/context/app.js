@@ -139,6 +139,7 @@ function ContextAppController($scope, config, Private) {
   );
 }
 
+
 function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
   return {
     queryParameters: createInitialQueryParametersState(defaultStepSize, tieBreakerField),
