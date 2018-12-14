@@ -40,11 +40,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
             size="m"
           >
             <p>
-              <FormattedMessage
-                defaultMessage="Spaces allow you to silo content into meaningful categories"
-                id="xpack.spaces.management.spacesGridPage.spacesSubtitle"
-                values={Object {}}
-              />
+              Organize your dashboards and other saved objects into meaningful categories.
             </p>
           </EuiText>
         </EuiFlexItem>
