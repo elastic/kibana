@@ -81,7 +81,7 @@ export const Snapshot = ({
         return `Error ${error.message}`;
       }
       const {
-        snapshot: { up, down, trouble, total, histogram },
+        snapshot: { up, down, total, histogram },
       } = data;
 
       const { up: histUp, down: histDown } = formatHistogramData(histogram);

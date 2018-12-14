@@ -5,9 +5,11 @@
  */
 
 import {
+  EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionProps,
   EuiEmptyPrompt,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -17,11 +19,15 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
-import { createGetPingsQuery } from './get_pings';
+import { Ping } from 'x-pack/plugins/uptime_monitoring/common/graphql/types';
+import { UMPingSortDirectionArg } from '../../../../common/domain_types';
+import { getPingsQuery } from './get_pings';
 
 interface PingListProps {
   monitorId?: string;
@@ -29,11 +35,14 @@ interface PingListProps {
   dateRangeEnd: number;
   autorefreshInterval: number;
   autorefreshEnabled: boolean;
+  sort?: UMPingSortDirectionArg;
+  size?: number;
 }
 
 interface PingListState {
   statusOptions: EuiComboBoxOptionProps[];
   selectedOption: EuiComboBoxOptionProps;
+  maxSearchSize: number;
 }
 
 export class Pings extends React.Component<PingListProps, PingListState> {
@@ -47,7 +56,8 @@ export class Pings extends React.Component<PingListProps, PingListState> {
     ];
     this.state = {
       statusOptions,
-      selectedOption: statusOptions[0],
+      selectedOption: statusOptions[2],
+      maxSearchSize: 200,
     };
   }
   public render() {
@@ -57,12 +67,14 @@ export class Pings extends React.Component<PingListProps, PingListState> {
       dateRangeEnd,
       autorefreshEnabled,
       autorefreshInterval,
+      sort,
+      size,
     } = this.props;
     const { statusOptions, selectedOption } = this.state;
     return (
       <Query
         pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
-        query={createGetPingsQuery({
+        variables={{
           monitorId,
           dateRangeStart,
           dateRangeEnd,
@@ -70,7 +82,10 @@ export class Pings extends React.Component<PingListProps, PingListState> {
             selectedOption.value === 'up' || selectedOption.value === 'down'
               ? selectedOption.value
               : '',
-        })}
+          size: this.state.maxSearchSize || size || 200,
+          sort: sort || 'desc',
+        }}
+        query={getPingsQuery}
       >
         {({ loading, error, data }) => {
           if (loading) {
@@ -90,12 +105,77 @@ export class Pings extends React.Component<PingListProps, PingListState> {
           if (error) {
             return `Error ${error.message}`;
           }
-          const { pings } = data;
+          const { allPings } = data;
+          const columns = [
+            {
+              field: 'monitor.status',
+              name: 'Status',
+              render: (pingStatus: string) => (
+                <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
+                  {pingStatus === 'up' ? 'Up' : 'Down'}
+                </EuiHealth>
+              ),
+              sortable: true,
+            },
+            {
+              field: 'timestamp',
+              name: 'Timestamp',
+              sortable: true,
+              render: (timestamp: string) => moment(timestamp).fromNow(),
+            },
+            {
+              field: 'monitor.ip',
+              name: 'IP',
+            },
+            {
+              field: 'monitor.id',
+              name: 'Id',
+              dataType: 'string',
+              width: '20%',
+            },
+            {
+              field: 'monitor.duration.us',
+              name: 'Duration ms',
+              render: (duration: number) => duration / 1000,
+              sortable: true,
+            },
+            {
+              field: 'error.type',
+              name: 'Error Type',
+            },
+            {
+              field: 'error.message',
+              name: 'Error Message',
+              render: (message: string) =>
+                message && message.length > 25 ? (
+                  <EuiToolTip position="top" title="Error Message" content={<p>{message}</p>}>
+                    <div>{message.slice(0, 24)}...</div>
+                  </EuiToolTip>
+                ) : (
+                  message
+                ),
+            },
+          ];
+          const hasStatus = allPings.reduce(
+            (hasHttpStatus: boolean, currentPing: Ping) =>
+              hasHttpStatus || get(currentPing, 'http.response.status_code'),
+            false
+          );
+          if (hasStatus) {
+            columns.push({ field: 'http.response.status_code', name: 'Response Code' });
+          }
           return (
             <Fragment>
-              <EuiTitle size="xs">
-                <h4>Check History</h4>
-              </EuiTitle>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h4>Check History</h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="primary">{allPings.length}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiPanel paddingSize="l">
                 <EuiFlexGroup>
                   <EuiFlexItem>
@@ -113,35 +193,23 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow label="Max Search Size">
+                      <EuiFieldNumber
+                        defaultValue={this.state.maxSearchSize.toString()}
+                        onBlur={e => {
+                          const sanitizedValue = parseInt(e.target.value, 10);
+                          if (!isNaN(sanitizedValue)) {
+                            this.setState({ maxSearchSize: sanitizedValue });
+                          }
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiInMemoryTable
-                  columns={[
-                    {
-                      field: 'monitor.status',
-                      name: 'Status',
-                      render: (pingStatus: string) => (
-                        <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
-                          {pingStatus === 'up' ? 'Up' : 'Down'}
-                        </EuiHealth>
-                      ),
-                    },
-                    {
-                      field: 'timestamp',
-                      name: 'Timestamp',
-                      sortable: true,
-                      render: (timestamp: string) =>
-                        moment(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS Z'),
-                    },
-                    {
-                      field: 'monitor.ip',
-                      name: 'IP',
-                    },
-                    {
-                      field: 'monitor.id',
-                      name: 'Id',
-                    },
-                  ]}
-                  items={pings}
+                  columns={columns}
+                  items={allPings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
                   sorting={true}
                 />

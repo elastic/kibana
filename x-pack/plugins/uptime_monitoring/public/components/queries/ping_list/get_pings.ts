@@ -5,54 +5,38 @@
  */
 
 import gql from 'graphql-tag';
-import moment from 'moment';
-import { UMPingSortDirectionArg } from '../../../../common/domain_types';
 
-interface PingsQueryOptions {
-  monitorId?: string;
-  sort?: UMPingSortDirectionArg;
-  size?: number;
-  status?: string;
-  dateRangeStart: number;
-  dateRangeEnd: number;
-}
-
-export const createGetPingsQuery = ({
-  monitorId = '',
-  sort = 'desc',
-  size = 100,
-  status = '',
-  dateRangeStart = moment()
-    .subtract(1, 'day')
-    .valueOf(),
-  dateRangeEnd = moment.now(),
-}: PingsQueryOptions) => gql`
-  {
-    pings: allPings(sort: "${sort}", size: ${size}, monitorId: "${monitorId}", status: "${status}", dateRangeStart: "${dateRangeStart}", dateRangeEnd: "${dateRangeEnd}") {
+export const getPingsQuery = gql`
+  query PingList(
+    $dateRangeStart: UnsignedInteger!
+    $dateRangeEnd: UnsignedInteger!
+    $monitorId: String
+    $status: String
+    $sort: String
+    $size: Int
+  ) {
+    allPings(
+      dateRangeStart: $dateRangeStart
+      dateRangeEnd: $dateRangeEnd
+      monitorId: $monitorId
+      status: $status
+      sort: $sort
+      size: $size
+    ) {
       timestamp
-      beat {
-        name
-        timezone
-      }
-      host {
-        architecture
-        id
-        ip
-        mac
-        name
-        os {
-          family
-          kernel
-          platform
-          version
-        }
-      }
       http {
         response {
           status_code
         }
       }
+      error {
+        message
+        type
+      }
       monitor {
+        duration {
+          us
+        }
         id
         ip
         name

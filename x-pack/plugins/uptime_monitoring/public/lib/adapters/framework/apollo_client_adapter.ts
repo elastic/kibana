@@ -11,5 +11,5 @@ import { HttpLink } from 'apollo-link-http';
 export const createApolloClient = (uri: string, xsrfHeader: string) =>
   new ApolloClient({
     link: new HttpLink({ uri, credentials: 'same-origin', headers: { 'kbn-xsrf': xsrfHeader } }),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({ dataIdFromObject: () => undefined }),
   });

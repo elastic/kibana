@@ -13,7 +13,7 @@ import { CreateUMGraphQLResolvers } from '../types';
 
 interface UMAllPingsArgs {
   sort: UMPingSortDirectionArg;
-  size: number;
+  size?: number;
   monitorId: string;
   status: string;
   dateRangeStart: number;

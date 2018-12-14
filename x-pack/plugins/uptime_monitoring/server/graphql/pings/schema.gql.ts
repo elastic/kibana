@@ -18,8 +18,8 @@ export const pingsSchema = gql`
       size: Int
       monitorId: String
       status: String
-      dateRangeStart: UnsignedInteger
-      dateRangeEnd: UnsignedInteger
+      dateRangeStart: UnsignedInteger!
+      dateRangeEnd: UnsignedInteger!
     ): [Ping!]!
   }
 
