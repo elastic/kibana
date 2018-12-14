@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { InfraMetricData } from '../../../common/graphql/types';
+import { InfraMetricData } from '../../graphql/types';
 import { InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { metricTimeActions } from '../../store';
 import { sections } from './sections';

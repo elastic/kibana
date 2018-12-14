@@ -10,3 +10,14 @@
 .canvasWorkpad__dropzoneTable .euiTable {
   background-color: transparent;
 }
+
+.canvasWorkpad__dropzoneTable--tags {
+  
+  .euiTableCellContent {
+    flex-wrap: wrap;
+  }
+  
+  .euiHealth {
+    width: 100%;
+  }
+} 

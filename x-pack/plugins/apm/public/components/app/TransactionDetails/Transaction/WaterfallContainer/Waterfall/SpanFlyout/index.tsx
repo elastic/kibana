@@ -33,8 +33,8 @@ import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
 import { DiscoverSpanButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverSpanButton';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { Span } from '../../../../../../../../typings/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
