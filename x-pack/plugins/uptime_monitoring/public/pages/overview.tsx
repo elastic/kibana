@@ -46,8 +46,6 @@ export class OverviewPage extends React.Component<OverviewPageProps> {
           start={dateRangeStart}
           end={dateRangeEnd}
         />
-        <Link to="/monitor/http@https://www.google.com/">A monitor&#8217;s ID</Link>
-        <p>This is where the Uptime app will live.</p>
       </Fragment>
     );
   }
