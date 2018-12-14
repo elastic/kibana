@@ -131,7 +131,7 @@
     "@scant/router": "^0.1.0",
     "@slack/client": "^4.8.0",
     "angular-resource": "1.4.9",
-    "angular-sanitize": "1.4.9",
+    "angular-sanitize": "1.6.5",
     "angular-ui-ace": "0.2.3",
     "apollo-cache-inmemory": "^1.2.7",
     "apollo-client": "^2.3.8",
