@@ -9,29 +9,13 @@ import 'jest-styled-components';
 import React from 'react';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { Stackframe } from '../Stackframe';
+import stacktracesMock from './stacktraces.json';
 
 describe('Stackframe', () => {
   describe('when stackframe has source lines', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      const stackframe = {
-        function: '<anonymous>',
-        libraryFrame: false,
-        excludeFromGrouping: false,
-        context: {
-          pre: ['', "app.get('/log-error', function (req, res) {"],
-          post: [
-            '    if (err) {',
-            "      res.status(500).send('could not capture error: ' + err.message)"
-          ]
-        },
-        line: {
-          number: 17,
-          context: "  apm.captureError(new Error('foo'), function (err) {"
-        },
-        filename: 'server/coffee.js',
-        absPath: '/app/server/coffee.js'
-      };
+      const stackframe = stacktracesMock[0];
       wrapper = mount(<Stackframe stackframe={stackframe} />);
     });
 
