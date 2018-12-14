@@ -7,7 +7,10 @@
 import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../../../../constants';
-import { selectAutoFollowPattern } from '../../../../../store/actions';
+import {
+  selectAutoFollowPattern,
+  openAutoFollowPatternDetailPanel as openDetailPanel,
+} from '../../../../../store/actions';
 import { getApiStatus } from '../../../../../store/selectors';
 import { AutoFollowPatternTable as AutoFollowPatternTableComponent } from './auto_follow_pattern_table';
 
@@ -19,6 +22,9 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   selectAutoFollowPattern: (name) => dispatch(selectAutoFollowPattern(name)),
+  openDetailPanel: (name) => {
+    dispatch(openDetailPanel(name));
+  },
 });
 
 export const AutoFollowPatternTable = connect(

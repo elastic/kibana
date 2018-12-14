@@ -9,12 +9,13 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiInMemoryTable,
   EuiButton,
   EuiButtonIcon,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiLoadingKibana,
   EuiToolTip,
   EuiOverlayMask,
-  EuiLoadingKibana
 } from '@elastic/eui';
 import { API_STATUS } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
@@ -24,6 +25,7 @@ import { getPrefixSuffixFromFollowPattern } from '../../../../../services/auto_f
 export class AutoFollowPatternTableUI extends PureComponent {
   static propTypes = {
     autoFollowPatterns: PropTypes.array,
+    openDetailPanel: PropTypes.func.isRequired,
   }
 
   state = {
@@ -57,23 +59,30 @@ export class AutoFollowPatternTableUI extends PureComponent {
   };
 
   getTableColumns() {
-    const { intl, selectAutoFollowPattern } = this.props;
+    const { intl, selectAutoFollowPattern, openDetailPanel } = this.props;
 
     return [{
       field: 'name',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.name_column_title"
+          id="xpack.crossClusterReplication.autofollowPatternList.table.nameColumnTitle"
           defaultMessage="Name"
         />
       ),
       sortable: true,
       truncateText: false,
+      render: (name) => {
+        return (
+          <EuiLink onClick={() => openDetailPanel(name)}>
+            {name}
+          </EuiLink>
+        );
+      }
     }, {
       field: 'remoteCluster',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.cluster_column_title"
+          id="xpack.crossClusterReplication.autofollowPatternList.table.clusterColumnTitle"
           defaultMessage="Cluster"
         />
       ),
@@ -83,7 +92,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       field: 'leaderIndexPatterns',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.leader_patterns_column_title"
+          id="xpack.crossClusterReplication.autofollowPatternList.table.leaderPatternsColumnTitle"
           defaultMessage="Leader patterns"
         />
       ),
@@ -92,7 +101,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       field: 'followIndexPattern',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
+          id="xpack.crossClusterReplication.autofollowPatternList.table.connectedNodesColumnTitle"
           defaultMessage="Follower pattern prefix"
         />
       ),
@@ -104,7 +113,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       field: 'followIndexPattern',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
+          id="xpack.crossClusterReplication.autofollowPatternList.table.connectedNodesColumnTitle"
           defaultMessage="Follower pattern suffix"
         />
       ),
@@ -200,7 +209,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
               onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
             >
               <FormattedMessage
-                id="xpack.cross_cluster_replication.delete_autofollow_pattern_button_label"
+                id="xpack.crossClusterReplication.deleteAutofollowPatternButtonLabel"
                 defaultMessage="Delete auto-follow {total, plural, one {pattern} other {patterns}}"
                 values={{
                   total: selectedItems.length

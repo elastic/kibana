@@ -12,7 +12,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import routing from '../../../services/routing';
 import { API_STATUS } from '../../../constants';
 import { SectionLoading, SectionError } from '../../../components';
-import { AutoFollowPatternTable } from './components';
+import { AutoFollowPatternTable, DetailPanel } from './components';
 
 const REFRESH_RATE_MS = 30000;
 
@@ -22,6 +22,9 @@ export class AutoFollowPatternListUI extends PureComponent {
     autoFollowPatterns: PropTypes.array,
     apiStatus: PropTypes.string,
     apiError: PropTypes.object,
+    openDetailPanel: PropTypes.func.isRequired,
+    closeDetailPanel: PropTypes.func.isRequired,
+    isDetailPanelOpen: PropTypes.bool,
   }
 
   componentDidMount() {
@@ -33,6 +36,10 @@ export class AutoFollowPatternListUI extends PureComponent {
 
   componentWillUnmount() {
     clearInterval(this.interval);
+
+    // Close the panel, otherwise it will default to already being open when we navigate back to
+    // this page.
+    this.props.closeDetailPanel();
   }
 
   renderEmpty() {
@@ -87,7 +94,12 @@ export class AutoFollowPatternListUI extends PureComponent {
       );
     }
 
-    return <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />;
+    return (
+      <Fragment>
+        <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
+        <DetailPanel />
+      </Fragment>
+    );
   }
 
   render() {

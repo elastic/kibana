@@ -23,6 +23,16 @@ export const selectAutoFollowPattern = (name) => ({
   payload: name
 });
 
+export const openAutoFollowPatternDetailPanel = (name) => ({
+  type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
+  payload: name
+});
+
+export const closeAutoFollowPatternDetailPanel = () => ({
+  type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
+  payload: null
+});
+
 export const loadAutoFollowPatterns = (isUpdating = false) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_LOAD,

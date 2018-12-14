@@ -27,4 +27,13 @@ export const getSelectedAutoFollowPattern = createSelector(getAutoFollowPatternS
   }
   return autoFollowPatternsState.byId[autoFollowPatternsState.selectedId];
 });
+export const isAutoFollowPatternDetailPanelOpen = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
+  return !!autoFollowPatternsState.detailPanelId;
+});
+export const getDetailPanelAutoFollowPattern = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
+  if(!autoFollowPatternsState.detailPanelId) {
+    return null;
+  }
+  return autoFollowPatternsState.byId[autoFollowPatternsState.detailPanelId];
+});
 export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  objectToArray(autoFollowPatterns));

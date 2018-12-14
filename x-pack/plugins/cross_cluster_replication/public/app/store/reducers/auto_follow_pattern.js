@@ -10,6 +10,7 @@ import { arrayToObject } from '../../services/utils';
 const initialState = {
   byId: {},
   selectedId: null,
+  detailPanelId: null,
 };
 
 const success = action => `${action}_SUCCESS`;
@@ -24,6 +25,9 @@ export const reducer = (state = initialState, action) => {
     }
     case t.AUTO_FOLLOW_PATTERN_SELECT: {
       return { ...state, selectedId: action.payload };
+    }
+    case t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL: {
+      return { ...state, detailPanelId: action.payload };
     }
     case success(t.AUTO_FOLLOW_PATTERN_DELETE): {
       const byId = { ...state.byId };
