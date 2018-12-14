@@ -34,7 +34,7 @@ import { getIndexBreadcrumbs } from './breadcrumbs';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, $injector) {
+function updateObjectsTable($scope, $injector, i18n) {
   const Private = $injector.get('Private');
   const indexPatterns = $injector.get('indexPatterns');
   const $http = $injector.get('$http');
@@ -70,7 +70,10 @@ function updateObjectsTable($scope, $injector) {
             }
             const serviceName = typeToServiceName(type);
             if (!serviceName) {
-              toastNotifications.addWarning(`Unknown saved object type: ${type}`);
+              toastNotifications.addWarning(i18n('kbn.management.objects.unknownSavedObjectTypeNotificationMessage', {
+                defaultMessage: 'Unknown saved object type: {type}',
+                values: { type }
+              }));
               return null;
             }
 
@@ -106,8 +109,8 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       controllerAs: 'managementObjectsController',
-      controller: function ($scope, $injector) {
-        updateObjectsTable($scope, $injector);
+      controller: function ($scope, $injector, i18n) {
+        updateObjectsTable($scope, $injector, i18n);
         $scope.$on('$destroy', destroyObjectsTable);
       }
     };
