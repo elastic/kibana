@@ -50,7 +50,7 @@ interface AssistantAPIClientParams {
 }
 
 type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
-type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
+type MIGRATION_DEPRECATION_LEVEL = 'warning' | 'critical';
 
 export interface AssistanceAPIResponse {
   indices: {
