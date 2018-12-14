@@ -35,7 +35,7 @@ import { AnomalyDetails } from './anomaly_details';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 
-import { mlAnomaliesTableService } from './anomalies_table_service';
+import { mlTableService } from '../../services/table_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { getSeverityColor, isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
@@ -314,14 +314,14 @@ class AnomaliesTable extends Component {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
-        mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord);
+        mlTableService.rowMouseleave.changed(this.mouseOverRecord);
 
         // fire mouseenter on the new record.
-        mlAnomaliesTableService.anomalyRecordMouseenter.changed(record);
+        mlTableService.rowMouseenter.changed(record);
       }
     } else {
       // Mouse is now over a row, fire mouseenter on the record.
-      mlAnomaliesTableService.anomalyRecordMouseenter.changed(record);
+      mlTableService.rowMouseenter.changed(record);
     }
 
     this.mouseOverRecord = record;
@@ -329,7 +329,7 @@ class AnomaliesTable extends Component {
 
   onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
-      mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord);
+      mlTableService.rowMouseleave.changed(this.mouseOverRecord);
       this.mouseOverRecord = undefined;
     }
   };
