@@ -430,7 +430,7 @@ guide to instrumenting Go source code.',
   },
 ];
 
-export const createJavaClientInstructions = (apmServerUrl = '') => [
+export const createJavaClientInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.javaClient.download.title', {
       defaultMessage: 'Download the APM agent',
@@ -455,6 +455,7 @@ Do **not** add the agent as a dependency to your application.',
     commands: `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
      -Delastic.apm.service_name=my-application \\
      -Delastic.apm.server_url=${apmServerUrl || 'http://localhost:8200'} \\
+     -Delastic.apm.secret_token=${secretToken} \\
      -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPost', {

@@ -64,7 +64,7 @@ export function createElasticCloudInstructions(config) {
           },
           {
             id: INSTRUCTION_VARIANT.JS,
-            instructions: createJsClientInstructions(apmServerUrl, secretToken),
+            instructions: createJsClientInstructions(apmServerUrl),
           },
           {
             id: INSTRUCTION_VARIANT.GO,
