@@ -313,6 +313,6 @@ export const termsBucketAgg = new BucketAggType({
       advanced: true,
       disabled: isNotType('string'),
       ...migrateIncludeExcludeFormat
-    }
+    },
   ]
 });
