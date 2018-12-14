@@ -5,7 +5,7 @@
  */
 
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../common/domain_types';
-import { Ping, SnapshotHistogram } from '../../../common/graphql/types';
+import { HistogramSeries, Ping } from '../../../common/graphql/types';
 import { UMPingsAdapter } from '../adapters/pings';
 
 export class UMPingsDomain {
@@ -42,7 +42,7 @@ export class UMPingsDomain {
     return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd, monitorId);
   }
 
-  public async getHist(request: any, range: UMGqlRange): Promise<SnapshotHistogram> {
+  public async getHist(request: any, range: UMGqlRange): Promise<HistogramSeries[] | null> {
     return this.adapter.getPingHistogram(request, range);
   }
 }

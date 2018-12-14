@@ -25,7 +25,7 @@ export const monitorsSchema = gql`
     down: Int
     trouble: Int
     total: Int
-    histogram: [HistogramSeries]
+    histogram: [HistogramSeries]!
   }
 
   type DataPoint {

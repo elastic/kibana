@@ -6,7 +6,7 @@
 
 import { take } from 'lodash';
 import { UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { Ping, SnapshotHistogram } from '../../../../common/graphql/types';
+import { HistogramSeries, Ping } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './adapter_types';
 
 const sortPings = (sort: UMPingSortDirectionArg) =>
@@ -40,6 +40,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     }
     return take(pings, size ? size : 10);
   }
+
+  // TODO implement
   public async getLatestMonitorDocs(
     request: any,
     dateRangeStart: number,
@@ -48,8 +50,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
   ): Promise<Ping[]> {
     throw new Error('Method not implemented.');
   }
-  // TODO remove
-  public async getPingHistogram(request: any): Promise<SnapshotHistogram> {
+  // TODO implement
+  public async getPingHistogram(request: any): Promise<HistogramSeries[] | null> {
     throw new Error('Method not implemented.');
   }
 }

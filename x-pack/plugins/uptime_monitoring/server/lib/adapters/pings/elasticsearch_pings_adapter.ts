@@ -6,7 +6,7 @@
 
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { Ping } from '../../../../common/graphql/types';
+import { HistogramSeries, Ping } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -114,7 +114,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     }));
   }
 
-  public async getPingHistogram(request: any, range: UMGqlRange): Promise<any> {
+  public async getPingHistogram(
+    request: any,
+    range: UMGqlRange
+  ): Promise<HistogramSeries[] | null> {
     const { start, end } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,

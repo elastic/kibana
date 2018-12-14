@@ -5,7 +5,7 @@
  */
 
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { Ping, SnapshotHistogram } from '../../../../common/graphql/types';
+import { HistogramSeries, Ping } from '../../../../common/graphql/types';
 
 export interface UMPingsAdapter {
   getAll(
@@ -25,5 +25,5 @@ export interface UMPingsAdapter {
     monitorId?: string
   ): Promise<Ping[]>;
 
-  getPingHistogram(request: any, range: UMGqlRange): Promise<SnapshotHistogram>;
+  getPingHistogram(request: any, range: UMGqlRange): Promise<HistogramSeries[] | null>;
 }
