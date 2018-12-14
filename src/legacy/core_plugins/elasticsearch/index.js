@@ -28,7 +28,7 @@ import { createClusters } from './lib/create_clusters';
 import { createProxy } from './lib/create_proxy';
 import filterHeaders from './lib/filter_headers';
 
-const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
+const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -91,8 +91,13 @@ export default function (kibana) {
       const url = () => {
         return (settings, log) => {
           const deprecatedUrl = get(settings, 'url');
-          if (!deprecatedUrl) return;
-          set(settings, 'hosts', [deprecatedUrl]);
+          const hosts = get(settings, 'hosts.length');
+          if (!deprecatedUrl) {
+            return;
+          }
+          if (!hosts) {
+            set(settings, 'hosts', [deprecatedUrl]);
+          }
           unset(settings, 'url');
           log(`Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"`);
         };

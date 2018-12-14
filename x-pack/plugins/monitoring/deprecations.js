@@ -47,10 +47,13 @@ export const deprecations = ({ rename }) => {
     },
     (settings, log) => {
       const deprecatedUrl = get(settings, 'url');
+      const hosts = get(settings, 'hosts.length');
       if (!deprecatedUrl) {
         return;
       }
-      set(settings, 'hosts', [deprecatedUrl]);
+      if (!hosts) {
+        set(settings, 'hosts', [deprecatedUrl]);
+      }
       unset(settings, 'url');
       log(`Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"`);
     }
