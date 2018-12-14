@@ -18,6 +18,7 @@ import moment from 'moment';
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { injectI18n } from '@kbn/i18n/react';
 
 function getLink(location, jobs) {
   let from = 0;
@@ -38,8 +39,19 @@ function getLink(location, jobs) {
   return `${chrome.getBasePath()}/app/${url}`;
 }
 
-export function ResultLinks({ jobs })  {
-  const tooltipJobs = (jobs.length === 1) ? jobs[0].id : `${jobs.length} jobs`;
+function ResultLinksUI({ jobs, intl }) {
+  const openJobsInSingleMetricViewerText = intl.formatMessage({
+    id: 'xpack.ml.jobsList.resultActions.openJobsInSingleMetricViewerText',
+    defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Single Metric Viewer' }, {
+    jobsCount: jobs.length,
+    jobId: jobs[0].id
+  });
+  const openJobsInAnomalyExplorerText = intl.formatMessage({
+    id: 'xpack.ml.jobsList.resultActions.openJobsInAnomalyExplorerText',
+    defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Anomaly Explorer' }, {
+    jobsCount: jobs.length,
+    jobId: jobs[0].id
+  });
   const singleMetricVisible = (jobs.length < 2);
   const singleMetricEnabled = (jobs.length === 1 && jobs[0].isSingleMetricViewerJob);
   return (
@@ -47,12 +59,12 @@ export function ResultLinks({ jobs })  {
       {(singleMetricVisible) &&
         <EuiToolTip
           position="bottom"
-          content={`Open ${tooltipJobs} in Single Metric Viewer`}
+          content={openJobsInSingleMetricViewerText}
         >
           <EuiButtonIcon
             href={getLink('timeseriesexplorer', jobs)}
             iconType="stats"
-            aria-label={`Open ${tooltipJobs} in Single Metric Viewer`}
+            aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
             isDisabled={(singleMetricEnabled === false)}
           />
@@ -60,12 +72,12 @@ export function ResultLinks({ jobs })  {
       }
       <EuiToolTip
         position="bottom"
-        content={`Open ${tooltipJobs} in Anomaly Explorer`}
+        content={openJobsInAnomalyExplorerText}
       >
         <EuiButtonIcon
           href={getLink('explorer', jobs)}
           iconType="tableOfContents"
-          aria-label={`Open ${tooltipJobs} in Anomaly Explorer`}
+          aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
         />
       </EuiToolTip>
@@ -73,7 +85,8 @@ export function ResultLinks({ jobs })  {
     </React.Fragment>
   );
 }
-ResultLinks.propTypes = {
+ResultLinksUI.propTypes = {
   jobs: PropTypes.array.isRequired,
 };
 
+export const ResultLinks = injectI18n(ResultLinksUI);

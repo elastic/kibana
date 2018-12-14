@@ -19,26 +19,23 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import { isEqual } from 'lodash';
 import React from 'react';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
-import { AssignmentActionType, Table } from '../table';
-import { BeatsTableType } from '../table';
-import { tagConfigAssignmentOptions } from '../table';
+import { AssignmentActionType, BeatsTableType, Table, tagConfigAssignmentOptions } from '../table';
 import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
-  mode: 'edit' | 'create';
   tag: Pick<BeatTag, Exclude<keyof BeatTag, 'last_updated'>>;
-  onDetachBeat: (beatIds: string[]) => void;
+  onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
-  attachedBeats: CMBeat[] | null;
-  intl: InjectedIntl;
+  attachedBeats?: CMBeat[];
 }
 
 interface TagEditState {
@@ -47,7 +44,7 @@ interface TagEditState {
   selectedConfigIndex?: number;
 }
 
-class TagEditUi extends React.PureComponent<TagEditProps, TagEditState> {
+export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   constructor(props: TagEditProps) {
     super(props);
 
@@ -58,7 +55,7 @@ class TagEditUi extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
-    const { tag, attachedBeats, intl } = this.props;
+    const { tag, attachedBeats } = this.props;
     return (
       <div>
         <EuiFlexGroup>
@@ -99,18 +96,16 @@ class TagEditUi extends React.PureComponent<TagEditProps, TagEditState> {
                   name="name"
                   isInvalid={!!this.getNameError(tag.id)}
                   onChange={this.updateTag('id')}
-                  disabled={this.props.mode === 'edit'}
+                  disabled={!!this.props.onDetachBeat}
                   value={tag.id}
-                  placeholder={intl.formatMessage({
-                    id: 'xpack.beatsManagement.tag.tagNamePlaceholder',
+                  placeholder={i18n.translate('xpack.beatsManagement.tag.tagNamePlaceholder', {
                     defaultMessage: 'Tag name (required)',
                   })}
                 />
               </EuiFormRow>
-              {this.props.mode === 'create' && (
+              {!this.props.onDetachBeat && (
                 <EuiFormRow
-                  label={intl.formatMessage({
-                    id: 'xpack.beatsManagement.tag.tagColorLabel',
+                  label={i18n.translate('xpack.beatsManagement.tag.tagColorLabel', {
                     defaultMessage: 'Tag Color',
                   })}
                 >
@@ -236,10 +231,8 @@ class TagEditUi extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   private getNameError = (name: string) => {
-    const { intl } = this.props;
     if (name && name !== '' && name.search(/^[a-zA-Z0-9-]+$/) === -1) {
-      return intl.formatMessage({
-        id: 'xpack.beatsManagement.tag.tagName.validationErrorMessage',
+      return i18n.translate('xpack.beatsManagement.tag.tagName.validationErrorMessage', {
         defaultMessage: 'Tag name must consist of letters, numbers, and dashes only',
       });
     } else {
@@ -251,15 +244,14 @@ class TagEditUi extends React.PureComponent<TagEditProps, TagEditState> {
     switch (action) {
       case AssignmentActionType.Delete:
         const { selection } = this.state.tableRef.current.state;
-        this.props.onDetachBeat(selection.map((beat: any) => beat.id));
+        if (this.props.onDetachBeat) {
+          this.props.onDetachBeat(selection.map((beat: any) => beat.id));
+        }
     }
   };
 
-  // TODO this should disable save button on bad validations
   private updateTag = (key: keyof BeatTag, value?: any) =>
     value !== undefined
       ? this.props.onTagChange(key, value)
       : (e: any) => this.props.onTagChange(key, e.target ? e.target.value : e);
 }
-
-export const TagEdit = injectI18n(TagEditUi);

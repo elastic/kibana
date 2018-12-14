@@ -118,7 +118,7 @@ exports[`it renders without crashing 1`] = `
             isDisabled={false}
             onChange={[Function]}
             options={Array []}
-            placeholder="Add a user..."
+            placeholder="Add a user…"
             selectedOptions={Array []}
             singleSelection={false}
           />

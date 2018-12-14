@@ -11,6 +11,7 @@ export async function callEsSearchApi({ callCluster, index, body }) {
     return {
       ok: true,
       resp: await callCluster('search', {
+        rest_total_hits_as_int: true,
         index,
         body
       })

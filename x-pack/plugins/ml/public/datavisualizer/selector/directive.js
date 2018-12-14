@@ -9,6 +9,7 @@ import 'ngreact';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { getDataVisualizerBreadcrumbs } from '../breadcrumbs';
 import { checkBasicLicense } from 'plugins/ml/license/check_license';
 import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
 import { initPromise } from 'plugins/ml/util/promise';
@@ -20,6 +21,7 @@ const template = `<ml-nav-menu name="datavisualizer" /><datavisualizer-selector 
 uiRoutes
   .when('/datavisualizer', {
     template,
+    k7Breadcrumbs: getDataVisualizerBreadcrumbs,
     resolve: {
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,

@@ -7,11 +7,12 @@
 import { createJobFactory } from './create_job';
 import { executeJobFactory } from './execute_job';
 import { metadata } from '../metadata';
+import { PDF_JOB_TYPE as jobType } from '../../../common/constants';
 
 export function register(registry) {
   registry.register({
     ...metadata,
-    jobType: 'printable_pdf',
+    jobType,
     jobContentEncoding: 'base64',
     jobContentExtension: 'pdf',
     createJobFactory,

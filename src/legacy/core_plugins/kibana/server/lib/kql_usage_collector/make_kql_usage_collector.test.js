@@ -32,6 +32,7 @@ describe('makeKQLUsageCollector', () => {
       usage: {
         collectorSet: { makeUsageCollector: makeUsageCollectorStub, register: registerStub },
       },
+      config: () => ({ get: () => '.kibana' })
     };
   });
 

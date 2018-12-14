@@ -220,17 +220,6 @@ export default () => Joi.object({
     watchPrebuild: Joi.boolean().default(false),
     watchProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi.when('$prod', {
-      is: true,
-      then: Joi.boolean().valid(false),
-      otherwise: Joi
-        .alternatives()
-        .try(
-          Joi.boolean(),
-          Joi.string().regex(/^\/.+\/$/)
-        )
-        .default(true),
-    }),
     sourceMaps: Joi.when('$prod', {
       is: true,
       then: Joi.boolean().valid(false),

@@ -27,7 +27,13 @@ const getFlattenedKeys = object => (
   Object.keys(getFlattenedObject(object))
 );
 
-async function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, configValues) {
+async function getUnusedConfigKeys(
+  coreHandledConfigPaths,
+  plugins,
+  disabledPluginSpecs,
+  rawSettings,
+  configValues
+) {
   // transform deprecated settings
   const transforms = [
     transformDeprecations,
@@ -50,7 +56,12 @@ async function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, co
     inputKeys[inputKeys.indexOf('env')] = 'env.name';
   }
 
-  return difference(inputKeys, appliedKeys);
+  // Filter out keys that are marked as used in the core (e.g. by new core plugins).
+  return difference(inputKeys, appliedKeys).filter(
+    unusedConfigKey => !coreHandledConfigPaths.some(
+      usedInCoreConfigKey => unusedConfigKey.startsWith(usedInCoreConfigKey)
+    )
+  );
 }
 
 export default async function (kbnServer, server, config) {
@@ -60,6 +71,7 @@ export default async function (kbnServer, server, config) {
   });
 
   const unusedKeys = await getUnusedConfigKeys(
+    kbnServer.core.handledConfigPaths,
     kbnServer.plugins,
     kbnServer.disabledPluginSpecs,
     kbnServer.settings,

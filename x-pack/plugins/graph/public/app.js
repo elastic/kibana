@@ -26,6 +26,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
+import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
 
 import './angular-venn-simple.js';
 import gws from './graphClientWorkspace.js';
@@ -72,6 +73,7 @@ if (uiRoutes.enable) {
 uiRoutes
   .when('/home', {
     template: appTemplate,
+    k7Breadcrumbs: getHomeBreadcrumbs,
     resolve: {
       //Copied from example found in wizard.js ( Kibana TODO - can't
       // IndexPatternsProvider abstract these implementation details better?)
@@ -95,6 +97,7 @@ uiRoutes
   })
   .when('/workspace/:id', {
     template: appTemplate,
+    k7Breadcrumbs: getWorkspaceBreadcrumbs,
     resolve: {
       savedWorkspace: function (savedGraphWorkspaces, courier, $route, i18n) {
         return savedGraphWorkspaces.get($route.current.params.id)
@@ -135,7 +138,9 @@ uiRoutes
 
 
 //========  Controller for basic UI ==================
-app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl, i18n) {
+app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl, i18n, config) {
+
+  config.bindToScope($scope, 'k7design');
 
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)
@@ -759,6 +764,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.topNavMenu = [];
   $scope.topNavMenu.push({
     key: 'new',
+    label: i18n('xpack.graph.topNavMenu.newWorkspaceLabel', {
+      defaultMessage: 'New',
+    }),
     description: i18n('xpack.graph.topNavMenu.newWorkspaceAriaLabel', {
       defaultMessage: 'New Workspace',
     }),
@@ -770,6 +778,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   if (!$scope.allSavingDisabled) {
     $scope.topNavMenu.push({
       key: 'save',
+      label: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledLabel', {
+        defaultMessage: 'Save',
+      }),
       description: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
         defaultMessage: 'Save Workspace',
       }),
@@ -782,6 +793,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   }else {
     $scope.topNavMenu.push({
       key: 'save',
+      label: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledLabel', {
+        defaultMessage: 'Save',
+      }),
       description: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel', {
         defaultMessage: 'Save Workspace',
       }),
@@ -793,6 +807,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   }
   $scope.topNavMenu.push({
     key: 'open',
+    label: i18n('xpack.graph.topNavMenu.loadWorkspaceLabel', {
+      defaultMessage: 'Open',
+    }),
     description: i18n('xpack.graph.topNavMenu.loadWorkspaceAriaLabel', {
       defaultMessage: 'Load Saved Workspace',
     }),
@@ -807,6 +824,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       disableButton: function () {
         return $route.current.locals === undefined || $route.current.locals.savedWorkspace === undefined;
       },
+      label: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledLabel', {
+        defaultMessage: 'Delete',
+      }),
       description: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaLabel', {
         defaultMessage: 'Delete Saved Workspace',
       }),
@@ -845,6 +865,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     $scope.topNavMenu.push({
       key: 'delete',
       disableButton: true,
+      label: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledLabel', {
+        defaultMessage: 'Delete',
+      }),
       description: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledAriaLabel', {
         defaultMessage: 'Delete Saved Workspace',
       }),
@@ -856,6 +879,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.topNavMenu.push({
     key: 'settings',
     disableButton: function () { return $scope.selectedIndex === null; },
+    label: i18n('xpack.graph.topNavMenu.settingsLabel', {
+      defaultMessage: 'Settings',
+    }),
     description: i18n('xpack.graph.topNavMenu.settingsAriaLabel', {
       defaultMessage: 'Settings',
     }),

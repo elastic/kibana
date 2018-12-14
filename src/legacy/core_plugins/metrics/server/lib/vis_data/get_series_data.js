@@ -25,6 +25,7 @@ export function getSeriesData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   const bodies = panel.series.map(series => getRequestParams(req, panel, series));
   const params = {
+    rest_total_hits_as_int: true,
     body: bodies.reduce((acc, items) => acc.concat(items), [])
   };
   return callWithRequest(req, 'msearch', params)

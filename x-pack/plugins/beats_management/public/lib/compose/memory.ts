@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import { management } from 'ui/management';
@@ -11,20 +12,20 @@ import { management } from 'ui/management';
 import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
+import { getSupportedConfig } from '../../config_schemas_translations_map';
 // @ts-ignore: path dynamic for kibana
 import { MemoryBeatsAdapter } from '../adapters/beats/memory_beats_adapter';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
-
 import { BeatsLib } from '../beats';
-import { FrontendDomainLibs, FrontendLibs } from '../lib';
-
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-import { getSupportedConfig } from '../../config_schemas_translations_map';
+import { FrameworkLib } from '../framework';
 import { TagsLib } from '../tags';
+import { FrontendLibs } from '../types';
 import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
 import { ElasticsearchLib } from './../elasticsearch';
+
+const onKibanaReady = uiModules.get('kibana').run;
 
 export function compose(
   mockIsKueryValid: (kuery: string) => boolean,
@@ -40,18 +41,25 @@ export function compose(
   const tokens = new MemoryTokensAdapter();
   const beats = new BeatsLib(new MemoryBeatsAdapter([]), { tags });
 
-  const domainLibs: FrontendDomainLibs = {
+  const pluginUIModule = uiModules.get('app/beats_management');
+
+  const framework = new FrameworkLib(
+    new KibanaFrameworkAdapter(
+      pluginUIModule,
+      management,
+      routes,
+      () => '',
+      onKibanaReady,
+      null,
+      null
+    )
+  );
+  const libs: FrontendLibs = {
+    framework,
+    elasticsearch: new ElasticsearchLib(esAdapter),
     tags,
     tokens,
     beats,
-  };
-  const pluginUIModule = uiModules.get('app/beats_management');
-
-  const framework = new KibanaFrameworkAdapter(pluginUIModule, management, routes, null, null);
-  const libs: FrontendLibs = {
-    ...domainLibs,
-    elasticsearch: new ElasticsearchLib(esAdapter),
-    framework,
   };
   return libs;
 }

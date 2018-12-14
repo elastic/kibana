@@ -18,8 +18,8 @@
  */
 
 import $ from 'jquery';
+import { Embeddable, EmbeddableFactory } from 'ui/embeddable';
 import { getVisualizeLoader } from 'ui/visualize/loader';
-import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import labDisabledTemplate from './visualize_lab_disabled.html';
@@ -48,30 +48,29 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
 
-    const waitFor = [ getVisualizeLoader(), this.savedVisualizations.get(visId) ];
-    return Promise.all(waitFor)
-      .then(([loader, savedObject]) => {
-        const isLabsEnabled = this._config.get('visualize:enableLabs');
+    const waitFor = [getVisualizeLoader(), this.savedVisualizations.get(visId)];
+    return Promise.all(waitFor).then(([loader, savedObject]) => {
+      const isLabsEnabled = this._config.get('visualize:enableLabs');
 
-        if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
-          return new Embeddable({
-            metadata: {
-              title: savedObject.title,
-            },
-            render: (domNode) => {
-              const template = $(labDisabledTemplate);
-              template.find('.visDisabledLabVisualization__title').text(savedObject.title);
-              $(domNode).html(template);
-            }
-          });
-        } else {
-          return new VisualizeEmbeddable({
-            onEmbeddableStateChanged,
-            savedVisualization: savedObject,
-            editUrl,
-            loader,
-          });
-        }
-      });
+      if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
+        return new Embeddable({
+          metadata: {
+            title: savedObject.title,
+          },
+          render: domNode => {
+            const template = $(labDisabledTemplate);
+            template.find('.visDisabledLabVisualization__title').text(savedObject.title);
+            $(domNode).html(template);
+          },
+        });
+      } else {
+        return new VisualizeEmbeddable({
+          onEmbeddableStateChanged,
+          savedVisualization: savedObject,
+          editUrl,
+          loader,
+        });
+      }
+    });
   }
 }

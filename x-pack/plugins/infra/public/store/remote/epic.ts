@@ -8,11 +8,6 @@ import { combineEpics } from 'redux-observable';
 
 import { createLogEntriesEpic } from './log_entries';
 import { createLogSummaryEpic } from './log_summary';
-import { createSourceEpic } from './source';
 
 export const createRemoteEpic = <State>() =>
-  combineEpics(
-    createLogEntriesEpic<State>(),
-    createLogSummaryEpic<State>(),
-    createSourceEpic<State>()
-  );
+  combineEpics(createLogEntriesEpic<State>(), createLogSummaryEpic<State>());

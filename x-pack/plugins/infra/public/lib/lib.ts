@@ -17,7 +17,7 @@ import {
   InfraPathInput,
   InfraTimerangeInput,
   SourceQuery,
-} from '../../common/graphql/types';
+} from '../graphql/types';
 
 export interface InfraFrontendLibs {
   framework: InfraFrameworkAdapter;

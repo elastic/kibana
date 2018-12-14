@@ -252,6 +252,14 @@ describe('Job Class', function () {
         expect(indexArgs.body).to.have.property('priority', defaultPriority);
       });
     });
+
+    it('should set a browser type', function () {
+      const job = new Job(mockQueue, index, type, payload);
+      return job.ready.then(() => {
+        const indexArgs = validateDoc(client.index);
+        expect(indexArgs.body).to.have.property('browser_type');
+      });
+    });
   });
 
   describe('option passing', function () {

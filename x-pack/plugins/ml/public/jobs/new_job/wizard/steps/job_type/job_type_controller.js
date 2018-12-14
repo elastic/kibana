@@ -14,6 +14,7 @@
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
+import { getCreateJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
@@ -25,6 +26,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/jobs/new_job/step/job_type', {
     template,
+    k7Breadcrumbs: getCreateJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,

@@ -23,6 +23,7 @@ import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
+import { i18n } from '@kbn/i18n';
 
 export function CallClientProvider(Private, Promise, es, config) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
@@ -95,7 +96,11 @@ export function CallClientProvider(Private, Promise, es, config) {
     // handle a request being aborted while being fetched
     const requestWasAborted = Promise.method(function (searchRequest, index) {
       if (searchRequestsAndStatuses[index] === ABORTED) {
-        defer.reject(new Error('Request was aborted twice?'));
+        defer.reject(new Error(
+          i18n.translate('common.ui.courier.fetch.requestWasAbortedTwiceErrorMessage', {
+            defaultMessage: 'Request was aborted twice?',
+          })
+        ));
       }
 
       requestsToFetchCount--;

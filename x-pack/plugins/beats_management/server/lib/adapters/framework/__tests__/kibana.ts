@@ -7,10 +7,12 @@
 
 // @ts-ignore
 import { createEsTestCluster } from '@kbn/test';
-import { config as beatsPluginConfig, configPrefix } from '../../../../..';
+import { config as beatsPluginConfig } from '../../../../..';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 import { KibanaBackendFrameworkAdapter } from '../kibana_framework_adapter';
+import { PLUGIN } from './../../../../../common/constants/plugin';
+import { CONFIG_PREFIX } from './../../../../../common/constants/plugin';
 import { contractTests } from './test_contract';
 
 const kbnServer = kbnTestServer.createRootWithCorePlugins({ server: { maxPayloadBytes: 100 } });
@@ -21,7 +23,7 @@ contractTests('Kibana  Framework Adapter', {
     await kbnServer.start();
 
     const config = legacyServer.server.config();
-    config.extendSchema(beatsPluginConfig, {}, configPrefix);
+    config.extendSchema(beatsPluginConfig, {}, CONFIG_PREFIX);
 
     config.set('xpack.beats.encryptionKey', 'foo');
   },
@@ -29,6 +31,6 @@ contractTests('Kibana  Framework Adapter', {
     await kbnServer.shutdown();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(legacyServer.server);
+    return new KibanaBackendFrameworkAdapter(PLUGIN.ID, legacyServer.server);
   },
 });

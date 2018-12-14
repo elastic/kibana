@@ -257,7 +257,10 @@ class DashboardListingUi extends React.Component {
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: (
                     <strong>
-                      listingLimit
+                      <FormattedMessage
+                        id="kbn.dashboard.listing.listingLimitExceededListingLimitTitle"
+                        defaultMessage="listingLimit"
+                      />
                     </strong>
                   ),
                   advancedSettingsLink: (

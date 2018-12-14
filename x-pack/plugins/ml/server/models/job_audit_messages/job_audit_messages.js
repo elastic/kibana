@@ -80,6 +80,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
       const resp = await callWithRequest('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
+        rest_total_hits_as_int: true,
         size: SIZE,
         body:
         {
@@ -107,6 +108,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
       const resp = await callWithRequest('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
+        rest_total_hits_as_int: true,
         size: 0,
         body: {
           query: {

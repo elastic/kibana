@@ -26,6 +26,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
+  const browser = getService('browser');
 
   class DiscoverPage {
     async getQueryField() {
@@ -112,6 +113,19 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
+    async clickHistogramBar(i) {
+      const bars = await find.allByCssSelector(`.series.histogram rect`);
+      await bars[i].click();
+    }
+
+    async brushHistogram(from, to) {
+      const bars = await find.allByCssSelector('.series.histogram rect');
+      await browser.moveMouseTo(bars[from], 0, -5);
+      await browser.pressMouseButton();
+      await browser.moveMouseTo(bars[to], 0, -5);
+      await browser.releaseMouseButton();
+    }
+
     async getCurrentQueryName() {
       return await testSubjects.getVisibleText('discoverCurrentQuery');
     }
@@ -189,17 +203,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverQueryHits');
     }
 
-    query(queryString) {
-      return find.byCssSelector('input[aria-label="Search input"]')
-        .clearValue()
-        .type(queryString)
-        .then(() => {
-          return find.byCssSelector('button[aria-label="Search"]')
-            .click();
-        })
-        .then(() => {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
+    async query(queryString) {
+      await find.setValue('input[aria-label="Search input"]', queryString);
+      await find.clickByCssSelector('button[aria-label="Search"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getDocHeader() {

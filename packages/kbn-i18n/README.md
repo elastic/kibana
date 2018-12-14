@@ -13,30 +13,7 @@ message syntax.
 
 ## Localization files
 
-Localization files have [JSON5](https://github.com/json5/json5) format.
-
-The main benefits of using `JSON5`:
-
-- Objects may have a single trailing comma.
-- Single and multi-line comments are allowed.
-- Strings may span multiple lines by escaping new line characters.
-
-Short example:
-
-```js
-{
-  // comments
-  unquoted: 'and you can quote me on that',
-  singleQuotes: 'I can use "double quotes" here',
-  lineBreaks: "Wow! \
-No \\n's!",
-  hexadecimal: 0xdecaf,
-  leadingDecimalPoint: .8675309, andTrailing: 8675309.,
-  positiveSign: +1,
-  trailingComma: 'in objects', andIn: ['arrays',],
-  "backwardsCompatible": "with JSON",
-}
-```
+Localization files are JSON files.
 
 Using comments can help to understand which section of the application
 the localization key is used for. Also `namespaces`
@@ -56,21 +33,7 @@ For example:
 src/legacy/core_plugins/kibana/translations/fr.json
 ```
 
-When a new translation file is added, you have to register this file into
-`uiExports.translations` array of plugin constructor parameters. For example:
-```js
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      translations: [
-        resolve(__dirname, './translations/fr.json'),
-      ],
-      ...
-    },
-    ...
-  });
-}
-```
+The engine scans `x-pack/plugins/*/translations`, `src/core_plugins/*/translations`, `plugins/*/translations` and `src/ui/translations` folders on initialization, so there is no need to register translation files.
 
 The engine uses a `config/kibana.yml` file for locale resolution process. If locale is
 defined via `i18n.locale` option in `config/kibana.yml` then it will be used as a base
@@ -107,7 +70,7 @@ when missing translations
 For the detailed explanation, see the section below
 - `getFormats()` - returns current formats
 - `getRegisteredLocales()` - returns array of locales having translations
-- `translate(id: string, [{values: object, defaultMessage: string, description: string}])` –
+- `translate(id: string, { values: object, defaultMessage: string, description: string })` –
 translate message by id. `description` is optional context comment that will be extracted
 by i18n tools and added as a comment next to translation message at `defaultMessages.json`.
 - `init(messages: Map<string, string>)` - initializes the engine
@@ -246,7 +209,7 @@ ReactDOM.render(
 ```
 
 After that we can use `FormattedMessage` components inside `RootComponent`:
-```js
+```jsx
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -270,10 +233,10 @@ class RootComponent extends Component {
       <p>
         <FormattedMessage
           id="welcome"
-          defaultMessage={`Hello {name}, you have {unreadCount, number} {unreadCount, plural,
+          defaultMessage="Hello {name}, you have {unreadCount, number} {unreadCount, plural,
             one {message}
             other {messages}
-          }`}
+          }"
           values={{name: <b>{name}</b>, unreadCount}}
         />
         ...
@@ -384,13 +347,13 @@ when missing translations
 - `init(messages: Map<string, string>)` - initializes the engine
 
 The translation `service` provides only one method:
-- `i18n(id: string, [{values: object, defaultMessage: string, description: string }])`–
+- `i18n(id: string, { values: object, defaultMessage: string, description: string })` –
 translate message by id
 
 The translation `filter` is used for attributes translation and has
 the following syntax:
 ```
-{{'translationId' | i18n[:{ values: object, defaultMessage: string, description: string }]}}
+{{ ::'translationId' | i18n: { values: object, defaultMessage: string, description: string } }}
 ```
 
 Where:
@@ -452,20 +415,10 @@ In order to translate attributes in AngularJS we should use `i18nFilter`:
 >
 ```
 
-## Build tools
+## I18n tools
 
-In order to simplify localization process, some build tools will be added:
-- tool for verifying all translations have translatable strings
-- tool for checking unused translation strings
-- tool for extracting default messages from templates
+In order to simplify localization process, some additional tools were implemented:
+- tool for verifying all translations have translatable strings and extracting default messages from templates
+- tool for verifying translation files and integrating them to Kibana
 
-While `react-intl` has
-[babel-plugin-react-intl](https://github.com/yahoo/babel-plugin-react-intl)
-library which extracts string messages for translation, angular wrapper requires
-own implementation of such tool. In order to extracrt translation keys from the
-template, we have to parse it and create AST object. There is a
-[babel-plugin-syntax-jsx](https://github.com/babel/babel/tree/master/packages/babel-plugin-syntax-jsx)
-plugin which helps to parse JSX syntax and then create AST object. Unfortunately,
-there are no babel plugins to parse angular templates. One of the solution can be internal
-[`$parse.$$getAst`](https://github.com/angular/angular.js/blob/master/src/ng/parse.js#L1819)
-angular method.
+[I18n tools documentation](../../src/dev/i18n/README.md)
