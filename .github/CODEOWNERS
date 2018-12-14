@@ -4,7 +4,6 @@
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/plugins/beats_management/  @elastic/beats
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
-/x-pack/plugins/monitoring/ @elastic/stack-monitoring 
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 **/*.scss  @elastic/kibana-design
