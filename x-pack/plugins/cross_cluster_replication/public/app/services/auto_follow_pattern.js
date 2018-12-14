@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { Fragment } from 'react';
+import { format, addDays } from 'date-fns';
+
 export const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => (
-  prefix + template + suffix
+  <Fragment>
+    <span style={{ fontWeight: 'bold' }}>{prefix}</span>
+    {template}
+    <span style={{ fontWeight: 'bold' }}>{suffix}</span>
+  </Fragment>
 );
 
 /**
@@ -20,7 +27,11 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
   suffix,
   leaderIndexPatterns,
   limit = 5,
-  wildcardPlaceHolders = ['0', '1', '2']
+  wildcardPlaceHolders = [
+    format(new Date(), 'YYYY-MM-DD'),
+    format(addDays(new Date(), 1), 'YYYY-MM-DD'),
+    format(addDays(new Date(), 2), 'YYYY-MM-DD'),
+  ]
 }) => {
   const indicesPreview = [];
   let indexPreview;

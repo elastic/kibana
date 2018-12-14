@@ -34,8 +34,7 @@ import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import routing from '../services/routing';
 import { API_STATUS } from '../constants';
-import { SectionError } from './';
-import { getPrefixSuffixFromFollowPattern, getPreviewIndicesFromAutoFollowPattern } from '../services/auto_follow_pattern';
+import { SectionError, AutoFollowPatternIndicesPreview } from './';
 import { validateAutoFollowPattern, validateLeaderIndexPattern } from '../services/auto_follow_pattern_validators';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -83,7 +82,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
       ? getEmptyAutoFollowPattern(this.props.remoteClusters)
       : {
         ...this.props.autoFollowPattern,
-        ...getPrefixSuffixFromFollowPattern(this.props.autoFollowPattern.followIndexPattern)
       };
 
     this.state = {
@@ -438,34 +436,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
       const isPrefixInvalid = areErrorsVisible && !!fieldsErrors.followIndexPatternPrefix;
       const isSuffixInvalid = areErrorsVisible && !!fieldsErrors.followIndexPatternSuffix;
 
-      const renderFollowIndicesPreview = () => {
-        const { indicesPreview } = getPreviewIndicesFromAutoFollowPattern({
-          prefix: followIndexPatternPrefix,
-          suffix: followIndexPatternSuffix,
-          leaderIndexPatterns
-        });
-
-        const title = intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewTitle',
-          defaultMessage: 'Index name examples',
-        });
-
-        return (
-          <EuiCallOut
-            title={title}
-            iconType="indexMapping"
-          >
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
-              defaultMessage="The above settings will generate index names that look like this:"
-            />
-            <ul>
-              {indicesPreview.map((followerIndex, i) => <li key={i}>{followerIndex}</li>)}
-            </ul>
-          </EuiCallOut>
-        );
-      };
-
       return (
         <EuiDescribedFormGroup
           title={(
@@ -545,7 +515,11 @@ export class AutoFollowPatternFormUI extends PureComponent {
           {!!leaderIndexPatterns.length && (
             <Fragment>
               <EuiSpacer size="m" />
-              {renderFollowIndicesPreview()}
+              <AutoFollowPatternIndicesPreview
+                prefix={followIndexPatternPrefix}
+                suffix={followIndexPatternSuffix}
+                leaderIndexPatterns={leaderIndexPatterns}
+              />
             </Fragment>
           )}
         </EuiDescribedFormGroup>

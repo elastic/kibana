@@ -19,7 +19,6 @@ import {
 import { API_STATUS } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
-import { getPrefixSuffixFromFollowPattern } from '../../../../../services/auto_follow_pattern';
 
 export class AutoFollowPatternTableUI extends PureComponent {
   static propTypes = {
@@ -44,12 +43,14 @@ export class AutoFollowPatternTableUI extends PureComponent {
 
     if(queryText) {
       return autoFollowPatterns.filter(autoFollowPattern => {
-        const { name, remoteCluster } = autoFollowPattern;
+        const { name, remoteCluster, followIndexPatternPrefix, followIndexPatternSuffix } = autoFollowPattern;
 
         const inName = name.toLowerCase().includes(queryText);
         const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
+        const inPrefix = followIndexPatternPrefix.toLowerCase().includes(queryText);
+        const inSuffix = followIndexPatternSuffix.toLowerCase().includes(queryText);
 
-        return inName || inRemoteCluster;
+        return inName || inRemoteCluster || inPrefix || inSuffix;
       });
     }
 
@@ -89,29 +90,21 @@ export class AutoFollowPatternTableUI extends PureComponent {
       ),
       render: (leaderPatterns) => leaderPatterns.join(', '),
     }, {
-      field: 'followIndexPattern',
+      field: 'followIndexPatternPrefix',
       name: (
         <FormattedMessage
           id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
           defaultMessage="Follower pattern prefix"
         />
       ),
-      render: (followIndexPattern) => {
-        const { followIndexPatternPrefix } = getPrefixSuffixFromFollowPattern(followIndexPattern);
-        return followIndexPatternPrefix;
-      }
     }, {
-      field: 'followIndexPattern',
+      field: 'followIndexPatternSuffix',
       name: (
         <FormattedMessage
           id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
           defaultMessage="Follower pattern suffix"
         />
       ),
-      render: (followIndexPattern) => {
-        const { followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(followIndexPattern);
-        return followIndexPatternSuffix;
-      }
     }, {
       name: '',
       actions: [

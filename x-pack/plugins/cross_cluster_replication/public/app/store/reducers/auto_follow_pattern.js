@@ -6,6 +6,7 @@
 
 import * as t from '../action_types';
 import { arrayToObject } from '../../services/utils';
+import { getPrefixSuffixFromFollowPattern } from '../../services/auto_follow_pattern';
 
 const initialState = {
   byId: {},
@@ -14,13 +15,20 @@ const initialState = {
 
 const success = action => `${action}_SUCCESS`;
 
+const parseAutoFollowPattern = (autoFollowPattern) => {
+  // Extract prefix and suffix from follow index pattern
+  const { followIndexPatternPrefix, followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(autoFollowPattern.followIndexPattern);
+
+  return { ...autoFollowPattern, followIndexPatternPrefix, followIndexPatternSuffix };
+};
+
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.AUTO_FOLLOW_PATTERN_LOAD): {
-      return { ...state, byId: arrayToObject(action.payload.patterns, 'name') };
+      return { ...state, byId: arrayToObject(action.payload.patterns.map(parseAutoFollowPattern), 'name') };
     }
     case success(t.AUTO_FOLLOW_PATTERN_GET): {
-      return { ...state, byId: { ...state.byId, [action.payload.name]: action.payload } };
+      return { ...state, byId: { ...state.byId, [action.payload.name]: parseAutoFollowPattern(action.payload) } };
     }
     case t.AUTO_FOLLOW_PATTERN_SELECT: {
       return { ...state, selectedId: action.payload };
