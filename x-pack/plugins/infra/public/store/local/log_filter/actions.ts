@@ -6,10 +6,10 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { FilterQuery } from './reducer';
+import { FilterQuery, SerializedFilterQuery } from './reducer';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/local/log_filter');
 
 export const setLogFilterQueryDraft = actionCreator<FilterQuery>('SET_LOG_FILTER_QUERY_DRAFT');
 
-export const applyLogFilterQuery = actionCreator<FilterQuery>('APPLY_LOG_FILTER_QUERY');
+export const applyLogFilterQuery = actionCreator<SerializedFilterQuery>('APPLY_LOG_FILTER_QUERY');

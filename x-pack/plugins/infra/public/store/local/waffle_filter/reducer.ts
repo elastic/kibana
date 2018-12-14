@@ -15,8 +15,13 @@ export interface KueryFilterQuery {
 
 export type FilterQuery = KueryFilterQuery;
 
+export interface SerializedFilterQuery {
+  query: FilterQuery;
+  serializedQuery: string;
+}
+
 export interface WaffleFilterState {
-  filterQuery: KueryFilterQuery | null;
+  filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
 }
 
@@ -33,6 +38,6 @@ export const waffleFilterReducer = reducerWithInitialState(initialWaffleFilterSt
   .case(applyWaffleFilterQuery, (state, filterQuery) => ({
     ...state,
     filterQuery,
-    filterQueryDraft: filterQuery,
+    filterQueryDraft: filterQuery.query,
   }))
   .build();

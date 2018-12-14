@@ -21,6 +21,7 @@ import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { WithSource } from '../../containers/with_source';
 
 const getTitle = (nodeType: string) => {
   const TITLES = {
@@ -78,32 +79,36 @@ export const HomeToolbar = injectI18n(({ intl }) => (
     </EuiFlexGroup>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
       <EuiFlexItem>
-        <WithKueryAutocompletion>
-          {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-            <WithWaffleFilter>
-              {({
-                applyFilterQueryFromKueryExpression,
-                filterQueryDraft,
-                isFilterQueryDraftValid,
-                setFilterQueryDraftFromKueryExpression,
-              }) => (
-                <AutocompleteField
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  isValid={isFilterQueryDraftValid}
-                  loadSuggestions={loadSuggestions}
-                  onChange={setFilterQueryDraftFromKueryExpression}
-                  onSubmit={applyFilterQueryFromKueryExpression}
-                  placeholder={intl.formatMessage({
-                    id: 'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
-                    defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-                  })}
-                  suggestions={suggestions}
-                  value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                />
+        <WithSource>
+          {({ derivedIndexPattern }) => (
+            <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
+              {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+                <WithWaffleFilter indexPattern={derivedIndexPattern}>
+                  {({
+                    applyFilterQueryFromKueryExpression,
+                    filterQueryDraft,
+                    isFilterQueryDraftValid,
+                    setFilterQueryDraftFromKueryExpression,
+                  }) => (
+                    <AutocompleteField
+                      isLoadingSuggestions={isLoadingSuggestions}
+                      isValid={isFilterQueryDraftValid}
+                      loadSuggestions={loadSuggestions}
+                      onChange={setFilterQueryDraftFromKueryExpression}
+                      onSubmit={applyFilterQueryFromKueryExpression}
+                      placeholder={intl.formatMessage({
+                        id: 'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
+                        defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+                      })}
+                      suggestions={suggestions}
+                      value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                    />
+                  )}
+                </WithWaffleFilter>
               )}
-            </WithWaffleFilter>
+            </WithKueryAutocompletion>
           )}
-        </WithKueryAutocompletion>
+        </WithSource>
       </EuiFlexItem>
       <WithWaffleOptions>
         {({ changeMetric, changeGroupBy, groupBy, metric, nodeType }) => (

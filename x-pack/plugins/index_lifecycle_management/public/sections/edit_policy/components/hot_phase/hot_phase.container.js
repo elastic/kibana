@@ -11,13 +11,14 @@ import { connect } from 'react-redux';
 import { HotPhase as PresentationComponent } from './hot_phase';
 import { getPhase } from '../../../../store/selectors';
 import { setPhaseData } from '../../../../store/actions';
-import { PHASE_HOT } from '../../../../store/constants';
+import { PHASE_HOT, PHASE_WARM, WARM_PHASE_ON_ROLLOVER } from '../../../../store/constants';
 
 export const HotPhase = connect(
   state => ({
     phaseData: getPhase(state, PHASE_HOT)
   }),
   {
-    setPhaseData: (key, value) => setPhaseData(PHASE_HOT, key, value)
+    setPhaseData: (key, value) => setPhaseData(PHASE_HOT, key, value),
+    setWarmPhaseOnRollover: (value) => setPhaseData(PHASE_WARM, WARM_PHASE_ON_ROLLOVER, value)
   },
 )(PresentationComponent);

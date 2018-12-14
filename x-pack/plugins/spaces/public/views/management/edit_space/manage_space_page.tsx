@@ -174,7 +174,14 @@ class ManageSpacePageUI extends Component<Props, State> {
           <Fragment>
             <EuiFlexGroup responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiFormRow label="Avatar">
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.spaces.management.manageSpacePage.avatarLabel"
+                      defaultMessage="Avatar"
+                    />
+                  }
+                >
                   <SpaceAvatar space={this.state.space} size="l" />
                 </EuiFormRow>
               </EuiFlexItem>

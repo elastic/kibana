@@ -129,7 +129,7 @@
     "angular-elastic": "2.5.0",
     "angular-recursion": "^1.0.5",
     "angular-route": "1.4.7",
-    "angular-sanitize": "1.5.7",
+    "angular-sanitize": "1.6.5",
     "angular-sortable-view": "0.0.15",
     "ansicolors": "0.3.2",
     "autoprefixer": "^9.1.0",
