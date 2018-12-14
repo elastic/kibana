@@ -50,8 +50,24 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { name: 'whatever-01', status: 'Status: Online', cpu: '0%', load: '3.28', memory: '39%', disk: '173.9 GB', shards: '38', },
-          { name: 'whatever-02', status: 'Status: Online', cpu: '2%', load: '3.28', memory: '25%', disk: '173.9 GB', shards: '38', },
+          {
+            name: 'whatever-01',
+            status: 'Status: Online',
+            cpu: '0% \n3% max\n0% min',
+            load: '3.28 \n3.71 max\n2.19 min',
+            memory: '39% \n52% max\n25% min',
+            disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
+            shards: '38',
+          },
+          {
+            name: 'whatever-02',
+            status: 'Status: Online',
+            cpu: '2% \n3% max\n0% min',
+            load: '3.28 \n3.73 max\n2.29 min',
+            memory: '25% \n49% max\n25% min',
+            disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
+            shards: '38',
+          },
           { name: 'whatever-03', status: 'Status: Offline' },
         ];
         nodesAll.forEach((obj, node) => {
@@ -100,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
         await nodesList.clickCpuCol();
 
         const nodesAll = await nodesList.getNodesAll();
-        const tableData = [{ cpu: '0%' }, { cpu: '2%' }, { cpu: undefined }];
+        const tableData = [{ cpu: '0% \n3% max\n0% min' }, { cpu: '2% \n3% max\n0% min' }, { cpu: undefined }];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
         });
@@ -112,8 +128,8 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { load: '3.28' },
-          { load: '3.28' },
+          { load: '3.28 \n3.71 max\n2.19 min' },
+          { load: '3.28 \n3.73 max\n2.29 min' },
           { load: undefined },
         ];
         nodesAll.forEach((obj, node) => {
@@ -127,8 +143,8 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { memory: '39%' },
-          { memory: '25%' },
+          { memory: '39% \n52% max\n25% min' },
+          { memory: '25% \n49% max\n25% min' },
           { memory: undefined },
         ];
         nodesAll.forEach((obj, node) => {
@@ -142,8 +158,8 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { disk: '173.9 GB' },
-          { disk: '173.9 GB' },
+          { disk: '173.9 GB \n173.9 GB max\n173.9 GB min' },
+          { disk: '173.9 GB \n173.9 GB max\n173.9 GB min' },
           { disk: undefined },
         ];
         nodesAll.forEach((obj, node) => {
@@ -198,7 +214,8 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should filter for specific indices', async () => {
+      // Skip until https://github.com/elastic/eui/issues/1318 is implemented
+      it.skip('should filter for specific indices', async () => {
         await nodesList.setFilter('01');
         const rows = await nodesList.getRows();
         expect(rows.length).to.be(1);

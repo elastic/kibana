@@ -51,6 +51,8 @@ export const NORMALIZED_DERIVATIVE_UNIT = '1s';
  * Values for column sorting in table options
  * @type {number} 1 or -1
  */
+export const EUI_SORT_ASCENDING = 'asc';
+export const EUI_SORT_DESCENDING = 'desc';
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
 

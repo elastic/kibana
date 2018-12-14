@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +23,7 @@ import template from './main.html';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
 import { indexManagementStore } from './store';
 
+let elem;
 const renderReact = async (elem) => {
   render(
     <I18nProvider>
@@ -49,6 +50,9 @@ routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {
     constructor($scope, $route, $http, kbnUrl, $rootScope) {
+      // clean up previously rendered React app if one exists
+      // this happens because of React Router redirects
+      elem && unmountComponentAtNode(elem);
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
       setHttpClient($http);
@@ -59,7 +63,7 @@ routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
         }
       });
       $scope.$$postDigest(() => {
-        const elem = document.getElementById('indexManagementReactRoot');
+        elem = document.getElementById('indexManagementReactRoot');
         renderReact(elem);
         manageAngularLifecycle($scope, $route, elem);
       });
