@@ -131,8 +131,9 @@ function generateDLL(config) {
 
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
-  const dllAlias = rawConfig.alias;
-  const dllNoParseRules = rawConfig.noParseRules;
+  const dllAlias = rawConfig.uiBundles.getAliases();
+  const dllNoParseRules = rawConfig.uiBundles.getWebpackNoParseRules();
+  const dllDevMode = rawConfig.uiBundles.isDevMode();
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -158,6 +159,7 @@ function extendRawConfig(rawConfig) {
   return {
     dllAlias,
     dllNoParseRules,
+    dllDevMode,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -169,9 +171,9 @@ function extendRawConfig(rawConfig) {
   };
 }
 
-function common(rawConfig) {
+function common(config) {
   return webpackMerge(
-    generateDLL(extendRawConfig(rawConfig))
+    generateDLL(config)
   );
 }
 
@@ -234,9 +236,11 @@ function unoptimized() {
 }
 
 export function configModel(rawConfig = {}) {
-  if (IS_KIBANA_DISTRIBUTABLE) {
-    return webpackMerge(common(rawConfig), optimized());
+  const config = extendRawConfig(rawConfig);
+
+  if (IS_KIBANA_DISTRIBUTABLE || !config.dllDevMode) {
+    return webpackMerge(common(config), optimized());
   }
 
-  return webpackMerge(common(rawConfig), unoptimized());
+  return webpackMerge(common(config), unoptimized());
 }
