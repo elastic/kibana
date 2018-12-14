@@ -9,21 +9,23 @@
  */
 
 import { createLocation } from 'history';
+import { stringify } from 'querystring';
 import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const isModifiedEvent = event => !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 const isLeftClickEvent = event => event.button === 0;
 
-const queryParamsFromObject = params => (
-  params
-    ? `?${Object.entries(params).reduce((queryParams, [key, value]) => (
-      queryParams
-        ? `${queryParams}&${key}=${value}`
-        : `${key}=${value}`
-    ), '')}`
-    : undefined
-);
+const queryParamsFromObject = params => {
+  if (!params) {
+    return;
+  }
+
+  const paramsStr = stringify(params, '&', '=', {
+    encodeURIComponent: (val) => val, // Don't encode special chars
+  });
+  return `?${paramsStr}`;
+};
 
 const appToBasePathMap = {
   [APPS.CCR_APP]: BASE_PATH,

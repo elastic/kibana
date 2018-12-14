@@ -113,16 +113,15 @@ export class RemoteClusterFormUi extends Component {
   }
 
   onFieldsChange = (changedFields) => {
-    const { fields: prevFields, seedInput } = this.state;
-
-    const newFields = {
-      ...prevFields,
-      ...changedFields,
-    };
-
-    this.setState({
-      fields: newFields,
-      fieldsErrors: this.getFieldsErrors(newFields, seedInput),
+    this.setState(({ fields: prevFields, seedInput }) => {
+      const newFields = {
+        ...prevFields,
+        ...changedFields,
+      };
+      return ({
+        fields: newFields,
+        fieldsErrors: this.getFieldsErrors(newFields, seedInput),
+      });
     });
   };
 
@@ -216,28 +215,36 @@ export class RemoteClusterFormUi extends Component {
   };
 
   onSeedsInputChange = (seedInput) => {
-    const { intl } = this.props;
-    const { fields, localSeedErrors } = this.state;
-    const { seeds } = fields;
-
-    // Allow typing to clear the errors, but not to add new ones.
-    const errors = (!seedInput || this.getLocalSeedErrors(seedInput).length === 0) ? [] : localSeedErrors;
-
-    // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
-    // input is a duplicate. So we need to surface this error here instead.
-    const isDuplicate = seeds.includes(seedInput);
-
-    if (isDuplicate) {
-      errors.push(intl.formatMessage({
-        id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.duplicateMessage',
-        defaultMessage: `Duplicate seed nodes aren't allowed.`,
-      }));
+    if (!seedInput) {
+      // If empty seedInput ("") don't do anything. This happens
+      // right after a seed is created.
+      return;
     }
 
-    this.setState({
-      localSeedErrors: errors,
-      fieldsErrors: this.getFieldsErrors(fields, seedInput),
-      seedInput,
+    const { intl } = this.props;
+
+    this.setState(({ fields, localSeedErrors }) => {
+      const { seeds } = fields;
+
+      // Allow typing to clear the errors, but not to add new ones.
+      const errors = (!seedInput || this.getLocalSeedErrors(seedInput).length === 0) ? [] : localSeedErrors;
+
+      // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
+      // input is a duplicate. So we need to surface this error here instead.
+      const isDuplicate = seeds.includes(seedInput);
+
+      if (isDuplicate) {
+        errors.push(intl.formatMessage({
+          id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.duplicateMessage',
+          defaultMessage: `Duplicate seed nodes aren't allowed.`,
+        }));
+      }
+
+      return ({
+        localSeedErrors: errors,
+        fieldsErrors: this.getFieldsErrors(fields, seedInput),
+        seedInput,
+      });
     });
   };
 
