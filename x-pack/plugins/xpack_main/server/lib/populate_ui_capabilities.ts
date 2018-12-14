@@ -8,20 +8,23 @@ import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../types';
 
+interface FeatureCapabilities {
+  [featureId: string]: Record<string, boolean>;
+}
+
 export function populateUICapabilities(
   xpackMainPlugin: Record<string, any>,
   uiCapabilities: UICapabilities
 ): UICapabilities {
   const features: Feature[] = xpackMainPlugin.getFeatures();
 
-  const featureCapabilities: UICapabilities[] = features.map(getCapabilitiesFromFeature);
+  const featureCapabilities: FeatureCapabilities[] = features.map(getCapabilitiesFromFeature);
 
   return mergeCapabilities(uiCapabilities || {}, ...featureCapabilities);
 }
 
-function getCapabilitiesFromFeature(feature: Feature): UICapabilities {
-  const capabilities: UICapabilities = {
-    navLinks: {},
+function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
+  const capabilities: FeatureCapabilities = {
     [feature.id]: {},
   };
 
@@ -48,9 +51,9 @@ function getCapabilitiesFromFeature(feature: Feature): UICapabilities {
 
 function mergeCapabilities(
   originalCapabilities: UICapabilities,
-  ...allFeatureCapabilities: UICapabilities[]
+  ...allFeatureCapabilities: FeatureCapabilities[]
 ): UICapabilities {
-  return allFeatureCapabilities.reduce((acc, capabilities) => {
+  return allFeatureCapabilities.reduce<UICapabilities>((acc, capabilities) => {
     return {
       ...capabilities,
       ...acc,
