@@ -9,7 +9,7 @@ export {
   loadClusters,
   addCluster,
   editCluster,
-  removeClusters,
+  removeClusterRequest,
 } from './api';
 
 export {

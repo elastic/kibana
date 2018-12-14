@@ -6,8 +6,7 @@
 
 import {
   REMOVE_CLUSTERS_START,
-  REMOVE_CLUSTERS_SUCCESS,
-  REMOVE_CLUSTERS_FAILURE,
+  REMOVE_CLUSTERS_FINISH,
 } from '../action_types';
 
 const initialState = {
@@ -23,8 +22,7 @@ export function removeCluster(state = initialState, action) {
         isRemoving: true,
       };
 
-    case REMOVE_CLUSTERS_FAILURE:
-    case REMOVE_CLUSTERS_SUCCESS:
+    case REMOVE_CLUSTERS_FINISH:
       return {
         isRemoving: false,
       };
