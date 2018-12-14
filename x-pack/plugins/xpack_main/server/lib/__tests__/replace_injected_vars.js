@@ -48,7 +48,6 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -73,7 +72,6 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -95,7 +93,6 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -117,7 +114,6 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -139,7 +135,6 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -161,7 +156,6 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -179,7 +173,6 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       ...originalInjectedVars,
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -197,7 +190,6 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       ...originalInjectedVars,
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
@@ -237,7 +229,6 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       ...originalInjectedVars,
       uiCapabilities: {
-        navLinks: {},
         mockFeature: {
           mockFeatureCapability: true,
         },
