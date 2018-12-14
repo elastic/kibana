@@ -5,4 +5,10 @@
  */
 
 
-import './anomalies_table_directive';
+import { annotationProvider } from './annotation';
+
+export function annotationServiceProvider(callWithRequest) {
+  return {
+    ...annotationProvider(callWithRequest)
+  };
+}

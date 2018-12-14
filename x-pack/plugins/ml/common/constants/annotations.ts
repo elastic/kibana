@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import './anomalies_table_directive';
+export enum ANNOTATION_TYPE {
+  ANNOTATION = 'annotation',
+  COMMENT = 'comment',
+}
