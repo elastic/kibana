@@ -20,7 +20,7 @@ interface Processor {
   event: 'span';
 }
 
-export interface HttpContext {
+interface HttpContext {
   url?: string;
 }
 
