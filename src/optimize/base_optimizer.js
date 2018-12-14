@@ -128,25 +128,23 @@ export default class BaseOptimizer {
     );
   }
 
-  getThreadLoaderPoolConfig() {
-    // In some cases cpus() returns undefined
-    // https://github.com/nodejs/node/issues/19022
-    //
-    // The logic to calculate the cpus is the following:
-    // - In case we can't calculate the number of cpus we will define it
-    // to be 4
-    // - Otherwise we will use the available number - 1 except for the cases where
-    // we only have 1 cpu. For those cases the final calculated cpus will also be 1
-    const cpus = os.cpus() || { length: 0 };
-    const currentAvailableOsCpus =  Math.max(0, cpus.length - 1) || 1;
-    const calculatedCpus = currentAvailableOsCpus > 0 ? currentAvailableOsCpus : 4;
+  getThreadPoolCpuCount() {
+    const cpus = os.cpus();
+    if (!cpus) {
+      // sometimes this call returns undefined so we fall back to 1: https://github.com/nodejs/node/issues/19022
+      return 1;
+    }
 
+    return Math.max(1, cpus.length - 1);
+  }
+
+  getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
     const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
 
     return {
       name: 'optimizer-thread-loader-main-pool',
-      workers: calculatedCpus,
+      workers: this.getThreadPoolCpuCount(),
       workerParallelJobs: 20,
       // This is a safe check in order to set
       // the parent node options applied from
@@ -154,7 +152,7 @@ export default class BaseOptimizer {
       // Otherwise, if the user sets max_old_space_size, as they
       // are used to, into NODE_OPTIONS, it won't affect the workers.
       workerNodeArgs: parsedNodeOptions,
-      poolParallelJobs: calculatedCpus * 20,
+      poolParallelJobs: this.getThreadPoolCpuCount() * 20,
       poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 5000
     };
   }
