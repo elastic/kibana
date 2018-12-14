@@ -5,12 +5,16 @@
  */
 
 import { ESFilter } from 'elasticsearch';
+import { get } from 'lodash';
 import { oc } from 'ts-optchain';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
+import { getTransaction } from '../transactions/get_transaction';
 
 export interface ErrorGroupAPIResponse {
+  transaction?: Transaction;
   error?: APMError;
   occurrencesCount?: number;
 }
@@ -61,9 +65,18 @@ export async function getErrorGroup({
   };
 
   const resp = await client<APMError>('search', params);
+  const error = oc(resp).hits.hits[0]._source();
+  const transactionId = oc(error).transaction.id();
+  const traceId: string | undefined = get(error, 'trace.id'); // cannot use oc because 'trace' doesn't exist on v1 errors
+
+  let transaction;
+  if (transactionId) {
+    transaction = await getTransaction(transactionId, traceId, setup);
+  }
 
   return {
-    error: oc(resp).hits.hits[0]._source(),
+    transaction,
+    error,
     occurrencesCount: oc(resp).hits.total()
   };
 }

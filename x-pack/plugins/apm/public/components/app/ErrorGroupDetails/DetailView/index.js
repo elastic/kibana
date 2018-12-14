@@ -33,9 +33,17 @@ import {
   REQUEST_METHOD,
   ERROR_EXC_HANDLED,
   ERROR_LOG_STACKTRACE,
-  ERROR_EXC_STACKTRACE
+  ERROR_EXC_STACKTRACE,
+  TRANSACTION_ID,
+  TRACE_ID
 } from '../../../../../common/constants';
-import { fromQuery, toQuery, history } from '../../../../utils/url';
+import {
+  fromQuery,
+  toQuery,
+  history,
+  KibanaLink,
+  legacyEncodeURIComponent
+} from '../../../../utils/url';
 
 const Container = styled.div`
   position: relative;
@@ -87,6 +95,27 @@ function DetailView({ errorGroup, urlParams, location }) {
     return null;
   }
 
+  const transaction = errorGroup.data.transaction;
+  let transactionLink;
+  if (transaction) {
+    transactionLink = (
+      <KibanaLink
+        pathname={'/app/apm'}
+        hash={`/${
+          transaction.context.service.name
+        }/transactions/${legacyEncodeURIComponent(
+          transaction.transaction.type
+        )}/${legacyEncodeURIComponent(transaction.transaction.name)}`}
+        query={{
+          transactionId: transaction.transaction.id,
+          traceid: get(transaction, TRACE_ID)
+        }}
+      >
+        {get(errorGroup.data.error, TRANSACTION_ID, 'N/A')}
+      </KibanaLink>
+    );
+  }
+
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -114,10 +143,16 @@ function DetailView({ errorGroup, urlParams, location }) {
       width: '25%'
     },
     {
+      fieldName: TRANSACTION_ID,
+      label: 'Transaction sample ID',
+      val: transactionLink || 'N/A',
+      width: '25%'
+    },
+    {
       fieldName: USER_ID,
       label: 'User ID',
       val: get(errorGroup.data.error, USER_ID, 'N/A'),
-      width: '50%'
+      width: '25%'
     }
   ];
 
