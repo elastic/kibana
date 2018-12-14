@@ -21,7 +21,7 @@ export const math = () => ({
       aliases: ['_'],
       types: ['string'],
       help:
-        'An evaluated TinyMath expression. (See [TinyMath Functions](http://canvas.elastic.co/reference/tinymath.html))',
+        'An evaluated TinyMath expression. (See [TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html))',
     },
   },
   fn: (context, args) => {

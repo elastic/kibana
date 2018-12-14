@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Stackframe } from '../../../../../typings/APMDoc';
+import { Stackframe } from '../../../../../typings/es_schemas/APMDoc';
 import { getGroupedStackframes, hasSourceLines } from '../stacktraceUtils';
 import stacktracesMock from './stacktraces.json';
 

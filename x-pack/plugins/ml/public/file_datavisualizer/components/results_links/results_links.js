@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -90,7 +91,12 @@ export class ResultsLinks extends Component {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
-            title="View index in Discover"
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.viewIndexInDiscoverTitle"
+                defaultMessage="View index in Discover"
+              />
+            }
             description=""
             href={`${uiChrome.getBasePath()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
           />
@@ -100,7 +106,12 @@ export class ResultsLinks extends Component {
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
-              title="Create new ML job"
+              title={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.resultsLinks.createNewMLJobTitle"
+                  defaultMessage="Create new ML job"
+                />
+              }
               description=""
               href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
             />
@@ -110,7 +121,12 @@ export class ResultsLinks extends Component {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
-            title="Open in Data Visualizer"
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.openInDataVisualizerTitle"
+                defaultMessage="Open in Data Visualizer"
+              />
+            }
             description=""
             href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
           />
@@ -119,7 +135,12 @@ export class ResultsLinks extends Component {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
-            title="Index Management"
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.indexManagementTitle"
+                defaultMessage="Index Management"
+              />
+            }
             description=""
             href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/home`}
           />
@@ -128,7 +149,12 @@ export class ResultsLinks extends Component {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
-            title="Index Pattern Management"
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.indexPatternManagementTitle"
+                defaultMessage="Index Pattern Management"
+              />
+            }
             description=""
             href={`${uiChrome.getBasePath()}/app/kibana#/management/kibana/indices/${indexPatternId}`}
           />
