@@ -70,6 +70,7 @@ export class RemoteClusterTableUi extends Component {
   render() {
     const {
       openDetailPanel,
+      intl,
     } = this.props;
 
     const {
@@ -78,12 +79,10 @@ export class RemoteClusterTableUi extends Component {
 
     const columns = [{
       field: 'name',
-      name: (
-        <FormattedMessage
-          id="xpack.remoteClusters.remoteClusterList.table.nameColumnTitle"
-          defaultMessage="Name"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.remoteClusters.remoteClusterList.table.nameColumnTitle',
+        defaultMessage: 'Name',
+      }),
       sortable: true,
       truncateText: false,
       render: (name, { isConfiguredByNode }) => {
@@ -120,42 +119,34 @@ export class RemoteClusterTableUi extends Component {
       }
     }, {
       field: 'seeds',
-      name: (
-        <FormattedMessage
-          id="xpack.remoteClusters.remoteClusterList.table.seedsColumnTitle"
-          defaultMessage="Seeds"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.remoteClusters.remoteClusterList.table.seedsColumnTitle',
+        defaultMessage: 'Seeds',
+      }),
       truncateText: true,
       render: (seeds) => seeds.join(', '),
     }, {
       field: 'isConnected',
-      name: (
-        <FormattedMessage
-          id="xpack.remoteClusters.remoteClusterList.table.connectedColumnTitle"
-          defaultMessage="Connection"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.remoteClusters.remoteClusterList.table.connectedColumnTitle',
+        defaultMessage: 'Connection',
+      }),
       sortable: true,
       render: (isConnected) => <ConnectionStatus isConnected={isConnected} />,
       width: '160px',
     }, {
       field: 'connectedNodesCount',
-      name: (
-        <FormattedMessage
-          id="xpack.remoteClusters.remoteClusterList.table.connectedNodesColumnTitle"
-          defaultMessage="Connected nodes"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.remoteClusters.remoteClusterList.table.connectedNodesColumnTitle',
+        defaultMessage: 'Connected nodes',
+      }),
       sortable: true,
       width: '160px',
     }, {
-      name: (
-        <FormattedMessage
-          id="xpack.remoteClusters.remoteClusterList.table.actionsColumnTitle"
-          defaultMessage="Actions"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.remoteClusters.remoteClusterList.table.actionsColumnTitle',
+        defaultMessage: 'Actionss',
+      }),
       width: '100px',
       actions: [{
         render: ({ name, isConfiguredByNode }) => {
