@@ -173,8 +173,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               label={'Grant read privileges to specific documents'}
               // @ts-ignore
               compressed={true}
-              // @ts-ignore
-              value={this.state.queryExpanded}
+              checked={this.state.queryExpanded}
               onChange={this.toggleDocumentQuery}
             />
           </EuiFlexItem>
