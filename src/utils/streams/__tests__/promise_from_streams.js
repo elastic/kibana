@@ -83,18 +83,25 @@ describe('promiseFromStreams', () => {
   describe('last stream is duplex', () => {
     it('waits for writing and resolves to final value', async () => {
       let written = '';
+
+      const duplexReadQueue = [];
+      const duplexItemsToPush = ['foo', 'bar', null];
       const result = await createPromiseFromStreams([
         createListStream(['a', 'b', 'c']),
         new Duplex({
-          read() {
-            this.push('foo');
-            this.push('bar');
-            this.push(null);
+          async read() {
+            const result = await duplexReadQueue.shift();
+            this.push(result);
           },
 
           write(chunk, enc, cb) {
-            written += chunk;
-            cb();
+            duplexReadQueue.push(new Promise((resolve) => {
+              setTimeout(() => {
+                written += chunk;
+                cb();
+                resolve(duplexItemsToPush.shift());
+              }, 50);
+            }));
           }
         }).setEncoding('utf8')
       ]);
