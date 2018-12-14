@@ -32,8 +32,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.cancelTimer(); notif.showStack = true"
+            i18n-id="common.ui.notify.toaster.moreInfoButtonLabel"
+            i18n-default-message="More Info"
           >
-            More Info
           </button>
           <button
             type="button"
@@ -41,8 +42,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.showStack = false"
+            i18n-id="common.ui.notify.toaster.lessInfoButtonLabel"
+            i18n-default-message="Less Info"
           >
-            Less Info
           </button>
           <button
             data-test-subj="notifierDismissButton"
@@ -51,8 +53,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.accept()"
+            i18n-id="common.ui.notify.toaster.okButtonLabel"
+            i18n-default-message="OK"
           >
-            OK
           </button>
           <button
             type="button"
@@ -60,8 +63,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.address()"
+            i18n-id="common.ui.notify.toaster.fixItButtonLabel"
+            i18n-default-message="Fix it"
           >
-            Fix it
           </button>
           <button
             type="button"
