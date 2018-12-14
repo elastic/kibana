@@ -25,6 +25,7 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
+import { clone, assign } from 'lodash';
 import { VisProvider } from 'ui/vis';
 import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
@@ -47,6 +48,8 @@ uiModules
         type: SavedVis.type,
         mapping: SavedVis.mapping,
         searchSource: SavedVis.searchSource,
+        extractReferences: SavedVis.extractReferences,
+        injectReferences: SavedVis.injectReferences,
 
         id: opts.id,
         indexPattern: opts.indexPattern,
@@ -87,6 +90,26 @@ uiModules
     SavedVis.fieldOrder = ['title', 'description'];
 
     SavedVis.searchSource = true;
+
+    SavedVis.extractReferences = (source) => {
+      const references = clone(source.references) || {};
+      if (source.savedSearchId) {
+        references.searchReference = {
+          type: 'search',
+          id: source.savedSearchId
+        };
+        return assign({}, source, {
+          references,
+          savedSearchId: undefined,
+          savedSearchReference: 'searchReference'
+        });
+      }
+      return source;
+    };
+
+    SavedVis.injectReferences = function (references) {
+      this.savedSearchId = references[this.savedSearchReference].id;
+    };
 
     SavedVis.prototype.getFullPath = function () {
       return `/app/kibana#${VisualizeConstants.EDIT_PATH}/${this.id}`;

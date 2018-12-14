@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { pick, assign } from 'lodash';
+import { pick, assign, clone } from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../dashboard_constants';
@@ -106,9 +106,9 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
 
   SavedDashboard.searchsource = true;
 
-  SavedDashboard.extractReferences = function (source) {
+  SavedDashboard.extractReferences = (source) => {
     // Extract references on save here
-    const references = _.clone(source.references) || {};
+    const references = clone(source.references) || {};
     const panels = JSON.parse(source.panelsJSON);
     panels.forEach((panel, i) => {
       panel.panelReference = `panel_${i}`;
