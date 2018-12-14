@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import { IRange } from 'monaco-editor';
 import { LineMapper } from '../../common/line_mapper';
 import {
@@ -17,6 +15,7 @@ import {
   SourceRange,
 } from '../../model';
 import { DocumentIndexNamePrefix } from '../indexer/schema';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import {
   expandRanges,

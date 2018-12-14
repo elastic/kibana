@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository } from '../../model';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { IndexWorker } from '../queue';
 import { RepositoryObjectClient } from '../search';

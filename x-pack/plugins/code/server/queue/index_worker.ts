@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient, Esqueue } from '@code/esqueue';
 import moment = require('moment');
 
 import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';
+import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { SocketService } from '../socket_service';

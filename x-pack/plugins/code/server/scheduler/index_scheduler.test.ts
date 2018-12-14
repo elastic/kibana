@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyObject, EsClient } from '@code/esqueue';
 import moment from 'moment';
 import sinon from 'sinon';
 
@@ -14,6 +13,7 @@ import {
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
 } from '../indexer/schema';
+import { AnyObject, EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { IndexWorker } from '../queue/index_worker';
 import { ServerOptions } from '../server_options';

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EsClient } from '@code/esqueue';
 
 import { Repository } from '../../model';
 import {
@@ -11,6 +10,7 @@ import {
   RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
+import { EsClient } from '../lib/esqueue';
 import { Poller } from '../poller';
 
 export abstract class AbstractScheduler {

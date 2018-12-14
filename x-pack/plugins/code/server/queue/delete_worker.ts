@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient, Esqueue } from '@code/esqueue';
 import moment from 'moment';
 
 import { RepositoryUri } from '../../model';
 import { WorkerProgress, WorkerResult } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
+import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryService } from '../repository_service';

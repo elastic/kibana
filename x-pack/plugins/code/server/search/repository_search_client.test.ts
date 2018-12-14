@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyObject, EsClient } from '@code/esqueue';
 import sinon from 'sinon';
 
 import { RepositoryReservedField } from '../indexer/schema';
+import { AnyObject, EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositorySearchClient } from './repository_search_client';
 

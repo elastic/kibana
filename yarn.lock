@@ -757,10 +757,6 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@code/esqueue@link:x-pack/plugins/code/packages/esqueue":
-  version "0.0.0"
-  uid ""
-
 "@commitlint/cli@^7.1.2":
   version "7.2.1"
   resolved "https://registry.yarnpkg.com/@commitlint/cli/-/cli-7.2.1.tgz#dbb9eeb1f5015a129bb0801fbc1115eb1dcd513b"

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from '@code/esqueue';
-
 import { Repository } from '../../model';
 import {
   RepositoryIndexName,
   RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
+import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { UpdateWorker } from '../queue';
 import { RepositoryObjectClient } from '../search';

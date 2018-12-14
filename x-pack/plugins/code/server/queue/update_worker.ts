@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient, Esqueue } from '@code/esqueue';
-
 import { CloneWorkerResult } from '../../model';
+import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractGitWorker } from './abstract_git_worker';
