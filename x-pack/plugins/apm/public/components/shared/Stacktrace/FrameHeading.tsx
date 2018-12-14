@@ -28,10 +28,7 @@ interface Props {
   isLibraryFrame?: boolean;
 }
 
-const FrameHeading: React.SFC<Props> = ({
-  stackframe,
-  isLibraryFrame = false
-}) => {
+const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
   const FileDetail = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;

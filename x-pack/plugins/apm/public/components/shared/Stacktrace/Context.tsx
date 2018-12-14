@@ -6,10 +6,24 @@
 
 import { get, size } from 'lodash';
 import React from 'react';
+// TODO add dependency for @types/react-syntax-highlighter
+// @ts-ignore
+import javascript from 'react-syntax-highlighter/dist/languages/javascript';
+// @ts-ignore
+import python from 'react-syntax-highlighter/dist/languages/python';
+// @ts-ignore
+import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 // @ts-ignore
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
+import { registerLanguage } from 'react-syntax-highlighter/dist/light';
+// @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
+
+registerLanguage('javascript', javascript);
+registerLanguage('python', python);
+registerLanguage('ruby', ruby);
+
 import styled from 'styled-components';
 
 import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';

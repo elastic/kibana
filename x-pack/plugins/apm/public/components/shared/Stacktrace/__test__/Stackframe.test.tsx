@@ -4,44 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { mount, ReactWrapper, shallow } from 'enzyme';
+import 'jest-styled-components';
 import React from 'react';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
-import { hasSourceLines, Stackframe } from '../Stackframe';
-import stacktracesMock from './stacktraces.json';
+import { Stackframe } from '../Stackframe';
 
 describe('Stackframe', () => {
   describe('when stackframe has source lines', () => {
-    let wrapper: ShallowWrapper;
+    let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = {
-        line: { context: 'this is line context' }
-      } as IStackframe;
-      wrapper = shallow(<Stackframe stackframe={stackframe} />);
+        function: '<anonymous>',
+        libraryFrame: false,
+        excludeFromGrouping: false,
+        context: {
+          pre: ['', "app.get('/log-error', function (req, res) {"],
+          post: [
+            '    if (err) {',
+            "      res.status(500).send('could not capture error: ' + err.message)"
+          ]
+        },
+        line: {
+          number: 17,
+          context: "  apm.captureError(new Error('foo'), function (err) {"
+        },
+        filename: 'server/coffee.js',
+        absPath: '/app/server/coffee.js'
+      };
+      wrapper = mount(<Stackframe stackframe={stackframe} />);
     });
 
-    it('should render CodePreview', () => {
+    it('should render correctly', () => {
       expect(wrapper).toMatchSnapshot();
     });
 
+    it('should render FrameHeading, Context and Variables', () => {
+      expect(wrapper.find('FrameHeading').length).toBe(1);
+      expect(wrapper.find('Context').length).toBe(1);
+      expect(wrapper.find('Variables').length).toBe(1);
+    });
+
     it('should have isLibraryFrame=false as default', () => {
-      expect(wrapper.prop('isLibraryFrame')).toBe(false);
+      expect(wrapper.find('Context').prop('isLibraryFrame')).toBe(false);
     });
   });
 
   describe('when stackframe does not have source lines', () => {
-    let wrapper: ShallowWrapper;
+    let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = { line: {} } as IStackframe;
-      wrapper = shallow(<Stackframe stackframe={stackframe} />);
+      wrapper = mount(<Stackframe stackframe={stackframe} />);
     });
 
-    it('should render FrameHeading', () => {
-      expect(wrapper).toMatchSnapshot();
+    it('should render only FrameHeading', () => {
+      expect(wrapper.find('FrameHeading').length).toBe(1);
+      expect(wrapper.find('Context').length).toBe(0);
+      expect(wrapper.find('Variables').length).toBe(0);
     });
 
     it('should have isLibraryFrame=false as default', () => {
-      expect(wrapper.prop('isLibraryFrame')).toBe(false);
+      expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(false);
     });
   });
 
@@ -50,19 +73,6 @@ describe('Stackframe', () => {
     const wrapper = shallow(
       <Stackframe stackframe={stackframe} isLibraryFrame />
     );
-    expect(wrapper.prop('isLibraryFrame')).toBe(true);
-  });
-});
-
-describe('hasSourceLines', () => {
-  it('should return true given a stackframe with a source context', () => {
-    const stackframeMockWithSource = stacktracesMock[0];
-    const result = hasSourceLines(stackframeMockWithSource as IStackframe);
-    expect(result).toBe(true);
-  });
-  it('should return false given a stackframe with no source context', () => {
-    const stackframeMockWithoutSource = stacktracesMock[1];
-    const result = hasSourceLines(stackframeMockWithoutSource as IStackframe);
-    expect(result).toBe(false);
+    expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(true);
   });
 });

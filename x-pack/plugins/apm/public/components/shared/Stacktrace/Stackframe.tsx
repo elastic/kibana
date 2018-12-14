@@ -3,41 +3,77 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
+import styled from 'styled-components';
 import {
   IStackframe,
   IStackframeWithLineContext
-} from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
-import { CodePreview } from '../CodePreview';
-import { FrameHeading } from './FrameHeading';
+} from '../../../../typings/es_schemas/Stackframe';
+import {
+  borderRadius,
+  colors,
+  fontFamilyCode,
+  px,
+  units
+} from '../../../style/variables';
+import { FrameHeading } from '../Stacktrace/FrameHeading';
+import { Context } from './Context';
+import { Variables } from './Variables';
 
-interface Props {
-  codeLanguage?: string;
-  stackframe: IStackframe;
+const CodeHeader = styled.div`
+  border-bottom: 1px solid ${colors.gray4};
+  border-radius: ${borderRadius} ${borderRadius} 0 0;
+`;
+
+interface ContainerProps {
   isLibraryFrame?: boolean;
 }
 
+const Container = styled.div<ContainerProps>`
+  margin: 0 0 ${px(units.plus)} 0;
+  position: relative;
+  font-family: ${fontFamilyCode};
+  border: 1px solid ${colors.gray4};
+  border-radius: ${borderRadius};
+  background: ${props => (props.isLibraryFrame ? colors.white : colors.gray5)};
+`;
+
+interface Props {
+  isLibraryFrame?: boolean;
+  codeLanguage?: string;
+  stackframe: IStackframe;
+}
+
 export function Stackframe({
-  codeLanguage,
   stackframe,
+  codeLanguage,
   isLibraryFrame = false
 }: Props) {
-  if (hasSourceLines(stackframe)) {
+  if (!hasSourceLines(stackframe)) {
     return (
-      <CodePreview
-        stackframe={stackframe}
-        isLibraryFrame={isLibraryFrame}
-        codeLanguage={codeLanguage}
-      />
+      <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
     );
   }
 
   return (
-    <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+    <Container isLibraryFrame={isLibraryFrame}>
+      <CodeHeader>
+        <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+      </CodeHeader>
+
+      <Context
+        stackframe={stackframe}
+        codeLanguage={codeLanguage}
+        isLibraryFrame={isLibraryFrame}
+      />
+
+      <Variables vars={stackframe.vars} />
+    </Container>
   );
 }
 
-export function hasSourceLines(
+function hasSourceLines(
   stackframe: IStackframe
 ): stackframe is IStackframeWithLineContext {
   return stackframe.line.context != null;

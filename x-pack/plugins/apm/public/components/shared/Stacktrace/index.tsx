@@ -43,7 +43,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
         // non-library frame
         return group.stackframes.map((stackframe, idx) => (
           <Stackframe
-            key={idx}
+            key={`${i}-${idx}`}
             codeLanguage={codeLanguage}
             stackframe={stackframe}
           />
