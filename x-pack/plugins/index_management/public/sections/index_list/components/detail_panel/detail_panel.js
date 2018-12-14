@@ -113,7 +113,7 @@ export class DetailPanel extends Component {
         >
           <FormattedMessage
             id="xpack.idxMgmt.detailPanel.missingIndexMessage"
-            defaultMessage="Sorry, this index does not exist.
+            defaultMessage="This index does not exist.
               It might have been deleted by a running job or another system."
           />
         </EuiCallOut>
