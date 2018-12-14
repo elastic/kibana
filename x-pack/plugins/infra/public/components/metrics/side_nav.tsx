@@ -39,7 +39,7 @@ export const MetricsSideNav = injectI18n(
             name: item.label,
             id: item.id,
             items: item.sections.map(section => ({
-              id: section.id as string,
+              id: section.id,
               name: section.label,
               onClick: this.props.handleClick(section),
             })),
