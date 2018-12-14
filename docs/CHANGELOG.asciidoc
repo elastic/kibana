@@ -65,7 +65,7 @@ For more details about breaking changes in this release, see
 Canvas::
 * Implements a clipboard and stores the copied elements in `localStorage` {pull}25890[#25890]
 * Adds the ability to reuse assets without editing an element's expression {pull}25764[#25764]
-* Adds `clear` function {pull}26397[#26397]
+* Adds the `clear` function {pull}26397[#26397]
 * Adds a template tab to the workpad manager where users can find workpad templates, 
 demos, and tutorials to help them get started {pull}23966[#23966]
 Design::
@@ -87,7 +87,7 @@ Machine Learning::
 detecting unusual processes on hosts and Docker containers {pull}25716[#25716]
 * Adds support for saved searches created using Kuery to the job wizards {pull}26094[#26094]
 * Allows user to enter their own query in the Discover page; stops passing the query 
-from the job datafeed config in custom URLs{pull}26957[#26957]
+from the job datafeed config in custom URLs {pull}26957[#26957]
 * Rewrites Calendar to React/EUI {pull}26741[#26741]
 Platform::
 * Adds `rest_total_hits_as_int` to all requests in platform code that eventually 
@@ -137,7 +137,7 @@ and fixes `urlparam` function {pull}25828[#25828]
 * Adds support for columns with dots {pull}26659[#26659]
 * Removes `es_indices` web service and uses the `savedObjectsClient` to get index-patterns {pull}25630[#25630]
 * Reduces HTTP POST generation on selections and drags {pull}26391[#26391]
-* Decrease size of tray toggle {pull}25470[#25470]
+* Decreases size of tray toggle {pull}25470[#25470]
 * Adds workpad-level CSS {pull}24143[#24143]
 * Makes selection border 1px {pull}26739[#26739]
 * Updates TinyMath reference links {pull}27085[#27085]
@@ -154,7 +154,7 @@ Infrastructure UI::
 * Stops showing sidenav while loading. {pull}27119[#27119]
 * Fixes styling after breaking EUI changes {pull}27021[#27021]
 * Fixes graphql type generation after package upgrades {pull}26991[#26991]
-* Removes usage of ts-optchain in the browser {pull}27148[#27148]
+* Removes usage of `ts-optchain` in the browser {pull}27148[#27148]
 Kibana App:: 
 * Fixes auto refresh after page reload {pull}26088[#26088]
 * Fixes flash of unstyled dashboard content {pull}25559[#25559]
@@ -170,7 +170,7 @@ Kibana App::
 * Fixes `kbn-interpreter` package to not import from UI {pull}26161[#26161]
 * Fixes OSS dynamic plugin loading by reverting to Canvas way of loading plugins {pull}26463[#26463]
 * Fixes interpreter socket error {pull}26870[#26870]
-* Uses `retry` to avoid stale element references in data table{pull}25973[#25973]
+* Uses `retry` to avoid stale element references in data table {pull}25973[#25973]
 * Fixes other bucket option to correctly apply without having to change other settings {pull}26874[#26874]
 Management::
 * Fixes index pattern wizard when there are remote clusters but no local indices  {pull}24339[#24339]
@@ -179,14 +179,14 @@ Management::
 * Uses new `_graph` endpoints {pull}26956[#26956]
 * Fixes fatal IE 11 error from undefined TextEncoder {pull}26966[#26966]
 * Adjusts spacing of Management navigation items {pull}25666[#25666]
-* Updates 'Disenroll' text to be consistent with menu option 'Unenroll' {pull}26816[#26816]
+* Updates "Disenroll" text to be consistent with menu option "Unenroll" {pull}26816[#26816]
 * Fixes validation issues with edit policy {pull}27045[#27045]
 * Fixes broken breadcrumb link for index management {pull}27164[#27164]
 * Fixes for index lifecycle management UI {pull}27153[#27153]
 Machine Learning::
-* Allows user to add/edit/delete annotations in the Single Series Viewer{pull}26034[#26034]
+* Allows user to add/edit/delete annotations in the Single Series Viewer {pull}26034[#26034]
 * Does not pass datafeed query to Discover in custom URL {pull}26957[#26957]
-* Fixes word break in anomalies and jobs tables {pull}26978[#26978]
+* Fixes word break in Anomalies and Jobs tables {pull}26978[#26978]
 * Fixes recognizer job wizard to use dedicated index setting {pull}25706[#25706]
 * Ensures jobs from saved searches are cloned in advanced wizard {pull}26002[#26002]
 * Aggregates Anomalies table data using configured Kibana timezone {pull}26192[#26192]
@@ -195,12 +195,12 @@ Machine Learning::
 Monitoring::
 * Uses proper Kibana index for KQL telemetry {pull}26479[#26479]
 * Fixes error handling for local stats collection/permissions {pull}26560[#26560]
-* Removes initial delay to check and send Telemetry data{pull}26575[#26575]
+* Removes initial delay to check and send Telemetry data {pull}26575[#26575]
 * Pulls local Kibana usage stats {pull}26496[#26496]
 * Adds a new plugin for Uptime Monitoring {pull}25480[#25480]
 * Adds server-side user authorization and license checks {pull}26070[#26070]
 * Fixes issue with multiple execution in Console {pull}26933[#26933]
-* Converts plugin to use EUI tables
+* Converts the Elasticsearch monitoring UIs to using EUI tables and page layout {pull}26217[#26217]
 Platform & Operations::
 * Decreases start limit and interval {pull}25474[#25474]
 * Fixes logging.useUTC deprecation unset {pull}26053[#26053]
@@ -261,7 +261,7 @@ Visualizations::
 * Rewrites URL when closing vis type selection modal {pull}26327[#26327]
 * Changes unbind calls from `.on` to `.off` {pull}24575[#24575]
 * Makes tooltips visible in stacked line chart {pull}26881[#26881]
-* Fixes date field in Controls visualization by generating labels with the field 
+* Fixes date field in controls visualization by generating labels with the field 
 formatter {pull}25654[#25654]
 * Preserves custom axis titles when loading a saved visualization {pull}24176[#24176]
 * Replaces LESS files with Sass in `ui/public/vis`, `visLib`, and `visualize` {pull}25333[#25333]
