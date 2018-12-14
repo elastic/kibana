@@ -62,7 +62,8 @@ class AutoFollowPatternAddUi extends PureComponent {
           <p>
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutDescription"
-              defaultMessage="Auto-follow patterns capture indices on remote clusters. Add a remote cluster before you create an auto-follow pattern." //eslint-disable-line max-len
+              defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add
+                a remote cluster."
             />
           </p>
 

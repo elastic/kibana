@@ -23,10 +23,10 @@ export const reducer = (state = initialState, action) => {
   const { scope, status, error } = payload;
 
   switch (action.type) {
-    case t.API_START: {
+    case t.API_REQUEST_START: {
       return { ...state, status: { ...state.status, [scope]: status } };
     }
-    case t.API_END: {
+    case t.API_REQUEST_END: {
       return { ...state, status: { ...state.status, [scope]: API_STATUS.IDLE } };
     }
     case t.API_ERROR_SET: {

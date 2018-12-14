@@ -6,6 +6,7 @@
 
 
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
+import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
 import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures';
 import { deserializeAutoFollowPattern } from '../../lib/auto_follow_pattern_serialization';
@@ -49,25 +50,43 @@ const registerHandlers = () => {
 };
 
 /**
+ * Queue to save request response and errors
+ * It allows us to fake multiple responses from the
+ * callWithRequestFactory() when the request handler call it
+ * multiple times.
+ */
+let requestResponseQueue = [];
+
+/**
  * Helper to mock the response from the call to Elasticsearch
  *
  * @param {*} err The mock error to throw
  * @param {*} response The response to return
  */
-const setHttpRequestResponse = (err, response) => {
-  if (err) {
-    return callWithRequestFactory.mockReturnValueOnce(() => {
-      throw err;
-    });
+const setHttpRequestResponse = (error, response) => {
+  requestResponseQueue.push ({ error, response });
+};
+
+const resetHttpRequestResponses = () => requestResponseQueue = [];
+
+const getNextResponseFromQueue = () => {
+  if (!requestResponseQueue.length) {
+    return null;
   }
 
-  callWithRequestFactory.mockReturnValueOnce(() => response);
+  const next = requestResponseQueue.shift();
+  if (next.error) {
+    return Promise.reject(next.error);
+  }
+  return Promise.resolve(next.response);
 };
 
 describe('[CCR API Routes] Auto Follow Pattern', () => {
   let routeHandler;
 
   beforeAll(() => {
+    isEsErrorFactory.mockReturnValue(() => false);
+    callWithRequestFactory.mockReturnValue(getNextResponseFromQueue);
     registerHandlers();
   });
 
@@ -125,11 +144,51 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
     it('should return a single resource even though ES return an array with 1 item', async () => {
       const autoFollowPattern = getAutoFollowPatternMock();
-      setHttpRequestResponse(null, { patterns: [autoFollowPattern] });
+      const esResponse = { patterns: [autoFollowPattern] };
+
+      setHttpRequestResponse(null, esResponse);
 
       const response = await routeHandler({ params: { id: 1 } });
       expect(Object.keys(response)).toEqual(DESERIALIZED_KEYS);
     });
+  });
 
+  describe('delete()', () => {
+    beforeEach(() => {
+      resetHttpRequestResponses();
+      routeHandler = routeHandlers.delete;
+    });
+
+    it('should delete a single item', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 'a' } });
+
+      expect(response.itemsDeleted).toEqual(['a']);
+      expect(response.errors).toEqual([]);
+    });
+
+    it('should accept a list of ids to delete', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 'a,b,c' } });
+
+      expect(response.itemsDeleted).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should catch error and return them in array', async () => {
+      const error = new Error('something went wrong');
+      error.response = '{ "error": {} }';
+
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(error);
+
+      const response = await routeHandler({ params: { id: 'a,b' } });
+
+      expect(response.itemsDeleted).toEqual(['a']);
+      expect(response.errors[0].id).toEqual('b');
+    });
   });
 });

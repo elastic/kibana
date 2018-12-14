@@ -202,7 +202,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
   };
 
   cancelForm = () => {
-    routing.navigate('/home');
+    routing.navigate('/auto_follow_patterns');
   };
 
   /**
