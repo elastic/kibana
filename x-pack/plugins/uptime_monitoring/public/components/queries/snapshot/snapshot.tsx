@@ -105,7 +105,6 @@ export const Snapshot = ({
                     <EuiStat
                       description="Down"
                       textAlign="center"
-                      textSize="xl"
                       title={down}
                       titleColor="danger"
                     />
@@ -116,7 +115,6 @@ export const Snapshot = ({
                     <EuiStat
                       description="Total"
                       textAlign="center"
-                      textSize="xl"
                       title={total}
                       titleColor="subdued"
                     />

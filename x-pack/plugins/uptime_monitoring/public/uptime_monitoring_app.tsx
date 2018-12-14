@@ -11,6 +11,10 @@ import {
   EuiFlexItem,
   EuiHeader,
   EuiHeaderBreadcrumbs,
+  // @ts-ignore missing typings for EuiHeaderLink
+  EuiHeaderLink,
+  // @ts-ignore missing typings for EuiHeaderLinks
+  EuiHeaderLinks,
   // @ts-ignore missing typings for EuiHeaderLogo
   EuiHeaderLogo,
   EuiHeaderSection,
@@ -162,6 +166,18 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     </EuiFlexGroup>
                   </EuiPopover>
                 </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+              <EuiHeaderSection side="right">
+                <EuiHeaderSection>
+                  <EuiHeaderLinks>
+                    <EuiHeaderLink
+                      iconType="help"
+                      href="https://discuss.elastic.co/c/beats/heartbeat"
+                    >
+                      Help
+                    </EuiHeaderLink>
+                  </EuiHeaderLinks>
+                </EuiHeaderSection>
               </EuiHeaderSection>
             </EuiHeader>
             <EuiPageContent>
