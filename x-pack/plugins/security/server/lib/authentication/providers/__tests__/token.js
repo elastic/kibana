@@ -78,6 +78,7 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.succeeded()).to.be(true);
       expect(authenticationResult.user).to.be.eql(user);
       expect(authenticationResult.state).to.be.eql({ accessToken: 'foo', refreshToken: 'bar' });
+      expect(request.headers.authorization).to.be.eql(`Bearer foo`);
       sinon.assert.calledOnce(callWithRequest);
     });
 
