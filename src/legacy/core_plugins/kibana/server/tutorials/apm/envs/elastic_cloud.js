@@ -21,15 +21,15 @@ import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from '../../../../common/tutorials/instruction_variant';
 
 import {
-  createNodeClientInstructions,
-  createDjangoClientInstructions,
-  createFlaskClientInstructions,
-  createRailsClientInstructions,
-  createRackClientInstructions,
-  createJsClientInstructions,
-  createGoClientInstructions,
-  createJavaClientInstructions,
-} from '../instructions/apm_client_instructions';
+  createNodeAgentInstructions,
+  createDjangoAgentInstructions,
+  createFlaskAgentInstructions,
+  createRailsAgentInstructions,
+  createRackAgentInstructions,
+  createJsAgentInstructions,
+  createGoAgentInstructions,
+  createJavaAgentInstructions,
+} from '../instructions/apm_agent_instructions';
 
 export function createElasticCloudInstructions(config) {
   const apmServerUrl = config.get('xpack.cloud.apm.url');
@@ -44,35 +44,35 @@ export function createElasticCloudInstructions(config) {
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.NODE,
-            instructions: createNodeClientInstructions(apmServerUrl, secretToken),
+            instructions: createNodeAgentInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.DJANGO,
-            instructions: createDjangoClientInstructions(apmServerUrl, secretToken),
+            instructions: createDjangoAgentInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.FLASK,
-            instructions: createFlaskClientInstructions(apmServerUrl, secretToken),
+            instructions: createFlaskAgentInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.RAILS,
-            instructions: createRailsClientInstructions(apmServerUrl, secretToken),
+            instructions: createRailsAgentInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.RACK,
-            instructions: createRackClientInstructions(apmServerUrl, secretToken),
+            instructions: createRackAgentInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.JS,
-            instructions: createJsClientInstructions(apmServerUrl),
+            instructions: createJsAgentInstructions(apmServerUrl),
           },
           {
             id: INSTRUCTION_VARIANT.GO,
-            instructions: createGoClientInstructions(apmServerUrl, secretToken),
+            instructions: createGoAgentInstructions(apmServerUrl, secretToken),
           },
           {
             id: INSTRUCTION_VARIANT.JAVA,
-            instructions: createJavaClientInstructions(apmServerUrl, secretToken),
+            instructions: createJavaAgentInstructions(apmServerUrl, secretToken),
           },
         ],
       },

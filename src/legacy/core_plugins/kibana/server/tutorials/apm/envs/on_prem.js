@@ -29,15 +29,15 @@ import {
   createDownloadServerOsx,
 } from '../instructions/apm_server_instructions';
 import {
-  createNodeClientInstructions,
-  createDjangoClientInstructions,
-  createFlaskClientInstructions,
-  createRailsClientInstructions,
-  createRackClientInstructions,
-  createJsClientInstructions,
-  createGoClientInstructions,
-  createJavaClientInstructions,
-} from '../instructions/apm_client_instructions';
+  createNodeAgentInstructions,
+  createDjangoAgentInstructions,
+  createFlaskAgentInstructions,
+  createRailsAgentInstructions,
+  createRackAgentInstructions,
+  createJsAgentInstructions,
+  createGoAgentInstructions,
+  createJavaAgentInstructions,
+} from '../instructions/apm_agent_instructions';
 
 export function onPremInstructions(apmIndexPattern) {
   const EDIT_CONFIG = createEditConfig();
@@ -106,35 +106,35 @@ export function onPremInstructions(apmIndexPattern) {
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.JAVA,
-            instructions: createJavaClientInstructions(),
+            instructions: createJavaAgentInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.JS,
-            instructions: createJsClientInstructions(),
+            instructions: createJsAgentInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.NODE,
-            instructions: createNodeClientInstructions(),
+            instructions: createNodeAgentInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.DJANGO,
-            instructions: createDjangoClientInstructions(),
+            instructions: createDjangoAgentInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.FLASK,
-            instructions: createFlaskClientInstructions(),
+            instructions: createFlaskAgentInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.RAILS,
-            instructions: createRailsClientInstructions(),
+            instructions: createRailsAgentInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.RACK,
-            instructions: createRackClientInstructions(),
+            instructions: createRackAgentInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.GO,
-            instructions: createGoClientInstructions(),
+            instructions: createGoAgentInstructions(),
           },
         ],
         statusCheck: {

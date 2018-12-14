@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const createNodeClientInstructions = (apmServerUrl = '', secretToken = '') => [
+export const createNodeAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.nodeClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -72,7 +72,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   },
 ];
 
-export const createDjangoClientInstructions = (apmServerUrl = '', secretToken = '') => [
+export const createDjangoAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.djangoClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -133,7 +133,7 @@ MIDDLEWARE = (
   },
 ];
 
-export const createFlaskClientInstructions = (apmServerUrl = '', secretToken = '') => [
+export const createFlaskAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.flaskClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -191,7 +191,7 @@ apm = ElasticAPM(app)`.split('\n'),
   },
 ];
 
-export const createRailsClientInstructions = (apmServerUrl = '', secretToken = '') => [
+export const createRailsAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.railsClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -227,7 +227,7 @@ export const createRailsClientInstructions = (apmServerUrl = '', secretToken = '
   },
 ];
 
-export const createRackClientInstructions = (apmServerUrl = '', secretToken = '') => [
+export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.rackClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -301,7 +301,7 @@ export const createRackClientInstructions = (apmServerUrl = '', secretToken = ''
   },
 ];
 
-export const createJsClientInstructions = (apmServerUrl = '') => [
+export const createJsAgentInstructions = (apmServerUrl = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.jsClient.enableRealUserMonitoring.title', {
       defaultMessage: 'Enable Real User Monitoring support in the APM server',
@@ -353,7 +353,7 @@ var apm = initApm({curlyOpen}
   },
 ];
 
-export const createGoClientInstructions = (apmServerUrl = '', secretToken = '') => [
+export const createGoAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.goClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -430,7 +430,7 @@ guide to instrumenting Go source code.',
   },
 ];
 
-export const createJavaClientInstructions = (apmServerUrl = '', secretToken = '') => [
+export const createJavaAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.javaClient.download.title', {
       defaultMessage: 'Download the APM agent',
