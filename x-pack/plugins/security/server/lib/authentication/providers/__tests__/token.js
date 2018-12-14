@@ -130,6 +130,34 @@ describe('TokenAuthenticationProvider', () => {
       sinon.assert.calledOnce(callWithRequest);
     });
 
+    it('succeeds with valid session even if requiring a token refresh', async () => {
+      const user = { username: 'user' };
+      const request = requestFixture();
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
+        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
+        .returns(Promise.resolve({ access_token: 'newfoo', refresh_token: 'newbar' }));
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer newfoo' } }), 'shield.authenticate')
+        .returns(user);
+
+      const accessToken = 'foo';
+      const refreshToken = 'bar';
+      const authenticationResult = await provider.authenticate(request, { accessToken, refreshToken });
+
+      sinon.assert.calledTwice(callWithRequest);
+      sinon.assert.calledOnce(callWithInternalUser);
+
+      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(user);
+      expect(authenticationResult.state).to.be.eql({ accessToken: 'newfoo', refreshToken: 'newbar' });
+    });
+
     it('does not handle `authorization` header with unsupported schema even if state contains valid credentials.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
       const accessToken = 'foo';
@@ -182,6 +210,151 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.user).to.be.eql(user);
       expect(authenticationResult.state).not.to.eql({ accessToken });
       sinon.assert.calledOnce(callWithRequest);
+    });
+
+    it('fails if token cannot be generated during login attempt', async () => {
+      const request = requestFixture();
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('user', 'password');
+      request.loginAttempt.returns(loginAttempt);
+
+      const authenticationError = new Error('Invalid credentials');
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'password', username: 'user', password: 'password' } })
+        .returns(Promise.reject(authenticationError));
+
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.calledOnce(callWithInternalUser);
+      sinon.assert.notCalled(callWithRequest);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.failed()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(undefined);
+      expect(authenticationResult.error).to.be.eql(authenticationError);
+    });
+
+    it('fails if user cannot be retrieved during login attempt', async () => {
+      const request = requestFixture();
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('user', 'password');
+      request.loginAttempt.returns(loginAttempt);
+
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'password', username: 'user', password: 'password' } })
+        .returns(Promise.resolve({ access_token: 'foo', refresh_token: 'bar' }));
+
+      const authenticationError = new Error('Some error');
+      callWithRequest
+        .withArgs(request, 'shield.authenticate')
+        .returns(Promise.reject(authenticationError));
+
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.calledOnce(callWithInternalUser);
+      sinon.assert.calledOnce(callWithRequest);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.failed()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(undefined);
+      expect(authenticationResult.error).to.be.eql(authenticationError);
+    });
+
+    it('fails when header contains a rejected token', async () => {
+      const authorization = `Bearer foo`;
+      const request = requestFixture({ headers: { authorization } });
+
+      const authenticationError = new Error('Forbidden');
+      callWithRequest
+        .withArgs(request, 'shield.authenticate')
+        .returns(Promise.reject(authenticationError));
+
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.calledOnce(callWithRequest);
+
+      expect(authenticationResult.failed()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(undefined);
+      expect(authenticationResult.error).to.be.eql(authenticationError);
+    });
+
+    it('fails when session contains a rejected token', async () => {
+      const accessToken = 'foo';
+      const request = requestFixture();
+
+      const authenticationError = new Error('Forbidden');
+      callWithRequest
+        .withArgs(request, 'shield.authenticate')
+        .returns(Promise.reject(authenticationError));
+
+      const authenticationResult = await provider.authenticate(request, { accessToken });
+
+      sinon.assert.calledOnce(callWithRequest);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.failed()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(undefined);
+      expect(authenticationResult.error).to.be.eql(authenticationError);
+    });
+
+    it('fails if token refresh is rejected', async () => {
+      const request = requestFixture();
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
+        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+
+      const authenticationError = new Error('failed to refresh token');
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
+        .returns(Promise.reject(authenticationError));
+
+      const accessToken = 'foo';
+      const refreshToken = 'bar';
+      const authenticationResult = await provider.authenticate(request, { accessToken, refreshToken });
+
+      sinon.assert.calledOnce(callWithRequest);
+      sinon.assert.calledOnce(callWithInternalUser);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.failed()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(undefined);
+      expect(authenticationResult.error).to.be.eql(authenticationError);
+    });
+
+    it('fails if new access token is rejected after successful refresh', async () => {
+      const request = requestFixture();
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
+        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
+        .returns(Promise.resolve({ access_token: 'newfoo', refresh_token: 'newbar' }));
+
+      const authenticationError = new Error('Some error');
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer newfoo' } }), 'shield.authenticate')
+        .returns(Promise.reject(authenticationError));
+
+      const accessToken = 'foo';
+      const refreshToken = 'bar';
+      const authenticationResult = await provider.authenticate(request, { accessToken, refreshToken });
+
+      sinon.assert.calledTwice(callWithRequest);
+      sinon.assert.calledOnce(callWithInternalUser);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.failed()).to.be(true);
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(undefined);
+      expect(authenticationResult.error).to.be.eql(authenticationError);
     });
   });
 
