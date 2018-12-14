@@ -47,6 +47,11 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
     });
 
     sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
@@ -66,6 +71,11 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
     });
   });
 
@@ -81,6 +91,11 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
+      },
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
       },
     });
   });
@@ -98,6 +113,11 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
     });
   });
 
@@ -113,6 +133,11 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: true,
       xpackInitialInfo: {
         b: 1
+      },
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
       },
     });
   });
@@ -130,31 +155,50 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
     });
   });
 
-  it('sends the originalInjectedVars if not authenticated', async () => {
+  it('sends the originalInjectedVars augmented with UI Capabilities if not authenticated', async () => {
     const originalInjectedVars = { a: 1 };
     const request = buildRequest();
     const server = mockServer();
     server.plugins.security.isAuthenticated.returns(false);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.be(originalInjectedVars);
+    expect(newVars).to.eql({
+      ...originalInjectedVars,
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
+    });
   });
 
-  it('sends the originalInjectedVars if xpack info is unavailable', async () => {
+  it('sends the originalInjectedVars augmented with UI Capabilities if xpack info is unavailable', async () => {
     const originalInjectedVars = { a: 1 };
     const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.isAvailable.returns(false);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.be(originalInjectedVars);
+    expect(newVars).to.eql({
+      ...originalInjectedVars,
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
+    });
   });
 
   it('sends the originalInjectedVars (with xpackInitialInfo = undefined) if security is disabled, xpack info is unavailable', async () => {
-    const originalInjectedVars = { a: 1 };
+    const originalInjectedVars = { a: 1, uiCapabilities: { navLinks: { foo: true }, bar: { baz: true } } };
     const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
@@ -165,17 +209,31 @@ describe('replaceInjectedVars uiExport', () => {
       a: 1,
       telemetryOptedIn: null,
       xpackInitialInfo: undefined,
+      uiCapabilities: {
+        navLinks: { foo: true },
+        bar: { baz: true },
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
     });
   });
 
-  it('sends the originalInjectedVars if the license check result is not available', async () => {
+  it('sends the originalInjectedVars augmented with UI Capabilities if the license check result is not available', async () => {
     const originalInjectedVars = { a: 1 };
     const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.feature().getLicenseCheckResults.returns(undefined);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.be(originalInjectedVars);
+    expect(newVars).to.eql({
+      ...originalInjectedVars,
+      uiCapabilities: {
+        mockFeature: {
+          mockFeatureCapability: true,
+        },
+      },
+    });
   });
 });
 
@@ -189,6 +247,20 @@ function mockServer() {
         isAuthenticated: sinon.stub().returns(true)
       },
       xpack_main: {
+        getFeatures: () => [{
+          id: 'mockFeature',
+          name: 'Mock Feature',
+          privileges: {
+            all: {
+              app: [],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['mockFeatureCapability']
+            }
+          }
+        }],
         info: {
           isAvailable: sinon.stub().returns(true),
           feature: () => ({

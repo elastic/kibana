@@ -9,7 +9,7 @@ import {
   InfraMetricData,
   InfraNodeType,
   InfraTimerangeInput,
-} from '../../../../common/graphql/types';
+} from '../../../graphql/types';
 
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';

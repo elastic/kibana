@@ -5,7 +5,6 @@
  */
 
 import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
 import React, { Component, ComponentClass } from 'react';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
@@ -64,13 +63,11 @@ export class NavControlPopover extends Component<Props, State> {
       element = <SpacesDescription onManageSpacesClick={this.toggleSpaceSelector} />;
     } else {
       element = (
-        <I18nProvider>
-          <SpacesMenu
-            spaces={this.state.spaces}
-            onSelectSpace={this.onSelectSpace}
-            onManageSpacesClick={this.toggleSpaceSelector}
-          />
-        </I18nProvider>
+        <SpacesMenu
+          spaces={this.state.spaces}
+          onSelectSpace={this.onSelectSpace}
+          onManageSpacesClick={this.toggleSpaceSelector}
+        />
       );
     }
 

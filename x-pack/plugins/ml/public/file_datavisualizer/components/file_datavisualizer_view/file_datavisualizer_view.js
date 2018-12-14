@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -129,7 +130,12 @@ export class FileDataVisualizerView extends Component {
 
       if (serverSettings.format === 'xml') {
         throw {
-          message: 'XML not currently supported'
+          message: (
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.fileDatavisualizerView.xmlNotCurrentlySupportedErrorMessage"
+              defaultMessage="XML not currently supported"
+            />
+          ),
         };
       }
 
