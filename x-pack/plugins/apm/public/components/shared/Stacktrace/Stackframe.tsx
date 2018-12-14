@@ -26,11 +26,7 @@ const CodeHeader = styled.div`
   border-radius: ${borderRadius} ${borderRadius} 0 0;
 `;
 
-interface ContainerProps {
-  isLibraryFrame?: boolean;
-}
-
-const Container = styled.div<ContainerProps>`
+const Container = styled.div<{ isLibraryFrame: boolean }>`
   margin: 0 0 ${px(units.plus)} 0;
   position: relative;
   font-family: ${fontFamilyCode};
@@ -40,9 +36,9 @@ const Container = styled.div<ContainerProps>`
 `;
 
 interface Props {
-  isLibraryFrame?: boolean;
-  codeLanguage?: string;
   stackframe: IStackframe;
+  codeLanguage?: string;
+  isLibraryFrame?: boolean;
 }
 
 export function Stackframe({

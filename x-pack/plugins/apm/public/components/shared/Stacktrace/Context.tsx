@@ -50,7 +50,7 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   background-color: ${colors.yellow};
 `;
 
-const LineNumberContainer = styled.div<{ isLibraryFrame?: boolean }>`
+const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -118,9 +118,9 @@ function getStartLineNumber(stackframe: IStackframeWithLineContext) {
 }
 
 interface Props {
-  isLibraryFrame?: boolean;
-  codeLanguage?: string;
   stackframe: IStackframeWithLineContext;
+  codeLanguage?: string;
+  isLibraryFrame: boolean;
 }
 
 export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {

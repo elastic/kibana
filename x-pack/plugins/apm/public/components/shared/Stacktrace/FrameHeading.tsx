@@ -25,7 +25,7 @@ const AppFrameFileDetail = styled.span`
 
 interface Props {
   stackframe: IStackframe;
-  isLibraryFrame?: boolean;
+  isLibraryFrame: boolean;
 }
 
 const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
