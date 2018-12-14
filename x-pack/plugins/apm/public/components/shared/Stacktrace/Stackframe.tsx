@@ -46,7 +46,7 @@ export function Stackframe({
   codeLanguage,
   isLibraryFrame = false
 }: Props) {
-  if (!hasSourceLines(stackframe)) {
+  if (!hasLineContext(stackframe)) {
     return (
       <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
     );
@@ -69,7 +69,7 @@ export function Stackframe({
   );
 }
 
-function hasSourceLines(
+function hasLineContext(
   stackframe: IStackframe
 ): stackframe is IStackframeWithLineContext {
   return stackframe.line.context != null;

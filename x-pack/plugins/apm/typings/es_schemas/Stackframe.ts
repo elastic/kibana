@@ -52,10 +52,6 @@ export interface IStackframeWithLineContext extends IStackframeBase {
     column?: number;
     context: string;
   };
-  context: {
-    post: string[];
-    pre: string[];
-  };
 }
 
 export type IStackframe =
