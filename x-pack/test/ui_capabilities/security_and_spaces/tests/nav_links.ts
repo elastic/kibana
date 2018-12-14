@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { SpacesService } from '../../../common/services';
+import { SecurityServiceProvider, SpacesService } from '../../../common/services';
 import { SecurityService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
@@ -45,6 +45,96 @@ async function forEachStringEnum<T>(
   }
 }
 
+interface CustomRoleSpecification {
+  name: string;
+  kibana: {
+    global: {
+      minimum?: string[];
+      feature?: {
+        [featureName: string]: string[];
+      };
+    };
+    space?: {
+      [spaceId: string]: {
+        minimum?: string[];
+        feature?: {
+          [featureName: string]: string[];
+        };
+      };
+    };
+  };
+}
+
+interface ReservedRoleSpecification {
+  name: string;
+}
+
+function isCustomRoleSpecification(
+  roleSpecification: CustomRoleSpecification | ReservedRoleSpecification
+): roleSpecification is CustomRoleSpecification {
+  return (roleSpecification as CustomRoleSpecification).kibana !== undefined;
+}
+
+class UserSpecification {
+  public readonly username: string;
+  public readonly password: string;
+  public readonly fullName: string;
+  public readonly role: CustomRoleSpecification | ReservedRoleSpecification;
+
+  constructor(username: string, role: CustomRoleSpecification | ReservedRoleSpecification) {
+    this.username = username;
+    this.password = `${username}-password`;
+    this.fullName = username;
+    this.role = role;
+  }
+}
+
+class UserSpecificationFactory {
+  public static create(user: Users): UserSpecification {
+    const username = Users[user];
+    switch (user) {
+      case Users.superuser:
+        return new UserSpecification(username, { name: 'superuser' });
+      case Users.global_all:
+        return new UserSpecification(username, {
+          name: 'global_all_role',
+          kibana: {
+            global: {
+              minimum: ['all'],
+            },
+          },
+        });
+      default:
+        throw new UnreachableError(user);
+    }
+  }
+}
+
+class SpaceSpecification {
+  public readonly id: string;
+  public readonly name: string;
+  public readonly disabledFeatures: string[];
+  constructor(id: string, disabledFeatures: string[]) {
+    this.id = id;
+    this.name = id;
+    this.disabledFeatures = disabledFeatures;
+  }
+}
+
+class SpaceSpecificationFactory {
+  public static create(space: Spaces): SpaceSpecification {
+    const spaceId = Spaces[space];
+    switch (space) {
+      case Spaces.space_1:
+        return new SpaceSpecification(spaceId, []);
+      case Spaces.space_2:
+        return new SpaceSpecification(spaceId, ['discover']);
+      default:
+        throw new UnreachableError(space);
+    }
+  }
+}
+
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: TestInvoker) {
   const securityService: SecurityService = getService('security');
@@ -54,68 +144,36 @@ export default function navLinksTests({ getService }: TestInvoker) {
   describe('navLinks', () => {
     before(async () => {
       await forEachStringEnum(Spaces, async space => {
-        switch (space) {
-          case Spaces.space_1:
-            await spacesService.create({
-              id: 'space_1',
-              name: 'space_1',
-              disabledFeatures: [],
-            });
-            break;
-          case Spaces.space_2:
-            await spacesService.create({
-              id: 'space_2',
-              name: 'space_2',
-              disabledFeatures: [],
-            });
-            break;
-          default:
-            throw new UnreachableError(space);
-        }
+        const spaceSpecification = SpaceSpecificationFactory.create(space);
+        await spacesService.create(spaceSpecification);
       });
 
       await forEachStringEnum(Users, async user => {
-        switch (user) {
-          case Users.superuser:
-            await securityService.user.create('superuser', {
-              password: 'password',
-              roles: ['superuser'],
-              full_name: 'superuser',
-            });
-          case Users.global_all:
-            await securityService.role.create('global_discover_all_role', {
-              kibana: {
-                global: {
-                  feature: {
-                    discover: ['all'],
-                  },
-                },
-              },
-            });
-
-            await securityService.user.create('global_discover_all_user', {
-              password: 'password',
-              roles: ['global_discover_all_role'],
-              full_name: 'global discover all user',
-            });
-            break;
-          default:
-            throw new UnreachableError(user);
+        const userSpecification = UserSpecificationFactory.create(user);
+        await securityService.user.create(userSpecification.username, {
+          password: userSpecification.password,
+          full_name: [userSpecification.fullName],
+          roles: [userSpecification.role.name],
+        });
+        if (isCustomRoleSpecification(userSpecification.role)) {
+          await securityService.role.create(userSpecification.role.name, {
+            kibana: userSpecification.role.kibana,
+          });
         }
       });
     });
 
     after(async () => {
       await forEachStringEnum(Spaces, async space => {
-        switch (space) {
-          case Spaces.space_1:
-            await spacesService.delete('space_1');
-            break;
-          case Spaces.space_2:
-            await spacesService.delete('space_2');
-            break;
-          default:
-            throw new UnreachableError(space);
+        const spaceSpecification = SpaceSpecificationFactory.create(space);
+        await spacesService.delete(spaceSpecification.id);
+      });
+
+      await forEachStringEnum(Users, async user => {
+        const userSpecification = UserSpecificationFactory.create(user);
+        await securityService.user.delete(userSpecification.username);
+        if (isCustomRoleSpecification) {
+          await securityService.role.delete(userSpecification.role.name);
         }
       });
     });
