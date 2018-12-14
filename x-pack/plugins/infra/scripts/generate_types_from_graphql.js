@@ -13,16 +13,18 @@ const GRAPHQL_GLOBS = [
   join('public', 'store', '**', '*.gql_query.ts{,x}'),
   join('common', 'graphql', '**', '*.gql_query.ts{,x}'),
 ];
-const CONFIG_PATH = resolve(__dirname, 'gql_gen.json');
-const OUTPUT_INTROSPECTION_PATH = resolve('common', 'graphql', 'introspection.json');
-const OUTPUT_TYPES_PATH = resolve('common', 'graphql', 'types.ts');
+const CLIENT_CONFIG_PATH = resolve(__dirname, 'gql_gen_client.json');
+const SERVER_CONFIG_PATH = resolve(__dirname, 'gql_gen_server.json');
+const OUTPUT_INTROSPECTION_PATH = resolve('public', 'graphql', 'introspection.json');
+const OUTPUT_CLIENT_TYPES_PATH = resolve('public', 'graphql', 'types.ts');
+const OUTPUT_SERVER_TYPES_PATH = resolve('server', 'graphql', 'types.ts');
 const SCHEMA_PATH = resolve(__dirname, 'combined_schema.ts');
 
 async function main() {
   await generate(
     {
       args: GRAPHQL_GLOBS,
-      config: CONFIG_PATH,
+      config: SERVER_CONFIG_PATH,
       out: OUTPUT_INTROSPECTION_PATH,
       overwrite: true,
       require: ['ts-node/register'],
@@ -34,11 +36,22 @@ async function main() {
   await generate(
     {
       args: GRAPHQL_GLOBS,
-      config: CONFIG_PATH,
-      out: OUTPUT_TYPES_PATH,
+      config: CLIENT_CONFIG_PATH,
+      out: OUTPUT_CLIENT_TYPES_PATH,
       overwrite: true,
       schema: SCHEMA_PATH,
       template: 'graphql-codegen-typescript-template',
+    },
+    true
+  );
+  await generate(
+    {
+      args: [],
+      config: SERVER_CONFIG_PATH,
+      out: OUTPUT_SERVER_TYPES_PATH,
+      overwrite: true,
+      schema: SCHEMA_PATH,
+      template: 'graphql-codegen-typescript-resolvers-template',
     },
     true
   );
