@@ -33,19 +33,19 @@
 
 import angular from 'angular';
 import { uiModules } from '../modules';
-import './kbn_ui_ace_keyboard_mode.less';
 import { keyCodes } from '@elastic/eui';
 
 let aceKeyboardModeId = 0;
 
-uiModules.get('kibana')
+uiModules
+  .get('kibana')
   .factory('kbnUiAceKeyboardModeService', () => ({
     initialize(scope, element) {
-      const uniqueId = `uiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
+      const uniqueId = `kbnUiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
 
       const hint = angular.element(
         `<div
-          class="uiAceKeyboardHint"
+          class="kbnUiAceKeyboardHint"
           id="${uniqueId}"
           tabindex="0"
           role="application"
@@ -63,15 +63,15 @@ uiModules.get('kibana')
 
       function startEditing() {
         // We are not using ng-class in the element, so that we won't need to $compile it
-        hint.addClass('uiAceKeyboardHint-isInactive');
+        hint.addClass('kbnUiAceKeyboardHint-isInactive');
         uiAceTextbox.focus();
       }
 
       function enableOverlay() {
-        hint.removeClass('uiAceKeyboardHint-isInactive');
+        hint.removeClass('kbnUiAceKeyboardHint-isInactive');
       }
 
-      hint.keydown((ev) => {
+      hint.keydown(ev => {
         if (ev.keyCode === keyCodes.ENTER) {
           ev.preventDefault();
           startEditing();
@@ -86,19 +86,23 @@ uiModules.get('kibana')
 
       // We have to capture this event on the 'capture' phase, otherwise Ace will have already
       // dismissed the autocompleter when the user hits ESC.
-      document.addEventListener('keydown', () => {
-        const autoCompleter = document.querySelector('.ace_autocomplete');
+      document.addEventListener(
+        'keydown',
+        () => {
+          const autoCompleter = document.querySelector('.ace_autocomplete');
 
-        if (!autoCompleter) {
-          isAutoCompleterOpen = false;
-          return;
-        }
+          if (!autoCompleter) {
+            isAutoCompleterOpen = false;
+            return;
+          }
 
-        // The autoComplete is just hidden when it's closed, not removed from the DOM.
-        isAutoCompleterOpen = autoCompleter.style.display !== 'none';
-      }, { capture: true });
+          // The autoComplete is just hidden when it's closed, not removed from the DOM.
+          isAutoCompleterOpen = autoCompleter.style.display !== 'none';
+        },
+        { capture: true }
+      );
 
-      uiAceTextbox.keydown((ev) => {
+      uiAceTextbox.keydown(ev => {
         if (ev.keyCode === keyCodes.ESCAPE) {
           // If the autocompletion context menu is open then we want to let ESC close it but
           // **not** exit out of editing mode.
@@ -115,11 +119,11 @@ uiModules.get('kibana')
       // Prevent tabbing into the ACE textarea, we now handle all focusing for it
       uiAceTextbox.attr('tabindex', '-1');
       element.prepend(hint);
-    }
+    },
   }))
-  .directive('kbnUiAceKeyboardMode', (kbnUiAceKeyboardModeService) => ({
+  .directive('kbnUiAceKeyboardMode', kbnUiAceKeyboardModeService => ({
     restrict: 'A',
     link(scope, element) {
       kbnUiAceKeyboardModeService.initialize(scope, element);
-    }
+    },
   }));

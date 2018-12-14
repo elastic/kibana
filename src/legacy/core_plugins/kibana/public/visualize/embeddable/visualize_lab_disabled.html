@@ -1,5 +1,15 @@
 <div class="visDisabledLabVisualization">
   <div class="kuiVerticalRhythm visDisabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
-  <div class="kuiVerticalRhythm"><em class="visDisabledLabVisualization__title"></em> is a lab visualization.</div>
-  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see lab visualizations.</div>
+  <div
+    class="kuiVerticalRhythm"
+  ><em class="visDisabledLabVisualization__title"></em>
+    {{ ::'kbn.visualize.embeddableVisualization.labVisualizationInfoText' | i18n: {
+        defaultMessage: 'is a lab visualization.',
+        description: 'Part of "{visTitle} is a lab visualization."' } }}
+  </div>
+  <div
+    class="kuiVerticalRhythm"
+    i18n-id="kbn.visualize.embeddableVisualization.labModeHelpText"
+    i18n-default-message="Please turn on lab-mode in the advanced settings to see lab visualizations."
+  ></div>
 </div>
