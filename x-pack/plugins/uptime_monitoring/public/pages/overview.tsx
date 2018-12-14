@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { MonitorList } from '../components/queries/monitor_list';
@@ -32,11 +32,7 @@ export class OverviewPage extends React.Component<OverviewPageProps> {
   public render() {
     const { autorefreshEnabled, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.props;
     return (
-      <div>
-        <EuiTitle>
-          <h2>Overview</h2>
-        </EuiTitle>
-        <EuiSpacer />
+      <Fragment>
         <Snapshot
           autorefreshEnabled={autorefreshEnabled}
           autorefreshInterval={autorefreshInterval}
@@ -52,7 +48,7 @@ export class OverviewPage extends React.Component<OverviewPageProps> {
         />
         <Link to="/monitor/http@https://www.google.com/">A monitor&#8217;s ID</Link>
         <p>This is where the Uptime app will live.</p>
-      </div>
+      </Fragment>
     );
   }
 }
