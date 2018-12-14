@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 
 import {
   EuiHideFor,
@@ -18,8 +17,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import React from 'react';
 import styled, { withTheme } from 'styled-components';
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+
 import { AutoSizer } from '../../components/auto_sizer';
 import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { Header } from '../../components/header';
@@ -33,6 +33,7 @@ import {
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
 import { WithOptions } from '../../containers/with_options';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
