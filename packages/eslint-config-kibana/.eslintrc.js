@@ -18,7 +18,7 @@ module.exports = {
 
   settings: {
     react: {
-      version: semver.coerce(PKG.dependencies.react),
+      version: semver.coerce(PKG.dependencies.react).version,
     },
   },
 
