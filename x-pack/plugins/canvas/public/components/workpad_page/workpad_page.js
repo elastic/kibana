@@ -66,6 +66,7 @@ export class WorkpadPage extends PureComponent {
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
+      onWheel,
     } = this.props;
 
     return (
@@ -89,6 +90,7 @@ export class WorkpadPage extends PureComponent {
         onKeyUp={onKeyUp}
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
+        onWheel={onWheel}
         tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
         {elements
