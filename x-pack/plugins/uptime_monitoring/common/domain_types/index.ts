@@ -5,3 +5,4 @@
  */
 
 export * from './pings';
+export * from './snapshot';

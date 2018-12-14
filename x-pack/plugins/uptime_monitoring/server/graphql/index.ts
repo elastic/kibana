@@ -4,22 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createLatestMonitorsResolvers, latestMonitorsSchema } from './latest_monitors';
-import { createMonitorsResolvers, monitorsSchema } from './monitor_charts';
+import { createMonitorsResolvers, monitorsSchema } from './monitors';
 import { createPingsResolvers, pingsSchema } from './pings';
 import { CreateUMGraphQLResolvers } from './types';
 import { unsignedIntegerResolverFunctions, unsignedIntegerSchema } from './unsigned_int_scalar';
 
 export { DEFAULT_GRAPHQL_PATH } from './constants';
 export const resolvers: CreateUMGraphQLResolvers[] = [
-  createLatestMonitorsResolvers,
   createPingsResolvers,
   unsignedIntegerResolverFunctions,
   createMonitorsResolvers,
 ];
-export const typeDefs: any[] = [
-  latestMonitorsSchema,
-  pingsSchema,
-  unsignedIntegerSchema,
-  monitorsSchema,
-];
+export const typeDefs: any[] = [pingsSchema, unsignedIntegerSchema, monitorsSchema];

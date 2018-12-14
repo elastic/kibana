@@ -67,6 +67,91 @@
             "deprecationReason": null
           },
           {
+            "name": "getMonitors",
+            "description": "",
+            "args": [
+              {
+                "name": "start",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "end",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+                "defaultValue": null
+              }
+            ],
+            "type": { "kind": "OBJECT", "name": "LatestMonitorsResult", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "getSnapshot",
+            "description": "",
+            "args": [
+              {
+                "name": "start",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "end",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "downCount",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "windowSize",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+                "defaultValue": null
+              }
+            ],
+            "type": { "kind": "OBJECT", "name": "Snapshot", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "getMonitorChartsData",
+            "description": "",
+            "args": [
+              {
+                "name": "monitorId",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "dateRangeStart",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "dateRangeEnd",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "MonitorChartEntry", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "getLatestMonitors",
             "description": "",
             "args": [
@@ -80,6 +165,12 @@
                 "name": "dateRangeEnd",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "monitorId",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -245,6 +336,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tcp",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "TCP", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1004,6 +1103,33 @@
       },
       {
         "kind": "OBJECT",
+        "name": "TCP",
+        "description": "",
+        "fields": [
+          {
+            "name": "port",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rtt",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "TLS",
         "description": "",
         "fields": [
@@ -1036,6 +1162,426 @@
             "description": "",
             "args": [],
             "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "LatestMonitorsResult",
+        "description": "",
+        "fields": [
+          {
+            "name": "monitors",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "LatestMonitor", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "LatestMonitor",
+        "description": "",
+        "fields": [
+          {
+            "name": "key",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "MonitorKey", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ping",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Ping", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "upSeries",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "downSeries",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MonitorKey",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "port",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MonitorSeriesPoint",
+        "description": "",
+        "fields": [
+          {
+            "name": "x",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "y",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Snapshot",
+        "description": "",
+        "fields": [
+          {
+            "name": "up",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "down",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trouble",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "total",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "histogram",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "SnapshotHistogram", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SnapshotHistogram",
+        "description": "",
+        "fields": [
+          {
+            "name": "upSeries",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramDataPoint", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "downSeries",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramDataPoint", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HistogramDataPoint",
+        "description": "",
+        "fields": [
+          {
+            "name": "x",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "x0",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "y",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MonitorChartEntry",
+        "description": "",
+        "fields": [
+          {
+            "name": "maxContent",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "maxResponse",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "maxValidate",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "maxTotal",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "maxWriteRequest",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "maxTcpRtt",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "maxDuration",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "minDuration",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "avgDuration",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "status",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "StatusData", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DataPoint",
+        "description": "",
+        "fields": [
+          {
+            "name": "x",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "y",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Float",
+        "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point). ",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StatusData",
+        "description": "",
+        "fields": [
+          {
+            "name": "x",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "up",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "down",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "total",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1747,22 +2293,18 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TCP",
+        "name": "HistogramSeries",
         "description": "",
         "fields": [
           {
-            "name": "port",
+            "name": "series",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "rtt",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramDataPoint", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }

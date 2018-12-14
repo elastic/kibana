@@ -2326,14 +2326,14 @@ apollo-cache-control@^0.1.0:
   dependencies:
     graphql-extensions "^0.0.x"
 
-apollo-cache-inmemory@^1.2.7:
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/apollo-cache-inmemory/-/apollo-cache-inmemory-1.2.7.tgz#80517c4b5e910022ab8d318f47d9364f99db8541"
-  integrity sha512-ikL3hWsd1DejiZSAuiGnX6TG3cKAZmkMTZZfNZggp9vcTa47kfPqms/pX0F4iajCJP/p7/AllhbpsQ3zVMOZGg==
+apollo-cache-inmemory@^1.3.9:
+  version "1.3.9"
+  resolved "https://registry.yarnpkg.com/apollo-cache-inmemory/-/apollo-cache-inmemory-1.3.9.tgz#10738ba6a04faaeeb0da21bbcc1f7c0b5902910c"
+  integrity sha512-Q2k84p/OqIuMUyeWGc6XbVXXZu0erYOO+wTx9p+CnQUspnNvf7zmvFNgFnmudXzfuG1m1CSzePk6fC/M1ehOqQ==
   dependencies:
-    apollo-cache "^1.1.14"
-    apollo-utilities "^1.0.18"
-    graphql-anywhere "^4.1.16"
+    apollo-cache "^1.1.20"
+    apollo-utilities "^1.0.25"
+    optimism "^0.6.6"
 
 apollo-cache@^1.1.14:
   version "1.1.14"
@@ -2341,6 +2341,13 @@ apollo-cache@^1.1.14:
   integrity sha512-Zmo9nVqpWFogki2QyulX6Xx6KYXMyYWX74grwgsYYUOukl4pIAdtYyK8e874o0QDgzSOq5AYPXjtfkoVpqhCRw==
   dependencies:
     apollo-utilities "^1.0.18"
+
+apollo-cache@^1.1.20:
+  version "1.1.20"
+  resolved "https://registry.yarnpkg.com/apollo-cache/-/apollo-cache-1.1.20.tgz#6152cc4baf6a63e376efee79f75de4f5c84bf90e"
+  integrity sha512-+Du0/4kUSuf5PjPx0+pvgMGV12ezbHA8/hubYuqRQoy/4AWb4faa61CgJNI6cKz2mhDd9m94VTNKTX11NntwkQ==
+  dependencies:
+    apollo-utilities "^1.0.25"
 
 apollo-client@^2.3.8:
   version "2.3.8"
@@ -2441,6 +2448,13 @@ apollo-utilities@^1.0.0, apollo-utilities@^1.0.1, apollo-utilities@^1.0.18, apol
   version "1.0.18"
   resolved "https://registry.yarnpkg.com/apollo-utilities/-/apollo-utilities-1.0.18.tgz#e4ee91534283fde2b744a26caaea120fe6a94f67"
   integrity sha512-hHrmsoMYzzzfUlTOPpxr0qRpTLotMkBIQ93Ub7ki2SWdLfYYKrp6/KB8YOUkbCwXxSFvYSV24ccuwUEqZIaHIA==
+  dependencies:
+    fast-json-stable-stringify "^2.0.0"
+
+apollo-utilities@^1.0.25:
+  version "1.0.25"
+  resolved "https://registry.yarnpkg.com/apollo-utilities/-/apollo-utilities-1.0.25.tgz#899b00f5f990fb451675adf84cb3de82eb6372ea"
+  integrity sha512-AXvqkhni3Ir1ffm4SA1QzXn8k8I5BBl4PVKEyak734i4jFdp+xgfUyi2VCqF64TJlFTA/B73TRDUvO2D+tKtZg==
   dependencies:
     fast-json-stable-stringify "^2.0.0"
 
@@ -9719,6 +9733,7 @@ graphql-code-generator@^0.13.0:
   version "0.13.0"
   resolved "https://registry.yarnpkg.com/graphql-code-generator/-/graphql-code-generator-0.13.0.tgz#fd71fe9cd913f5ca14eedd7ce39c4e2ff6053ee1"
   integrity sha512-SM+K58Cg6jGL9pzOGWgRUJD4swQ+iOWEy/pyQ9BJxjv3d+eIV9uYwFwZ+flstRTvnu3spenTbjRE/mnw3jxHTQ==
+
   dependencies:
     "@graphql-modules/epoxy" "0.1.9"
     "@types/babylon" "6.16.3"
@@ -10789,6 +10804,11 @@ import-from@^2.1.0:
   integrity sha1-M1238qev/VOqpHHUuAId7ja387E=
   dependencies:
     resolve-from "^3.0.0"
+
+immutable-tuple@^0.4.9:
+  version "0.4.9"
+  resolved "https://registry.yarnpkg.com/immutable-tuple/-/immutable-tuple-0.4.9.tgz#473ebdd6c169c461913a454bf87ef8f601a20ff0"
+  integrity sha512-LWbJPZnidF8eczu7XmcnLBsumuyRBkpwIRPCZxlojouhBo5jEBO4toj6n7hMy6IxHU/c+MqDSWkvaTpPlMQcyA==
 
 import-lazy@^2.1.0:
   version "2.1.0"
@@ -15200,6 +15220,13 @@ oppsy@2.x.x, oppsy@^2.0.0:
   integrity sha1-OhlFF63CTDxhzcVvNfRTfpOjXjQ=
   dependencies:
     hoek "5.x.x"
+
+optimism@^0.6.6:
+  version "0.6.8"
+  resolved "https://registry.yarnpkg.com/optimism/-/optimism-0.6.8.tgz#0780b546da8cd0a72e5207e0c3706c990c8673a6"
+  integrity sha512-bN5n1KCxSqwBDnmgDnzMtQTHdL+uea2HYFx1smvtE+w2AMl0Uy31g0aXnP/Nt85OINnMJPRpJyfRQLTCqn5Weg==
+  dependencies:
+    immutable-tuple "^0.4.9"
 
 optimist@^0.6.1, optimist@~0.6.1:
   version "0.6.1"

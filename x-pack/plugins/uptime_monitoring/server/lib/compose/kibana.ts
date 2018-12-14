@@ -9,8 +9,7 @@ import { UMKibanaDatabaseAdapter } from '../adapters/database/kibana_database_ad
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
 import { ElasticsearchMonitorsAdapter } from '../adapters/monitors';
 import { ElasticsearchPingsAdapter } from '../adapters/pings';
-import { UMMonitorsDomain, UMPingsDomain } from '../domains';
-import { UMAuthDomain } from '../domains/auth';
+import { UMAuthDomain, UMMonitorsDomain, UMPingsDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 
 export function compose(hapiServer: any): UMServerLibs {

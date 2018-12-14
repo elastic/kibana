@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createLatestMonitorsResolvers } from './resolvers';
-export { latestMonitorsSchema } from './schema.gql';
+export { DateSelection } from './types';
+export { UMDateRangePicker } from './date_range_picker';

@@ -106,11 +106,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 </EuiHeaderSectionItem>
                 {!isUsingK7Design && (
                   <EuiHeaderSectionItem>
-                    <EuiHeaderBreadcrumbs
-                      breadcrumbs={this.state.breadcrumbs}
-                      // @ts-ignore TODO: handle style issues outside of code
-                      style={{ paddingTop: '20px', paddingRight: '8px' }}
-                    />
+                    <div style={{ paddingTop: '20px', paddingRight: '8px' }}>
+                      <EuiHeaderBreadcrumbs breadcrumbs={this.state.breadcrumbs} />
+                    </div>
                   </EuiHeaderSectionItem>
                 )}
               </EuiHeaderSection>

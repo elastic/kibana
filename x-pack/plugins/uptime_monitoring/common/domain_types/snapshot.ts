@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import gql from 'graphql-tag';
-
-export const unsignedIntegerSchema = gql`
-  scalar UnsignedInteger
-`;
+export interface UMGqlRange {
+  start: number;
+  end: number;
+}

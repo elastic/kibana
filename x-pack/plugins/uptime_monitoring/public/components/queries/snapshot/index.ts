@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import gql from 'graphql-tag';
-
-export const unsignedIntegerSchema = gql`
-  scalar UnsignedInteger
-`;
+export { Snapshot } from './snapshot';

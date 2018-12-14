@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UMGqlRange } from '../../../common/domain_types';
 import { UMMonitorsAdapter } from '../adapters/monitors';
 
 export class UMMonitorsDomain {
@@ -18,5 +19,18 @@ export class UMMonitorsDomain {
     dateRangeEnd: number
   ): Promise<any> {
     return this.adapter.getMonitorChartsData(request, monitorId, dateRangeStart, dateRangeEnd);
+  }
+
+  public async getLatestMonitors(request: any, range: UMGqlRange): Promise<any> {
+    return this.adapter.getLatestMonitors(request, range);
+  }
+
+  public async getSnapshotCount(
+    request: any,
+    range: UMGqlRange,
+    downCount: number,
+    windowSize: number
+  ): Promise<any> {
+    return this.adapter.getSnapshotCount(request, range, downCount, windowSize);
   }
 }
