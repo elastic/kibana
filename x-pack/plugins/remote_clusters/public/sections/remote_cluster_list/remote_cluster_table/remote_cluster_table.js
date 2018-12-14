@@ -145,7 +145,7 @@ export class RemoteClusterTableUi extends Component {
     }, {
       name: intl.formatMessage({
         id: 'xpack.remoteClusters.remoteClusterList.table.actionsColumnTitle',
-        defaultMessage: 'Actionss',
+        defaultMessage: 'Actions',
       }),
       width: '100px',
       actions: [{
