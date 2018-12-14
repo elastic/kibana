@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
-import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from '../../../';
+import { map } from 'rxjs/operators';
+import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from '../../../../';
 import { TestBedConfig } from './config';
 
 class Plugin {
@@ -28,21 +28,21 @@ class Plugin {
     this.log = this.initializerContext.logger.get();
   }
 
-  public async start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
+  public start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
     this.log.debug(
       `Starting TestBed with core contract [${Object.keys(startContext)}] and deps [${Object.keys(
         deps
       )}]`
     );
 
-    const config = await this.initializerContext.config
-      .create(TestBedConfig)
-      .pipe(first())
-      .toPromise();
-
-    this.log.debug(`I've got value from my config: ${config.secret}`);
-
-    return { secret: config.secret };
+    return {
+      data$: this.initializerContext.config.create(TestBedConfig).pipe(
+        map(config => {
+          this.log.debug(`I've got value from my config: ${config.secret}`);
+          return `Some exposed data derived from config: ${config.secret}`;
+        })
+      ),
+    };
   }
 
   public stop() {
