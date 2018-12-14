@@ -122,6 +122,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         "step": "ERROR",
         "step_info": Object {
           "reason": "setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined",
+          "stack_trace": "fakestacktrace",
           "type": "illegal_argument_exception",
         },
         "step_time_millis": 1544187776208,
@@ -270,11 +271,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
             className="euiIcon euiIcon--medium euiCallOutHeader__icon"
             focusable="false"
             height="16"
-            style={
-              Object {
-                "fill": undefined,
-              }
-            }
+            style={null}
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"
@@ -285,11 +282,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
               className="euiIcon euiIcon--medium euiCallOutHeader__icon"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -337,73 +330,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
               className="euiSpacer euiSpacer--s"
             />
           </EuiSpacer>
-          <EuiPopover
-            anchorPosition="downCenter"
-            button={
-              <EuiButtonEmpty
-                color="primary"
-                iconSide="left"
-                onClick={[Function]}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="Stack trace"
-                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                  values={Object {}}
-                />
-              </EuiButtonEmpty>
-            }
-            closePopover={[Function]}
-            hasArrow={true}
-            id="stackPopover"
-            isOpen={false}
-            ownFocus={false}
-            panelPaddingSize="m"
-          >
-            <EuiOutsideClickDetector
-              onOutsideClick={[Function]}
-            >
-              <div
-                className="euiPopover euiPopover--anchorDownCenter"
-                id="stackPopover"
-                onClick={[Function]}
-                onKeyDown={[Function]}
-              >
-                <div
-                  className="euiPopover__anchor"
-                >
-                  <EuiButtonEmpty
-                    color="primary"
-                    iconSide="left"
-                    onClick={[Function]}
-                    type="button"
-                  >
-                    <button
-                      className="euiButtonEmpty euiButtonEmpty--primary"
-                      onClick={[Function]}
-                      type="button"
-                    >
-                      <span
-                        className="euiButtonEmpty__content"
-                      >
-                        <span
-                          className="euiButtonEmpty__text"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Stack trace"
-                            id="xpack.idxMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                            values={Object {}}
-                          >
-                            Stack trace
-                          </FormattedMessage>
-                        </span>
-                      </span>
-                    </button>
-                  </EuiButtonEmpty>
-                </div>
-              </div>
-            </EuiOutsideClickDetector>
-          </EuiPopover>
         </div>
       </EuiText>
     </div>
@@ -481,7 +407,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action
+                    Current action
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -561,7 +487,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action time
+                    Current action time
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -571,7 +497,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 <dd
                   className="euiDescriptionList__description"
                 >
-                  1544187775891
+                  2018-12-07 13:02:55
                 </dd>
               </EuiDescriptionListDescription>
               <EuiPopover
@@ -843,7 +769,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action
+                    Current action
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -923,7 +849,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action time
+                    Current action time
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -933,7 +859,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 <dd
                   className="euiDescriptionList__description"
                 >
-                  1544187775867
+                  2018-12-07 13:02:55
                 </dd>
               </EuiDescriptionListDescription>
             </dl>

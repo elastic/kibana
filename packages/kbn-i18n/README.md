@@ -33,21 +33,7 @@ For example:
 src/legacy/core_plugins/kibana/translations/fr.json
 ```
 
-When a new translation file is added, you have to register this file into
-`uiExports.translations` array of plugin constructor parameters. For example:
-```js
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      translations: [
-        resolve(__dirname, './translations/fr.json'),
-      ],
-      ...
-    },
-    ...
-  });
-}
-```
+The engine scans `x-pack/plugins/*/translations`, `src/core_plugins/*/translations`, `plugins/*/translations` and `src/ui/translations` folders on initialization, so there is no need to register translation files.
 
 The engine uses a `config/kibana.yml` file for locale resolution process. If locale is
 defined via `i18n.locale` option in `config/kibana.yml` then it will be used as a base
@@ -223,7 +209,7 @@ ReactDOM.render(
 ```
 
 After that we can use `FormattedMessage` components inside `RootComponent`:
-```js
+```jsx
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -247,10 +233,10 @@ class RootComponent extends Component {
       <p>
         <FormattedMessage
           id="welcome"
-          defaultMessage={`Hello {name}, you have {unreadCount, number} {unreadCount, plural,
+          defaultMessage="Hello {name}, you have {unreadCount, number} {unreadCount, plural,
             one {message}
             other {messages}
-          }`}
+          }"
           values={{name: <b>{name}</b>, unreadCount}}
         />
         ...

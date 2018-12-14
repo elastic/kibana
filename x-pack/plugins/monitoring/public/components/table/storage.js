@@ -33,3 +33,26 @@ export const tableStorageSetter = keyPrefix => {
     return localStorageData;
   };
 };
+
+export const euiTableStorageGetter = keyPrefix => {
+  return storage => {
+    const localStorageData = storage.get(STORAGE_KEY) || {};
+    const sort = get(localStorageData, [ keyPrefix, 'sort' ]);
+    const page  = get(localStorageData, [ keyPrefix, 'page' ]);
+
+    return { page, sort };
+  };
+};
+
+export const euiTableStorageSetter = keyPrefix => {
+  return (storage, { sort, page }) => {
+    const localStorageData = storage.get(STORAGE_KEY) || {};
+
+    set(localStorageData, [ keyPrefix, 'sort' ], sort || undefined); // don`t store empty data
+    set(localStorageData, [ keyPrefix, 'page' ], page || undefined);
+
+    storage.set(STORAGE_KEY, localStorageData);
+
+    return localStorageData;
+  };
+};
