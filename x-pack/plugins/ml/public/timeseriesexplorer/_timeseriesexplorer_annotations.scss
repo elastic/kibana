@@ -52,7 +52,7 @@ $mlAnnotationRectDefaultFillOpacity: 0.05;
   text-anchor: middle;
   font-size: $euiFontSizeXS;
   font-family: $euiFontFamily;
-  font-weight: 600;
+  font-weight: $euiFontWeightMedium;
 
   fill: $euiColorFullShade;
   transition: fill $euiAnimSpeedFast;
@@ -68,8 +68,8 @@ $mlAnnotationRectDefaultFillOpacity: 0.05;
   transition: fill $euiAnimSpeedFast;
   // TODO This is hard-coded for now for labels A-Z
   // Needs to support dynamic SVG width.
-  width: 25px;
-  height: 20px;
+  width: $euiSizeL;
+  height: $euiSize + $euiSizeXS;
 }
 
 .mlAnnotationTextRect-isBlur {
