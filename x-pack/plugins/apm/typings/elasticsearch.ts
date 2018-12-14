@@ -28,10 +28,4 @@ declare module 'elasticsearch' {
       [key: string]: string | number | StringMap | ESFilter[];
     };
   }
-
-  export interface ESQueryBody {
-    bool: {
-      filter: ESFilter[];
-    };
-  }
 }

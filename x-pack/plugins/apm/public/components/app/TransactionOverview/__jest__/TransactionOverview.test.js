@@ -6,8 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { TransactionOverview } from '..';
-import { toJson } from '../../../../utils/testHelpers';
+import { TransactionOverviewView } from '..';
 
 jest.mock(
   'ui/chrome',
@@ -39,25 +38,38 @@ jest.mock(
 
 const setup = () => {
   const props = {
-    license: {
-      data: {
-        features: {
-          ml: { isAvailable: true }
-        }
-      }
-    },
-    hasDynamicBaseline: false,
+    agentName: 'test-agent',
+    serviceName: 'test-service',
+    serviceTransactionTypes: ['a', 'b'],
     location: {},
+    history: {
+      push: jest.fn()
+    },
     urlParams: { transactionType: 'request', serviceName: 'MyServiceName' }
   };
 
-  const wrapper = shallow(<TransactionOverview {...props} />);
+  const wrapper = shallow(<TransactionOverviewView {...props} />);
   return { props, wrapper };
 };
 
-describe('TransactionOverview', () => {
-  it('should not call loadTransactionList without any props', () => {
+describe('TransactionOverviewView', () => {
+  it('should render null if there is no transaction type in the search string', () => {
     const { wrapper } = setup();
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchInlineSnapshot(`""`);
+  });
+
+  it('should render with type filter controls', () => {
+    const { wrapper } = setup();
+    wrapper.setProps({ location: { search: '?transactionType=test-type' } });
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should render without type filter controls if there is just a single type', () => {
+    const { wrapper } = setup();
+    wrapper.setProps({
+      location: { search: '?transactionType=test-type' },
+      serviceTransactionTypes: ['a']
+    });
+    expect(wrapper).toMatchSnapshot();
   });
 });

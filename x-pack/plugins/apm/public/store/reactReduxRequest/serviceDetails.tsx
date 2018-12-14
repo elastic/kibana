@@ -5,26 +5,34 @@
  */
 
 import _ from 'lodash';
-import PropTypes from 'prop-types';
 import React from 'react';
-import { Request } from 'react-redux-request';
+import { Request, RRRRender } from 'react-redux-request';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { ServiceAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
 import { loadServiceDetails } from '../../services/rest/apm/services';
+import { IReduxState } from '../rootReducer';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceDetails';
 const INITIAL_DATA = { types: [] };
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-export function getServiceDetails(state) {
+export function getServiceDetails(state: IReduxState) {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
-export function getDefaultTransactionType(state) {
-  const types = _.get(state.reactReduxRequest[ID], 'data.types');
+export function getDefaultTransactionType(state: IReduxState) {
+  const types: string[] = _.get(state.reactReduxRequest[ID], 'data.types');
   return _.first(types);
 }
 
-export function ServiceDetailsRequest({ urlParams, render }) {
+export function ServiceDetailsRequest({
+  urlParams,
+  render
+}: {
+  urlParams: IUrlParams;
+  render: RRRRender<ServiceAPIResponse>;
+}) {
   const { serviceName, start, end, kuery } = urlParams;
 
   if (!(serviceName && start && end)) {
@@ -41,8 +49,3 @@ export function ServiceDetailsRequest({ urlParams, render }) {
     />
   );
 }
-
-ServiceDetailsRequest.propTypes = {
-  urlParams: PropTypes.object.isRequired,
-  render: PropTypes.func.isRequired
-};

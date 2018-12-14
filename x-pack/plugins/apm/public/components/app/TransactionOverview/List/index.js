@@ -49,7 +49,7 @@ export default function TransactionList({
     {
       field: 'transactionType',
       name: 'Type',
-      sortable: true,
+      sortable: false,
       dataType: 'string',
       render: (_, data) => data.sample.transaction.type
     },

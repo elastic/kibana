@@ -22,6 +22,7 @@ interface ServiceIntegrationProps {
   location: any;
   serviceName: string;
   transactionType?: string;
+  serviceTransactionTypes: string[];
 }
 interface ServiceIntegrationState {
   isPopoverOpen: boolean;
