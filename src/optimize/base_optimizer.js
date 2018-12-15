@@ -135,7 +135,13 @@ export default class BaseOptimizer {
       return 1;
     }
 
-    return Math.max(1, cpus.length - 1);
+    return Math.max(
+      1,
+      Math.min(
+        cpus.length - 1,
+        10
+      )
+    );
   }
 
   getThreadLoaderPoolConfig() {
