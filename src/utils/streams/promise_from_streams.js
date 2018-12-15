@@ -39,10 +39,12 @@ import { pipeline, Writable } from 'stream';
 export async function createPromiseFromStreams(streams) {
   let finalChunk;
   const last = streams[streams.length - 1];
+  if (typeof last.read !== 'function' && streams.length === 1) {
+    // For a nicer error than what stream.pipeline throws
+    return Promise.reject(new Error('A minimum of 2 streams is required when a non-readable stream is given'));
+  }
   if (typeof last.read === 'function') {
     // We are pushing a writable stream to capture the last chunk
-    // but also to ensure we have the minimum 2 streams requirement
-    // for stream.pipeline.
     streams.push(new Writable({
       // Use object mode even when "last" stream isn't. This allows to
       // capture the last chunk as-is.
