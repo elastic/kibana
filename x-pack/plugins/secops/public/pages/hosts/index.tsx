@@ -11,12 +11,17 @@ import chrome from 'ui/chrome';
 
 import { KpiItem } from '../../../common/graphql/types';
 import { EmptyPage } from '../../components/empty_page';
-import { HorizontalBarChartData } from '../../components/horizontal_bar_chart';
-import { EventsTable, HostsTable, TypesBar } from '../../components/page/hosts';
+import {
+  EventsTable,
+  HostsTable,
+  TypesBar,
+  UncommonProcessTable,
+} from '../../components/page/hosts';
 
 import { EventsQuery } from '../../containers/events';
 import { HostsQuery } from '../../containers/hosts';
 import { WithSource } from '../../containers/source';
+import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 
 const basePath = chrome.getBasePath();
 
@@ -33,12 +38,10 @@ export const Hosts = pure(() => (
             {({ kpiEventType, loading }) => (
               <TypesBar
                 loading={loading}
-                data={
-                  kpiEventType!.map((i: KpiItem) => ({
-                    x: i.count,
-                    y: i.value,
-                  })) as HorizontalBarChartData[]
-                }
+                data={kpiEventType!.map((i: KpiItem) => ({
+                  x: i.count,
+                  y: i.value,
+                }))}
               />
             )}
           </EventsQuery>
@@ -54,6 +57,23 @@ export const Hosts = pure(() => (
               />
             )}
           </HostsQuery>
+          <UncommonProcessesQuery
+            sourceId="default"
+            startDate={0} // TODO: Wire this up to the date-time picker
+            endDate={1544817214088} // TODO: Wire this up to the date-time picker
+            cursor={null}
+          >
+            {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore }) => (
+              <UncommonProcessTable
+                loading={loading}
+                data={uncommonProcesses}
+                totalCount={totalCount}
+                hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                loadMore={loadMore}
+              />
+            )}
+          </UncommonProcessesQuery>
           <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
             {({ events, loading }) => (
               <EventsTable

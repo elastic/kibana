@@ -21,7 +21,7 @@ export const hostsSchema = gql`
   }
 
   type HostsData {
-    edges: [HostsEdges]!
+    edges: [HostsEdges!]!
     totalCount: Int!
     pageInfo: PageInfo!
   }

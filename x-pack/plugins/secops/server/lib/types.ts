@@ -12,11 +12,13 @@ import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
 import { SourceStatus } from './source_status';
 import { SourceConfigurations, Sources } from './sources';
+import { UncommonProcesses } from './uncommon_processes';
 
 export interface AppDomainLibs {
   events: Events;
   fields: IndexFields;
   hosts: Hosts;
+  uncommonProcesses: UncommonProcesses;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {

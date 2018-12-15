@@ -5,16 +5,16 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo, getOr } from 'lodash/fp';
+import { defaultTo } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import { HostItem } from '../../../../../common/graphql/types';
+import { HostItem, HostsEdges } from '../../../../../common/graphql/types';
 import { hostsActions, hostsSelector, State } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 interface OwnProps {
-  data: HostItem[];
+  data: HostsEdges[];
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
@@ -89,7 +89,6 @@ const HostsTableComponent = pure<HostsTableProps>(
 
 const mapStateToProps = (state: State) => {
   const limit = defaultTo(2, hostsSelector(state));
-
   return { limit };
 };
 
@@ -105,24 +104,24 @@ const getHostsColumns = () => [
     name: 'Host',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.name', item)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.name)}</>,
   },
   {
     name: 'First seen',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.firstSeen', item)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.firstSeen)}</>,
   },
   {
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.os', item)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.os)}</>,
   },
   {
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.version', item)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.version)}</>,
   },
 ];

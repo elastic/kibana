@@ -11,6 +11,7 @@ import { createEventsResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
+import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
 import { Logger } from './utils/logger';
@@ -24,6 +25,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
   const { logger, mocking } = config;
   const schema = makeExecutableSchema({
     resolvers: [
+      createUncommonProcessesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createEventsResolvers(libs) as IResolvers,

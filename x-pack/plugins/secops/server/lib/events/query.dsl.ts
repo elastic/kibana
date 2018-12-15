@@ -5,10 +5,11 @@
  */
 
 import { createQueryFilterClauses } from '../../utils/build_query';
+import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { FilterQuery } from '../types';
 import { EventsRequestOptions } from './types';
 
-export const EventFieldsMap = {
+export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   'host.hostname': 'host.name',
   'host.ip': 'host.ip',
@@ -31,21 +32,8 @@ export const EventFieldsMap = {
 
 export const buildQuery = (options: EventsRequestOptions) => {
   const { to, from } = options.timerange;
-  const Fields = options.fields;
-  const filterQuery = options.filterQuery;
-  const EsFields = Fields.reduce(
-    (res, f: string) => {
-      if (EventFieldsMap.hasOwnProperty(f)) {
-        const esField = Object.getOwnPropertyDescriptor(EventFieldsMap, f);
-        if (esField && esField.value) {
-          res = [...res, esField.value];
-        }
-      }
-      return res;
-    },
-    [] as string[]
-  );
-
+  const { fields, filterQuery } = options;
+  const esFields = reduceFields(fields, eventFieldsMap);
   const filter = [
     ...createQueryFilterClauses(filterQuery as FilterQuery),
     {
@@ -99,7 +87,7 @@ export const buildQuery = (options: EventsRequestOptions) => {
           [options.sourceConfiguration.fields.timestamp]: 'desc',
         },
       ],
-      _source: EsFields,
+      _source: esFields,
     },
   };
 };

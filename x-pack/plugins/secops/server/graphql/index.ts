@@ -13,6 +13,7 @@ import { eventsSchema } from './events/schema.gql';
 import { hostsSchema } from './hosts/schema.gql';
 import { sourceStatusSchema } from './source_status/schema.gql';
 import { sourcesSchema } from './sources/schema.gql';
+import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i/schema.gql';
 
 export const schemas = [
@@ -22,6 +23,7 @@ export const schemas = [
   sourcesSchema,
   sourceStatusSchema,
   sharedSchema,
+  uncommonProcessesSchema,
   whoAmISchema,
 ];
 

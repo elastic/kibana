@@ -8,7 +8,7 @@ import { get, has, merge } from 'lodash/fp';
 import { EventItem, EventsData, KpiItem } from '../../../common/graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-import { buildQuery, EventFieldsMap } from './query.dsl';
+import { buildQuery, eventFieldsMap } from './query.dsl';
 import { EventData, EventsAdapter, EventsRequestOptions } from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
@@ -32,29 +32,32 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
           }))
         : [];
     const hits = response.hits.hits;
-    const events = hits.map(formatEventsData(options.fields)) as [EventItem];
+    const events = hits.map(hit => formatEventsData(options.fields, hit, eventFieldsMap)) as [
+      EventItem
+    ];
     return {
       events,
       kpiEventType,
-    } as EventsData;
+    };
   }
 }
 
-const formatEventsData = (fields: string[]) => (hit: EventData) =>
+export const formatEventsData = (
+  fields: ReadonlyArray<string>,
+  hit: EventData,
+  fieldMap: Readonly<Record<string, string>>
+) =>
   fields.reduce(
     (flattenedFields, fieldName) => {
-      flattenedFields._id = get('_id', hit);
-      if (EventFieldsMap.hasOwnProperty(fieldName)) {
-        const esField = Object.getOwnPropertyDescriptor(EventFieldsMap, fieldName);
-        return has(esField && esField.value, hit._source)
+      flattenedFields._id = hit._id;
+      if (fieldMap[fieldName] != null) {
+        const esField = fieldMap[fieldName];
+        return has(esField, hit._source)
           ? merge(
               flattenedFields,
               fieldName
                 .split('.')
-                .reduceRight(
-                  (obj, next) => ({ [next]: obj }),
-                  get(esField && esField.value, hit._source)
-                )
+                .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source))
             )
           : flattenedFields;
       }
