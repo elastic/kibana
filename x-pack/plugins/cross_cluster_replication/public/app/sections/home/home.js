@@ -44,9 +44,10 @@ export const CrossClusterReplicationHome = injectI18n(
     }
 
     getHeaderSection() {
-      const { autoFollowPatterns } = this.props;
+      const { isAutoFollowApiAuthorized, autoFollowPatterns } = this.props;
 
-      if (!autoFollowPatterns.length) {
+      // We want to show the title when the user isn't authorized.
+      if (isAutoFollowApiAuthorized && !autoFollowPatterns.length) {
         return null;
       }
 
@@ -63,7 +64,7 @@ export const CrossClusterReplicationHome = injectI18n(
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItem="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="m">
                 <h2>
@@ -86,15 +87,17 @@ export const CrossClusterReplicationHome = injectI18n(
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton
-                {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
-                fill
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.autoFollowPatternList.addAutofollowPatternButtonLabel"
-                  defaultMessage="Create an auto-follow pattern"
-                />
-              </EuiButton>
+              {isAutoFollowApiAuthorized ? (
+                <EuiButton
+                  {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
+                  fill
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternList.addAutofollowPatternButtonLabel"
+                    defaultMessage="Create an auto-follow pattern"
+                  />
+                </EuiButton>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
 
