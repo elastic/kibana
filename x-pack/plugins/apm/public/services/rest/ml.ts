@@ -27,12 +27,12 @@ interface MlResponseItem {
   };
 }
 
-interface StartMlJobApiResponse {
+interface StartMLJobApiResponse {
   datafeeds: MlResponseItem[];
   jobs: MlResponseItem[];
 }
 
-export async function startMlJob({
+export async function startMLJob({
   serviceName,
   transactionType
 }: {
@@ -46,7 +46,7 @@ export async function startMlJob({
     groups.push(transactionType.toLowerCase());
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
-  return callApi<StartMlJobApiResponse>({
+  return callApi<StartMLJobApiResponse>({
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
@@ -64,7 +64,7 @@ export async function startMlJob({
 }
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.5/ml-get-job.html
-interface GetMlJobApiResponse {
+interface GetMLJobApiResponse {
   count: number;
   jobs: Array<{
     job_id: string;
@@ -72,7 +72,7 @@ interface GetMlJobApiResponse {
   }>;
 }
 
-export async function getMlJob({
+export async function getMLJob({
   serviceName,
   transactionType,
   anomalyName = 'high_mean_response_time'
@@ -81,7 +81,7 @@ export async function getMlJob({
   transactionType?: string;
   anomalyName?: string;
 }) {
-  return callApi<GetMlJobApiResponse>({
+  return callApi<GetMLJobApiResponse>({
     method: 'GET',
     pathname: `/api/ml/anomaly_detectors/${getMlPrefix(
       serviceName,

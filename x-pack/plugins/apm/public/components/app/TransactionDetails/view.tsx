@@ -19,6 +19,7 @@ import { Distribution } from './Distribution';
 import { Transaction } from './Transaction';
 
 interface Props {
+  mlAvailable: boolean;
   urlParams: IUrlParams;
   location: any;
 }

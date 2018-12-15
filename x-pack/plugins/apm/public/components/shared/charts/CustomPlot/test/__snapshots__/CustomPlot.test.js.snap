@@ -1331,19 +1331,31 @@ exports[`when response has data when dragging without releasing should display S
 exports[`when response has data when setting hoverX should display tooltip 1`] = `
 Array [
   Object {
-    "color": "#3185fc",
-    "text": "Avg.",
-    "value": 438704.4,
+    "color": "#f98510",
+    "point": Object {
+      "x": 1502283720000,
+      "y": 1820377.1200000006,
+    },
+    "text": "99th",
+    "value": 1820377.1200000006,
   },
   Object {
     "color": "#ecae23",
+    "point": Object {
+      "x": 1502283720000,
+      "y": 1557383.999999999,
+    },
     "text": "95th",
     "value": 1557383.999999999,
   },
   Object {
-    "color": "#f98510",
-    "text": "99th",
-    "value": 1820377.1200000006,
+    "color": "#3185fc",
+    "point": Object {
+      "x": 1502283720000,
+      "y": 438704.4,
+    },
+    "text": "Avg.",
+    "value": 438704.4,
   },
 ]
 `;
@@ -1374,7 +1386,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #3185fc;
+  background: #f98510;
   border-radius: 100%;
 }
 
@@ -1390,7 +1402,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #f98510;
+  background: #3185fc;
   border-radius: 100%;
 }
 
@@ -2030,15 +2042,15 @@ Array [
                 >
                   <span
                     className="c6"
-                    color="#3185fc"
+                    color="#f98510"
                     radius={8}
                   />
-                  Avg.
+                  99th
                 </div>
                 <div
                   className="c7"
                 >
-                  438704.4
+                  1820377.1200000006
                 </div>
               </div>
               <div
@@ -2072,15 +2084,15 @@ Array [
                 >
                   <span
                     className="c9"
-                    color="#f98510"
+                    color="#3185fc"
                     radius={8}
                   />
-                  99th
+                  Avg.
                 </div>
                 <div
                   className="c7"
                 >
-                  1820377.1200000006
+                  438704.4
                 </div>
               </div>
             </div>
@@ -3316,7 +3328,7 @@ Array [
               "left": "50%",
               "position": "absolute",
               "top": "50%",
-              "transform": "translate(calc(-50% + 80px),calc(-50% + -16px - 15px))",
+              "transform": "translate(calc(-50% + 30px),calc(-50% + -16px - 15px))",
             }
           }
         >

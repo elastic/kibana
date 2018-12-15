@@ -34,13 +34,13 @@ const viewJobLabel: string = i18n.translate(
   }
 );
 
-interface ViewMlJobArgs {
+interface ViewMLJobArgs {
   serviceName: string;
   transactionType?: string;
   location: any;
 }
 
-export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
+export const ViewMLJob: React.SFC<ViewMLJobArgs> = ({
   serviceName,
   transactionType,
   location,

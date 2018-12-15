@@ -20,8 +20,8 @@ import {
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import {
-  getMlJob,
-  startMlJob
+  getMLJob,
+  startMLJob
 } from 'x-pack/plugins/apm/public/services/rest/ml';
 import {
   getAPMIndexPattern,
@@ -40,7 +40,7 @@ interface FlyoutProps {
 
 interface FlyoutState {
   isLoading: boolean;
-  hasMlJob: boolean;
+  hasMLJob: boolean;
   hasIndexPattern: boolean;
 }
 
@@ -48,14 +48,14 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   public state = {
     isLoading: false,
     hasIndexPattern: false,
-    hasMlJob: false
+    hasMLJob: false
   };
 
   public componentDidMount() {
     getAPMIndexPattern().then((indexPattern?: ISavedObject) => {
       this.setState({ hasIndexPattern: !!indexPattern });
     });
-    this.checkForMlJob();
+    this.checkForMLJob();
   }
 
   public componentDidUpdate(prevProps: FlyoutProps) {
@@ -63,17 +63,17 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
       prevProps.serviceName !== this.props.serviceName ||
       prevProps.transactionType !== this.props.transactionType
     ) {
-      this.checkForMlJob();
+      this.checkForMLJob();
     }
   }
 
-  public async checkForMlJob() {
+  public async checkForMLJob() {
     const { serviceName, transactionType } = this.props;
-    const { count } = await getMlJob({
+    const { count } = await getMLJob({
       serviceName,
       transactionType
     });
-    this.setState({ hasMlJob: count > 0 });
+    this.setState({ hasMLJob: count > 0 });
   }
 
   public createJob = async () => {
@@ -81,7 +81,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
     try {
       const { serviceName, transactionType } = this.props;
       if (serviceName) {
-        const res = await startMlJob({ serviceName, transactionType });
+        const res = await startMLJob({ serviceName, transactionType });
         const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
         if (!didSucceed) {
           throw new Error('Creating ML job failed');
@@ -143,7 +143,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
 
   public render() {
     const { isOpen, onClose, serviceName, transactionType } = this.props;
-    const { isLoading, hasIndexPattern, hasMlJob } = this.state;
+    const { isLoading, hasIndexPattern, hasMLJob } = this.state;
 
     if (!isOpen) {
       return null;
@@ -158,7 +158,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
           <EuiSpacer size="s" />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {hasMlJob && (
+          {hasMLJob && (
             <div>
               <EuiCallOut
                 title="Job already exists"
@@ -246,7 +246,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
               <EuiButton
                 onClick={this.createJob}
                 fill
-                disabled={isLoading || hasMlJob || !hasIndexPattern}
+                disabled={isLoading || hasMLJob || !hasIndexPattern}
               >
                 Create new job
               </EuiButton>
