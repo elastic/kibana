@@ -41,7 +41,7 @@ export async function createPromiseFromStreams(streams) {
   const last = streams[streams.length - 1];
   if (typeof last.read !== 'function' && streams.length === 1) {
     // For a nicer error than what stream.pipeline throws
-    return Promise.reject(new Error('A minimum of 2 streams is required when a non-readable stream is given'));
+    throw new Error('A minimum of 2 streams is required when a non-readable stream is given');
   }
   if (typeof last.read === 'function') {
     // We are pushing a writable stream to capture the last chunk
