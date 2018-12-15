@@ -23,7 +23,7 @@ export const reducer = (state = initialState, action) => {
     case success(t.AUTO_FOLLOW_PATTERN_GET): {
       return { ...state, byId: { ...state.byId, [action.payload.name]: action.payload } };
     }
-    case t.AUTO_FOLLOW_PATTERN_SELECT: {
+    case t.AUTO_FOLLOW_PATTERN_EDIT: {
       return { ...state, selectedId: action.payload };
     }
     case t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL: {

@@ -9,13 +9,14 @@ import { DetailPanel as DetailPanelView } from './detail_panel';
 
 import {
   getDetailPanelAutoFollowPattern,
+  getDetailPanelAutoFollowPatternName,
   getApiStatus,
   isAutoFollowPatternDetailPanelOpen as isDetailPanelOpen,
 } from '../../../../../store/selectors';
 
 import {
   closeAutoFollowPatternDetailPanel as closeDetailPanel,
-  selectAutoFollowPattern,
+  editAutoFollowPattern,
 } from '../../../../../store/actions';
 
 import {
@@ -28,6 +29,7 @@ const mapStateToProps = (state) => {
   return {
     isDetailPanelOpen: isDetailPanelOpen(state),
     autoFollowPattern: getDetailPanelAutoFollowPattern(state),
+    autoFollowPatternName: getDetailPanelAutoFollowPatternName(state),
     apiStatus: getApiStatus(scope)(state),
   };
 };
@@ -37,8 +39,8 @@ const mapDispatchToProps = (dispatch) => {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
     },
-    selectAutoFollowPattern: (name) => {
-      dispatch(selectAutoFollowPattern(name));
+    editAutoFollowPattern: (name) => {
+      dispatch(editAutoFollowPattern(name));
     }
   };
 };

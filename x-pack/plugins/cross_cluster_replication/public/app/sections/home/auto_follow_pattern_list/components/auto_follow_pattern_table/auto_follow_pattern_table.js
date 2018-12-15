@@ -59,7 +59,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
   };
 
   getTableColumns() {
-    const { intl, selectAutoFollowPattern, openDetailPanel } = this.props;
+    const { intl, editAutoFollowPattern, openDetailPanel } = this.props;
 
     return [{
       field: 'name',
@@ -155,7 +155,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
             id: 'kbn.management.editIndexPattern.fields.table.editDescription', defaultMessage: 'Edit' }),
           icon: 'pencil',
           onClick: ({ name }) => {
-            selectAutoFollowPattern(name);
+            editAutoFollowPattern(name);
             routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
           },
           type: 'icon',

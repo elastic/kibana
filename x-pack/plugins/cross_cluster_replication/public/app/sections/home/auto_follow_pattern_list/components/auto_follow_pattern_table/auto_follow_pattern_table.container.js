@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../../../../constants';
 import {
-  selectAutoFollowPattern,
+  editAutoFollowPattern,
   openAutoFollowPatternDetailPanel as openDetailPanel,
 } from '../../../../../store/actions';
 import { getApiStatus } from '../../../../../store/selectors';
@@ -21,7 +21,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  selectAutoFollowPattern: (name) => dispatch(selectAutoFollowPattern(name)),
+  editAutoFollowPattern: (name) => dispatch(editAutoFollowPattern(name)),
   openDetailPanel: (name) => {
     dispatch(openDetailPanel(name));
   },

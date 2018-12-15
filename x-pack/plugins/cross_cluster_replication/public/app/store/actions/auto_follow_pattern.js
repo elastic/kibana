@@ -13,20 +13,34 @@ import {
   deleteAutoFollowPattern as deleteAutoFollowPatternRequest,
 } from '../../services/api';
 import routing from '../../services/routing';
+import { extractQueryParams } from '../../services/query_params';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 
-export const selectAutoFollowPattern = (name) => ({
-  type: t.AUTO_FOLLOW_PATTERN_SELECT,
+export const editAutoFollowPattern = (name) => ({
+  type: t.AUTO_FOLLOW_PATTERN_EDIT,
   payload: name
 });
 
-export const openAutoFollowPatternDetailPanel = (name) => ({
-  type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
-  payload: name
-});
+export const openAutoFollowPatternDetailPanel = (name) => {
+  const { history } = routing.reactRouter;
+  const search = history.location.search;
+  const { pattern: patternName } = extractQueryParams(search);
+
+  if (patternName !== name) {
+    // Allow the user to share a deep link to this job.
+    history.replace({
+      search: `?pattern=${name}`,
+    });
+  }
+
+  return {
+    type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
+    payload: name
+  };
+};
 
 export const closeAutoFollowPatternDetailPanel = () => ({
   type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
@@ -50,7 +64,7 @@ export const getAutoFollowPattern = (id) =>
     handler: async (dispatch) => (
       getAutoFollowPatternRequest(id)
         .then((response) => {
-          dispatch(selectAutoFollowPattern(id));
+          dispatch(editAutoFollowPattern(id));
           return response;
         })
     )
@@ -76,7 +90,7 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isEditing = false) 
         });
 
       toastNotifications.addSuccess(successMessage);
-      routing.navigate('/auto_follow_patterns');
+      routing.navigate(`/auto_follow_patterns?pattern=${id}`);
     },
   })
 );

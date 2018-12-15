@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from './action_types';
-import { apiRequestStart, apiRequestEnd, setApiError, clearApiError }  from './actions/api';
+import * as t from '../action_types';
+import { apiRequestStart, apiRequestEnd, setApiError, clearApiError }  from '../actions/api';
 
 export const apiMiddleware = ({ dispatch }) => next => async (action) => {
   next(action);

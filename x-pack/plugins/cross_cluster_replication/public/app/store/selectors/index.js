@@ -21,6 +21,8 @@ export const isApiAuthorized = (scope) => createSelector(getApiError(scope), (er
 // Auto-follow pattern
 export const getAutoFollowPatternState = (state) => state.autoFollowPattern;
 export const getAutoFollowPatterns = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => autoFollowPatternsState.byId);
+export const getDetailPanelAutoFollowPatternName = createSelector(getAutoFollowPatternState,
+  (autoFollowPatternsState) => autoFollowPatternsState.detailPanelId);
 export const getSelectedAutoFollowPattern = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
   if(!autoFollowPatternsState.selectedId) {
     return null;

@@ -40,8 +40,9 @@ export class DetailPanelUi extends Component {
     isDetailPanelOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
     autoFollowPattern: PropTypes.object,
+    autoFollowPatternName: PropTypes.string,
     closeDetailPanel: PropTypes.func.isRequired,
-    selectAutoFollowPattern: PropTypes.func.isRequired,
+    editAutoFollowPattern: PropTypes.func.isRequired,
   }
 
   renderAutoFollowPattern() {
@@ -217,11 +218,14 @@ export class DetailPanelUi extends Component {
 
   renderFooter() {
     const {
-      selectAutoFollowPattern,
-      autoFollowPattern: {
-        name
-      },
+      editAutoFollowPattern,
+      autoFollowPattern,
+      autoFollowPatternName,
     } = this.props;
+
+    if (!autoFollowPattern) {
+      return null;
+    }
 
     return (
       <EuiFlyoutFooter>
@@ -232,7 +236,7 @@ export class DetailPanelUi extends Component {
                 <EuiButton
                   iconType="trash"
                   color="danger"
-                  onClick={() => deleteAutoFollowPattern(name)}
+                  onClick={() => deleteAutoFollowPattern(autoFollowPatternName)}
                 >
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
@@ -248,8 +252,8 @@ export class DetailPanelUi extends Component {
               fill
               color="primary"
               onClick={() => {
-                selectAutoFollowPattern(name);
-                routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
+                editAutoFollowPattern(autoFollowPatternName);
+                routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(autoFollowPatternName)}`));
               }}
             >
               <FormattedMessage
@@ -267,7 +271,7 @@ export class DetailPanelUi extends Component {
     const {
       isDetailPanelOpen,
       closeDetailPanel,
-      autoFollowPattern,
+      autoFollowPatternName,
     } = this.props;
 
     if (!isDetailPanelOpen) {
@@ -284,7 +288,7 @@ export class DetailPanelUi extends Component {
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m" id="autoFollowPatternDetailsFlyoutTitle">
-            <h2>{autoFollowPattern.name}</h2>
+            <h2>{autoFollowPatternName}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
