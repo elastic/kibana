@@ -548,7 +548,11 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
                       />
                     </EuiLink>,
                     "listingLimitText": <strong>
-                      listingLimit
+                      <FormattedMessage
+                        defaultMessage="listingLimit"
+                        id="kbn.dashboard.listing.listingLimitExceededListingLimitTitle"
+                        values={Object {}}
+                      />
                     </strong>,
                     "listingLimitValue": 1,
                     "totalDashboards": 2,

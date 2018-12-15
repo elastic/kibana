@@ -42,6 +42,7 @@ export class JobsListView extends Component {
 
     this.state = {
       isRefreshing: false,
+      loading: null,
       jobsSummaryList: [],
       filteredJobsSummaryList: [],
       fullJobsList: {},
@@ -245,39 +246,46 @@ export class JobsListView extends Component {
     this.setState({ isRefreshing: false });
   }
 
-  refreshJobSummaryList(forceRefresh = false) {
+  async refreshJobSummaryList(forceRefresh = false) {
     if (forceRefresh === true || this.blockRefresh === false) {
+
+      // Set loading to true for jobs_list table for initial job loading
+      if (this.state.loading === null) {
+        this.setState({ loading: true });
+      }
+
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
-      ml.jobs.jobsSummary(expandedJobsIds)
-        .then((jobs) => {
-          const fullJobsList = {};
-          const jobsSummaryList = jobs.map((job) => {
-            if (job.fullJob !== undefined) {
-              fullJobsList[job.id] = job.fullJob;
-              delete job.fullJob;
-            }
-            job.latestTimestampSortValue = (job.latestTimestampMs || 0);
-            return job;
-          });
-          const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
-          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
-            this.refreshSelectedJobs();
-          });
-
-          Object.keys(this.updateFunctions).forEach((j) => {
-            this.updateFunctions[j].setState({ job: fullJobsList[j] });
-          });
-
-          this.isDoneRefreshing();
-        })
-        .catch((error) => {
-          console.error(error);
+      try {
+        const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
+        const fullJobsList = {};
+        const jobsSummaryList = jobs.map((job) => {
+          if (job.fullJob !== undefined) {
+            fullJobsList[job.id] = job.fullJob;
+            delete job.fullJob;
+          }
+          job.latestTimestampSortValue = (job.latestTimestampMs || 0);
+          return job;
         });
+        const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
+        this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false }, () => {
+          this.refreshSelectedJobs();
+        });
+
+        Object.keys(this.updateFunctions).forEach((j) => {
+          this.updateFunctions[j].setState({ job: fullJobsList[j] });
+        });
+
+        this.isDoneRefreshing();
+      } catch (error) {
+        console.error(error);
+        this.setState({ loading: false });
+      }
     }
   }
 
   renderJobsListComponents() {
-    const jobIds = this.state.jobsSummaryList.map(j => j.id);
+    const { loading, jobsSummaryList } = this.state;
+    const jobIds = jobsSummaryList.map(j => j.id);
     return (
       <div>
         <div className="actions-bar">
@@ -301,6 +309,7 @@ export class JobsListView extends Component {
           showStartDatafeedModal={this.showStartDatafeedModal}
           refreshJobs={() => this.refreshJobSummaryList(true)}
           selectedJobsCount={this.state.selectedJobs.length}
+          loading={loading}
         />
         <EditJobFlyout
           setShowFunction={this.setShowEditJobFlyoutFunction}

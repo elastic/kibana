@@ -33,6 +33,8 @@ import {
   rgbToHex,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class CreateButton extends Component {
   constructor(props) {
     super(props);
@@ -64,7 +66,12 @@ export class CreateButton extends Component {
   renderBetaBadge = () => {
     const color = rgbToHex(euiColorAccent);
     return (
-      <EuiBadge color={color}>Beta</EuiBadge>
+      <EuiBadge color={color}>
+        <FormattedMessage
+          id="kbn.management.indexPatternList.createButton.betaLabel"
+          defaultMessage="Beta"
+        />
+      </EuiBadge>
     );
   };
 
