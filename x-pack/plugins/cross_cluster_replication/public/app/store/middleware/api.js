@@ -7,7 +7,7 @@
 import * as t from '../action_types';
 import { apiRequestStart, apiRequestEnd, setApiError, clearApiError }  from '../actions/api';
 
-export const apiMiddleware = ({ dispatch }) => next => async (action) => {
+export const apiMiddleware = ({ dispatch, getState }) => next => async (action) => {
   next(action);
 
   if (action.type !== t.API) {
@@ -25,13 +25,13 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     dispatch(apiRequestEnd({ label, scope }));
     dispatch({ type: `${label}_SUCCESS`, payload: response });
 
-    onSuccess(response, dispatch);
+    onSuccess(response, dispatch, getState);
 
   } catch (error) {
     dispatch(apiRequestEnd({ label, scope }));
     dispatch(setApiError({ error, scope }));
     dispatch({ type: `${label}_FAILURE`, payload: error });
 
-    onError(error, dispatch);
+    onError(error, dispatch, getState);
   }
 };
