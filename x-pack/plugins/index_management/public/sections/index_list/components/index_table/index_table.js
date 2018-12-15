@@ -324,7 +324,6 @@ export class IndexTableUi extends Component {
       indicesLoading,
       allIndices
     } = this.props;
-    console.log("L", indicesLoading, allIndices);
     const emptyState = indicesLoading ? (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
