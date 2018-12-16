@@ -7,6 +7,13 @@
 import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
+  type FilterBar {
+    id: [String]
+    port: [Int]
+    scheme: [String]
+    status: [String]
+  }
+
   type HistogramDataPoint {
     upCount: Int
     downCount: Int
@@ -75,13 +82,18 @@ export const monitorsSchema = gql`
   }
 
   extend type Query {
-    getMonitors(start: UnsignedInteger, end: UnsignedInteger): LatestMonitorsResult
+    getMonitors(
+      dateRangeStart: UnsignedInteger!
+      dateRangeEnd: UnsignedInteger!
+      filters: String
+    ): LatestMonitorsResult
 
     getSnapshot(
-      start: UnsignedInteger
-      end: UnsignedInteger
+      dateRangeStart: UnsignedInteger
+      dateRangeEnd: UnsignedInteger
       downCount: Int
       windowSize: Int
+      filters: String
     ): Snapshot
 
     getMonitorChartsData(
@@ -91,9 +103,11 @@ export const monitorsSchema = gql`
     ): [MonitorChartEntry]
 
     getLatestMonitors(
-      dateRangeStart: UnsignedInteger
-      dateRangeEnd: UnsignedInteger
+      dateRangeStart: UnsignedInteger!
+      dateRangeEnd: UnsignedInteger!
       monitorId: String
     ): [Ping!]!
+
+    getFilterBar(dateRangeStart: UnsignedInteger!, dateRangeEnd: UnsignedInteger!): FilterBar
   }
 `;

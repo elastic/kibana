@@ -8,16 +8,18 @@ import gql from 'graphql-tag';
 
 export const getSnapshotQuery = gql`
   query Snapshot(
-    $start: UnsignedInteger
-    $end: UnsignedInteger
+    $dateRangeStart: UnsignedInteger
+    $dateRangeEnd: UnsignedInteger
     $downCount: Int
     $windowSize: Int
+    $filters: String
   ) {
     snapshot: getSnapshot(
-      start: $start
-      end: $end
+      dateRangeStart: $dateRangeStart
+      dateRangeEnd: $dateRangeEnd
       downCount: $downCount
       windowSize: $windowSize
+      filters: $filters
     ) {
       up
       down

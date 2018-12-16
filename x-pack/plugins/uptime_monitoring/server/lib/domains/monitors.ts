@@ -21,16 +21,31 @@ export class UMMonitorsDomain {
     return this.adapter.getMonitorChartsData(request, monitorId, dateRangeStart, dateRangeEnd);
   }
 
-  public async getLatestMonitors(request: any, range: UMGqlRange): Promise<any> {
-    return this.adapter.getLatestMonitors(request, range);
+  public async getMonitors(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    filters: string
+  ): Promise<any> {
+    return this.adapter.getLatestMonitors(request, dateRangeStart, dateRangeEnd, filters);
   }
 
   public async getSnapshotCount(
     request: any,
     range: UMGqlRange,
     downCount: number,
-    windowSize: number
+    windowSize: number,
+    filters?: string
   ): Promise<any> {
-    return this.adapter.getSnapshotCount(request, range, downCount, windowSize);
+    return this.adapter.getSnapshotCount(request, range, downCount, windowSize, filters);
+  }
+
+  // TODO: this should adhere to the date range as well
+  public async getFilterBar(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number
+  ): Promise<any> {
+    return this.adapter.getFilterBar(request, dateRangeStart, dateRangeEnd);
   }
 }

@@ -7,8 +7,16 @@
 import gql from 'graphql-tag';
 
 export const getMonitorListQuery = gql`
-  query MonitorList($start: UnsignedInteger, $end: UnsignedInteger) {
-    monitorStatus: getMonitors(start: $start, end: $end) {
+  query MonitorList(
+    $dateRangeStart: UnsignedInteger!
+    $dateRangeEnd: UnsignedInteger!
+    $filters: String
+  ) {
+    monitorStatus: getMonitors(
+      dateRangeStart: $dateRangeStart
+      dateRangeEnd: $dateRangeEnd
+      filters: $filters
+    ) {
       monitors {
         key {
           id

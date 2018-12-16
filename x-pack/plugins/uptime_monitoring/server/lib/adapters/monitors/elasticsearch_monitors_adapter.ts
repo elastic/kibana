@@ -36,6 +36,29 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   };
 };
 
+const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+  let filtersObj;
+  // TODO: handle bad JSON gracefully
+  filtersObj = filters ? JSON.parse(filters) : undefined;
+  let query = { ...filtersObj };
+  const rangeSection = {
+    range: {
+      '@timestamp': {
+        gte: dateRangeStart,
+        lte: dateRangeEnd,
+      },
+    },
+  };
+  if (get(query, 'bool.must', undefined)) {
+    query.bool.must.push({
+      ...rangeSection,
+    });
+  } else {
+    query = { ...rangeSection };
+  }
+  return query;
+};
+
 export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
@@ -119,20 +142,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     range: UMGqlRange,
     downCount: number,
-    windowSize: number
+    windowSize: number,
+    filters: string = ''
   ): Promise<any> {
-    const { start, end } = range;
+    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: {
-          range: {
-            '@timestamp': {
-              gte: start,
-              lte: end,
-            },
-          },
-        },
+        query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
         aggs: {
           hosts: {
             composite: {
@@ -206,19 +223,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     return { up, down, trouble, total: up + down + trouble };
   }
 
-  public async getLatestMonitors(request: any, range: UMGqlRange): Promise<any> {
-    const { start, end } = range;
+  public async getLatestMonitors(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    filters: string
+  ): Promise<any> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: {
-          range: {
-            '@timestamp': {
-              gte: start,
-              lte: end,
-            },
-          },
-        },
+        query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
         aggs: {
           hosts: {
             composite: {
@@ -297,5 +311,59 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       };
     });
     return result;
+  }
+
+  public async getFilterBar(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number
+  ): Promise<any> {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: dateRangeStart,
+              lte: dateRangeEnd,
+            },
+          },
+        },
+        aggs: {
+          id: {
+            terms: {
+              field: 'monitor.id',
+            },
+          },
+          port: {
+            terms: {
+              field: 'tcp.port',
+            },
+          },
+          scheme: {
+            terms: {
+              field: 'monitor.scheme',
+            },
+          },
+          status: {
+            terms: {
+              field: 'monitor.status',
+            },
+          },
+        },
+      },
+    };
+    const {
+      aggregations: { scheme, port, id, status },
+    } = await this.database.search(request, params);
+
+    // TODO update typings
+    const getKey = (list: { buckets: any[] }) => list.buckets.map(value => value.key);
+    return {
+      scheme: getKey(scheme),
+      port: getKey(port),
+      id: getKey(id),
+      status: getKey(status),
+    };
   }
 }

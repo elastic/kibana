@@ -26,20 +26,22 @@ import { getMonitorListQuery } from './get_monitor_list';
 interface MonitorListProps {
   autorefreshInterval: number;
   autorefreshEnabled: boolean;
-  start: number;
-  end: number;
+  dateRangeStart: number;
+  dateRangeEnd: number;
+  filters?: string;
 }
 
 export const MonitorList = ({
   autorefreshInterval,
   autorefreshEnabled,
-  start,
-  end,
+  dateRangeStart,
+  dateRangeEnd,
+  filters,
 }: MonitorListProps) => (
   <Query
     pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
     query={getMonitorListQuery}
-    variables={{ start, end }}
+    variables={{ dateRangeStart, dateRangeEnd, filters }}
   >
     {({ loading, error, data }) => {
       if (loading) {

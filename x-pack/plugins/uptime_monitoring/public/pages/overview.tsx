@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { Link } from 'react-router-dom';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
+import { FilterBar } from '../components/queries/filter_bar';
 import { MonitorList } from '../components/queries/monitor_list';
 import { Snapshot } from '../components/queries/snapshot';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
@@ -20,9 +20,16 @@ interface OverviewPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export class OverviewPage extends React.Component<OverviewPageProps> {
+interface OverviewPageState {
+  currentFilterQuery?: string;
+}
+
+export class OverviewPage extends React.Component<OverviewPageProps, OverviewPageState> {
   constructor(props: OverviewPageProps) {
     super(props);
+    this.state = {
+      currentFilterQuery: undefined,
+    };
   }
 
   public componentWillMount() {
@@ -33,18 +40,29 @@ export class OverviewPage extends React.Component<OverviewPageProps> {
     const { autorefreshEnabled, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.props;
     return (
       <Fragment>
+        <FilterBar
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          updateQuery={(query: object) => {
+            if (query) {
+              this.setState({ currentFilterQuery: JSON.stringify(query) });
+            }
+          }}
+        />
         <Snapshot
           autorefreshEnabled={autorefreshEnabled}
           autorefreshInterval={autorefreshInterval}
           dateRangeStart={dateRangeStart}
           dateRangeEnd={dateRangeEnd}
+          filters={this.state.currentFilterQuery}
         />
         <EuiSpacer size="xl" />
         <MonitorList
           autorefreshEnabled={autorefreshEnabled}
           autorefreshInterval={autorefreshInterval}
-          start={dateRangeStart}
-          end={dateRangeEnd}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          filters={this.state.currentFilterQuery}
         />
       </Fragment>
     );

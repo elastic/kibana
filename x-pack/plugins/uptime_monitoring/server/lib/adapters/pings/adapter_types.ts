@@ -25,5 +25,9 @@ export interface UMPingsAdapter {
     monitorId?: string
   ): Promise<Ping[]>;
 
-  getPingHistogram(request: any, range: UMGqlRange): Promise<HistogramSeries[] | null>;
+  getPingHistogram(
+    request: any,
+    range: UMGqlRange,
+    filters?: string
+  ): Promise<HistogramSeries[] | null>;
 }

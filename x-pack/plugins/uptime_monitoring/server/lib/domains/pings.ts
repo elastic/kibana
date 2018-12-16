@@ -42,7 +42,11 @@ export class UMPingsDomain {
     return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd, monitorId);
   }
 
-  public async getHist(request: any, range: UMGqlRange): Promise<HistogramSeries[] | null> {
-    return this.adapter.getPingHistogram(request, range);
+  public async getHist(
+    request: any,
+    range: UMGqlRange,
+    filters?: string
+  ): Promise<HistogramSeries[] | null> {
+    return this.adapter.getPingHistogram(request, range, filters);
   }
 }

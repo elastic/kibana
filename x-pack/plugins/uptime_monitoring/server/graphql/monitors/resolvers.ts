@@ -25,6 +25,19 @@ interface UMLatestMonitorsArgs {
   monitorId?: string;
 }
 
+interface UMGetMonitorsArgs {
+  dateRangeStart: number;
+  dateRangeEnd: number;
+  filters: string;
+}
+
+export type UMGetMonitorsResolver = UMResolver<
+  any | Promise<any>,
+  any,
+  UMGetMonitorsArgs,
+  UMContext
+>;
+
 export type UMLatestMonitorsResolver = UMResolver<
   Ping[] | Promise<Ping[]>,
   any,
@@ -33,10 +46,11 @@ export type UMLatestMonitorsResolver = UMResolver<
 >;
 
 interface GetSnapshotArgs {
-  start: number;
-  end: number;
+  dateRangeStart: number;
+  dateRangeEnd: number;
   downCount: number;
   windowSize: number;
+  filters?: string;
 }
 
 interface UMMonitorChartsArgs {
@@ -52,31 +66,48 @@ export type UMGetMonitorChartsResolver = UMResolver<
   UMContext
 >;
 
+interface UMGetFilterBarArgs {
+  dateRangeStart: number;
+  dateRangeEnd: number;
+}
+
+export type UMGetFilterBarResolver = UMResolver<
+  any | Promise<any>,
+  any,
+  UMGetFilterBarArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
   Query: {
-    getMonitors: any;
+    getMonitors: UMGetMonitorsResolver;
     getSnapshot: UMSnapshotResolver;
     getMonitorChartsData: UMGetMonitorChartsResolver;
     getLatestMonitors: UMLatestMonitorsResolver;
+    getFilterBar: UMGetFilterBarResolver;
   };
 } => ({
   Query: {
     // @ts-ignore TODO update typings and remove this comment
-    async getMonitors(resolver, args, { req }): Promise<any> {
-      const result = await libs.monitors.getLatestMonitors(req, args);
+    async getMonitors(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
+      const result = await libs.monitors.getMonitors(req, dateRangeStart, dateRangeEnd, filters);
       return {
         monitors: result,
       };
     },
-    async getSnapshot(resolver, args, { req }): Promise<any> {
-      const { start, end, downCount, windowSize } = args;
+    async getSnapshot(
+      resolver,
+      { dateRangeStart, dateRangeEnd, downCount, windowSize, filters },
+      { req }
+    ): Promise<any> {
       const { up, down, trouble } = await libs.monitors.getSnapshotCount(
         req,
-        { start, end },
+        { dateRangeStart, dateRangeEnd },
         downCount,
-        windowSize
+        windowSize,
+        filters
       );
 
       return {
@@ -85,7 +116,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         // @ts-ignore TODO update typings and remove this comment
         trouble,
         total: up + down + trouble,
-        histogram: await libs.pings.getHist(req, { start, end }),
+        histogram: await libs.pings.getHist(req, { dateRangeStart, dateRangeEnd }, filters),
       };
     },
     async getMonitorChartsData(
@@ -101,6 +132,9 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { req }
     ): Promise<Ping[]> {
       return libs.pings.getLatestMonitorDocs(req, dateRangeStart, dateRangeEnd, monitorId);
+    },
+    async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<any> {
+      return libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
     },
   },
 });

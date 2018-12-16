@@ -4,11 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { HistogramSeries, Ping } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
+
+const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+  let filtersObj;
+  // TODO: handle bad JSON gracefully
+  filtersObj = filters ? JSON.parse(filters) : undefined;
+  let query = { ...filtersObj };
+  const rangeSection = {
+    range: {
+      '@timestamp': {
+        gte: dateRangeStart,
+        lte: dateRangeEnd,
+      },
+    },
+  };
+  if (get(query, 'bool.must', undefined)) {
+    query.bool.must.push({
+      ...rangeSection,
+    });
+  } else {
+    query = { ...rangeSection };
+  }
+  return query;
+};
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -116,20 +140,14 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getPingHistogram(
     request: any,
-    range: UMGqlRange
+    range: UMGqlRange,
+    filters?: string
   ): Promise<HistogramSeries[] | null> {
-    const { start, end } = range;
+    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: {
-          range: {
-            '@timestamp': {
-              gte: start,
-              lte: end,
-            },
-          },
-        },
+        query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
         aggs: {
           timeseries: {
             auto_date_histogram: {

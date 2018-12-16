@@ -31,6 +31,7 @@ interface SnapshotProps {
   dateRangeEnd: number;
   autorefreshEnabled: boolean;
   autorefreshInterval: number;
+  filters?: string;
 }
 
 const formatHistogramData = (histogram: any) => {
@@ -66,12 +67,13 @@ export const Snapshot = ({
   dateRangeEnd,
   autorefreshEnabled,
   autorefreshInterval,
+  filters,
 }: SnapshotProps) => (
   <Query
     pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
     query={getSnapshotQuery}
     // TODO downCount and windowSize aren't needed for MVP
-    variables={{ dateRangeStart, dateRangeEnd, downCount: 1, windowSize: 1 }}
+    variables={{ dateRangeStart, dateRangeEnd, downCount: 1, windowSize: 1, filters }}
   >
     {({ loading, error, data }) => {
       if (loading) {
