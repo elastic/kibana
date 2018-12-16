@@ -69,6 +69,10 @@ export default function (opts) {
       const getIds = Private(IndexPatternsGetProvider)('id');
       const route = _.get($route, 'current.$$route');
 
+      if (!route.requireDefaultIndex) {
+        return;
+      }
+
       return getIds()
         .then(function (patterns) {
           let defaultId = config.get('defaultIndex');
@@ -80,7 +84,7 @@ export default function (opts) {
             defaultId = defined = false;
           }
 
-          if (!defined && route.requireDefaultIndex) {
+          if (!defined) {
             // If there is only one index pattern, set it as default
             if (patterns.length === 1) {
               defaultId = patterns[0];

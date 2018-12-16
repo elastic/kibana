@@ -115,7 +115,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               textAnchor="middle"
               transform="translate(0, 18)"
             >
-              0
+              0 ms
             </text>
           </g>
           <g

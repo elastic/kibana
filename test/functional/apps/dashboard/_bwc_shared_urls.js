@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const queryBar = getService('queryBar');
 
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
 
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
     });
 
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
-        await remote.get(url, true);
+        await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const url = `${kibanaBaseUrl}#/dashboard/${id}`;
-        await remote.get(url, true);
+        await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
         const updatedQuery = urlQuery.replace(/F9D9F9/g, '000000');
         const url = `${kibanaBaseUrl}#/dashboard/${id}?${updatedQuery}`;
 
-        await remote.get(url, true);
+        await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await dashboardExpect.selectedLegendColorCount('#000000', 5);

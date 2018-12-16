@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
 import { CRUD_APP_BASE_PATH } from './constants';
-import { registerRouter } from './services';
+import { registerRouter, setUserHasLeftApp } from './services';
 import { JobList, JobCreate } from './sections';
 
 export class App extends Component {
@@ -31,6 +31,11 @@ export class App extends Component {
     // Share the router with the app without requiring React or context.
     const { router } = this.context;
     registerRouter(router);
+  }
+
+  componentWillUnmount() {
+    // Set internal flag so we can prevent reacting to route changes internally.
+    setUserHasLeftApp(true);
   }
 
   render() {

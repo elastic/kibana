@@ -20,11 +20,18 @@
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
+import { i18n } from '@kbn/i18n';
+
+const overallMinLabel = i18n.translate('common.ui.aggTypes.metrics.overallMinLabel', {
+  defaultMessage: 'overall min'
+});
 
 export const bucketMinMetricAgg = new MetricAggType({
   name: 'min_bucket',
-  title: 'Min Bucket',
-  makeLabel: agg => makeNestedLabel(agg, 'overall min'),
+  title: i18n.translate('common.ui.aggTypes.metrics.minBucketTitle', {
+    defaultMessage: 'Min Bucket'
+  }),
+  makeLabel: agg => makeNestedLabel(agg, overallMinLabel),
   subtype: siblingPipelineAggHelper.subtype,
   params: [
     ...siblingPipelineAggHelper.params()

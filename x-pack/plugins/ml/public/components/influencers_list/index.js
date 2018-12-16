@@ -6,4 +6,3 @@
 
 
 import './influencers_list_directive';
-import './styles/main.less';

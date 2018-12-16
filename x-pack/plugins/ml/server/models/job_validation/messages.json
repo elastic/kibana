@@ -89,7 +89,7 @@
   },
   "detectors_function_not_empty": {
     "status": "SUCCESS",
-    "heading": "Dectector functions",
+    "heading": "Detector functions",
     "text": "Presence of detector functions validated in all detectors.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },

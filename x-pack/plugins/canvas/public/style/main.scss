@@ -19,6 +19,7 @@
     linear-gradient(45deg, transparent 75%, #ddd 75%),
     linear-gradient(-45deg, transparent 75%, #ddd 75%);
   background-size: 8px 8px;
+  position: relative;
 }
 
 .canvasTextArea--code {
@@ -29,10 +30,9 @@
   max-width: 100%;
 }
 
-#canvas-app body {
+#canvas-app {
   overflow-y: hidden;
 
-  // Todo: replace this with EuiToast
   .window-error {
     position: absolute;
     bottom: 10px;

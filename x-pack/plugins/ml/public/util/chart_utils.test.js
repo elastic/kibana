@@ -136,6 +136,15 @@ describe('getTickValues', () => {
       1519257600000
     ]);
   });
+
+  test('invalid tickIntervals trigger an error', () => {
+    expect(() => {
+      getTickValues(1518652800000, 0, 1518274800000, 1519635600000);
+    }).toThrow();
+    expect(() => {
+      getTickValues(1518652800000, -604800000, 1518274800000, 1519635600000);
+    }).toThrow();
+  });
 });
 
 describe('isLabelLengthAboveThreshold', () => {

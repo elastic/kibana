@@ -11,6 +11,7 @@ import { SAMLAuthenticationProvider } from './providers/saml';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
+import { LoginAttempt } from './login_attempt';
 
 // Mapping between provider key defined in the config and authentication
 // provider class that can handle specific authentication mechanism.
@@ -169,6 +170,10 @@ class Authenticator {
         }
       }
 
+      if (authenticationResult.failed()) {
+        return authenticationResult;
+      }
+
       if (authenticationResult.succeeded()) {
         // we have to do this here, as the auth scope's could be dependent on this
         await this._authorizationMode.initialize(request);
@@ -211,25 +216,6 @@ class Authenticator {
     }
 
     return DeauthenticationResult.notHandled();
-  }
-
-  /**
-   * Serializes the request's session.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<string>}
-   */
-  async serializeSession(request) {
-    assertRequest(request);
-
-    return await this._session.serialize(request);
-  }
-
-  /**
-   * Returns the options that we're using for the session cookie
-   * @returns {CookieOptions}
-   */
-  getSessionCookieOptions() {
-    return this._session.getCookieOptions();
   }
 
   /**
@@ -297,11 +283,18 @@ export async function initAuthenticator(server, authorizationMode) {
   const authScope = new AuthScopeService();
   const authenticator = new Authenticator(server, authScope, session, authorizationMode);
 
+  const loginAttempts = new WeakMap();
+  server.decorate('request', 'loginAttempt', function () {
+    const request = this;
+    if (!loginAttempts.has(request)) {
+      loginAttempts.set(request, new LoginAttempt());
+    }
+    return loginAttempts.get(request);
+  });
+
   server.expose('authenticate', (request) => authenticator.authenticate(request));
   server.expose('deauthenticate', (request) => authenticator.deauthenticate(request));
   server.expose('registerAuthScopeGetter', (scopeExtender) => authScope.registerGetter(scopeExtender));
-  server.expose('serializeSession', (request) => authenticator.serializeSession(request));
-  server.expose('getSessionCookieOptions', () => authenticator.getSessionCookieOptions());
 
   server.expose('isAuthenticated', async (request) => {
     try {

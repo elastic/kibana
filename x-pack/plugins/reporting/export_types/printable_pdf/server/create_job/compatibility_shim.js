@@ -61,7 +61,7 @@ export function compatibilityShimFactory(server) {
       queryString,
       browserTimezone,
       layout
-    }, headers, serializedSession, request) {
+    }, headers, request) {
 
       if (objectType && savedObjectId && relativeUrls) {
         throw new Error('objectType and savedObjectId should not be provided in addition to the relativeUrls');
@@ -75,7 +75,7 @@ export function compatibilityShimFactory(server) {
         layout
       };
 
-      return await createJob(transformedJobParams, headers, serializedSession, request);
+      return await createJob(transformedJobParams, headers, request);
     };
   };
 }

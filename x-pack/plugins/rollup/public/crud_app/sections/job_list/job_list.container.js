@@ -5,7 +5,6 @@
  */
 
 import { connect } from 'react-redux';
-import { JobList as JobListView } from './job_list';
 
 import {
   getPageOfJobs,
@@ -19,6 +18,8 @@ import {
   openDetailPanel,
   closeDetailPanel,
 } from '../../store/actions';
+
+import { JobList as JobListView } from './job_list';
 
 const mapStateToProps = (state) => {
   return {

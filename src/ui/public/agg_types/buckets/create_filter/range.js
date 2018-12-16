@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { buildRangeFilter } from '../../../filter_manager/lib/range';
+import { buildRangeFilter } from '@kbn/es-query';
 
 export function createFilterRange(aggConfig, key) {
   return buildRangeFilter(

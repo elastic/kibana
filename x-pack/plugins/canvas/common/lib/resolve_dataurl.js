@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { isValid } from '../../common/lib/url';
+import { isValidUrl } from '../../common/lib/url';
 import { missingImage } from '../../common/lib/missing_asset';
 
 /*
@@ -15,11 +15,11 @@ import { missingImage } from '../../common/lib/missing_asset';
  */
 export const resolveFromArgs = (args, defaultDataurl = null) => {
   const dataurl = get(args, 'dataurl.0', null);
-  return isValid(dataurl) ? dataurl : defaultDataurl;
+  return isValidUrl(dataurl) ? dataurl : defaultDataurl;
 };
 
 export const resolveWithMissingImage = (img, alt = null) => {
-  if (isValid(img)) return img;
+  if (isValidUrl(img)) return img;
   if (img === null) return alt;
   return missingImage;
 };

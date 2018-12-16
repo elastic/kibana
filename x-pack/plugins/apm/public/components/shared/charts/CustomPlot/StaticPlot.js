@@ -9,7 +9,8 @@ import {
   YAxis,
   HorizontalGridLines,
   LineSeries,
-  AreaSeries
+  AreaSeries,
+  VerticalRectSeries
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
@@ -56,13 +57,14 @@ class StaticPlot extends PureComponent {
       case 'areaMaxHeight':
         const yMax = last(plotValues.yTickValues);
         const data = serie.data.map(p => ({
+          x0: p.x0,
           x: p.x,
           y0: 0,
-          y: p.y ? yMax : null
+          y: yMax
         }));
 
         return (
-          <AreaSeries
+          <VerticalRectSeries
             getNull={d => d.y !== null}
             key={serie.title}
             xType="time"

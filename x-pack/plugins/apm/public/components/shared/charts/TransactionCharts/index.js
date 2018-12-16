@@ -63,11 +63,7 @@ export class Charts extends Component {
   };
 
   getResponseTimeTooltipFormatter = (p = {}) => {
-    if (this.props.charts.noHits) {
-      return '- ms';
-    } else {
-      return p.y == null ? 'N/A' : asMillis(p.y);
-    }
+    return this.props.charts.noHits ? '- ms' : asMillis(p.y);
   };
 
   getTPMFormatter = t => {
@@ -139,7 +135,7 @@ function responseTimeLabel(type) {
     case 'route-change':
       return 'Route change times';
     default:
-      return 'Response times';
+      return 'Transactions duration';
   }
 }
 

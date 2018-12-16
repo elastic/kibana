@@ -7,7 +7,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { elasticLogo } from '../lib/elastic_logo';
-import { isValid } from '../../common/lib/url';
+import { isValidUrl } from '../../common/lib/url';
 
 export const image = () => ({
   name: 'image',
@@ -15,7 +15,7 @@ export const image = () => ({
   help: 'Render an image',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const dataurl = isValid(config.dataurl) ? config.dataurl : elasticLogo;
+    const dataurl = isValidUrl(config.dataurl) ? config.dataurl : elasticLogo;
 
     const style = {
       height: '100%',

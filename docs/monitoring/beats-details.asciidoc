@@ -1,6 +1,6 @@
 [role="xpack"]
 [[beats-page]]
-=== Beats Monitoring Metrics
+== Beats Monitoring Metrics
 ++++
 <titleabbrev>Beats Metrics</titleabbrev>
 ++++

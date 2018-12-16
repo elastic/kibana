@@ -21,7 +21,7 @@ uiRoutes.when('/overview', {
       return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
     }
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -29,7 +29,7 @@ uiRoutes.when('/overview', {
     $scope.cluster = $route.current.locals.cluster;
 
     const title = $injector.get('title');
-    title($scope.cluster, 'Overview');
+    title($scope.cluster, i18n('xpack.monitoring.cluster.overviewTitle', { defaultMessage: 'Overview' }));
 
     const $executor = $injector.get('$executor');
     const monitoringClusters = $injector.get('monitoringClusters');

@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
 import { BaseAction } from './base_action';
-import { ACTION_TYPES } from '../../../common/constants';
+import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class EmailAction extends BaseAction {
-  constructor(props) {
+  constructor(props, errors) {
     props.type = ACTION_TYPES.EMAIL;
-    super(props);
+    super(props, errors);
 
     this.to = props.to;
     this.subject = props.subject;
@@ -34,14 +33,16 @@ export class EmailAction extends BaseAction {
   // From Kibana
   static fromDownstreamJson(json) {
     const props = super.getPropsFromDownstreamJson(json);
+    const { errors } = this.validateJson(json);
 
     Object.assign(props, {
       to: json.to,
       subject: json.subject,
-      body: json.body
+      body: json.body,
     });
 
-    return new EmailAction(props);
+    const action = new EmailAction(props, errors);
+    return { action, errors };
   }
 
   // To Elasticsearch
@@ -70,29 +71,10 @@ export class EmailAction extends BaseAction {
   // From Elasticsearch
   static fromUpstreamJson(json) {
     const props = super.getPropsFromUpstreamJson(json);
-
-    if (!json.actionJson.email) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.emailAction.absenceOfActionJsonEmailPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonEmail} property',
-          values: {
-            actionJsonEmail: 'actionJson.email'
-          }
-        }),
-      );
-    }
-    if (!json.actionJson.email.to) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.emailAction.absenceOfActionJsonEmailToPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonEmailTo} property',
-          values: {
-            actionJsonEmailTo: 'actionJson.email.to'
-          }
-        }),
-      );
-    }
+    const { errors } = this.validateJson(json.actionJson);
 
     const optionalFields = {};
+
     if (json.actionJson.email.subject) {
       optionalFields.subject = json.actionJson.email.subject;
     }
@@ -106,7 +88,45 @@ export class EmailAction extends BaseAction {
       ...optionalFields,
     });
 
-    return new EmailAction(props);
+    const action = new EmailAction(props, errors);
+
+    return { action, errors };
+  }
+
+  static validateJson(json) {
+    const errors = [];
+
+    if (!json.email) {
+      const message = i18n.translate('xpack.watcher.models.emailAction.actionJsonEmailPropertyMissingBadRequestMessage', {
+        defaultMessage: 'json argument must contain an {actionJsonEmail} property',
+        values: {
+          actionJsonEmail: 'actionJson.email'
+        }
+      });
+
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message
+      });
+
+      json.email = {};
+    }
+
+    if (!json.email.to) {
+      const message = i18n.translate('xpack.watcher.models.emailAction.actionJsonEmailToPropertyMissingBadRequestMessage', {
+        defaultMessage: 'json argument must contain an {actionJsonEmailTo} property',
+        values: {
+          actionJsonEmailTo: 'actionJson.email.to'
+        }
+      });
+
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message
+      });
+    }
+
+    return { errors: errors.length ? errors : null };
   }
 
   /*

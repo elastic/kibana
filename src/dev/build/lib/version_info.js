@@ -32,10 +32,15 @@ async function getBuildNumber() {
   return parseFloat(wc.stdout.trim());
 }
 
-export async function getVersionInfo({ isRelease, pkg }) {
+export async function getVersionInfo({ isRelease, versionQualifier, pkg }) {
+  const buildVersion = pkg.version.concat(
+    versionQualifier ? `-${versionQualifier}` : '',
+    isRelease ? '' : '-SNAPSHOT'
+  );
+
   return {
     buildSha: await execa.stdout('git', ['rev-parse', 'HEAD']),
-    buildVersion: isRelease ? pkg.version : `${pkg.version}-SNAPSHOT`,
+    buildVersion,
     buildNumber: await getBuildNumber(),
   };
 }

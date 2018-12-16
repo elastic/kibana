@@ -7,7 +7,7 @@
 import $ from 'jquery';
 import { times } from 'lodash';
 import { elasticOutline } from '../lib/elastic_outline';
-import { isValid } from '../../common/lib/url';
+import { isValidUrl } from '../../common/lib/url';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
@@ -18,7 +18,7 @@ export const repeatImage = () => ({
     const settings = {
       count: 10,
       ...config,
-      image: isValid(config.image) ? config.image : elasticOutline,
+      image: isValidUrl(config.image) ? config.image : elasticOutline,
     };
 
     const container = $('<div class="repeatImage" style="pointer-events: none;">');
@@ -39,7 +39,7 @@ export const repeatImage = () => ({
       if (settings.max && settings.count > settings.max) settings.count = settings.max;
       times(settings.count, () => container.append(img.cloneNode(true)));
 
-      if (isValid(settings.emptyImage)) {
+      if (isValidUrl(settings.emptyImage)) {
         if (settings.max == null) throw new Error('max must be set if using an emptyImage');
 
         const emptyImage = new Image();

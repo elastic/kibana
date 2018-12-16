@@ -7,7 +7,6 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
-import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
 
 export function initAuthenticateApi(server) {
@@ -18,10 +17,10 @@ export function initAuthenticateApi(server) {
     config: {
       auth: false,
       validate: {
-        payload: {
+        payload: Joi.object({
           username: Joi.string().required(),
           password: Joi.string().required()
-        }
+        })
       },
       response: {
         emptyStatusCode: 204,
@@ -31,9 +30,8 @@ export function initAuthenticateApi(server) {
       const { username, password } = request.payload;
 
       try {
-        const authenticationResult = await server.plugins.security.authenticate(
-          BasicCredentials.decorateRequest(request, username, password)
-        );
+        request.loginAttempt().setCredentials(username, password);
+        const authenticationResult = await server.plugins.security.authenticate(request);
 
         if (!authenticationResult.succeeded()) {
           throw Boom.unauthorized(authenticationResult.error);
@@ -58,10 +56,10 @@ export function initAuthenticateApi(server) {
     config: {
       auth: false,
       validate: {
-        payload: {
+        payload: Joi.object({
           SAMLResponse: Joi.string().required(),
           RelayState: Joi.string().allow('')
-        }
+        })
       }
     },
     async handler(request, h) {

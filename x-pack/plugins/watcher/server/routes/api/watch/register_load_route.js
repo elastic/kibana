@@ -30,16 +30,20 @@ export function registerLoadRoute(server) {
       const id = request.params.id;
 
       return fetchWatch(callWithRequest, id)
-        .then((hit) => {
+        .then(hit => {
           const watchJson = get(hit, 'watch');
           const watchStatusJson = get(hit, 'status');
           const json = {
             id,
             watchJson,
-            watchStatusJson
+            watchStatusJson,
           };
 
-          const watch = Watch.fromUpstreamJson(json);
+          const watch = Watch.fromUpstreamJson(json, {
+            throwExceptions: {
+              Action: false,
+            },
+          });
           return {
             watch: watch.downstreamJson
           };
@@ -48,7 +52,7 @@ export function registerLoadRoute(server) {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             const statusCodeToMessageMap = {
-              404: `Watch with id = ${id} not found`
+              404: `Watch with id = ${id} not found`,
             };
             throw wrapEsError(err, statusCodeToMessageMap);
           }

@@ -19,7 +19,7 @@
 
 const execa = require('execa');
 const chalk = require('chalk');
-const { installSnapshot, installSource, installArchive } = require('./install');
+const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
 const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
 const { createCliError } = require('./errors');
@@ -44,6 +44,28 @@ exports.Cluster = class Cluster {
     this._log.indent(4);
 
     const { installPath } = await installSource({ log: this._log, ...options });
+
+    this._log.indent(-4);
+
+    return { installPath };
+  }
+
+  /**
+   * Download ES from a snapshot
+   *
+   * @param {Object} options
+   * @property {Array} options.installPath
+   * @property {Array} options.sourcePath
+   * @returns {Promise<{installPath}>}
+   */
+  async downloadSnapshot(options = {}) {
+    this._log.info(chalk.bold('Downloading snapshot'));
+    this._log.indent(4);
+
+    const { installPath } = await downloadSnapshot({
+      log: this._log,
+      ...options,
+    });
 
     this._log.indent(-4);
 

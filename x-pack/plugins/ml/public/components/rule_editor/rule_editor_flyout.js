@@ -53,8 +53,6 @@ import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { metadata } from 'ui/metadata';
 
-import './styles/main.less';
-
 // metadata.branch corresponds to the version used in documentation links.
 const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-rules.html`;
 

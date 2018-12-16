@@ -100,11 +100,4 @@ export const jobs = {
     });
   },
 
-  jobAuditSummary() {
-    return http({
-      url: `${basePath}/job_audit_messages/summary`,
-      method: 'GET',
-    });
-  },
-
 };

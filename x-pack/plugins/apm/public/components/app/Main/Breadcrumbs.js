@@ -6,10 +6,12 @@
 
 import React from 'react';
 import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';
+import { flatten, capitalize } from 'lodash';
+
+import chrome from 'ui/chrome';
+
 import { toQuery } from '../../../utils/url';
 import { routes } from './routeConfig';
-import { flatten, capitalize } from 'lodash';
-import { set } from 'ui/chrome/services/breadcrumb_state';
 
 class Breadcrumbs extends React.Component {
   updateHeaderBreadcrumbs() {
@@ -19,7 +21,7 @@ class Breadcrumbs extends React.Component {
       href: `#${match.url}?_g=${_g}&kuery=${kuery}`
     }));
 
-    set(breadcrumbs);
+    chrome.breadcrumbs.set(breadcrumbs);
   }
 
   componentDidMount() {

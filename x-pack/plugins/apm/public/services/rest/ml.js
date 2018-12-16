@@ -9,14 +9,14 @@ import { callApi } from './callApi';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/constants';
 
 export async function startMlJob({ serviceName, transactionType }) {
-  const apmIndexPattern = chrome.getInjected('apmIndexPattern');
+  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
   return callApi({
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
       prefix: `${serviceName}-${transactionType}-`.toLowerCase(),
       groups: ['apm', serviceName.toLowerCase(), transactionType.toLowerCase()],
-      indexPatternName: apmIndexPattern,
+      indexPatternName: apmIndexPatternTitle,
       startDatafeed: true,
       query: {
         bool: {

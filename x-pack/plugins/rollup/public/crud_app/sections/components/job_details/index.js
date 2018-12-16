@@ -11,4 +11,5 @@ export {
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_JSON,
+  tabToHumanizedMap,
 } from './job_details';

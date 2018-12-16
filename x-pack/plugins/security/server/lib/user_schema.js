@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 
-export const userSchema = {
+export const userSchema = Joi.object({
   username: Joi.string().required(),
   password: Joi.string(),
   roles: Joi.array().items(Joi.string()),
@@ -14,4 +14,4 @@ export const userSchema = {
   email: Joi.string().allow(null, ''),
   metadata: Joi.object(),
   enabled: Joi.boolean().default(true)
-};
+});

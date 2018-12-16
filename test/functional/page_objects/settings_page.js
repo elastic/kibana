@@ -18,14 +18,14 @@
  */
 
 import { map as mapAsync } from 'bluebird';
+import expect from 'expect.js';
+
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const find = getService('find');
   const flyout = getService('flyout');
-  const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['header', 'common']);
@@ -170,13 +170,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return Promise.all(getChartTypesPromises);
     }
 
-    getTableRow(rowNumber, colNumber) {
-      return remote.setFindTimeout(defaultFindTimeout)
-        // passing in zero-based index, but adding 1 for css 1-based indexes
-        .findByCssSelector('table.euiTable tbody tr:nth-child(' +
-          (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
-          (colNumber + 1) + ')'
-        );
+    async getTableRow(rowNumber, colNumber) {
+      // passing in zero-based index, but adding 1 for css 1-based indexes
+      return await find.byCssSelector(
+        'table.euiTable tbody tr:nth-child(' +
+        (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
+        (colNumber + 1) + ')'
+      );
     }
 
     async getFieldsTabCount() {
@@ -271,9 +271,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndices();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
-        await this.setIndexPatternField(indexPatternName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          await this.setIndexPatternField(indexPatternName);
+        });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
         await PageObjects.common.sleep(2000);
@@ -284,7 +289,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
         if (!currentUrl.match(/indices\/.+\?/)) {
           throw new Error('Index pattern not created');
@@ -296,21 +301,15 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await this.getIndexPatternIdFromUrl();
     }
 
-    //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
-
+    // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
     async clickOptionalAddNewButton() {
-      const buttonParent = await testSubjects.find('createIndexPatternParent');
-      const buttonVisible = (await buttonParent.getProperty('innerHTML')).includes(
-        'createIndexPatternButton'
-      );
-      log.debug('found the button ' + buttonVisible);
-      if (buttonVisible) {
+      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
       }
     }
 
     async getIndexPatternIdFromUrl() {
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const indexPatternId = currentUrl.match(/.*\/(.*)/)[1];
 
       log.debug('index pattern ID: ', indexPatternId);
@@ -323,6 +322,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName);
+      const currentName = await field.getAttribute('value');
+      log.debug(`setIndexPatternField set to ${currentName}`);
+      expect(currentName).to.eql(`${indexPatternName}*`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
@@ -352,7 +354,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('confirmModalConfirmButton');
       });
       await retry.try(async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         if (currentUrl.match(/indices\/.+\?/)) {
           throw new Error('Index pattern not removed');
         }
@@ -595,7 +597,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAll('css selector', 'td:nth-child(3)');
+      const cells = await table.findAllByCssSelector('td:nth-child(3)');
 
       const objects = [];
       for (const cell of cells) {

@@ -9,7 +9,6 @@ import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { InfraMetricModel } from '../metrics/adapter_types';
 
-export * from '../../../../common/graphql/typed_resolvers';
 import { JsonObject } from '../../../../common/typed_json';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
@@ -148,15 +147,15 @@ export interface InfraDateRangeAggregationResponse {
   buckets: InfraDateRangeAggregationBucket[];
 }
 
-export interface InfraCapabilityAggregationBucket {
+export interface InfraMetadataAggregationBucket {
   key: string;
   names?: {
-    buckets: InfraCapabilityAggregationBucket[];
+    buckets: InfraMetadataAggregationBucket[];
   };
 }
 
-export interface InfraCapabilityAggregationResponse {
-  buckets: InfraCapabilityAggregationBucket[];
+export interface InfraMetadataAggregationResponse {
+  buckets: InfraMetadataAggregationBucket[];
 }
 
 export interface InfraFieldsResponse {

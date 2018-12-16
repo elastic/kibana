@@ -17,7 +17,7 @@ import {
   units
 } from '../../../style/variables';
 
-export type KeySorter = (data: StringMap<any>, parentKey?: string) => string[];
+export type KeySorter = (data: StringMap, parentKey?: string) => string[];
 
 const Table = styled.table`
   font-family: ${fontFamilyCode};
@@ -35,6 +35,7 @@ const Row = styled.tr`
 const Cell = styled.td`
   vertical-align: top;
   padding: ${px(units.half)} 0;
+  line-height: 1.5;
 
   ${Row}:first-child> & {
     padding-top: 0;
@@ -59,7 +60,7 @@ export function FormattedKey({
   value
 }: {
   k: string;
-  value: any;
+  value: unknown;
 }): JSX.Element {
   if (value == null) {
     return <EmptyValue>{k}</EmptyValue>;
@@ -86,7 +87,7 @@ export function NestedValue({
   depth,
   keySorter
 }: {
-  value: any;
+  value: StringMap;
   depth: number;
   parentKey?: string;
   keySorter?: KeySorter;

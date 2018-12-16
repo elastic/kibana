@@ -7,12 +7,17 @@
 /**
  * Controller for Advanced Index Detail
  */
+import React from 'react';
+import { render } from 'react-dom';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { AdvancedIndex } from '../../../../components/elasticsearch/index/advanced';
+import { I18nProvider } from '@kbn/i18n/react';
+import moment from 'moment';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
@@ -46,7 +51,7 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -57,7 +62,14 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Indices - ${$scope.indexName} - Advanced`);
+    const routeTitle = i18n('xpack.monitoring.elasticsearch.indices.advanced.routeTitle', {
+      defaultMessage: 'Elasticsearch - Indices - {indexName} - Advanced',
+      values: {
+        indexName: $scope.indexName
+      }
+    });
+
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({
@@ -68,5 +80,28 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
+
+    function onBrush({ xaxis }) {
+      timefilter.setTime({
+        from: moment(xaxis.from),
+        to: moment(xaxis.to),
+        mode: 'absolute',
+      });
+    }
+
+    this.renderReact = () => {
+      render(
+        <I18nProvider>
+          <AdvancedIndex
+            indexSummary={$scope.pageData.indexSummary}
+            metrics={$scope.pageData.metrics}
+            onBrush={onBrush}
+          />
+        </I18nProvider>,
+        document.getElementById('monitoringElasticsearchAdvancedIndexApp')
+      );
+    };
+
+    $scope.$watch('pageData', this.renderReact);
   }
 });

@@ -5,7 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 export interface AgentMark {
   name: string;
@@ -13,7 +13,7 @@ export interface AgentMark {
 }
 
 export function getAgentMarks(transaction: Transaction): AgentMark[] {
-  if (!transaction.transaction.marks) {
+  if (!(transaction.transaction.marks && transaction.transaction.marks.agent)) {
     return [];
   }
 

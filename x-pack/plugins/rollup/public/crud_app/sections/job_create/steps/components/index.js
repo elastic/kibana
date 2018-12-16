@@ -6,3 +6,4 @@
 
 export { FieldChooser } from './field_chooser';
 export { CronEditor } from './cron_editor';
+export { StepError } from './step_error';

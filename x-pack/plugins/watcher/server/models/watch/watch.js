@@ -27,7 +27,7 @@ export class Watch {
   static fromDownstreamJson(json) {
     if (!json.type) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watch.absenceOfTypePropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watch.typePropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {type} property',
           values: {
             type: 'type'
@@ -39,7 +39,7 @@ export class Watch {
     const WatchType = WatchTypes[json.type];
     if (!WatchType) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watch.unknownJsonTypeAttemptedToLoadBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watch.unknownWatchTypeLoadingAttemptBadRequestMessage', {
           defaultMessage: 'Attempted to load unknown type {jsonType}',
           values: { jsonType: json.type }
         }),
@@ -50,10 +50,10 @@ export class Watch {
   }
 
   // from Elasticsearch
-  static fromUpstreamJson(json) {
+  static fromUpstreamJson(json, options) {
     if (!json.watchJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watch.absenceOfWatchJsonPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watch.watchJsonPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain a {watchJson} property',
           values: {
             watchJson: 'watchJson'
@@ -65,6 +65,6 @@ export class Watch {
     const type = getWatchType(json.watchJson);
     const WatchType = WatchTypes[type];
 
-    return WatchType.fromUpstreamJson(json);
+    return WatchType.fromUpstreamJson(json, options);
   }
 }

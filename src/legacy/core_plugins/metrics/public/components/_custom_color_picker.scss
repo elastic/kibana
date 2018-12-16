@@ -1,0 +1,97 @@
+// EUITODO: Convert to EuiColorPicker
+// with additional support for alpha, saturation, swatches
+
+// SASSTODO: This custom picker moved all styles from react-color inline styles
+// to SASS, but it should be in EUI.
+// Also, some pixel values were kept as is to match inline styles from react-color
+.tvbColorPickerPopUp {
+  @include euiBottomShadowMedium();
+  background-color: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  box-sizing: initial;
+  width: 275px;
+  font-family: 'Menlo';
+}
+
+.tvbColorPickerPopUp__saturation {
+  width: 100%;
+  padding-bottom: 55%;
+  position: relative;
+  border-radius: $euiBorderRadius $euiBorderRadius 0 0;
+  overflow: hidden;
+}
+
+.tvbColorPickerPopUp__body {
+  padding: $euiSize;
+}
+
+.tvbColorPickerPopUp__controls {
+  display: flex;
+}
+
+.tvbColorPickerPopUp__color {
+  width: $euiSizeXL;
+
+  // The color indicator doesn't work, hiding it until it does
+  display: none;
+}
+
+.tvbColorPickerPopUp__color-disableAlpha {
+  width: $euiSizeL;
+}
+
+.tvbColorPickerPopUp__swatch {
+  margin-top: 6px;
+  width: $euiSize;
+  height: $euiSize;
+  border-radius: $euiSizeS;
+  position: relative;
+  overflow: hidden;
+}
+
+.tvbColorPickerPopUp__swatch-disableAlpha {
+  width: 10px;
+  height: 10px;
+  margin: 0px;
+}
+
+.tvbColorPickerPopUp__active {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  border-radius: $euiSizeS;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+  z-index: 2;
+}
+
+.tvbColorPickerPopUp__toggles {
+  flex: 1
+}
+
+.tvbColorPickerPopUp__hue {
+  height: 10px;
+  position: relative;
+  margin-bottom: $euiSizeS;
+}
+
+.tvbColorPickerPopUp__hue-disableAlpha {
+  margin-bottom: 0px;
+}
+
+.tvbColorPickerPopUp__alpha {
+  height: 10px;
+  position: relative;
+}
+
+.tvbColorPickerPopUp__alpha-disableAlpha {
+  display: none;
+}
+
+.tvbColorPickerPopUp__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: $euiSize;
+}

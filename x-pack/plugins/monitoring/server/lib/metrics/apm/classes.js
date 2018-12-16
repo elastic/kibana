@@ -6,6 +6,7 @@
 
 import { ClusterMetric, Metric } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
+import { i18n } from '@kbn/i18n';
 
 export class ApmClusterMetric extends ClusterMetric {
   constructor(opts) {
@@ -83,7 +84,9 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: '/m'
+      units: i18n.translate('xpack.monitoring.metrics.apm.perMinuteUnitLabel', {
+        defaultMessage: '/m'
+      })
     });
 
     this.aggs = {

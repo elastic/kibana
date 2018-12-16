@@ -9,7 +9,13 @@
 
     <div
       css-truncate
-      aria-label="{{:: 'Index pattern: ' + vis.indexPattern.title}}"
+      aria-label="{{
+        ::'common.ui.vis.editors.sidebar.indexPatternAriaLabel' | i18n:
+        {
+          defaultMessage: 'Index pattern: {title}',
+          values: { title: vis.indexPattern.title }
+        }
+      }}"
       ng-if="vis.type.requiresSearch && vis.type.options.showIndexSelection"
       class="index-pattern visEditorSidebar__indexPattern"
       tabindex="0"
@@ -35,8 +41,9 @@
               ng-click="sidebar.section='data'"
               kbn-accessible-click
               data-test-subj="visualizeEditDataLink"
+              i18n-id="common.ui.vis.editors.sidebar.tabs.dataLabel"
+              i18n-default-message="Data"
             >
-              Data
             </a>
           </li>
 
@@ -78,7 +85,7 @@
           </li>
 
           <li
-            tooltip="Auto apply changes"
+            tooltip="{{::'common.ui.vis.editors.sidebar.autoApplyChangesTooltip' | i18n: { defaultMessage: 'Auto apply changes' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
@@ -87,7 +94,7 @@
             <button
               data-test-subj="visualizeEditorAutoButton"
               class="kuiButton kuiButton--basic navbar-btn-link visEditorSidebar__navButtonLink"
-              aria-label="Auto update the visualization on every change"
+              aria-label="{{::'common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel' | i18n: { defaultMessage: 'Auto update the visualization on every change' } }}"
               ng-click="toggleAutoApply()"
               ng-class="{
                 'kuiButton--primary': autoApplyEnabled,
@@ -97,10 +104,15 @@
               <icon aria-hidden="true" type="'refresh'"></icon>
             </button>
           </li>
-              <span ng-show="autoApplyEnabled">Auto Apply</span>
+              <span
+                ng-show="autoApplyEnabled"
+                i18n-id="common.ui.vis.editors.sidebar.autoApplyChangesLabel"
+                i18n-default-message="Auto Apply"
+              >
+            </span>
 
           <li
-            tooltip="Apply changes"
+            tooltip="{{::'common.ui.vis.editors.sidebar.applyChangesTooltip' | i18n: { defaultMessage: 'Apply changes' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400" tooltip-append-to-body="1"
             ng-hide="autoApplyEnabled"
@@ -110,14 +122,14 @@
               class="kuiButton kuiButton--primary navbar-btn-link visEditorSidebar__navButtonLink"
               type="submit"
               ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0 || autoApplyEnabled"
-              aria-label="Update the visualization with your changes"
+              aria-label="{{::'common.ui.vis.editors.sidebar.applyChangesAriaLabel' | i18n: { defaultMessage: 'Update the visualization with your changes' } }}"
             >
               <icon aria-hidden="true" type="'play'"></icon>
             </button>
           </li>
 
           <li
-            tooltip="Discard changes"
+            tooltip="{{::'common.ui.vis.editors.sidebar.discardChangesTooltip' | i18n: { defaultMessage: 'Discard changes' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
@@ -128,7 +140,7 @@
               class="kuiButton kuiButton--basic navbar-btn-link visEditorSidebar__navButtonLink"
               ng-disabled="!vis.dirty"
               ng-click="resetEditableVis()"
-              aria-label="Reset the visualization"
+              aria-label="{{::'common.ui.vis.editors.sidebar.discardChangesAriaLabel' | i18n: { defaultMessage: 'Reset the visualization' } }}"
             >
               <icon type="'cross'"></icon>
             </button>

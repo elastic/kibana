@@ -3,7 +3,7 @@
 
   <!-- open/close editor -->
   <button
-    aria-label="Toggle {{agg.schema.title}} editor"
+    aria-label="{{::'common.ui.vis.editors.agg.toggleEditorButtonAriaLabel' | i18n: { defaultMessage: 'Toggle {schema} editor', values: { schema: agg.schema.title } } }}"
     ng-click="editorOpen = !editorOpen"
     aria-expanded="{{ !!editorOpen }}"
     aria-controls="visAggEditorParams{{agg.id}}"
@@ -34,8 +34,8 @@
     <button
       ng-if="agg.enabled && canRemove(agg)"
       ng-click="agg.enabled = false"
-      aria-label="Disable aggregation"
-      tooltip="Disable aggregation"
+      aria-label="{{::'common.ui.vis.editors.agg.disableAggButtonAriaLabel' | i18n: { defaultMessage: 'Disable aggregation' } }}"
+      tooltip="{{::'common.ui.vis.editors.agg.disableAggButtonTooltip' | i18n: { defaultMessage: 'Disable aggregation' } }}"
       tooltip-append-to-body="true"
       data-test-subj="disableAggregationBtn"
       type="button"
@@ -47,8 +47,8 @@
     <button
       ng-if="!agg.enabled"
       ng-click="agg.enabled = true"
-      aria-label="Enable aggregation"
-      tooltip="Enable aggregation"
+      aria-label="{{::'common.ui.vis.editors.agg.enableAggButtonAriaLabel' | i18n: { defaultMessage: 'Enable aggregation' } }}"
+      tooltip="{{::'common.ui.vis.editors.agg.enableAggButtonTooltip' | i18n: { defaultMessage: 'Enable aggregation' } }}"
       tooltip-append-to-body="true"
       data-test-subj="disableAggregationBtn"
       type="button"
@@ -60,25 +60,26 @@
     <button
       draggable-handle
       ng-if="stats.count > 1"
-      tooltip="Modify Priority by Dragging"
+      tooltip="{{::'common.ui.vis.editors.agg.modifyPriorityButtonTooltip' | i18n: { defaultMessage: 'Modify Priority by Dragging' } }}"
       tooltip-append-to-body="true"
       type="button"
       keyboard-move="onPriorityReorder(direction)"
       class="kuiButton kuiButton--basic kuiButton--small">
       <i aria-hidden="true" class="fa fa-arrows-v"></i>
-      <span class="kuiScreenReaderOnly">
-        Use up and down key on this button to move this aggregation up and down
-        in the priority order.
+      <span class="kuiScreenReaderOnly"
+        i18n-id="common.ui.vis.editors.howToModifyScreenReaderPriorityDescription"
+        i18n-default-message="Use up and down key on this button to move this aggregation up and down in the priority order."
+      >
       </span>
     </button>
 
     <!-- remove button -->
     <button
       ng-if="canRemove(agg)"
-      aria-label="Remove Dimension"
+      aria-label="{{::'common.ui.vis.editors.agg.removeDimensionButtonAriaLabel' | i18n: { defaultMessage: 'Remove Dimension' } }}"
       ng-if="stats.count > stats.min"
       ng-click="remove(agg)"
-      tooltip="Remove Dimension"
+      tooltip="{{::'common.ui.vis.editors.agg.removeDimensionButtonTooltip' | i18n: { defaultMessage: 'Remove Dimension' } }}"
       tooltip-append-to-body="true"
       type="button"
       class="kuiButton kuiButton--danger kuiButton--small">

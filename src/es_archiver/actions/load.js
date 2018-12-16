@@ -46,7 +46,7 @@ const pipeline = (...streams) => streams
       .pipe(dest)
   ));
 
-export async function loadAction({ name, skipExisting, client, dataDir, log }) {
+export async function loadAction({ name, skipExisting, client, dataDir, log, kibanaUrl }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
@@ -68,7 +68,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log }),
+    createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }),
     createIndexDocRecordsStream(client, stats),
   ]);
 

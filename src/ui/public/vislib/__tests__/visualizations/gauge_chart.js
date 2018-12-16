@@ -77,7 +77,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
     const config = _.defaultsDeep({}, opts, visLibParams);
     if (vis) {
       vis.destroy();
-      $('.visualize-chart').remove();
+      $('.visChart').remove();
     }
     vis = vislibVis(config);
     persistedState = new PersistedState();
@@ -95,7 +95,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
 
   afterEach(function () {
     vis.destroy();
-    $('.visualize-chart').remove();
+    $('.visChart').remove();
   });
 
   it('creates meter gauge', function () {

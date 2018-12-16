@@ -72,7 +72,7 @@
     "text": "Character used to encapsulate values containing reserved characters."
   },
   "new_job_enable_datafeed_job": {
-    "text": "Required for jobs that analyze data from Elasticsearch.\nRequires data format to be set to Elasticsearch/"
+    "text": "Required for jobs that analyze data from Elasticsearch."
   },
   "new_job_data_source": {
     "text": "Elasticsearch versions 1.7.x and 2+ supported."
@@ -106,6 +106,9 @@
   },
   "new_job_dedicated_index": {
     "text": "Select to store results in a separate index for this job."
+  },
+  "new_job_enable_model_plot": {
+    "text": "Select to enable model plot. Stores model information along with results. Can add considerable overhead to the performance of the system."
   },
   "new_job_model_memory_limit": {
     "text": "An approximate limit for the amount of memory used by the analytical models."

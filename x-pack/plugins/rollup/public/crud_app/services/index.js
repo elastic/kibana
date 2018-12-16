@@ -14,6 +14,16 @@ export {
 } from './api';
 
 export {
+  showApiError,
+  showApiWarning,
+} from './api_errors';
+
+export {
+  listBreadcrumb,
+  createBreadcrumb,
+} from './breadcrumbs';
+
+export {
   cronExpressionToParts,
   cronPartsToExpression,
   MINUTE,
@@ -62,6 +72,10 @@ export {
   deserializeJob,
   deserializeJobs,
 } from './jobs';
+
+export {
+  createNoticeableDelay,
+} from './noticeable_delay';
 
 export {
   extractQueryParams,

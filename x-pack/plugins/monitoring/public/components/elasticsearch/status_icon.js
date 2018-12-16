@@ -6,14 +6,25 @@
 
 import React from 'react';
 import { StatusIcon } from '../status_icon';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function ElasticsearchStatusIcon({ status }) {
+function ElasticsearchStatusIconUI({ intl, status }) {
   const type = (() => {
     const statusKey = status.toUpperCase();
     return StatusIcon.TYPES[statusKey] || StatusIcon.TYPES.GRAY;
   })();
 
   return (
-    <StatusIcon type={type} label={`Health: ${status}`} />
+    <StatusIcon
+      type={type}
+      label={intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.healthStatusLabel',
+        defaultMessage: 'Health: {status}' }, {
+        status
+      })
+      }
+    />
   );
 }
+
+export const ElasticsearchStatusIcon = injectI18n(ElasticsearchStatusIconUI);

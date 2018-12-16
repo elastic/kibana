@@ -9,20 +9,20 @@ import {
   // @ts-ignore
   EuiConfirmModal,
 } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { DeleteRoleButton } from './delete_role_button';
 
 test('it renders without crashing', () => {
   const deleteHandler = jest.fn();
-  const wrapper = shallow(<DeleteRoleButton canDelete={true} onDelete={deleteHandler} />);
+  const wrapper = shallowWithIntl(<DeleteRoleButton canDelete={true} onDelete={deleteHandler} />);
   expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
   expect(deleteHandler).toHaveBeenCalledTimes(0);
 });
 
 test('it shows a confirmation dialog when clicked', () => {
   const deleteHandler = jest.fn();
-  const wrapper = mount(<DeleteRoleButton canDelete={true} onDelete={deleteHandler} />);
+  const wrapper = mountWithIntl(<DeleteRoleButton canDelete={true} onDelete={deleteHandler} />);
 
   wrapper.find(EuiButtonEmpty).simulate('click');
 
@@ -33,7 +33,7 @@ test('it shows a confirmation dialog when clicked', () => {
 
 test('it renders nothing when canDelete is false', () => {
   const deleteHandler = jest.fn();
-  const wrapper = shallow(<DeleteRoleButton canDelete={false} onDelete={deleteHandler} />);
+  const wrapper = shallowWithIntl(<DeleteRoleButton canDelete={false} onDelete={deleteHandler} />);
   expect(wrapper.find('*')).toHaveLength(0);
   expect(deleteHandler).toHaveBeenCalledTimes(0);
 });

@@ -5,6 +5,7 @@
  */
 
 import { EuiFieldSearch } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -14,56 +15,66 @@ interface LogSearchInputProps {
   isLoading: boolean;
   onSearch: (query: string) => void;
   onClear: () => void;
+  intl: InjectedIntl;
 }
 
 interface LogSearchInputState {
   query: string;
 }
 
-export class LogSearchInput extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
-  public readonly state = {
-    query: '',
-  };
+export const LogSearchInput = injectI18n(
+  class extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
+    public static displayName = 'LogSearchInput';
+    public readonly state = {
+      query: '',
+    };
 
-  public handleSubmit: React.FormEventHandler<HTMLFormElement> = evt => {
-    evt.preventDefault();
+    public handleSubmit: React.FormEventHandler<HTMLFormElement> = evt => {
+      evt.preventDefault();
 
-    const { query } = this.state;
+      const { query } = this.state;
 
-    if (query === '') {
-      this.props.onClear();
-    } else {
-      this.props.onSearch(this.state.query);
+      if (query === '') {
+        this.props.onClear();
+      } else {
+        this.props.onSearch(this.state.query);
+      }
+    };
+
+    public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
+      this.setState({
+        query: evt.target.value,
+      });
+    };
+
+    public render() {
+      const { className, isLoading, intl } = this.props;
+      const { query } = this.state;
+
+      const classes = classNames('loggingSearchInput', className);
+
+      return (
+        <form onSubmit={this.handleSubmit}>
+          <PlainSearchField
+            aria-label={intl.formatMessage({
+              id: 'xpack.infra.logs.search.searchInLogsAriaLabel',
+              defaultMessage: 'search',
+            })}
+            className={classes}
+            fullWidth
+            isLoading={isLoading}
+            onChange={this.handleChangeQuery}
+            placeholder={intl.formatMessage({
+              id: 'xpack.infra.logs.search.searchInLogsPlaceholder',
+              defaultMessage: 'Search',
+            })}
+            value={query}
+          />
+        </form>
+      );
     }
-  };
-
-  public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
-    this.setState({
-      query: evt.target.value,
-    });
-  };
-
-  public render() {
-    const { className, isLoading } = this.props;
-    const { query } = this.state;
-
-    const classes = classNames('loggingSearchInput', className);
-
-    return (
-      <form onSubmit={this.handleSubmit}>
-        <PlainSearchField
-          aria-label="search"
-          className={classes}
-          fullWidth
-          isLoading={isLoading}
-          onChange={this.handleChangeQuery}
-          placeholder="Search"
-          value={query}
-        />
-      </form>
-    );
   }
-}
+);
 
 const PlainSearchField = styled(EuiFieldSearch)`
   background: transparent;

@@ -6,6 +6,5 @@
 
 
 
-import './styles/main.less';
 import './create_watch_directive.js';
 import './create_watch_service.js';

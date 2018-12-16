@@ -38,7 +38,7 @@ export class ElementShareContainer extends React.PureComponent {
     onComplete(() => {
       clearTimeout(this.timeout);
       if (!this.sharedItemRef) return; // without this, crazy fast forward/backward paging leads to an error
-      const ev = new Event('renderComplete');
+      const ev = new CustomEvent('renderComplete');
       this.sharedItemRef.dispatchEvent(ev);
 
       // if the element is finished before reporting is listening for then

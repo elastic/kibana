@@ -69,7 +69,7 @@ describe('dev/build/lib/runner', () => {
       const runTask = sinon.stub();
       await run({ global: true, run: runTask });
       sinon.assert.calledOnce(runTask);
-      sinon.assert.calledWithExactly(runTask, config, log);
+      sinon.assert.calledWithExactly(runTask, config, log, sinon.match.array);
     });
 
     it('does not call local tasks', async () => {
@@ -91,7 +91,7 @@ describe('dev/build/lib/runner', () => {
       const runTask = sinon.stub();
       await run({ global: true, run: runTask });
       sinon.assert.calledOnce(runTask);
-      sinon.assert.calledWithExactly(runTask, config, log);
+      sinon.assert.calledWithExactly(runTask, config, log, sinon.match.array);
     });
 
     it('runs local tasks twice, passing config log and both builds', async () => {
@@ -114,7 +114,7 @@ describe('dev/build/lib/runner', () => {
       const runTask = sinon.stub();
       await run({ global: true, run: runTask });
       sinon.assert.calledOnce(runTask);
-      sinon.assert.calledWithExactly(runTask, config, log);
+      sinon.assert.calledWithExactly(runTask, config, log, sinon.match.array);
     });
 
     it('runs local tasks once, passing config log and default build', async () => {
@@ -136,7 +136,7 @@ describe('dev/build/lib/runner', () => {
       const runTask = sinon.stub();
       await run({ global: true, run: runTask });
       sinon.assert.calledOnce(runTask);
-      sinon.assert.calledWithExactly(runTask, config, log);
+      sinon.assert.calledWithExactly(runTask, config, log, sinon.match.array);
     });
 
     it('runs local tasks once, passing config log and oss build', async () => {

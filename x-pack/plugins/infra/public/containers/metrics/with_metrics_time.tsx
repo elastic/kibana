@@ -11,7 +11,7 @@ import { createSelector } from 'reselect';
 import { metricTimeActions, metricTimeSelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { UrlStateContainer } from '../../utils/url_state';
+import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 
 export const withMetricsTime = connect(
   (state: State) => ({
@@ -94,3 +94,15 @@ const mapToTimeUrlState = (value: any) =>
   value && (typeof value.to === 'number' && typeof value.from === 'number') ? value : undefined;
 
 const mapToAutoReloadUrlState = (value: any) => (typeof value === 'boolean' ? value : undefined);
+
+export const replaceMetricTimeInQueryString = (from: number, to: number) =>
+  Number.isNaN(from) || Number.isNaN(to)
+    ? (value: string) => value
+    : replaceStateKeyInQueryString<MetricTimeUrlState>('metricTime', {
+        autoReload: false,
+        time: {
+          interval: '>=1m',
+          from,
+          to,
+        },
+      });

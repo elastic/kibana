@@ -16,6 +16,8 @@ exports[`i18n utils should not escape linebreaks 1`] = `
 "
 `;
 
+exports[`i18n utils should parse string concatenation 1`] = `"Very long concatenated string"`;
+
 exports[`i18n utils should throw if "values" has a value that is unused in the message 1`] = `
 "\\"values\\" object contains unused properties (\\"namespace.message.id\\"):
 [url]."
@@ -34,4 +36,9 @@ exports[`i18n utils should throw if "values" property is provided and defaultMes
 exports[`i18n utils should throw if some key is missing in "values" 1`] = `
 "some properties are missing in \\"values\\" object (\\"namespace.message.id\\"):
 [password]."
+`;
+
+exports[`i18n utils should throw on wrong nested ICU message 1`] = `
+"\\"values\\" object contains unused properties (\\"namespace.message.id\\"):
+[third]."
 `;

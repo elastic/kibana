@@ -20,6 +20,7 @@ import {
   EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { ChangeEvent, Component } from 'react';
 import { Space } from '../../../../common/model/space';
@@ -31,6 +32,7 @@ interface Props {
   spacesNavState: SpacesNavState;
   onCancel: () => void;
   onConfirm: () => void;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -39,7 +41,7 @@ interface State {
   deleteInProgress: boolean;
 }
 
-export class ConfirmDeleteModal extends Component<Props, State> {
+class ConfirmDeleteModalUI extends Component<Props, State> {
   public state = {
     confirmSpaceName: '',
     error: null,
@@ -47,7 +49,7 @@ export class ConfirmDeleteModal extends Component<Props, State> {
   };
 
   public render() {
-    const { space, spacesNavState, onCancel } = this.props;
+    const { space, spacesNavState, onCancel, intl } = this.props;
 
     let warning = null;
     if (isDeletingCurrentSpace(space, spacesNavState)) {
@@ -59,8 +61,11 @@ export class ConfirmDeleteModal extends Component<Props, State> {
       warning = (
         <EuiCallOut color="warning">
           <EuiText>
-            You are about to delete your current space {name}. You will be redirected to choose a
-            different space if you continue.
+            <FormattedMessage
+              id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
+              defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
+              values={{ name }}
+            />
           </EuiText>
         </EuiCallOut>
       );
@@ -74,20 +79,44 @@ export class ConfirmDeleteModal extends Component<Props, State> {
         <EuiModal onClose={onCancel} className={'spcConfirmDeleteModal'}>
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-              Delete space {`'${space.name}'`}
+              <FormattedMessage
+                id="xpack.spaces.management.confirmDeleteModal.confirmDeleteSpaceButtonLabel"
+                defaultMessage="Delete space {spaceName}"
+                values={{
+                  spaceName: "'" + space.name + "'",
+                }}
+              />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiText data-test-subj="confirmModalBodyText">
               <p>
-                Deleting a space permanently removes the space and{' '}
-                <strong>all of its contents</strong>. You can't undo this action.
+                <FormattedMessage
+                  id="xpack.spaces.management.confirmDeleteModal.deletingSpaceWarningMessage"
+                  defaultMessage="Deleting a space permanently removes the space and {allContents}. You can't undo this action."
+                  values={{
+                    allContents: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.spaces.management.confirmDeleteModal.allContentsText"
+                          defaultMessage="all of its contents"
+                        />
+                      </strong>
+                    ),
+                  }}
+                />
               </p>
 
               <EuiFormRow
-                label={'Confirm space name'}
+                label={intl.formatMessage({
+                  id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
+                  defaultMessage: 'Confirm space name',
+                })}
                 isInvalid={!!this.state.error}
-                error={'Space names do not match.'}
+                error={intl.formatMessage({
+                  id: 'xpack.spaces.management.confirmDeleteModal.spaceNamesDoNoMatchErrorMessage',
+                  defaultMessage: 'Space names do not match.',
+                })}
               >
                 <EuiFieldText
                   value={this.state.confirmSpaceName}
@@ -105,7 +134,10 @@ export class ConfirmDeleteModal extends Component<Props, State> {
               onClick={onCancel}
               isDisabled={this.state.deleteInProgress}
             >
-              Cancel
+              <FormattedMessage
+                id="xpack.spaces.management.confirmDeleteModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
 
             <EuiButton
@@ -115,7 +147,10 @@ export class ConfirmDeleteModal extends Component<Props, State> {
               color={'danger'}
               isLoading={this.state.deleteInProgress}
             >
-              Delete space and all contents
+              <FormattedMessage
+                id="xpack.spaces.management.confirmDeleteModal.deleteSpaceAndAllContentsButtonLabel"
+                defaultMessage=" Delete space and all contents"
+              />
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
@@ -165,3 +200,5 @@ export class ConfirmDeleteModal extends Component<Props, State> {
 function isDeletingCurrentSpace(space: Space, spacesNavState: SpacesNavState) {
   return space.id === spacesNavState.getActiveSpace().id;
 }
+
+export const ConfirmDeleteModal = injectI18n(ConfirmDeleteModalUI);

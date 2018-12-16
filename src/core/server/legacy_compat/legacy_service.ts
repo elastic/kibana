@@ -20,11 +20,12 @@
 import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
-import { CoreService } from '../../types/core_service';
-import { Config, ConfigService, Env } from '../config';
+import { CoreContext, CoreService } from '../../types';
+import { Config } from '../config';
 import { DevConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpServerInfo } from '../http';
-import { Logger, LoggerFactory } from '../logging';
+import { BasePathProxyServer, HttpConfig, HttpServiceStartContract } from '../http';
+import { Logger } from '../logging';
+import { PluginsServiceStartContract } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
@@ -34,23 +35,25 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
+interface Deps {
+  http?: HttpServiceStartContract;
+  plugins: PluginsServiceStartContract;
+}
+
+/** @internal */
 export class LegacyService implements CoreService {
   private readonly log: Logger;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
 
-  constructor(
-    private readonly env: Env,
-    private readonly logger: LoggerFactory,
-    private readonly configService: ConfigService
-  ) {
-    this.log = logger.get('legacy', 'service');
+  constructor(private readonly coreContext: CoreContext) {
+    this.log = coreContext.logger.get('legacy-service');
   }
 
-  public async start(httpServerInfo?: HttpServerInfo) {
+  public async start(deps: Deps) {
     this.log.debug('starting legacy service');
 
-    const update$ = this.configService.getConfig$().pipe(
+    const update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
           this.kbnServer.applyLoggingConfiguration(config.toRaw());
@@ -67,12 +70,12 @@ export class LegacyService implements CoreService {
       .pipe(
         first(),
         mergeMap(async config => {
-          if (this.env.isDevClusterMaster) {
+          if (this.coreContext.env.isDevClusterMaster) {
             await this.createClusterManager(config);
             return;
           }
 
-          return await this.createKbnServer(config, httpServerInfo);
+          return await this.createKbnServer(config, deps);
         })
       )
       .toPromise();
@@ -93,26 +96,27 @@ export class LegacyService implements CoreService {
   }
 
   private async createClusterManager(config: Config) {
-    const basePathProxy$ = this.env.cliArgs.basePath
+    const basePathProxy$ = this.coreContext.env.cliArgs.basePath
       ? combineLatest(
-          this.configService.atPath('dev', DevConfig),
-          this.configService.atPath('server', HttpConfig)
+          this.coreContext.configService.atPath('dev', DevConfig),
+          this.coreContext.configService.atPath('server', HttpConfig)
         ).pipe(
           first(),
-          map(([devConfig, httpConfig]) => {
-            return new BasePathProxyServer(this.logger.get('server'), httpConfig, devConfig);
-          })
+          map(
+            ([devConfig, httpConfig]) =>
+              new BasePathProxyServer(this.coreContext.logger.get('server'), httpConfig, devConfig)
+          )
         )
       : EMPTY;
 
     require('../../../cli/cluster/cluster_manager').create(
-      this.env.cliArgs,
+      this.coreContext.env.cliArgs,
       config.toRaw(),
       await basePathProxy$.toPromise()
     );
   }
 
-  private async createKbnServer(config: Config, httpServerInfo?: HttpServerInfo) {
+  private async createKbnServer(config: Config, deps: Deps) {
     const KbnServer = require('../../../server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(config.toRaw(), {
       // If core HTTP service is run we'll receive internal server reference and
@@ -121,22 +125,24 @@ export class LegacyService implements CoreService {
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
       serverOptions:
-        httpServerInfo !== undefined
+        deps.http !== undefined
           ? {
-              ...httpServerInfo.options,
-              listener: this.setupProxyListener(httpServerInfo.server),
+              ...deps.http.options,
+              listener: this.setupProxyListener(deps.http.server),
             }
           : { autoListen: false },
+      handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
+      plugins: deps.plugins,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl
     // from being started multiple times in different processes.
     // We only want one REPL.
-    if (this.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+    if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
       require('../../../cli/repl').startRepl(kbnServer);
     }
 
-    const httpConfig = await this.configService
+    const httpConfig = await this.coreContext.configService
       .atPath('server', HttpConfig)
       .pipe(first())
       .toPromise();
@@ -157,7 +163,7 @@ export class LegacyService implements CoreService {
 
   private setupProxyListener(server: HapiServer) {
     const legacyProxy = new LegacyPlatformProxy(
-      this.logger.get('legacy', 'proxy'),
+      this.coreContext.logger.get('legacy-proxy'),
       server.listener
     );
 

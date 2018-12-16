@@ -20,7 +20,8 @@
 import {
   createLifecycle,
   readConfigFile,
-  createProviderCollection,
+  ProviderCollection,
+  readProviderSpec,
   setupMocha,
   runTests,
 } from './lib';
@@ -36,8 +37,65 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
     log.verbose('ending %j lifecycle phase', name);
   });
 
+
   class FunctionalTestRunner {
     async run() {
+      return await this._run(async (config, coreProviders) => {
+        const providers = new ProviderCollection(log, [
+          ...coreProviders,
+          ...readProviderSpec('Service', config.get('services')),
+          ...readProviderSpec('PageObject', config.get('pageObjects'))
+        ]);
+
+        await providers.loadAll();
+
+        const mocha = await setupMocha(lifecycle, log, config, providers);
+        await lifecycle.trigger('beforeTests');
+        log.info('Starting tests');
+
+        return await runTests(lifecycle, log, mocha);
+      });
+    }
+
+    async getTestStats() {
+      return await this._run(async (config, coreProviders) => {
+        // replace the function of custom service providers so that they return
+        // promise-like objects which never resolve, essentially disabling them
+        // allowing us to load the test files and populate the mocha suites
+        const stubProvider = provider => (
+          coreProviders.includes(provider)
+            ? provider
+            : {
+              ...provider,
+              fn: () => ({
+                then: () => {}
+              })
+            }
+        );
+
+        const providers = new ProviderCollection(log, [
+          ...coreProviders,
+          ...readProviderSpec('Service', config.get('services')),
+          ...readProviderSpec('PageObject', config.get('pageObjects'))
+        ].map(stubProvider));
+
+        const mocha = await setupMocha(lifecycle, log, config, providers);
+
+        const countTests = suite => (
+          suite.suites.reduce(
+            (sum, suite) => sum + countTests(suite),
+            suite.tests.length
+          )
+        );
+
+        return {
+          testCount: countTests(mocha.suite),
+          excludedTests: mocha.excludedTests.map(t => t.fullTitle())
+        };
+      });
+    }
+
+    async _run(handler) {
       let runErrorOccurred = false;
 
       try {
@@ -49,14 +107,14 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
           return;
         }
 
-        const providers = createProviderCollection(lifecycle, log, config);
-        await providers.loadAll();
+        // base level services that functional_test_runner exposes
+        const coreProviders = readProviderSpec('Service', {
+          lifecycle: () => lifecycle,
+          log: () => log,
+          config: () => config,
+        });
 
-        const mocha = await setupMocha(lifecycle, log, config, providers);
-        await lifecycle.trigger('beforeTests');
-        log.info('Starting tests');
-        return await runTests(lifecycle, log, mocha);
-
+        return await handler(config, coreProviders);
       } catch (runError) {
         runErrorOccurred = true;
         throw runError;

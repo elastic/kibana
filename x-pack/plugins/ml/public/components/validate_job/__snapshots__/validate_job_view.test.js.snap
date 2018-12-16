@@ -33,11 +33,13 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
     />
     <EuiText
       grow={true}
+      size="m"
     >
       Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results.
     </EuiText>
     <EuiText
       grow={true}
+      size="m"
     >
       For more information, see 
       <EuiLink
@@ -93,11 +95,13 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results.
     </EuiText>
     <EuiText
       grow={true}
+      size="m"
     >
       For more information, see 
       <EuiLink

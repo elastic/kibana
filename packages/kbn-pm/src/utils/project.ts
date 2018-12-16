@@ -32,9 +32,13 @@ import {
 } from './package_json';
 import { installInDir, runScriptInPackage, runScriptInPackageStreaming } from './scripts';
 
-interface IBuildConfig {
+interface BuildConfig {
   skip?: boolean;
   intermediateBuildDirectory?: string;
+}
+
+interface CleanConfig {
+  extraPatterns?: string[];
 }
 
 export class Project {
@@ -46,13 +50,14 @@ export class Project {
   public readonly json: IPackageJson;
   public readonly packageJsonLocation: string;
   public readonly nodeModulesLocation: string;
-  public readonly optimizeLocation: string;
   public readonly targetLocation: string;
   public readonly path: string;
   public readonly allDependencies: IPackageDependencies;
   public readonly productionDependencies: IPackageDependencies;
   public readonly devDependencies: IPackageDependencies;
   public readonly scripts: IPackageScripts;
+  public isWorkspaceRoot = false;
+  public isWorkspaceProject = false;
 
   constructor(packageJson: IPackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
@@ -60,7 +65,6 @@ export class Project {
 
     this.packageJsonLocation = resolvePath(this.path, 'package.json');
     this.nodeModulesLocation = resolvePath(this.path, 'node_modules');
-    this.optimizeLocation = resolvePath(this.path, 'optimize');
     this.targetLocation = resolvePath(this.path, 'target');
 
     this.productionDependencies = this.json.dependencies || {};
@@ -69,6 +73,7 @@ export class Project {
       ...this.devDependencies,
       ...this.productionDependencies,
     };
+    this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
 
     this.scripts = this.json.scripts || {};
   }
@@ -77,41 +82,44 @@ export class Project {
     return this.json.name;
   }
 
-  public ensureValidProjectDependency(project: Project) {
-    const relativePathToProject = normalizePath(relative(this.path, project.path));
-
+  public ensureValidProjectDependency(project: Project, dependentProjectIsInWorkspace: boolean) {
     const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
 
+    let expectedVersionInPackageJson;
+    if (dependentProjectIsInWorkspace) {
+      expectedVersionInPackageJson = project.json.version;
+    } else {
+      const relativePathToProject = normalizePath(relative(this.path, project.path));
+      expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    }
+
+    // No issues!
     if (versionInPackageJson === expectedVersionInPackageJson) {
       return;
     }
 
-    const updateMsg = 'Update its package.json to the expected value below.';
-    const meta = {
-      actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-      package: `${this.name} (${this.packageJsonLocation})`,
-    };
-
-    if (isLinkDependency(versionInPackageJson)) {
-      throw new CliError(
-        `[${this.name}] depends on [${
-          project.name
-        }] using 'link:', but the path is wrong. ${updateMsg}`,
-        meta
-      );
+    let problemMsg;
+    if (isLinkDependency(versionInPackageJson) && dependentProjectIsInWorkspace) {
+      problemMsg = `but should be using a workspace`;
+    } else if (isLinkDependency(versionInPackageJson)) {
+      problemMsg = `using 'link:', but the path is wrong`;
+    } else {
+      problemMsg = `but it's not using the local package`;
     }
 
     throw new CliError(
       `[${this.name}] depends on [${
         project.name
-      }], but it's not using the local package. ${updateMsg}`,
-      meta
+      }] ${problemMsg}. Update its package.json to the expected value below.`,
+      {
+        actual: `"${project.name}": "${versionInPackageJson}"`,
+        expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+        package: `${this.name} (${this.packageJsonLocation})`,
+      }
     );
   }
 
-  public getBuildConfig(): IBuildConfig {
+  public getBuildConfig(): BuildConfig {
     return (this.json.kibana && this.json.kibana.build) || {};
   }
 
@@ -122,6 +130,10 @@ export class Project {
    */
   public getIntermediateBuildDirectory() {
     return resolvePath(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+  }
+
+  public getCleanConfig(): CleanConfig {
+    return (this.json.kibana && this.json.kibana.clean) || {};
   }
 
   public hasScript(name: string) {

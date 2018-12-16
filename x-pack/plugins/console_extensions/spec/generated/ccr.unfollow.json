@@ -1,0 +1,11 @@
+{
+  "ccr.unfollow": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_ccr/unfollow"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-unfollow.html"
+  }
+}

@@ -29,7 +29,19 @@ import template from './templates/index.html';
 import { defaultQuery } from './templates/default_query';
 
 uiRoutes.when('/dev_tools/searchprofiler', {
-  template: template
+  template: template,
+  controller: ($scope, i18n) => {
+    $scope.registerLicenseLinkLabel = i18n('xpack.searchProfiler.registerLicenseLinkLabel',
+      { defaultMessage: 'register a license' });
+    $scope.trialLicense = i18n('xpack.searchProfiler.trialLicenseTitle',
+      { defaultMessage: 'Trial' });
+    $scope.basicLicense = i18n('xpack.searchProfiler.basicLicenseTitle',
+      { defaultMessage: 'Basic' });
+    $scope.goldLicense = i18n('xpack.searchProfiler.goldLicenseTitle',
+      { defaultMessage: 'Gold' });
+    $scope.platinumLicense = i18n('xpack.searchProfiler.platinumLicenseTitle',
+      { defaultMessage: 'Platinum' });
+  },
 });
 
 uiModules

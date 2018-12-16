@@ -11,29 +11,9 @@ import {
   EuiPopover
 } from '@elastic/eui';
 import React from 'react';
-import {
-  PROCESSOR_EVENT,
-  TRACE_ID,
-  TRANSACTION_ID
-} from 'x-pack/plugins/apm/common/constants';
 import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-
-function getDiscoverQuery(transactionId: string, traceId?: string) {
-  let query = `${PROCESSOR_EVENT}:transaction AND ${TRANSACTION_ID}:${transactionId}`;
-  if (traceId) {
-    query += ` AND ${TRACE_ID}:${traceId}`;
-  }
-  return {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query
-      }
-    }
-  };
-}
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { DiscoverTransactionButton } from '../../../shared/DiscoverButtons/DiscoverTransactionButton';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -114,16 +94,9 @@ export class ActionMenu extends React.Component<
 
     const items = [
       <EuiContextMenuItem icon="discoverApp" key="discover-transaction">
-        <KibanaLink
-          pathname="/app/kibana"
-          hash="/discover"
-          query={getDiscoverQuery(
-            transaction.transaction.id,
-            transaction.version === 'v2' ? transaction.trace.id : undefined
-          )}
-        >
+        <DiscoverTransactionButton transaction={transaction}>
           View sample document
-        </KibanaLink>
+        </DiscoverTransactionButton>
       </EuiContextMenuItem>,
       ...this.getInfraActions(transaction)
     ];

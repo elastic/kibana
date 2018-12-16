@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import init from './init';
 import { mappings } from './server/mappings';
-import { CANVAS_APP } from './common/lib/constants';
+import { CANVAS_APP } from './common/lib';
 
 export function canvas(kibana) {
   return new kibana.Plugin({

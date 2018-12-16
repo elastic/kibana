@@ -22,8 +22,6 @@ import {
 
 import { ItemsGridPagination } from './items_grid_pagination';
 
-import './styles/main.less';
-
 export function ItemsGrid({
   numberColumns,
   totalItemCount,

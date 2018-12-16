@@ -92,17 +92,7 @@ export class Telemetry {
    * Public method
    */
   start() {
-    // delay the initial report to allow the user some time to read the opt-out message
-    let hasWaited = false;
-
-    // continuously check if it's due time for a report
-    window.setInterval(() => {
-      if (hasWaited) {
-        // throw away the return data
-        this._sendIfDue();
-      }
-      hasWaited = true;
-    }, 60000);
+    window.setInterval(() => this._sendIfDue(), 60000);
   }
 
 } // end class

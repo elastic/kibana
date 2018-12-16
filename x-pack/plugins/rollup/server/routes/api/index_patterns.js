@@ -10,6 +10,7 @@ import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import indexBy from 'lodash/collection/indexBy';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
+import querystring from 'querystring';
 
 /**
  * Get list of fields for rollup index pattern, in the format of regular index pattern fields
@@ -25,26 +26,36 @@ export function registerFieldsForWildcardRoute(server) {
       pre: [ licensePreRouting ],
       validate: {
         query: Joi.object().keys({
-          pattern: Joi.string(),
+          pattern: Joi.string().required(),
           meta_fields: Joi.array().items(Joi.string()).default([]),
-          fields: Joi.array(),
           params: Joi.object().keys({
             rollup_index: Joi.string().required(),
-          }).default({})
+          }).required()
         }).default()
       }
     },
     handler: async (request) => {
       const {
+        pattern,
         meta_fields: metaFields,
-        fields,
         params,
       } = request.query;
 
-      const rollupIndex = params.rollup_index;
-      const callWithRequest = callWithRequestFactory(server, request);
+      // Format call to standard index pattern `fields for wildcard`
+      const standardRequest = {
+        url: `/api/index_patterns/_fields_for_wildcard?${querystring.stringify({ pattern, meta_fields: metaFields })}`,
+        method: 'GET',
+        headers: request.headers,
+      };
 
       try {
+        // Make call and use field information from response
+        const standardResponse = await server.inject(standardRequest);
+        const fields = standardResponse.result && standardResponse.result.fields;
+
+        const rollupIndex = params.rollup_index;
+        const callWithRequest = callWithRequestFactory(server, request);
+
         const rollupFields = [];
         const rollupFieldNames = [];
         const fieldsFromFieldCapsApi = indexBy(fields, 'name');
@@ -69,23 +80,44 @@ export function registerFieldsForWildcardRoute(server) {
             readFromDocValues: true,
           };
 
-          rollupFields.push(
-            ...fields
-              // For each field of the aggregation, filter out ones that have already been added
-              // to the field list bcause the same field can be part of multiple aggregations, but
-              // end consumption doesn't differentiate fields based on their aggregation abilities.
-              .filter(field => !rollupFieldNames.includes(field))
-              // Then expand each field into object format that end consumption expects.
-              .map(field => {
-                const fieldCapsKey = `${field}.${agg}.${agg === 'date_histogram' ? 'timestamp' : 'value'}`;
-                rollupFieldNames.push(field);
-                return {
-                  ...fieldsFromFieldCapsApi[fieldCapsKey],
-                  ...defaultField,
-                  name: field,
-                };
-              })
-          );
+          // Date histogram agg only ever has one field defined, let date type overwrite a
+          // previous type if defined (such as number from max and min aggs).
+          if(agg === 'date_histogram') {
+            const timeFieldName = fields[0];
+            const fieldCapsKey = `${timeFieldName}.${agg}.timestamp`;
+            const newField = {
+              ...fieldsFromFieldCapsApi[fieldCapsKey],
+              ...defaultField,
+              name: timeFieldName,
+            };
+            const existingField = rollupFields.find(field => field.name === timeFieldName);
+
+            if(existingField) {
+              Object.assign(existingField, newField);
+            } else {
+              rollupFieldNames.push(timeFieldName);
+              rollupFields.push(newField);
+            }
+          }
+          // For all other aggs, filter out ones that have already been added to the field list
+          // because the same field can be part of multiple aggregations, but end consumption
+          // doesn't differentiate fields based on their aggregation abilities.
+          else {
+            rollupFields.push(
+              ...fields
+                .filter(field => !rollupFieldNames.includes(field))
+                .map(field => {
+                  // Expand each field into object format that end consumption expects.
+                  const fieldCapsKey = `${field}.${agg}.value`;
+                  rollupFieldNames.push(field);
+                  return {
+                    ...fieldsFromFieldCapsApi[fieldCapsKey],
+                    ...defaultField,
+                    name: field,
+                  };
+                })
+            );
+          }
         });
 
         return {

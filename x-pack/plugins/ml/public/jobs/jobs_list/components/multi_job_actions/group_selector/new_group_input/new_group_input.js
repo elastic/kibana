@@ -19,7 +19,6 @@ import {
   keyCodes,
 } from '@elastic/eui';
 
-import './styles/main.less';
 import { validateGroupNames } from '../../../validate_job';
 
 export class NewGroupInput extends Component {

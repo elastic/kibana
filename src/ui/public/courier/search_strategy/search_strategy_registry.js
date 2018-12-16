@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { noOpSearchStrategy } from './no_op_search_strategy';
+
 const searchStrategies = [];
 
 export const addSearchStrategy = searchStrategy => {
@@ -48,7 +50,14 @@ const getSearchStrategyForSearchRequest = searchRequest => {
 
   // Otherwise try to match it to a strategy.
   const indexPattern = searchRequest.source.getField('index');
-  return getSearchStrategyByViability(indexPattern);
+  const viableSearchStrategy = getSearchStrategyByViability(indexPattern);
+
+  if (viableSearchStrategy) {
+    return viableSearchStrategy;
+  }
+
+  // This search strategy automatically rejects with an error.
+  return noOpSearchStrategy;
 };
 
 

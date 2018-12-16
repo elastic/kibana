@@ -117,7 +117,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       template: `
         <div
           id="${ROOT_ELEMENT_ID}"
-          style="display: flex; flex-direction: column; align-items: stretch; flex: 1 0 0; overflow: hidden;"
+          style="display: flex; flex-direction: column; align-items: stretch; flex: 1 0 0%; overflow: hidden;"
         ></div>
       `,
     }));
@@ -140,7 +140,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
     uiRoutes.otherwise({
       reloadOnSearch: false,
       template:
-        '<infra-ui-kibana-adapter style="display: flex; align-items: stretch; flex: 1 0 0;"></infra-ui-kibana-adapter>',
+        '<infra-ui-kibana-adapter style="display: flex; align-items: stretch; flex: 1 0 0%;"></infra-ui-kibana-adapter>',
     });
   };
 }

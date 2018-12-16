@@ -125,6 +125,9 @@ export default class Worker extends EventEmitter {
       case 'WORKER_BROADCAST':
         this.emit('broadcast', data);
         break;
+      case 'OPTIMIZE_STATUS':
+        this.emit('optimizeStatus', data);
+        break;
       case 'WORKER_LISTENING':
         this.listening = true;
         this.emit('listening');

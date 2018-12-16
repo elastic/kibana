@@ -48,6 +48,7 @@ jest.mock('ui/timefilter/lib/parse_querystring',
 
 import sinon from 'sinon';
 import expect from 'expect.js';
+import moment from 'moment';
 import { timefilter } from './timefilter';
 
 function stubNowTime(nowTime) {
@@ -100,6 +101,17 @@ describe('setTime', () => {
     timefilter.setTime({ from: 5, to: 10 });
     expect(update.called).to.be(true);
     expect(fetch.called).to.be(true);
+  });
+
+  test('should return strings and not moment objects', () => {
+    const from = moment().subtract(15, 'minutes');
+    const to = moment();
+    timefilter.setTime({ to, from, mode: 'absolute' });
+    expect(timefilter.getTime()).to.eql({
+      from: from.toISOString(),
+      to: to.toISOString(),
+      mode: 'absolute'
+    });
   });
 });
 

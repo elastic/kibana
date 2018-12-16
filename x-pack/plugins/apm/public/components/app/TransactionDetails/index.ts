@@ -6,29 +6,16 @@
 
 import { connect } from 'react-redux';
 import { TransactionDetailsView } from 'x-pack/plugins/apm/public/components/app/TransactionDetails/view';
-import { selectWaterfallRoot } from 'x-pack/plugins/apm/public/store/selectors/waterfall';
-import {
-  getUrlParams,
-  IUrlParams
-} from 'x-pack/plugins/apm/public/store/urlParams';
-import { Transaction } from '../../../../typings/Transaction';
+import { getUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IReduxState } from '../../../store/rootReducer';
 
-interface Props {
-  location: any;
-  urlParams: IUrlParams;
-  waterfallRoot: Transaction;
-}
-
-function mapStateToProps(state: any = {}, props: Partial<Props>) {
+function mapStateToProps(state = {} as IReduxState) {
   return {
     location: state.location,
-    urlParams: getUrlParams(state),
-    waterfallRoot: selectWaterfallRoot(state, props)
+    urlParams: getUrlParams(state)
   };
 }
 
-const mapDispatchToProps = {};
-export const TransactionDetails = connect<{}, {}, Props>(
-  mapStateToProps,
-  mapDispatchToProps
-)(TransactionDetailsView);
+export const TransactionDetails = connect(mapStateToProps)(
+  TransactionDetailsView
+);

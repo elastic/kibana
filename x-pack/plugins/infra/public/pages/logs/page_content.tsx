@@ -106,14 +106,14 @@ export const LogsPageContent: React.SFC = () => (
 );
 
 const LogPageEventStreamColumn = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 `;
 
 const LogPageMinimapColumn = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   overflow: hidden;
   min-width: 100px;
   max-width: 100px;

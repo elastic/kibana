@@ -2,10 +2,10 @@
 
 exports[`VisualizationRequestError should render according to snapshot 1`] = `
 <div
-  class="visualize-error visualize-chart"
+  class="visError visChart"
 >
   <div
-    class="euiText euiText--extraSmall visualize-request-error"
+    class="euiText euiText--extraSmall visError--request"
   >
     <div
       class="euiTextColor euiTextColor--danger"

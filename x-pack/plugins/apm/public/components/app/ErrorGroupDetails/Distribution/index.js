@@ -6,7 +6,7 @@
 
 import React from 'react';
 import Histogram from '../../../shared/charts/Histogram';
-import EmptyMessage from '../../../shared/EmptyMessage';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { HeaderSmall } from '../../../shared/UIComponents';
 
 export function getFormattedBuckets(buckets, bucketSize) {

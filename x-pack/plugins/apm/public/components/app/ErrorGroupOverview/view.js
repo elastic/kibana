@@ -53,6 +53,7 @@ class ErrorGroupOverview extends Component {
         />
 
         <WatcherFlyout
+          location={location}
           serviceName={serviceName}
           isOpen={this.state.isFlyoutOpen}
           onClose={this.onCloseFlyout}

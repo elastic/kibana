@@ -39,7 +39,7 @@ export class WatchHistoryItem {
   static fromUpstreamJson(json, opts) {
     if (!json.id) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfIdPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watchHistoryItem.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {id} property',
           values: {
             id: 'id'
@@ -49,7 +49,7 @@ export class WatchHistoryItem {
     }
     if (!json.watchId) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfWatchIdPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain a {watchId} property',
           values: {
             watchId: 'watchId'
@@ -59,7 +59,7 @@ export class WatchHistoryItem {
     }
     if (!json.watchHistoryItemJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfWatchHistoryItemJsonPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain a {watchHistoryItemJson} property',
           values: {
             watchHistoryItemJson: 'watchHistoryItemJson'

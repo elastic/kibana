@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { NodeDetailStatus } from 'plugins/monitoring/components/elasticsearch/node_detail_status';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringNodeSummary', () => {
@@ -18,7 +19,7 @@ uiModule.directive('monitoringNodeSummary', () => {
     },
     link(scope, $el) {
       scope.$watch('node', node => {
-        render(<NodeDetailStatus stats={node} />, $el[0]);
+        render(<I18nProvider><NodeDetailStatus stats={node} /></I18nProvider>, $el[0]);
       });
     }
   };

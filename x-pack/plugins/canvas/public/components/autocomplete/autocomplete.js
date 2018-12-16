@@ -4,6 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*disabling eslint because of these jsx-a11y errors(https://www.npmjs.com/package/eslint-plugin-jsx-a11y):
+181:7   error  Elements with the 'combobox' interactive role must be focusable                                                 jsx-a11y/interactive-supports-focus
+  187:9   error  Elements with the ARIA role "combobox" must have the following attributes defined: aria-controls,aria-expanded  jsx-a11y/role-has-required-aria-props
+  209:23  error  Elements with the 'option' interactive role must be focusable                                                   jsx-a11y/interactive-supports-focus
+  218:25  error  Elements with the ARIA role "option" must have the following attributes defined: aria-selected                  jsx-a11y/role-has-required-aria-props
+*/
+/* eslint-disable jsx-a11y/interactive-supports-focus */
+/* eslint-disable jsx-a11y/role-has-required-aria-props */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, keyCodes } from '@elastic/eui';

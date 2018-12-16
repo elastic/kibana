@@ -20,15 +20,19 @@ const SESSION_TIMEOUT_GRACE_PERIOD_MS = 5000;
 
 const module = uiModules.get('security', []);
 module.config(($httpProvider) => {
-  $httpProvider.interceptors.push(($timeout, $window, $q, $injector, sessionTimeout, Notifier, Private, autoLogout) => {
-    const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
+  $httpProvider.interceptors.push(($timeout, $window, $q, $injector, sessionTimeout, Notifier, Private, autoLogout, i18n) => {
+    const isUnauthenticated = Private(PathProvider).isUnauthenticated();
     const notifier = new Notifier();
     const notificationLifetime = 60 * 1000;
     const notificationOptions = {
       type: 'warning',
-      content: 'You will soon be logged out due to inactivity. Click OK to resume.',
+      content: i18n('xpack.security.hacks.logoutNotification', {
+        defaultMessage: 'You will soon be logged out due to inactivity. Click OK to resume.'
+      }),
       icon: 'warning',
-      title: 'Warning',
+      title: i18n('xpack.security.hacks.warningTitle', {
+        defaultMessage: 'Warning'
+      }),
       lifetime: Math.min(
         (sessionTimeout - SESSION_TIMEOUT_GRACE_PERIOD_MS),
         notificationLifetime
@@ -61,7 +65,7 @@ module.config(($httpProvider) => {
 
     function interceptorFactory(responseHandler) {
       return function interceptor(response) {
-        if (!isLoginOrLogout && !isSystemApiRequest(response.config) && sessionTimeout !== null) {
+        if (!isUnauthenticated && !isSystemApiRequest(response.config) && sessionTimeout !== null) {
           clearNotifications();
           scheduleNotification();
         }

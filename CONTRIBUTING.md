@@ -22,6 +22,7 @@ A high level overview of our contributing guidelines.
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
   - [Testing and Building](#testing-and-building)
+    - [Debugging server code](#debugging-server-code)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
   - [Cross-browser compatibility](#cross-browser-compatibility)
@@ -229,8 +230,6 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Potential Optimization Pitfalls
 
-In development mode, Kibana runs a customized version of [Webpack](http://webpack.github.io/) with some optimizations enabled to make building the browser bundles as fast as possible. These optimizations make the build process about 2x as fast for initial builds, and about 7x faster for rebuilds, but are labeled "unsafe" by Webpack because they can sometimes cause changes to go unnoticed by the compiler. If you experience any of the scenarios below either restart the dev server, or add `optimize.unsafeCache: false` to your `config/kibana.dev.yml` file to disable these optimizations completely.
-
  - Webpack is trying to include a file in the bundle that I deleted and is now complaining about it is missing
  - A module id that used to resolve to a single file now resolves to a directory, but webpack isn't adapting
  - (if you discover other scenarios, please send a PR!)
@@ -281,7 +280,7 @@ macOS users on a machine with a discrete graphics card may see significant speed
 - Restart iTerm
 
 ### Debugging Server Code
-`yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+`yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
 ### Unit testing frameworks
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.

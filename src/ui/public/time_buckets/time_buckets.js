@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import chrome from '../chrome';
 import { parseInterval } from '../utils/parse_interval';
-import { calcAutoInterval } from './calc_auto_interval';
+import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
@@ -225,13 +225,19 @@ TimeBuckets.prototype.setInterval = function (input) {
 TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
   const self = this;
   const duration = self.getDuration();
-  return decorateInterval(maybeScaleInterval(readInterval()));
+  const parsedInterval = readInterval();
+
+  if(useNormalizedEsInterval) {
+    return decorateInterval(maybeScaleInterval(parsedInterval));
+  } else {
+    return decorateInterval(parsedInterval);
+  }
 
   // either pull the interval from state or calculate the auto-interval
   function readInterval() {
     const interval = self._i;
     if (moment.isDuration(interval)) return interval;
-    return calcAutoInterval.near(config.get('histogram:barTarget'), duration);
+    return calcAutoIntervalNear(config.get('histogram:barTarget'), Number(duration));
   }
 
   // check to see if the interval should be scaled, and scale it if so
@@ -243,7 +249,7 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
     let scaled;
 
     if (approxLen > maxLength) {
-      scaled = calcAutoInterval.lessThan(maxLength, duration);
+      scaled = calcAutoIntervalLessThan(maxLength, Number(duration));
     } else {
       return interval;
     }

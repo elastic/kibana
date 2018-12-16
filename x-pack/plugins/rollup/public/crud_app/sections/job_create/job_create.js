@@ -11,9 +11,10 @@ import cloneDeep from 'lodash/lang/cloneDeep';
 import debounce from 'lodash/function/debounce';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiBreadcrumbs,
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
@@ -26,11 +27,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
+import { fatalError } from 'ui/notify';
+
 import {
-  getRouterLinkProps,
   validateIndexPattern,
   formatFields,
+  listBreadcrumb,
+  createBreadcrumb,
 } from '../../services';
 
 import { Navigation } from './navigation';
@@ -56,22 +59,22 @@ import {
 } from './steps_config';
 
 const stepIdToTitleMap = {
-  [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.stepLogisticsTitle', {
+  [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
     defaultMessage: 'Logistics',
   }),
-  [STEP_DATE_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.stepDateHistogramTitle', {
+  [STEP_DATE_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.steps.stepDateHistogramTitle', {
     defaultMessage: 'Date histogram',
   }),
-  [STEP_TERMS]: i18n.translate('xpack.rollupJobs.create.stepTermsTitle', {
+  [STEP_TERMS]: i18n.translate('xpack.rollupJobs.create.steps.stepTermsTitle', {
     defaultMessage: 'Terms',
   }),
-  [STEP_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.stepHistogramTitle', {
+  [STEP_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.steps.stepHistogramTitle', {
     defaultMessage: 'Histogram',
   }),
-  [STEP_METRICS]: i18n.translate('xpack.rollupJobs.create.stepMetricsTitle', {
+  [STEP_METRICS]: i18n.translate('xpack.rollupJobs.create.steps.stepMetricsTitle', {
     defaultMessage: 'Metrics',
   }),
-  [STEP_REVIEW]: i18n.translate('xpack.rollupJobs.create.stepReviewTitle', {
+  [STEP_REVIEW]: i18n.translate('xpack.rollupJobs.create.steps.stepReviewTitle', {
     defaultMessage: 'Review and save',
   }),
 };
@@ -85,6 +88,8 @@ export class JobCreateUi extends Component {
 
   constructor(props) {
     super(props);
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb ]);
 
     const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
 
@@ -191,6 +196,7 @@ export class JobCreateUi extends Component {
 
       const formattedNumericFields = formatFields(numericFields, 'numeric');
       const formattedKeywordFields = formatFields(keywordFields, 'keyword');
+      const formattedDateFields = formatFields(indexPatternDateFields, 'date');
 
       function sortFields(a, b) {
         const nameA = a.name.toUpperCase();
@@ -213,7 +219,11 @@ export class JobCreateUi extends Component {
       ].sort(sortFields);
 
       const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
-      const indexPatternMetricsFields = [ ...formattedNumericFields ].sort(sortFields);
+
+      const indexPatternMetricsFields = [
+        ...formattedNumericFields,
+        ...formattedDateFields,
+      ].sort(sortFields);
 
       this.setState({
         indexPatternAsyncErrors,
@@ -228,7 +238,7 @@ export class JobCreateUi extends Component {
       this.onFieldsChange({
         dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
       }, STEP_DATE_HISTOGRAM);
-    }).catch(() => {
+    }).catch((error) => {
       // We don't need to do anything if this component has been unmounted.
       if (!this._isMounted) {
         return;
@@ -239,10 +249,35 @@ export class JobCreateUi extends Component {
         return;
       }
 
-      // TODO: Show toast or inline error.
-      this.setState({
-        isValidatingIndexPattern: false,
-      });
+      // Expect an error in the shape provided by Angular's $http service.
+      if (error && error.data) {
+        const { error: errorString, statusCode } = error.data;
+
+        const indexPatternAsyncErrors = [(
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.indexPatternValidationError"
+            defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
+            values={{ error: errorString, statusCode }}
+          />
+        )];
+
+        this.setState({
+          indexPatternAsyncErrors,
+          indexPatternDateFields: [],
+          indexPatternTermsFields: [],
+          indexPatternHistogramFields: [],
+          indexPatternMetricsFields: [],
+          isValidatingIndexPattern: false,
+        });
+
+        return;
+      }
+
+      // This error isn't an HTTP error, so let the fatal error screen tell the user something
+      // unexpected happened.
+      fatalError(error, i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
+        defaultMessage: 'Rollup Job Wizard index pattern validation',
+      }));
     });
   }, 300);
 
@@ -413,23 +448,6 @@ export class JobCreateUi extends Component {
   render() {
     const { isSaving, saveError } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.jobs"
-          defaultMessage="Rollup jobs"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.create"
-          defaultMessage="Create"
-        />
-      ),
-    }];
-
     let savingFeedback;
 
     if (isSaving) {
@@ -484,9 +502,6 @@ export class JobCreateUi extends Component {
               horizontalPosition="center"
               className="rollupJobWizardPage"
             >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-              <EuiSpacer size="xs" />
-
               <EuiPageContentHeader>
                 <EuiTitle size="l">
                   <h1>

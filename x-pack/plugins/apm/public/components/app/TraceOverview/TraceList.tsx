@@ -6,11 +6,9 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { Transaction } from '../../../../typings/Transaction';
-import { ITransactionGroup } from '../../../../typings/TransactionGroup';
+import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
-// @ts-ignore
-import { asMillisWithDefault } from '../../../utils/formatters';
+import { asMillis } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
@@ -24,36 +22,35 @@ const StyledTransactionLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  noItemsMessage: any;
+  noItemsMessage: React.ReactNode;
   isLoading: boolean;
 }
 
 const traceListColumns: ITableColumn[] = [
   {
-    field: 'sample',
+    field: 'name',
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (transaction: Transaction) => (
-      <TooltipOverlay content={transaction.transaction.name}>
-        <StyledTransactionLink transaction={transaction}>
-          {transaction.transaction.name}
+    render: (name, group: ITransactionGroup) => (
+      <TooltipOverlay content={name}>
+        <StyledTransactionLink transaction={group.sample}>
+          {name}
         </StyledTransactionLink>
       </TooltipOverlay>
     )
   },
   {
-    field: 'sample',
+    field: 'sample.context.service.name',
     name: 'Originating service',
-    sortable: true,
-    render: (transaction: Transaction) => transaction.context.service.name
+    sortable: true
   },
   {
     field: 'averageResponseTime',
     name: 'Avg. response time',
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillisWithDefault(value)
+    render: (value: number) => asMillis(value)
   },
   {
     field: 'transactionsPerMinute',

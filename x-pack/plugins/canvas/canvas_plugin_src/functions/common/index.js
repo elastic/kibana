@@ -11,7 +11,6 @@ import { asFn } from './as';
 import { axisConfig } from './axisConfig';
 import { compare } from './compare';
 import { containerStyle } from './containerStyle';
-import { clog } from './clog';
 import { context } from './context';
 import { columns } from './columns';
 import { csv } from './csv';
@@ -65,7 +64,6 @@ export const functions = [
   any,
   asFn,
   axisConfig,
-  clog,
   columns,
   compare,
   containerStyle,

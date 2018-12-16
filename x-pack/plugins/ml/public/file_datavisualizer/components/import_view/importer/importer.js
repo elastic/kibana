@@ -28,10 +28,12 @@ export class Importer {
     const pipeline = this.pipeline;
     updatePipelineTimezone(pipeline);
 
-    const ingestPipeline = {
+    // if no pipeline has been supplied,
+    // send an empty object
+    const ingestPipeline = (pipeline !== undefined) ? {
       id: `${index}-pipeline`,
       pipeline,
-    };
+    } : {};
 
     const createIndexResp = await ml.fileDatavisualizer.import({
       id: undefined,

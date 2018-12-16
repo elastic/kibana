@@ -22,6 +22,7 @@ import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
+import { i18n } from '@kbn/i18n';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -36,7 +37,9 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
-      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" title="Fit Data Bounds" aria-label="Fit Data Bounds"></a>')
+      const fitDatBoundsLabel = i18n.translate('common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel',
+        { defaultMessage: 'Fit Data Bounds' });
+      $(this._fitContainer).html(`<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`)
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();

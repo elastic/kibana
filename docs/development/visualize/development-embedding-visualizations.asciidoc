@@ -55,4 +55,4 @@ The returned `EmbeddedVisualizeHandler` itself has the following methods and pro
 - `removeRenderCompleteListener(listener)`: removes an event listener from the handler again
 
 You can find the detailed `EmbeddedVisualizeHandler` documentation in its
-{repo}blob/{branch}/src/ui/public/visualize/loader/embedded_visualize_handler.js[source code].
+{repo}blob/{branch}/src/ui/public/visualize/loader/embedded_visualize_handler.ts[source code].

@@ -19,13 +19,19 @@
 
 import { MetricAggType } from './metric_agg_type';
 import { percentilesMetricAgg } from './percentiles';
+import { i18n } from '@kbn/i18n';
 
 export const medianMetricAgg = new MetricAggType({
   name: 'median',
   dslName: 'percentiles',
-  title: 'Median',
+  title: i18n.translate('common.ui.aggTypes.metrics.medianTitle', {
+    defaultMessage: 'Median'
+  }),
   makeLabel: function (aggConfig) {
-    return 'Median ' + aggConfig.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.metrics.medianLabel', {
+      defaultMessage: 'Median {field}',
+      values: { field: aggConfig.getFieldDisplayName() }
+    });
   },
   params: [
     {

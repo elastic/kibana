@@ -6,10 +6,10 @@
 
 Canvas is included with X-Pack and requires a Basic license or better to use.
 
-Canvas has its own build pipeline that gets triggered as part of `yarn kbn bootstrap`. However, should you ever need to run the build manually, like if you updated one of the plugins, you can do so with the following command:
+Canvas has its own build pipeline that gets triggered as part of `node scripts/kbn bootstrap`. However, should you ever need to run the build manually, like if you updated one of the plugins, you can do so with the following command:
 
 ```bash
-yarn kbn run build:plugins --include canvas
+yarn kbn run build --include x-pack
 ```
 
 ### Developing in Canvas
@@ -28,10 +28,10 @@ yarn start
 
 There are several other scripts available once you are in that path as well.
 
-- `yarn build:plugins` - local alias to build Canvas plugins, an alternative to using `kbn`.
-- `yarn lint` - local linter setup, can also be used with the `--fix` flag for automatic fixes.
-- `yarn test` - local test runner, does not require a real Kibana instance. Runs all the same unit tests the normal runner does, just limited to Canvas, and *waaaaaay* faster (currently 12 seconds or less).
-- `yarn test:dev` - Same as above, but watches for changes and only runs tests for the given scope (browser, server, or common).
+- `node scripts/build_plugins` - local alias to build Canvas plugins, an alternative to using `kbn`.
+- `node scripts/lint` - local linter setup, can also be used with the `--fix` flag for automatic fixes.
+- `node scripts/test` - local test runner, does not require a real Kibana instance. Runs all the same unit tests the normal runner does, just limited to Canvas, and *waaaaaay* faster (currently 12 seconds or less).
+- `node scripts/test_dev` - Same as above, but watches for changes and only runs tests for the given scope (browser, server, or common).
 
 ## Feature Questions
 

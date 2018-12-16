@@ -27,8 +27,12 @@ export interface TimeRange {
   to: string;
 }
 
+export interface FilterMeta {
+  disabled: boolean;
+}
+
 export interface Filter {
-  meta: object;
+  meta: FilterMeta;
   query: object;
 }
 
@@ -48,6 +52,9 @@ export interface VisSavedObject {
   vis: Vis;
   description?: string;
   searchSource: SearchSource;
+  title: string;
+  uiStateJSON?: string;
+  destroy: () => void;
 }
 
 /**

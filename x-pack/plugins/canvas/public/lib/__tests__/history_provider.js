@@ -22,7 +22,7 @@ function createState() {
   };
 }
 
-describe('historyProvider', () => {
+describe.skip('historyProvider', () => {
   let history;
   let state;
 

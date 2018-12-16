@@ -26,6 +26,7 @@
 
 import _ from 'lodash';
 import { fieldFormats } from '../registry/field_formats';
+import { i18n } from '@kbn/i18n';
 
 class AggConfig {
 
@@ -265,8 +266,11 @@ class AggConfig {
     }
 
     if (!this.type) return '';
-    let pre = percentageMode ? 'Percentage of ' : '';
-    return pre += this.type.makeLabel(this);
+    return percentageMode ?
+      i18n.translate('common.ui.vis.aggConfig.percentageOfLabel', {
+        defaultMessage: 'Percentage of {label}',
+        values: { label: this.type.makeLabel(this) },
+      }) : `${this.type.makeLabel(this)}`;
   }
 
   getIndexPattern() {

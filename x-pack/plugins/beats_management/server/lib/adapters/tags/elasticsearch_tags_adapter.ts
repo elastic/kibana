@@ -21,6 +21,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
   public async getAll(user: FrameworkUser, ESQuery?: any) {
     const params = {
+      ignore: [404],
       _source: true,
       size: 10000,
       index: INDEX_NAMES.BEATS,
@@ -106,10 +107,13 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
   }
 
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
+    if (tagIds.length === 0) {
+      return [];
+    }
     const ids = tagIds.map(tag => `tag:${tag}`);
 
-    // TODO abstract to kibana adapter as the more generic getDocs
     const params = {
+      ignore: [404],
       _source: true,
       body: {
         ids,
@@ -142,7 +146,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     };
     const response = await this.database.index(user, params);
 
-    // TODO this is not something that works for TS... change this return type
     return get(response, 'result');
   }
 }

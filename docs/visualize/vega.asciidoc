@@ -215,7 +215,8 @@ the graph must specify `type=map` in the host configuration:
       // defaults to true, shows +/- buttons to zoom in/out
       "zoomControl": false,
 
-      // defaults to true, disables mouse wheel zoom
+      // Defaults to 'false', disables mouse wheel zoom. If set to 
+      // 'true', map may zoom unexpectedly while scrolling dashboard
       "scrollWheelZoom": false,
 
       // When false, repaints on each move frame.

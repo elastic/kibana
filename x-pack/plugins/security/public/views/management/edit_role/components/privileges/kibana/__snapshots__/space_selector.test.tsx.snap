@@ -2,6 +2,7 @@
 
 exports[`SpaceSelector renders without crashing 1`] = `
 <EuiComboBox
+  compressed={false}
   fullWidth={false}
   isClearable={true}
   onChange={[Function]}

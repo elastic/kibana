@@ -12,6 +12,7 @@ import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
 import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/list';
 import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringLogstashPipelineViewer', $injector => {
@@ -33,12 +34,14 @@ uiModule.directive('monitoringLogstashPipelineViewer', $injector => {
         pipelineState.update(updatedPipeline);
 
         render(
-          <PipelineViewer
-            pipeline={List.fromPipeline(
-              Pipeline.fromPipelineGraph(pipelineState.config.graph)
-            )}
-            timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
-          />,
+          <I18nProvider>
+            <PipelineViewer
+              pipeline={List.fromPipeline(
+                Pipeline.fromPipelineGraph(pipelineState.config.graph)
+              )}
+              timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+            />
+          </I18nProvider>,
           $el[0]
         );
       });

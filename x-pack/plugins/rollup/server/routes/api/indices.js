@@ -112,7 +112,7 @@ export function registerIndicesRoute(server) {
           return wrapEsError(err);
         }
 
-        wrapUnknownError(err);
+        return wrapUnknownError(err);
       }
     }
   });

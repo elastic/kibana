@@ -20,18 +20,18 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import AggConfigResult from '../vis/agg_config_result';
-import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
 import { uiModules } from '../modules';
 import tableCellFilterHtml from './partials/table_cell_filter.html';
 import { isNumeric } from '../utils/numeric';
+import { VisFiltersProvider } from '../vis/vis_filters';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
+module.directive('kbnRows', function ($compile, Private) {
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {
+      const visFilter = Private(VisFiltersProvider);
       function addCell($tr, contents) {
         function createCell() {
           return $(document.createElement('td'));
@@ -43,15 +43,13 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
 
           const scope = $scope.$new();
 
-          const $state = getAppState();
-          const addFilter = filterBarClickHandler($state);
           scope.onFilterClick = (event, negate) => {
             // Don't add filter if a link was clicked.
             if ($(event.target).is('a')) {
               return;
             }
 
-            addFilter({ point: { aggConfigResult: aggConfigResult }, negate });
+            visFilter.filter({ datum: { aggConfigResult: aggConfigResult }, negate });
           };
 
           return $compile($template)(scope);

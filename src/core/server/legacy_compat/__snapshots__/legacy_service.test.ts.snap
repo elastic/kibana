@@ -6,6 +6,7 @@ Array [
     Object {
       "basePath": true,
       "dev": true,
+      "open": false,
       "optimize": false,
       "quiet": true,
       "repl": false,
@@ -59,6 +60,7 @@ Array [
     Object {
       "basePath": false,
       "dev": true,
+      "open": false,
       "optimize": false,
       "quiet": false,
       "repl": false,

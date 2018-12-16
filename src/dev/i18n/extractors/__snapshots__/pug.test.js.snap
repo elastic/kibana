@@ -4,7 +4,7 @@ exports[`dev/i18n/extractors/pug extracts messages from pug template with interp
 Array [
   "message-id",
   Object {
-    "context": "Message context",
+    "description": "Message description",
     "message": "Default message",
   },
 ]
@@ -14,7 +14,7 @@ exports[`dev/i18n/extractors/pug extracts messages from pug template without int
 Array [
   "message-id",
   Object {
-    "context": "Message context",
+    "description": "Message description",
     "message": "Default message",
   },
 ]

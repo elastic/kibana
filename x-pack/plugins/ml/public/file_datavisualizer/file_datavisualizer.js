@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 import React from 'react';
 
-export function FileDataVisualizerPage({ indexPatterns }) {
+export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
   return (
     <div className="file-datavisualizer-container">
-      <FileDataVisualizerView indexPatterns={indexPatterns} />
+      <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
     </div>
   );
 }

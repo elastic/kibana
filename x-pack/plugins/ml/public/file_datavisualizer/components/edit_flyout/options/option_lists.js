@@ -6,8 +6,8 @@
 
 
 export const FORMAT_OPTIONS = [
-  'json',
   'delimited',
+  'ndjson',
   'semi_structured_text',
   'xml',
 ];

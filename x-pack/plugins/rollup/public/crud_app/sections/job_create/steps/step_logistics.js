@@ -10,7 +10,6 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -28,7 +27,7 @@ import {
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl, cronUrl } from '../../../services';
-import { CronEditor } from './components';
+import { CronEditor, StepError } from './components';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -99,7 +98,7 @@ export class StepLogisticsUi extends Component {
         <p>
           <FormattedMessage
             id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpMustMatchLabel"
-            defaultMessage="Index pattern must match at least one non-rollup index."
+            defaultMessage="Index pattern must match at least one index that is not a rollup."
           />
         </p>
       );
@@ -111,14 +110,14 @@ export class StepLogisticsUi extends Component {
         <p>
           <FormattedMessage
             id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpAllowLabel"
-            defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+            defaultMessage="Use a wildcard ({asterisk}) to match multiple indices."
             values={{ asterisk: <strong>*</strong> }}
           />
         </p>
         <p>
           <FormattedMessage
             id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpDisallowLabel"
-            defaultMessage="You can't use spaces or the characters {characterList}"
+            defaultMessage="Spaces and the characters {characterList} are not allowed."
             values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
           />
         </p>
@@ -152,28 +151,20 @@ export class StepLogisticsUi extends Component {
             label={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.fieldCronLabel"
-                defaultMessage="Cron pattern"
+                defaultMessage="Cron expression"
               />
             )}
             error={errorRollupCron}
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={(
-              <Fragment>
-                <p>
+              <p>
+                <EuiLink href={cronUrl} target="_blank">
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLabel"
-                    defaultMessage="{link}"
-                    values={{ link: (
-                      <EuiLink href={cronUrl} target="_blank">
-                        <FormattedMessage
-                          id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
-                          defaultMessage="Learn more about cron syntax"
-                        />
-                      </EuiLink>
-                    ) }}
+                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
+                    defaultMessage="Learn more about cron expressions"
                   />
-                </p>
-              </Fragment>
+                </EuiLink>
+              </p>
             )}
             fullWidth
           >
@@ -188,7 +179,7 @@ export class StepLogisticsUi extends Component {
           <EuiText size="s">
             <EuiLink onClick={this.hideAdvancedCron}>
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvancedLabel"
+                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonBasicLabel"
                 defaultMessage="Create basic interval"
               />
             </EuiLink>
@@ -219,7 +210,7 @@ export class StepLogisticsUi extends Component {
           <EuiLink onClick={this.showAdvancedCron}>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvancedLabel"
-              defaultMessage="Create advanced cron expression"
+              defaultMessage="Create cron expression"
             />
           </EuiLink>
         </EuiText >
@@ -271,8 +262,8 @@ export class StepLogisticsUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogisticsDescription"
-                  defaultMessage="Define the manner in which data will be rolled up."
+                  id="xpack.rollupJobs.create.stepLogistics.logisticsDescription"
+                  defaultMessage="Define how to run the rollup job and when to index the documents."
                 />
               </p>
             </EuiText>
@@ -350,7 +341,7 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDataFlowDescription"
-                defaultMessage="Which indices do you want to pull data from and which rollup index should store this data?"
+                defaultMessage="Which indices do you want to roll up and where do you want to store the data?"
               />
             )}
             fullWidth
@@ -388,7 +379,7 @@ export class StepLogisticsUi extends Component {
               helpText={(
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndex.helpDisallowLabel"
-                  defaultMessage="You can't use spaces, commas, or the characters {characterList}"
+                  defaultMessage="Spaces, commas, and the characters {characterList} are not allowed."
                   values={{ characterList: <strong>{indexIllegalCharacters}</strong> }}
                 />
               )}
@@ -417,9 +408,7 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionScheduleDescription"
-                defaultMessage={`
-                  How often should data be rolled up?
-                `}
+                defaultMessage="How often do you want to roll up the data?"
               />
             )}
             fullWidth
@@ -433,7 +422,7 @@ export class StepLogisticsUi extends Component {
                 <h5>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
-                    defaultMessage="How many documents should be rolled up at a time?"
+                    defaultMessage="How many documents do you want to roll up at a time?"
                   />
                 </h5>
               </EuiTitle>
@@ -441,10 +430,7 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeDescription"
-                defaultMessage={`
-                  A larger page size
-                  will roll up data more quickly, but will require more memory during processing.
-                `}
+                defaultMessage="A larger page size will roll up data quicker, but requires more memory."
               />
             )}
             fullWidth
@@ -475,7 +461,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionDelayTitle"
                     defaultMessage="How long should the rollup job wait before rolling up new data?"
                   />
                 </h5>
@@ -484,10 +470,9 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDelayDescription"
-                defaultMessage={`
-                  Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency.
-                  By default, the rollup job attempts to roll up all data that is available.
-                `}
+                defaultMessage="A latency buffer will delay rolling up data. This will yield a
+                  higher-fidelity rollup by allowing for variable ingest latency. By default, the
+                  rollup job attempts to roll up all data that is available."
               />
             )}
             fullWidth
@@ -496,7 +481,7 @@ export class StepLogisticsUi extends Component {
               label={(
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogram.fieldDelayLabel"
-                  defaultMessage="Delay (optional)"
+                  defaultMessage="Latency buffer (optional)"
                 />
               )}
               error={errorRollupDelay}
@@ -506,7 +491,7 @@ export class StepLogisticsUi extends Component {
                   <p>
                     <FormattedMessage
                       id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExampleLabel"
-                      defaultMessage="Example delay values: 30s, 20m, 24h, 2d, 1w, 1M"
+                      defaultMessage="Example values: 30s, 20m, 24h, 2d, 1w, 1M"
                     />
                   </p>
                 </Fragment>
@@ -535,21 +520,7 @@ export class StepLogisticsUi extends Component {
       return null;
     }
 
-    return (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistics.stepErrorTitle"
-              defaultMessage="Fix errors before going to next step"
-            />
-          )}
-          color="danger"
-          iconType="cross"
-        />
-      </Fragment>
-    );
+    return <StepError />;
   }
 }
 

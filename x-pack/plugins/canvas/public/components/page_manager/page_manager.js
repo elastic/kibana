@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import Style from 'style-it';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
@@ -25,6 +26,7 @@ export class PageManager extends React.PureComponent {
     selectedPage: PropTypes.string,
     deleteId: PropTypes.string,
     setDeleteId: PropTypes.func.isRequired,
+    workpadCSS: PropTypes.string,
   };
 
   state = {
@@ -53,6 +55,10 @@ export class PageManager extends React.PureComponent {
 
   scrollToActivePage = () => {
     if (this.activePageRef && this.pageListRef) {
+      // not all target browsers support element.scrollTo
+      // TODO: replace this with something more cross-browser, maybe scrollIntoView
+      if (!this.pageListRef.scrollTo) return;
+
       const pageOffset = this.activePageRef.offsetLeft;
       const {
         left: pageLeft,
@@ -103,7 +109,14 @@ export class PageManager extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { isWriteable, selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const {
+      isWriteable,
+      selectedPage,
+      workpadId,
+      movePage,
+      duplicatePage,
+      workpadCSS,
+    } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -133,16 +146,19 @@ export class PageManager extends React.PureComponent {
                   params={{ id: workpadId, page: pageNumber }}
                   aria-label={`Load page number ${pageNumber}`}
                 >
-                  <PagePreview
-                    isWriteable={isWriteable}
-                    page={page}
-                    height={100}
-                    pageNumber={pageNumber}
-                    movePage={movePage}
-                    selectedPage={selectedPage}
-                    duplicatePage={duplicatePage}
-                    confirmDelete={this.confirmDelete}
-                  />
+                  {Style.it(
+                    workpadCSS,
+                    <PagePreview
+                      isWriteable={isWriteable}
+                      page={page}
+                      height={100}
+                      pageNumber={pageNumber}
+                      movePage={movePage}
+                      selectedPage={selectedPage}
+                      duplicatePage={duplicatePage}
+                      confirmDelete={this.confirmDelete}
+                    />
+                  )}
                 </Link>
               </EuiFlexItem>
             </EuiFlexGroup>

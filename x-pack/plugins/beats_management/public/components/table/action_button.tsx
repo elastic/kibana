@@ -4,53 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { ActionDefinition } from './table_type_configs';
 
 interface ActionButtonProps {
+  itemName: 'Beats' | 'Tags';
   actions: ActionDefinition[];
+  intl: InjectedIntl;
   isPopoverVisible: boolean;
   actionHandler(action: string, payload?: any): void;
   hidePopover(): void;
   showPopover(): void;
 }
 
-const Action = (props: {
-  action: string;
-  danger?: boolean;
-  name: string;
-  actionHandler(action: string, payload?: any): void;
-}) => {
-  const { action, actionHandler, danger, name } = props;
-  return (
-    <EuiButton color={danger ? 'danger' : 'primary'} onClick={() => actionHandler(action)}>
-      {name}
-    </EuiButton>
-  );
-};
-
-export function ActionButton(props: ActionButtonProps) {
-  const { actions, actionHandler, hidePopover, isPopoverVisible, showPopover } = props;
+export const ActionButton = injectI18n((props: ActionButtonProps) => {
+  const { actions, actionHandler, hidePopover, isPopoverVisible, showPopover, intl } = props;
   if (actions.length === 0) {
     return null;
-  } else if (actions.length <= 2) {
-    return (
-      <EuiFlexGroup>
-        {actions.map(({ action, danger, name }) => (
-          <EuiFlexItem key={action} grow={false}>
-            <Action action={action} actionHandler={actionHandler} danger={danger} name={name} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
   }
   return (
     <EuiPopover
       anchorPosition="downLeft"
       button={
         <EuiButton iconSide="right" iconType="arrowDown" onClick={showPopover}>
-          Bulk Action
+          <FormattedMessage
+            id="xpack.beatsManagement.table.bulkActionButtonLabel"
+            defaultMessage="Bulk Action"
+          />
         </EuiButton>
       }
       closePopover={hidePopover}
@@ -64,7 +46,13 @@ export function ActionButton(props: ActionButtonProps) {
         panels={[
           {
             id: 0,
-            title: 'Bulk Actions',
+            title: intl.formatMessage(
+              {
+                id: 'xpack.beatsManagement.table.bulkActionMenuLabel',
+                defaultMessage: 'Manage {itemName}',
+              },
+              { itemName: props.itemName }
+            ),
             items: actions.map(action => ({
               ...action,
               onClick: () => actionHandler(action.action),
@@ -74,4 +62,4 @@ export function ActionButton(props: ActionButtonProps) {
       />
     </EuiPopover>
   );
-}
+});

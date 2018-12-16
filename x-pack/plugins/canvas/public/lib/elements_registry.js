@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Registry } from '../../common/lib/registry';
+import { Registry } from '@kbn/interpreter/common';
 import { Element } from './element';
 
 class ElementsRegistry extends Registry {

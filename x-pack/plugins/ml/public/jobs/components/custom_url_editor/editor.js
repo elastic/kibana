@@ -31,8 +31,6 @@ import {
 import { isValidCustomUrlSettingsTimeRange } from '../../../jobs/components/custom_url_editor/utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 
-import './styles/main.less';
-
 import {
   TIME_RANGE_TYPE,
   URL_TYPE

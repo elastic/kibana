@@ -11,16 +11,16 @@ export const ColumnarPage = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  flex: 1 0 0;
+  flex: 1 0 0%;
 `;
 
 export const PageContent = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   display: flex;
   flex-direction: row;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
 `;
 
 export const FlexPage = styled(EuiPage)`
-  flex: 1 0 0;
+  flex: 1 0 0%;
 `;

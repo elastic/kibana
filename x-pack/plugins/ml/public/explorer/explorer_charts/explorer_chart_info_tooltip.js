@@ -5,8 +5,6 @@
  */
 
 
-import './styles/explorer_chart_info_tooltip.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 

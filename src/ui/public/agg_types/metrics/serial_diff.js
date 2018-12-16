@@ -20,12 +20,19 @@
 import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
+import { i18n } from '@kbn/i18n';
+
+const serialDiffLabel = i18n.translate('common.ui.aggTypes.metrics.serialDiffLabel', {
+  defaultMessage: 'serial diff'
+});
 
 export const serialDiffMetricAgg = new MetricAggType({
   name: 'serial_diff',
-  title: 'Serial Diff',
+  title: i18n.translate('common.ui.aggTypes.metrics.serialDiffTitle', {
+    defaultMessage: 'Serial Diff'
+  }),
   subtype: parentPipelineAggHelper.subtype,
-  makeLabel: agg => makeNestedLabel(agg, 'serial diff'),
+  makeLabel: agg => makeNestedLabel(agg, serialDiffLabel),
   params: [
     ...parentPipelineAggHelper.params()
   ],

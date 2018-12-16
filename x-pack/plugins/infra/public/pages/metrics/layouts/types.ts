@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetric } from '../../../../common/graphql/types';
+import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 
 export enum InfraMetricLayoutVisualizationType {

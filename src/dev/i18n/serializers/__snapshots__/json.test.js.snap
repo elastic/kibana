@@ -62,7 +62,7 @@ exports[`dev/i18n/serializers/json should serialize default messages to JSON 1`]
     \\"plugin1.message.id-1\\": \\"Message text 1 \\",
     \\"plugin2.message.id-2\\": {
       \\"text\\": \\"Message text 2\\",
-      \\"comment\\": \\"Message context\\"
+      \\"comment\\": \\"Message description\\"
     }
   }
 }"

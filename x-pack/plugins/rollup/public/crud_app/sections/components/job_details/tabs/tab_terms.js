@@ -5,22 +5,18 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
 
 import { FieldList } from '../../field_list';
 
 const columns = [{
   field: 'name',
   name: 'Field',
-  truncateText: true,
   sortable: true,
 }];
 
-export const TabTermsUi = ({ terms }) => (
+export const TabTerms = ({ terms }) => (
   <FieldList
     columns={columns}
     fields={terms}
   />
 );
-
-export const TabTerms = injectI18n(TabTermsUi);

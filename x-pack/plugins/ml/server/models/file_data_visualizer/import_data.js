@@ -13,10 +13,6 @@ export function importDataProvider(callWithRequest) {
 
     try {
 
-      if (ingestPipeline === undefined || ingestPipeline.id === undefined) {
-        throw 'No ingest pipeline id specified';
-      }
-
       const {
         id: pipelineId,
         pipeline,
@@ -29,9 +25,12 @@ export function importDataProvider(callWithRequest) {
         await createIndex(index, settings, mappings);
         createdIndex = index;
 
-        const success = await createPipeline(pipelineId, pipeline);
-        if (success.acknowledged !== true) {
-          throw success;
+        // create the pipeline if one has been supplied
+        if (pipelineId !== undefined) {
+          const success = await createPipeline(pipelineId, pipeline);
+          if (success.acknowledged !== true) {
+            throw success;
+          }
         }
         createdPipelineId = pipelineId;
 

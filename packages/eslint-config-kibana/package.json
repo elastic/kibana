@@ -18,6 +18,7 @@
     "babel-eslint": "^9.0.0",
     "eslint": "^5.6.0",
     "eslint-plugin-babel": "^5.2.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jest": "^21.22.1",
     "eslint-plugin-mocha": "^5.2.0",

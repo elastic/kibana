@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -20,19 +21,28 @@ export function ImportSummary({
   ingestPipelineId,
   docCount,
   importFailures,
+  createIndexPattern,
+  createPipeline,
 }) {
   const items = createDisplayItems(
     index,
     indexPattern,
     ingestPipelineId,
     docCount,
-    importFailures
+    importFailures,
+    createIndexPattern,
+    createPipeline
   );
 
   return (
     <React.Fragment>
       <EuiCallOut
-        title="Import complete"
+        title={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.importSummary.importCompleteTitle"
+            defaultMessage="Import complete"
+          />
+        }
         color="success"
         iconType="check"
       >
@@ -47,13 +57,26 @@ export function ImportSummary({
         <React.Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
-            title="Some documents could not be imported"
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.importSummary.documentsCouldNotBeImportedTitle"
+                defaultMessage="Some documents could not be imported"
+              />
+            }
             color="warning"
             iconType="help"
           >
             <p>
-              {importFailures.length} out of {docCount} documents could not be imported.
-              This could be due to lines not matching the Grok pattern.
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.importSummary.documentsCouldNotBeImportedDescription"
+                defaultMessage="{importFailuresLength} out of {docCount} documents could not be imported.
+                This could be due to lines not matching the Grok pattern."
+                values={{
+                  importFailuresLength: importFailures.length,
+                  docCount,
+                }}
+              />
+
             </p>
 
             <Failures failedDocs={importFailures} />
@@ -68,7 +91,12 @@ function Failures({ failedDocs }) {
   return (
     <EuiAccordion
       id="failureList"
-      buttonContent="Failed documents"
+      buttonContent={
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importSummary.failedDocumentsButtonLabel"
+          defaultMessage="Failed documents"
+        />
+      }
       paddingSize="m"
     >
       <div className="failure-list">
@@ -90,30 +118,63 @@ function createDisplayItems(
   indexPattern,
   ingestPipelineId,
   docCount,
-  importFailures
+  importFailures,
+  createIndexPattern,
+  createPipeline
 ) {
   const items = [
     {
-      title: 'Index',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importSummary.indexTitle"
+          defaultMessage="Index"
+        />
+      ),
       description: index,
     },
     {
-      title: 'Index pattern',
-      description: indexPattern,
-    },
-    {
-      title: 'Ingest pipeline',
-      description: ingestPipelineId,
-    },
-    {
-      title: 'Documents ingested',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importSummary.documentsIngestedTitle"
+          defaultMessage="Documents ingested"
+        />
+      ),
       description: docCount - ((importFailures && importFailures.length) || 0),
     }
   ];
 
+  if (createPipeline) {
+    items.splice(1, 0, {
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importSummary.ingestPipelineTitle"
+          defaultMessage="Ingest pipeline"
+        />
+      ),
+      description: ingestPipelineId,
+    });
+  }
+
+  if (createIndexPattern) {
+    items.splice(1, 0, {
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importSummary.indexPatternTitle"
+          defaultMessage="Index pattern"
+        />
+      ),
+      description: indexPattern,
+    });
+  }
+
   if (importFailures && importFailures.length > 0) {
     items.push({
-      title: 'Failed documents',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importSummary.failedDocumentsTitle"
+          defaultMessage="Failed documents"
+        />
+      ),
       description: importFailures.length,
     });
   }

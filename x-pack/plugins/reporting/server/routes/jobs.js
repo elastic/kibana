@@ -64,7 +64,7 @@ export function jobs(server) {
     handler: (request) => {
       const { docId } = request.params;
 
-      jobsQuery.get(request.pre.user, docId, { includeContent: true })
+      return jobsQuery.get(request.pre.user, docId, { includeContent: true })
         .then((doc) => {
           if (!doc) {
             return boom.notFound();
@@ -76,6 +76,36 @@ export function jobs(server) {
           }
 
           return doc._source.output;
+        });
+    },
+    config: getRouteConfig(),
+  });
+
+  // return some info about the job
+  server.route({
+    path: `${mainEntry}/info/{docId}`,
+    method: 'GET',
+    handler: (request) => {
+      const { docId } = request.params;
+
+      return jobsQuery.get(request.pre.user, docId)
+        .then((doc) => {
+          if (!doc) {
+            return boom.notFound();
+          }
+
+          const { jobtype: jobType } = doc._source;
+          if (!request.pre.management.jobTypes.includes(jobType)) {
+            return boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+          }
+
+          const { payload } = doc._source;
+          payload.headers = 'not shown';
+
+          return {
+            ...doc._source,
+            payload
+          };
         });
     },
     config: getRouteConfig(),
@@ -94,6 +124,16 @@ export function jobs(server) {
       const { docId } = request.params;
 
       let response = await jobResponseHandler(request.pre.management.jobTypes, request.pre.user, h, { docId });
+      const { statusCode } = response;
+
+      if (statusCode !== 200) {
+        const logLevel = statusCode === 500 ? 'error' : 'debug';
+        server.log(
+          [logLevel, "reporting", "download"],
+          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(response.source)}]`
+        );
+      }
+
       if (!response.isBoom) {
         response = response.header('accept-ranges', 'none');
       }

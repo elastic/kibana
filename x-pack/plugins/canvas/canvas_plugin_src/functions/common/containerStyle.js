@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isValid } from '../../../common/lib/url';
+import { isValidUrl } from '../../../common/lib/url';
 
 export const containerStyle = () => ({
   name: 'containerStyle',
@@ -67,7 +67,7 @@ export const containerStyle = () => ({
     };
 
     if (backgroundImage) {
-      if (!isValid(backgroundImage))
+      if (!isValidUrl(backgroundImage))
         throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
       style.backgroundImage = `url(${backgroundImage})`;
       style.backgroundSize = backgroundSize;

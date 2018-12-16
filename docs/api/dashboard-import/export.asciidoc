@@ -7,13 +7,15 @@ The dashboard export API allows people to export dashboards along with all of
 their corresponding saved objects such as visualizations, saved searches, and
 index patterns.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `GET /api/kibana/dashboards/export`
 
 ==== Query Parameters
 
-`dashboard` (optional)::
+`dashboard` (required)::
   (array|string) The id(s) of the dashboard(s) to export
 
 ==== Response body

@@ -26,6 +26,7 @@ export function registerSearchRoute(server) {
         const requests = request.payload.map(({ index, query }) => (
           callWithRequest('rollup.search', {
             index,
+            rest_total_hits_as_int: true,
             body: query,
           })
         ));
@@ -36,7 +37,7 @@ export function registerSearchRoute(server) {
           return wrapEsError(err);
         }
 
-        wrapUnknownError(err);
+        return wrapUnknownError(err);
       }
     },
   });

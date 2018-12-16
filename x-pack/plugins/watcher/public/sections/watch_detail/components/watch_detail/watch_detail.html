@@ -53,10 +53,12 @@
       <!-- Action status table -->
       <action-status-table
         action-statuses="watchDetail.sortedActionStatuses"
+        action-errors="watchDetail.actionErrors"
         on-action-acknowledge="watchDetail.onActionAcknowledge"
         sort-field="watchDetail.actionStatusTableSortField"
         sort-reverse="watchDetail.actionStatusTableSortReverse"
         on-sort-change="watchDetail.onActionSortChange"
+        show-errors="watchDetail.showErrors"
       ></action-status-table>
       <table-info ng-show="!watchDetail.hasActionStatusTableActions">
         {{ 'xpack.watcher.sections.watchDetail.noActionsFoundText' | i18n: { defaultMessage: 'No actions found.' } }}

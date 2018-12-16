@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { Transaction } from '../../../typings/Transaction';
+import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { KibanaLink, legacyEncodeURIComponent } from '../../utils/url';
 
 interface TransactionLinkProps {
-  transaction: Transaction;
+  transaction?: Transaction;
 }
 
 /**

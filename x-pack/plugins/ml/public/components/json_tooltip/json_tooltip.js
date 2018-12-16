@@ -9,8 +9,6 @@
 // component for placing an icon with a popover tooltip anywhere on a page
 // the id will match an entry in tooltips.json
 import tooltips from './tooltips.json';
-import './styles/main.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 

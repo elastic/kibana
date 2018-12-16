@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   TabSummary,
@@ -15,11 +16,44 @@ import {
   TabHistogram,
 } from './tabs';
 
-export const JOB_DETAILS_TAB_SUMMARY = 'Summary';
-export const JOB_DETAILS_TAB_TERMS = 'Terms';
-export const JOB_DETAILS_TAB_HISTOGRAM = 'Histogram';
-export const JOB_DETAILS_TAB_METRICS = 'Metrics';
-export const JOB_DETAILS_TAB_JSON = 'JSON';
+export const JOB_DETAILS_TAB_SUMMARY = 'JOB_DETAILS_TAB_SUMMARY';
+export const JOB_DETAILS_TAB_TERMS = 'JOB_DETAILS_TAB_TERMS';
+export const JOB_DETAILS_TAB_HISTOGRAM = 'JOB_DETAILS_TAB_HISTOGRAM';
+export const JOB_DETAILS_TAB_METRICS = 'JOB_DETAILS_TAB_METRICS';
+export const JOB_DETAILS_TAB_JSON = 'JOB_DETAILS_TAB_JSON';
+
+export const tabToHumanizedMap = {
+  [JOB_DETAILS_TAB_SUMMARY]: (
+    <FormattedMessage
+      id="xpack.rollupJobs.create.jobDetails.tabSummaryLabel"
+      defaultMessage="Summary"
+    />
+  ),
+  [JOB_DETAILS_TAB_TERMS]: (
+    <FormattedMessage
+      id="xpack.rollupJobs.create.jobDetails.tabTermsLabel"
+      defaultMessage="Terms"
+    />
+  ),
+  [JOB_DETAILS_TAB_HISTOGRAM]: (
+    <FormattedMessage
+      id="xpack.rollupJobs.create.jobDetails.tabHistogramLabel"
+      defaultMessage="Histogram"
+    />
+  ),
+  [JOB_DETAILS_TAB_METRICS]: (
+    <FormattedMessage
+      id="xpack.rollupJobs.create.jobDetails.tabMetricsLabel"
+      defaultMessage="Metrics"
+    />
+  ),
+  [JOB_DETAILS_TAB_JSON]: (
+    <FormattedMessage
+      id="xpack.rollupJobs.create.jobDetails.tabJsonLabel"
+      defaultMessage="JSON"
+    />
+  ),
+};
 
 const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_SUMMARY,
@@ -43,22 +77,22 @@ export const JobDetails = ({
   } = job;
 
   const tabToContentMap = {
-    Summary: (
+    [JOB_DETAILS_TAB_SUMMARY]: (
       <TabSummary
         job={job}
         stats={stats}
       />
     ),
-    Terms: (
+    [JOB_DETAILS_TAB_TERMS]: (
       <TabTerms terms={terms} />
     ),
-    Histogram: (
+    [JOB_DETAILS_TAB_HISTOGRAM]: (
       <TabHistogram histogram={histogram} histogramInterval={histogramInterval} />
     ),
-    Metrics: (
+    [JOB_DETAILS_TAB_METRICS]: (
       <TabMetrics metrics={metrics} />
     ),
-    JSON: (
+    [JOB_DETAILS_TAB_JSON]: (
       <TabJson json={json} />
     ),
   };

@@ -7,7 +7,7 @@
 
 import { CsvImporter } from './csv_importer';
 import { SstImporter } from './sst_importer';
-import { JsonImporter } from './json_importer';
+import { NdjsonImporter } from './ndjson_importer';
 
 export function importerFactory(format, results, settings) {
 
@@ -16,8 +16,8 @@ export function importerFactory(format, results, settings) {
       return new CsvImporter(results, settings);
     case 'semi_structured_text':
       return new SstImporter(results, settings);
-    case 'json':
-      return new JsonImporter(results, settings);
+    case 'ndjson':
+      return new NdjsonImporter(results, settings);
     default:
       return;
   }

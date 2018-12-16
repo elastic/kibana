@@ -7,4 +7,6 @@
 import { addSearchStrategy } from 'ui/courier';
 import { rollupSearchStrategy } from './rollup_search_strategy';
 
-addSearchStrategy(rollupSearchStrategy);
+export function initSearch() {
+  addSearchStrategy(rollupSearchStrategy);
+}

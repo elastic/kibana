@@ -10,6 +10,7 @@ exports[`TelemetryForm renders as expected 1`] = `
     <EuiForm>
       <EuiText
         grow={true}
+        size="m"
       >
         <EuiFlexGroup
           alignItems="baseline"

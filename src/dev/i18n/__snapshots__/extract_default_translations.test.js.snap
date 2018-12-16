@@ -5,49 +5,49 @@ Array [
   Array [
     "plugin_1.id_1",
     Object {
-      "context": undefined,
+      "description": undefined,
       "message": "Message 1",
     },
   ],
   Array [
     "plugin_1.id_2",
     Object {
-      "context": "Message context",
+      "description": "Message description",
       "message": "Message 2",
     },
   ],
   Array [
     "plugin_1.id_3",
     Object {
-      "context": undefined,
+      "description": undefined,
       "message": "Message 3",
     },
   ],
   Array [
     "plugin_1.id_4",
     Object {
-      "context": undefined,
+      "description": undefined,
       "message": "Message 4",
     },
   ],
   Array [
     "plugin_1.id_5",
     Object {
-      "context": undefined,
+      "description": undefined,
       "message": "Message 5",
     },
   ],
   Array [
     "plugin_1.id_6",
     Object {
-      "context": "",
+      "description": "",
       "message": "Message 6",
     },
   ],
   Array [
     "plugin_1.id_7",
     Object {
-      "context": undefined,
+      "description": undefined,
       "message": "Message 7",
     },
   ],

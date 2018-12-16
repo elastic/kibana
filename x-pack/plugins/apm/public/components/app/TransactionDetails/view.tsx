@@ -6,16 +6,14 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { RRRRenderArgs } from 'react-redux-request';
-import { Transaction as ITransaction } from '../../../../typings/Transaction';
-// @ts-ignore
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
-// @ts-ignore
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
+import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
 // @ts-ignore
 import TransactionCharts from '../../shared/charts/TransactionCharts';
+import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 // @ts-ignore
@@ -26,14 +24,9 @@ import { Transaction } from './Transaction';
 interface Props {
   urlParams: IUrlParams;
   location: any;
-  waterfallRoot: ITransaction;
 }
 
-export function TransactionDetailsView({
-  urlParams,
-  location,
-  waterfallRoot
-}: Props) {
+export function TransactionDetailsView({ urlParams, location }: Props) {
   return (
     <div>
       <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
@@ -44,7 +37,7 @@ export function TransactionDetailsView({
 
       <TransactionDetailsChartsRequest
         urlParams={urlParams}
-        render={({ data }: RRRRenderArgs<any>) => (
+        render={({ data }) => (
           <TransactionCharts
             charts={data}
             urlParams={urlParams}
@@ -55,7 +48,7 @@ export function TransactionDetailsView({
 
       <TransactionDistributionRequest
         urlParams={urlParams}
-        render={({ data }: RRRRenderArgs<any>) => (
+        render={({ data }) => (
           <Distribution
             distribution={data}
             urlParams={urlParams}
@@ -68,13 +61,30 @@ export function TransactionDetailsView({
 
       <TransactionDetailsRequest
         urlParams={urlParams}
-        render={(res: RRRRenderArgs<any>) => {
+        render={({ data: transaction }) => {
+          if (!transaction) {
+            return (
+              <EmptyMessage
+                heading="No transaction sample available."
+                subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
+              />
+            );
+          }
+
           return (
-            <Transaction
-              location={location}
-              transaction={res.data}
+            <WaterfallRequest
               urlParams={urlParams}
-              waterfallRoot={waterfallRoot}
+              transaction={transaction}
+              render={({ data: waterfall }) => {
+                return (
+                  <Transaction
+                    location={location}
+                    transaction={transaction}
+                    urlParams={urlParams}
+                    waterfall={waterfall}
+                  />
+                );
+              }}
             />
           );
         }}

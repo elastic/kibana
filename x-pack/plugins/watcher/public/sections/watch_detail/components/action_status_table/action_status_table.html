@@ -21,6 +21,9 @@
           {{ 'xpack.watcher.sections.watchDetail.actionStatusTable.stateColumnLabel' | i18n: { defaultMessage: 'State' } }}
         </sortable-column>
       </th>
+      <th scope="col" class="kuiTableHeaderCell" ng-if="actionStatusTable.actionErrors">
+          <span class="kuiTableHeaderCell__liner">Errors</span>
+      </th>
       <th scope="col" class="kuiTableHeaderCell">
       </th>
     </tr>
@@ -37,6 +40,14 @@
         <div class="kuiTableRowCell__liner">
           <action-state-icon action-status="actionStatus"></action-state-icon>
           {{ actionStatus.state }}
+        </div>
+      </td>
+      <td class="kuiTableRowCell" ng-if="actionStatusTable.actionErrors">
+        <div class="kuiTableRowCell__liner">
+          <a
+            role="button"
+            ng-if="actionStatusTable.actionErrors[actionStatus.id]"
+            ng-click="actionStatusTable.showErrors(actionStatus.id, actionStatusTable.actionErrors[actionStatus.id])">{{actionStatusTable.getLabelErrors(actionStatus.id)}}</a>
         </div>
       </td>
       <td class="kuiTableRowCell">

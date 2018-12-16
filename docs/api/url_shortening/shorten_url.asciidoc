@@ -3,6 +3,8 @@
 
 The Shorten URL API allows for converting a Kibana URL into a token.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `POST /api/shorten_url`

@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
 import { BaseAction } from './base_action';
-import { ACTION_TYPES } from '../../../common/constants';
+import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class SlackAction extends BaseAction {
-  constructor(props) {
+  constructor(props, errors) {
     props.type = ACTION_TYPES.SLACK;
-    super(props);
+    super(props, errors);
 
     this.to = props.to;
     this.text = props.text;
@@ -33,12 +32,15 @@ export class SlackAction extends BaseAction {
   static fromDownstreamJson(json) {
     const props = super.getPropsFromDownstreamJson(json);
 
+    const { errors } = this.validateJson(json);
+
     Object.assign(props, {
       to: json.to,
       text: json.text
     });
 
-    return new SlackAction(props);
+    const action = new SlackAction(props, errors);
+    return { action, errors };
   }
 
   // To Elasticsearch
@@ -60,45 +62,50 @@ export class SlackAction extends BaseAction {
   // From Elasticsearch
   static fromUpstreamJson(json) {
     const props = super.getPropsFromUpstreamJson(json);
-
-    if (!json.actionJson.slack) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonSlack} property',
-          values: {
-            actionJsonSlack: 'actionJson.slack'
-          }
-        }),
-      );
-    }
-    if (!json.actionJson.slack.message) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackMessagePropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonSlackMessage} property',
-          values: {
-            actionJsonSlackMessage: 'actionJson.slack.message'
-          }
-
-        }),
-      );
-    }
-    if (!json.actionJson.slack.message.to) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackMessageToPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonSlackMessageTo} property',
-          values: {
-            actionJsonSlackMessageTo: 'actionJson.slack.message.to'
-          }
-        }),
-      );
-    }
+    const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
       to: json.actionJson.slack.message.to,
       text: json.actionJson.slack.message.text
     });
 
-    return new SlackAction(props);
+    const action = new SlackAction(props, errors);
+
+    return { action, errors };
+  }
+
+  static validateJson(json) {
+    const errors = [];
+
+    if (!json.slack) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonSlack} property',
+          values: {
+            actionJsonSlack: 'actionJson.slack'
+          }
+        })
+      });
+
+      json.slack = {};
+    }
+
+    if (!json.slack.message) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackMessagePropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonSlackMessage} property',
+          values: {
+            actionJsonSlackMessage: 'actionJson.slack.message'
+          }
+        }),
+      });
+
+      json.slack.message = {};
+    }
+
+    return { errors: errors.length ? errors : null };
   }
 
   /*

@@ -21,14 +21,17 @@ import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
+import { ORIGIN } from './origin';
 
 const markdownIt = new MarkdownIt({
   html: false,
   linkify: true
 });
 
+const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
+
 uiModules.get('kibana')
-  .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
+  .service('serviceSettings', function ($http, $sanitize, mapConfig, regionmapsConfig, tilemapsConfig, kbnVersion) {
 
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
@@ -49,7 +52,6 @@ uiModules.get('kibana')
     };
 
 
-
     class ServiceSettings {
 
       constructor() {
@@ -63,6 +65,7 @@ uiModules.get('kibana')
 
         this._invalidateSettings();
       }
+
       _invalidateSettings() {
 
         this._loadCatalogue = _.once(async () => {
@@ -97,7 +100,6 @@ uiModules.get('kibana')
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
-            layer.url = this._extendUrlWithParams(layer.url);
             layer.attribution = $sanitize(markdownIt.render(layer.attribution));
           });
           return layers;
@@ -115,7 +117,7 @@ uiModules.get('kibana')
             const preppedService = _.cloneDeep(tmsService);
             preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
             preppedService.subdomains = preppedService.subdomains || [];
-            preppedService.url = this._extendUrlWithParams(preppedService.url);
+            preppedService.origin = ORIGIN.EMS;
             return preppedService;
           });
 
@@ -143,7 +145,13 @@ uiModules.get('kibana')
 
 
       async getFileLayers() {
-        return await this._loadFileLayers();
+        const fileLayers = await this._loadFileLayers();
+        return fileLayers.map(fileLayer => {
+          const massagedFileLayer = { ...fileLayer };
+          delete massagedFileLayer.url;
+          massagedFileLayer.origin = ORIGIN.EMS;
+          return massagedFileLayer;
+        });
       }
 
 
@@ -156,14 +164,22 @@ uiModules.get('kibana')
         const allServices = [];
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
-          tmsService.url = tilemapsConfig.deprecated.config.url;
-          tmsService.id = 'TMS in config/kibana.yml';
+          tmsService.id = TMS_IN_YML_ID;
+          tmsService.origin = ORIGIN.KIBANA_YML;
           allServices.push(tmsService);
         }
 
         const servicesFromManifest = await this._loadTMSServices();
-        return allServices.concat(servicesFromManifest);
 
+        const strippedServiceFromManifest = servicesFromManifest.map((service) => {
+          const strippedService = { ...service };
+          //do not expose url. needs to be resolved dynamically
+          delete strippedService.url;
+          strippedService.origin = ORIGIN.EMS;
+          return strippedService;
+        });
+
+        return allServices.concat(strippedServiceFromManifest);
       }
 
       /**
@@ -188,6 +204,74 @@ uiModules.get('kibana')
         const id = `file/${fileLayer.name}`;
         return `${mapConfig.emsLandingPageUrl}#${id}`;
       }
+
+
+      async _getUrlTemplateForEMSTMSLayer(tmsServiceConfig) {
+        const tmsServices = await this._loadTMSServices();
+        const serviceConfig = tmsServices.find(service => {
+          return service.id === tmsServiceConfig.id;
+        });
+        return this._extendUrlWithParams(serviceConfig.url);
+      }
+
+      async getUrlTemplateForTMSLayer(tmsServiceConfig) {
+
+        if (tmsServiceConfig.origin === ORIGIN.EMS) {
+          return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
+        } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
+          return tilemapsConfig.deprecated.config.url;
+        } else {
+          //this is an older config. need to resolve this dynamically.
+          if (tmsServiceConfig.id === TMS_IN_YML_ID) {
+            return tilemapsConfig.deprecated.config.url;
+          } else {
+            //assume ems
+            return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
+          }
+        }
+
+      }
+
+      async _getUrlFromEms(fileLayerConfig) {
+        const fileLayers = await this._loadFileLayers();
+        const layerConfig = fileLayers.find(fileLayer => {
+          return fileLayer.name === fileLayerConfig.name;//the id is the filename
+        });
+
+        if (layerConfig) {
+          return this._extendUrlWithParams(layerConfig.url);
+        } else {
+          throw new Error(`File  ${fileLayerConfig.name} not recognized`);
+        }
+      }
+
+      async getUrlForRegionLayer(fileLayerConfig) {
+        let url;
+        if (fileLayerConfig.origin === ORIGIN.EMS) {
+          url = this._getUrlFromEms(fileLayerConfig);
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) {
+          //fallback for older saved objects
+          url = this._getUrlFromEms(fileLayerConfig);
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.KIBANA_YML}.`)) {
+          //fallback for older saved objects
+          url = fileLayerConfig.url;
+        } else {
+          //generic fallback
+          url = fileLayerConfig.url;
+        }
+        return url;
+      }
+
+      async getGeoJsonForRegionLayer(fileLayerConfig) {
+        const url = await this.getUrlForRegionLayer(fileLayerConfig);
+        const geojson = await $http({
+          url: url,
+          method: 'GET'
+        });
+        return geojson.data;
+      }
+
+
     }
 
     return new ServiceSettings();

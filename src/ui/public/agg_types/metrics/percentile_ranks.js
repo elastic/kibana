@@ -23,6 +23,7 @@ import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { fieldFormats } from '../../registry/field_formats';
 import { getPercentileValue } from './percentiles_get_value';
+import { i18n } from '@kbn/i18n';
 
 
 // required by the values editor
@@ -33,15 +34,23 @@ const valueProps = {
     const format = (field && field.format) || fieldFormats.getDefaultInstance('number');
     const label = this.params.customLabel || this.getFieldDisplayName();
 
-    return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + label + '"';
+    return i18n.translate('common.ui.aggTypes.metrics.percentileRanks.valuePropsLabel', {
+      defaultMessage: 'Percentile rank {format} of "{label}"',
+      values: { format: format.convert(this.key, 'text'), label }
+    });
   }
 };
 
 export const percentileRanksMetricAgg = new MetricAggType({
   name: 'percentile_ranks',
-  title: 'Percentile Ranks',
+  title: i18n.translate('common.ui.aggTypes.metrics.percentileRanksTitle', {
+    defaultMessage: 'Percentile Ranks'
+  }),
   makeLabel: function (agg) {
-    return 'Percentile ranks of ' + agg.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.metrics.percentileRanksLabel', {
+      defaultMessage: 'Percentile ranks of {field}',
+      values: { field: agg.getFieldDisplayName() }
+    });
   },
   params: [
     {

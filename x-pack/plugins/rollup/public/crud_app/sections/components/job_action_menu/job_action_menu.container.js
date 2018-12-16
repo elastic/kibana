@@ -5,12 +5,22 @@
  */
 
 import { connect } from 'react-redux';
-import { JobActionMenu as JobActionMenuComponent } from './job_action_menu';
+
+import { isUpdating } from '../../../store/selectors';
+
 import {
   startJobs,
   stopJobs,
   deleteJobs,
 } from '../../../store/actions';
+
+import { JobActionMenu as JobActionMenuComponent } from './job_action_menu';
+
+const mapStateToProps = (state) => {
+  return {
+    isUpdating: isUpdating(state),
+  };
+};
 
 const mapDispatchToProps = (dispatch, { jobs }) => {
   const jobIds = jobs.map(job => job.id);
@@ -27,4 +37,4 @@ const mapDispatchToProps = (dispatch, { jobs }) => {
   };
 };
 
-export const JobActionMenu = connect(undefined, mapDispatchToProps)(JobActionMenuComponent);
+export const JobActionMenu = connect(mapStateToProps, mapDispatchToProps)(JobActionMenuComponent);

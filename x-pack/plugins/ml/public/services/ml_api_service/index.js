@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 
 import { http } from '../../services/http_service';
 
+import { annotations } from './annotations';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -55,13 +56,6 @@ export const ml = {
     });
   },
 
-  forceCloseJob(obj) {
-    return http({
-      url: `${basePath}/anomaly_detectors/${obj.jobId}/_close?force=true`,
-      method: 'POST'
-    });
-  },
-
   deleteJob(obj) {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}`,
@@ -95,6 +89,14 @@ export const ml = {
   validateJob(obj) {
     return http({
       url: `${basePath}/validate/job`,
+      method: 'POST',
+      data: obj
+    });
+  },
+
+  validateCardinality(obj) {
+    return http({
+      url: `${basePath}/validate/cardinality`,
       method: 'POST',
       data: obj
     });
@@ -257,7 +259,8 @@ export const ml = {
       'prefix',
       'groups',
       'indexPatternName',
-      'query'
+      'query',
+      'useDedicatedIndex'
     ]);
 
     return http({
@@ -417,6 +420,7 @@ export const ml = {
     });
   },
 
+  annotations,
   filters,
   results,
   jobs,

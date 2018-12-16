@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiButton,
@@ -27,7 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps, extractQueryParams } from '../../services';
+import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
 
 import {
   JobTable,
@@ -71,9 +73,11 @@ export class JobListUi extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
-
     props.loadJobs();
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+
+    this.state = {};
   }
 
   componentDidMount() {
@@ -87,6 +91,7 @@ export class JobListUi extends Component {
     // this page.
     this.props.closeDetailPanel();
   }
+
   getHeaderSection() {
     return (
       <EuiPageContentHeaderSection>
@@ -101,6 +106,7 @@ export class JobListUi extends Component {
       </EuiPageContentHeaderSection>
     );
   }
+
   renderNoPermission() {
     const { intl } = this.props;
     const title = intl.formatMessage({
@@ -124,10 +130,39 @@ export class JobListUi extends Component {
       </Fragment>
     );
   }
+
+  renderError(error) {
+    // We can safely depend upon the shape of this error coming from Angular $http, because we
+    // handle unexpected error shapes in the API action.
+    const {
+      statusCode,
+      error: errorString,
+    } = error.data;
+
+    const { intl } = this.props;
+    const title = intl.formatMessage({
+      id: 'xpack.rollupJobs.jobList.loadingErrorTitle',
+      defaultMessage: 'Error loading rollup jobs',
+    });
+    return (
+      <Fragment>
+        {this.getHeaderSection()}
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={title}
+          color="danger"
+          iconType="alert"
+        >
+          {statusCode} {errorString}
+        </EuiCallOut>
+      </Fragment>
+    );
+  }
+
   renderEmpty() {
     return (
       <EuiEmptyPrompt
-        iconType="managementApp"
+        iconType="indexRollupApp"
         title={(
           <h1>
             <FormattedMessage
@@ -141,9 +176,8 @@ export class JobListUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.rollupJobs.jobList.emptyPromptDescription"
-                defaultMessage={`
-                Rollup jobs summarize and store historical data in a smaller index for future analysis.
-                `}
+                defaultMessage="Rollup jobs summarize and store historical data in a smaller index
+                  for future analysis."
               />
             </p>
           </Fragment>
@@ -222,8 +256,13 @@ export class JobListUi extends Component {
     const { isLoading, jobs, jobLoadError } = this.props;
 
     let content;
-    if (jobLoadError && jobLoadError.status === 403) {
-      content = this.renderNoPermission();
+
+    if (jobLoadError) {
+      if (jobLoadError.status === 403) {
+        content = this.renderNoPermission();
+      } else {
+        content = this.renderError(jobLoadError);
+      }
     } else if (!isLoading && !jobs.length) {
       content = this.renderEmpty();
     } else {

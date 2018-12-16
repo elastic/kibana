@@ -19,7 +19,7 @@
 
 import cheerio from 'cheerio';
 import { parse } from '@babel/parser';
-import { isDirectiveLiteral, isObjectExpression } from '@babel/types';
+import { isObjectExpression, isStringLiteral } from '@babel/types';
 
 import {
   isPropertyWithKey,
@@ -30,9 +30,9 @@ import {
   createParserErrorMessage,
   extractMessageValueFromNode,
   extractValuesKeysFromNode,
-  extractContextValueFromNode,
+  extractDescriptionValueFromNode,
 } from '../utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from '../constants';
+import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
 import { createFailError } from '../../run';
 
 /**
@@ -42,31 +42,32 @@ import { createFailError } from '../../run';
  */
 const ANGULAR_EXPRESSION_REGEX = /{{([^{}]|({([^']|('([^']|(\\'))*'))*?}))*}}+/g;
 
+const LINEBREAK_REGEX = /\n/g;
 const I18N_FILTER_MARKER = '| i18n: ';
+
+function parseExpression(expression) {
+  let ast;
+
+  try {
+    ast = parse(`+${expression}`.replace(LINEBREAK_REGEX, ' '));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      const errorWithContext = createParserErrorMessage(` ${expression}`, error);
+      throw createFailError(`Couldn't parse angular i18n expression:\n${errorWithContext}`);
+    }
+  }
+
+  return ast;
+}
 
 /**
  * Extract default message from an angular filter expression argument
  * @param {string} expression JavaScript code containing a filter object
  * @param {string} messageId id of the message
- * @returns {{ message?: string, context?: string, valuesKeys: string[]] }}
+ * @returns {{ message?: string, description?: string, valuesKeys: string[]] }}
  */
 function parseFilterObjectExpression(expression, messageId) {
-  let ast;
-
-  try {
-    // parse an object expression instead of block statement
-    ast = parse(`+${expression}`);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      const errorWithContext = createParserErrorMessage(` ${expression}`, error);
-      throw createFailError(
-        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
-      );
-    }
-
-    throw error;
-  }
-
+  const ast = parseExpression(expression);
   const objectExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
     isObjectExpression(node)
   );
@@ -75,9 +76,9 @@ function parseFilterObjectExpression(expression, messageId) {
     return {};
   }
 
-  const [messageProperty, contextProperty, valuesProperty] = [
+  const [messageProperty, descriptionProperty, valuesProperty] = [
     DEFAULT_MESSAGE_KEY,
-    CONTEXT_KEY,
+    DESCRIPTION_KEY,
     VALUES_KEY,
   ].map(key => objectExpressionNode.properties.find(property => isPropertyWithKey(property, key)));
 
@@ -85,57 +86,31 @@ function parseFilterObjectExpression(expression, messageId) {
     ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
     : undefined;
 
-  const context = contextProperty
-    ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
+  const description = descriptionProperty
+    ? formatJSString(extractDescriptionValueFromNode(descriptionProperty.value, messageId))
     : undefined;
 
   const valuesKeys = valuesProperty
     ? extractValuesKeysFromNode(valuesProperty.value, messageId)
     : [];
 
-  return { message, context, valuesKeys };
+  return { message, description, valuesKeys };
 }
 
 function parseIdExpression(expression) {
-  let ast;
-
-  try {
-    ast = parse(expression);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      const errorWithContext = createParserErrorMessage(expression, error);
-      throw createFailError(
-        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
-      );
-    }
-
-    throw error;
-  }
-
-  const stringNode = [...traverseNodes(ast.program.directives)].find(node =>
-    isDirectiveLiteral(node)
-  );
+  const ast = parseExpression(expression);
+  const stringNode = [...traverseNodes(ast.program.body)].find(node => isStringLiteral(node));
 
   if (!stringNode) {
     throw createFailError(`Message id should be a string literal, but got: \n${expression}`);
   }
 
-  return formatJSString(stringNode.value);
+  return stringNode ? formatJSString(stringNode.value) : null;
 }
 
 function trimCurlyBraces(string) {
-  return string.slice(2, -2).trim();
-}
-
-/**
- * Removes parentheses from the start and the end of a string.
- *
- * Example: `('id' | i18n: { defaultMessage: 'Message' })`
- * @param {string} string string to trim
- */
-function trimParentheses(string) {
-  if (string.startsWith('(') && string.endsWith(')')) {
-    return string.slice(1, -1);
+  if (string.startsWith('{{') && string.endsWith('}}')) {
+    return string.slice(2, -2).trim();
   }
 
   return string;
@@ -155,54 +130,37 @@ function trimOneTimeBindingOperator(string) {
   return string;
 }
 
-/**
- * Remove interpolation expressions from angular and throw on `| i18n:` substring.
- *
- * Correct usage: `<p aria-label="{{ ::'namespace.id' | i18n: { defaultMessage: 'Message' } }}"></p>`.
- *
- * Incorrect usage: `ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"`
- *
- * @param {string} string html content
- */
-function validateI18nFilterUsage(string) {
-  const stringWithoutExpressions = string.replace(ANGULAR_EXPRESSION_REGEX, '');
-  const i18nMarkerPosition = stringWithoutExpressions.indexOf(I18N_FILTER_MARKER);
+function* extractExpressions(htmlContent) {
+  const elements = cheerio
+    .load(htmlContent)('*')
+    .toArray();
 
-  if (i18nMarkerPosition === -1) {
-    return;
+  for (const element of elements) {
+    for (const node of element.children) {
+      if (node.type === 'text') {
+        yield* (node.data.match(ANGULAR_EXPRESSION_REGEX) || [])
+          .filter(expression => expression.includes(I18N_FILTER_MARKER))
+          .map(trimCurlyBraces);
+      }
+    }
+
+    for (const attribute of Object.values(element.attribs)) {
+      if (attribute.includes(I18N_FILTER_MARKER)) {
+        yield trimCurlyBraces(attribute);
+      }
+    }
   }
-
-  const linesCount = (stringWithoutExpressions.slice(0, i18nMarkerPosition).match(/\n/g) || [])
-    .length;
-
-  const errorWithContext = createParserErrorMessage(string, {
-    loc: {
-      line: linesCount + 1,
-      column: 0,
-    },
-    message: 'I18n filter can be used only in interpolation expressions',
-  });
-
-  throw createFailError(errorWithContext);
 }
 
 function* getFilterMessages(htmlContent) {
-  validateI18nFilterUsage(htmlContent);
-
-  const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
-    .filter(expression => expression.includes(I18N_FILTER_MARKER))
-    .map(trimCurlyBraces);
-
-  for (const expression of expressions) {
+  for (const expression of extractExpressions(htmlContent)) {
     const filterStart = expression.indexOf(I18N_FILTER_MARKER);
-    const idExpression = trimParentheses(
-      trimOneTimeBindingOperator(expression.slice(0, filterStart).trim())
-    );
 
+    const idExpression = trimOneTimeBindingOperator(expression.slice(0, filterStart).trim());
     const filterObjectExpression = expression.slice(filterStart + I18N_FILTER_MARKER.length).trim();
 
     if (!filterObjectExpression || !idExpression) {
-      throw createFailError(`Cannot parse i18n filter expression: {{ ${expression} }}`);
+      throw createFailError(`Cannot parse i18n filter expression: ${expression}`);
     }
 
     const messageId = parseIdExpression(idExpression);
@@ -211,7 +169,7 @@ function* getFilterMessages(htmlContent) {
       throw createFailError(`Empty "id" value in angular filter expression is not allowed.`);
     }
 
-    const { message, context, valuesKeys } = parseFilterObjectExpression(
+    const { message, description, valuesKeys } = parseFilterObjectExpression(
       filterObjectExpression,
       messageId
     );
@@ -224,7 +182,7 @@ function* getFilterMessages(htmlContent) {
 
     checkValuesProperty(valuesKeys, message, messageId);
 
-    yield [messageId, { message, context }];
+    yield [messageId, { message, description }];
   }
 }
 
@@ -232,12 +190,13 @@ function* getDirectiveMessages(htmlContent) {
   const $ = cheerio.load(htmlContent);
 
   const elements = $('[i18n-id]')
-    .map(function (idx, el) {
+    .map((idx, el) => {
       const $el = $(el);
+
       return {
         id: $el.attr('i18n-id'),
         defaultMessage: $el.attr('i18n-default-message'),
-        context: $el.attr('i18n-context'),
+        description: $el.attr('i18n-description'),
         values: $el.attr('i18n-values'),
       };
     })
@@ -257,8 +216,10 @@ function* getDirectiveMessages(htmlContent) {
     }
 
     if (element.values) {
-      const nodes = parse(`+${element.values}`).program.body;
-      const valuesObjectNode = [...traverseNodes(nodes)].find(node => isObjectExpression(node));
+      const ast = parseExpression(element.values);
+      const valuesObjectNode = [...traverseNodes(ast.program.body)].find(node =>
+        isObjectExpression(node)
+      );
       const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
 
       checkValuesProperty(valuesKeys, message, messageId);
@@ -266,7 +227,7 @@ function* getDirectiveMessages(htmlContent) {
       checkValuesProperty([], message, messageId);
     }
 
-    yield [messageId, { message, context: formatHTMLString(element.context) || undefined }];
+    yield [messageId, { message, description: formatHTMLString(element.description) || undefined }];
   }
 }
 

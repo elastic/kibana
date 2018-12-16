@@ -7,6 +7,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { verifyMonitoringLicense } from './verify_monitoring_license';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Retrieve any statically defined cluster alerts (not indexed) for the {@code cluster}.
@@ -32,8 +33,12 @@ export function staticAlertForCluster(cluster) {
       },
       update_timestamp: cluster.timestamp,
       timestamp: get(cluster, 'license.issue_date', cluster.timestamp),
-      prefix: 'Configuring TLS will be required to apply a Gold or Platinum license when security is enabled.',
-      message: 'See documentation for details.'
+      prefix: i18n.translate('xpack.monitoring.clusterAlerts.clusterNeedsTSLEnabledDescription', {
+        defaultMessage: 'Configuring TLS will be required to apply a Gold or Platinum license when security is enabled.'
+      }),
+      message: i18n.translate('xpack.monitoring.clusterAlerts.seeDocumentationDescription', {
+        defaultMessage: 'See documentation for details.'
+      })
     };
   }
 

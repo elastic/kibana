@@ -24,7 +24,10 @@ export class EmailAction extends BaseAction {
     Object.assign(result, {
       to: this.to,
       subject: this.subject,
-      body: this.body
+      body: this.body,
+      email: {
+        to: this.to.length ? this.to : undefined,
+      }
     });
 
     return result;

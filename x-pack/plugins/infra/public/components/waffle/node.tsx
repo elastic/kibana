@@ -5,10 +5,13 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
+
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+import { InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
@@ -26,18 +29,25 @@ interface Props {
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
+  timeRange: InfraTimerangeInput;
 }
 
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { nodeType, node, options, squareSize, bounds, formatter } = this.props;
+    const { nodeType, node, options, squareSize, bounds, formatter, timeRange } = this.props;
     const { isPopoverOpen } = this.state;
     const { metric } = node;
     const valueMode = squareSize > 110;
     const rawValue = (metric && metric.value) || 0;
     const color = colorFromValue(options.legend, rawValue, bounds);
     const value = formatter(rawValue);
+    const newTimerange = {
+      ...timeRange,
+      from: moment(timeRange.to)
+        .subtract(1, 'hour')
+        .valueOf(),
+    };
     return (
       <NodeContextMenu
         node={node}
@@ -45,6 +55,7 @@ export class Node extends React.PureComponent<Props, State> {
         isPopoverOpen={isPopoverOpen}
         closePopover={this.closePopover}
         options={options}
+        timeRange={newTimerange}
       >
         <EuiToolTip position="top" content={`${node.name} | ${value}`}>
           <NodeContainer

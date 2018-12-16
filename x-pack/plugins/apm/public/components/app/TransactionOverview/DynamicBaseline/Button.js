@@ -22,7 +22,7 @@ export default class DynamicBaselineButton extends Component {
       title: 'Machine Learning',
       items: [
         {
-          name: 'Anomaly detection (BETA)',
+          name: 'Anomaly detection',
           icon: <EuiIcon type="stats" size="m" />,
           onClick: () => {
             this.closePopover();

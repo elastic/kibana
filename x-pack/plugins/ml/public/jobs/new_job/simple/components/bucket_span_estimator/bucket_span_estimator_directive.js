@@ -8,7 +8,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { BucketSpanEstimator } from './bucket_span_estimator_view';
-import { getQueryFromSavedSearch } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
@@ -57,7 +56,7 @@ module.directive('mlBucketSpanEstimator', function () {
           fields: [],
           filters: $scope.formConfig.filters,
           index: $scope.formConfig.indexPattern.title,
-          query: getQueryFromSavedSearch($scope.formConfig),
+          query: $scope.formConfig.combinedQuery,
           splitField: $scope.formConfig.splitField && $scope.formConfig.splitField.name,
           timeField: $scope.formConfig.timeField
         };

@@ -51,10 +51,10 @@ export function registerStatsApi(kbnServer, server, config) {
       path: '/api/stats',
       config: {
         validate: {
-          query: {
+          query: Joi.object({
             extended: Joi.string().valid('', 'true', 'false'),
             legacy: Joi.string().valid('', 'true', 'false')
-          }
+          })
         },
         tags: ['api'],
       },

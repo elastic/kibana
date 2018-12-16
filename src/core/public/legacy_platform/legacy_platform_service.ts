@@ -72,6 +72,7 @@ export class LegacyPlatformService {
     require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
     require('ui/chrome/api/controls').__newPlatformInit__(chrome);
     require('ui/chrome/api/theme').__newPlatformInit__(chrome);
+    require('ui/chrome/api/breadcrumbs').__newPlatformInit__(chrome);
     require('ui/chrome/services/global_nav_state').__newPlatformInit__(chrome);
 
     // Load the bootstrap module before loading the legacy platform files so that

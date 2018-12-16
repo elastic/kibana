@@ -12,7 +12,7 @@ export function validateId(id) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.idMissing"
-        defaultMessage="You must provide an ID"
+        defaultMessage="Name is required."
       />
     )];
   }

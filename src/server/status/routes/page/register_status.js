@@ -20,14 +20,21 @@
 import { wrapAuthConfig } from '../../wrap_auth_config';
 
 export function registerStatusPage(kbnServer, server, config) {
-  const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
+  const allowAnonymous = config.get('status.allowAnonymous');
+  const wrapAuth = wrapAuthConfig(allowAnonymous);
 
   server.decorate('toolkit', 'renderStatusPage', async function () {
     const app = server.getHiddenUiAppById('status_page');
     const h = this;
-    const response = app
-      ? await h.renderApp(app)
-      : h.response(kbnServer.status.toString());
+
+    let response;
+    // An unauthenticated (anonymous) user may not have access to the customized configuration.
+    // For this scenario, render with the default config.
+    if (app) {
+      response = allowAnonymous ? await h.renderAppWithDefaultConfig(app) : await h.renderApp(app);
+    } else {
+      h.response(kbnServer.status.toString());
+    }
 
     if (response) {
       return response.code(kbnServer.status.isGreen() ? 200 : 503);

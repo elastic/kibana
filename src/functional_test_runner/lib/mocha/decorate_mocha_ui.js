@@ -61,6 +61,10 @@ export function decorateMochaUi(lifecycle, context) {
             await lifecycle.trigger('beforeTestSuite', this);
           });
 
+          this.tags = (tags) => {
+            this._tags = [].concat(this._tags || [], tags);
+          };
+
           provider.call(this);
 
           after(async () => {

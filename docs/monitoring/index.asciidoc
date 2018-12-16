@@ -5,24 +5,29 @@
 [partintro]
 --
 
-{monitoring} in {kib} serves two separate purposes:
+The {kib} {monitor-features} serve two separate purposes:
 
-. To visualize monitoring data from across the Elastic Stack. You can view
-health and performance data for {es}, Logstash, and Beats in real time, as well
-as analyze past performance. For more information, see {xpack-ref}/xpack-monitoring.html[Monitoring the Elastic Stack].
-
+. To visualize monitoring data from across the {stack}. You can view health and 
+performance data for {es}, {ls}, and Beats in real time, as well as analyze past 
+performance. 
 . To monitor {kib} itself and route that data to the monitoring cluster.
 
-If you enable {monitoring} across the Elastic Stack, a monitoring agent runs on
-each {es} node, Logstash node, {kib} instance, and Beat to collect and index
-metrics. Each node and instance is considered unique based on its persistent
+If you enable monitoring across the {stack}, each {es} node, {ls} node, {kib} 
+instance, and Beat is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node
-or instance starts.
+or instance starts. 
 
-* <<monitoring-kibana>>
-* <<monitoring-data>>
+NOTE: Watcher must be enabled to view cluster alerts. If you have a Basic
+license, Top Cluster Alerts are not displayed.
+
+For more information, see <<configuring-monitoring>> and 
+{stack-ov}/xpack-monitoring.html[Monitoring the {stack}].  
 
 --
 
-include::viewing-metrics.asciidoc[]
+include::beats-details.asciidoc[]
+include::cluster-alerts.asciidoc[]
+include::elasticsearch-details.asciidoc[]
+include::kibana-details.asciidoc[]
+include::logstash-details.asciidoc[]
 include::monitoring-troubleshooting.asciidoc[]

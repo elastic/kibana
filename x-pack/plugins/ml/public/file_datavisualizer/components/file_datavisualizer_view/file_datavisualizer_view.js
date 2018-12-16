@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -23,12 +24,19 @@ import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { ImportView } from '../import_view';
 import { MAX_BYTES } from '../../../../common/constants/file_datavisualizer';
-import { readFile, createUrlOverrides, processResults } from './utils';
+import {
+  readFile,
+  createUrlOverrides,
+  processResults,
+  reduceData,
+} from './utils';
 
 export const MODE = {
   READ: 0,
   IMPORT: 1,
 };
+
+const UPLOAD_SIZE_MB = 5;
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -75,7 +83,7 @@ export class FileDataVisualizerView extends Component {
   };
 
   async loadFile(file) {
-    if (file.size < MAX_BYTES) {
+    if (file.size <= MAX_BYTES) {
       try {
         const fileContents = await readFile(file);
         const data = fileContents.data;
@@ -108,9 +116,12 @@ export class FileDataVisualizerView extends Component {
 
   async loadSettings(data, overrides, isRetry = false) {
     try {
+      // reduce the amount of data being sent to the endpoint
+      // 5MB should be enough to contain 1000 lines
+      const lessData = reduceData(data, UPLOAD_SIZE_MB);
       console.log('overrides', overrides);
       const { analyzeFile } = ml.fileDatavisualizer;
-      const resp = await analyzeFile(data, overrides);
+      const resp = await analyzeFile(lessData, overrides);
       const serverSettings = processResults(resp.results);
       const serverOverrides = resp.overrides;
 
@@ -119,7 +130,12 @@ export class FileDataVisualizerView extends Component {
 
       if (serverSettings.format === 'xml') {
         throw {
-          message: 'XML not currently supported'
+          message: (
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.fileDatavisualizerView.xmlNotCurrentlySupportedErrorMessage"
+              defaultMessage="XML not currently supported"
+            />
+          ),
         };
       }
 
@@ -298,6 +314,7 @@ export class FileDataVisualizerView extends Component {
               fileContents={fileContents}
               fileSize={fileSize}
               indexPatterns={this.props.indexPatterns}
+              kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}
               hideBottomBar={this.hideBottomBar}
             />

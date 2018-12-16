@@ -33,7 +33,7 @@ import {
 
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
 
-import { KibanaLink } from '../../../../utils/url';
+import { UnconnectedKibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch } from './createErrorGroupWatch';
 import chrome from 'ui/chrome';
 
@@ -187,12 +187,13 @@ export default class WatcherFlyout extends Component {
         <p>
           The watch is now ready and will send error reports for{' '}
           {this.props.serviceName}.{' '}
-          <KibanaLink
+          <UnconnectedKibanaLink
+            location={this.props.location}
             pathname={'/app/kibana'}
             hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
           >
             View watch.
-          </KibanaLink>
+          </UnconnectedKibanaLink>
         </p>
       )
     });
@@ -419,6 +420,7 @@ export default class WatcherFlyout extends Component {
 }
 
 WatcherFlyout.propTypes = {
+  location: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   serviceName: PropTypes.string,
   onClose: PropTypes.func.isRequired

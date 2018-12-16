@@ -29,7 +29,7 @@ test(`passes title through if provided`, async () => {
   const title = 'test title';
 
   const createJobMock = jest.fn();
-  await compatibilityShim(createJobMock)({ title, relativeUrl: '/something' }, null, null, createMockRequest());
+  await compatibilityShim(createJobMock)({ title, relativeUrl: '/something' }, null, createMockRequest());
 
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].title).toBe(title);
@@ -48,7 +48,7 @@ test(`gets the title from the savedObject`, async () => {
     }
   });
 
-  await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, null, mockRequest);
+  await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, mockRequest);
 
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].title).toBe(title);
@@ -67,7 +67,7 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
 
   const objectType = 'search';
   const savedObjectId = 'abc';
-  await compatibilityShim(createJobMock)({ objectType, savedObjectId, }, null, null, mockRequest);
+  await compatibilityShim(createJobMock)({ objectType, savedObjectId, }, null, mockRequest);
 
   const getMock = mockRequest.getSavedObjectsClient().get.mock;
   expect(getMock.calls.length).toBe(1);
@@ -87,7 +87,7 @@ test(`logs deprecations when generating the title/relativeUrl using the savedObj
     }
   });
 
-  await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, null, mockRequest);
+  await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, mockRequest);
 
   expect(mockServer.log.mock.calls.length).toBe(2);
   expect(mockServer.log.mock.calls[0][0]).toEqual(['warning', 'reporting', 'deprecation']);
@@ -101,7 +101,7 @@ test(`passes objectType through`, async () => {
   const mockRequest = createMockRequest();
 
   const objectType = 'foo';
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrl: '/something', objectType }, null, null, mockRequest);
+  await compatibilityShim(createJobMock)({ title: 'test', relativeUrl: '/something', objectType }, null, mockRequest);
 
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].objectType).toBe(objectType);
@@ -113,7 +113,7 @@ test(`passes the relativeUrls through`, async () => {
   const createJobMock = jest.fn();
 
   const relativeUrls = ['/app/kibana#something', '/app/kibana#something-else'];
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls }, null, null, null);
+  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls }, null, null);
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].relativeUrls).toBe(relativeUrls);
 });
@@ -123,7 +123,7 @@ const testSavedObjectRelativeUrl = (objectType, expectedUrl) => {
     const compatibilityShim = compatibilityShimFactory(createMockServer());
     const createJobMock = jest.fn();
 
-    await compatibilityShim(createJobMock)({ title: 'test', objectType, savedObjectId: 'abc', }, null, null, null);
+    await compatibilityShim(createJobMock)({ title: 'test', objectType, savedObjectId: 'abc', }, null, null);
     expect(createJobMock.mock.calls.length).toBe(1);
     expect(createJobMock.mock.calls[0][0].relativeUrls).toEqual([expectedUrl]);
   });
@@ -137,10 +137,7 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
   const compatibilityShim = compatibilityShimFactory(createMockServer());
   const createJobMock = jest.fn();
 
-  await compatibilityShim(createJobMock)(
-    { title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' },
-    null, null, null
-  );
+  await compatibilityShim(createJobMock)({ title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' }, null, null);
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].relativeUrls).toEqual(['/app/kibana#/discover/abc?foo=bar']);
 });
@@ -154,24 +151,22 @@ test(`throw an Error if the objectType, savedObjectId and relativeUrls are provi
     objectType: 'something',
     relativeUrls: ['/something'],
     savedObjectId: 'abc',
-  }, null, null, null);
+  }, null, null);
 
-  await expect(promise).rejects.toThrowErrorMatchingSnapshot();
+  await expect(promise).rejects.toBeDefined();
 });
 
-test(`passes headers, serializedSession and request through`, async () => {
+test(`passes headers and request through`, async () => {
   const compatibilityShim = compatibilityShimFactory(createMockServer());
 
   const createJobMock = jest.fn();
 
   const headers = {};
-  const serializedSession = 'thisoldeserializedsession';
   const request = createMockRequest();
 
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrl: '/something' }, headers, serializedSession, request);
+  await compatibilityShim(createJobMock)({ title: 'test', relativeUrl: '/something' }, headers, request);
 
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][1]).toBe(headers);
-  expect(createJobMock.mock.calls[0][2]).toBe(serializedSession);
-  expect(createJobMock.mock.calls[0][3]).toBe(request);
+  expect(createJobMock.mock.calls[0][2]).toBe(request);
 });

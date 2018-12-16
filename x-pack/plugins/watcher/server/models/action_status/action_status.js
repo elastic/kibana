@@ -14,6 +14,7 @@ export class ActionStatus {
   constructor(props) {
     this.id = props.id;
     this.actionStatusJson = props.actionStatusJson;
+    this.errors = props.errors;
 
     this.lastAcknowledged = getMoment(get(this.actionStatusJson, 'ack.timestamp'));
     this.lastExecution = getMoment(get(this.actionStatusJson, 'last_execution.timestamp'));
@@ -29,6 +30,10 @@ export class ActionStatus {
 
     if (this.lastExecutionSuccessful === false) {
       return ACTION_STATES.ERROR;
+    }
+
+    if (this.errors) {
+      return ACTION_STATES.CONFIG_ERROR;
     }
 
     if (ackState === 'awaits_successful_execution') {
@@ -98,7 +103,7 @@ export class ActionStatus {
   static fromUpstreamJson(json) {
     if (!json.id) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.absenceOfIdPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {id} property',
           values: {
             id: 'id'
@@ -108,7 +113,7 @@ export class ActionStatus {
     }
     if (!json.actionStatusJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.absenceOfActionStatusJsonPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {actionStatusJson} property',
           values: {
             actionStatusJson: 'actionStatusJson'

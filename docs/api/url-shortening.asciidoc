@@ -6,6 +6,8 @@ Internet Explorer has URL length restrictions, and some wiki and markup parsers 
 
 The short URLs enabled by this API are designed to make sharing Kibana URLs easier.
 
+NOTE: You cannot access these endpoints via the Console in Kibana.
+
 * <<url-shortening-api-api-shorten-url>>
 
 include::url_shortening/shorten_url.asciidoc[]

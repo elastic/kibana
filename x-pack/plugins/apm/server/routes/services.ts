@@ -6,18 +6,21 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
+import {
+  AgentName,
+  createApmTelementry,
+  storeApmTelemetry
+} from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getService } from '../lib/services/get_service';
 import { getServices } from '../lib/services/get_services';
 
 const ROOT = '/api/apm/services';
-const pre = [{ method: setupRequest, assign: 'setup' }];
 const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
-  // @ts-ignore
-  return Boom.boomify(err, { statusCode: 400 });
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initServicesApi(server: Server) {
@@ -25,14 +28,22 @@ export function initServicesApi(server: Server) {
     method: 'GET',
     path: ROOT,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators()
       }
     },
-    handler: req => {
-      const { setup } = req.pre;
-      return getServices(setup).catch(defaultErrorHandler);
+    handler: async req => {
+      const setup = setupRequest(req);
+      const services = await getServices(setup).catch(defaultErrorHandler);
+
+      // Store telemetry data derived from services
+      const agentNames = services.map(
+        ({ agentName }) => agentName as AgentName
+      );
+      const apmTelemetry = createApmTelementry(agentNames);
+      storeApmTelemetry(server, apmTelemetry);
+
+      return services;
     }
   });
 
@@ -40,13 +51,12 @@ export function initServicesApi(server: Server) {
     method: 'GET',
     path: `${ROOT}/{serviceName}`,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators()
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       const { serviceName } = req.params;
       return getService(serviceName, setup).catch(defaultErrorHandler);
     }

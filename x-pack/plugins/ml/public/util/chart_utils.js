@@ -239,6 +239,12 @@ const TICK_DIRECTION = {
 // the bounds of earliest and latest. This is useful for the Anomaly Explorer Charts
 // to align axis ticks with the gray area resembling the swimlane cell selection.
 export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
+  // A tickInterval equal or smaller than 0 would trigger a call stack exception,
+  // so we're trying to catch that before it happens.
+  if (tickInterval <= 0) {
+    throw Error('tickInterval must be larger than 0.');
+  }
+
   const tickValues = [startTimeMs];
 
   function addTicks(ts, operator) {
@@ -318,7 +324,7 @@ export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
     const fn = function (ts) {
       const filteredTicks = axis.selectAll('.tick').filter(d => d === ts);
 
-      if (filteredTicks[0].length === 0) {
+      if (filteredTicks.length === 0 || filteredTicks[0].length === 0) {
         return false;
       }
 

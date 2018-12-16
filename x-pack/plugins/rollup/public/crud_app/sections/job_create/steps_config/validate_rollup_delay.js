@@ -25,7 +25,7 @@ export function validateRollupDelay(rollupDelay) {
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.rollupDelayInvalidFormat"
-          defaultMessage="Invalid delay format"
+          defaultMessage="Invalid delay format."
         />
       )];
     }

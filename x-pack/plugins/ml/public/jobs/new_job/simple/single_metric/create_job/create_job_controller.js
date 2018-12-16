@@ -12,7 +12,7 @@ import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
@@ -20,6 +20,7 @@ import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { getCreateSingleMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
@@ -30,7 +31,7 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } 
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider,
   focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
@@ -48,6 +49,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/jobs/new_job/simple/single_metric', {
     template,
+    k7Breadcrumbs: getCreateSingleMetricJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
@@ -114,12 +116,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
@@ -199,6 +202,7 @@ module
       end: 0,
       timeField: indexPattern.timeFieldName,
       indexPattern: undefined,
+      usesSavedSearch: (savedSearch.id !== undefined),
       query,
       filters,
       combinedQuery,

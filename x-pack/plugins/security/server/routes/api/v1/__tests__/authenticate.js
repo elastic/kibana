@@ -44,13 +44,13 @@ describe('Authentication routes', () => {
         .firstCall
         .args[0];
 
-      request = {
+      request = requestFixture({
         headers: {},
         payload: { username: 'user', password: 'password' }
-      };
+      });
 
       authenticateStub = serverStub.plugins.security.authenticate.withArgs(
-        sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'password'))
+        sinon.match(BasicCredentials.decorateRequest(request, 'user', 'password'))
       );
       authorizationModeStub = serverStub.plugins.security.authorization.mode;
     });
@@ -62,10 +62,10 @@ describe('Authentication routes', () => {
       expect(loginRoute.config).to.eql({
         auth: false,
         validate: {
-          payload: {
+          payload: Joi.object({
             username: Joi.string().required(),
             password: Joi.string().required()
-          }
+          })
         },
         response: {
           emptyStatusCode: 204,
@@ -304,10 +304,10 @@ describe('Authentication routes', () => {
       expect(samlAcsRoute.config).to.eql({
         auth: false,
         validate: {
-          payload: {
+          payload: Joi.object({
             SAMLResponse: Joi.string().required(),
             RelayState: Joi.string().allow('')
-          }
+          })
         }
       });
     });

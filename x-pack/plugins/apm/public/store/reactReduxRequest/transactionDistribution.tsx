@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { Request, RRRRenderArgs } from 'react-redux-request';
-import { IDistributionResponse } from '../../../server/lib/transactions/distribution/get_distribution';
-import { loadTransactionDistribution } from '../../services/rest/apm';
+import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
+import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
+import { loadTransactionDistribution } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
 // @ts-ignore
@@ -17,13 +17,9 @@ const ID = 'transactionDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-interface RrrResponse<T> {
-  data: T;
-}
-
 export function getTransactionDistribution(
   state: IReduxState
-): RrrResponse<IDistributionResponse> {
+): RRRRenderResponse<ITransactionDistributionAPIResponse> {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
@@ -41,11 +37,19 @@ export function TransactionDistributionRequest({
   render
 }: {
   urlParams: IUrlParams;
-  render: (args: RRRRenderArgs<any>) => any;
+  render: RRRRender<ITransactionDistributionAPIResponse>;
 }) {
-  const { serviceName, start, end, transactionName, kuery } = urlParams;
+  const {
+    serviceName,
+    transactionType,
+    transactionId,
+    start,
+    end,
+    transactionName,
+    kuery
+  } = urlParams;
 
-  if (!(serviceName && start && end && transactionName)) {
+  if (!(serviceName && transactionType && start && end && transactionName)) {
     return null;
   }
 
@@ -53,7 +57,17 @@ export function TransactionDistributionRequest({
     <Request
       id={ID}
       fn={loadTransactionDistribution}
-      args={[{ serviceName, start, end, transactionName, kuery }]}
+      args={[
+        {
+          serviceName,
+          transactionType,
+          transactionId,
+          start,
+          end,
+          transactionName,
+          kuery
+        }
+      ]}
       selector={getTransactionDistribution}
       render={render}
     />

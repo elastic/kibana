@@ -33,7 +33,7 @@ import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_typ
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 
 
-const defaultEditor = function ($rootScope, $compile) {
+const defaultEditor = function ($rootScope, $compile, i18n) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -44,12 +44,16 @@ const defaultEditor = function ($rootScope, $compile) {
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.vis.type.editorConfig.optionsTemplate }
+          {
+            name: 'options',
+            title: i18n('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            editor: this.vis.type.editorConfig.optionsTemplate,
+          }
         ];
       }
     }
 
-    render({ uiState, timeRange, appState }) {
+    render({ uiState, timeRange, filters, appState }) {
       let $scope;
 
       const updateScope = () => {
@@ -162,12 +166,14 @@ const defaultEditor = function ($rootScope, $compile) {
               uiState: uiState,
               listenOnChange: false,
               timeRange: timeRange,
+              filters: filters,
               appState: appState,
             });
           });
         } else {
           this._handler.update({
-            timeRange: timeRange
+            timeRange: timeRange,
+            filters: filters,
           });
         }
 

@@ -11,13 +11,13 @@ import { colors } from '../../../../style/variables';
 
 class VerticalLines extends PureComponent {
   render() {
+    const { traceRootDuration } = this.props;
     const {
       width,
       height,
       margins,
       xDomain,
-      tickValues,
-      xMax
+      tickValues
     } = this.props.plotValues;
 
     const agentMarkTimes = this.props.agentMarks.map(({ us }) => us);
@@ -43,9 +43,16 @@ class VerticalLines extends PureComponent {
           />
 
           <VerticalGridLines
-            tickValues={[...agentMarkTimes, xMax]}
+            tickValues={agentMarkTimes}
             style={{ stroke: colors.gray3 }}
           />
+
+          {traceRootDuration && (
+            <VerticalGridLines
+              tickValues={[traceRootDuration]}
+              style={{ stroke: colors.gray3 }}
+            />
+          )}
         </XYPlot>
       </div>
     );

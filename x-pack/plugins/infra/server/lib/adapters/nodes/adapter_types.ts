@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { JsonObject } from '../../../../common/typed_json';
 import {
   InfraMetricInput,
   InfraNode,
@@ -11,8 +12,7 @@ import {
   InfraPathInput,
   InfraPathType,
   InfraTimerangeInput,
-} from '../../../../common/graphql/types';
-import { JsonObject } from '../../../../common/typed_json';
+} from '../../../graphql/types';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
@@ -228,7 +228,8 @@ export type InfraAgg =
   | InfraDerivativeAgg
   | InfraAvgAgg
   | InfraMaxAgg
-  | InfraCumulativeSumAgg;
+  | InfraCumulativeSumAgg
+  | undefined;
 export interface InfraNodeMetricAgg {
   [key: string]: InfraAgg;
 }

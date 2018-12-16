@@ -34,7 +34,7 @@ exports[`MLButton should render initial state 1`] = `
                 size="m"
                 type="stats"
               />,
-              "name": "Anomaly detection (BETA)",
+              "name": "Anomaly detection",
               "onClick": [Function],
             },
             Object {

@@ -4,4 +4,13 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-import './register';
+import chrome from 'ui/chrome';
+
+import { initSearch } from './register';
+
+const uiSettings = chrome.getUiSettingsClient();
+const isRollupIndexPatternsEnabled = uiSettings.get('rollups:enableIndexPatterns');
+
+if (isRollupIndexPatternsEnabled) {
+  initSearch();
+}

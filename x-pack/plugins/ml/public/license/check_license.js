@@ -119,7 +119,7 @@ export function xpackFeatureProvider(Private) {
 
   return {
     isAvailable(feature) {
-      xpackInfo.get(`features.${feature}.isAvailable`, false);
+      return xpackInfo.get(`features.${feature}.isAvailable`, false);
     }
   };
 }

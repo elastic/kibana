@@ -14,7 +14,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupIndexMissing"
-        defaultMessage="You must provide a rollup index"
+        defaultMessage="Rollup index is required."
       />
     )];
   }
@@ -23,7 +23,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupIndexSameAsIndexPattern"
-        defaultMessage="Rollup index must not be the same as the index pattern"
+        defaultMessage="Rollup index cannot have the same as the index pattern."
       />
     )];
   }
@@ -40,7 +40,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupIndexIllegalCharacters"
-        defaultMessage="You must remove these characters from your rollup index name: {characterList}"
+        defaultMessage="Remove the characters {characterList} from your rollup index name."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
       />
     )];
@@ -50,7 +50,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupIndexCommas"
-        defaultMessage="You must remove commas from your rollup index name"
+        defaultMessage="Remove the commas from your rollup index name."
       />
     )];
   }
@@ -59,7 +59,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupIndexSpaces"
-        defaultMessage="You must remove spaces from your rollup index name"
+        defaultMessage="Remove the spaces from your rollup index name."
       />
     )];
   }
@@ -67,8 +67,8 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
   if (rollupIndex[0] === '.') {
     return [(
       <FormattedMessage
-        id="xpack.rollupJobs.create.errors.rollupIndexSpaces"
-        defaultMessage="Index names can't begin with periods"
+        id="xpack.rollupJobs.create.errors.rollupIndexBeginningPeriod"
+        defaultMessage="Index names cannot begin with periods."
       />
     )];
   }

@@ -7,4 +7,3 @@
 
 
 import './general_job_details_directive';
-import './styles/main.less';

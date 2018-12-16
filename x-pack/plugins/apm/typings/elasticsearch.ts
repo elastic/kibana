@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface TermsAggsBucket {
-  key: string;
+export interface BucketAgg<T = string> {
+  key: T;
   doc_count: number;
+}
+
+declare module 'elasticsearch' {
+  // extending SearchResponse to be able to have typed aggregations
+  export interface AggregationSearchResponse<T, U = void>
+    extends SearchResponse<T> {
+    aggregations: U;
+  }
 }

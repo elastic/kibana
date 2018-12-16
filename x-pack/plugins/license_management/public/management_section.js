@@ -6,10 +6,13 @@
 
 import { management } from 'ui/management';
 import { BASE_PATH } from '../common/constants';
+import { i18n } from '@kbn/i18n';
 
 management.getSection('elasticsearch').register('license_management', {
   visible: true,
-  display: 'License Management',
+  display: i18n.translate('xpack.licenseMgmt.managementSectionDisplayName', {
+    defaultMessage: 'License Management',
+  }),
   order: 4,
   url: `#${BASE_PATH}home`
 });

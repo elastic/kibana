@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
 import yaml from 'js-yaml';
 import { get } from 'lodash';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
-import { YamlConfigSchema } from '../../../lib/lib';
+import { YamlConfigSchema } from '../../../lib/types';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,
@@ -19,23 +20,8 @@ import {
 } from '../../inputs';
 
 addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
-  if (values && values.length > 0 && values instanceof Array) {
-    return values.reduce((pass: boolean, value: string) => {
-      if (
-        pass &&
-        value.match(
-          new RegExp(
-            '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'
-          )
-        ) !== null
-      ) {
-        return true;
-      }
-      return false;
-    }, true);
-  } else {
-    return true;
-  }
+  // TODO add more validation
+  return true;
 });
 
 addValidationRule('isString', (values: FormData, value: FieldValue) => {
@@ -54,7 +40,6 @@ addValidationRule('isPath', (values: FormData, value: FieldValue) => {
 
 addValidationRule('isPaths', (values: FormData, value: FieldValue) => {
   // TODO add more validation
-
   return true;
 });
 
@@ -71,6 +56,7 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
 });
 
 interface ComponentProps {
+  intl: InjectedIntl;
   values: ConfigurationBlock;
   schema: YamlConfigSchema[];
   id: string;
@@ -78,7 +64,7 @@ interface ComponentProps {
   canSubmit(canIt: boolean): any;
 }
 
-export class ConfigForm extends React.Component<ComponentProps, any> {
+class ConfigFormUi extends React.Component<ComponentProps, any> {
   private form = React.createRef<HTMLButtonElement>();
   constructor(props: ComponentProps) {
     super(props);
@@ -113,6 +99,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     this.props.onSubmit(model);
   };
   public render() {
+    const { intl } = this.props;
     return (
       <div>
         <br />
@@ -197,9 +184,15 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     )}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    options={[{ value: '', text: 'Please Select An Option' }].concat(
-                      schema.options || []
-                    )}
+                    options={[
+                      {
+                        value: '',
+                        text: intl.formatMessage({
+                          id: 'xpack.beatsManagement.tagConfig.selectOptionLabel',
+                          defaultMessage: 'Please Select An Option',
+                        }),
+                      },
+                    ].concat(schema.options || [])}
                     validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required}
@@ -241,3 +234,4 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     );
   }
 }
+export const ConfigForm = injectI18n(ConfigFormUi, { withRef: true });

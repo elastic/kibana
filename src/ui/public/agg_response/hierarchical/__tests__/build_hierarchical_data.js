@@ -242,7 +242,16 @@ describe('buildHierarchicalData', function () {
         schema: 'group',
         params: {
           field: 'geo.src',
-          filters: [ { label: 'type:apache' }, { label: 'type:nginx' } ]
+          filters: [
+            {
+              label: 'type:apache',
+              input: { query: 'type:apache' },
+            },
+            {
+              label: 'type:nginx',
+              input: { query: 'type:nginx' },
+            },
+          ],
         }
       }];
       results = await buildHierarchicalData(aggs, fixtures.oneFilterBucket);

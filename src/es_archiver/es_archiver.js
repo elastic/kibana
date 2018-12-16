@@ -26,10 +26,11 @@ import {
 } from './actions';
 
 export class EsArchiver {
-  constructor({ client, dataDir, log }) {
+  constructor({ client, dataDir, log, kibanaUrl }) {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
+    this.kibanaUrl = kibanaUrl;
   }
 
   /**
@@ -71,6 +72,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
+      kibanaUrl: this.kibanaUrl,
     });
   }
 

@@ -44,9 +44,9 @@ export function Tooltip(id, el, formatter, events) {
   this.order = 100; // higher ordered contents are rendered below the others
   this.formatter = formatter;
   this.events = events;
-  this.containerClass = 'vis-wrapper';
-  this.tooltipClass = 'vis-tooltip';
-  this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
+  this.containerClass = 'visWrapper';
+  this.tooltipClass = 'visTooltip';
+  this.tooltipSizerClass = 'visTooltip__sizingClone';
   this.showCondition = _.constant(true);
 
   this.binder = new Binder();
