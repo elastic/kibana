@@ -102,7 +102,25 @@ export function getElements(state, pageId, withAst = true) {
     return [];
   }
 
-  // explicitely strip the ast, basically a fix for corrupted workpads
+  // explicitly strip the ast, basically a fix for corrupted workpads
+  // due to https://github.com/elastic/kibana-canvas/issues/260
+  // TODO: remove this once it's been in the wild a bit
+  if (!withAst) return elements.map(el => omit(el, ['ast']));
+
+  return elements.map(appendAst);
+}
+
+// todo unify or DRY up with `getElements`
+export function getNodes(state, pageId, withAst = true) {
+  const id = pageId || getSelectedPage(state);
+  if (!id) return [];
+
+  const page = getPageById(state, id);
+  const elements = get(page, 'elements').concat(get(page, 'groups'));
+
+  if (!elements) return [];
+
+  // explicitly strip the ast, basically a fix for corrupted workpads
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {

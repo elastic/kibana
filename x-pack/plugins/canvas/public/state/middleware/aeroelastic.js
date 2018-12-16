@@ -22,7 +22,7 @@ import { selectElement } from '../actions/transient';
 import { addPage, removePage, duplicatePage } from '../actions/pages';
 import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
-import { getElements, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
+import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
 
 const isGroupId = id => id.startsWith('group_');
 
@@ -81,6 +81,7 @@ const shapeToElement = shape => {
     angle: (Math.round(matrixToAngle(shape.transformMatrix)) * 180) / Math.PI,
     parent: shape.parent || null,
     localTransformMatrix: shape.localTransformMatrix,
+    type: shape.type === 'group' ? 'group' : 'element',
   };
 };
 
@@ -147,7 +148,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
     // read current data out of redux
     const page = getSelectedPage(getState());
-    const elements = getElements(getState(), page);
+    const elements = getNodes(getState(), page);
     const selectedElement = getSelectedElement(getState());
 
     const shapes = nextScene.shapes;
@@ -224,7 +225,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
     );
 
   const populateWithElements = page => {
-    const newShapes = getElements(getState(), page)
+    const newShapes = getNodes(getState(), page)
       .map(elementToShape)
       // filtering to eliminate residual element of a possible group that had been deleted in Redux
       .filter((d, i, a) => !isGroupId(d.id) || a.find(s => s.parent === d.id));
@@ -244,7 +245,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
   return next => action => {
     // get information before the state is changed
     const prevPage = getSelectedPage(getState());
-    const prevElements = getElements(getState(), prevPage);
+    const prevElements = getNodes(getState(), prevPage);
 
     if (action.type === setWorkpad.toString()) {
       const pages = action.payload.pages;
@@ -316,7 +317,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case elementLayer.toString():
       case setMultiplePositions.toString():
         const page = getSelectedPage(getState());
-        const elements = getElements(getState(), page);
+        const elements = getNodes(getState(), page);
 
         // TODO: add a better check for elements changing, including their position, ids, etc.
         const shouldResetState =
