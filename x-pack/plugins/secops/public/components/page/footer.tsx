@@ -17,8 +17,6 @@ import { WhoAmI } from '../../containers/who_am_i';
 
 export const Footer = pure(() => (
   <FooterContainer data-test-subj="footer">
-    <WhoAmI sourceId="default">
-      {({ appName }) => <EuiHealth color="success">Live {appName} data</EuiHealth>}
-    </WhoAmI>
+    <WhoAmI sourceId="default">{() => <EuiHealth color="success">Live data</EuiHealth>}</WhoAmI>
   </FooterContainer>
 ));

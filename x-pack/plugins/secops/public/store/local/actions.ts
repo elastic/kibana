@@ -7,3 +7,4 @@
 export { dragAndDropActions } from './drag_and_drop';
 export { hostsActions } from './hosts';
 export { timelineActions } from './timeline';
+export { appActions } from './app';

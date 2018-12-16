@@ -20,30 +20,30 @@ describe('suricata_column_renderer', () => {
 
   test('should return isInstance of false if event is empty', () => {
     const missingSource = omit('event', mockDatum);
-    expect(suricataColumnRenderer.isInstance('event', missingSource)).toBe(false);
+    expect(suricataColumnRenderer.isInstance('event.id', missingSource)).toBe(false);
   });
 
   test('should return isInstance of false if event module is empty', () => {
     const missingSource = omit('event.module', mockDatum);
-    expect(suricataColumnRenderer.isInstance('event', missingSource)).toBe(false);
+    expect(suricataColumnRenderer.isInstance('event.id', missingSource)).toBe(false);
   });
 
   test('should return isInstance of false if event module does not equal suricata', () => {
     mockDatum.event.module = 'some other value';
-    expect(suricataColumnRenderer.isInstance('event', mockDatum)).toBe(false);
+    expect(suricataColumnRenderer.isInstance('event.id', mockDatum)).toBe(false);
   });
 
   test('should return isInstance true if event is NOT empty and module equals suricata', () => {
-    expect(suricataColumnRenderer.isInstance('event', mockDatum)).toBe(true);
+    expect(suricataColumnRenderer.isInstance('event.id', mockDatum)).toBe(true);
   });
 
   test('should return isInstance true if event is NOT empty and module equals SurICaTA', () => {
     mockDatum.event.module = 'SurICaTA';
-    expect(suricataColumnRenderer.isInstance('event', mockDatum)).toBe(true);
+    expect(suricataColumnRenderer.isInstance('event.id', mockDatum)).toBe(true);
   });
 
   test('should return a value of the CVE if event has a valid suricata value and it is a CVE', () => {
-    const column = suricataColumnRenderer.renderColumn('event', mockDatum);
+    const column = suricataColumnRenderer.renderColumn('event.id', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('CVE-2016-10174');
   });
@@ -54,7 +54,7 @@ describe('suricata_column_renderer', () => {
       'Something without a CVE entry inside of it',
       mockDatum
     );
-    const column = suricataColumnRenderer.renderColumn('event', dataumWithValue);
+    const column = suricataColumnRenderer.renderColumn('event.id', dataumWithValue);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('4');
   });
@@ -62,7 +62,7 @@ describe('suricata_column_renderer', () => {
   test('should return a value of the empty if no CVE is in the event and the event does not have an id', () => {
     const missingSignature = omit('suricata.eve.alert.signature', mockDatum);
     const missingEventIdAndSignature = omit('event.id', missingSignature);
-    const column = suricataColumnRenderer.renderColumn('event', missingEventIdAndSignature);
+    const column = suricataColumnRenderer.renderColumn('event.id', missingEventIdAndSignature);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(EMPTY_VALUE);
   });

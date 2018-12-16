@@ -8,6 +8,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { Theme } from '../../../store/local/app/model';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../drag_and_drop/helpers';
 import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
@@ -21,6 +22,7 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   show: boolean;
+  theme: Theme;
 }
 
 const DropTargetDataProviders = styled.div`
@@ -54,9 +56,16 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  * the data pro section.
  */
 export const DataProviders = pure<Props>(
-  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled, show }: Props) => (
+  ({
+    id,
+    dataProviders,
+    onDataProviderRemoved,
+    onToggleDataProviderEnabled,
+    show,
+    theme,
+  }: Props) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
-      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)}>
+      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)} theme={theme}>
         {dataProviders.length ? (
           <Providers
             id={id}

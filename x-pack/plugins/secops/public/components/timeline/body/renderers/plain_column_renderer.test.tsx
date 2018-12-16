@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 
+import moment = require('moment');
 import { EMPTY_VALUE, plainColumnRenderer } from '.';
 import { mockECSData } from '../../../../mock/mock_ecs';
 import { ECS } from '../../ecs';
@@ -31,63 +32,63 @@ describe('plain_column_renderer', () => {
     expect(plainColumnRenderer.isInstance('made up name', mockDatum)).toBe(false);
   });
 
-  test('should return a plain value of category if category has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('category', mockDatum);
+  test('should return the value of event.category if event.category has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('event.category', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('Access');
   });
 
-  test('should return a plain value of destination if destination has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('destination', mockDatum);
+  test('should return the value of destination.ip if destination.ip has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('destination.ip', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('192.168.0.3');
   });
 
-  test('should return a plain value of event if event has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('event', mockDatum);
+  test('should return the value of event.id if event has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('event.id', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('1');
   });
 
-  test('should return a plain value of geo if geo has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('geo', mockDatum);
+  test('should return the value of geo.region_name if geo.region_name has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('geo.region_name', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('xx');
   });
 
-  test('should return a plain value of severity if severity has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('severity', mockDatum);
+  test('should return the value of event.severity if severity has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('event.severity', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('3');
   });
 
-  test('should return a plain value of source if source has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('source', mockDatum);
+  test('should return the value of source.ip if source.ip has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('source.ip', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('192.168.0.1');
   });
 
-  test('should return a plain value of timestamp if timestamp has a valid value', () => {
+  test('should return a formatted value of timestamp if timestamp has a valid value', () => {
     const column = plainColumnRenderer.renderColumn('timestamp', mockDatum);
     const wrapper = mount(<span>{column}</span>);
-    expect(wrapper.text()).toEqual('2018-11-05');
+    expect(wrapper.text()).toEqual(moment(mockDatum.timestamp).format());
   });
 
-  test('should return a plain value of type if type has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('type', mockDatum);
+  test('should return the value of event.type if event.type has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('event.type', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('HTTP Request');
   });
 
-  test('should return a plain value of user if user has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('user', mockDatum);
+  test('should return the of user.name if user.name has a valid value', () => {
+    const column = plainColumnRenderer.renderColumn('user.name', mockDatum);
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('john.dee');
   });
 
-  test('should return an empty value if category is empty', () => {
+  test('should return an empty value if event.category is empty', () => {
     const missingCategory = omit('event.category', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('category', missingCategory);
+    const emptyColumn = plainColumnRenderer.renderColumn('event.category', missingCategory);
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(EMPTY_VALUE);
   });
@@ -101,14 +102,14 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if destination ip is empty', () => {
     const missingDestination = omit('destination.ip', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('destination', missingDestination);
+    const emptyColumn = plainColumnRenderer.renderColumn('destination.ip', missingDestination);
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(EMPTY_VALUE);
   });
 
   test('should return an empty value if event severity is empty', () => {
     const missingSeverity = omit('event.severity', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('severity', missingSeverity);
+    const emptyColumn = plainColumnRenderer.renderColumn('event.severity', missingSeverity);
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(EMPTY_VALUE);
   });
@@ -122,21 +123,21 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if source.ip is empty', () => {
     const missingSource = omit('source.ip', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('source', missingSource);
+    const emptyColumn = plainColumnRenderer.renderColumn('source.ip', missingSource);
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(EMPTY_VALUE);
   });
 
-  test('should return an empty value if type is empty', () => {
+  test('should return an empty value if event.type is empty', () => {
     const missingType = omit('event.type', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('type', missingType);
+    const emptyColumn = plainColumnRenderer.renderColumn('event.type', missingType);
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(EMPTY_VALUE);
   });
 
-  test('should return an empty value if user name is empty', () => {
+  test('should return an empty value if user.name is empty', () => {
     const missingUser = omit('user.name', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('user', missingUser);
+    const emptyColumn = plainColumnRenderer.renderColumn('user.name', missingUser);
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(EMPTY_VALUE);
   });

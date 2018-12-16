@@ -10,6 +10,8 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { timelineActions } from '../../store';
+import { themeSelector } from '../../store/local/app';
+import { Theme } from '../../store/local/app/model';
 import { timelineDefaults } from '../../store/local/timeline/model';
 import { State } from '../../store/reducer';
 import { timelineByIdSelector } from '../../store/selectors';
@@ -30,8 +32,9 @@ import { Timeline } from './timeline';
 
 export interface OwnProps {
   id: string;
+  flyoutHeaderHeight: number;
+  flyoutHeight: number;
   headers: ColumnHeader[];
-  width: number;
 }
 
 interface StateReduxProps {
@@ -43,6 +46,7 @@ interface StateReduxProps {
   range?: Range;
   sort?: Sort;
   show?: boolean;
+  theme?: Theme;
 }
 
 interface DispatchProps {
@@ -99,6 +103,8 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     const {
       activePage,
       dataProviders,
+      flyoutHeight,
+      flyoutHeaderHeight,
       headers,
       id,
       itemsPerPage,
@@ -108,9 +114,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       removeProvider,
       show,
       sort,
+      theme,
       updateRange,
       updateSort,
-      width,
       updateDataProviderEnabled,
       updateItemsPerPage,
       updatePageIndex,
@@ -139,6 +145,8 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         columnRenderers={columnRenderers}
         id={id}
         dataProviders={dataProviders!}
+        flyoutHeaderHeight={flyoutHeaderHeight}
+        flyoutHeight={flyoutHeight}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}
         onChangeItemsPerPage={onChangeItemsPerPage}
@@ -151,9 +159,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         pageCount={pageCount!}
         range={range!}
         rowRenderers={rowRenderers}
-        sort={sort!}
         show={show!}
-        width={width}
+        sort={sort!}
+        theme={theme!}
       />
     );
   }
@@ -162,8 +170,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const timeline = timelineByIdSelector(state)[id];
   const { dataProviders, sort, show } = timeline || timelineDefaults;
+  const theme = defaultTo('dark', themeSelector(state));
 
-  return defaultTo({ id, dataProviders, sort, show }, timeline);
+  return { id, dataProviders, sort, show, theme };
 };
 
 export const StatefulTimeline = connect(

@@ -43,6 +43,7 @@ const getEventsColumns = (startDate: number, endDate: number) => [
         <>
           <DraggableWrapper
             dataProvider={{
+              and: [],
               enabled: true,
               id: `${item.event!.id}`,
               name: hostName,

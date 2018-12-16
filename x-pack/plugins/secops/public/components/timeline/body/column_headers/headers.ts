@@ -9,9 +9,6 @@ import { ColumnHeader } from './column_header';
 /** The default minimum width of a column */
 export const DEFAULT_COLUMN_MIN_WIDTH = 100;
 
-/** The default minimum width of the Event column */
-export const DEFAULT_EVENT_COLUMN_WIDTH = 300;
-
 /** The default column headers */
 export const headers: ColumnHeader[] = [
   {
@@ -22,38 +19,50 @@ export const headers: ColumnHeader[] = [
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'severity',
+    id: 'event.severity',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'Severity',
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'category',
+    id: 'event.category',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'Category',
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'type',
+    id: 'event.type',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'Type',
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'source',
+    id: 'host.hostname',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Source',
+    text: 'Hostname',
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'user',
+    id: 'source.ip',
+    minWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    text: 'Source IP',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'destination.ip',
+    minWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    text: 'Destination IP',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.name',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'User',
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'event',
-    minWidth: DEFAULT_EVENT_COLUMN_WIDTH,
+    id: 'event.id',
+    minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'Event',
   },
 ];

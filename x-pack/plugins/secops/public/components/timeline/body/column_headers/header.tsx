@@ -77,6 +77,7 @@ const HeaderDiv = styled.div`
 
 const Text = styled(EuiText)`
   display: inline;
+  font-weight: 700;
 `;
 
 /** Renders a header */

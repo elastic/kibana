@@ -27,6 +27,7 @@ describe('DataProviders', () => {
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
             show={true}
+            theme="dark"
           />
         </DragDropContext>
       );
@@ -43,6 +44,7 @@ describe('DataProviders', () => {
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
             show={true}
+            theme="dark"
           />
         </DragDropContext>
       );
@@ -59,6 +61,7 @@ describe('DataProviders', () => {
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
             show={true}
+            theme="dark"
           />
         </DragDropContext>
       );

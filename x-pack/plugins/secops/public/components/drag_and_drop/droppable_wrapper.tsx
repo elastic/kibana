@@ -8,27 +8,30 @@ import * as React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { ThemeProvider } from 'styled-components';
-
-import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { Theme } from '../../store/local/app/model';
 
 interface Props {
   droppableId: string;
   isDropDisabled?: boolean;
+  theme: Theme;
 }
 
-const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
+const getBackgroundColor = (theme: Theme): string =>
+  theme === 'dark' ? 'rgb(63,63,63)' : '#F5F7FA';
+
+const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Theme }>`
   transition: background-color 0.7s ease;
-  background-color: ${({ isDraggingOver, theme }) =>
-    isDraggingOver ? '#f0f8ff' : theme.eui.euiColorEmptyShade};
+  background-color: ${({ isDraggingOver, themeName }) =>
+    isDraggingOver ? '#f0f8ff' : getBackgroundColor(themeName)};
   min-height: 100px;
 `;
 
-export const DroppableWrapper = pure<Props>(({ droppableId, isDropDisabled = false, children }) => (
-  <ThemeProvider theme={{ eui: euiVars }}>
+export const DroppableWrapper = pure<Props>(
+  ({ droppableId, isDropDisabled = false, theme, children }) => (
     <Droppable isDropDisabled={isDropDisabled} droppableId={droppableId} direction={'horizontal'}>
       {(provided, snapshot) => (
         <ReactDndDropTarget
+          themeName={theme}
           innerRef={provided.innerRef}
           {...provided.droppableProps}
           isDraggingOver={snapshot.isDraggingOver}
@@ -38,5 +41,5 @@ export const DroppableWrapper = pure<Props>(({ droppableId, isDropDisabled = fal
         </ReactDndDropTarget>
       )}
     </Droppable>
-  </ThemeProvider>
-));
+  )
+);

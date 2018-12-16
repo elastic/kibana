@@ -27,8 +27,17 @@ describe('empty_column_renderer', () => {
     expect(emptyColumnRenderer.isInstance('source', mockDatum)).toBe(false);
   });
 
-  test('should return isInstance false if it encounters a column it does not know about', () => {
-    expect(emptyColumnRenderer.isInstance('made up name', mockDatum)).toBe(false);
+  test('should return isInstance true if source.ip is empty', () => {
+    const missingSource = omit('source.ip', mockDatum);
+    expect(emptyColumnRenderer.isInstance('source.ip', missingSource)).toBe(true);
+  });
+
+  test('should return isInstance false if source.ip is NOT empty', () => {
+    expect(emptyColumnRenderer.isInstance('source.ip', mockDatum)).toBe(false);
+  });
+
+  test('should return isInstance true if it encounters a column it does not know about', () => {
+    expect(emptyColumnRenderer.isInstance('made up name', mockDatum)).toBe(true);
   });
 
   test('should return an empty value', () => {

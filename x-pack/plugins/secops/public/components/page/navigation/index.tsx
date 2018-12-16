@@ -15,6 +15,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
+import { ThemeSwitcher } from '../../theme_switcher';
 
 interface NavTab {
   id: string;
@@ -49,15 +50,18 @@ interface NavigationState {
 }
 
 const AddSources = styled.div`
+  display: flex;
+  flex-direction: row;
   position: relative;
   top: -48px;
 `;
 
 const AddData = pure(() => (
-  <AddSources>
+  <AddSources data-test-subj="add-sources">
     <EuiButton href="kibana#home/tutorial_directory/security" target="_blank">
       Add data
     </EuiButton>
+    <ThemeSwitcher />
   </AddSources>
 ));
 

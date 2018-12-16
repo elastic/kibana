@@ -54,11 +54,7 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
             key={`visualizationPlaceholder-${i}`}
           >
             <WhoAmI data-test-subj="whoAmI" sourceId="default">
-              {({ appName }) => (
-                <div>
-                  {appName} {myRoute}
-                </div>
-              )}
+              {() => <div>{myRoute}</div>}
             </WhoAmI>
             <DraggableWrapper
               dataProvider={mockDataProviders[i]}

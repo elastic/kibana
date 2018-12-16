@@ -9,8 +9,9 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ECS } from './ecs';
 
-import { EuiTablePagination } from '@elastic/eui';
-import { EventsProps, EventsQuery } from '../../containers/events';
+import { EventsQuery } from '../../containers/events';
+import { Theme } from '../../store/local/app/model';
+import { AutoSizer } from '../auto_sizer';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Range } from './body/column_headers/range_picker/ranges';
@@ -27,14 +28,17 @@ import {
   OnRangeSelected,
   OnToggleDataProviderEnabled,
 } from './events';
+import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header/timeline_header';
+import { calculateBodyHeight, combineQueries, getIsLoading } from './helpers';
 
 interface Props {
   activePage: number;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   dataProviders: DataProvider[];
-  height?: string;
+  flyoutHeaderHeight: number;
+  flyoutHeight: number;
   id: string;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
@@ -48,22 +52,12 @@ interface Props {
   pageCount: number;
   range: Range;
   rowRenderers: RowRenderer[];
-  sort: Sort;
   show: boolean;
-  width: number;
+  sort: Sort;
+  theme: Theme;
 }
 
-const TimelineDiv = styled.div<{ width: string; height: string }>`
-  display: flex;
-  flex-direction: column;
-  min-height: 700px;
-  overflow: hidden;
-  user-select: none;
-  width: ${props => props.width};
-  height: ${props => props.height};
-`;
-
-const defaultHeight = '100%';
+const WrappedByAutoSizer = styled.div``; // required by AutoSizer
 
 /** The parent Timeline component */
 export const Timeline = pure<Props>(
@@ -72,7 +66,8 @@ export const Timeline = pure<Props>(
     columnHeaders,
     columnRenderers,
     dataProviders,
-    height = defaultHeight,
+    flyoutHeaderHeight,
+    flyoutHeight,
     id,
     itemsPerPage,
     itemsPerPageOptions,
@@ -88,58 +83,77 @@ export const Timeline = pure<Props>(
     rowRenderers,
     show,
     sort,
-    width,
-  }) => (
-    <TimelineDiv data-test-subj="timeline" width={`${width}px`} height={height}>
-      <TimelineHeader
-        id={id}
-        dataProviders={dataProviders}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        show={show}
-        width={width}
-      />
-      {dataProviders.map(provider => {
-        const queryProps: EventsProps = provider.componentQueryProps as EventsProps;
-        const resParm = provider.componentResultParam;
-        return (
-          <EventsQuery
-            sourceId="default"
-            startDate={queryProps.startDate}
-            endDate={queryProps.endDate}
-            filterQuery={queryProps.filterQuery}
-            key={provider.id}
-          >
-            {(resData: {}) => (
-              <Body
-                columnHeaders={columnHeaders}
-                columnRenderers={columnRenderers}
-                data={getOr([], resParm, resData) as ECS[]}
-                onColumnSorted={onColumnSorted}
-                onDataProviderRemoved={onDataProviderRemoved}
-                onFilterChange={onFilterChange}
-                onRangeSelected={onRangeSelected}
-                range={range}
-                rowRenderers={rowRenderers}
-                sort={sort}
-                width={width}
-              />
-            )}
-          </EventsQuery>
-        );
-      })}
-      {dataProviders.length !== 0 && (
-        <div data-test-subj="table-pagination">
-          <EuiTablePagination
-            activePage={activePage}
-            itemsPerPage={itemsPerPage}
-            itemsPerPageOptions={itemsPerPageOptions}
-            pageCount={pageCount}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onChangePage={onChangePage}
-          />
-        </div>
-      )}
-    </TimelineDiv>
-  )
+    theme,
+  }) => {
+    const combinedQueries = combineQueries(dataProviders);
+
+    return (
+      <>
+        <AutoSizer detectAnyWindowResize={true} content>
+          {({ measureRef, content: { height: timelineHeaderHeight = 0 } }) => (
+            <>
+              <WrappedByAutoSizer innerRef={measureRef}>
+                <TimelineHeader
+                  columnHeaders={columnHeaders}
+                  id={id}
+                  dataProviders={dataProviders}
+                  onColumnSorted={onColumnSorted}
+                  onDataProviderRemoved={onDataProviderRemoved}
+                  onFilterChange={onFilterChange}
+                  onRangeSelected={onRangeSelected}
+                  onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                  range={range}
+                  show={show}
+                  sort={sort}
+                  theme={theme}
+                />
+              </WrappedByAutoSizer>
+
+              <div data-test-subj="timeline">
+                {combinedQueries != null ? (
+                  <EventsQuery
+                    sourceId="default"
+                    startDate={combinedQueries.queryProps.startDate}
+                    endDate={combinedQueries.queryProps.endDate}
+                    filterQuery={combinedQueries.queryProps.filterQuery}
+                  >
+                    {(resData: {}) => (
+                      <>
+                        <Body
+                          id={id}
+                          columnHeaders={columnHeaders}
+                          columnRenderers={columnRenderers}
+                          data={getOr([], combinedQueries.resParm, resData) as ECS[]}
+                          height={calculateBodyHeight({
+                            flyoutHeight,
+                            flyoutHeaderHeight,
+                            timelineHeaderHeight,
+                            timelineFooterHeight: footerHeight,
+                          })}
+                          rowRenderers={rowRenderers}
+                          theme={theme}
+                        />
+                        <Footer
+                          activePage={activePage}
+                          dataProviders={dataProviders}
+                          serverSideEventCount={Infinity} // TODO: replace sentinel value with value from response
+                          height={footerHeight}
+                          isLoading={getIsLoading(resData)}
+                          itemsPerPage={itemsPerPage}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          pageCount={pageCount}
+                          onChangeItemsPerPage={onChangeItemsPerPage}
+                          onChangePage={onChangePage}
+                        />
+                      </>
+                    )}
+                  </EventsQuery>
+                ) : null}
+              </div>
+            </>
+          )}
+        </AutoSizer>
+      </>
+    );
+  }
 );

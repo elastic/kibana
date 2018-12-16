@@ -10,7 +10,7 @@ import React from 'react';
 import { ColumnRenderer, EMPTY_VALUE, getSuricataCVEFromSignature } from '.';
 import { ECS } from '../../ecs';
 
-const suricataColumnsOverridden = ['event'];
+const suricataColumnsOverridden = ['event.id'];
 
 export const suricataColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, ecs: ECS) => {
@@ -28,7 +28,7 @@ export const suricataColumnRenderer: ColumnRenderer = {
 
   renderColumn: (columnName: string, data: ECS) => {
     switch (columnName) {
-      case 'event':
+      case 'event.id':
         const signature = get('suricata.eve.alert.signature', data) as string;
         const cve = getSuricataCVEFromSignature(signature);
         if (cve != null) {

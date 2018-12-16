@@ -39,7 +39,7 @@ export const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): st
  * affords uniform UI controls for the following actions:
  * 1) removing a data provider
  * 2) temporarily disabling a data provider
- * 3) TODO: applying boolean negation to the data provider
+ * 3) applying boolean negation to the data provider
  */
 export const Providers = pure<Props>(
   ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (

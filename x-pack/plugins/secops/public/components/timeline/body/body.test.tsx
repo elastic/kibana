@@ -5,45 +5,66 @@
  */
 
 import { mount } from 'enzyme';
-import { noop } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import * as React from 'react';
+
+import moment = require('moment');
 import { Body } from '.';
 import { mockECSData } from '../../../mock/mock_ecs';
 import { headers } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
-import { Sort } from './sort';
+
+const testBodyHeight = 700;
 
 describe('ColumnHeaders', () => {
   describe('rendering', () => {
-    const sort: Sort = {
-      columnId: 'timestamp',
-      sortDirection: 'descending',
-    };
+    test('it renders each column of data (NOTE: this test omits timestamp, which is a special case tested below)', () => {
+      const headersSansTimestamp = headers.filter(h => h.id !== 'timestamp');
 
-    test('it renders the column headers', () => {
       const wrapper = mount(
         <Body
-          columnHeaders={headers}
+          id={'timeline-test'}
+          columnHeaders={headersSansTimestamp}
           columnRenderers={columnRenderers}
           data={mockECSData}
-          sort={sort}
-          onColumnSorted={noop}
-          onDataProviderRemoved={noop}
-          onFilterChange={noop}
-          onRangeSelected={noop}
-          range="1 Day"
           rowRenderers={rowRenderers}
-          width={1000}
+          height={testBodyHeight}
+          theme="dark"
         />
       );
 
-      headers.forEach(h => {
+      headersSansTimestamp.forEach(h => {
         expect(
           wrapper
-            .find('[data-test-subj="columnHeaders"]')
+            .find('[data-test-subj="dataDrivenColumns"]')
             .first()
             .text()
-        ).toContain(h.text);
+        ).toContain(get(h.id, mockECSData[0]));
+      });
+    });
+
+    test('it renders a formatted timestamp', () => {
+      const headersJustTimestamp = headers.filter(h => h.id === 'timestamp');
+
+      const wrapper = mount(
+        <Body
+          id={'timeline-test'}
+          columnHeaders={headersJustTimestamp}
+          columnRenderers={columnRenderers}
+          data={mockECSData}
+          rowRenderers={rowRenderers}
+          height={testBodyHeight}
+          theme="dark"
+        />
+      );
+
+      headersJustTimestamp.forEach(h => {
+        expect(
+          wrapper
+            .find('[data-test-subj="dataDrivenColumns"]')
+            .first()
+            .text()
+        ).toContain(moment(get(h.id, mockECSData[0])).format());
       });
     });
   });

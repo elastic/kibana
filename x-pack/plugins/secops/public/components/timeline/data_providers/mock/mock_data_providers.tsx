@@ -68,5 +68,6 @@ export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEve
         <Text> {name} </Text>
       </div>
     ),
+    and: [],
   })
 );

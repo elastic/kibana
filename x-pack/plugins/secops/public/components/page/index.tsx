@@ -11,6 +11,7 @@ export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   height: 100%;
   padding: 1rem;
   overflow: hidden;
