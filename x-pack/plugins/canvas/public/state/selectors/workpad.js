@@ -131,10 +131,17 @@ export function getNodes(state, pageId, withAst = true) {
 }
 
 export function getElementById(state, id, pageId) {
+  // do we need to pass a truthy empty array instead of `true`?
   const element = getElements(state, pageId, []).find(el => el.id === id);
   if (element) {
     return appendAst(element);
   }
+}
+
+export function getNodeById(state, id, pageId) {
+  // do we need to pass a truthy empty array instead of `true`?
+  const group = getNodes(state, pageId, []).find(el => el.id === id);
+  if (group) return appendAst(group);
 }
 
 export function getResolvedArgs(state, elementId, path) {

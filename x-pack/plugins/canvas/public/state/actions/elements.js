@@ -10,7 +10,7 @@ import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
-import { getPages, getElementById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
+import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { notify } from '../../lib/notify';
@@ -218,8 +218,8 @@ export const removeElements = createThunk(
     );
 
     const shouldRefresh = elementIds.some(elementId => {
-      const element = getElementById(state, elementId, pageId);
-      const filterIsApplied = element.filter != null && element.filter.length > 0;
+      const element = getNodeById(state, elementId, pageId);
+      const filterIsApplied = element.filter && element.filter.length > 0;
       return filterIsApplied;
     });
 
@@ -250,7 +250,7 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
   dispatch(_setExpression({ expression, elementId, pageId }));
 
   // read updated element from state and fetch renderable
-  const updatedElement = getElementById(getState(), elementId, pageId);
+  const updatedElement = getNodeById(getState(), elementId, pageId);
   if (doRender === true) dispatch(fetchRenderable(updatedElement));
 }
 
