@@ -71,7 +71,12 @@ const mouseIsDown = selectReduce(
   false
 )(mouseButtonEvent);
 
-const gestureEnd = select(next => next && next.event === 'mouseUp')(mouseButtonEvent);
+const gestureEnd = select(
+  action =>
+    action &&
+    (action.type === 'actionEvent' ||
+      (action.type === 'mouseEvent' && action.payload.event === 'mouseUp'))
+)(primaryUpdate);
 
 /**
  * mouseButtonStateTransitions
