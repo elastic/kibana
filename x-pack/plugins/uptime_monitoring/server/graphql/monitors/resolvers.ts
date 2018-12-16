@@ -78,6 +78,19 @@ export type UMGetFilterBarResolver = UMResolver<
   UMContext
 >;
 
+interface UMGetErrorsList {
+  dateRangeStart: number;
+  dateRangeEnd: number;
+  filters?: string;
+}
+
+export type UMGetErrorsListResolver = UMResolver<
+  any | Promise<any>,
+  any,
+  UMGetErrorsList,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
@@ -87,6 +100,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     getMonitorChartsData: UMGetMonitorChartsResolver;
     getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
+    getErrorsList: UMGetErrorsListResolver;
   };
 } => ({
   Query: {
@@ -135,6 +149,13 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     },
     async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<any> {
       return libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
+    },
+    async getErrorsList(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters },
+      { req }
+    ): Promise<any> {
+      return libs.monitors.getErrorsList(req, dateRangeStart, dateRangeEnd, filters);
     },
   },
 });

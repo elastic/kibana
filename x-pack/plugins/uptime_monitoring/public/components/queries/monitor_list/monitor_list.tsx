@@ -56,7 +56,7 @@ export const MonitorList = ({
       return (
         <Fragment>
           <EuiTitle size="xs">
-            <h5>Monitor Status</h5>
+            <h5>Monitor status</h5>
           </EuiTitle>
           <EuiPanel paddingSize="l">
             <EuiInMemoryTable

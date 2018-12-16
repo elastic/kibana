@@ -36,4 +36,13 @@ export class MemoryMonitorsAdapter implements UMMonitorsAdapter {
   public async getFilterBar(request: any): Promise<any> {
     throw new Error('Method not implemented.');
   }
+
+  public async getErrorsList(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    filters?: string | undefined
+  ): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
 }

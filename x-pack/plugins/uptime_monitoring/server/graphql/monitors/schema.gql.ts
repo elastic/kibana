@@ -81,6 +81,13 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor]
   }
 
+  type ErrorList {
+    latestMessage: String
+    monitorId: String
+    type: String
+    count: Int
+  }
+
   extend type Query {
     getMonitors(
       dateRangeStart: UnsignedInteger!
@@ -109,5 +116,11 @@ export const monitorsSchema = gql`
     ): [Ping!]!
 
     getFilterBar(dateRangeStart: UnsignedInteger!, dateRangeEnd: UnsignedInteger!): FilterBar
+
+    getErrorsList(
+      dateRangeStart: UnsignedInteger!
+      dateRangeEnd: UnsignedInteger!
+      filters: String
+    ): [ErrorList]
   }
 `;

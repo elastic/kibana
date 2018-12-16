@@ -27,4 +27,10 @@ export interface UMMonitorsAdapter {
     filters?: string
   ): Promise<any>;
   getFilterBar(request: any, dateRangeStart: number, dateRangeEnd: number): Promise<any>;
+  getErrorsList(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    filters?: string
+  ): Promise<any>;
 }

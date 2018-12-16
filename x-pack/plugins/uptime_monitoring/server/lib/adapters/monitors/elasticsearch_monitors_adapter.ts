@@ -366,4 +366,76 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       status: getKey(status),
     };
   }
+
+  public async getErrorsList(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    filters?: string | undefined
+  ): Promise<any> {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'monitor.status': {
+                    value: 'down',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          error_type: {
+            terms: {
+              field: 'error.type',
+            },
+            aggs: {
+              by_id: {
+                terms: {
+                  field: 'monitor.id',
+                },
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      sort: [{ '@timestamp': { order: 'desc' } }],
+                      size: 1,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const {
+      aggregations: {
+        error_type: { buckets },
+      },
+    } = await this.database.search(request, params);
+
+    const errorsList: any[] = [];
+    buckets.forEach(
+      ({
+        key: errorType,
+        by_id: { buckets: monitorBuckets },
+      }: {
+        key: string;
+        by_id: { buckets: any[] };
+      }) => {
+        monitorBuckets.forEach(bucket => {
+          const count = get(bucket, 'doc_count', null);
+          const monitorId = get(bucket, 'key', null);
+          const errorMessage = get(bucket, 'latest.hits.hits[0]._source.error.message', null);
+          errorsList.push({ latestMessage: errorMessage, monitorId, type: errorType, count });
+        });
+      }
+    );
+    return errorsList;
+  }
 }

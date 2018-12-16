@@ -40,12 +40,20 @@ export class UMMonitorsDomain {
     return this.adapter.getSnapshotCount(request, range, downCount, windowSize, filters);
   }
 
-  // TODO: this should adhere to the date range as well
   public async getFilterBar(
     request: any,
     dateRangeStart: number,
     dateRangeEnd: number
   ): Promise<any> {
     return this.adapter.getFilterBar(request, dateRangeStart, dateRangeEnd);
+  }
+
+  public async getErrorsList(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    filters?: string
+  ): Promise<any> {
+    return this.adapter.getErrorsList(request, dateRangeStart, dateRangeEnd, filters);
   }
 }

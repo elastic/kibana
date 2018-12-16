@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
+import { ErrorList } from '../components/queries/error_list';
 import { FilterBar } from '../components/queries/filter_bar';
 import { MonitorList } from '../components/queries/monitor_list';
 import { Snapshot } from '../components/queries/snapshot';
@@ -60,6 +61,12 @@ export class OverviewPage extends React.Component<OverviewPageProps, OverviewPag
         <MonitorList
           autorefreshEnabled={autorefreshEnabled}
           autorefreshInterval={autorefreshInterval}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          filters={this.state.currentFilterQuery}
+        />
+        <EuiSpacer />
+        <ErrorList
           dateRangeStart={dateRangeStart}
           dateRangeEnd={dateRangeEnd}
           filters={this.state.currentFilterQuery}
