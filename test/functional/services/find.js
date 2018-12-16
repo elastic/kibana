@@ -320,9 +320,9 @@ export function FindProvider({ getService }) {
       await leadfoot.waitForDeletedByCssSelector(selector);
     }
     async waitForAttributeToChange(selector, attribute, value) {
-      const locator = `${selector}[${attribute}="${value}"]`;
-      await retry.try(async () => {
-        await this.byCssSelector(locator);
+      retry.waitFor(`${attribute} to equal "${value}"`, async () => {
+        const el = await this.byCssSelector(selector);
+        return value === await el.getAttribute(attribute);
       });
     }
   }

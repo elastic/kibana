@@ -104,17 +104,16 @@ export function BrowserProvider({ getService }) {
     /**
      * Does a drag-and-drop action from one point to another
      *
-     * @param {Element|{x: number, y: number}} from
-     * @param {Element|{x: number, y: number}} to
-     * @param {number} offset Optional
-     * @param {number} yOffset Optional
+     * @param {{element: LeadfootElementWrapper, xOffset: number, yOffset: number}} from
+     * @param {{element: LeadfootElementWrapper, xOffset: number, yOffset: number}} to
      * @return {Promise<void>}
      */
-    async dragAndDrop(from, to, xOffset, yOffset) {
-      await this.moveMouseTo(from, xOffset, yOffset);
-      await this.pressMouseButton();
-      await this.moveMouseTo(to, xOffset, yOffset);
-      await this.releaseMouseButton();
+    async dragAndDrop(from, to) {
+      await this.moveMouseTo(from.element, from.xOffset, from.yOffset);
+      await leadfoot.pressMouseButton();
+      await this.moveMouseTo(to.element, to.xOffset, to.yOffset);
+      await leadfoot.releaseMouseButton();
+
     }
 
     /**
@@ -159,28 +158,6 @@ export function BrowserProvider({ getService }) {
      */
     async clickMouseButton(...args) {
       await leadfoot.clickMouseButton(...args);
-    }
-
-    /**
-     * Depresses a mouse button without releasing it.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#pressMouseButton
-     *
-     * @param {number} button Optional
-     * @return {Promise<void>}
-     */
-    async pressMouseButton(...args) {
-      await leadfoot.pressMouseButton(...args);
-    }
-
-    /**
-     * Releases a previously depressed mouse button.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#releaseMouseButton
-     *
-     * @param {number} button Optional
-     * @return {Promise<void>}
-     */
-    async releaseMouseButton(...args) {
-      await leadfoot.releaseMouseButton(...args);
     }
 
     /**
