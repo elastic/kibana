@@ -103,6 +103,7 @@ const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, uns
           width: elemPos.width,
           height: elemPos.height,
           angle: Math.round(elemPos.angle),
+          type: elemPos.type,
           parent: elemPos.parent || null,
           localTransformMatrix:
             elemPos.localTransformMatrix ||
