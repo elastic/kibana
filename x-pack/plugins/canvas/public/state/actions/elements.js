@@ -10,7 +10,7 @@ import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
-import { getPages, getElementById, getElements, getSelectedPageIndex } from '../selectors/workpad';
+import { getPages, getElementById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { notify } from '../../lib/notify';
@@ -208,8 +208,8 @@ export const removeElements = createThunk(
   ({ dispatch, getState }, rootElementIds, pageId) => {
     const state = getState();
 
-    // todo consider doing the group membership collation in aeroelastic when pros/cons crystallize
-    const allElements = getElements(state, pageId);
+    // todo consider doing the group membership collation in aeroelastic, or the Redux reducer, when adding templates
+    const allElements = getNodes(state, pageId);
     const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id));
     if (allRoots.indexOf(undefined) !== -1)
       throw new Error('Some of the elements to be deleted do not exist');
