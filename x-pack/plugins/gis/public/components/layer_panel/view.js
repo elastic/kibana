@@ -9,7 +9,7 @@ import React from 'react';
 import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
-import { LayerSettingsPanel } from './layer_settings_panel';
+import { SettingsPanel } from './settings_panel';
 
 import {
   EuiHorizontalRule,
@@ -54,10 +54,6 @@ export class LayerPanel  extends React.Component {
     );
   }
 
-  _renderSourceDetails() {
-    return this.props.selectedLayer.renderSourceDetails();
-  }
-
   render() {
     const { selectedLayer } = this.props;
 
@@ -78,10 +74,9 @@ export class LayerPanel  extends React.Component {
         </EuiFlexItem>
 
         <EuiFlexItem className="gisViewPanel__body">
-          <LayerSettingsPanel/>
+          <SettingsPanel/>
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
-          {this._renderSourceDetails()}
         </EuiFlexItem>
 
         <EuiFlexItem grow={false} className="gisViewPanel__footer">

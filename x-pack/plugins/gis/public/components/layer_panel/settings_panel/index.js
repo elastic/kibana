@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { LayerSettingsPanel } from './layer_settings_panel';
+import { SettingsPanel } from './settings_panel';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 import {
   updateLayerLabel,
@@ -23,6 +23,8 @@ function mapStateToProps(state = {}) {
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),
     minZoom: selectedLayer.getMinZoom(),
+    alphaValue: _.get(selectedLayer.getCurrentStyle(), '_descriptor.properties.alphaValue', 1),
+    renderSourceDetails: selectedLayer.renderSourceDetails,
   };
 }
 
@@ -35,5 +37,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedLayerSettingsPanel = connect(mapStateToProps, mapDispatchToProps)(LayerSettingsPanel);
-export { connectedLayerSettingsPanel as LayerSettingsPanel };
+const connectedSettingsPanel = connect(mapStateToProps, mapDispatchToProps)(SettingsPanel);
+export { connectedSettingsPanel as SettingsPanel };

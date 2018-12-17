@@ -7,8 +7,6 @@ import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import React, { Fragment } from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -126,16 +124,8 @@ export class ALayer {
     return this._style;
   }
 
-  renderSourceDetails() {
-    return (
-      <Fragment>
-        <EuiPanel>
-          <EuiTitle size="xs"><h5>Source details</h5></EuiTitle>
-          <EuiSpacer margin="m"/>
-          {this._source.renderDetails()}
-        </EuiPanel>
-      </Fragment>
-    );
+  renderSourceDetails = () => {
+    return this._source.renderDetails();
   }
 
   isLayerLoading() {
