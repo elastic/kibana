@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome, { Breadcrumb } from 'ui/chrome';
 import { PLUGIN } from '../../../../common/constants';
+import { UptimePersistedState } from '../../../uptime_monitoring_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
@@ -40,6 +41,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
             : basePath + PLUGIN.ROUTER_BASE_NAME;
+          const { autorefreshEnabled, autorefreshInterval } = this.initializePersistedState();
           ReactDOM.render(
             component({
               isUsingK7Design: $scope.k7design,
@@ -47,6 +49,9 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               kibanaBreadcrumbs,
               routerBasename,
               graphQLClient,
+              initialAutorefreshEnabled: autorefreshEnabled,
+              initialAutorefreshInterval: autorefreshInterval,
+              persistState: this.updatePersistedState,
             }),
             elem
           );
@@ -74,5 +79,20 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
       deregister();
       unmountComponentAtNode(elem);
     });
+  };
+
+  private initializePersistedState = () => {
+    const uptimeConfigurationData = window.localStorage.getItem(PLUGIN.LOCAL_STORAGE_KEY);
+    try {
+      if (uptimeConfigurationData) {
+        return JSON.parse(uptimeConfigurationData) || {};
+      }
+    } catch (e) {
+      return {};
+    }
+  };
+
+  private updatePersistedState = (state: UptimePersistedState) => {
+    window.localStorage.setItem(PLUGIN.LOCAL_STORAGE_KEY, JSON.stringify(state));
   };
 }

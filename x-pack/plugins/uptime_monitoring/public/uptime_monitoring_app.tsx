@@ -35,6 +35,11 @@ import { overviewBreadcrumb } from './breadcrumbs';
 import { UMUpdateBreadcrumbs, UptimeAppProps } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 
+export interface UptimePersistedState {
+  autorefreshEnabled: boolean;
+  autorefreshInterval: number;
+}
+
 interface UptimeAppState {
   breadcrumbs: Breadcrumb[];
   autorefreshEnabled: boolean;
@@ -52,14 +57,28 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   constructor(props: UptimeAppProps) {
     super(props);
 
-    const { isUsingK7Design, kibanaBreadcrumbs, updateBreadcrumbs } = this.props;
+    const {
+      isUsingK7Design,
+      kibanaBreadcrumbs,
+      updateBreadcrumbs,
+      initialAutorefreshEnabled,
+      initialAutorefreshInterval,
+      initialDateRangeStart,
+      initialDateRangeEnd,
+    } = props;
+
     let initialBreadcrumbs: Breadcrumb[];
-    const dateRangeEnd = moment()
-      .add(2, 'hours')
-      .valueOf();
-    const dateRangeStart = moment()
-      .subtract(1, 'day')
-      .valueOf();
+    const dateRangeStart =
+      initialDateRangeStart ||
+      moment()
+        .subtract(1, 'day')
+        .valueOf();
+    const dateRangeEnd =
+      initialDateRangeEnd ||
+      moment()
+        .add(1, 'hours')
+        .valueOf();
+
     if (isUsingK7Design) {
       this.setBreadcrumbs = updateBreadcrumbs;
       initialBreadcrumbs = kibanaBreadcrumbs;
@@ -78,12 +97,15 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       { label: '10m', value: minsToMillis(10) },
       { label: '30m', value: minsToMillis(30) },
     ];
+
     this.state = {
-      autorefreshEnabled: false,
+      autorefreshEnabled: initialAutorefreshEnabled || false,
       breadcrumbs: initialBreadcrumbs,
       popoverIsOpen: false,
       autorefreshOptions,
-      selectedAutorefresh: autorefreshOptions[0],
+      selectedAutorefresh:
+        autorefreshOptions.find(opt => opt.value === initialAutorefreshInterval) ||
+        autorefreshOptions[0],
       dateRangeStart,
       dateRangeEnd,
     };
@@ -100,7 +122,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
         <ApolloProvider client={graphQLClient}>
           <EuiPage className="app-wrapper-panel">
             <EuiHeader>
-              <EuiHeaderSection>
+              {/*
+              // @ts-ignore TODO no typings for grow prop */}
+              <EuiHeaderSection grow={true}>
                 <EuiHeaderSectionItem border="right">
                   <EuiHeaderLogo
                     aria-label="Go to Uptime Monitoring home page"
@@ -109,12 +133,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     iconTitle="Uptime Monitoring"
                   >
                     Uptime Monitoring
-                    <EuiIcon
-                      style={{ paddingLeft: '8px' }}
-                      size="xl"
-                      // @ts-ignore missing typings for beaker icon
-                      type="beaker"
-                    />
+                    <EuiIcon style={{ paddingLeft: '8px' }} size="xl" type="beaker" />
                   </EuiHeaderLogo>
                 </EuiHeaderSectionItem>
                 {!isUsingK7Design && (
@@ -149,14 +168,22 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         <EuiSwitch
                           label="Auto-refresh"
                           checked={this.state.autorefreshEnabled}
-                          onChange={e => this.setState({ autorefreshEnabled: e.target.checked })}
+                          onChange={e => {
+                            this.setState(
+                              { autorefreshEnabled: e.target.checked },
+                              this.persistState
+                            );
+                          }}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiComboBox
-                          onChange={selectedOptions =>
-                            this.setState({ selectedAutorefresh: selectedOptions[0] })
-                          }
+                          onChange={selectedOptions => {
+                            this.setState(
+                              { selectedAutorefresh: selectedOptions[0] },
+                              this.persistState
+                            );
+                          }}
                           options={this.state.autorefreshOptions}
                           isClearable={false}
                           singleSelection={{ asPlainText: true }}
@@ -216,6 +243,17 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       </Router>
     );
   }
+
+  private persistState = (): void => {
+    const {
+      autorefreshEnabled,
+      selectedAutorefresh: { value },
+    } = this.state;
+    this.props.persistState({
+      autorefreshEnabled,
+      autorefreshInterval: value,
+    });
+  };
 }
 
 export const UptimeMonitoringApp = (props: UptimeAppProps) => <Application {...props} />;

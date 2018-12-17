@@ -8,6 +8,7 @@ import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import React from 'react';
 import { Breadcrumb } from 'ui/chrome';
+import { UptimePersistedState } from '../uptime_monitoring_app';
 
 export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
@@ -21,6 +22,11 @@ export interface UptimeAppProps {
   kibanaBreadcrumbs: Breadcrumb[];
   routerBasename: string;
   graphQLClient: ApolloClient<NormalizedCacheObject>;
+  initialDateRangeStart?: number;
+  initialDateRangeEnd?: number;
+  initialAutorefreshInterval?: number;
+  initialAutorefreshEnabled?: boolean;
+  persistState(state: UptimePersistedState): void;
 }
 
 export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<any>;
