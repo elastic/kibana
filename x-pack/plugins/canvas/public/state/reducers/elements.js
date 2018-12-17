@@ -92,6 +92,11 @@ export const elementsReducer = handleActions(
       if (pageIndex < 0) return workpadState;
       return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
     },
+    [actions.rawDuplicateElement]: (workpadState, { payload: { pageId, element } }) => {
+      const pageIndex = getPageIndexById(workpadState, pageId);
+      if (pageIndex < 0) return workpadState;
+      return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
+    },
     [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) return workpadState;
