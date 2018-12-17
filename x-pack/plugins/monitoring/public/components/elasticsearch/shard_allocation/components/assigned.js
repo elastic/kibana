@@ -9,8 +9,8 @@
 import { get, sortBy } from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
-import { calculateClass } from '../lib/calculateClass';
-import { generateQueryAndLink } from '../lib/generateQueryAndLink';
+import { calculateClass } from '../lib/calculate_class';
+import { generateQueryAndLink } from '../lib/generate_query_and_link';
 import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';
