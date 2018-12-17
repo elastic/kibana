@@ -190,8 +190,7 @@ describe('once LegacyService is started with connection info', () => {
 
   test('creates legacy kbnServer and closes it if `listen` fails.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
-    const listen = MockKbnServer.prototype.listen;
-    listen.mockRejectedValue(new Error('something failed'));
+    MockKbnServer.prototype.listen.mockRejectedValue(new Error('something failed'));
 
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
 
