@@ -11,10 +11,10 @@ import * as actions from '../actions/elements';
 
 const getLocation = type => (type === 'group' ? 'groups' : 'elements');
 
-const getLocationFromIds = (workpadState, pageId, nodeId) =>
-  workpadState.pages.find(p => p.id === pageId).groups.find(e => e.id === nodeId)
-    ? 'groups'
-    : 'elements';
+const getLocationFromIds = (workpadState, pageId, nodeId) => {
+  const groups = workpadState.pages.find(p => p.id === pageId).groups || [];
+  return groups.find(e => e.id === nodeId) ? 'groups' : 'elements';
+};
 
 function getPageIndexById(workpadState, pageId) {
   return get(workpadState, 'pages', []).findIndex(page => page.id === pageId);
