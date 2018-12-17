@@ -24,7 +24,7 @@ export default function ({ getService }) {
     let expectedCompletedReportCount;
     let cleanupIndexAlias;
 
-    describe.skip('existing 6_2 index', () => {
+    describe('existing 6_2 index', () => {
       before('load data and add index alias', async () => {
         await reportingAPI.deleteAllReportingIndexes();
         await esArchiver.load('bwc/6_2');

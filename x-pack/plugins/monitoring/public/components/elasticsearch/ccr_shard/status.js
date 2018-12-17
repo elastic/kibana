@@ -29,7 +29,7 @@ function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
         defaultMessage: 'Follower Index',
       }),
       value: followerIndex,
-      dataTestSubj: 'followerIndex'
+      'data-test-subj': 'followerIndex'
     },
     {
       label: intl.formatMessage({
@@ -37,7 +37,7 @@ function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
         defaultMessage: 'Shard Id',
       }),
       value: shardId,
-      dataTestSubj: 'shardId'
+      'data-test-subj': 'shardId'
     },
     {
       label: intl.formatMessage({
@@ -45,7 +45,7 @@ function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
         defaultMessage: 'Leader Index',
       }),
       value: formattedLeader,
-      dataTestSubj: 'leaderIndex'
+      'data-test-subj': 'leaderIndex'
     },
     {
       label: intl.formatMessage({
@@ -53,7 +53,7 @@ function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
         defaultMessage: 'Ops Synced',
       }),
       value: formatMetric(operationsReceived - oldestOperationsReceived, 'int_commas'),
-      dataTestSubj: 'operationsReceived'
+      'data-test-subj': 'operationsReceived'
     },
     {
       label: intl.formatMessage({
@@ -61,7 +61,7 @@ function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
         defaultMessage: 'Failed Fetches',
       }),
       value: formatMetric(failedFetches - oldestFailedFetches, 'int_commas'),
-      dataTestSubj: 'failedFetches'
+      'data-test-subj': 'failedFetches'
     },
   ];
 

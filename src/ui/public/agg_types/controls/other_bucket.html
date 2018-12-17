@@ -8,19 +8,23 @@
           name="showOther"
           ng-model="agg.params.otherBucket"
         >
-        Group other values in separate bucket
+        <span
+          i18n-id="common.ui.aggTypes.otherBucket.groupValuesLabel"
+          i18n-default-message="Group other values in separate bucket"
+        ></span>
         <icon-tip
           position="'right'"
-          content="'Values not in the top N are grouped in this bucket. To include documents with missing values, enable \'Show missing values\'.'"
+          content="::'common.ui.aggTypes.otherBucket.groupValuesTooltip' | i18n: { defaultMessage: 'Values not in the top N are grouped in this bucket. To include documents with missing values, enable \'Show missing values\'.' }"
         ></icon-tip>
       </label>
     </div>
   </div>
   <div class="visEditorAgg__formRow--flex" ng-if="agg.params.otherBucket">
     <div class="form-group">
-      <label>
-        Label for other bucket
-      </label>
+      <label
+        i18n-id="common.ui.aggTypes.otherBucket.labelForOtherBucketLabel"
+        i18n-default-message="Label for other bucket"
+      ></label>
       <div>
         <input
           type="text"
@@ -40,19 +44,23 @@
           ng-model="agg.params.missingBucket"
           ng-disabled="agg.params.field.type !== 'string'"
         >
-        Show missing values
+        <span
+          i18n-id="common.ui.aggTypes.otherBucket.showMissingValuesLabel"
+          i18n-default-message="Show missing values"
+        ></span>
         <icon-tip
           position="'right'"
-          content="'Only works for fields of type \'string\'. When enabled, include documents with missing values in the search. If this bucket is in the top N, it appears in the chart.  If not in the top N, and you enable \'Group other values in separate bucket\', Elasticsearch adds the missing values to the \'other\' bucket.'"
+          content="::'common.ui.aggTypes.otherBucket.showMissingValuesTooltip' | i18n: { defaultMessage: 'Only works for fields of type \'string\'. When enabled, include documents with missing values in the search. If this bucket is in the top N, it appears in the chart. If not in the top N, and you enable \'Group other values in separate bucket\', Elasticsearch adds the missing values to the \'other\' bucket.' }"
         ></icon-tip>
       </label>
     </div>
   </div>
   <div class="visEditorAgg__formRow--flex" ng-show="agg.params.missingBucket">
     <div class="form-group">
-      <label>
-        Label for missing values
-      </label>
+      <label
+        i18n-id="common.ui.aggTypes.otherBucket.labelForMissingValuesLabel"
+        i18n-default-message="Label for missing values"
+      ></label>
       <div>
         <input
           type="text"

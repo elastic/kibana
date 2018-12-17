@@ -15,6 +15,7 @@ import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
 
+import { formatHumanReadableDateTime } from '../../../../../util/date_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { numTicksForDateFormat } from '../../../../../util/chart_utils';
 import { mlEscape } from '../../../../../util/string_utils';
@@ -229,7 +230,7 @@ module.directive('mlPopulationJobChart', function () {
     function showTooltip(data, el) {
       scope;
       let contents = '';
-      const formattedDate = moment(data.date).format('MMMM Do YYYY, HH:mm');
+      const formattedDate = formatHumanReadableDateTime(data.date);
       contents += `${formattedDate}<br/><hr/>`;
       contents += `${mlEscape(scope.overFieldName)}: ${mlEscape(data.label)}<br/>`;
       if (scope.chartData.fieldFormat !== undefined) {

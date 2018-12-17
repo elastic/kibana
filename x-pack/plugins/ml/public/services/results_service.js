@@ -17,7 +17,6 @@ import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns'
 
 import { ml } from '../services/ml_api_service';
 
-
 // Obtains the maximum bucket anomaly scores by job ID and time.
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a results property, with a key for job
