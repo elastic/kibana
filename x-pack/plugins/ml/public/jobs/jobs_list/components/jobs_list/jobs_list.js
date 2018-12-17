@@ -254,7 +254,7 @@ class JobsListUI extends Component {
     return (
       <EuiBasicTable
         loading={loading === true}
-        noItemsMessage={loading ? 'Loading jobs...' : 'No jobs found.'}
+        noItemsMessage={loading ? 'Loading jobs...' : 'No jobs found'}
         itemId="id"
         className={`jobs-list-table ${selectedJobsClass}`}
         items={pageOfItems}
