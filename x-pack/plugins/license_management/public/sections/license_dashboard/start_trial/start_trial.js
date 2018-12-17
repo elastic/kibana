@@ -113,11 +113,12 @@ export class StartTrial extends React.PureComponent {
                     </li>
                     <li>
                       <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.dateBaseConnectivityFeatureTitle"
-                        defaultMessage="{jdbcStandart} connectivity for {sqlDateBase}"
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.dataBaseConnectivityFeatureTitle"
+                        defaultMessage="{jdbcStandard} and {odbcStandard} connectivity for {sqlDataBase}"
                         values={{
-                          jdbcStandart: 'JDBC',
-                          sqlDateBase: 'SQL'
+                          jdbcStandard: 'JDBC',
+                          odbcStandard: 'ODBC',
+                          sqlDataBase: 'SQL'
                         }}
                       />
                     </li>

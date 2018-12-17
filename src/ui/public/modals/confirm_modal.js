@@ -44,7 +44,7 @@ export const ConfirmationButtonTypes = {
  * @property {String=} title - If given, shows a title on the confirm modal.
  */
 
-module.factory('confirmModal', function ($rootScope, $compile) {
+module.factory('confirmModal', function ($rootScope, $compile, i18n) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -55,7 +55,9 @@ module.factory('confirmModal', function ($rootScope, $compile) {
   return function confirmModal(message, customOptions) {
     const defaultOptions = {
       onCancel: noop,
-      cancelButtonText: 'Cancel',
+      cancelButtonText: i18n('common.ui.modals.cancelButtonLabel', {
+        defaultMessage: 'Cancel'
+      }),
       defaultFocusedButton: ConfirmationButtonTypes.CONFIRM
     };
 
