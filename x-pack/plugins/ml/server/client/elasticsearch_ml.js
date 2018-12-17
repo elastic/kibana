@@ -340,7 +340,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.privilegeCheck = ca({
     url: {
-      fmt: '/_security/user/_has_privileges'
+      fmt: '/_xpack/security/user/_has_privileges'
     },
     needBody: true,
     method: 'POST'
