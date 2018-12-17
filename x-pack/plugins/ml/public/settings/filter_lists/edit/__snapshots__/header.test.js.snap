@@ -36,11 +36,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
               <FormattedMessage
                 defaultMessage="Create new filter list"
                 id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
-                values={
-                  Object {
-                    "filterId": undefined,
-                  }
-                }
+                values={Object {}}
               />
             </h1>
           </EuiTitle>
@@ -170,11 +166,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
               <FormattedMessage
                 defaultMessage="Create new filter list"
                 id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
-                values={
-                  Object {
-                    "filterId": undefined,
-                  }
-                }
+                values={Object {}}
               />
             </h1>
           </EuiTitle>
