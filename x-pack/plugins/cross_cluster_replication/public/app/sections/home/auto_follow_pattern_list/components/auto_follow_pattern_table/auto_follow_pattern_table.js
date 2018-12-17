@@ -62,53 +62,46 @@ export class AutoFollowPatternTableUI extends PureComponent {
 
     return [{
       field: 'name',
-      name: (
-        <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.name_column_title"
-          defaultMessage="Name"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternList.table.nameColumnTitle',
+        defaultMessage: 'Name',
+      }),
       sortable: true,
       truncateText: false,
     }, {
       field: 'remoteCluster',
-      name: (
-        <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.cluster_column_title"
-          defaultMessage="Cluster"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
+        defaultMessage: 'Cluster',
+      }),
       truncateText: true,
       sortable: true,
     }, {
       field: 'leaderIndexPatterns',
-      name: (
-        <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.leader_patterns_column_title"
-          defaultMessage="Leader patterns"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternList.table.leaderPatternsColumnTitle',
+        defaultMessage: 'Leader patterns',
+      }),
       render: (leaderPatterns) => leaderPatterns.join(', '),
     }, {
       field: 'followIndexPatternPrefix',
-      name: (
-        <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
-          defaultMessage="Follower pattern prefix"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternList.table.prefixColumnTitle',
+        defaultMessage: 'Follower pattern prefix',
+      }),
       sortable: true,
     }, {
       field: 'followIndexPatternSuffix',
-      name: (
-        <FormattedMessage
-          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
-          defaultMessage="Follower pattern suffix"
-        />
-      ),
+      name: intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternList.table.suffixColumnTitle',
+        defaultMessage: 'Follower pattern suffix',
+      }),
       sortable: true,
     }, {
-      name: '',
+      name: intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternList.table.actionsColumnTitle',
+        defaultMessage: 'Actions',
+      }),
       actions: [
         {
           render: ({ name }) => {
@@ -147,7 +140,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
           type: 'icon',
         },
       ],
-      width: '40px',
+      width: '100px',
     }];
   }
 
