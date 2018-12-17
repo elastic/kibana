@@ -16,6 +16,8 @@ import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_t
 
 import { TimeseriesChart } from './timeseries_chart';
 
+export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
+
 // getAnnotationBrush() is expected to be called like getAnnotationBrush.call(this)
 // so it gets passed on the context of the component it gets called from.
 export function getAnnotationBrush(this: TimeseriesChart) {
@@ -147,6 +149,7 @@ export function renderAnnotations(
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
     .classed('mlAnnotationRect', true)
+    .attr('mask', `url(#${ANNOTATION_MASK_ID})`)
     .on('mouseover', function(this: object, d: Annotation) {
       showFocusChartTooltip(d, this);
     })
@@ -195,11 +198,21 @@ export function renderAnnotations(
     .append('text')
     .classed('mlAnnotationText', true);
 
+  function labelXOffset(ts: number) {
+    const earliestMs = focusXScale.domain()[0];
+    const latestMs = focusXScale.domain()[1];
+    const date = moment(ts);
+    const minX = Math.max(focusXScale(earliestMs), focusXScale(date));
+    // To avoid overflow to the right, substract maxOffset which is
+    // the width of the text label (24px) plus left margin (8xp).
+    const maxOffset = 32;
+    return Math.min(focusXScale(latestMs) - maxOffset, minX);
+  }
+
   texts
     .attr('x', (d: Annotation) => {
-      const date = moment(d.timestamp);
-      const x = focusXScale(date);
-      return x + 17;
+      const leftInnerOffset = 17;
+      return labelXOffset(d.timestamp) + leftInnerOffset;
     })
     .attr('y', (d: Annotation) => {
       const level = d.key !== undefined ? levels[d.key] : ANNOTATION_DEFAULT_LEVEL;
@@ -214,9 +227,8 @@ export function renderAnnotations(
 
   textRects
     .attr('x', (d: Annotation) => {
-      const date = moment(d.timestamp);
-      const x = focusXScale(date);
-      return x + 5;
+      const leftInnerOffset = 5;
+      return labelXOffset(d.timestamp) + leftInnerOffset;
     })
     .attr('y', (d: Annotation) => {
       const level = d.key !== undefined ? levels[d.key] : ANNOTATION_DEFAULT_LEVEL;
