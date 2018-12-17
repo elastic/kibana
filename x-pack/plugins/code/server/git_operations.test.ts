@@ -17,6 +17,7 @@ jest.setTimeout(10000);
 test('get default branch from a non master repo', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test_git'));
   // create a non-master using git commands
+  console.log('1');
   const shell = `
     git init
     git add 'run.sh'
@@ -24,15 +25,23 @@ test('get default branch from a non master repo', async () => {
     git branch -m trunk
   `;
   fs.writeFileSync(path.join(tmpDir, 'run.sh'), shell, 'utf-8');
+  console.log('2');
+
   execSync('sh ./run.sh', {
     cwd: tmpDir,
   });
+  console.log('3');
 
   try {
     const defaultBranch = await getDefaultBranch(tmpDir);
+    console.log('4');
+
     expect(defaultBranch).toEqual('trunk');
+    console.log('5');
+
   } finally {
     rimraf.sync(tmpDir);
+    console.log('6');
   }
 });
 
