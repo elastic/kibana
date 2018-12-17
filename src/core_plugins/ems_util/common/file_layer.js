@@ -75,7 +75,6 @@ export class FileLayer {
   }
 
   getEMSHotlink() {
-    console.log('get hotlink');
     const id = `file/${this.getId()}`;
     return `${this._emsClient.getLandingPageUrl()}#${id}`;
   }

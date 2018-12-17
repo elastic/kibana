@@ -142,7 +142,7 @@ uiModules.get('kibana')
           const hasIdById =  fileLayer.hasId(fileLayerConfig.id);
           return hasIdByName || hasIdById;
         });
-        return layer.getEMSHotlink();
+        return  (layer) ? layer.getEMSHotlink() : null;
       }
 
 

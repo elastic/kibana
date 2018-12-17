@@ -87,7 +87,7 @@ uiModules.get('kibana/region_map')
             });
         }
 
-        function onLayerChange() {
+        async function onLayerChange() {
 
           if (!$scope.editorState.params.selectedLayer) {
             return;
@@ -96,7 +96,9 @@ uiModules.get('kibana/region_map')
           $scope.editorState.params.selectedJoinField = $scope.editorState.params.selectedLayer.fields[0];
 
           if ($scope.editorState.params.selectedLayer.isEMS) {
-            $scope.editorState.params.emsHotLink = serviceSettings.getEMSHotLink($scope.editorState.params.selectedLayer);
+            $scope.editorState.params.emsHotLink = null;
+            $scope.editorState.params.emsHotLink = await serviceSettings.getEMSHotLink($scope.editorState.params.selectedLayer);
+            $scope.$digest();
           } else {
             $scope.editorState.params.emsHotLink = null;
           }
