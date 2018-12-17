@@ -6,48 +6,58 @@
 
 import gql from 'graphql-tag';
 
-interface UMMonitorChartsQueryOptions {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  monitorId: string;
-}
-
-export const createGetMonitorChartsQuery = ({
-  monitorId,
-  dateRangeStart,
-  dateRangeEnd,
-}: UMMonitorChartsQueryOptions) => gql`
-  {
-    monitorChartsData: getMonitorChartsData(monitorId: "${monitorId}", dateRangeStart: ${dateRangeStart}, dateRangeEnd: ${dateRangeEnd}) {
+export const createGetMonitorChartsQuery = gql`
+  query MonitorCharts(
+    $dateRangeStart: UnsignedInteger!
+    $dateRangeEnd: UnsignedInteger!
+    $monitorId: String
+  ) {
+    monitorChartsData: getMonitorChartsData(
+      monitorId: $monitorId
+      dateRangeStart: $dateRangeStart
+      dateRangeEnd: $dateRangeEnd
+    ) {
       minDuration {
-        x, y
+        x
+        y
       }
       maxDuration {
-        x, y
+        x
+        y
       }
       maxContent {
-        x, y
+        x
+        y
       }
       maxResponse {
-        x, y
+        x
+        y
       }
       maxValidate {
-        x, y
+        x
+        y
       }
       maxTotal {
-        x, y
+        x
+        y
       }
       maxWriteRequest {
-        x, y
+        x
+        y
       }
       maxTcpRtt {
-        x, y
+        x
+        y
       }
       avgDuration {
-        x, y
+        x
+        y
       }
       status {
-        x, up, down, total
+        x
+        up
+        down
+        total
       }
     }
   }
