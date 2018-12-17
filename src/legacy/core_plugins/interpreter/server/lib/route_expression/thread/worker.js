@@ -19,10 +19,15 @@
 
 import uuid from 'uuid/v4';
 import { populateServerRegistries } from '@kbn/interpreter/server';
-import { interpretProvider, serializeProvider } from '@kbn/interpreter/common';
+import { interpretProvider, serializeProvider, FunctionsRegistry, TypesRegistry } from '@kbn/interpreter/common';
 
 // We actually DO need populateServerRegistries here since this is a different node process
-const pluginsReady = populateServerRegistries(['commonFunctions', 'types']);
+const registries = {
+  commonFunctions: new FunctionsRegistry(),
+  types: new TypesRegistry(),
+};
+
+const pluginsReady = populateServerRegistries(registries);
 const heap = {};
 
 process.on('message', msg => {

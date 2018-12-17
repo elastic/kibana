@@ -18,13 +18,12 @@
  */
 
 import io from 'socket.io-client';
-import { functionsRegistry } from '../common/lib/functions_registry';
 import { getBrowserRegistries } from './browser_registries';
 
 const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
 let socket;
 
-export async function createSocket(basePath) {
+export async function createSocket(basePath, functionsRegistry) {
   if (socket != null) return socket;
 
   return new Promise((resolve, rej) => {

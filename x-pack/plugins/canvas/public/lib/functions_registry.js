@@ -5,4 +5,4 @@
  */
 
 // export the common registry here, so it's available in plugin public code
-export { functionsRegistry } from '@kbn/interpreter/common';
+export { functionsRegistry } from 'plugins/interpreter/functions_registry';

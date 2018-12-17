@@ -18,15 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { typesRegistry } from '../common/lib/types_registry';
-import { functionsRegistry as serverFunctions } from '../common/lib/functions_registry';
 import { getPluginPaths } from './get_plugin_paths';
-
-const registries = {
-  serverFunctions: serverFunctions,
-  commonFunctions: serverFunctions,
-  types: typesRegistry,
-};
 
 let resolve = null;
 let called = false;
@@ -39,14 +31,14 @@ export const getServerRegistries = () => {
   return populatePromise;
 };
 
-export const populateServerRegistries = types => {
+export const populateServerRegistries = registries => {
   if (called) {
     return populatePromise;
   }
   called = true;
-  if (!types || !types.length) throw new Error('types is required');
+  if (!registries) throw new Error('registries are required');
 
-  const remainingTypes = types;
+  const remainingTypes = Object.keys(registries);
   const populatedTypes = {};
 
   const loadType = () => {

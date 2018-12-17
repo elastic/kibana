@@ -20,16 +20,20 @@
 import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
 import { serializeProvider } from '../common/lib/serialize';
 import { getSocket } from './socket';
-import { typesRegistry } from '../common/lib/types_registry';
 import { createHandlers } from './create_handlers';
-import { functionsRegistry } from '../common/lib/functions_registry';
 import { getBrowserRegistries } from './browser_registries';
 
 let socket;
 let resolve;
 const functionList = new Promise(_resolve => (resolve = _resolve));
 
-export async function initializeInterpreter() {
+let typesRegistry;
+let functionsRegistry;
+
+export async function initializeInterpreter(types, functions) {
+  typesRegistry = types;
+  functionsRegistry = functions;
+
   socket = getSocket();
 
   // Listen for interpreter runs

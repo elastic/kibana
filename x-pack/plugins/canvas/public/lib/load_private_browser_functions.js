@@ -6,7 +6,6 @@
 
 import { commonFunctions } from '../../common/functions';
 import { clientFunctions } from '../functions';
-import { functionsRegistry } from './functions_registry';
 
 /*
   Functions loaded here use PRIVATE APIs
@@ -15,11 +14,11 @@ import { functionsRegistry } from './functions_registry';
   few of these things as we can't thread them.
 */
 
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
+export const loadPrivateBrowserFunctions = functionsRegistry => {
+  function addFunction(fnDef) {
+    functionsRegistry.register(fnDef);
+  }
 
-export const loadPrivateBrowserFunctions = () => {
   clientFunctions.forEach(addFunction);
   commonFunctions.forEach(addFunction);
 };

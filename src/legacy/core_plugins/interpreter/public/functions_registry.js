@@ -17,26 +17,7 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
-import { functions } from './functions';
-import { functionsRegistry } from './functions_registry';
-import { typesRegistry } from './types_registry';
 
-const basePath = chrome.getBasePath();
+import { FunctionsRegistry } from '@kbn/interpreter/common';
 
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-
-createSocket(basePath, functionsRegistry).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter(typesRegistry, functionsRegistry);
-});
+export const functionsRegistry = new FunctionsRegistry();

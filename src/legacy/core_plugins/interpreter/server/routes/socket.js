@@ -18,7 +18,7 @@
  */
 
 import socket from 'socket.io';
-import { serializeProvider, typesRegistry } from '@kbn/interpreter/common';
+import { serializeProvider } from '@kbn/interpreter/common';
 import { getServerRegistries } from '@kbn/interpreter/server';
 import { routeExpressionProvider } from '../lib/route_expression/index';
 import { browser } from '../lib/route_expression/browser';
@@ -54,7 +54,7 @@ export function socketApi(server) {
     const request = await getModifiedRequest(server, socket);
     if (!request) return; // do nothing without the request object
 
-    const types = typesRegistry.toJS();
+    const types = server.plugins.interpreter.types.toJS();
     const { serialize, deserialize } = serializeProvider(types);
 
     // I'd love to find a way to generalize all of these, but they each need a different set of things

@@ -20,10 +20,8 @@
 import { Registry } from './registry';
 import { Type } from './type';
 
-class TypesRegistry extends Registry {
+export class TypesRegistry extends Registry {
   wrapper(obj) {
     return new Type(obj);
   }
 }
-
-export const typesRegistry = new TypesRegistry();

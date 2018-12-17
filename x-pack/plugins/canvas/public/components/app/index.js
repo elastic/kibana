@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/functions_registry';
 import { populateBrowserRegistries, getInitializedFunctions } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -51,7 +52,7 @@ const mapDispatchToProps = dispatch => ({
   setAppReady: basePath => async () => {
     try {
       // initialize the socket and interpreter
-      loadPrivateBrowserFunctions();
+      loadPrivateBrowserFunctions(functionsRegistry);
       await populateBrowserRegistries(types, basePath);
       await getInitializedFunctions();
 

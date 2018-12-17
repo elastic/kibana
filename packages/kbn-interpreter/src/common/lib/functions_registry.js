@@ -20,10 +20,8 @@
 import { Registry } from './registry';
 import { Fn } from './fn';
 
-class FunctionsRegistry extends Registry {
+export class FunctionsRegistry extends Registry {
   wrapper(obj) {
     return new Fn(obj);
   }
 }
-
-export const functionsRegistry = new FunctionsRegistry();

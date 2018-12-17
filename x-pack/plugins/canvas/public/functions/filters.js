@@ -5,9 +5,10 @@
  */
 
 import { interpretAst } from '@kbn/interpreter/public';
-import { fromExpression, typesRegistry } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter/common';
 import { getState } from '../state/store';
 import { getGlobalFilterExpression } from '../state/selectors/workpad';
+import { typesRegistry } from '../lib/types_registry';
 
 export const filters = () => ({
   name: 'filters',
