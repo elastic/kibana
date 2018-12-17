@@ -35,31 +35,34 @@ interface SnapshotProps {
 }
 
 const formatHistogramData = (histogram: any) => {
-  const a: { up: any[]; down: any[] } = {
-    up: [],
-    down: [],
+  const histogramSeriesData: { upSeriesData: any[]; downSeriesData: any[] } = {
+    upSeriesData: [],
+    downSeriesData: [],
   };
   histogram.forEach(({ data }: { data: any }) => {
     data.forEach(({ x, x0, downCount }: { x: any; x0: any; downCount: any }) => {
-      const upEntry = a.up.find(f => f.x === x && f.x0 === x0);
-      const downEntry = a.down.find(f => f.x === x && f.x0 === x0);
+      const upEntry = histogramSeriesData.upSeriesData.find(
+        histogramDataPoint => histogramDataPoint.x === x && histogramDataPoint.x0 === x0
+      );
+      const downEntry = histogramSeriesData.downSeriesData.find(
+        histogramDataPoint => histogramDataPoint.x === x && histogramDataPoint.x0 === x0
+      );
       if (downCount) {
         if (downEntry) {
           downEntry.y += 1;
         } else {
-          const vvv = { x, x0, y: 1 };
-          a.down.push(vvv);
+          histogramSeriesData.downSeriesData.push({ x, x0, y: 1 });
         }
       } else {
         if (upEntry) {
           upEntry.y += 1;
         } else {
-          a.up.push({ x, x0, y: 1 });
+          histogramSeriesData.upSeriesData.push({ x, x0, y: 1 });
         }
       }
     });
   });
-  return a;
+  return histogramSeriesData;
 };
 
 export const Snapshot = ({
@@ -86,7 +89,7 @@ export const Snapshot = ({
         snapshot: { up, down, total, histogram },
       } = data;
 
-      const { up: histUp, down: histDown } = formatHistogramData(histogram);
+      const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
 
       return (
         <EuiFlexGroup alignItems="baseline" gutterSize="xl">
@@ -139,8 +142,8 @@ export const Snapshot = ({
                   xType={EuiSeriesChartUtils.SCALE.TIME}
                 >
                   {}
-                  <EuiHistogramSeries data={histUp} name="Up" color="green" />
-                  <EuiHistogramSeries data={histDown} name="Down" color="red" />
+                  <EuiHistogramSeries data={upSeriesData} name="Up" color="green" />
+                  <EuiHistogramSeries data={downSeriesData} name="Down" color="red" />
                 </EuiSeriesChart>
               )}
               {!histogram && (
