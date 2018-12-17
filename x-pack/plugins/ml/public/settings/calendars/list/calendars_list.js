@@ -21,7 +21,6 @@ import {
 import { CalendarsListTable } from './table/';
 import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
-import { checkPermission } from '../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
 
@@ -34,8 +33,6 @@ export class CalendarsList extends Component {
       isDestroyModalVisible: false,
       calendarId: null,
       selectedForDeletion: [],
-      canCreateCalendar: checkPermission('canCreateCalendar'),
-      canDeleteCalendar: checkPermission('canDeleteCalendar'),
       nodesAvailable: mlNodesAvailable()
     };
   }
@@ -94,10 +91,9 @@ export class CalendarsList extends Component {
       calendars,
       selectedForDeletion,
       loading,
-      canCreateCalendar,
-      canDeleteCalendar,
       nodesAvailable
     } = this.state;
+    const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
     if (this.state.isDestroyModalVisible) {

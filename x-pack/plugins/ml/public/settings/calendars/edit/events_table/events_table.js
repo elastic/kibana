@@ -34,6 +34,7 @@ function DeleteButton({ onClick }) {
 }
 
 export function EventsTable({
+  canCreateCalendar,
   eventsList,
   onDeleteClick,
   showSearchBar,
@@ -92,6 +93,7 @@ export function EventsTable({
   const search = {
     toolsRight: [(
       <EuiButton
+        isDisabled={canCreateCalendar === false}
         key="ml_new_event"
         data-testid="ml_new_event"
         size="s"
@@ -102,6 +104,7 @@ export function EventsTable({
       </EuiButton>),
     (
       <EuiButton
+        isDisabled={canCreateCalendar === false}
         key="ml_import_event"
         data-testid="ml_import_events"
         size="s"
@@ -133,6 +136,7 @@ export function EventsTable({
 }
 
 EventsTable.propTypes = {
+  canCreateCalendar: PropTypes.bool.isRequired,
   eventsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   showImportModal: PropTypes.func,

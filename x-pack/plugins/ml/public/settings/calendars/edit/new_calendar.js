@@ -303,6 +303,7 @@ export class NewCalendar extends Component {
         >
           <CalendarForm
             calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
+            canCreateCalendar={this.props.canCreateCalendar}
             description={selectedCalendar ? selectedCalendar.description : description}
             eventsList={events}
             groupIds={groupIdOptions}
@@ -332,4 +333,5 @@ export class NewCalendar extends Component {
 
 NewCalendar.propTypes = {
   calendarId: PropTypes.string,
+  canCreateCalendar: PropTypes.bool.isRequired
 };
