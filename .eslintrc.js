@@ -369,7 +369,6 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/canvas/**/*'],
-      plugins: ['prettier'],
       rules: {
         radix: 'error',
         curly: ['error', 'all'],
