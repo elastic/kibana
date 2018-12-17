@@ -61,6 +61,7 @@ class DashboardPanelUi extends React.Component {
         .then((embeddable) => {
           if (this.mounted) {
             this.embeddable = embeddable;
+            this.props.registerEmbeddable(this.props.panel.panelIndex, embeddable);
             embeddableIsInitialized(embeddable.metadata);
             this.embeddable.render(this.panelElement, this.props.containerState);
           } else {
@@ -79,6 +80,7 @@ class DashboardPanelUi extends React.Component {
     this.props.destroy();
     this.mounted = false;
     if (this.embeddable) {
+      this.props.deregisterEmbeddable(this.props.panel.panelIndex);
       this.embeddable.destroy();
     }
   }
@@ -185,6 +187,8 @@ DashboardPanelUi.propTypes = {
   panel: PropTypes.shape({
     panelIndex: PropTypes.string,
   }).isRequired,
+  registerEmbeddable: PropTypes.func.isRequired,
+  deregisterEmbeddable: PropTypes.func.isRequired,
 };
 
 export const DashboardPanel = injectI18n(DashboardPanelUi);
