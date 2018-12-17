@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { YamlConfigSchema } from './lib/types';
+import { YamlConfigSchema } from './lib/lib';
 
 const filebeatInputConfig: YamlConfigSchema[] = [
   {
@@ -329,6 +329,10 @@ const outputConfig: YamlConfigSchema[] = [
       {
         value: 'kafka',
         text: 'Kafka',
+      },
+      {
+        value: 'redis',
+        text: 'Redis',
       },
     ],
     error: 'outputConfig.output.error',
