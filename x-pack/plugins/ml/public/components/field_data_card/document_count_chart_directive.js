@@ -20,6 +20,7 @@ import { numTicksForDateFormat } from '../../util/chart_utils';
 import { calculateTextWidth } from '../../util/string_utils';
 import { IntervalHelperProvider } from '../../util/ml_time_buckets';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+import { formatHumanReadableDateTime } from '../../util/date_utils';
 
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -155,7 +156,7 @@ module.directive('mlDocumentCountChart', function (Private) {
         .on('mouseout', () => mlChartTooltipService.hide());
 
       function showChartTooltip(data, rect) {
-        const formattedDate = moment(data.time).format('MMMM Do YYYY, HH:mm');
+        const formattedDate = formatHumanReadableDateTime(data.time);
         const contents = `${formattedDate}<br/><hr/>count: ${data.value}`;
 
         // Calculate the y offset.
