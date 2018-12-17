@@ -46,7 +46,7 @@ class AutoFollowPatternAddUi extends PureComponent {
   }
 
   renderEmptyClusters() {
-    const { intl } = this.props;
+    const { intl, match: { url: currentUrl } } = this.props;
     const title = intl.formatMessage({
       id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutTitle',
       defaultMessage: 'No remote cluster found'
@@ -68,7 +68,7 @@ class AutoFollowPatternAddUi extends PureComponent {
           </p>
 
           <EuiButton
-            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS)}
+            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
             iconType="plusInCircle"
             color="warning"
           >

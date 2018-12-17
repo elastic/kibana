@@ -9,11 +9,23 @@
  */
 
 import { createLocation } from 'history';
+import { stringify } from 'querystring';
 import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const isModifiedEvent = event => !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 const isLeftClickEvent = event => event.button === 0;
+
+const queryParamsFromObject = params => {
+  if (!params) {
+    return;
+  }
+
+  const paramsStr = stringify(params, '&', '=', {
+    encodeURIComponent: (val) => val, // Don't encode special chars
+  });
+  return `?${paramsStr}`;
+};
 
 const appToBasePathMap = {
   [APPS.CCR_APP]: BASE_PATH,
@@ -30,9 +42,10 @@ class Routing {
    *
    * @param {*} to URL to navigate to
    */
-  getRouterLinkProps(to, base = BASE_PATH) {
+  getRouterLinkProps(to, base = BASE_PATH, params = {}) {
+    const search = queryParamsFromObject(params) || '';
     const location = typeof to === "string"
-      ? createLocation(base + to, null, null, this._reactRouter.history.location)
+      ? createLocation(base + to + search, null, null, this._reactRouter.history.location)
       : to;
     const href = this._reactRouter.history.createHref(location);
 
@@ -59,13 +72,7 @@ class Routing {
   }
 
   navigate(route = '/home', app = APPS.CCR_APP, params) {
-    const search = params
-      ? `?${Object.entries(params).reduce((queryParams, [key, value]) => (
-        queryParams
-          ? `${queryParams}&${key}=${value}`
-          : `${key}=${value}`
-      ), '')}`
-      : undefined;
+    const search = queryParamsFromObject(params);
 
     this._reactRouter.history.push({
       pathname: encodeURI(appToBasePathMap[app] + route),
