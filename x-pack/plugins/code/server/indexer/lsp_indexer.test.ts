@@ -5,7 +5,7 @@
  */
 
 import fs from 'fs';
-import Git from 'nodegit';
+import Git, { CloneOptions } from 'nodegit';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
@@ -39,10 +39,18 @@ const esClient = {
 };
 
 function prepareProject(url: string, p: string) {
+  const opts: CloneOptions = {
+    fetchOpts: {
+      callbacks: {
+        certificateCheck: () => 1,
+      },
+    },
+  };
+
   return new Promise(resolve => {
     if (!fs.existsSync(p)) {
       rimraf(p, error => {
-        Git.Clone.clone(url, p).then(repo => {
+        Git.Clone.clone(url, p, opts).then(repo => {
           resolve(repo);
         });
       });
