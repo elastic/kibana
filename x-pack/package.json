@@ -117,9 +117,9 @@
     "yargs": "4.8.1"
   },
   "dependencies": {
-    "@elastic/datemath": "5.0.1",
+    "@elastic/datemath": "5.0.2",
     "@elastic/elasticsearch": "elastic/elasticsearch-js#next",
-    "@elastic/eui": "5.6.0",
+    "@elastic/eui": "5.6.1",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
@@ -132,7 +132,7 @@
     "@scant/router": "^0.1.0",
     "@slack/client": "^4.8.0",
     "angular-resource": "1.4.9",
-    "angular-sanitize": "1.4.9",
+    "angular-sanitize": "1.6.5",
     "angular-ui-ace": "0.2.3",
     "apollo-cache-inmemory": "^1.2.7",
     "apollo-client": "^2.3.8",
