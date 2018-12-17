@@ -68,6 +68,7 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
 
   const request = {
     index: config.index,
+    ignore_throttled: !tlConfig.settings['search:includeFrozen'],
     body: {
       query: {
         bool: bool
