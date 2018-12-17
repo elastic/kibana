@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 
 
-export const AddItemPopover = injectI18n(class extends Component {
+export class AddItemPopover extends Component {
   static displayName = 'AddItemPopover';
   static propTypes = {
     addItems: PropTypes.func.isRequired
@@ -79,8 +79,6 @@ export const AddItemPopover = injectI18n(class extends Component {
   }
 
   render() {
-    const { intl } = this.props;
-
     const button = (
       <EuiButton
         size="s"
@@ -90,7 +88,7 @@ export const AddItemPopover = injectI18n(class extends Component {
         onClick={this.onButtonClick}
       >
         <FormattedMessage
-          id="xpack.ml.settings.addItemPopover.addItemButtonLabel"
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
           defaultMessage="Add item"
         />
       </EuiButton>
@@ -108,10 +106,10 @@ export const AddItemPopover = injectI18n(class extends Component {
         >
           <EuiForm>
             <EuiFormRow
-              label={intl.formatMessage({
-                id: 'xpack.ml.settings.addItemPopover.itemsLabel',
-                defaultMessage: 'Items' }
-              )}
+              label={<FormattedMessage
+                id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+                defaultMessage="Items"
+              />}
             >
               <EuiTextArea
                 value={this.state.itemsText}
@@ -121,7 +119,7 @@ export const AddItemPopover = injectI18n(class extends Component {
           </EuiForm>
           <EuiText size="xs">
             <FormattedMessage
-              id="xpack.ml.settings.addItemPopover.enterItemPerLineDescription"
+              id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
               defaultMessage="Enter one item per line"
             />
           </EuiText>
@@ -133,7 +131,7 @@ export const AddItemPopover = injectI18n(class extends Component {
                 disabled={(this.state.itemsText.length === 0)}
               >
                 <FormattedMessage
-                  id="xpack.ml.settings.addItemPopover.addButtonLabel"
+                  id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
                   defaultMessage="Add"
                 />
               </EuiButton>
@@ -143,4 +141,4 @@ export const AddItemPopover = injectI18n(class extends Component {
       </div>
     );
   }
-});
+}

@@ -41,7 +41,7 @@ const UsedByIcon = injectI18n(function ({ usedBy, intl }) {
       <EuiIcon
         type="check"
         aria-label={intl.formatMessage({
-          id: 'xpack.ml.settings.table.inUseAriaLabel',
+          id: 'xpack.ml.settings.filterLists.table.inUseAriaLabel',
           defaultMessage: 'In use',
         })}
       />
@@ -51,7 +51,7 @@ const UsedByIcon = injectI18n(function ({ usedBy, intl }) {
       <EuiIcon
         type="cross"
         aria-label={intl.formatMessage({
-          id: 'xpack.ml.settings.table.notInUseAriaLabel',
+          id: 'xpack.ml.settings.filterLists.table.notInUseAriaLabel',
           defaultMessage: 'Not in use',
         })}
       />
@@ -74,7 +74,7 @@ function NewFilterButton() {
       isDisabled={(canCreateFilter === false)}
     >
       <FormattedMessage
-        id="xpack.ml.settings.table.newButtonLabel"
+        id="xpack.ml.settings.filterLists.table.newButtonLabel"
         defaultMessage="New"
       />
     </EuiButton>
@@ -86,7 +86,7 @@ function getColumns() {
   const columns = [
     {
       field: 'filter_id',
-      name: i18n.translate('xpack.ml.settings.table.idColumnName', {
+      name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
       render: (id) => (
@@ -98,21 +98,21 @@ function getColumns() {
     },
     {
       field: 'description',
-      name: i18n.translate('xpack.ml.settings.table.descriptionColumnName', {
+      name: i18n.translate('xpack.ml.settings.filterLists.table.descriptionColumnName', {
         defaultMessage: 'Description',
       }),
       sortable: true
     },
     {
       field: 'item_count',
-      name: i18n.translate('xpack.ml.settings.table.itemCountColumnName', {
+      name: i18n.translate('xpack.ml.settings.filterLists.table.itemCountColumnName', {
         defaultMessage: 'Item count',
       }),
       sortable: true
     },
     {
       field: 'used_by',
-      name: i18n.translate('xpack.ml.settings.table.inUseColumnName', {
+      name: i18n.translate('xpack.ml.settings.filterLists.table.inUseColumnName', {
         defaultMessage: 'In use',
       }),
       render: (usedBy) => (
@@ -186,7 +186,7 @@ export function FilterListsTable({
               <EuiText>
                 <h4>
                   <FormattedMessage
-                    id="xpack.ml.settings.table.noFiltersCreatedTitle"
+                    id="xpack.ml.settings.filterLists.table.noFiltersCreatedTitle"
                     defaultMessage="No filters have been created"
                   />
                 </h4>

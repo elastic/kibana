@@ -40,15 +40,23 @@ export const EditFilterListHeader = injectI18n(function ({
   usedBy,
   intl }) {
 
-  const title = (filterId !== undefined) ? intl.formatMessage({
-    id: 'xpack.ml.settings.editFilterHeader.filterListTitle',
-    defaultMessage: 'Filter list {filterId}',
-  }, {
-    filterId,
-  }) : intl.formatMessage({
-    id: 'xpack.ml.settings.editFilterHeader.createFilterListTitle',
-    defaultMessage: 'Create new filter list',
-  });
+  const title = (filterId !== undefined) ? (
+    <FormattedMessage
+      id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
+      defaultMessage="Filter list {filterId}"
+      values={{
+        filterId,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
+      defaultMessage="Create new filter list"
+      values={{
+        filterId,
+      }}
+    />
+  );
 
   let idField;
   let descriptionField;
@@ -56,7 +64,7 @@ export const EditFilterListHeader = injectI18n(function ({
 
   if (filterId === undefined) {
     const msg = intl.formatMessage({
-      id: 'xpack.ml.settings.editFilterHeader.allowedCharactersDescription',
+      id: 'xpack.ml.settings.filterLists.editFilterHeader.allowedCharactersDescription',
       defaultMessage: 'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;' +
       ' must start and end with an alphanumeric character',
     });
@@ -65,10 +73,11 @@ export const EditFilterListHeader = injectI18n(function ({
 
     idField = (
       <EuiFormRow
-        label={intl.formatMessage({
-          id: 'xpack.ml.settings.editFilterHeader.filterListIdAriaLabel',
-          defaultMessage: 'Filter list ID',
-        })}
+        label={
+          <FormattedMessage
+            id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
+            defaultMessage="Filter list ID"
+          />}
         helpText={helpText}
         error={error}
         isInvalid={isNewFilterIdInvalid}
@@ -96,7 +105,7 @@ export const EditFilterListHeader = injectI18n(function ({
       <EuiText>
         <EuiTextColor color="subdued">
           <FormattedMessage
-            id="xpack.ml.settings.editFilterList.addDescriptionText"
+            id="xpack.ml.settings.filterLists.editFilterList.addDescriptionText"
             defaultMessage="Add a description"
           />
         </EuiTextColor>
@@ -111,7 +120,7 @@ export const EditFilterListHeader = injectI18n(function ({
           <div className="ml-filter-list-usage">
             <EuiText>
               <FormattedMessage
-                id="xpack.ml.settings.editFilterList.filterIsUsedInJobsDescription"
+                id="xpack.ml.settings.filterLists.editFilterList.filterIsUsedInJobsDescription"
                 defaultMessage="This filter list is used in"
               />
             </EuiText>
@@ -121,7 +130,7 @@ export const EditFilterListHeader = injectI18n(function ({
             />
             <EuiText>
               <FormattedMessage
-                id="xpack.ml.settings.editFilterList.acrossText"
+                id="xpack.ml.settings.filterLists.editFilterList.acrossText"
                 defaultMessage="across"
               />
             </EuiText>
@@ -139,7 +148,7 @@ export const EditFilterListHeader = injectI18n(function ({
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.ml.settings.editFilterList.filterIsNotUsedInJobsDescription"
+                id="xpack.ml.settings.filterLists.editFilterList.filterIsNotUsedInJobsDescription"
                 defaultMessage="This filter list is not used by any jobs."
               />
             </p>
@@ -164,7 +173,7 @@ export const EditFilterListHeader = injectI18n(function ({
               <EuiTextColor color="subdued">
                 <p>
                   <FormattedMessage
-                    id="xpack.ml.settings.editFilterList.totalItemsDescription"
+                    id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
                     defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
                     values={{
                       totalItemCount,

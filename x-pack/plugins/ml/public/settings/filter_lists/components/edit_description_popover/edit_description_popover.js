@@ -22,7 +22,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 
 export const EditDescriptionPopover = injectI18n(class extends Component {
@@ -78,7 +78,7 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
         onClick={this.onButtonClick}
         iconType="pencil"
         aria-label={intl.formatMessage({
-          id: 'xpack.ml.settings.editDescriptionPopover.editDescriptionAriaLabel',
+          id: 'xpack.ml.settings.filterLists.editDescriptionPopover.editDescriptionAriaLabel',
           defaultMessage: 'Edit description',
         })}
       />
@@ -96,10 +96,10 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
           <div style={{ width: '300px' }}>
             <EuiForm>
               <EuiFormRow
-                label={intl.formatMessage({
-                  id: 'xpack.ml.settings.editDescriptionPopover.filterListDescriptionAriaLabel',
-                  defaultMessage: 'Filter list description',
-                })}
+                label={<FormattedMessage
+                  id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+                  defaultMessage="Filter list description"
+                />}
               >
                 <EuiFieldText
                   name="filter_list_description"

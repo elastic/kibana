@@ -116,7 +116,7 @@ export const EditFilterList = injectI18n(class extends Component {
       .catch((resp) => {
         console.log(`Error loading filter ${filterId}:`, resp);
         toastNotifications.addDanger(intl.formatMessage({
-          id: 'xpack.ml.settings.editFilterList.loadingDetailsOfFilterErrorMessage',
+          id: 'xpack.ml.settings.filterLists.editFilterList.loadingDetailsOfFilterErrorMessage',
           defaultMessage: 'An error occurred loading details of filter {filterId}',
         }, {
           filterId,
@@ -177,7 +177,7 @@ export const EditFilterList = injectI18n(class extends Component {
 
       if (alreadyInFilter.length > 0) {
         toastNotifications.addWarning(intl.formatMessage({
-          id: 'xpack.ml.settings.editFilterList.duplicatedItemsInFilterListWarningMessage',
+          id: 'xpack.ml.settings.filterLists.editFilterList.duplicatedItemsInFilterListWarningMessage',
           defaultMessage: 'The following items were already in the filter list: {alreadyInFilter}',
         }, {
           alreadyInFilter,
@@ -281,7 +281,7 @@ export const EditFilterList = injectI18n(class extends Component {
       .catch((resp) => {
         console.log(`Error saving filter ${filterId}:`, resp);
         toastNotifications.addDanger(intl.formatMessage({
-          id: 'xpack.ml.settings.editFilterList.savingFilterErrorMessage',
+          id: 'xpack.ml.settings.filterLists.editFilterList.savingFilterErrorMessage',
           defaultMessage: 'An error occurred saving filter {filterId}',
         }, {
           filterId,
@@ -345,7 +345,7 @@ export const EditFilterList = injectI18n(class extends Component {
                 onClick={returnToFiltersList}
               >
                 <FormattedMessage
-                  id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+                  id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
@@ -357,7 +357,7 @@ export const EditFilterList = injectI18n(class extends Component {
                 fill
               >
                 <FormattedMessage
-                  id="xpack.ml.settings.editFilterList.saveButtonLabel"
+                  id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
                   defaultMessage="Save"
                 />
               </EuiButton>

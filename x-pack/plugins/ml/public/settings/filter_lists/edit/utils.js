@@ -49,7 +49,7 @@ export function saveFilterList(filterId, description, items, loadedFilterList)  
 }
 
 export function addFilterList(filterId, description, items) {
-  const filterWithIdExistsErrorMessage = i18n.translate('xpack.ml.settings.filterWithIdExistsErrorMessage', {
+  const filterWithIdExistsErrorMessage = i18n.translate('xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage', {
     defaultMessage: 'A filter with id {filterId} already exists',
     values: {
       filterId,

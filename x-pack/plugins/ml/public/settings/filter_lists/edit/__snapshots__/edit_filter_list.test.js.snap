@@ -87,7 +87,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -106,7 +106,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -205,7 +205,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -224,7 +224,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -318,7 +318,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -337,7 +337,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -415,7 +415,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -434,7 +434,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -512,7 +512,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -531,7 +531,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -626,7 +626,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -645,7 +645,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -740,7 +740,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -759,7 +759,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -854,7 +854,7 @@ exports[`EditFilterList updates the items per page 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="xpack.ml.settings.editFilterList.cancelButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -873,7 +873,7 @@ exports[`EditFilterList updates the items per page 1`] = `
         >
           <FormattedMessage
             defaultMessage="Save"
-            id="xpack.ml.settings.editFilterList.saveButtonLabel"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
             values={Object {}}
           />
         </EuiButton>

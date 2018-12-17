@@ -15,7 +15,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
       component="div"
       grow={false}
     >
-      <InjectIntl(AddItemPopover)
+      <AddItemPopover
         addItems={[MockFunction]}
       />
     </EuiFlexItem>
@@ -43,7 +43,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
       >
         <FormattedMessage
           defaultMessage="Delete item"
-          id="xpack.ml.settings.toolbar.deleteItemButtonLabel"
+          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
           values={Object {}}
         />
       </EuiButton>
@@ -75,7 +75,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
       component="div"
       grow={false}
     >
-      <InjectIntl(AddItemPopover)
+      <AddItemPopover
         addItems={[MockFunction]}
       />
     </EuiFlexItem>
@@ -103,7 +103,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
       >
         <FormattedMessage
           defaultMessage="Delete item"
-          id="xpack.ml.settings.toolbar.deleteItemButtonLabel"
+          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
           values={Object {}}
         />
       </EuiButton>

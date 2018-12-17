@@ -72,7 +72,7 @@ export const FilterLists = injectI18n(class extends Component {
       .catch((resp) => {
         console.log('Error loading list of filters:', resp);
         toastNotifications.addDanger(intl.formatMessage({
-          id: 'xpack.ml.settings.filterLists.loadingFilterListsErrorMessage',
+          id: 'xpack.ml.settings.filterLists.filterLists.loadingFilterListsErrorMessage',
           defaultMessage: 'An error occurred loading the filter lists',
         }));
       });

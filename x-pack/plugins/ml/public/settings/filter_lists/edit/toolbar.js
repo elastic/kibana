@@ -47,7 +47,7 @@ export function EditFilterListToolbar({
             onClick={deleteSelectedItems}
           >
             <FormattedMessage
-              id="xpack.ml.settings.toolbar.deleteItemButtonLabel"
+              id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
               defaultMessage="Delete item"
             />
           </EuiButton>

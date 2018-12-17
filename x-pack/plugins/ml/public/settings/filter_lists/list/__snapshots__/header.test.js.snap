@@ -35,7 +35,7 @@ exports[`Filter Lists Header renders header 1`] = `
             <h1>
               <FormattedMessage
                 defaultMessage="Filter Lists"
-                id="xpack.ml.settings.listHeader.filterListsTitle"
+                id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
                 values={Object {}}
               />
             </h1>
@@ -52,7 +52,7 @@ exports[`Filter Lists Header renders header 1`] = `
             <p>
               <FormattedMessage
                 defaultMessage="{totalCount} in total"
-                id="xpack.ml.settings.listHeader.filterListsDescription"
+                id="xpack.ml.settings.filterLists.listHeader.filterListsDescription"
                 values={
                   Object {
                     "totalCount": 3,
@@ -91,7 +91,7 @@ exports[`Filter Lists Header renders header 1`] = `
           >
             <FormattedMessage
               defaultMessage="Refresh"
-              id="xpack.ml.settings.listHeader.refreshButtonLabel"
+              id="xpack.ml.settings.filterLists.listHeader.refreshButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -114,7 +114,7 @@ exports[`Filter Lists Header renders header 1`] = `
         <FormattedMessage
           defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
 You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
-          id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription"
+          id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription"
           values={
             Object {
               "br": <br />,
@@ -126,7 +126,7 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
               >
                 <FormattedMessage
                   defaultMessage="Learn more"
-                  id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
+                  id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
                   values={Object {}}
                 />
               </EuiLink>,

@@ -16,7 +16,7 @@ export async function deleteFilterLists(filterListsToDelete) {
 
   // Delete each of the specified filter lists in turn, waiting for each response
   // before deleting the next to minimize load on the cluster.
-  toastNotifications.add(i18n.translate('xpack.ml.settings.deleteFilterLists.deletingNotificationMessage', {
+  toastNotifications.add(i18n.translate('xpack.ml.settings.filterLists.deleteFilterLists.deletingNotificationMessage', {
     defaultMessage: 'Deleting {filterListsToDeleteLength, plural, one {{filterListToDeleteId}} other {# filter lists}}',
     values: {
       filterListsToDeleteLength: filterListsToDelete.length,
@@ -30,7 +30,7 @@ export async function deleteFilterLists(filterListsToDelete) {
       await ml.filters.deleteFilter(filterId);
     } catch (resp) {
       console.log('Error deleting filter list:', resp);
-      toastNotifications.addDanger(i18n.translate('xpack.ml.settings.deleteFilterLists.deleteErrorMessage', {
+      toastNotifications.addDanger(i18n.translate('xpack.ml.settings.filterLists.deleteFilterLists.deletingErrorMessage', {
         defaultMessage: 'An error occurred deleting filter list {filterListId}{respMessage}',
         values: {
           filterListId: filterList.filter_id,
@@ -40,11 +40,12 @@ export async function deleteFilterLists(filterListsToDelete) {
     }
   }
 
-  toastNotifications.addSuccess(i18n.translate('xpack.ml.settings.deleteFilterLists.filtersSuccessfullyDeletedNotificationMessage', {
-    defaultMessage: '{filterListsToDeleteLength, plural, one {{filterListToDeleteId}} other {# filter lists}} deleted',
-    values: {
-      filterListsToDeleteLength: filterListsToDelete.length,
-      filterListToDeleteId: !!filterListsToDelete.length && filterListsToDelete[0].filter_id,
-    }
-  }));
+  toastNotifications.addSuccess(
+    i18n.translate('xpack.ml.settings.filterLists.deleteFilterLists.filtersSuccessfullyDeletedNotificationMessage', {
+      defaultMessage: '{filterListsToDeleteLength, plural, one {{filterListToDeleteId}} other {# filter lists}} deleted',
+      values: {
+        filterListsToDeleteLength: filterListsToDelete.length,
+        filterListToDeleteId: !!filterListsToDelete.length && filterListsToDelete[0].filter_id,
+      }
+    }));
 }

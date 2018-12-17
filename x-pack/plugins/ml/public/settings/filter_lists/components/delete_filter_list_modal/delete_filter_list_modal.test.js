@@ -32,7 +32,7 @@ describe('DeleteFilterListModal', () => {
 
   test('renders as disabled delete button when no lists selected', () => {
     const component = shallowWithIntl(
-      <DeleteFilterListModal.WrappedComponent />
+      <DeleteFilterListModal />
     );
 
     expect(component).toMatchSnapshot();
@@ -40,7 +40,7 @@ describe('DeleteFilterListModal', () => {
 
   test('renders as enabled delete button when a list is selected', () => {
     const component = shallowWithIntl(
-      <DeleteFilterListModal.WrappedComponent {...testProps} />
+      <DeleteFilterListModal {...testProps} />
     );
 
     expect(component).toMatchSnapshot();
@@ -48,7 +48,7 @@ describe('DeleteFilterListModal', () => {
 
   test('renders modal after clicking delete button', () => {
     const wrapper = shallowWithIntl(
-      <DeleteFilterListModal.WrappedComponent {...testProps} />
+      <DeleteFilterListModal {...testProps} />
     );
     wrapper.find('EuiButton').simulate('click');
     wrapper.update();
@@ -58,7 +58,7 @@ describe('DeleteFilterListModal', () => {
 
   test('renders as delete button after opening and closing modal', () => {
     const wrapper = shallowWithIntl(
-      <DeleteFilterListModal.WrappedComponent {...testProps} />
+      <DeleteFilterListModal {...testProps} />
     );
     wrapper.find('EuiButton').simulate('click');
     const instance = wrapper.instance();
@@ -83,7 +83,7 @@ describe('DeleteFilterListModal false canDeleteFilter privilege', () => {
     });
 
     const component = shallowWithIntl(
-      <DeleteFilterListModal.WrappedComponent {...testProps} />
+      <DeleteFilterListModal {...testProps} />
     );
 
     expect(component).toMatchSnapshot();

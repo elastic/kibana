@@ -39,7 +39,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
               <EuiTitle>
                 <h1>
                   <FormattedMessage
-                    id="xpack.ml.settings.listHeader.filterListsTitle"
+                    id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
                     defaultMessage="Filter Lists"
                   />
                 </h1>
@@ -49,7 +49,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
               <EuiTextColor color="subdued">
                 <p>
                   <FormattedMessage
-                    id="xpack.ml.settings.listHeader.filterListsDescription"
+                    id="xpack.ml.settings.filterLists.listHeader.filterListsDescription"
                     defaultMessage="{totalCount} in total"
                     values={{
                       totalCount,
@@ -69,7 +69,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
                 onClick={() => refreshFilterLists()}
               >
                 <FormattedMessage
-                  id="xpack.ml.settings.listHeader.refreshButtonLabel"
+                  id="xpack.ml.settings.filterLists.listHeader.refreshButtonLabel"
                   defaultMessage="Refresh"
                 />
               </EuiButtonEmpty>
@@ -82,7 +82,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
         <p>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription"
+              id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription"
               defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
 You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
               values={{
@@ -90,7 +90,7 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
                 learnMoreLink: (
                   <EuiLink href={docsUrl} target="_blank">
                     <FormattedMessage
-                      id="xpack.ml.settings.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
+                      id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
                       defaultMessage="Learn more"
                     />
                   </EuiLink>

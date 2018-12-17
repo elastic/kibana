@@ -17,7 +17,7 @@ function prepareTest(addItemsFn) {
   };
 
   const wrapper = shallowWithIntl(
-    <AddItemPopover.WrappedComponent {...props} />
+    <AddItemPopover {...props} />
   );
 
   return wrapper;

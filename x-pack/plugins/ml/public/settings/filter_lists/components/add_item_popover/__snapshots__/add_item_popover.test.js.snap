@@ -16,7 +16,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
       >
         <FormattedMessage
           defaultMessage="Add item"
-          id="xpack.ml.settings.addItemPopover.addItemButtonLabel"
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
           values={Object {}}
         />
       </EuiButton>
@@ -34,7 +34,13 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Items"
+        label={
+          <FormattedMessage
+            defaultMessage="Items"
+            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiTextArea
           fullWidth={false}
@@ -50,7 +56,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     >
       <FormattedMessage
         defaultMessage="Enter one item per line"
-        id="xpack.ml.settings.addItemPopover.enterItemPerLineDescription"
+        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
         values={Object {}}
       />
     </EuiText>
@@ -80,7 +86,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         >
           <FormattedMessage
             defaultMessage="Add"
-            id="xpack.ml.settings.addItemPopover.addButtonLabel"
+            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -106,7 +112,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
       >
         <FormattedMessage
           defaultMessage="Add item"
-          id="xpack.ml.settings.addItemPopover.addItemButtonLabel"
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
           values={Object {}}
         />
       </EuiButton>
@@ -124,7 +130,13 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Items"
+        label={
+          <FormattedMessage
+            defaultMessage="Items"
+            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiTextArea
           fullWidth={false}
@@ -140,7 +152,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     >
       <FormattedMessage
         defaultMessage="Enter one item per line"
-        id="xpack.ml.settings.addItemPopover.enterItemPerLineDescription"
+        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
         values={Object {}}
       />
     </EuiText>
@@ -170,7 +182,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add"
-            id="xpack.ml.settings.addItemPopover.addButtonLabel"
+            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -196,7 +208,7 @@ exports[`AddItemPopover renders the popover 1`] = `
       >
         <FormattedMessage
           defaultMessage="Add item"
-          id="xpack.ml.settings.addItemPopover.addItemButtonLabel"
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
           values={Object {}}
         />
       </EuiButton>
@@ -214,7 +226,13 @@ exports[`AddItemPopover renders the popover 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Items"
+        label={
+          <FormattedMessage
+            defaultMessage="Items"
+            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiTextArea
           fullWidth={false}
@@ -230,7 +248,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     >
       <FormattedMessage
         defaultMessage="Enter one item per line"
-        id="xpack.ml.settings.addItemPopover.enterItemPerLineDescription"
+        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
         values={Object {}}
       />
     </EuiText>
@@ -260,7 +278,7 @@ exports[`AddItemPopover renders the popover 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add"
-            id="xpack.ml.settings.addItemPopover.addButtonLabel"
+            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
             values={Object {}}
           />
         </EuiButton>
