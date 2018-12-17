@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { fromRoot } from '../../utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -238,9 +238,9 @@ function unoptimized() {
 export function configModel(rawConfig = {}) {
   const config = extendRawConfig(rawConfig);
 
-  if (IS_KIBANA_DISTRIBUTABLE || !config.dllDevMode) {
-    return webpackMerge(common(config), optimized());
+  if (config.dllDevMode) {
+    return webpackMerge(common(config), unoptimized());
   }
 
-  return webpackMerge(common(config), unoptimized());
+  return webpackMerge(common(config), optimized());
 }
