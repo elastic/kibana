@@ -126,6 +126,8 @@ export class MonitoringViewBaseController {
         mode: 'absolute'
       });
     };
+
+    this.setTitle = title => titleService($scope.cluster, title);
   }
 
   renderReact(component) {
