@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricType } from '../../../../../common/graphql/types';
+import { InfraMetricType } from '../../../../graphql/types';
 import { count } from './count';
 import { cpu } from './cpu';
 import { load } from './load';

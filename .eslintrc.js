@@ -341,6 +341,7 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
         'jsx-a11y/anchor-has-content': 'off',
         'jsx-a11y/tabindex-no-positive': 'off',
+        'jsx-a11y/label-has-associated-control': 'off',
         'jsx-a11y/aria-role': 'off',
       },
     },
