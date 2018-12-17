@@ -73,6 +73,9 @@ export class VisualizeDataLoader {
     this.vis.showRequestError = false;
 
     try {
+      // Vis types that have a `showMetricsAtAllLevels` param (e.g. data table) should tell
+      // tabify whether to return columns for each bucket based on the param value. Vis types
+      // without this param should default to returning all columns if they are hierarchical.
       const minimalColumns =
         typeof this.vis.params.showMetricsAtAllLevels !== 'undefined'
           ? !this.vis.params.showMetricsAtAllLevels

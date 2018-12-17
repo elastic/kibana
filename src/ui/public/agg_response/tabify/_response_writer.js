@@ -36,7 +36,6 @@ function TabbedAggResponseWriter(aggs, {
 } = {}) {
   // Private
   this._removePartialRows = !partialRows;
-  this._minimalColumns = minimalColumns;
 
   // Public
   this.rowBuffer = {};
@@ -44,7 +43,7 @@ function TabbedAggResponseWriter(aggs, {
   this.metricBuffer = [];
   this.aggs = aggs;
   this.partialRows = partialRows;
-  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this._minimalColumns);
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), minimalColumns);
   this.aggStack = [...this.columns];
   this.rows = [];
   // Extract the time range object if provided
