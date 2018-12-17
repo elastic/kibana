@@ -65,8 +65,6 @@ uiModules.get('kibana')
       }
 
       async getFileLayers() {
-        // const fileLayers = await this._loadFileLayers();
-
 
         if (!mapConfig.includeElasticMapsService) {
           return [];
@@ -74,17 +72,21 @@ uiModules.get('kibana')
 
         const fileLayers = await this._emsClient.getFileLayers();
         return fileLayers.map(fileLayer => {
-          const shim = {
+
+          //backfill to older settings
+          const format = fileLayer.getDefaultFormatType();
+          const meta = fileLayer.getDefaultFormatMeta();
+
+          return {
             name: fileLayer.getDisplayName(),
             origin: fileLayer.getOrigin(),
             id: fileLayer.getId(),
-            format: fileLayer.getDefaultFormatType(),
             created_at: fileLayer.getCreatedAt(),
             attribution: fileLayer.getHTMLAttribution(),
-            fields: fileLayer.getFieldsInLanguage()
+            fields: fileLayer.getFieldsInLanguage(),
+            format: format, //legacy: format and meta are split up
+            meta: meta //legacy, format and meta are split up
           };
-
-          return shim;
         });
       }
 
@@ -203,15 +205,14 @@ uiModules.get('kibana')
         return url;
       }
 
-      async getGeoJsonForRegionLayer(fileLayerConfig) {
+      async getJsonForRegionLayer(fileLayerConfig) {
         const url = await this.getUrlForRegionLayer(fileLayerConfig);
-        const geojson = await $http({
+        const json = await $http({
           url: url,
           method: 'GET'
         });
-        return geojson.data;
+        return json.data;
       }
-
 
     }
 

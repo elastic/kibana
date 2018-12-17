@@ -134,6 +134,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         } else {
           formatType = 'geojson';
         }
+
         if (formatType === 'geojson') {
           featureCollection = data;
         } else if (formatType === 'topojson') {
@@ -193,7 +194,7 @@ CORS configuration of the server permits requests from the Kibana application on
   //This method is stubbed in the tests to avoid network request during unit tests.
   async _makeJsonAjaxCall() {
     const serviceSettings = await emsServiceSettings;
-    return serviceSettings.getGeoJsonForRegionLayer(this._layerConfig);
+    return serviceSettings.getJsonForRegionLayer(this._layerConfig);
   }
 
   _invalidateJoin() {

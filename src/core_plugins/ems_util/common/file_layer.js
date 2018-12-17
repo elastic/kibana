@@ -78,7 +78,12 @@ export class FileLayer {
 
   getDefaultFormatType() {
     const format = this._getDefaultFormat();
-    return format.format;
+    return format.type;
+  }
+
+  getDefaultFormatMeta() {
+    const format = this._getDefaultFormat();
+    return format.meta;
   }
 
   getDefaultFormatUrl() {
