@@ -30,162 +30,163 @@ const disabledFields = {
   name: true,
 };
 
-export class RemoteClusterEditUi extends Component {
-  static propTypes = {
-    isLoading: PropTypes.bool,
-    cluster: PropTypes.object,
-    startEditingCluster: PropTypes.func,
-    stopEditingCluster: PropTypes.func,
-    editCluster: PropTypes.func,
-    isEditingCluster: PropTypes.bool,
-    getEditClusterError: PropTypes.string,
-    clearEditClusterErrors: PropTypes.func,
-    openDetailPanel: PropTypes.func,
-  }
 
-  constructor(props) {
-    super(props);
+export const RemoteClusterEdit = injectI18n(
+  class extends Component {
+    static propTypes = {
+      isLoading: PropTypes.bool,
+      cluster: PropTypes.object,
+      startEditingCluster: PropTypes.func,
+      stopEditingCluster: PropTypes.func,
+      editCluster: PropTypes.func,
+      isEditingCluster: PropTypes.bool,
+      getEditClusterError: PropTypes.string,
+      clearEditClusterErrors: PropTypes.func,
+      openDetailPanel: PropTypes.func,
+    }
 
-    const {
-      match: {
-        params: {
-          name,
+    constructor(props) {
+      super(props);
+
+      const {
+        match: {
+          params: {
+            name,
+          },
         },
-      },
-    } = props;
+      } = props;
 
-    chrome.breadcrumbs.set([
-      MANAGEMENT_BREADCRUMB,
-      buildListBreadcrumb(`?cluster=${name}`),
-      editBreadcrumb,
-    ]);
+      chrome.breadcrumbs.set([
+        MANAGEMENT_BREADCRUMB,
+        buildListBreadcrumb(`?cluster=${name}`),
+        editBreadcrumb,
+      ]);
 
-    this.state = {
-      clusterName: name,
+      this.state = {
+        clusterName: name,
+      };
+    }
+
+    componentDidMount() {
+      const { startEditingCluster } = this.props;
+      const { clusterName } = this.state;
+      startEditingCluster(clusterName);
+    }
+
+    componentWillUnmount() {
+      // Clean up after ourselves.
+      this.props.clearEditClusterErrors();
+      this.props.stopEditingCluster();
+    }
+
+    save = (clusterConfig) => {
+      this.props.editCluster(clusterConfig);
     };
-  }
 
-  componentDidMount() {
-    const { startEditingCluster } = this.props;
-    const { clusterName } = this.state;
-    startEditingCluster(clusterName);
-  }
+    cancel = () => {
+      const { history, openDetailPanel } = this.props;
+      const { clusterName } = this.state;
+      history.push(CRUD_APP_BASE_PATH);
+      openDetailPanel(clusterName);
+    };
 
-  componentWillUnmount() {
-    // Clean up after ourselves.
-    this.props.clearEditClusterErrors();
-    this.props.stopEditingCluster();
-  }
+    renderContent() {
+      const {
+        isLoading,
+        cluster,
+        isEditingCluster,
+        getEditClusterError,
+      } = this.props;
 
-  save = (clusterConfig) => {
-    this.props.editCluster(clusterConfig);
-  };
+      if (isLoading) {
+        return (
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
 
-  cancel = () => {
-    const { history, openDetailPanel } = this.props;
-    const { clusterName } = this.state;
-    history.push(CRUD_APP_BASE_PATH);
-    openDetailPanel(clusterName);
-  };
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.remoteClusters.edit.loadingLabel"
+                    defaultMessage="Loading remote cluster..."
+                  />
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      } else if (!cluster) {
+        return (
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="alert" color="danger" />
+            </EuiFlexItem>
 
-  renderContent() {
-    const {
-      isLoading,
-      cluster,
-      isEditingCluster,
-      getEditClusterError,
-    } = this.props;
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.remoteClusters.edit.notFoundLabel"
+                    defaultMessage="Remote cluster not found"
+                  />
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
 
-    if (isLoading) {
       return (
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.remoteClusters.edit.loadingLabel"
-                  defaultMessage="Loading remote cluster..."
-                />
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    } else if (!cluster) {
-      return (
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.remoteClusters.edit.notFoundLabel"
-                  defaultMessage="Remote cluster not found"
-                />
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <RemoteClusterForm
+          fields={cluster}
+          disabledFields={disabledFields}
+          isSaving={isEditingCluster}
+          saveError={getEditClusterError}
+          save={this.save}
+          cancel={this.cancel}
+        />
       );
     }
 
-    return (
-      <RemoteClusterForm
-        fields={cluster}
-        disabledFields={disabledFields}
-        isSaving={isEditingCluster}
-        saveError={getEditClusterError}
-        save={this.save}
-        cancel={this.cancel}
-      />
-    );
+    render() {
+      const {
+        clusterName,
+      } = this.state;
+
+      return (
+        <Fragment>
+          <EuiPage>
+            <EuiPageBody>
+              <EuiPageContent
+                horizontalPosition="center"
+                className="remoteClusterAddPage"
+              >
+                <RemoteClusterPageTitle
+                  title={(
+                    <FormattedMessage
+                      id="xpack.remoteClusters.editTitle"
+                      defaultMessage="Edit {name}"
+                      values={{ name: clusterName }}
+                    />
+                  )}
+                />
+
+                {this.renderContent()}
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>
+        </Fragment>
+      );
+    }
   }
-
-  render() {
-    const {
-      clusterName,
-    } = this.state;
-
-    return (
-      <Fragment>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="remoteClusterAddPage"
-            >
-              <RemoteClusterPageTitle
-                title={(
-                  <FormattedMessage
-                    id="xpack.remoteClusters.editTitle"
-                    defaultMessage="Edit {name}"
-                    values={{ name: clusterName }}
-                  />
-                )}
-              />
-
-              {this.renderContent()}
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-      </Fragment>
-    );
-  }
-}
-
-export const RemoteClusterEdit = injectI18n(RemoteClusterEditUi);
+);

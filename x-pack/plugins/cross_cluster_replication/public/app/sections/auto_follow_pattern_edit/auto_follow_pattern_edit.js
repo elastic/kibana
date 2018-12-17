@@ -33,174 +33,175 @@ import {
 } from '../../components';
 import { API_STATUS } from '../../constants';
 
-class AutoFollowPatternEditUi extends PureComponent {
-  static propTypes = {
-    getAutoFollowPattern: PropTypes.func.isRequired,
-    saveAutoFollowPattern: PropTypes.func.isRequired,
-    clearApiError: PropTypes.func.isRequired,
-    apiError: PropTypes.object,
-    apiStatus: PropTypes.string.isRequired,
-  }
-
-  componentDidMount() {
-    const { autoFollowPattern, match: { params: { id } } } = this.props;
-    if (!autoFollowPattern) {
-      const decodedId = decodeURIComponent(id);
-      this.props.getAutoFollowPattern(decodedId);
+export const AutoFollowPatternEdit = injectI18n(
+  class extends PureComponent {
+    static propTypes = {
+      getAutoFollowPattern: PropTypes.func.isRequired,
+      saveAutoFollowPattern: PropTypes.func.isRequired,
+      clearApiError: PropTypes.func.isRequired,
+      apiError: PropTypes.object,
+      apiStatus: PropTypes.string.isRequired,
     }
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);
-  }
+    componentDidMount() {
+      const { autoFollowPattern, match: { params: { id } } } = this.props;
+      if (!autoFollowPattern) {
+        const decodedId = decodeURIComponent(id);
+        this.props.getAutoFollowPattern(decodedId);
+      }
 
-  componentWillUnmount() {
-    this.props.clearApiError();
-  }
+      chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);
+    }
 
-  renderApiError(error) {
-    const { intl } = this.props;
-    const title = intl.formatMessage({
-      id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorTitle',
-      defaultMessage: 'Error loading auto-follow pattern',
-    });
+    componentWillUnmount() {
+      this.props.clearApiError();
+    }
 
-    return (
-      <Fragment>
-        <SectionError title={title} error={error} />
-        <EuiSpacer />
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
+    renderApiError(error) {
+      const { intl } = this.props;
+      const title = intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorTitle',
+        defaultMessage: 'Error loading auto-follow pattern',
+      });
+
+      return (
+        <Fragment>
+          <SectionError title={title} error={error} />
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                {...routing.getRouterLinkProps('/auto_follow_patterns')}
+                fill
+                iconType="plusInCircle"
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewAutoFollowPatternsButtonLabel"
+                  defaultMessage="View auto-follow patterns"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      );
+    }
+
+    renderLoadingAutoFollowPattern() {
+      return (
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingTitle"
+            defaultMessage="Loading auto-follow pattern..."
+          />
+        </SectionLoading>
+      );
+    }
+
+    renderMissingCluster({ name, remoteCluster }) {
+      const { intl } = this.props;
+
+      const title = intl.formatMessage({
+        id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersTitle',
+        defaultMessage: 'Remote cluster missing'
+      });
+
+      return (
+        <Fragment>
+          <EuiCallOut
+            title={title}
+            color="warning"
+            iconType="help"
+          >
+            <p>
+
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersDescription"
+                defaultMessage="The remote cluster '{remoteCluster}' does not exist or is not
+                  connected. Make sure it is connected before editing the '{name}' auto-follow pattern."
+                values={{ remoteCluster, name }}
+              />
+            </p>
             <EuiButton
-              {...routing.getRouterLinkProps('/auto_follow_patterns')}
-              fill
-              iconType="plusInCircle"
+              {...routing.getRouterLinkProps('/list', BASE_PATH_REMOTE_CLUSTERS)}
+              color="warning"
             >
               <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewAutoFollowPatternsButtonLabel"
-                defaultMessage="View auto-follow patterns"
+                id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewRemoteClustersButtonLabel"
+                defaultMessage="View remote clusters"
               />
             </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
-    );
-  }
+          </EuiCallOut>
+        </Fragment>
+      );
+    }
 
-  renderLoadingAutoFollowPattern() {
-    return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingTitle"
-          defaultMessage="Loading auto-follow pattern..."
-        />
-      </SectionLoading>
-    );
-  }
+    render() {
+      const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
 
-  renderMissingCluster({ name, remoteCluster }) {
-    const { intl } = this.props;
+      return (
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageContent
+              horizontalPosition="center"
+              className="ccrPageContent"
+            >
+              <AutoFollowPatternPageTitle
+                title={(
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPattern.editTitle"
+                    defaultMessage="Edit auto-follow pattern"
+                  />
+                )}
+              />
 
-    const title = intl.formatMessage({
-      id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersTitle',
-      defaultMessage: 'Remote cluster missing'
-    });
+              {apiStatus === API_STATUS.LOADING && this.renderLoadingAutoFollowPattern()}
 
-    return (
-      <Fragment>
-        <EuiCallOut
-          title={title}
-          color="warning"
-          iconType="help"
-        >
-          <p>
+              {apiError && this.renderApiError(apiError)}
 
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersDescription"
-              defaultMessage="The remote cluster '{remoteCluster}' does not exist or is not connected. Make sure it is connected before editing the '{name}' auto-follow pattern." //eslint-disable-line max-len
-              values={{ remoteCluster, name }}
-            />
-          </p>
-          <EuiButton
-            {...routing.getRouterLinkProps('/list', BASE_PATH_REMOTE_CLUSTERS)}
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewtRemoteClustersButtonLabel"
-              defaultMessage="View remote clusters"
-            />
-          </EuiButton>
-        </EuiCallOut>
-      </Fragment>
-    );
-  }
+              {autoFollowPattern && (
+                <RemoteClustersProvider>
+                  {({ isLoading, error, remoteClusters }) => {
+                    if (isLoading) {
+                      return (
+                        <SectionLoading>
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClusters"
+                            defaultMessage="Loading remote clusters..."
+                          />
+                        </SectionLoading>
+                      );
+                    }
 
-  render() {
-    const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
+                    if (error) {
+                      const title = intl.formatMessage({
+                        id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClustersErrorTitle',
+                        defaultMessage: 'Error loading remote clusters',
+                      });
+                      return <SectionError title={title} error={error} />;
+                    }
 
-    return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent
-            horizontalPosition="center"
-            className="ccrPageContent"
-          >
-            <AutoFollowPatternPageTitle
-              title={(
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.autoFollowPattern.editTitle"
-                  defaultMessage="Edit auto-follow pattern"
-                />
-              )}
-            />
+                    const autoFollowPatternCluster = remoteClusters.find(cluster => cluster.name === autoFollowPattern.remoteCluster);
 
-            {apiStatus === API_STATUS.LOADING && this.renderLoadingAutoFollowPattern()}
+                    if (!autoFollowPatternCluster || !autoFollowPatternCluster.isConnected) {
+                      return this.renderMissingCluster(autoFollowPattern);
+                    }
 
-            {apiError && this.renderApiError(apiError)}
-
-            {autoFollowPattern && (
-              <RemoteClustersProvider>
-                {({ isLoading, error, remoteClusters }) => {
-                  if (isLoading) {
                     return (
-                      <SectionLoading>
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClusters"
-                          defaultMessage="Loading remote clusters..."
-                        />
-                      </SectionLoading>
+                      <AutoFollowPatternForm
+                        apiStatus={apiStatus}
+                        apiError={apiError}
+                        remoteClusters={remoteClusters}
+                        autoFollowPattern={autoFollowPattern}
+                        saveAutoFollowPattern={saveAutoFollowPattern}
+                      />
                     );
-                  }
-
-                  if (error) {
-                    const title = intl.formatMessage({
-                      id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClustersErrorTitle',
-                      defaultMessage: 'Error loading remote clusters',
-                    });
-                    return <SectionError title={title} error={error} />;
-                  }
-
-                  const autoFollowPatternCluster = remoteClusters.find(cluster => cluster.name === autoFollowPattern.remoteCluster);
-
-                  if (!autoFollowPatternCluster || !autoFollowPatternCluster.isConnected) {
-                    return this.renderMissingCluster(autoFollowPattern);
-                  }
-
-                  return (
-                    <AutoFollowPatternForm
-                      apiStatus={apiStatus}
-                      apiError={apiError}
-                      remoteClusters={remoteClusters}
-                      autoFollowPattern={autoFollowPattern}
-                      saveAutoFollowPattern={saveAutoFollowPattern}
-                    />
-                  );
-                }}
-              </RemoteClustersProvider>
-            )}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
+                  }}
+                </RemoteClustersProvider>
+              )}
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      );
+    }
   }
-}
-
-export const AutoFollowPatternEdit = injectI18n(AutoFollowPatternEditUi);
+);

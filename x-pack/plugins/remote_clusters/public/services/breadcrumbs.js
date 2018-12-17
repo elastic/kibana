@@ -30,7 +30,7 @@ export const addBreadcrumb = {
 };
 
 export const editBreadcrumb = {
-  text: i18n.translate('xpack.remoteClusters.addBreadcrumbTitle', {
+  text: i18n.translate('xpack.remoteClusters.editBreadcrumbTitle', {
     defaultMessage: 'Edit',
   }),
 };
