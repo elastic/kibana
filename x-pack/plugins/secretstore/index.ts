@@ -27,15 +27,15 @@ export const secretstore = (kibana: any) => {
         // warn('I am warning you this is bad');
         return {
           errors: client.errors,
-          get: async (type: string, id: string, options?: any) => {
+          get: async (type: string, id: string, options: any = {}) => {
             warn(`get type:'${type}' and id:'${id}'`);
             return await client.get(type, id, options);
           },
-          find: async (options: any) => {
+          find: async (options: any = {}) => {
             warn(`find options:'${JSON.stringify(options)}'`);
             return await client.find(options);
           },
-          bulkCreate: async (objects: any[], options: any) => {
+          bulkCreate: async (objects: any[], options: any = {}) => {
             warn(
               `bulkCreate objects:'${JSON.stringify(objects)}' and options:'${JSON.stringify(
                 options
@@ -43,7 +43,7 @@ export const secretstore = (kibana: any) => {
             );
             return await client.bulkCreate(objects, options);
           },
-          bulkGet: async (objects: any[], options: any) => {
+          bulkGet: async (objects: any[], options: any = {}) => {
             warn(
               `bulkGet objects:'${JSON.stringify(objects)}' and options:'${JSON.stringify(
                 options
@@ -51,11 +51,11 @@ export const secretstore = (kibana: any) => {
             );
             return await client.bulkGet(objects, options);
           },
-          update: async (type: string, id: string, attributes: any, options: any) => {
+          update: async (type: string, id: string, attributes: any, options: any = {}) => {
             warn(`update type:'${type}' and id:'${id}' and attrs:'${JSON.stringify(attributes)}'`);
             return await client.update(type, id, attributes, options);
           },
-          create: async (type: string, attributes: any, options: any) => {
+          create: async (type: string, attributes: any = {}, options: any = {}) => {
             warn(
               `create type:'${type}' and options:'${JSON.stringify(
                 options
@@ -63,7 +63,7 @@ export const secretstore = (kibana: any) => {
             );
             return await client.create(type, attributes, options);
           },
-          delete: async (type: string, id: string, options: any) => {
+          delete: async (type: string, id: string, options: any = {}) => {
             warn(`delete type:'${type}' and id:'${id}' and options:'${JSON.stringify(options)}'`);
             return await client.delete(type, id, options);
           },
