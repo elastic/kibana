@@ -18,10 +18,17 @@ interface MonitorStatusBarProps {
   autorefreshEnabled: boolean;
 }
 
-export const MonitorStatusBar = (props: MonitorStatusBarProps) => (
+export const MonitorStatusBar = ({
+  dateRangeStart,
+  dateRangeEnd,
+  monitorId,
+  autorefreshEnabled,
+  autorefreshInterval,
+}: MonitorStatusBarProps) => (
   <Query
-    pollInterval={props.autorefreshEnabled ? props.autorefreshInterval : undefined}
-    query={createGetMonitorStatusBarQuery({ ...props })}
+    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    query={createGetMonitorStatusBarQuery}
+    variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
     {({ loading, error, data }) => {
       if (loading) {
@@ -32,7 +39,7 @@ export const MonitorStatusBar = (props: MonitorStatusBarProps) => (
       }
       const { monitorStatus } = data;
       if (!monitorStatus.length) {
-        return `No data found for monitor id ${props.monitorId}`;
+        return `No data found for monitor id ${monitorId}`;
       }
       const { monitor, tcp } = monitorStatus[0];
 
