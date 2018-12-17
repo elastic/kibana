@@ -31,11 +31,11 @@ const getHeaders = () => {
     phase: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader', {
       defaultMessage: 'Current phase',
     }),
-    action: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionHeader', {
-      defaultMessage: 'Next action',
+    action: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.currentActionHeader', {
+      defaultMessage: 'Current action',
     }),
-    action_time_millis: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionTimeHeader', {
-      defaultMessage: 'Next action time',
+    action_time_millis: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeHeader', {
+      defaultMessage: 'Current action time',
     }),
     failed_step: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader', {
       defaultMessage: 'Failed step',
@@ -63,6 +63,9 @@ export class IndexLifecycleSummary extends Component {
     this.setState({ showPhaseExecutionPopover: false });
   }
   renderStackPopoverButton(ilm) {
+    if (!ilm.stack_trace) {
+      return null;
+    }
     const button = (
       <EuiButtonEmpty onClick={this.toggleStackPopover}>
         <FormattedMessage
@@ -127,7 +130,7 @@ export class IndexLifecycleSummary extends Component {
     Object.keys(headers).forEach((fieldName, arrayIndex) => {
       const value = ilm[fieldName];
       let content;
-      if (fieldName === 'action_time') {
+      if (fieldName === 'action_time_millis') {
         content = moment(value).format('YYYY-MM-DD HH:mm:ss');
       } else if (fieldName === 'policy') {
         content = (<EuiLink href={getPolicyPath(value)}>{value}</EuiLink>);
@@ -185,6 +188,22 @@ export class IndexLifecycleSummary extends Component {
               {ilm.step_info.type}: {ilm.step_info.reason}
               <EuiSpacer size="s" />
               {this.renderStackPopoverButton(ilm)}
+            </EuiCallOut>
+          </Fragment>
+        ) : null}
+        { ilm.step_info && ilm.step_info.message && !ilm.step_info.stack_trace ? (
+          <Fragment>
+            <EuiSpacer size="s"/>
+            <EuiCallOut
+              color="primary"
+              title={
+                <FormattedMessage
+                  defaultMessage="Action status"
+                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.actionStatusTitle"
+                />
+              }
+            >
+              {ilm.step_info.message}
             </EuiCallOut>
           </Fragment>
         ) : null}

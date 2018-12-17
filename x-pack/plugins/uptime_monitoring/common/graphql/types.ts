@@ -25,6 +25,10 @@ export interface Query {
   getMonitorChartsData?: (MonitorChartEntry | null)[] | null;
 
   getLatestMonitors: Ping[];
+
+  getFilterBar?: FilterBar | null;
+
+  getErrorsList?: (ErrorList | null)[] | null;
 }
 /** A request sent from a monitor to a host */
 export interface Ping {
@@ -281,7 +285,7 @@ export interface Snapshot {
 
   total?: number | null;
 
-  histogram?: (HistogramSeries | null)[] | null;
+  histogram: (HistogramSeries | null)[];
 }
 
 export interface HistogramSeries {
@@ -340,6 +344,28 @@ export interface StatusData {
   total?: number | null;
 }
 
+export interface FilterBar {
+  id?: (string | null)[] | null;
+
+  port?: (number | null)[] | null;
+
+  scheme?: (string | null)[] | null;
+
+  status?: (string | null)[] | null;
+}
+
+export interface ErrorList {
+  latestMessage?: string | null;
+
+  monitorId?: string | null;
+
+  type?: string | null;
+
+  count?: number | null;
+
+  statusCode?: string | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -353,23 +379,27 @@ export interface AllPingsQueryArgs {
 
   status?: string | null;
 
+  dateRangeStart: UnsignedInteger;
+
+  dateRangeEnd: UnsignedInteger;
+}
+export interface GetMonitorsQueryArgs {
+  dateRangeStart: UnsignedInteger;
+
+  dateRangeEnd: UnsignedInteger;
+
+  filters?: string | null;
+}
+export interface GetSnapshotQueryArgs {
   dateRangeStart?: UnsignedInteger | null;
 
   dateRangeEnd?: UnsignedInteger | null;
-}
-export interface GetMonitorsQueryArgs {
-  start?: UnsignedInteger | null;
-
-  end?: UnsignedInteger | null;
-}
-export interface GetSnapshotQueryArgs {
-  start?: UnsignedInteger | null;
-
-  end?: UnsignedInteger | null;
 
   downCount?: number | null;
 
   windowSize?: number | null;
+
+  filters?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
   monitorId?: string | null;
@@ -379,11 +409,23 @@ export interface GetMonitorChartsDataQueryArgs {
   dateRangeEnd?: UnsignedInteger | null;
 }
 export interface GetLatestMonitorsQueryArgs {
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: UnsignedInteger;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: UnsignedInteger;
 
   monitorId?: string | null;
+}
+export interface GetFilterBarQueryArgs {
+  dateRangeStart: UnsignedInteger;
+
+  dateRangeEnd: UnsignedInteger;
+}
+export interface GetErrorsListQueryArgs {
+  dateRangeStart: UnsignedInteger;
+
+  dateRangeEnd: UnsignedInteger;
+
+  filters?: string | null;
 }
 
 // ====================================================
