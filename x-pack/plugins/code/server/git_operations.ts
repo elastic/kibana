@@ -415,6 +415,7 @@ export async function getDefaultBranch(path: string): Promise<string> {
   console.log('c');
 
   const name = ref.name();
+  repo.cleanup();
   if (name.startsWith(REFS_HEADS)) {
     return name.substr(REFS_HEADS.length);
   }
