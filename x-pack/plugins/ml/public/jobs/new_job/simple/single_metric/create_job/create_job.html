@@ -168,9 +168,9 @@
                 ></h4>
                 <span
                   i18n-id="xpack.ml.newJob.simple.singleMetric.noResultsFoundDescription"
-                  i18n-default-message="Consider using the {indexPatternLink}"
-                  i18n-values="{ html_indexPatternLink: '<a ng-click=\'setFullTimeRange()\'>' + indexPatternLinkText + '</a>' }"
+                  i18n-default-message="Consider using the"
                 ></span>
+                <a ng-click="setFullTimeRange()">{{indexPatternLinkText}}</a>
               </div>
             </div>
         </div>
