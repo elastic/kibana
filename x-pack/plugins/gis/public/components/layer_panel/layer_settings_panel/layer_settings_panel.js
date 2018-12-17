@@ -17,8 +17,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import _ from 'lodash';
-
 export function LayerSettingsPanel({
   alphaValue,
   layerId,
@@ -46,14 +44,10 @@ export function LayerSettingsPanel({
     updateMaxZoom(layerId, zoom);
   }
 
-  const debouncedAlphaChange = _.debounce((alphaValue) => {
-    updateAlphaValue(layerId, alphaValue);
-  }, 250);
-
   function onAlphaValueChange(event) {
     const sanitizedValue = parseFloat(event.target.value);
     const alphaValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
-    debouncedAlphaChange(alphaValue);
+    updateAlphaValue(layerId, alphaValue);
   }
 
   function renderZoomSliders() {

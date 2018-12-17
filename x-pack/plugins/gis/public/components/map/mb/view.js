@@ -17,6 +17,15 @@ export class MBMapContainer extends React.Component {
     super();
     this._mbMap = null;
     this._listeners = new Map(); // key is mbLayerId, value eventHandlers map
+
+
+    this._debouncedSync = _.debounce(() => {
+      if (this._isMounted) {
+        this._syncMbMapWithMapState();
+        this._syncMbMapWithLayerList();
+        this._syncMbMapWithInspector();
+      }
+    }, 256);
   }
 
   _getMapState() {
@@ -40,9 +49,11 @@ export class MBMapContainer extends React.Component {
 
   componentDidMount() {
     this._initializeMap();
+    this._isMounted = true;
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     this._checker.destroy();
     if (this._mbMap) {
       this._mbMap.remove();
@@ -55,7 +66,7 @@ export class MBMapContainer extends React.Component {
     const initialZoom = this.props.mapState.zoom;
     const initialCenter = this.props.mapState.center;
     this._mbMap = await createMbMapInstance(this.refs.mapContainer, initialZoom, initialCenter);
-    window._mnMap = this._mbMap;
+    window._mbMap = this._mbMap;
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -192,10 +203,7 @@ export class MBMapContainer extends React.Component {
   }
 
   render() {
-    this._syncMbMapWithMapState();
-    this._syncMbMapWithLayerList();
-    this._syncMbMapWithInspector();
-
+    this._debouncedSync();
     return (
       <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
     );
