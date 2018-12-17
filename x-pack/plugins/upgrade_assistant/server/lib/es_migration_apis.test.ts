@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { getUpgradeAssistantStatus } from './es_migration_apis';
 
-import { DeprecationAPIResponse } from 'src/core_plugins/elasticsearch';
+import { DeprecationAPIResponse } from '../../common/types';
 import { CURRENT_MAJOR_VERSION } from '../../common/version';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 

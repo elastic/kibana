@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
 import { get } from 'lodash';
-import { CallClusterWithRequest, Request } from 'src/core_plugins/elasticsearch';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;
 }
 
 export async function getDeprecationLoggingStatus(
-  callWithRequest: CallClusterWithRequest,
+  callWithRequest: any,
   req: Request
 ): Promise<DeprecationLoggingStatus> {
   const response = await callWithRequest(req, 'cluster.getSettings', {
@@ -25,7 +25,7 @@ export async function getDeprecationLoggingStatus(
 }
 
 export async function setDeprecationLogging(
-  callWithRequest: CallClusterWithRequest,
+  callWithRequest: any,
   req: Request,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {

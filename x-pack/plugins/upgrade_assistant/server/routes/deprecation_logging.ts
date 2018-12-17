@@ -5,8 +5,8 @@
  */
 
 import Boom from 'boom';
+import { Server } from 'hapi';
 import Joi from 'joi';
-import { Server } from 'src/server/kbn_server';
 
 import {
   getDeprecationLoggingStatus,

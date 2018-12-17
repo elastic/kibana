@@ -6,11 +6,26 @@
 
 /* tslint:disable no-console */
 import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
+import { Request } from 'hapi';
 import moment from 'moment';
-import { KibanaConfig, Request } from 'src/server/kbn_server';
 
 function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
+}
+
+interface KibanaConfig {
+  get: <T = void>(key: string) => T;
+}
+
+// Extend the defaults with the plugins and server methods we need.
+declare module 'hapi' {
+  interface PluginProperties {
+    elasticsearch: any;
+  }
+
+  interface Server {
+    config: () => KibanaConfig;
+  }
 }
 
 export type ESClient = <T = void, U = void>(

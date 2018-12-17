@@ -5,13 +5,13 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'src/server/kbn_server';
+import { Server } from 'hapi';
 
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 
 export function registerClusterCheckupRoutes(server: Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-  const basePath = server.config().get('server.basePath');
+  const basePath = server.config().get<string>('server.basePath');
 
   server.route({
     path: '/api/upgrade_assistant/status',

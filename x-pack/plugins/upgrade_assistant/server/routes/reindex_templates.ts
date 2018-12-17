@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'src/server/kbn_server';
+import { Server } from 'hapi';
 
 import { getReindexTemplate } from '../lib/reindex_console_template';
 

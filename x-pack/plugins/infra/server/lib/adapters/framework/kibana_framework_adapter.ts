@@ -5,7 +5,7 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Request, ResponseToolkit, Server } from 'src/server/kbn_server';
+import { Request, ResponseToolkit, Server } from 'hapi';
 
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
@@ -24,6 +24,13 @@ import {
   HapiGraphiQLPluginOptions,
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
+
+declare module 'hapi' {
+  interface PluginProperties {
+    elasticsearch: any;
+    kibana: any;
+  }
+}
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;

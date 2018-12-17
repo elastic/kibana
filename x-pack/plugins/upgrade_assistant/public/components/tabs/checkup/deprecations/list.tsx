@@ -6,7 +6,7 @@
 
 import React, { StatelessComponent } from 'react';
 
-import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
+import { DeprecationInfo } from '../../../../../common/types';
 import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_apis';
 import { GroupByOption } from '../../../types';
 

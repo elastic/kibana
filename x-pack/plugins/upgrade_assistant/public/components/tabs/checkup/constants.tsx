@@ -7,14 +7,14 @@
 import { IconColor } from '@elastic/eui';
 import { invert } from 'lodash';
 
-import { MIGRATION_DEPRECATION_LEVEL as LEVEL } from 'src/core_plugins/elasticsearch';
+import { DeprecationInfo } from '../../../../common/types';
 
 export const LEVEL_MAP = {
   warning: 2,
   critical: 3,
 };
 
-export const REVERSE_LEVEL_MAP: { [idx: number]: LEVEL } = invert(LEVEL_MAP);
+export const REVERSE_LEVEL_MAP: { [idx: number]: DeprecationInfo['level'] } = invert(LEVEL_MAP);
 
 export const COLOR_MAP: { [level: string]: IconColor } = {
   warning: 'default',

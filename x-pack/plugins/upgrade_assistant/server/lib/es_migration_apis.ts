@@ -7,12 +7,8 @@
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import {
-  CallClusterWithRequest,
-  DeprecationAPIResponse,
-  DeprecationInfo,
-  Request,
-} from 'src/core_plugins/elasticsearch';
+import { Request } from 'hapi';
+import { DeprecationAPIResponse, DeprecationInfo } from '../../common/types';
 
 import { CURRENT_MAJOR_VERSION } from '../../common/version';
 
@@ -34,14 +30,14 @@ export interface UpgradeAssistantStatus {
 }
 
 export async function getUpgradeAssistantStatus(
-  callWithRequest: CallClusterWithRequest,
+  callWithRequest: any,
   req: Request,
   basePath: string
 ): Promise<UpgradeAssistantStatus> {
-  const deprecations = await callWithRequest(req, 'transport.request', {
+  const deprecations = (await callWithRequest(req, 'transport.request', {
     path: '/_xpack/migration/deprecations',
     method: 'GET',
-  });
+  })) as DeprecationAPIResponse;
 
   return {
     cluster: deprecations.cluster_settings,
