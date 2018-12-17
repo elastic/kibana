@@ -49,10 +49,10 @@ describe('ElasticsearchPingsAdapter class', () => {
 
   describe('getAll', () => {
     let getAllSearchMock: (request: any, params: any) => Promise<any>;
-    let expectedEsParams: any;
+    let expectedGetAllParams: any;
     beforeEach(() => {
       getAllSearchMock = jest.fn(async (request: any, params: any) => mockEsResult);
-      expectedEsParams = {
+      expectedGetAllParams = {
         index: 'heartbeat*',
         body: {
           query: {
@@ -82,22 +82,40 @@ describe('ElasticsearchPingsAdapter class', () => {
       await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
 
       expect(database.search).toHaveBeenCalledTimes(1);
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
     it('omits the sort param when no sort passed', async () => {
       database.search = getAllSearchMock;
       await adapter.getAll(serverRequest, 100, 200, undefined, undefined, undefined, 12);
-      delete expectedEsParams.body.sort;
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
+      delete expectedGetAllParams.body.sort;
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
     it('omits the size param when no size passed', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'desc', undefined);
-      delete expectedEsParams.body.size;
-      set(expectedEsParams, 'body.sort[0].@timestamp.order', 'desc');
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
+      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'desc');
+      delete expectedGetAllParams.body.size;
+      set(expectedGetAllParams, 'body.sort[0].@timestamp.order', 'desc');
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+    });
+
+    it('adds a filter for monitor ID', async () => {
+      database.search = getAllSearchMock;
+      await adapter.getAll(serverRequest, 100, 200, 'testmonitorid');
+      delete expectedGetAllParams.body.size;
+      delete expectedGetAllParams.body.sort;
+      expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.id': 'testmonitorid' } });
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+    });
+
+    it('adds a filter for monitor status', async () => {
+      database.search = getAllSearchMock;
+      await adapter.getAll(serverRequest, 100, 200, undefined, 'down');
+      delete expectedGetAllParams.body.size;
+      delete expectedGetAllParams.body.sort;
+      expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.status': 'down' } });
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
   });
 });
