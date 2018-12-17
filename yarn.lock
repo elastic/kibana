@@ -803,10 +803,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.6.1":
-  version "5.6.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.1.tgz#468019d1d140b11b24d5e7e772132676d43678a8"
-  integrity sha512-UnExe+pgHPldz66EdZMVP0RZhBAKqaLMbEsAK/tMT+nFwXIiFqGfGftwozFP5ax8uxGzR9biuXvUHpuGd7/5Lw==
+"@elastic/eui@5.6.2":
+  version "5.6.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.2.tgz#c3308591f83167a0f7e94909a75af45d4d043047"
+  integrity sha512-gN0HtzAVu37RuHp2iYbDBEFfjTp1mdbR3lRWjP5eA88L+EeA+JVRxdy7Tgit+P73ZCyyLgAWlcQxMJIREqzXeg==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
