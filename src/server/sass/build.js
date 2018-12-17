@@ -64,10 +64,11 @@ export class Build {
   async build() {
     const outFile = this.outputPath();
 
-    const lintResults = sassLint.lintFiles(this.getGlob(), {}, path.resolve(__dirname, '..', '..', '.sass-lint'));
+    const lintResults = sassLint.lintFiles(this.getGlob(), {}, path.resolve(__dirname, '..', '..', '..', '.sass-lint.yml'));
+
     lintResults.forEach(result => {
       if (result.messages.length > 0) {
-        this.log.info(result.filePath);
+        this.log.info(`lint errors in ${result.filePath}`);
         this.log.info(JSON.stringify(result.messages, null, 2));
       }
     });

@@ -1,6 +1,13 @@
 files:
   include:
-    - 'src/**/*.s+(a|c)ss'
+    - '{src,x-pack}/**/*.s+(a|c)ss'
+  ignore:
+    # _only include_ rollup and security files
+    - '**/x-pack/plugins/!(rollup|security)/**'
+    # ignore all of src
+    - '**/src/**/*'
+    # ignore all node_modules
+    - '**/node_modules/**'
 rules:
   quotes:
     - 2

@@ -17,36 +17,12 @@
  * under the License.
  */
 
-import { reportFailedTests } from '../src/dev/failed_tests/report';
+import { resolve } from 'path';
 
-module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+process.argv.push('--no-exit'); // don't exit after encountering a rule error
+process.argv.push('--verbose'); // print results
+process.argv.push('--max-warnings', '0'); // return nonzero exit code on any warnings
+process.argv.push('--config', resolve(__dirname, '..', '..', '.sass-lint.yml')); // configuration file
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:tslint',
-    'run:sasslint',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
-  ]);
-
-  grunt.registerTask(
-    'jenkins:report',
-    'Reports failed tests found in junit xml files to Github issues',
-    function () {
-      reportFailedTests(this.async());
-    }
-  );
-};
+// common-js is required so that logic before this executes before loading sass-lint
+require('sass-lint/bin/sass-lint');
