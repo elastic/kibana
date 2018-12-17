@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { ShowJson } from './show_json';
@@ -12,15 +12,17 @@ import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTabs,
   EuiTab,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { IndexActionsContextMenu } from '../../components';
 import { INDEX_OPEN } from '../../../../../common/constants';
@@ -32,17 +34,16 @@ function capitalizeFirstLetter(string) {
 const tabs = ['Summary', 'Settings', 'Mapping', 'Stats', 'Edit settings'];
 export class DetailPanel extends Component {
   renderTabs() {
-    const { panelType, indexName, indexStatus, openDetailPanel } = this.props;
-
-    return tabs.map((tab, index) => {
+    const { panelType, indexName, index, openDetailPanel } = this.props;
+    return tabs.map((tab, i) => {
       const isSelected = tab === panelType;
       return (
         <EuiTab
           onClick={() => openDetailPanel({ panelType: tab, indexName })}
           isSelected={isSelected}
-          data-test-subj={`detailPanelTab${isSelected ? "Selected" : ""}`}
-          disabled={tab === 'stats' && indexStatus !== INDEX_OPEN}
-          key={index}
+          data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
+          disabled={tab === 'Stats' && index.status !== INDEX_OPEN}
+          key={i}
         >
           {capitalizeFirstLetter(tab)}
         </EuiTab>
@@ -51,7 +52,7 @@ export class DetailPanel extends Component {
   }
 
   render() {
-    const { panelType, indexName, closeDetailPanel } = this.props;
+    const { panelType, indexName, index, closeDetailPanel } = this.props;
     if (!panelType) {
       return null;
     }
@@ -68,21 +69,9 @@ export class DetailPanel extends Component {
       default:
         component = <Summary />;
     }
-    return (
-      <EuiFlyout
-        data-test-subj="indexDetailFlyout"
-        onClose={closeDetailPanel}
-        aria-labelledby="indexDetailsFlyoutTitle"
-      >
-        <EuiFlyoutHeader>
-          <EuiTitle size="l" id="indexDetailsFlyoutTitle">
-            <h2>{indexName}</h2>
-          </EuiTitle>
-          <EuiTabs>{this.renderTabs()}</EuiTabs>
-        </EuiFlyoutHeader>
-
+    const content = index ? (
+      <Fragment>
         <EuiFlyoutBody>{component}</EuiFlyoutBody>
-
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
@@ -95,13 +84,54 @@ export class DetailPanel extends Component {
                     anchorPosition="upRight"
                     detailPanel={true}
                     iconType="arrowUp"
-                    label={<FormattedMessage id="xpack.idxMgmt.detailPanel.manageContextMenuLabel" defaultMessage="Manage" />}
+                    label={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.detailPanel.manageContextMenuLabel"
+                        defaultMessage="Manage"
+                      />
+                    }
                   />
                 )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
+        \
+      </Fragment>
+    ) : (
+      <EuiFlyoutBody>
+        <EuiSpacer size="l" />
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.detailPanel.missingIndexTitle"
+              defaultMessage="Missing index"
+            />
+          }
+          color="danger"
+          iconType="cross"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.detailPanel.missingIndexMessage"
+            defaultMessage="This index does not exist.
+              It might have been deleted by a running job or another system."
+          />
+        </EuiCallOut>
+      </EuiFlyoutBody>
+    );
+    return (
+      <EuiFlyout
+        data-test-subj="indexDetailFlyout"
+        onClose={closeDetailPanel}
+        aria-labelledby="indexDetailsFlyoutTitle"
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle size="l" id="indexDetailsFlyoutTitle">
+            <h2>{indexName}</h2>
+          </EuiTitle>
+          {index ? <EuiTabs>{this.renderTabs()}</EuiTabs> : null }
+        </EuiFlyoutHeader>
+        {content}
       </EuiFlyout>
     );
   }

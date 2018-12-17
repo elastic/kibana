@@ -129,7 +129,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
         label={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.chooseAliasLabel"
-            defaultMessage="Index alias"
+            defaultMessage="Index rollover alias"
           />
         }
       >

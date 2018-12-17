@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
@@ -26,13 +27,15 @@ import { Plugin, PluginManifest } from './plugin';
 import { createPluginInitializerContext, createPluginStartContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
-jest.mock('plugin-with-initializer-path', () => ({ plugin: mockPluginInitializer }), {
+jest.mock(
+  join('plugin-with-initializer-path', 'server'),
+  () => ({ plugin: mockPluginInitializer }),
+  { virtual: true }
+);
+jest.mock(join('plugin-without-initializer-path', 'server'), () => ({}), {
   virtual: true,
 });
-jest.mock('plugin-without-initializer-path', () => ({}), {
-  virtual: true,
-});
-jest.mock('plugin-with-wrong-initializer-path', () => ({ plugin: {} }), {
+jest.mock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
   virtual: true,
 });
 
@@ -44,6 +47,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     kibanaVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
+    server: true,
     ui: true,
     ...manifestProps,
   };
