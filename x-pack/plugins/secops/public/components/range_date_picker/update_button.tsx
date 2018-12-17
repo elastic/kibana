@@ -10,22 +10,22 @@ import { pure } from 'recompose';
 import { inputsModel } from '../../store';
 
 interface Props {
-  isLoading: boolean;
+  loading: boolean;
   refetch: inputsModel.Refetch[];
 }
 
-export const UpdateButton = pure<Props>(({ isLoading, refetch }) => {
-  const color = isLoading ? 'secondary' : 'primary';
+export const UpdateButton = pure<Props>(({ loading, refetch }) => {
+  const color = loading ? 'secondary' : 'primary';
   const icon = 'refresh';
   let text = 'Refresh';
 
-  if (isLoading) {
+  if (loading) {
     text = 'Updating';
   }
 
   return (
     <EuiButton
-      isLoading={isLoading}
+      isLoading={loading}
       className="euiGlobalDatePicker__updateButton"
       color={color}
       fill

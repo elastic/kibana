@@ -20,7 +20,7 @@ interface GlobalTimeArgs {
   poll: number;
   from: number;
   to: number;
-  setQuery: (params: { id: string; isLoading: boolean; refetch: inputsModel.Refetch }) => void;
+  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void;
 }
 
 interface OwnProps {
@@ -28,7 +28,7 @@ interface OwnProps {
 }
 
 interface GlobalTimeDispatch {
-  setQuery: (params: { id: string; isLoading: boolean; refetch: inputsModel.Refetch }) => void;
+  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void;
 }
 
 interface GlobalTimeReduxState {
@@ -42,17 +42,17 @@ type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
 const checkIfNeedToUpdateReduxState = (
   query: inputsModel.GlobalQuery[],
-  setQuery: (params: { id: string; isLoading: boolean; refetch: inputsModel.Refetch }) => void,
-  params: { id: string; isLoading: boolean; refetch: inputsModel.Refetch }
+  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void,
+  params: { id: string; loading: boolean; refetch: inputsModel.Refetch }
 ) => {
-  const { isLoading, id } = params;
-  if (query.length === 0 && isLoading) {
+  const { loading, id } = params;
+  if (query.length === 0 && loading) {
     setQuery(params);
   } else if (query.length > 0) {
     const oldItem = query.filter(i => i.id === id);
-    if (oldItem.length === 0 && isLoading) {
+    if (oldItem.length === 0 && loading) {
       setQuery(params);
-    } else if (oldItem.length > 0 && oldItem[0].isLoading !== isLoading) {
+    } else if (oldItem.length > 0 && oldItem[0].loading !== loading) {
       setQuery(params);
     }
   }

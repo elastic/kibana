@@ -5,7 +5,8 @@
  */
 
 import { EuiDatePickerRange, EuiFlexGroup, EuiFlexItem, EuiFormControlLayout } from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
+import { hasBasename } from 'history/PathUtils';
+import { get, getOr, has, isEqual } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -21,7 +22,7 @@ interface RangeDatePickerStateRedux {
   to: number;
   isTimerOn: boolean;
   duration: number;
-  isLoading: boolean;
+  loading: boolean;
   refetch: inputsModel.Refetch[];
 }
 
@@ -41,10 +42,17 @@ interface OwnProps {
 
 type RangeDatePickerProps = OwnProps & RangeDatePickerDispatchProps & RangeDatePickerStateRedux;
 
-export interface RecentlyUsedI {
+interface RecentylUsedBasic {
   kind: string;
-  text: string | number[];
+  text: string;
 }
+
+interface RecentylUsedDateRange {
+  kind: string;
+  timerange: number[];
+}
+
+export type RecentlyUsedI = RecentylUsedBasic | RecentylUsedDateRange;
 
 interface RangeDatePickerState {
   recentlyUsed: RecentlyUsedI[];
@@ -60,7 +68,7 @@ class RangeDatePickerComponents extends React.PureComponent<
 
   public render() {
     const { recentlyUsed } = this.state;
-    const { id, isLoading, disabled = false, from, to, isTimerOn, refetch } = this.props;
+    const { id, loading, disabled = false, from, to, isTimerOn, refetch } = this.props;
 
     const quickSelectPopover = (
       <QuickSelectPopover
@@ -82,7 +90,7 @@ class RangeDatePickerComponents extends React.PureComponent<
               isCustom
               startDateControl={
                 <GlobalDateButton
-                  id={`${id}From`}
+                  id={`${id}-from`}
                   date={moment(from)}
                   position="start"
                   onChange={this.handleChangeFrom}
@@ -91,7 +99,7 @@ class RangeDatePickerComponents extends React.PureComponent<
               }
               endDateControl={
                 <GlobalDateButton
-                  id={`${id}To`}
+                  id={`${id}-to`}
                   date={moment(to)}
                   position="end"
                   onChange={this.handleChangeTo}
@@ -102,7 +110,7 @@ class RangeDatePickerComponents extends React.PureComponent<
           </EuiFormControlLayout>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <UpdateButton isLoading={isLoading} refetch={refetch} />
+          <UpdateButton loading={loading} refetch={refetch} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -114,7 +122,7 @@ class RangeDatePickerComponents extends React.PureComponent<
       this.props.setAbsoluteRangeDatePicker({ id, from: date.valueOf(), to });
       this.updateRecentlyUsed({
         kind: 'date-range',
-        text: [date.valueOf(), to],
+        timerange: [date.valueOf(), to],
       });
     }
   };
@@ -125,14 +133,26 @@ class RangeDatePickerComponents extends React.PureComponent<
       this.props.setAbsoluteRangeDatePicker({ id, from, to: date.valueOf() });
       this.updateRecentlyUsed({
         kind: 'date-range',
-        text: [from, date.valueOf()],
+        timerange: [from, date.valueOf()],
       });
     }
   };
 
   private updateRecentlyUsed = (msg?: RecentlyUsedI) => {
     const { recentlyUsed } = this.state;
-    if (msg && recentlyUsed.filter((i: RecentlyUsedI) => i.text === msg.text).length === 0) {
+    if (
+      msg &&
+      recentlyUsed.filter((i: RecentlyUsedI) => {
+        const timerange = getOr(false, 'timerange', msg);
+        const text = getOr(false, 'text', msg);
+        if (timerange && has('timerange', i)) {
+          return isEqual(timerange, get('timerange', i));
+        } else if (text && has('text', i)) {
+          return text === get('text', i);
+        }
+        return false;
+      }).length === 0
+    ) {
       recentlyUsed.unshift(msg);
       this.setState({
         ...this.state,
@@ -183,8 +203,7 @@ const mapStateToProps = (state: State, { id }: OwnProps) => {
     to: get('timerange.to', myState),
     isTimerOn: get('policy.kind', myState) === 'interval',
     duration: get('policy.duration', myState),
-    isLoading:
-      myState.query.filter((i: inputsModel.GlobalQuery) => i.isLoading === true).length > 0,
+    loading: myState.query.filter((i: inputsModel.GlobalQuery) => i.loading === true).length > 0,
     refetch: myState.query.map((i: inputsModel.GlobalQuery) => i.refetch),
   };
 };

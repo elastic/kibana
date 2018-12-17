@@ -27,7 +27,7 @@ export interface Policy {
 export type Refetch = () => void;
 export interface GlobalQuery {
   id: string;
-  isLoading: boolean;
+  loading: boolean;
   refetch: null | Refetch;
 }
 

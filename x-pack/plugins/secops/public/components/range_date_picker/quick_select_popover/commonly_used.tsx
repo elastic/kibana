@@ -22,7 +22,7 @@ export enum DatePickerOptions {
   yearToDate = 'year-to-date',
 }
 
-const commonDates: Array<{ id: string; label: string }> = [
+const commonDates: Array<{ id: DatePickerOptions; label: string }> = [
   {
     id: DatePickerOptions.today,
     label: 'Today',
@@ -65,13 +65,7 @@ export const CommonlyUsed = pure<Props>(({ setRangeDatePicker }) => {
   const links = commonDates.map(date => {
     return (
       <EuiFlexItem key={date.id}>
-        <EuiLink
-          onClick={updateRangeDatePickerByCommonUsed.bind(
-            null,
-            date.id as DatePickerOptions,
-            setRangeDatePicker
-          )}
-        >
+        <EuiLink onClick={() => updateRangeDatePickerByCommonUsed(date.id, setRangeDatePicker)}>
           {date.label}
         </EuiLink>
       </EuiFlexItem>
@@ -85,7 +79,6 @@ export const CommonlyUsed = pure<Props>(({ setRangeDatePicker }) => {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s" className="euiGlobalDatePicker__popoverSection">
-        {/* <EuiFlexGrid gutterSize="s" columns={2} responsive={false}> */}
         <EuiFlexGrid gutterSize="s" columns={2}>
           {links}
         </EuiFlexGrid>

@@ -28,6 +28,6 @@ export const startAutoReload = actionCreator<{ id: string }>('START_KQL_AUTO_REL
 
 export const stopAutoReload = actionCreator<{ id: string }>('STOP_KQL_AUTO_RELOAD');
 
-export const setQuery = actionCreator<{ id: string; isLoading: boolean; refetch: Refetch }>(
+export const setQuery = actionCreator<{ id: string; loading: boolean; refetch: Refetch }>(
   'SET_QUERY'
 );

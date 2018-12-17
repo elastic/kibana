@@ -12,15 +12,15 @@ interface OwnProps {
   id: string;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  setQuery: (params: { id: string; isLoading: boolean; refetch: inputsModel.Refetch }) => void;
+  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void;
 }
 
 export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>) {
-  class ManageQuery extends React.PureComponent<OwnProps> {
+  class ManageQuery extends React.PureComponent<OwnProps & T> {
     public componentDidUpdate(prevProps: OwnProps) {
       const { loading, id, refetch, setQuery } = this.props;
       if (prevProps.loading !== loading) {
-        setQuery({ id, isLoading: loading, refetch });
+        setQuery({ id, loading, refetch });
       }
     }
 

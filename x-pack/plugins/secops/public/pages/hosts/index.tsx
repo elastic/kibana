@@ -29,6 +29,7 @@ const basePath = chrome.getBasePath();
 
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
+const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 export const Hosts = pure(() => (
   <WithSource sourceId="default">
@@ -65,12 +66,16 @@ export const Hosts = pure(() => (
               </HostsQuery>
               <UncommonProcessesQuery
                 sourceId="default"
-                startDate={0} // TODO: Wire this up to the date-time picker
-                endDate={1544817214088} // TODO: Wire this up to the date-time picker
+                startDate={from}
+                endDate={to}
+                poll={poll}
                 cursor={null}
               >
-                {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore }) => (
-                  <UncommonProcessTable
+                {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                  <UncommonProcessTableManage
+                    id={id}
+                    refetch={refetch}
+                    setQuery={setQuery}
                     loading={loading}
                     data={uncommonProcesses}
                     totalCount={totalCount}
@@ -86,7 +91,7 @@ export const Hosts = pure(() => (
                     id={id}
                     refetch={refetch}
                     setQuery={setQuery}
-                    data={events}
+                    data={events!}
                     loading={loading}
                     startDate={from}
                     endDate={to}

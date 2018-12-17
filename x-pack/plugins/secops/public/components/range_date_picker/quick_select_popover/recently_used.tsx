@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { getOr } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
@@ -20,17 +21,21 @@ interface Props {
 export const MyRecentlyUsed = pure<Props>(({ setRangeDatePicker, recentlyUsed }) => {
   const links = recentlyUsed.map((date: RecentlyUsedI) => {
     let dateRange;
-    let dateLink = (
-      <EuiLink onClick={updateRangeDatePicker.bind(null, date.kind, setRangeDatePicker, date.text)}>
-        {date.text}
-      </EuiLink>
-    );
-    if (typeof date.text !== 'string') {
-      dateRange = `${moment(date.text[0]).format('L LTS')} – ${moment(date.text[1]).format(
+    let dateLink = null;
+    const text = getOr(false, 'text', date);
+    const timerange = getOr(false, 'timerange', date);
+    if (text) {
+      dateLink = (
+        <EuiLink onClick={updateRangeDatePicker.bind(null, date.kind, setRangeDatePicker, text)}>
+          {text}
+        </EuiLink>
+      );
+    } else if (timerange) {
+      dateRange = `${moment(timerange[0]).format('L LTS')} – ${moment(timerange[1]).format(
         'L LTS'
       )}`;
       dateLink = (
-        <EuiLink onClick={setRangeDatePicker.bind(null, date.text[0], date.text[1], 'absolute')}>
+        <EuiLink onClick={setRangeDatePicker.bind(null, timerange[0], timerange[1], 'absolute')}>
           {dateRange}
         </EuiLink>
       );

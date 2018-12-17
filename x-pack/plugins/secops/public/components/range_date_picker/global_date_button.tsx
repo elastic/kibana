@@ -78,7 +78,7 @@ export class GlobalDateButton extends React.PureComponent<Props, State> {
       button
     ) : (
       <EuiPopover
-        id={`${id}Popover`}
+        id={`${id}-popover`}
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}

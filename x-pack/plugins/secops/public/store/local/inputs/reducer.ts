@@ -61,11 +61,11 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       },
     },
   }))
-  .case(setQuery, (state, { id, isLoading, refetch }) => ({
+  .case(setQuery, (state, { id, loading, refetch }) => ({
     ...state,
     global: {
       ...state.global,
-      query: unionBy('id', [{ id, isLoading, refetch }], state.global.query),
+      query: unionBy('id', [{ id, loading, refetch }], state.global.query),
     },
   }))
   .case(setDuration, (state, { id, duration }) => ({
