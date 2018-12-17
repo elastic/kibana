@@ -62,6 +62,10 @@ For more details about breaking changes in this release, see
 [float]
 [[enhancement-7.0.0-alpha2]]
 === Enhancements
+Highlights:: 
+* Starting in 7.0, visualizations in Kibana will use a new data pipeline 
+introduced as part of Canvas. The change does not yet apply to Vega, 
+Timelion, or Time Series Visual Builder (TSVB). See {pull}25711[#25711] for more information.
 Canvas::
 * Implements a clipboard and stores the copied elements in `localStorage` {pull}25890[#25890]
 * Adds the ability to reuse assets without editing an element's expression {pull}25764[#25764]
