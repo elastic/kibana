@@ -26,7 +26,7 @@ export const MyRecentlyUsed = pure<Props>(({ setRangeDatePicker, recentlyUsed })
     const timerange = getOr(false, 'timerange', date);
     if (text) {
       dateLink = (
-        <EuiLink onClick={updateRangeDatePicker.bind(null, date.kind, setRangeDatePicker, text)}>
+        <EuiLink onClick={() => updateRangeDatePicker(date.kind, setRangeDatePicker, text)}>
           {text}
         </EuiLink>
       );
@@ -35,7 +35,7 @@ export const MyRecentlyUsed = pure<Props>(({ setRangeDatePicker, recentlyUsed })
         'L LTS'
       )}`;
       dateLink = (
-        <EuiLink onClick={setRangeDatePicker.bind(null, timerange[0], timerange[1], 'absolute')}>
+        <EuiLink onClick={() => setRangeDatePicker(timerange[0], timerange[1], 'absolute')}>
           {dateRange}
         </EuiLink>
       );

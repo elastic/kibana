@@ -140,12 +140,13 @@ export const QuickSelect = pure<Props>(
         <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButton
-              onClick={updateRangeDatePickerByQuickSelect.bind(
-                null,
-                quickSelectTime,
-                quickSelectUnit,
-                setRangeDatePicker
-              )}
+              onClick={() =>
+                updateRangeDatePickerByQuickSelect(
+                  quickSelectTime,
+                  quickSelectUnit,
+                  setRangeDatePicker
+                )
+              }
               style={{ minWidth: 0 }}
             >
               Apply

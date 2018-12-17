@@ -30,7 +30,7 @@ export const UpdateButton = pure<Props>(({ loading, refetch }) => {
       color={color}
       fill
       iconType={icon}
-      onClick={refetchQuery.bind(null, refetch)}
+      onClick={() => refetchQuery(refetch)}
       textProps={{ className: 'euiGlobalDatePicker__updateButtonText' }}
     >
       {text}

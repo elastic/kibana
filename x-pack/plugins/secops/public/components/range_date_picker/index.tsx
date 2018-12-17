@@ -5,7 +5,6 @@
  */
 
 import { EuiDatePickerRange, EuiFlexGroup, EuiFlexItem, EuiFormControlLayout } from '@elastic/eui';
-import { hasBasename } from 'history/PathUtils';
 import { get, getOr, has, isEqual } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';

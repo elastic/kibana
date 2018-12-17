@@ -90,7 +90,7 @@ export const Timer = pure<Props>(({ onChange, timerIsOn, duration, durationKind,
         <EuiFormRow>
           <EuiButton
             iconType={timerIsOn ? 'stop' : 'play'}
-            onClick={toggleTimer.bind(null, !timerIsOn)}
+            onClick={() => toggleTimer(!timerIsOn)}
             style={{ minWidth: 0 }}
           >
             {timerIsOn ? 'Stop' : 'Start'}

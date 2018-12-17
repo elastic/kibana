@@ -14,7 +14,6 @@ import {
   inputsModel,
   State,
 } from '../../store';
-import { globalQuery } from '../../store/local';
 
 interface GlobalTimeArgs {
   poll: number;
@@ -35,48 +34,25 @@ interface GlobalTimeReduxState {
   from: number;
   to: number;
   poll: number;
-  query: inputsModel.GlobalQuery[];
 }
 
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
-const checkIfNeedToUpdateReduxState = (
-  query: inputsModel.GlobalQuery[],
-  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void,
-  params: { id: string; loading: boolean; refetch: inputsModel.Refetch }
-) => {
-  const { loading, id } = params;
-  if (query.length === 0 && loading) {
-    setQuery(params);
-  } else if (query.length > 0) {
-    const oldItem = query.filter(i => i.id === id);
-    if (oldItem.length === 0 && loading) {
-      setQuery(params);
-    } else if (oldItem.length > 0 && oldItem[0].loading !== loading) {
-      setQuery(params);
-    }
-  }
-};
-
-const GlobalTimeComponent = pure<GlobalTimeProps>(
-  ({ children, poll, from, to, query, setQuery }) => (
-    <>
-      {children({
-        poll,
-        from,
-        to,
-        setQuery: checkIfNeedToUpdateReduxState.bind(null, query, setQuery),
-      })}
-    </>
-  )
-);
+const GlobalTimeComponent = pure<GlobalTimeProps>(({ children, poll, from, to, setQuery }) => (
+  <>
+    {children({
+      poll,
+      from,
+      to,
+      setQuery,
+    })}
+  </>
+));
 
 const mapStateToProps = (state: State) => {
   const timerange: inputsModel.TimeRange = globalTimeRangeSelector(state);
   const policy: inputsModel.Policy = globalPolicySelector(state);
-  const query: inputsModel.GlobalQuery[] = globalQuery(state);
   return {
-    query,
     poll: policy.kind === 'interval' && timerange.kind === 'absolute' ? policy.duration : 0,
     from: timerange.from,
     to: timerange.to,
