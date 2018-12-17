@@ -38,7 +38,7 @@ export class VectorLayer extends ALayer {
 
   static createDescriptor(options) {
     // Colors must be state-aware to reduce unnecessary incrementation
-    const DEFAULT_ALPHA_VALUE = 0.5;
+    const DEFAULT_ALPHA_VALUE = 1;
     const mapColors = getMapColors(store.getState());
     const lastColor = mapColors.pop();
     const nextColor = DEFAULT_COLORS[
@@ -52,6 +52,18 @@ export class VectorLayer extends ALayer {
           type: VectorStyle.STYLE_TYPE.STATIC,
           options: {
             color: nextColor,
+          }
+        },
+        lineColor: {
+          type: VectorStyle.STYLE_TYPE.STATIC,
+          options: {
+            color: '#FFFFFF'
+          }
+        },
+        lineWidth: {
+          type: VectorStyle.STYLE_TYPE.STATIC,
+          options: {
+            size: 1
           }
         },
         iconSize: {
@@ -365,7 +377,7 @@ export class VectorLayer extends ALayer {
       });
       mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
     }
-    this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
+    this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId);
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._addTooltipListeners(mbMap, pointLayerId);

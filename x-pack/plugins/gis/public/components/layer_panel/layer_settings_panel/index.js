@@ -18,7 +18,7 @@ import {
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    alphaValue: _.get(selectedLayer.getCurrentStyle(), '_descriptor.properties.alphaValue', 0.5),
+    alphaValue: _.get(selectedLayer.getCurrentStyle(), '_descriptor.properties.alphaValue', 1),
     label: selectedLayer.getLabel(),
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),

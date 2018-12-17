@@ -261,7 +261,7 @@ export class ESGeohashGridSource extends VectorSource {
             "size": 10
           }
         },
-        "alphaValue": 0.5
+        "alphaValue": 1
       }
     };
     return descriptor;

@@ -319,10 +319,10 @@ export class VectorStyle {
     return color;
   }
 
-  _getMBOpacity(isTemp) {
-    const DEFAULT_OPACITY = 0.5;
+  _getMBOpacity() {
+    const DEFAULT_OPACITY = 1;
     const opacity = this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
-    return isTemp ? opacity * .8 : opacity; // TODO: Need better indicator of temp status
+    return opacity;
   }
 
   _getMbSize(property) {
@@ -333,8 +333,8 @@ export class VectorStyle {
     }
   }
 
-  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId, isTemp) {
-    const opacity = this._getMBOpacity(isTemp);
+  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId) {
+    const opacity = this._getMBOpacity();
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
@@ -362,8 +362,8 @@ export class VectorStyle {
     }
   }
 
-  setMBPaintPropertiesForPoints(mbMap, sourceId, pointLayerId, isTemp) {
-    const opacity = this._getMBOpacity(isTemp);
+  setMBPaintPropertiesForPoints(mbMap, sourceId, pointLayerId) {
+    const opacity = this._getMBOpacity();
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);

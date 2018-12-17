@@ -28,7 +28,7 @@ export class TileStyle {
   }
 
   _getMBOpacity() {
-    const DEFAULT_OPACITY = 0.5;
+    const DEFAULT_OPACITY = 1;
     return this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
   }
 

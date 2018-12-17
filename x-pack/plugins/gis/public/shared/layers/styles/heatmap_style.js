@@ -27,7 +27,7 @@ export class HeatmapStyle {
       type: HeatmapStyle.type,
       refinement: refinement || 'coarse',
       properties: {
-        alphaValue: 0.5
+        alphaValue: 1
       }
     };
   }
@@ -48,7 +48,7 @@ export class HeatmapStyle {
   }
 
   _getMBOpacity() {
-    const DEFAULT_OPACITY = 0.5;
+    const DEFAULT_OPACITY = 1;
     return this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
   }
 
