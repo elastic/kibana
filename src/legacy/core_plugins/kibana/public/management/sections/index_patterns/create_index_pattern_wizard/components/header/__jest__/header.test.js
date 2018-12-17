@@ -19,12 +19,12 @@
 
 import React from 'react';
 import { Header } from '../header';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('Header', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <Header
+    const component = shallowWithIntl(
+      <Header.WrappedComponent
         isIncludingSystemIndices={true}
         onChangeIncludingSystemIndices={() => {}}
       />
@@ -34,8 +34,8 @@ describe('Header', () => {
   });
 
   it('should render without including system indices', () => {
-    const component = shallow(
-      <Header
+    const component = shallowWithIntl(
+      <Header.WrappedComponent
         isIncludingSystemIndices={false}
         onChangeIncludingSystemIndices={() => {}}
       />
@@ -45,8 +45,8 @@ describe('Header', () => {
   });
 
   it('should render a different name, prompt, and beta tag if provided', () => {
-    const component = shallow(
-      <Header
+    const component = shallowWithIntl(
+      <Header.WrappedComponent
         isIncludingSystemIndices={false}
         onChangeIncludingSystemIndices={() => {}}
         prompt={<div>Test prompt</div>}

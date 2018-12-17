@@ -46,6 +46,6 @@
   @import 'components/nav_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
 
-  // Hacks are last so they can ovwerite anything above if needed
+  // Hacks are last so they can overwrite anything above if needed
   @import 'hacks';
 }
