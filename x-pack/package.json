@@ -239,6 +239,7 @@
     "ngreact": "^0.5.1",
     "nodegit": "git+https://github.com/elastic/nodegit.git",
     "nodemailer": "^4.6.4",
+    "nock": "10.0.4",
     "object-path-immutable": "^0.5.3",
     "oppsy": "^2.0.0",
     "papaparse": "^4.6.0",
