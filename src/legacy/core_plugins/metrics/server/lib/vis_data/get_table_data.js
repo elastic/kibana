@@ -23,7 +23,7 @@ import { get } from 'lodash';
 import processBucket from './table/process_bucket';
 export async function getTableData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const includeFrozen = await req.getUiSettingsClient().get('search:includeFrozen');
+  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
   const params = {
     index: panel.index_pattern,
     ignore_throttled: !includeFrozen,

@@ -28,7 +28,7 @@ export const searchProxyRoute = {
       }).default()
     },
     async handler(request) {
-      const includeFrozen = await request.getUiSettingsClient().get('search:includeFrozen');
+      const includeFrozen = await request.getUiSettingsService().get('search:includeFrozen');
       return await callEsSearchApi({
         callCluster: request.pre.callCluster,
         index: request.payload.index,
