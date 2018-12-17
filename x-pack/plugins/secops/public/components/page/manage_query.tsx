@@ -7,7 +7,6 @@
 import { omit } from 'lodash/fp';
 import React from 'react';
 import { inputsModel } from '../../store';
-import { EventsTableProps, OwnHostsTableProps } from './hosts';
 
 interface OwnProps {
   id: string;
@@ -15,12 +14,10 @@ interface OwnProps {
   refetch: inputsModel.Refetch;
   setQuery: (params: { id: string; isLoading: boolean; refetch: inputsModel.Refetch }) => void;
 }
-type Props = (OwnProps & OwnHostsTableProps) | (OwnProps & EventsTableProps);
-export const manageQuery = (
-  WrappedComponent: React.ComponentType<EventsTableProps> | React.ComponentClass<OwnHostsTableProps>
-) => {
-  class ManageQuery extends React.PureComponent<Props> {
-    public componentDidUpdate(prevProps: Props) {
+
+export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>) {
+  class ManageQuery extends React.PureComponent<OwnProps> {
+    public componentDidUpdate(prevProps: OwnProps) {
       const { loading, id, refetch, setQuery } = this.props;
       if (prevProps.loading !== loading) {
         setQuery({ id, isLoading: loading, refetch });
@@ -34,4 +31,4 @@ export const manageQuery = (
   }
 
   return ManageQuery;
-};
+}
