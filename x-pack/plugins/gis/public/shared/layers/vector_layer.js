@@ -435,8 +435,6 @@ export class VectorLayer extends ALayer {
   _syncSourceBindingWithMb(mbMap) {
     const mbSource = mbMap.getSource(this.getId());
     if (!mbSource) {
-      //todo: hack, but want to get some quick visual indication for points data
-      //cannot map single kibana layer to single mapbox source
       mbMap.addSource(this.getId(), {
         type: 'geojson',
         data: { 'type': 'FeatureCollection', 'features': [] }
