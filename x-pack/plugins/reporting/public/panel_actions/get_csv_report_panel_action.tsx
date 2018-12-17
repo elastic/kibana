@@ -14,7 +14,7 @@ import {
 } from 'ui/embeddable';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
-import { SearchEmbeddable } from '../../../../../src/core_plugins/kibana/public/discover/embeddable/search_embeddable';
+import { SearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { jobCompletionNotifications } from '../lib/job_completion_notifications';
 
 class GetCsvReportPanelAction extends ContextMenuAction {
@@ -32,6 +32,34 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       }
     );
   }
+
+  public async generateJobParams({ searchEmbeddable }: { searchEmbeddable: SearchEmbeddable }) {
+    const adapters = searchEmbeddable.getInspectorAdapters();
+    if (!adapters) {
+      return '';
+    }
+    if (adapters.requests.requests.length === 0) {
+      return '';
+    }
+    const body = await searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
+    const timeFieldName = searchEmbeddable.metadata.indexPattern.timeFieldName;
+    const fields = timeFieldName
+      ? [timeFieldName, ...searchEmbeddable.savedSearch.columns]
+      : searchEmbeddable.savedSearch.columns;
+
+    const jobParams = rison.encode({
+      conflictedTypesFields: [],
+      fields,
+      indexPatternId: searchEmbeddable.metadata.indexPattern.id,
+      metaFields: searchEmbeddable.metadata.indexPattern.metaFields,
+      searchRequest: { body },
+      title: searchEmbeddable.savedSearch.title,
+      type: 'search',
+    });
+
+    return jobParams;
+  }
+
   public isVisible({ embeddable }: { embeddable: Embeddable }): boolean {
     if (!embeddable) {
       return false;
@@ -59,35 +87,21 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     }
     const searchEmbeddable = embeddable as SearchEmbeddable;
 
-    if (!searchEmbeddable.savedSearch.id) {
-      return;
-    }
-
     closeContextMenu();
 
-    const searchURL = searchEmbeddable.generateAccessLink(containerState);
+    const jobParams = await this.generateJobParams({ searchEmbeddable });
 
-    const reportconfig = {
-      browserTimezone: 'America/Phoenix',
-      layout: {
-        dimensions: {
-          width: 960,
-          height: 720,
-        },
-      },
-      objectType: 'search',
-      relativeUrl: searchURL,
-      title: 'searchEmbeddable.getPanelTitle(containerState)',
-    };
-
+    if (jobParams === '') {
+      return;
+    }
     const query = {
-      jobParams: rison.encode(reportconfig),
+      jobParams,
     };
 
     const API_BASE_URL = '/api/reporting/generate';
 
     toastNotifications.addSuccess({
-      title: `Queued report for ${reportconfig.objectType}`,
+      title: `Queued report for CSV`,
       text: 'Track its progress in Management',
       'data-test-subj': 'queueReportSuccess',
     });

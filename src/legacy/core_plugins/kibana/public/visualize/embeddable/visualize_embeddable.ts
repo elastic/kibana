@@ -112,8 +112,9 @@ export class VisualizeEmbeddable extends Embeddable {
     }
   }
 
-  /**
-   * Generates an access URL that will be used in creating a PNG report.
+  /*
+   * Generates an access URL that can be used to open up the visualization directly in the Visualize App,
+   with the settings applied from the given containerState.    
    */
   public generateAccessLink(containerState: ContainerState) {
     const id = this.savedVisualization.id;

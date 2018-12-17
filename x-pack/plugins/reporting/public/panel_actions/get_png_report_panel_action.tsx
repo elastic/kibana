@@ -14,7 +14,7 @@ import {
 } from 'ui/embeddable';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
-import { VisualizeEmbeddable } from '../../../../../src/core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
+import { VisualizeEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
 import { jobCompletionNotifications } from '../lib/job_completion_notifications';
 
 class GetPngReportPanelAction extends ContextMenuAction {
@@ -59,10 +59,6 @@ class GetPngReportPanelAction extends ContextMenuAction {
     }
     const visualizeEmbeddable = embeddable as VisualizeEmbeddable;
 
-    if (!visualizeEmbeddable.savedVisualization.id) {
-      return;
-    }
-
     closeContextMenu();
 
     const visualizationURL = visualizeEmbeddable.generateAccessLink(containerState);
@@ -77,7 +73,7 @@ class GetPngReportPanelAction extends ContextMenuAction {
       },
       objectType: 'visualization',
       relativeUrl: visualizationURL,
-      title: visualizeEmbeddable.getPanelTitle(containerState),
+      title: visualizeEmbeddable.metadata.title,
     };
 
     const query = {
