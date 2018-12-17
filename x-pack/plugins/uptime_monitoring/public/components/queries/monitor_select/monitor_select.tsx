@@ -20,10 +20,18 @@ interface MonitorSelectProps {
   onChange: (path: string, state: object) => void;
 }
 
-export const MonitorSelect = (props: MonitorSelectProps) => (
+export const MonitorSelect = ({
+  dateRangeStart,
+  dateRangeEnd,
+  valueOfSelectedMonitor,
+  autorefreshInterval,
+  autorefreshEnabled,
+  onChange,
+}: MonitorSelectProps) => (
   <Query
-    pollInterval={props.autorefreshEnabled ? props.autorefreshInterval : undefined}
-    query={createGetLatestMonitorsQuery({ ...props })}
+    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    query={createGetLatestMonitorsQuery}
+    variables={{ dateRangeStart, dateRangeEnd }}
   >
     {({ loading, error, data }) => {
       if (loading) {
@@ -47,8 +55,8 @@ export const MonitorSelect = (props: MonitorSelectProps) => (
       return (
         <EuiSuperSelect
           options={options}
-          valueOfSelected={props.valueOfSelectedMonitor}
-          onChange={(e: string) => props.onChange(`/monitor/${e}`, {})}
+          valueOfSelected={valueOfSelectedMonitor}
+          onChange={(e: string) => onChange(`/monitor/${e}`, {})}
         />
       );
     }}

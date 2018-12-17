@@ -6,17 +6,12 @@
 
 import gql from 'graphql-tag';
 
-interface UMLatestMonitorsQueryOptions {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-}
-
-export const createGetLatestMonitorsQuery = ({
-  dateRangeStart,
-  dateRangeEnd,
-}: UMLatestMonitorsQueryOptions) => gql`
-  {
-    latestMonitors: getLatestMonitors(dateRangeStart: ${dateRangeStart}, dateRangeEnd: ${dateRangeEnd}) {
+export const createGetLatestMonitorsQuery = gql`
+  query GetLatestMonitorQuery($dateRangeStart: UnsignedInteger!, $dateRangeEnd: UnsignedInteger!) {
+    latestMonitors: getLatestMonitors(
+      dateRangeStart: $dateRangeStart
+      dateRangeEnd: $dateRangeEnd
+    ) {
       monitor {
         status
         id
