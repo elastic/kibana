@@ -455,8 +455,29 @@ export class VectorLayer extends ALayer {
     });
   }
 
+  _canShowTooltips() {
+    return this._source.canFormatFeatureProperties();
+  }
+
+
+  async _getPropertiesForTooltip(feature) {
+    const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);
+
+    //add tooltips from joins
+    const allProps = this._joins.reduce((acc, join) => {
+      const propsFromJoin = join.filterAndFormatPropertiesForTooltip(feature.properties);
+      return {
+        ...propsFromJoin,
+        ...acc,
+      };
+    }, { ...tooltipsFromSource });
+
+    return allProps;
+  }
+
   _addTooltipListeners(mbMap, mbLayerId) {
-    if (!this._source.areFeatureTooltipsEnabled()) {
+
+    if (!this._canShowTooltips()) {
       return;
     }
 
@@ -467,7 +488,7 @@ export class VectorLayer extends ALayer {
 
       let popupAnchorLocation = e.lngLat; // default popup location to mouse location
       if (feature.geometry.type === 'Point') {
-        const coordinates = e.features[0].geometry.coordinates.slice();
+        const coordinates = feature.geometry.coordinates.slice();
 
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
@@ -479,7 +500,7 @@ export class VectorLayer extends ALayer {
         popupAnchorLocation = coordinates;
       }
 
-      const properties = await this._source.filterAndFormatProperties(e.features[0].properties);
+      const properties = await this._getPropertiesForTooltip(feature);
 
       ReactDOM.render(
         React.createElement(

@@ -99,4 +99,8 @@ export class EMSFileSource extends VectorSource {
     return false;
   }
 
+  canFormatFeatureProperties() {
+    return true;
+  }
+
 }

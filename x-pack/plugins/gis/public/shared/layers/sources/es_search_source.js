@@ -158,7 +158,7 @@ export class ESSearchSource extends VectorSource {
     };
   }
 
-  areFeatureTooltipsEnabled() {
+  canFormatFeatureProperties() {
     return this._descriptor.showTooltip && this._descriptor.tooltipProperties.length > 0;
   }
 

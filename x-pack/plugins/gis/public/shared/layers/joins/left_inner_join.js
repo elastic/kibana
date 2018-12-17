@@ -68,5 +68,21 @@ export class LeftInnerJoin {
     return this._descriptor;
   }
 
+  filterAndFormatPropertiesForTooltip(properties) {
+    const joinFields = this.getJoinFields();
+    const tooltipProps = {};
+    joinFields.forEach((joinField) => {
+      for (const key in properties) {
+        if (properties.hasOwnProperty(key)) {
+          if (joinField.name === key) {
+            tooltipProps[joinField.label] = properties[key];
+          }
+        }
+      }
+    });
+
+    return tooltipProps;
+  }
+
 }
 
