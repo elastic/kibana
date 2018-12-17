@@ -9,7 +9,6 @@ import { EMS_V2 } from '../common/ems_v2';
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import _ from 'lodash';
-import ZIPCODES from './junk/usa_zip_codes_v2';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -23,14 +22,6 @@ export function initRoutes(server) {
     license: server.plugins.xpack_main.info.license.getUid(),
     manifestServiceUrl: mapConfig.manifestServiceUrl,
     emsLandingPageUrl: mapConfig.emsLandingPageUrl
-  });
-
-  server.route({
-    method: 'get',
-    path: `${ROOT}/junk`,
-    handler: async () => {
-      return ZIPCODES;
-    }
   });
 
   server.route({
