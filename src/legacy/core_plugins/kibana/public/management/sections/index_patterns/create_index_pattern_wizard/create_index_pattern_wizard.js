@@ -104,7 +104,7 @@ export class CreateIndexPatternWizard extends Component {
       defaultMessage="Failed to load remote clusters"
     />);
 
-    const [allIndices, remoteClusters] = await ensureMinimumTime([
+    const [allIndices, { remoteClustersExist }] = await ensureMinimumTime([
       this.catchAndWarn(getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg),
       this.catchAndWarn(getRemoteClusters(services.$http), [], clustersFailMsg)
     ]);
@@ -112,7 +112,7 @@ export class CreateIndexPatternWizard extends Component {
     this.setState({
       allIndices,
       isInitiallyLoadingIndices: false,
-      remoteClustersExist: remoteClusters.length !== 0
+      remoteClustersExist
     });
   }
 

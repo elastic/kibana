@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { callWithRequestFactory } from './call_with_request_factory';
 import handleEsError from '../../../lib/handle_es_error';
 
 async function fetchRemoteClusters(callWithRequest) {
@@ -26,17 +25,17 @@ async function fetchRemoteClusters(callWithRequest) {
     path: '_remote/info'
   };
   const remoteInfo = await callWithRequest('transport.request', options);
-  return Object.keys(remoteInfo);
+  // request made with internal user. please don't extend data returned.
+  return { 'remoteClustersExist': Object.keys(remoteInfo).length > 0 };
 }
 
 export function registerClustersRoute(server) {
   server.route({
     path: '/api/kibana/clusters',
     method: 'GET',
-    handler: async request => {
-      const callWithRequest = callWithRequestFactory(server, request);
+    handler: async () => {
       try {
-        return await fetchRemoteClusters(callWithRequest);
+        return await fetchRemoteClusters(server.plugins.elasticsearch.getCluster('data').callWithInternalUser);
       } catch (error) {
         throw handleEsError(error);
       }
