@@ -19,7 +19,6 @@ import {
 import { API_STATUS } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
-import { getPrefixSuffixFromFollowPattern } from '../../../../../services/auto_follow_pattern';
 
 export const AutoFollowPatternTable = injectI18n(
   class extends PureComponent {
@@ -45,12 +44,14 @@ export const AutoFollowPatternTable = injectI18n(
 
       if(queryText) {
         return autoFollowPatterns.filter(autoFollowPattern => {
-          const { name, remoteCluster } = autoFollowPattern;
+          const { name, remoteCluster, followIndexPatternPrefix, followIndexPatternSuffix } = autoFollowPattern;
 
           const inName = name.toLowerCase().includes(queryText);
           const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
+          const inPrefix = followIndexPatternPrefix.toLowerCase().includes(queryText);
+          const inSuffix = followIndexPatternSuffix.toLowerCase().includes(queryText);
 
-          return inName || inRemoteCluster;
+          return inName || inRemoteCluster || inPrefix || inSuffix;
         });
       }
 
@@ -84,25 +85,19 @@ export const AutoFollowPatternTable = injectI18n(
         }),
         render: (leaderPatterns) => leaderPatterns.join(', '),
       }, {
-        field: 'followIndexPattern',
+        field: 'followIndexPatternPrefix',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternList.table.prefixColumnTitle',
           defaultMessage: 'Follower pattern prefix',
         }),
-        render: (followIndexPattern) => {
-          const { followIndexPatternPrefix } = getPrefixSuffixFromFollowPattern(followIndexPattern);
-          return followIndexPatternPrefix;
-        }
+        sortable: true,
       }, {
-        field: 'followIndexPattern',
+        field: 'followIndexPatternSuffix',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternList.table.suffixColumnTitle',
           defaultMessage: 'Follower pattern suffix',
         }),
-        render: (followIndexPattern) => {
-          const { followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(followIndexPattern);
-          return followIndexPatternSuffix;
-        }
+        sortable: true,
       }, {
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternList.table.actionsColumnTitle',
