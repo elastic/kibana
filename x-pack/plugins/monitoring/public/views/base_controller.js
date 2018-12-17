@@ -97,23 +97,21 @@ export class MonitoringViewBaseController {
     }
 
     this.updateDataPromise = null;
-    this.updatingData = false;
     this.updateData = () => {
-      if (this.updatingData) {
+      if (this.updateDataPromise) {
         // Do not sent another request if one is inflight
         // See https://github.com/elastic/kibana/issues/24082
         return this.updateDataPromise;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      this.updatingData = true;
       return this.updateDataPromise = _getPageData($injector, _api)
         .then(pageData => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result
-          this.updatingData = false;
+          this.updateDataPromise = null;
         })
         .catch(() => {
-          this.updatingData = false;
+          this.updateDataPromise = null;
         });
     };
     this.updateData();
