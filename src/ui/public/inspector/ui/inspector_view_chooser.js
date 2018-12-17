@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -27,6 +28,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+
+const viewLabel = i18n.translate('common.ui.inspector.view', {
+  defaultMessage: 'View',
+});
 
 class InspectorViewChooser extends Component {
 
@@ -72,7 +77,7 @@ class InspectorViewChooser extends Component {
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"
       >
-        View: { this.props.selectedView.title }
+        {viewLabel}: { this.props.selectedView.title }
       </EuiButtonEmpty>
     );
   }
@@ -83,7 +88,7 @@ class InspectorViewChooser extends Component {
         position="bottom"
         content={this.props.selectedView.help}
       >
-        <span>View: { this.props.selectedView.title }</span>
+        <span>{viewLabel}: { this.props.selectedView.title }</span>
       </EuiToolTip>
     );
   }
