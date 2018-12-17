@@ -61,12 +61,17 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       ])
     );
 
-    await this.database.bulk(user, {
+    const result = await this.database.bulk(user, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
     });
+
+    if (result.errors) {
+      throw new Error(result.items[0].result);
+    }
+
     return tokens;
   }
 }
