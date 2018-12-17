@@ -18,7 +18,7 @@
       <icon ng-if="euiIconType" type="'{{ euiIconType }}'" size="'l'" color="'ghost'" class="global-nav-link__euiIcon"></icon>
 
       <img
-        ng-if="!euiIconType"
+        ng-if="!euiIconType && icon"
         class="global-nav-link__icon-image"
         kbn-src="{{ '/' + icon }}"
         aria-hidden="true"
