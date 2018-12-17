@@ -256,9 +256,15 @@ export class ESGeohashGridSource extends VectorSource {
           }
         },
         "iconSize": {
-          "type": "STATIC",
+          "type": "DYNAMIC",
           "options": {
-            "size": 10
+            "field": {
+              "label": "doc_count",
+              "name": "doc_count",
+              "origin": "source"
+            },
+            "minSize": 4,
+            "maxSize": 32,
           }
         },
         "alphaValue": 1
