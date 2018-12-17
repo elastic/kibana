@@ -21,7 +21,7 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlMetricDistributionChart', function () {
+module.directive('mlMetricDistributionChart', function (i18n) {
 
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
@@ -179,7 +179,13 @@ module.directive('mlMetricDistributionChart', function () {
         .attr('y', 10)
         .attr('class', 'info-text')
         .attr('transform', `translate(${margin.left}, ${margin.top})`)
-        .text(`Displaying ${minPercent} - ${maxPercent} percentiles`);
+        .text(i18n('xpack.ml.metricDistributionChart.displayingPercentilesLabel', {
+          defaultMessage: 'Displaying {minPercent} - {maxPercent} percentiles',
+          values: {
+            minPercent,
+            maxPercent,
+          },
+        }));
 
       const translateTop = margin.top + infoLabelHeight;
       chartGroup = svg.append('g')
