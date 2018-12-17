@@ -1100,12 +1100,35 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
   integrity sha512-ONhaKPIufzzrlNbqtWFFd+jlnemX6lJAgq9ZeiZtS7I1PIf/la7CW4m83rTXRnVnsMbW2k56pGYu7AUFJD9Pow==
 
+"@sinonjs/commons@^1.0.2", "@sinonjs/commons@^1.2.0":
+  version "1.3.0"
+  resolved "http://registry.npm.taobao.org/@sinonjs/commons/download/@sinonjs/commons-1.3.0.tgz#50a2754016b6f30a994ceda6d9a0a8c36adda849"
+  integrity sha1-UKJ1QBa28wqZTO2m2aCow2rdqEk=
+  dependencies:
+    type-detect "4.0.8"
+
 "@sinonjs/formatio@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@sinonjs/formatio/-/formatio-2.0.0.tgz#84db7e9eb5531df18a8c5e0bfb6e449e55e654b2"
   integrity sha512-ls6CAMA6/5gG+O/IdsBcblvnd8qcO/l1TYoNeAzp3wcISOxlPXQEus0mLcdwazEkWjaBdaJ3TaxmNgCLWwvWzg==
   dependencies:
     samsam "1.3.0"
+
+"@sinonjs/formatio@^3.1.0":
+  version "3.1.0"
+  resolved "http://registry.npm.taobao.org/@sinonjs/formatio/download/@sinonjs/formatio-3.1.0.tgz#6ac9d1eb1821984d84c4996726e45d1646d8cce5"
+  integrity sha1-asnR6xghmE2ExJlnJuRdFkbYzOU=
+  dependencies:
+    "@sinonjs/samsam" "^2 || ^3"
+
+"@sinonjs/samsam@^2 || ^3", "@sinonjs/samsam@^3.0.2":
+  version "3.0.2"
+  resolved "http://registry.npm.taobao.org/@sinonjs/samsam/download/@sinonjs/samsam-3.0.2.tgz#304fb33bd5585a0b2df8a4c801fcb47fa84d8e43"
+  integrity sha1-ME+zO9VYWgst+KTIAfy0f6hNjkM=
+  dependencies:
+    "@sinonjs/commons" "^1.0.2"
+    array-from "^2.1.1"
+    lodash.get "^4.4.2"
 
 "@slack/client@^4.8.0":
   version "4.8.0"
@@ -2881,6 +2904,11 @@ array-flatten@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/array-flatten/-/array-flatten-2.1.1.tgz#426bb9da84090c1838d812c8150af20a8331e296"
   integrity sha1-Qmu52oQJDBg42BLIFQryCoMx4pY=
+
+array-from@^2.1.1:
+  version "2.1.1"
+  resolved "http://registry.npm.taobao.org/array-from/download/array-from-2.1.1.tgz#cfe9d8c26628b9dc5aecc62a9f5d8f1f352c1195"
+  integrity sha1-z+nYwmYoudxa7MYqn12PHzUsEZU=
 
 array-ify@^1.0.0:
   version "1.0.0"
@@ -5049,7 +5077,7 @@ chai@3.5.0, "chai@>=1.9.2 <4.0.0":
     deep-eql "^0.1.3"
     type-detect "^1.0.0"
 
-chai@^4.0.1, chai@^4.2.0:
+chai@^4.0.1, chai@^4.1.2, chai@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/chai/-/chai-4.2.0.tgz#760aa72cf20e3795e84b12877ce0e83737aa29e5"
   integrity sha512-XQU3bhBukrOsQCuwZndwGcCVQHyZi53fQ6Ys1Fym7E4olpIqqZZhhoFJoaKVvV17lWQoXYwgWN2nF5crA8J2jw==
@@ -6915,6 +6943,13 @@ debug@3.X, debug@^3.1.0, debug@^3.2.5:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.2.6.tgz#e83d17de16d8a7efb7717edbe5fb10135eee629b"
   integrity sha512-mel+jf7nrtEl5Pn1Qx46zARXKDpBbvzezse7p7LqINmdoIk8PYP5SySaxEmYv6TZ0JyEKA1hsCId6DIhgITtWQ==
+  dependencies:
+    ms "^2.1.1"
+
+debug@^4.1.0:
+  version "4.1.0"
+  resolved "http://registry.npm.taobao.org/debug/download/debug-4.1.0.tgz#373687bffa678b38b1cd91f861b63850035ddc87"
+  integrity sha1-NzaHv/pnizixzZH4YbY4UANd3Ic=
   dependencies:
     ms "^2.1.1"
 
@@ -13259,6 +13294,11 @@ just-extend@^1.1.27:
   resolved "https://registry.yarnpkg.com/just-extend/-/just-extend-1.1.27.tgz#ec6e79410ff914e472652abfa0e603c03d60e905"
   integrity sha512-mJVp13Ix6gFo3SBAy9U/kL+oeZqzlYYYLQBwXVBlVzIsZwBqGREnOro24oC/8s8aox+rJhtZ2DiQof++IrkA+g==
 
+just-extend@^4.0.2:
+  version "4.0.2"
+  resolved "http://registry.npm.taobao.org/just-extend/download/just-extend-4.0.2.tgz#f3f47f7dfca0f989c55410a7ebc8854b07108afc"
+  integrity sha1-8/R/ffyg+YnFVBCn68iFSwcQivw=
+
 just-reduce-object@^1.0.3:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/just-reduce-object/-/just-reduce-object-1.1.0.tgz#d29d172264f8511c74462de30d72d5838b6967e6"
@@ -14390,6 +14430,11 @@ lolex@^2.2.0, lolex@^2.3.2:
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.6.0.tgz#cf9166f3c9dece3cdeb5d6b01fce50f14a1203e3"
   integrity sha512-e1UtIo1pbrIqEXib/yMjHciyqkng5lc0rrIbytgjmRgDR9+2ceNIAcwOWSgylRjoEP9VdVguCSRwnNmlbnOUwA==
 
+lolex@^3.0.0:
+  version "3.0.0"
+  resolved "http://registry.npm.taobao.org/lolex/download/lolex-3.0.0.tgz#f04ee1a8aa13f60f1abd7b0e8f4213ec72ec193e"
+  integrity sha1-8E7hqKoT9g8avXsOj0IT7HLsGT4=
+
 long@^2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/long/-/long-2.4.0.tgz#9fa180bb1d9500cdc29c4156766a1995e1f4524f"
@@ -15420,6 +15465,17 @@ nise@^1.2.0:
     path-to-regexp "^1.7.0"
     text-encoding "^0.6.4"
 
+nise@^1.4.7:
+  version "1.4.8"
+  resolved "http://registry.npm.taobao.org/nise/download/nise-1.4.8.tgz#ce91c31e86cf9b2c4cac49d7fcd7f56779bfd6b0"
+  integrity sha1-zpHDHobPmyxMrEnX/Nf1Z3m/1rA=
+  dependencies:
+    "@sinonjs/formatio" "^3.1.0"
+    just-extend "^4.0.2"
+    lolex "^2.3.2"
+    path-to-regexp "^1.7.0"
+    text-encoding "^0.6.4"
+
 no-case@^2.2.0, no-case@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-2.3.2.tgz#60b813396be39b3f1288a4c1ed5d1e7d28b464ac"
@@ -15431,6 +15487,21 @@ no-ui-slider@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/no-ui-slider/-/no-ui-slider-1.2.0.tgz#1f64f5a8b82e6786f3261d82b0cc99b598817e69"
   integrity sha1-H2T1qLguZ4bzJh2CsMyZtZiBfmk=
+
+nock@10.0.4:
+  version "10.0.4"
+  resolved "http://registry.npm.taobao.org/nock/download/nock-10.0.4.tgz#44f5dcfe0a6b09f95d541f6b3f057cfabbbd2a3a"
+  integrity sha1-RPXc/gprCfldVB9rPwV8+ru9Kjo=
+  dependencies:
+    chai "^4.1.2"
+    debug "^4.1.0"
+    deep-equal "^1.0.0"
+    json-stringify-safe "^5.0.1"
+    lodash "^4.17.5"
+    mkdirp "^0.5.0"
+    propagate "^1.0.0"
+    qs "^6.5.1"
+    semver "^5.5.0"
 
 nock@8.0.0:
   version "8.0.0"
@@ -15636,9 +15707,9 @@ nodegit-promise@~4.0.0:
   dependencies:
     asap "~2.0.3"
 
-"nodegit@git+https://github.com/elastic/nodegit.git#v0.24.0-alpha.6":
+"nodegit@git+https://github.com/elastic/nodegit.git":
   version "0.24.0-alpha.6"
-  resolved "git+https://github.com/elastic/nodegit.git#a997b5adc28b89386d325c56993030acc7ca8c40"
+  resolved "git+https://github.com/elastic/nodegit.git#54173ad757bc09f155183bb27bce921b02fb8198"
   dependencies:
     babel-cli "^6.7.7"
     babel-preset-es2015 "^6.6.0"
@@ -17270,6 +17341,11 @@ propagate@0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/propagate/-/propagate-0.4.0.tgz#f3fcca0a6fe06736a7ba572966069617c130b481"
   integrity sha1-8/zKCm/gZzanulcpZgaWF8EwtIE=
+
+propagate@^1.0.0:
+  version "1.0.0"
+  resolved "http://registry.npm.taobao.org/propagate/download/propagate-1.0.0.tgz#00c2daeedda20e87e3782b344adba1cddd6ad709"
+  integrity sha1-AMLa7t2iDofjeCs0Stuhzd1q1wk=
 
 proper-lockfile@^3.0.2:
   version "3.2.0"
@@ -19765,6 +19841,19 @@ sinon@^5.0.7:
     supports-color "^5.1.0"
     type-detect "^4.0.5"
 
+sinon@v7.2.2:
+  version "7.2.2"
+  resolved "http://registry.npm.taobao.org/sinon/download/sinon-7.2.2.tgz#388ecabd42fa93c592bfc71d35a70894d5a0ca07"
+  integrity sha1-OI7KvUL6k8WSv8cdNacIlNWgygc=
+  dependencies:
+    "@sinonjs/commons" "^1.2.0"
+    "@sinonjs/formatio" "^3.1.0"
+    "@sinonjs/samsam" "^3.0.2"
+    diff "^3.5.0"
+    lolex "^3.0.0"
+    nise "^1.4.7"
+    supports-color "^5.5.0"
+
 sisteransi@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/sisteransi/-/sisteransi-0.1.1.tgz#5431447d5f7d1675aac667ccd0b865a4994cb3ce"
@@ -21550,15 +21639,15 @@ type-detect@0.1.1:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-0.1.1.tgz#0ba5ec2a885640e470ea4e8505971900dac58822"
   integrity sha1-C6XsKohWQORw6k6FBZcZANrFiCI=
 
+type-detect@4.0.8, type-detect@^4.0.0, type-detect@^4.0.5, type-detect@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
+  integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
+
 type-detect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-1.0.0.tgz#762217cc06db258ec48908a1298e8b95121e8ea2"
   integrity sha1-diIXzAbbJY7EiQihKY6LlRIejqI=
-
-type-detect@^4.0.0, type-detect@^4.0.5, type-detect@^4.0.8:
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
-  integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
 type-is@~1.6.15, type-is@~1.6.16:
   version "1.6.16"

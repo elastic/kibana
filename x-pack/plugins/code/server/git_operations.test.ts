@@ -4,33 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { execSync } from 'child_process';
 import fs from 'fs';
 import Git from 'nodegit';
+import os from 'os';
+import path from 'path';
+import rimraf from 'rimraf';
 import { getDefaultBranch } from './git_operations';
 
-function rmDir(dirPath: string) {
-  const files = fs.readdirSync(dirPath);
-  if (files.length > 0) {
-    for (const f of files) {
-      const filePath = dirPath + '/' + f;
-      if (fs.statSync(filePath).isFile()) {
-        fs.unlinkSync(filePath);
-      } else {
-        rmDir(filePath);
-      }
-    }
-  }
-  fs.rmdirSync(dirPath);
-}
+jest.setTimeout(10000);
 
-it('get default branch from a non master repo', async () => {
-  const path = '/tmp/testtrunk';
-  if (fs.existsSync(path)) {
-    rmDir(path);
+test('get default branch from a non master repo', async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test_git'));
+  // create a non-master using git commands
+  const shell = `
+    git init
+    git add 'run.sh'
+    git commit -m 'init commit'
+    git branch -m trunk
+  `;
+  fs.writeFileSync(path.join(tmpDir, 'run.sh'), shell, 'utf-8');
+  execSync('sh ./run.sh', {
+    cwd: tmpDir,
+  });
+
+  try {
+    const defaultBranch = await getDefaultBranch(tmpDir);
+    expect(defaultBranch).toEqual('trunk');
+  } finally {
+    rimraf.sync(tmpDir);
   }
-  await Git.Clone.clone('https://github.com/spacedragon/testtrunk.git', path);
-  const defaultBranch = await getDefaultBranch(path);
-  expect(defaultBranch).toEqual('trunk');
-  rmDir(path);
   return '';
+});
+
+test('nodegit should be able to clone a repo from github.com', async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test_clone'));
+  const url = 'https://github.com/Microsoft/TypeScript-Node-Starter.git';
+  try {
+    await Git.Clone.clone(url, tmpDir);
+    expect(fs.existsSync(path.join(tmpDir, '.git'))).toBeTruthy();
+  } finally {
+    rimraf.sync(tmpDir);
+  }
 });
