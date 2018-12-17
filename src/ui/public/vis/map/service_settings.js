@@ -74,7 +74,7 @@ uiModules.get('kibana')
         this._loadCatalogue = _.once(async () => {
 
           if (!mapConfig.includeElasticMapsService) {
-            return { services: [] };
+            return [];
           }
 
           try {
@@ -101,7 +101,7 @@ uiModules.get('kibana')
             return [];
           }
 
-          const { layers = null } = await this._getManifest(fileService.manifest);
+          const { layers } = await this._getManifest(fileService.manifest);
           if (layers) {
             const fileLayers = layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
             layers.forEach((layer) => {
@@ -120,7 +120,7 @@ uiModules.get('kibana')
           if (!tmsService) {
             return [];
           }
-          const { services = null } = await this._getManifest(tmsService.manifest);
+          const { services } = await this._getManifest(tmsService.manifest);
           const preppedTMSServices = services
             ? services.map((tmsService) => {
               const preppedService = _.cloneDeep(tmsService);
@@ -150,7 +150,7 @@ uiModules.get('kibana')
           method: 'GET',
           timeout: this.EMS_LOAD_TIMEOUT
         }).then(({ data }) => data)
-          .catch(() => null);
+          .catch(() => ({ services: null }));
       }
 
       async getFileLayers() {
