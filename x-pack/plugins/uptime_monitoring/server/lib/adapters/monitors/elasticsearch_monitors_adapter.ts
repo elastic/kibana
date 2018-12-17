@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, set } from 'lodash';
 import { UMGqlRange } from 'x-pack/plugins/uptime_monitoring/common/domain_types';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DatabaseAdapter } from '../database';
@@ -40,7 +40,7 @@ const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
-  let query = { ...filtersObj };
+  const query = { ...filtersObj };
   const rangeSection = {
     range: {
       '@timestamp': {
@@ -54,7 +54,7 @@ const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?
       ...rangeSection,
     });
   } else {
-    query = { ...rangeSection };
+    set(query, 'bool.must', [rangeSection]);
   }
   return query;
 };
@@ -373,22 +373,24 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: number,
     filters?: string | undefined
   ): Promise<any> {
+    const statusDown = {
+      term: {
+        'monitor.status': {
+          value: 'down',
+        },
+      },
+    };
+    const query = getFilteredQuery(dateRangeStart, dateRangeEnd, filters);
+    if (get(query, 'bool.must', undefined)) {
+      query.bool.must.push(statusDown);
+    } else {
+      set(query, 'bool.must', [{ ...statusDown }]);
+    }
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  'monitor.status': {
-                    value: 'down',
-                  },
-                },
-              },
-            ],
-          },
-        },
+        query,
         aggs: {
           error_type: {
             terms: {
