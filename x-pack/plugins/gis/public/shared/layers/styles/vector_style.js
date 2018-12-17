@@ -321,7 +321,7 @@ export class VectorStyle {
 
   _getMBOpacity() {
     const DEFAULT_OPACITY = 1;
-    const opacity = this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
+    const opacity = typeof this._descriptor.properties.alphaValue === 'number' ? this._descriptor.properties.alphaValue : DEFAULT_OPACITY;
     return opacity;
   }
 

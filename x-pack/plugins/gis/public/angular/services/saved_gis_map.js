@@ -44,7 +44,7 @@ module.factory('SavedGisMap', function (Private) {
             style: {
               type: TileStyle.type,
               properties: {
-                alphaValue: 1.0
+                alphaValue: 1
               }
             },
             type: "TILE",

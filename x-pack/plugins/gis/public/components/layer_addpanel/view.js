@@ -42,7 +42,7 @@ export class AddLayerPanel extends React.Component {
 
   componentDidUpdate() {
     if (this.layer && this.state.alphaValue === null) {
-      const defaultAlphaValue = this.layer._descriptor.type === 'TILE' ? 1.0 : 1;
+      const defaultAlphaValue = this.layer._descriptor.type === 'TILE' ? 1 : 1;
       if (this.state.alphaValue !== defaultAlphaValue) {
         this.setState({
           alphaValue: defaultAlphaValue

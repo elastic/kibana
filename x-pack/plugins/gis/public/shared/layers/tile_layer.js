@@ -18,7 +18,7 @@ export class TileLayer extends ALayer {
     super({ layerDescriptor, source, style });
     if (!style || !_.get(style, '_descriptor.properties.alphaValue')) {
       const defaultStyle = TileStyle.createDescriptor({
-        alphaValue: 1.0
+        alphaValue: 1
       });
       this._style = new TileStyle(defaultStyle);
     }

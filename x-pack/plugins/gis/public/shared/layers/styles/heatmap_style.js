@@ -49,7 +49,7 @@ export class HeatmapStyle {
 
   _getMBOpacity() {
     const DEFAULT_OPACITY = 1;
-    return this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
+    return typeof this._descriptor.properties.alphaValue === 'number' ?  this._descriptor.properties.alphaValue : DEFAULT_OPACITY;
   }
 
   setMBPaintProperties(mbMap, pointLayerID, property) {
