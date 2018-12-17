@@ -7,7 +7,7 @@
 import d3 from 'd3';
 import moment from 'moment';
 
-import { ANNOTATION_MASK_ID, ANNOTATION_TYPE } from '../../../../common/constants/annotations';
+import { ANNOTATION_TYPE } from '../../../../common/constants/annotations';
 import { Annotation, Annotations } from '../../../../common/types/annotations';
 import { Dictionary } from '../../../../common/types/common';
 
@@ -15,6 +15,8 @@ import { Dictionary } from '../../../../common/types/common';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 
 import { TimeseriesChart } from './timeseries_chart';
+
+export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
 
 // getAnnotationBrush() is expected to be called like getAnnotationBrush.call(this)
 // so it gets passed on the context of the component it gets called from.

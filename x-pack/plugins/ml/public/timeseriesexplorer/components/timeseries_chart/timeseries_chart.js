@@ -45,6 +45,7 @@ import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 import {
+  ANNOTATION_MASK_ID,
   getAnnotationBrush,
   getAnnotationLevels,
   renderAnnotations,
@@ -52,7 +53,6 @@ import {
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation
 } from './timeseries_chart_annotations';
-import { ANNOTATION_MASK_ID } from '../../../../common/constants/annotations';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
