@@ -26,6 +26,7 @@ interface Props {
 export const NodeContextMenu = injectI18n(
   ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl }: Props) => {
     const nodeName = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
+    const nodeField = options.fields ? options.fields[nodeType] : null;
     const nodeLogsUrl = nodeName
       ? getNodeLogsUrl({
           nodeType,
@@ -41,6 +42,17 @@ export const NodeContextMenu = injectI18n(
           to: timeRange.to,
         })
       : undefined;
+
+    const apmTracesUrl = {
+      name: intl.formatMessage(
+        {
+          id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
+          defaultMessage: 'View {nodeType} APM traces',
+        },
+        { nodeType }
+      ),
+      href: `../app/apm#/?_g=()&kuery=${nodeField}~20~3A~20~22${node.id}~22`,
+    };
 
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
@@ -69,6 +81,7 @@ export const NodeContextMenu = injectI18n(
                 },
               ]
             : []),
+          ...[apmTracesUrl],
         ],
       },
     ];
