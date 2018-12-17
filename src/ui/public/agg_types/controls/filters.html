@@ -1,16 +1,23 @@
 <div class="form-group">
   <div ng-repeat="filter in agg.params.filters">
     <div class="visEditorAggHeader">
-      <label class="visEditorAggHeader__title visEditorAggHeader__title--grow" for="visEditorFilterInput{{agg.id}}">
-          Filter {{$index + 1}}
-          <span ng-if="filter.label">- {{ filter.label }}</span>
+      <label
+        class="visEditorAggHeader__title visEditorAggHeader__title--grow"
+        for="visEditorFilterInput{{agg.id}}"
+      >
+        <span
+          i18n-id="common.ui.aggTypes.filters.filterLabel"
+          i18n-default-message="Filter {index}"
+          i18n-values="{ index: $index + 1 }"
+        ></span>
+        <span ng-if="filter.label">- {{ filter.label }}</span>
       </label>
 
       <div class="visEditorAggHeader__controls kuiButtonGroup kuiButtonGroup--united">
         <button
           ng-click="showConfig = !showConfig"
           type="button"
-          aria-label="Toggle filter label"
+          aria-label="{{ ::'common.ui.aggTypes.filters.toggleFilterButtonAriaLabel' | i18n: { defaultMessage: 'Toggle filter label' } }}"
           aria-expanded="{{!!showConfig}}"
           aria-controls="visEditorFilterLabel{{agg.id}}"
           class="kuiButton kuiButton--basic kuiButton--small">
@@ -18,7 +25,7 @@
         </button>
         <button
           type="button"
-          aria-label="Remove this filter"
+          aria-label="{{ ::'common.ui.aggTypes.filters.removeFilterButtonAriaLabel' | i18n: { defaultMessage: 'Remove this filter' } }}"
           ng-click="agg.params.filters.splice($index, 1)"
           class="kuiButton kuiButton--danger kuiButton--small">
           <i class="fa fa-times"></i>
@@ -38,11 +45,16 @@
     </div>
 
     <div class="form-group" ng-show="showConfig" id="visEditorFilterLabel{{agg.id}}">
-      <label for="visEditorFilterLabelInput{{agg.id}}">Filter {{$index + 1}} label</label>
+      <label
+        for="visEditorFilterLabelInput{{agg.id}}"
+        i18n-id="common.ui.aggTypes.filters.definiteFilterLabel"
+        i18n-default-message="Filter {index} label"
+        i18n-values="{ index: $index + 1 }"
+      ></label>
       <input
         id="visEditorFilterLabelInput{{agg.id}}"
         ng-model="filter.label"
-        placeholder="Label"
+        placeholder="{{ ::'common.ui.aggTypes.filters.labelPlaceholder' | i18n: { defaultMessage: 'Label' } }}"
         type="text"
         class="form-control"
         name="label{{$index}}">
@@ -54,7 +66,14 @@
 <div class="hintbox" ng-show="aggForm.filterLength.$invalid">
   <p>
     <i class="fa fa-danger text-danger"></i>
-    <strong>Required:</strong> You must specify at least one filter.
+    <strong
+      i18n-id="common.ui.aggTypes.filters.requiredFilterLabel"
+      i18n-default-message="Required:"
+    ></strong>
+    <span
+      i18n-id="common.ui.aggTypes.filters.requiredFilterDescription"
+      i18n-default-message="You must specify at least one filter."
+    ></span>
   </p>
 </div>
 
@@ -64,7 +83,7 @@
   ng-click="agg.params.filters.push({input:{}})"
   class="kuiButton kuiButton--primary kuiButton--fullWidth"
 >
-  Add Filter
+  {{ ::'common.ui.aggTypes.filters.addFilterButtonLabel' | i18n: { defaultMessage: 'Add Filter' } }}
 </button>
 
 <div class="euiSpacer euiSpacer--s"></div>

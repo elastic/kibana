@@ -86,11 +86,15 @@ uiModules
     };
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'management',
-    title: 'Management',
-    description: 'Your center console for managing the Elastic Stack.',
+    title: i18n('kbn.management.managementLabel', {
+      defaultMessage: 'Management',
+    }),
+    description: i18n('kbn.management.managementDescription', {
+      defaultMessage: 'Your center console for managing the Elastic Stack.',
+    }),
     icon: 'managementApp',
     path: '/app/kibana#/management',
     showOnHomePage: false,

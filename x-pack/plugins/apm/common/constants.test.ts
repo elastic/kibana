@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
-import { Span } from '../typings/Span';
-import { Transaction } from '../typings/Transaction';
+import { Span } from '../typings/es_schemas/Span';
+import { Transaction } from '../typings/es_schemas/Transaction';
 import * as constants from './constants';
 
 describe('Transaction v1:', () => {

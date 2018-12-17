@@ -33,7 +33,11 @@ import { PluginsSystem } from './plugins_system';
 
 function createPlugin(
   id: string,
-  { required = [], optional = [] }: { required?: string[]; optional?: string[] } = {}
+  {
+    required = [],
+    optional = [],
+    server = true,
+  }: { required?: string[]; optional?: string[]; server?: boolean } = {}
 ) {
   return new Plugin(
     'some-path',
@@ -44,6 +48,7 @@ function createPlugin(
       kibanaVersion: '7.0.0',
       requiredPlugins: required,
       optionalPlugins: optional,
+      server,
       ui: true,
     },
     { logger } as any
@@ -180,4 +185,37 @@ Array [
     expect(plugin.start).toHaveBeenCalledTimes(1);
     expect(plugin.start).toHaveBeenCalledWith(startContextMap.get(plugin.name), deps);
   }
+});
+
+test('`startPlugins` only starts plugins that have server side', async () => {
+  const firstPluginToRun = createPlugin('order-0');
+  const secondPluginNotToRun = createPlugin('order-not-run', { server: false });
+  const thirdPluginToRun = createPlugin('order-1');
+
+  [firstPluginToRun, secondPluginNotToRun, thirdPluginToRun].forEach((plugin, index) => {
+    jest.spyOn(plugin, 'start').mockResolvedValue(`added-as-${index}`);
+
+    pluginsSystem.addPlugin(plugin);
+  });
+
+  expect([...(await pluginsSystem.startPlugins())]).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "order-1",
+    "added-as-2",
+  ],
+  Array [
+    "order-0",
+    "added-as-0",
+  ],
+]
+`);
+
+  expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, firstPluginToRun);
+  expect(mockCreatePluginStartContext).not.toHaveBeenCalledWith(coreContext, secondPluginNotToRun);
+  expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, thirdPluginToRun);
+
+  expect(firstPluginToRun.start).toHaveBeenCalledTimes(1);
+  expect(secondPluginNotToRun.start).not.toHaveBeenCalled();
+  expect(thirdPluginToRun.start).toHaveBeenCalledTimes(1);
 });
