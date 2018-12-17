@@ -142,7 +142,7 @@ export class StaticDynamicStyleSelector extends React.Component {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSwitch
-              label={'Dynamic?'}
+              label={'Dynamic'}
               checked={this.state.isDynamic}
               onChange={e => this._onTypeToggle(e, currentOptions)}
             />
