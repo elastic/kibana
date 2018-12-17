@@ -56,7 +56,10 @@ describe('ElasticsearchPingsAdapter class', () => {
         index: 'heartbeat*',
         body: {
           query: {
-            match_all: {},
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: 100, lte: 200 } } }],
+              must: [],
+            },
           },
           sort: [{ '@timestamp': { order: 'asc' } }],
           size: 12,
@@ -65,7 +68,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
 
     it('returns data in the appropriate shape', async () => {
-      const result = await adapter.getAll(serverRequest, 'asc', 12);
+      const result = await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
 
       expect(result).toHaveLength(3);
       expect(result[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
@@ -75,7 +78,8 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('creates appropriate sort and size parameters', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'asc', 12);
+
+      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
 
       expect(database.search).toHaveBeenCalledTimes(1);
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
@@ -83,14 +87,14 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('omits the sort param when no sort passed', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, undefined, 12);
+      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, undefined, 12);
       delete expectedEsParams.body.sort;
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
     });
 
     it('omits the size param when no size passed', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'desc', undefined);
+      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'desc', undefined);
       delete expectedEsParams.body.size;
       set(expectedEsParams, 'body.sort[0].@timestamp.order', 'desc');
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
