@@ -112,7 +112,7 @@ class AnnotationsTable extends Component {
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(dataCounts.latest_record_timestamp).toISOString();
 
-    const _g = rison.encode({
+    const globalSettings = {
       ml: {
         jobIds: [this.props.jobs[0].job_id]
       },
@@ -126,7 +126,7 @@ class AnnotationsTable extends Component {
         to,
         mode: 'absolute'
       }
-    });
+    };
 
     const appState = {
       filters: [],
@@ -145,8 +145,17 @@ class AnnotationsTable extends Component {
           to: new Date(annotation.end_timestamp).toISOString()
         }
       };
+
+      if (annotation.timestamp < dataCounts.earliest_record_timestamp) {
+        globalSettings.time.from = new Date(annotation.timestamp).toISOString();
+      }
+
+      if (annotation.end_timestamp > dataCounts.latest_record_timestamp) {
+        globalSettings.time.to = new Date(annotation.end_timestamp).toISOString();
+      }
     }
 
+    const _g = rison.encode(globalSettings);
     const _a = rison.encode(appState);
 
     const url = `?_g=${_g}&_a=${_a}`;
