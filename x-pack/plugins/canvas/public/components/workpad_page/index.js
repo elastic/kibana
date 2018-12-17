@@ -12,14 +12,15 @@ import { aeroelastic } from '../../lib/aeroelastic_kibana';
 import { setClipboardData, getClipboardData } from '../../lib/clipboard';
 import { removeElements, duplicateElement } from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
-import { getElements, isWriteable } from '../../state/selectors/workpad';
+import { getNodes, isWriteable } from '../../state/selectors/workpad';
+import { flatten } from '../../lib/aeroelastic/functional';
 import { withEventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
 
 const mapStateToProps = (state, ownProps) => {
   return {
     isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
-    elements: getElements(state, ownProps.page.id),
+    elements: getNodes(state, ownProps.page.id),
   };
 };
 
@@ -81,11 +82,22 @@ export const WorkpadPage = compose(
       removeElements,
       duplicateElement,
     }) => {
-      const { shapes, selectedLeafShapes = [], cursor } = aeroelastic.getStore(
+      const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(
         page.id
       ).currentScene;
       const elementLookup = new Map(pageElements.map(element => [element.id, element]));
-      const selectedElementIds = selectedLeafShapes;
+      const recurseGroupTree = shapeId => {
+        return [
+          shapeId,
+          ...flatten(
+            shapes
+              .filter(s => s.parent === shapeId && s.type !== 'annotation')
+              .map(s => s.id)
+              .map(recurseGroupTree)
+          ),
+        ];
+      };
+      const selectedElementIds = flatten(selectedPrimaryShapes.map(recurseGroupTree));
       const selectedElements = [];
       const elements = shapes.map(shape => {
         let element = null;
