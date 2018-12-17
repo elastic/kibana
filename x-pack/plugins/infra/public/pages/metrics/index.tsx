@@ -82,34 +82,34 @@ export const MetricDetail = withTheme(
           );
         }
         const layouts = layoutCreator(this.props.theme);
-        const breadcrumbs = [{ text: nodeId }];
 
         return (
-          <ColumnarPage>
-            <Header
-              appendSections={<InfrastructureBetaBadgeHeaderSection />}
-              breadcrumbs={breadcrumbs}
-            />
-            <WithMetricsTimeUrlState />
-            <DetailPageContent>
-              <WithOptions>
-                {({ sourceId }) => (
-                  <WithMetricsTime resetOnUnmount>
-                    {({
-                      currentTimeRange,
-                      isAutoReloading,
-                      setRangeTime,
-                      startMetricsAutoReload,
-                      stopMetricsAutoReload,
-                    }) => (
-                      <WithMetadata
-                        layouts={layouts}
-                        sourceId={sourceId}
-                        nodeType={nodeType}
-                        nodeId={nodeId}
-                      >
-                        {({ filteredLayouts, loading: metadataLoading }) => {
-                          return (
+          <WithOptions>
+            {({ sourceId }) => (
+              <WithMetricsTime resetOnUnmount>
+                {({
+                  currentTimeRange,
+                  isAutoReloading,
+                  setRangeTime,
+                  startMetricsAutoReload,
+                  stopMetricsAutoReload,
+                }) => (
+                  <WithMetadata
+                    layouts={layouts}
+                    sourceId={sourceId}
+                    nodeType={nodeType}
+                    nodeId={nodeId}
+                  >
+                    {({ name, filteredLayouts, loading: metadataLoading }) => {
+                      const breadcrumbs = [{ text: name }];
+                      return (
+                        <ColumnarPage>
+                          <Header
+                            appendSections={<InfrastructureBetaBadgeHeaderSection />}
+                            breadcrumbs={breadcrumbs}
+                          />
+                          <WithMetricsTimeUrlState />
+                          <DetailPageContent>
                             <WithMetrics
                               layouts={filteredLayouts}
                               sourceId={sourceId}
@@ -126,7 +126,7 @@ export const MetricDetail = withTheme(
                                     <MetricsSideNav
                                       layouts={filteredLayouts}
                                       loading={metadataLoading}
-                                      nodeName={nodeId}
+                                      nodeName={name}
                                       handleClick={this.handleClick}
                                     />
                                     <AutoSizer content={false} bounds detectAnyWindowResize>
@@ -176,15 +176,15 @@ export const MetricDetail = withTheme(
                                 );
                               }}
                             </WithMetrics>
-                          );
-                        }}
-                      </WithMetadata>
-                    )}
-                  </WithMetricsTime>
+                          </DetailPageContent>
+                        </ColumnarPage>
+                      );
+                    }}
+                  </WithMetadata>
                 )}
-              </WithOptions>
-            </DetailPageContent>
-          </ColumnarPage>
+              </WithMetricsTime>
+            )}
+          </WithOptions>
         );
       }
 
