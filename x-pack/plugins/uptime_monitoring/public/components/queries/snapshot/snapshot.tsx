@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { SnapshotHistogram } from '../../functional/snapshot_histogram';
 import { getSnapshotQuery } from './get_snapshot';
 
 interface SnapshotProps {
@@ -33,37 +34,6 @@ interface SnapshotProps {
   autorefreshInterval: number;
   filters?: string;
 }
-
-const formatHistogramData = (histogram: any) => {
-  const histogramSeriesData: { upSeriesData: any[]; downSeriesData: any[] } = {
-    upSeriesData: [],
-    downSeriesData: [],
-  };
-  histogram.forEach(({ data }: { data: any }) => {
-    data.forEach(({ x, x0, downCount }: { x: any; x0: any; downCount: any }) => {
-      const upEntry = histogramSeriesData.upSeriesData.find(
-        histogramDataPoint => histogramDataPoint.x === x && histogramDataPoint.x0 === x0
-      );
-      const downEntry = histogramSeriesData.downSeriesData.find(
-        histogramDataPoint => histogramDataPoint.x === x && histogramDataPoint.x0 === x0
-      );
-      if (downCount) {
-        if (downEntry) {
-          downEntry.y += 1;
-        } else {
-          histogramSeriesData.downSeriesData.push({ x, x0, y: 1 });
-        }
-      } else {
-        if (upEntry) {
-          upEntry.y += 1;
-        } else {
-          histogramSeriesData.upSeriesData.push({ x, x0, y: 1 });
-        }
-      }
-    });
-  });
-  return histogramSeriesData;
-};
 
 export const Snapshot = ({
   dateRangeStart,
@@ -88,8 +58,6 @@ export const Snapshot = ({
       const {
         snapshot: { up, down, total, histogram },
       } = data;
-
-      const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
 
       return (
         <EuiFlexGroup alignItems="baseline" gutterSize="xl">
@@ -134,18 +102,7 @@ export const Snapshot = ({
             </EuiTitle>
             {/* TODO: this is a UI hack that should be replaced */}
             <EuiPanel paddingSize="s">
-              {histogram && (
-                <EuiSeriesChart
-                  width={600}
-                  height={107}
-                  stackBy="y"
-                  xType={EuiSeriesChartUtils.SCALE.TIME}
-                >
-                  {}
-                  <EuiHistogramSeries data={upSeriesData} name="Up" color="green" />
-                  <EuiHistogramSeries data={downSeriesData} name="Down" color="red" />
-                </EuiSeriesChart>
-              )}
+              {histogram && <SnapshotHistogram histogram={histogram} />}
               {!histogram && (
                 <EuiEmptyPrompt
                   title={
