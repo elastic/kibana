@@ -98,12 +98,12 @@ export const Snapshot = ({
               <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="xl">
                 <EuiFlexItem>
                   {/* TODO: this is a UI hack that needs to be replaced */}
-                  <EuiPanel style={{ minWidth: '150px', minHeight: '150px' }}>
+                  <EuiPanel>
                     <EuiStat description="Up" textAlign="center" title={up} titleColor="primary" />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiPanel style={{ minWidth: '150px' }}>
+                  <EuiPanel>
                     <EuiStat
                       description="Down"
                       textAlign="center"
@@ -113,7 +113,7 @@ export const Snapshot = ({
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiPanel style={{ minWidth: '150px' }}>
+                  <EuiPanel>
                     <EuiStat
                       description="Total"
                       textAlign="center"
@@ -130,11 +130,11 @@ export const Snapshot = ({
               <h5>Status over time</h5>
             </EuiTitle>
             {/* TODO: this is a UI hack that should be replaced */}
-            <EuiPanel style={{ minHeight: '150px' }} paddingSize="s">
+            <EuiPanel paddingSize="s">
               {histogram && (
                 <EuiSeriesChart
                   width={600}
-                  height={155}
+                  height={107}
                   stackBy="y"
                   xType={EuiSeriesChartUtils.SCALE.TIME}
                 >
