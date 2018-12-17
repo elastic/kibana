@@ -38,7 +38,6 @@ module.factory('SavedGisMap', function (Private) {
         layerListJSON: JSON.stringify([
           {
             id: "0hmz5",
-            label: 'EMS base layer (road_map)',
             sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
             visible: true,
             temporary: false,

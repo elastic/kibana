@@ -22,7 +22,7 @@ export function gis(kibana) {
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
-        title: 'GIS',
+        title: 'Maps',
         description: 'Map application',
         main: 'plugins/gis/index',
         icon: 'plugins/gis/icon.svg',
