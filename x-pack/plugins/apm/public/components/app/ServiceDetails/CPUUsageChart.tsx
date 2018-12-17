@@ -8,16 +8,20 @@ import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
-import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
+import {
+  ChartGroupRenderProps,
+  SyncChartGroup
+} from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
 import { CPUChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_cpu_chart_data/transformer';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 
 interface Props {
   data: CPUChartAPIResponse;
+  chartGroupProps?: ChartGroupRenderProps;
 }
 
-const CPUUsageChart: React.SFC<Props> = ({ data }) => (
+const CPUUsageChart: React.SFC<Props> = ({ data, chartGroupProps }) => (
   <SyncChartGroup
     render={syncProps => (
       <React.Fragment>
@@ -25,7 +29,7 @@ const CPUUsageChart: React.SFC<Props> = ({ data }) => (
           <span>CPU usage</span>
         </EuiTitle>
         <CustomPlot
-          {...syncProps}
+          {...chartGroupProps || syncProps}
           noHits={data.totalHits === 0}
           series={data.series}
           tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}

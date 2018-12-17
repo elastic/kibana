@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormRow,
   EuiSpacer,
   EuiText,
   EuiTitle
@@ -20,14 +21,16 @@ import {
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import {
-  getMLJob,
+  getMlPrefix,
   startMLJob
 } from 'x-pack/plugins/apm/public/services/rest/ml';
 import {
   getAPMIndexPattern,
   ISavedObject
 } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
+import { MLJobsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/machineLearningJobs';
 import { KibanaLink, ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
+import { TransactionSelect } from './TransactionSelect';
 
 interface FlyoutProps {
   isOpen: boolean;
@@ -42,38 +45,31 @@ interface FlyoutState {
   isLoading: boolean;
   hasMLJob: boolean;
   hasIndexPattern: boolean;
+  selectedTransactionType: string;
 }
 
 export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   public state = {
     isLoading: false,
     hasIndexPattern: false,
-    hasMLJob: false
+    hasMLJob: false,
+    selectedTransactionType:
+      this.props.transactionType || this.props.serviceTransactionTypes[0]
   };
 
   public componentDidMount() {
     getAPMIndexPattern().then((indexPattern?: ISavedObject) => {
       this.setState({ hasIndexPattern: !!indexPattern });
     });
-    this.checkForMLJob();
   }
 
   public componentDidUpdate(prevProps: FlyoutProps) {
-    if (
-      prevProps.serviceName !== this.props.serviceName ||
-      prevProps.transactionType !== this.props.transactionType
-    ) {
-      this.checkForMLJob();
+    if (prevProps.transactionType !== this.props.transactionType) {
+      this.setState({
+        selectedTransactionType:
+          this.props.transactionType || this.props.serviceTransactionTypes[0]
+      });
     }
-  }
-
-  public async checkForMLJob() {
-    const { serviceName, transactionType } = this.props;
-    const { count } = await getMLJob({
-      serviceName,
-      transactionType
-    });
-    this.setState({ hasMLJob: count > 0 });
   }
 
   public createJob = async () => {
@@ -143,117 +139,147 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
 
   public render() {
     const { isOpen, onClose, serviceName, transactionType } = this.props;
-    const { isLoading, hasIndexPattern, hasMLJob } = this.state;
+    const { isLoading, hasIndexPattern, selectedTransactionType } = this.state;
 
     if (!isOpen) {
       return null;
     }
 
     return (
-      <EuiFlyout onClose={onClose} size="s">
-        <EuiFlyoutHeader>
-          <EuiTitle>
-            <h2>Enable anomaly detection</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {hasMLJob && (
-            <div>
-              <EuiCallOut
-                title="Job already exists"
-                color="success"
-                iconType="check"
-              >
-                <p>
-                  There is currently a job running for {serviceName} (
-                  {transactionType}
-                  ).{' '}
-                  <ViewMLJob
-                    serviceName={serviceName}
-                    transactionType={transactionType}
-                    location={location}
-                  >
-                    View existing job
-                  </ViewMLJob>
-                </p>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </div>
-          )}
+      <MLJobsRequest
+        serviceName={serviceName}
+        render={({ data, status }) => {
+          if (status === 'LOADING') {
+            return null;
+          }
 
-          {!hasIndexPattern && (
-            <div>
-              <EuiCallOut
-                title={
-                  <span>
-                    No APM index pattern available. To create a job, please
-                    import the APM index pattern via the{' '}
-                    <KibanaLink
-                      pathname={'/app/kibana'}
-                      hash={`/home/tutorial/apm`}
+          const hasMLJob = Boolean(
+            data.jobs.find(
+              job =>
+                job.jobId &&
+                job.jobId.startsWith(
+                  getMlPrefix(serviceName, selectedTransactionType)
+                )
+            )
+          );
+
+          return (
+            <EuiFlyout onClose={onClose} size="s">
+              <EuiFlyoutHeader>
+                <EuiTitle>
+                  <h2>Enable anomaly detection</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                {hasMLJob && (
+                  <div>
+                    <EuiCallOut
+                      title="Job already exists"
+                      color="success"
+                      iconType="check"
                     >
-                      Setup Instructions
+                      <p>
+                        There is currently a job running for {serviceName} (
+                        {transactionType}
+                        ).{' '}
+                        <ViewMLJob
+                          serviceName={serviceName}
+                          transactionType={transactionType}
+                          location={location}
+                        >
+                          View existing job
+                        </ViewMLJob>
+                      </p>
+                    </EuiCallOut>
+                    <EuiSpacer size="m" />
+                  </div>
+                )}
+
+                {!hasIndexPattern && (
+                  <div>
+                    <EuiCallOut
+                      title={
+                        <span>
+                          No APM index pattern available. To create a job,
+                          please import the APM index pattern via the{' '}
+                          <KibanaLink
+                            pathname={'/app/kibana'}
+                            hash={`/home/tutorial/apm`}
+                          >
+                            Setup Instructions
+                          </KibanaLink>
+                        </span>
+                      }
+                      color="warning"
+                      iconType="alert"
+                    />
+                    <EuiSpacer size="m" />
+                  </div>
+                )}
+
+                <EuiText>
+                  <p>
+                    Here you can create a machine learning job to calculate
+                    anomaly scores on durations for APM transactions within the{' '}
+                    {serviceName} service. Once enabled,{' '}
+                    <b>the transaction duration graph</b> will show the expected
+                    bounds and annotate the graph once the anomaly score is
+                    &gt;=75.
+                  </p>
+                  <p>
+                    Jobs can be created for each service + transaction type
+                    combination. Once a job is created, you can manage it and
+                    see more details in the{' '}
+                    <KibanaLink pathname={'/app/ml'}>
+                      Machine Learning jobs management page
                     </KibanaLink>
-                  </span>
-                }
-                color="warning"
-                iconType="alert"
-              />
-              <EuiSpacer size="m" />
-            </div>
-          )}
+                    .{' '}
+                    <em>
+                      Note: It might take a few minutes for the job to begin
+                      calculating results.
+                    </em>
+                  </p>
+                </EuiText>
 
-          <EuiText>
-            <div>
-              <p>EUI Combo box here, with:</p>
-              <ul>
-                {this.props.serviceTransactionTypes.map(t => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-            </div>
-          </EuiText>
-
-          <EuiText>
-            <p>
-              Here you can create a machine learning job to calculate anomaly
-              scores on durations for APM transactions within the {serviceName}{' '}
-              service. Once enabled, <b>the transaction duration graph</b> will
-              show the expected bounds and annotate the graph once the anomaly
-              score is &gt;=75.
-            </p>
-            <p>
-              Jobs can be created for each service + transaction type
-              combination. Once a job is created, you can manage it and see more
-              details in the{' '}
-              <KibanaLink pathname={'/app/ml'}>
-                Machine Learning jobs management page
-              </KibanaLink>
-              .{' '}
-            </p>
-            <p>
-              <em>
-                Note: It might take a few minutes for the job to begin
-                calculating results.
-              </em>
-            </p>
-          </EuiText>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup alignItems="flexEnd" direction="rowReverse">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={this.createJob}
-                fill
-                disabled={isLoading || hasMLJob || !hasIndexPattern}
-              >
-                Create new job
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+                <EuiSpacer />
+              </EuiFlyoutBody>
+              <EuiFlyoutFooter>
+                <EuiFlexGroup
+                  justifyContent="spaceBetween"
+                  alignItems="flexEnd"
+                >
+                  <EuiFlexItem>
+                    {this.props.serviceTransactionTypes.length > 1 ? (
+                      <TransactionSelect
+                        types={this.props.serviceTransactionTypes}
+                        selected={this.state.selectedTransactionType}
+                        existingJobs={data.jobs}
+                        onChange={value =>
+                          this.setState({
+                            selectedTransactionType: value
+                          })
+                        }
+                      />
+                    ) : null}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow>
+                      <EuiButton
+                        onClick={this.createJob}
+                        fill
+                        disabled={isLoading || hasMLJob || !hasIndexPattern}
+                      >
+                        Create new job
+                      </EuiButton>
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutFooter>
+            </EuiFlyout>
+          );
+        }}
+      />
     );
   }
 }

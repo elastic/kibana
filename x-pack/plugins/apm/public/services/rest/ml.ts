@@ -64,7 +64,7 @@ export async function startMLJob({
 }
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.5/ml-get-job.html
-interface GetMLJobApiResponse {
+export interface GetMLJobApiResponse {
   count: number;
   jobs: Array<{
     job_id: string;

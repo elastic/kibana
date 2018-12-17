@@ -47,7 +47,11 @@ export class Tabs extends React.PureComponent<TabsProps> {
         name: 'Metrics',
         path: `/${serviceName}/metrics`,
         component: () => (
-          <ServiceMetrics serviceName={serviceName} urlParams={urlParams} />
+          <ServiceMetrics
+            serviceName={serviceName}
+            urlParams={urlParams}
+            serviceTransactionTypes={transactionTypes}
+          />
         )
       }
     ];

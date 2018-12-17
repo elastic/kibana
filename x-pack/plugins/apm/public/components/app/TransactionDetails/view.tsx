@@ -31,6 +31,8 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
         <h1>{urlParams.transactionName}</h1>
       </EuiTitle>
 
+      <EuiSpacer />
+
       <KueryBar />
 
       <EuiSpacer size="s" />

@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiPanel,
   EuiText,
   EuiTitle
 } from '@elastic/eui';
@@ -27,7 +26,7 @@ import { SyncChartGroup } from '../SyncChartGroup';
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
-  ChartHeaderContent?: React.ReactNode;
+  chartWrapper?: React.ComponentClass | React.SFC;
   location: any;
   urlParams: IUrlParams;
   mlAvailable: boolean;
@@ -37,38 +36,16 @@ interface TransactionChartState {
   hasMLJob: boolean;
 }
 
-// const MLTipContainer = styled.div`
-// display: flex;
-// align-items: center;
-// font-size: ${ fontSizes.small };
-// `;
-
-// const MLText = styled.div`
-// margin - left: ${ px(units.half) };
-// `;
-//
-// const ChartHeaderContent =
-//   hasDynamicBaseline && get(license.data, 'features.ml.isAvailable') ? (
-//     <MLTipContainer>
-//       <EuiIconTip content="The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
-//       <MLText>
-//         Machine Learning:{' '}
-//         <ViewMLJob
-//           serviceName={serviceName}
-//           transactionType={transactionType}
-//           location={this.props.location}
-//         >
-//           View job
-//             </ViewMLJob>
-//       </MLText>
-//     </MLTipContainer>
-//   ) : null;
-
 const ShiftedIconWrapper = styled.span`
   padding-right: 5px;
   position: relative;
   top: -1px;
   display: inline-block;
+`;
+
+const ShiftedEuiText = styled(EuiText)`
+  position: relative;
+  top: 5px;
 `;
 
 export class TransactionChartsView extends Component<
@@ -140,7 +117,7 @@ export class TransactionChartsView extends Component<
 
     return (
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">
+        <ShiftedEuiText size="xs">
           <ShiftedIconWrapper>
             <EuiIconTip content="The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
           </ShiftedIconWrapper>
@@ -150,13 +127,17 @@ export class TransactionChartsView extends Component<
             transactionType={transactionType}
             location={this.props.location}
           />
-        </EuiText>
+        </ShiftedEuiText>
       </EuiFlexItem>
     );
   }
 
   public render() {
-    const { charts, urlParams } = this.props;
+    const {
+      charts,
+      urlParams,
+      chartWrapper: ChartWrapper = React.Fragment
+    } = this.props;
     const { noHits, responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
 
@@ -165,7 +146,7 @@ export class TransactionChartsView extends Component<
         render={chartGroupProps => (
           <EuiFlexGrid columns={2}>
             <EuiFlexItem>
-              <EuiPanel>
+              <ChartWrapper>
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem>
                     <EuiTitle size="s">
@@ -181,11 +162,11 @@ export class TransactionChartsView extends Component<
                   tickFormatY={this.getResponseTimeTickFormatter}
                   formatTooltipValue={this.getResponseTimeTooltipFormatter}
                 />
-              </EuiPanel>
+              </ChartWrapper>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
-              <EuiPanel>
+              <ChartWrapper>
                 <EuiTitle size="s">
                   <span>{tpmLabel(transactionType)}</span>
                 </EuiTitle>
@@ -197,7 +178,7 @@ export class TransactionChartsView extends Component<
                   formatTooltipValue={this.getTPMTooltipFormatter}
                   truncateLegends
                 />
-              </EuiPanel>
+              </ChartWrapper>
             </EuiFlexItem>
           </EuiFlexGrid>
         )}
@@ -217,6 +198,6 @@ function responseTimeLabel(type?: string) {
     case 'route-change':
       return 'Route change times';
     default:
-      return 'Transactions duration';
+      return 'Transaction duration';
   }
 }

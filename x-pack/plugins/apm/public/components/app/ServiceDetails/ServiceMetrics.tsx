@@ -8,13 +8,13 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
 // @ts-ignore
 import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
+import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
 import { MetricsChartDataRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceMetricsCharts';
@@ -26,12 +26,20 @@ import { MemoryUsageChart } from './MemoryUsageChart';
 interface ServiceMetricsProps {
   serviceName: string;
   urlParams: IUrlParams;
+  serviceTransactionTypes: string[];
+  chartWrapper?: React.ComponentClass | React.SFC;
 }
 
-export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
-  const { serviceName, urlParams } = props;
-  // TODO: Find out why serviceName isn't present in urlParams here?
+export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
+  serviceName,
+  urlParams,
+  serviceTransactionTypes,
+  chartWrapper: ChartWrapper = React.Fragment
+}) => {
   const params = { serviceName, ...urlParams };
+  if (serviceTransactionTypes.length !== 1) {
+    delete params.transactionType;
+  }
   return (
     <React.Fragment>
       <TransactionOverviewChartsRequest
@@ -41,13 +49,16 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
             charts={data}
             urlParams={params}
             location={location}
+            chartWrapper={ChartWrapper}
           />
         )}
       />
-      <EuiSpacer />
+
+      <EuiSpacer size="xxl" />
+
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiPanel>
+          <ChartWrapper>
             <ErrorDistributionRequest
               urlParams={params}
               render={({ data }) => (
@@ -61,26 +72,38 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
                 />
               )}
             />
-          </EuiPanel>
+          </ChartWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+
+      <EuiSpacer size="xxl" />
+
       <MetricsChartDataRequest
         urlParams={params}
         render={({ data }) => {
           return (
-            <EuiFlexGrid columns={2}>
-              <EuiFlexItem>
-                <EuiPanel>
-                  <CPUUsageChart data={data.cpu} />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiPanel>
-                  <MemoryUsageChart data={data.memory} />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGrid>
+            <SyncChartGroup
+              render={chartGroupProps => (
+                <EuiFlexGrid columns={2}>
+                  <EuiFlexItem>
+                    <ChartWrapper>
+                      <CPUUsageChart
+                        data={data.cpu}
+                        chartGroupProps={chartGroupProps}
+                      />
+                    </ChartWrapper>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <ChartWrapper>
+                      <MemoryUsageChart
+                        data={data.memory}
+                        chartGroupProps={chartGroupProps}
+                      />
+                    </ChartWrapper>
+                  </EuiFlexItem>
+                </EuiFlexGrid>
+              )}
+            />
           );
         }}
       />

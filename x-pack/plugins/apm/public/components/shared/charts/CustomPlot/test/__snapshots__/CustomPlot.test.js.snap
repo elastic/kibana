@@ -1455,7 +1455,8 @@ Array [
 }
 
 .c4 {
-  color: #98A2B3;
+  color: #999999;
+  padding-bottom: 0;
 }
 
 .c7 {

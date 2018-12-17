@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
-  EuiIcon,
   EuiPopover
 } from '@elastic/eui';
 import React from 'react';
@@ -40,8 +39,8 @@ export class ServiceIntegrationsView extends React.Component<
   public addMlPanelItems = () => {
     this.panelItems = this.panelItems.concat([
       {
-        name: 'ML anomaly detection',
-        icon: <EuiIcon type="stats" size="m" />,
+        name: 'Enable ML anomaly detection',
+        icon: 'machineLearningApp',
         toolTipContent: 'Set up a machine learning job for this service',
         onClick: () => {
           this.closePopover();
@@ -50,7 +49,7 @@ export class ServiceIntegrationsView extends React.Component<
       },
       {
         name: 'View existing ML jobs',
-        icon: 'tableOfContents',
+        icon: 'machineLearningApp',
         href: chrome.addBasePath('/app/ml'),
         target: '_blank',
         onClick: () => this.closePopover()
@@ -70,7 +69,12 @@ export class ServiceIntegrationsView extends React.Component<
       },
       {
         name: 'View existing watches',
-        icon: 'watchesApp'
+        icon: 'watchesApp',
+        href: chrome.addBasePath(
+          '/app/kibana#/management/elasticsearch/watcher'
+        ),
+        target: '_blank',
+        onClick: () => this.closePopover()
       }
     ]);
   };

@@ -47,7 +47,6 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
                   <ServiceIntegrations
                     location={this.props.location}
                     serviceName={serviceName}
-                    // TODO fix url params : transaction type to read from qs too
                     transactionType={params.transactionType}
                     serviceTransactionTypes={data.types}
                   />
