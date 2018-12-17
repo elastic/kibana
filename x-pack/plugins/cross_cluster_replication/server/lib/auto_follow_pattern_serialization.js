@@ -13,8 +13,8 @@ export const deserializeAutoFollowPattern = (
   followIndexPattern: follow_index_pattern,
 });
 
-export const deserializeListAutoFollowPatterns = autofollowPatterns =>
-  autofollowPatterns.map(deserializeAutoFollowPattern);
+export const deserializeListAutoFollowPatterns = autoFollowPatterns =>
+  autoFollowPatterns.map(deserializeAutoFollowPattern);
 
 export const serializeAutoFollowPattern = ({
   remoteCluster,

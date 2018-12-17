@@ -34,8 +34,7 @@ import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import routing from '../services/routing';
 import { API_STATUS } from '../constants';
-import { SectionError, FollowerIndicesPreview } from './';
-import { getPrefixSuffixFromFollowPattern } from '../services/auto_follow_pattern';
+import { SectionError, AutoFollowPatternIndicesPreview } from './';
 import { validateAutoFollowPattern, validateLeaderIndexPattern } from '../services/auto_follow_pattern_validators';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -83,7 +82,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
       ? getEmptyAutoFollowPattern(this.props.remoteClusters)
       : {
         ...this.props.autoFollowPattern,
-        ...getPrefixSuffixFromFollowPattern(this.props.autoFollowPattern.followIndexPattern)
       };
 
     this.state = {
@@ -517,7 +515,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           {!!leaderIndexPatterns.length && (
             <Fragment>
               <EuiSpacer size="m" />
-              <FollowerIndicesPreview
+              <AutoFollowPatternIndicesPreview
                 prefix={followIndexPatternPrefix}
                 suffix={followIndexPatternSuffix}
                 leaderIndexPatterns={leaderIndexPatterns}

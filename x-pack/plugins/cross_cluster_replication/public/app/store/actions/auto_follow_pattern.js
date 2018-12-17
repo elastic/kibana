@@ -81,11 +81,11 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isEditing = false) 
     },
     onSuccess() {
       const successMessage = isEditing
-        ? i18n.translate('xpack.crossClusterReplication.autoFollowPattern.addAction.successTitle', {
+        ? i18n.translate('xpack.crossClusterReplication.autoFollowPattern.addAction.successMultipleNotificationTitle', {
           defaultMessage: `Auto-follow pattern '{name}' updated successfully`,
           values: { name: id },
         })
-        : i18n.translate('xpack.crossClusterReplication.autoFollowPattern.addAction.successTitle', {
+        : i18n.translate('xpack.crossClusterReplication.autoFollowPattern.addAction.successSingleNotificationTitle', {
           defaultMessage: `Added auto-follow pattern '{name}'`,
           values: { name: id },
         });

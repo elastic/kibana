@@ -11,7 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 
 export function SectionUnauthorizedUI({ intl, children }) {
   const title = intl.formatMessage({
-    id: 'xpack.remoteClusters.remoteClusterList.noPermissionTitle',
+    id: 'xpack.crossClusterReplication.remoteClusterList.noPermissionTitle',
     defaultMessage: 'Permission error',
   });
   return (

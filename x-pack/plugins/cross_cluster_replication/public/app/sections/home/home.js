@@ -29,107 +29,108 @@ import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { SectionUnauthorized } from '../../components';
 
-export class CrossClusterReplicationHomeUI extends PureComponent {
-  static propTypes = {
-    autoFollowPatterns: PropTypes.array,
-  }
-
-  state = {
-    sectionActive: 'auto-follow'
-  }
-
-  componentDidMount() {
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
-  }
-
-  getHeaderSection() {
-    const { autoFollowPatterns } = this.props;
-
-    if (!autoFollowPatterns.length) {
-      return null;
+export const CrossClusterReplicationHome = injectI18n(
+  class extends PureComponent {
+    static propTypes = {
+      autoFollowPatterns: PropTypes.array,
     }
 
-    return (
-      <Fragment>
-        <EuiTitle size="l">
-          <h1>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-              defaultMessage="Cross Cluster Replication"
-            />
-          </h1>
-        </EuiTitle>
+    state = {
+      sectionActive: 'auto-follow'
+    }
 
-        <EuiSpacer size="s" />
+    componentDidMount() {
+      chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+    }
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
-                  defaultMessage="Auto-follow patterns"
-                />
-              </h2>
-            </EuiTitle>
+    getHeaderSection() {
+      const { autoFollowPatterns } = this.props;
 
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
-                  defaultMessage="Auto-follow patterns replicate leader indices from a remote cluster to follower indices on the local cluster." //eslint-disable-line max-len
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
+      if (!autoFollowPatterns.length) {
+        return null;
+      }
 
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
-              fill
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternList.addAutofollowPatternButtonLabel"
-                defaultMessage="Create an auto-follow pattern"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer />
-      </Fragment>
-    );
-  }
-
-  getUnauthorizedSection() {
-    const { isAutoFollowApiAuthorized } = this.props;
-    if (!isAutoFollowApiAuthorized) {
       return (
-        <SectionUnauthorized>
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
-            defaultMessage="You do not have permission to view or add auto-follow patterns."
-          />
-        </SectionUnauthorized>
+        <Fragment>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
+                defaultMessage="Cross Cluster Replication"
+              />
+            </h1>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
+                    defaultMessage="Auto-follow patterns"
+                  />
+                </h2>
+              </EuiTitle>
+
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
+                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
+                      cluster to follower indices on the local cluster."
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
+                fill
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternList.addAutofollowPatternButtonLabel"
+                  defaultMessage="Create an auto-follow pattern"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
+
+    getUnauthorizedSection() {
+      const { isAutoFollowApiAuthorized } = this.props;
+      if (!isAutoFollowApiAuthorized) {
+        return (
+          <SectionUnauthorized>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
+              defaultMessage="You do not have permission to view or add auto-follow patterns."
+            />
+          </SectionUnauthorized>
+        );
+      }
+    }
+
+    render() {
+      return (
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageContent>
+              {this.getHeaderSection()}
+              {this.getUnauthorizedSection()}
+              <Switch>
+                <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+              </Switch>
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
       );
     }
   }
-
-  render() {
-    return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            {this.getHeaderSection()}
-            {this.getUnauthorizedSection()}
-            <Switch>
-              <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
-            </Switch>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-}
-
-export const CrossClusterReplicationHome = injectI18n(CrossClusterReplicationHomeUI);
+);
