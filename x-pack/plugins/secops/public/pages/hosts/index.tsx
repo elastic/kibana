@@ -86,7 +86,7 @@ export const Hosts = pure(() => (
                     id={id}
                     refetch={refetch}
                     setQuery={setQuery}
-                    data={events!}
+                    data={events}
                     loading={loading}
                     startDate={from}
                     endDate={to}

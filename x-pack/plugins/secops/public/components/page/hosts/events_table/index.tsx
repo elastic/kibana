@@ -14,7 +14,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { Provider } from '../../../timeline/data_providers/provider';
 import { ProviderContainer } from '../../../visualization_placeholder';
 
-export interface EventsTableProps {
+interface EventsTableProps {
   data: EventItem[];
   loading: boolean;
   startDate: number;
