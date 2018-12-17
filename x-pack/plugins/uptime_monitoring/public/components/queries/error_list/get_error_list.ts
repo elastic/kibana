@@ -21,6 +21,7 @@ export const getErrorListQuery = gql`
       monitorId
       type
       count
+      statusCode
     }
   }
 `;

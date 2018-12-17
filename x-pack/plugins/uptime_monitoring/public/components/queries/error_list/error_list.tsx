@@ -45,7 +45,10 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
                 },
                 { field: 'count', name: 'Count', sortable: true },
                 { field: 'latestMessage', name: 'Latest message', sortable: true, width: '40%' },
+                { field: 'statusCode', name: 'Response code', sortable: true },
               ]}
+              sorting={true}
+              pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
             />
           </EuiPanel>
         </Fragment>

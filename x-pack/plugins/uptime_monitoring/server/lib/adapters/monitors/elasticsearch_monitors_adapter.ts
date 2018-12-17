@@ -433,8 +433,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         monitorBuckets.forEach(bucket => {
           const count = get(bucket, 'doc_count', null);
           const monitorId = get(bucket, 'key', null);
-          const errorMessage = get(bucket, 'latest.hits.hits[0]._source.error.message', null);
-          errorsList.push({ latestMessage: errorMessage, monitorId, type: errorType, count });
+          const source = get(bucket, 'latest.hits.hits[0]._source', null);
+          const errorMessage = get(source, 'error.message', null);
+          const statusCode = get(source, 'http.response.status_code', null);
+          errorsList.push({
+            latestMessage: errorMessage,
+            monitorId,
+            type: errorType,
+            count,
+            statusCode,
+          });
         });
       }
     );

@@ -86,6 +86,7 @@ export const monitorsSchema = gql`
     monitorId: String
     type: String
     count: Int
+    statusCode: String
   }
 
   extend type Query {
