@@ -25,7 +25,16 @@ interface Props {
 
 export const NodeContextMenu = injectI18n(
   ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl }: Props) => {
-    const nodeField = options.fields ? options.fields[nodeType] : null;
+    // Due to the changing nature of the fields between APM and this UI,
+    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
+    // #26620 for the details for these fields.
+    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
+    const APM_FIELDS = {
+      [InfraNodeType.host]: 'context.system.hostname',
+      [InfraNodeType.container]: 'container.id',
+      [InfraNodeType.pod]: 'kubernetes.pod.uid',
+    };
+
     const nodeLogsUrl = node.id
       ? getNodeLogsUrl({
           nodeType,
@@ -50,7 +59,7 @@ export const NodeContextMenu = injectI18n(
         },
         { nodeType }
       ),
-      href: `../app/apm#/?_g=()&kuery=${nodeField}~20~3A~20~22${node.id}~22`,
+      href: `../app/apm#/services?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
     };
 
     const panels: EuiContextMenuPanelDescriptor[] = [
