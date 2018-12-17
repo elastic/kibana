@@ -329,7 +329,7 @@ export class EditFilterList extends Component {
                 onClick={this.save}
                 disabled={(saveInProgress === true) ||
                   (isNewFilterIdInvalid === true) ||
-                  (canDeleteFilter === false)
+                  (canCreateFilter === false)
                 }
                 fill
               >
