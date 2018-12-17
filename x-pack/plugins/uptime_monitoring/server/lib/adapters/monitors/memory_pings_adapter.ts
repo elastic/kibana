@@ -4,17 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { UMGqlRange } from '../../../../common/domain_types';
+import { Ping } from '../../../../common/graphql/types';
 import { UMMonitorsAdapter } from './adapter_types';
 
-export class MemoryMonitorsAdapter implements UMMonitorsAdapter {
+export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
+  private monitorsDB: Ping[];
+
+  constructor(monitorsDB: Ping[]) {
+    this.monitorsDB = monitorsDB;
+  }
+
   public async getLatestMonitors(
     request: any,
     dateRangeStart: number,
     dateRangeEnd: number,
     filters: string
   ): Promise<any> {
-    throw new Error('Method not implemented.');
+    return this.monitorsDB.filter(ping => {
+      const timestamp = moment(ping.timestamp).valueOf();
+      return dateRangeStart <= timestamp && timestamp <= dateRangeEnd;
+    });
   }
   public async getMonitorChartsData(
     req: any,
