@@ -90,9 +90,8 @@ describe('waterfall_helpers', () => {
         }
       ];
 
-      const childrenByParentId = groupBy(
-        items,
-        hit => (hit.parentId ? hit.parentId : 'root')
+      const childrenByParentId = groupBy(items, hit =>
+        hit.parentId ? hit.parentId : 'root'
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(

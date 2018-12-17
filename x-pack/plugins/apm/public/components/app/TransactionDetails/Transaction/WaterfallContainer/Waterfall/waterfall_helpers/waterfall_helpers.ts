@@ -287,9 +287,8 @@ export function getWaterfall(
       }
     });
 
-  const childrenByParentId = groupBy(
-    filteredHits,
-    hit => (hit.parentId ? hit.parentId : 'root')
+  const childrenByParentId = groupBy(filteredHits, hit =>
+    hit.parentId ? hit.parentId : 'root'
   );
   const entryTransactionItem = getTransactionItem(entryTransaction);
   const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
