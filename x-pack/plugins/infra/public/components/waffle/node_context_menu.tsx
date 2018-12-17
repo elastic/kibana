@@ -25,18 +25,18 @@ interface Props {
 
 export const NodeContextMenu = injectI18n(
   ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl }: Props) => {
-    const nodeName = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
-    const nodeLogsUrl = nodeName
+    const nodeId = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
+    const nodeLogsUrl = nodeId
       ? getNodeLogsUrl({
           nodeType,
-          nodeName,
+          nodeId,
           time: timeRange.to,
         })
       : undefined;
-    const nodeDetailUrl = nodeName
+    const nodeDetailUrl = nodeId
       ? getNodeDetailUrl({
           nodeType,
-          nodeName,
+          nodeId,
           from: timeRange.from,
           to: timeRange.to,
         })
@@ -76,7 +76,7 @@ export const NodeContextMenu = injectI18n(
     return (
       <EuiPopover
         closePopover={closePopover}
-        id={`${node.id}-popover`}
+        id={`${node.pathId}-popover`}
         isOpen={isPopoverOpen}
         button={children}
         panelPaddingSize="none"
