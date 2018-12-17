@@ -34,26 +34,30 @@ describe('service_settings (FKA tilemaptest)', function () {
   const vectorManifestUrl = `http://vector.maps.elastic.co/v2/manifest`;
   const manifestUrl2 = 'https://foobar/v1/manifest';
 
-  const manifest = [{
-    'id': 'tiles_v2',
-    'name': 'Elastic Tile Service',
-    'manifest': tmsManifestUrl,
-    'type': 'tms'
-  },
-  {
-    'id': 'geo_layers',
-    'name': 'Elastic Layer Service',
-    'manifest': vectorManifestUrl,
-    'type': 'file'
-  }];
+  const manifest = {
+    services: [{
+      'id': 'tiles_v2',
+      'name': 'Elastic Tile Service',
+      'manifest': tmsManifestUrl,
+      'type': 'tms'
+    },
+    {
+      'id': 'geo_layers',
+      'name': 'Elastic Layer Service',
+      'manifest': vectorManifestUrl,
+      'type': 'file'
+    }]
+  };
 
-  const tmsManifest = [{
-    'id': 'road_map',
-    'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
-    'minZoom': 0,
-    'maxZoom': 10,
-    'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
-  }];
+  const tmsManifest = {
+    'services': [{
+      'id': 'road_map',
+      'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+      'minZoom': 0,
+      'maxZoom': 10,
+      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
+    }]
+  };
 
   const vectorManifest = {
     'layers': [{
@@ -103,7 +107,7 @@ describe('service_settings (FKA tilemaptest)', function () {
     manifestServiceUrlOriginal = mapConfig.manifestServiceUrl;
     tilemapsConfigDeprecatedOriginal = tilemapsConfig.deprecated;
 
-    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
+    sinon.stub(serviceSettings, '_getManifest').callsFake(url => {
       let contents = null;
       if (url.startsWith(tmsManifestUrl)) {
         contents = tmsManifest;

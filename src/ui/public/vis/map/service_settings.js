@@ -78,8 +78,9 @@ uiModules.get('kibana')
           }
 
           try {
-            const response = await this._getManifest(mapConfig.manifestServiceUrl);
-            return response;
+            const { services = [] } =
+              await this._getManifest(mapConfig.manifestServiceUrl);
+            return services;
           } catch (e) {
             if (!e) {
               e = new Error('Unknown error');
@@ -95,13 +96,12 @@ uiModules.get('kibana')
         this._loadFileLayers = _.once(async () => {
           const catalogue = await this._loadCatalogue();
 
-          const fileService = catalogue.services
-            .find(service => service.type === 'file');
+          const fileService = catalogue.find(({ type }) => type === 'file');
           if (!fileService) {
             return [];
           }
 
-          const { layers } = await this._getManifest(fileService.manifest);
+          const { layers = null } = await this._getManifest(fileService.manifest);
           if (layers) {
             const fileLayers = layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
             layers.forEach((layer) => {
@@ -115,12 +115,12 @@ uiModules.get('kibana')
         this._loadTMSServices = _.once(async () => {
 
           const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services
-            .find(service => service.type === 'tms');
+          const tmsService = catalogue
+            .find(({ type }) => type === 'tms');
           if (!tmsService) {
             return [];
           }
-          const { services } = await this._getManifest(tmsService.manifest);
+          const { services = null } = await this._getManifest(tmsService.manifest);
           const preppedTMSServices = services
             ? services.map((tmsService) => {
               const preppedService = _.cloneDeep(tmsService);
@@ -219,7 +219,6 @@ uiModules.get('kibana')
         const id = `file/${fileLayer.name}`;
         return `${mapConfig.emsLandingPageUrl}#${id}`;
       }
-
 
       async _getUrlTemplateForEMSTMSLayer(tmsServiceConfig) {
         const tmsServices = await this._loadTMSServices();
