@@ -24,7 +24,7 @@ describe('get_column_renderer', () => {
   });
 
   test('should render event id when dealing with data that is not suricata', () => {
-    const columnName = 'event';
+    const columnName = 'event.id';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn(columnName, nonSuricata);
     const wrapper = mount(<span>{column}</span>);
@@ -32,7 +32,7 @@ describe('get_column_renderer', () => {
   });
 
   test('should render CVE text as the event when dealing with a suricata event', () => {
-    const columnName = 'event';
+    const columnName = 'event.id';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, suricata);
     const column = columnRenderer.renderColumn(columnName, suricata);
     const wrapper = mount(<span>{column}</span>);
@@ -41,7 +41,7 @@ describe('get_column_renderer', () => {
 
   test('should render empty value when dealing with an empty value of user', () => {
     const omitUser = omit('user', nonSuricata);
-    const columnName = 'user';
+    const columnName = 'user.name';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, omitUser);
     const column = columnRenderer.renderColumn(columnName, omitUser);
     const wrapper = mount(<span>{column}</span>);

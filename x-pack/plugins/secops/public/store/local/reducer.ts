@@ -6,23 +6,27 @@
 
 import { combineReducers } from 'redux';
 
+import { appReducer, AppState, initialAppState } from './app';
 import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from './drag_and_drop';
 import { hostsReducer, HostsState, initialHostsState } from './hosts';
 import { initialTimelineState, timelineReducer, TimelineState } from './timeline';
 
 export interface LocalState {
+  app: AppState;
   dragAndDrop: DragAndDropState;
   timeline: TimelineState;
   hosts: HostsState;
 }
 
 export const initialLocalState: LocalState = {
+  app: initialAppState,
   dragAndDrop: initialDragAndDropState,
   timeline: initialTimelineState,
   hosts: initialHostsState,
 };
 
 export const localReducer = combineReducers<LocalState>({
+  app: appReducer,
   dragAndDrop: dragAndDropReducer,
   timeline: timelineReducer,
   hosts: hostsReducer,

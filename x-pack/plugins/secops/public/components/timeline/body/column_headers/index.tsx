@@ -35,6 +35,7 @@ const ColumnHeaderContainer = styled.div``;
 const Flex = styled.div`
   display: flex;
   margin-left: 5px;
+  user-select: none;
   width: 100%;
 `;
 

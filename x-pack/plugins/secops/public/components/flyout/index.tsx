@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { defaultTo, getOr } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -20,43 +12,16 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { State, timelineActions } from '../../store';
+import { themeSelector } from '../../store/local/app';
+import { Theme } from '../../store/local/app/model';
 import { timelineByIdSelector } from '../../store/selectors';
-import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
-import { droppableTimelineFlyoutButtonPrefix } from '../drag_and_drop/helpers';
 import { defaultWidth } from '../timeline/body';
 import { DataProvider } from '../timeline/data_providers/data_provider';
+import { FlyoutButton } from './button';
+import { FlyoutPane } from './pane';
 
-const Container = styled.div`
-  overflow-x: auto;
-  overflow-y: hidden;
-  position: absolute;
-  top: 40%;
-  right: 0%;
-  min-width: 30px;
-  max-width: 200px;
-  z-index: 1;
-  height: 210px;
-  max-height: 210px;
-`;
-
-export const Button = styled(EuiPanel)`
-  display: flex;
-  z-index: 2;
-  justify-content: center;
-  text-align: center;
-  border-top: 1px solid #c5c5c5;
-  border-bottom: 1px solid #c5c5c5;
-  border-left: 1px solid #c5c5c5;
-  border-radius: 6px 0 0 6px;
-  box-shadow: 0 3px 3px -1px rgba(173, 173, 173, 0.5), 0 5px 7px -2px rgba(173, 173, 173, 0.5);
-  background-color: inherit;
-  cursor: pointer;
-`;
-
-export const Text = styled(EuiText)`
-  width: 12px;
-  z-index: 3;
-`;
+/** The height in pixels of the flyout header, exported for use in height calculations */
+export const flyoutHeaderHeight: number = 50;
 
 export const Badge = styled(EuiBadge)`
   position: absolute;
@@ -72,87 +37,70 @@ const Visible = styled.div<{ show: boolean }>`
 `;
 
 interface OwnProps {
-  timelineId: string;
   children?: React.ReactNode;
+  flyoutHeight: number;
+  headerHeight: number;
+  timelineId: string;
 }
 
-type ShowTimeline = (params: { id: string; show: boolean }) => void;
-
 interface DispatchProps {
-  showTimeline: ShowTimeline;
+  showTimeline?: ({ id, show }: { id: string; show: boolean }) => void;
+  applyDeltaToWidth?: (
+    {
+      id,
+      delta,
+      bodyClientWidthPixels,
+      maxWidthPercent,
+      minWidthPixels,
+    }: {
+      id: string;
+      delta: number;
+      bodyClientWidthPixels: number;
+      maxWidthPercent: number;
+      minWidthPixels: number;
+    }
+  ) => void;
 }
 
 interface StateReduxProps {
-  show: boolean;
-  dataProviders: DataProvider[];
+  dataProviders?: DataProvider[];
+  show?: boolean;
+  theme?: Theme;
+  width?: number;
 }
 
 type Props = OwnProps & DispatchProps & StateReduxProps;
 
-interface FlyoutPaneProps {
-  onClose: () => void;
-  children: React.ReactNode;
-}
-
-export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
-  <EuiFlyout
-    size="l"
-    maxWidth={defaultWidth + 50}
-    onClose={onClose}
-    aria-labelledby="flyoutTitle"
-    data-test-subj="flyout"
-  >
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2 data-test-subj="flyoutTitle" id="flyoutTitle">
-          Timeline
-        </h2>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody data-test-subj="flyoutChildren">{children}</EuiFlyoutBody>
-  </EuiFlyout>
-));
-
-interface FlyoutButtonProps {
-  onOpen: () => void;
-  show: boolean;
-  dataProviders: DataProvider[];
-  timelineId: string;
-}
-
-export const FlyoutButton = pure(
-  ({ onOpen, show, dataProviders, timelineId }: FlyoutButtonProps) =>
-    show ? (
-      <Container>
-        <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
-          <div data-test-subj="flyoutOverlay" onClick={onOpen}>
-            {dataProviders.length !== 0 && (
-              <Badge data-test-subj="badge" color="primary">
-                {dataProviders.length}
-              </Badge>
-            )}
-            <Button>
-              <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
-            </Button>
-          </div>
-        </DroppableWrapper>
-      </Container>
-    ) : null
-);
-
 export const FlyoutComponent = pure<Props>(
-  ({ show, dataProviders, timelineId, showTimeline, children }) => (
+  ({
+    children,
+    dataProviders,
+    flyoutHeight,
+    headerHeight,
+    show,
+    showTimeline,
+    timelineId,
+    theme,
+    width,
+  }) => (
     <>
-      <Visible show={show}>
-        <FlyoutPane onClose={() => showTimeline({ id: timelineId, show: false })}>
+      <Visible show={show!}>
+        <FlyoutPane
+          flyoutHeight={flyoutHeight}
+          headerHeight={headerHeight}
+          onClose={() => showTimeline!({ id: timelineId, show: false })}
+          timelineId={timelineId}
+          width={width!}
+        >
           {children}
         </FlyoutPane>
       </Visible>
       <FlyoutButton
-        dataProviders={dataProviders}
+        dataProviders={dataProviders!}
         show={!show}
+        theme={theme!}
         timelineId={timelineId}
-        onOpen={() => showTimeline({ id: timelineId, show: true })}
+        onOpen={() => showTimeline!({ id: timelineId, show: true })}
       />
     </>
   )
@@ -160,9 +108,12 @@ export const FlyoutComponent = pure<Props>(
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById = defaultTo({}, timelineByIdSelector(state));
-  const show = getOr('false', `${timelineId}.show`, timelineById);
   const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);
-  return { show, dataProviders };
+  const show = getOr('false', `${timelineId}.show`, timelineById);
+  const theme = defaultTo('dark', themeSelector(state));
+  const width = getOr(defaultWidth, `${timelineId}.width`, timelineById);
+
+  return { dataProviders, show, theme, width };
 };
 
 export const Flyout = connect(

@@ -10,96 +10,37 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
 }
 
-import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
+import { Actions } from './actions';
 import { DataProvider } from './data_provider';
 
 const PanelProvider = styled(EuiPanel)`
   && {
     align-items: center;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: space-between;
     margin: 5px;
-    min-height: 50px;
+    min-height: 60px;
     padding: 5px 5px 5px 10px;
-    max-width: 240px;
-    min-width: 200px;
+    min-width: 150px;
   }
 `;
-
-const FlexGroup = styled.span`
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-  flex-grow: 1;
-  align-items: center;
-  margin-left: 5px;
-`;
-
-const Spacer = styled(EuiSpacer)`
-  margin-left: 10px;
-  margin-right: 0px;
-  border-left: 1px solid #ccc;
-`;
-
-interface SwitchButtonProps {
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  dataProvider: DataProvider;
-}
-
-/** An affordance for enabling/disabling a data provider. It invokes `onToggleDataProviderEnabled` when clicked */
-const SwitchButton = pure(({ onToggleDataProviderEnabled, dataProvider }: SwitchButtonProps) => {
-  const onClick = () => {
-    onToggleDataProviderEnabled({ dataProvider, enabled: !dataProvider.enabled });
-  };
-
-  return (
-    <EuiSwitch
-      aria-label="Toggle"
-      data-test-subj="switchButton"
-      defaultChecked={dataProvider.enabled}
-      onClick={onClick}
-    />
-  );
-});
-
-interface CloseButtonProps {
-  onDataProviderRemoved: OnDataProviderRemoved;
-  dataProvider: DataProvider;
-}
-
-/** An affordance for removing a data provider. It invokes `onDataProviderRemoved` when clicked */
-const CloseButton = pure(({ onDataProviderRemoved, dataProvider }: CloseButtonProps) => {
-  const onClick = () => {
-    onDataProviderRemoved(dataProvider);
-  };
-
-  return (
-    <EuiButtonIcon
-      data-test-subj="closeButton"
-      onClick={onClick}
-      iconType="cross"
-      aria-label="Next"
-    />
-  );
-});
 
 export const Provider = pure<Props>(
   ({ dataProvider, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
     <PanelProvider data-test-subj="provider" key={dataProvider.id}>
       {dataProvider.name}
-      <FlexGroup>
-        <SwitchButton
-          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-          dataProvider={dataProvider}
-        />
-        <Spacer />
-        <CloseButton onDataProviderRemoved={onDataProviderRemoved} dataProvider={dataProvider} />
-      </FlexGroup>
+      <Actions
+        dataProvider={dataProvider}
+        onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+      />
     </PanelProvider>
   )
 );

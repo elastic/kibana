@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * A runtime representation of the Elastic Common Schema (ECS) https://github.com/elastic/ecs
+ *
+ * It is NOT a 1:1 mapping to the ECS:
+ * + It INCLUDES "virtual (non-spec)" fields that are not defined by ECS (e.g. `_id`)
+ * + It INCLUDES "mapped" fields (e.g. `@timestamp` in ECS is named `timestamp` here)
+ */
 export interface ECS {
   _id: string;
   timestamp: string;

@@ -6,24 +6,57 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { filter } from 'lodash/fp';
-import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
-import { Sort } from '../../../components/timeline/body/sort';
-import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import {
+  addHistory,
+  addNote,
+  addNoteToEvent,
   addProvider,
+  applyDeltaToWidth,
   createTimeline,
+  pinEvent,
   removeProvider,
   showTimeline,
+  unPinEvent,
   updateDataProviderEnabled,
+  updateDescription,
+  updateIsFavorite,
+  updateIsLive,
   updateItemsPerPage,
   updateItemsPerPageOptions,
+  updateKqlMode,
+  updateKqlQuery,
   updatePageIndex,
   updateProviders,
   updateRange,
   updateSort,
+  updateTitle,
 } from './actions';
-import { timelineDefaults, TimelineModel } from './model';
+import {
+  addNewTimeline,
+  addTimelineHistory,
+  addTimelineNote,
+  addTimelineNoteToEvent,
+  addTimelineProvider,
+  applyDeltaToCurrentWidth,
+  pinTimelineEvent,
+  removeTimelineProvider,
+  unPinTimelineEvent,
+  updateTimelineDescription,
+  updateTimelineIsFavorite,
+  updateTimelineIsLive,
+  updateTimelineItemsPerPage,
+  updateTimelineKqlMode,
+  updateTimelineKqlQuery,
+  updateTimelinePageIndex,
+  updateTimelinePerPageOptions,
+  updateTimelineProviderEnabled,
+  updateTimelineProviders,
+  updateTimelineRange,
+  updateTimelineShowTimeline,
+  updateTimelineSort,
+  updateTimelineTitle,
+} from './helpers';
+import { TimelineModel } from './model';
 
 /** A map of id to timeline  */
 export interface TimelineById {
@@ -41,251 +74,23 @@ export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
 };
 
-interface AddNewTimelineParams {
-  id: string;
-  timelineById: TimelineById;
-}
-/** Adds a new `Timeline` to the provided collection of `TimelineById` */
-export const addNewTimeline = ({ id, timelineById }: AddNewTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    id,
-    ...timelineDefaults,
-  },
-});
-
-interface UpdateShowTimelineProps {
-  id: string;
-  show: boolean;
-  timelineById: TimelineById;
-}
-
-export const updateShowTimeline = ({
-  id,
-  show,
-  timelineById,
-}: UpdateShowTimelineProps): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      show,
-    },
-  };
-};
-
-interface AddTimelineProviderParams {
-  id: string;
-  provider: DataProvider;
-  timelineById: TimelineById;
-}
-
-export const addTimelineProvider = ({
-  id,
-  provider,
-  timelineById,
-}: AddTimelineProviderParams): TimelineById => {
-  const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex(p => p.id === provider.id);
-
-  const dataProviders =
-    alreadyExistsAtIndex > -1
-      ? [
-          ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
-          provider,
-          ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
-        ]
-      : [...timeline.dataProviders, provider];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders,
-    },
-  };
-};
-
-interface UpdateTimelineProvidersParams {
-  id: string;
-  providers: DataProvider[];
-  timelineById: TimelineById;
-}
-
-export const updateTimelineProviders = ({
-  id,
-  providers,
-  timelineById,
-}: UpdateTimelineProvidersParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders: providers,
-    },
-  };
-};
-
-interface UpdateTimelineRangeParams {
-  id: string;
-  range: Range;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineRange = ({
-  id,
-  range,
-  timelineById,
-}: UpdateTimelineRangeParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      range,
-    },
-  };
-};
-
-interface UpdateTimelineSortParams {
-  id: string;
-  sort: Sort;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineSort = ({
-  id,
-  sort,
-  timelineById,
-}: UpdateTimelineSortParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      sort,
-    },
-  };
-};
-
-interface UpdateTimelineProviderEnabledParams {
-  id: string;
-  providerId: string;
-  enabled: boolean;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineProviderEnabled = ({
-  id,
-  providerId,
-  enabled,
-  timelineById,
-}: UpdateTimelineProviderEnabledParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders: timeline.dataProviders.map(
-        provider => (provider.id === providerId ? { ...provider, ...{ enabled } } : provider)
-      ),
-    },
-  };
-};
-
-interface UpdateTimelineItemsPerPageParams {
-  id: string;
-  itemsPerPage: number;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineItemsPerPage = ({
-  id,
-  itemsPerPage,
-  timelineById,
-}: UpdateTimelineItemsPerPageParams) => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      itemsPerPage,
-    },
-  };
-};
-
-interface UpdateTimelinePageIndexParams {
-  id: string;
-  activePage: number;
-  timelineById: TimelineById;
-}
-
-export const updateTimelinePageIndex = ({
-  id,
-  activePage,
-  timelineById,
-}: UpdateTimelinePageIndexParams) => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      activePage,
-    },
-  };
-};
-
-interface UpdateTimelinePerPageOptionsParams {
-  id: string;
-  itemsPerPageOptions: number[];
-  timelineById: TimelineById;
-}
-
-export const updateTimelinePerPageOptions = ({
-  id,
-  itemsPerPageOptions,
-  timelineById,
-}: UpdateTimelinePerPageOptionsParams) => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      itemsPerPageOptions,
-    },
-  };
-};
-
-interface RemoveTimelineProviderParams {
-  id: string;
-  providerId: string;
-  timelineById: TimelineById;
-}
-
-export const removeTimelineProvider = ({
-  id,
-  providerId,
-  timelineById,
-}: RemoveTimelineProviderParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders: filter(p => p.id !== providerId, timeline.dataProviders),
-    },
-  };
-};
-
 /** The reducer for all timeline actions  */
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
-  .case(createTimeline, (state, { id }) => ({
+  .case(createTimeline, (state, { id, show }) => ({
     ...state,
-    timelineById: addNewTimeline({ id, timelineById: state.timelineById }),
+    timelineById: addNewTimeline({ id, show, timelineById: state.timelineById }),
+  }))
+  .case(addHistory, (state, { id, historyId }) => ({
+    ...state,
+    timelineById: addTimelineHistory({ id, historyId, timelineById: state.timelineById }),
+  }))
+  .case(addNote, (state, { id, noteId }) => ({
+    ...state,
+    timelineById: addTimelineNote({ id, noteId, timelineById: state.timelineById }),
+  }))
+  .case(addNoteToEvent, (state, { id, noteId, eventId }) => ({
+    ...state,
+    timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
@@ -293,11 +98,57 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(showTimeline, (state, { id, show }) => ({
     ...state,
-    timelineById: updateShowTimeline({ id, show, timelineById: state.timelineById }),
+    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
+  }))
+  .case(
+    applyDeltaToWidth,
+    (state, { id, delta, bodyClientWidthPixels, minWidthPixels, maxWidthPercent }) => ({
+      ...state,
+      timelineById: applyDeltaToCurrentWidth({
+        id,
+        delta,
+        bodyClientWidthPixels,
+        minWidthPixels,
+        maxWidthPercent,
+        timelineById: state.timelineById,
+      }),
+    })
+  )
+  .case(pinEvent, (state, { id, eventId }) => ({
+    ...state,
+    timelineById: pinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
   }))
   .case(removeProvider, (state, { id, providerId }) => ({
     ...state,
     timelineById: removeTimelineProvider({ id, providerId, timelineById: state.timelineById }),
+  }))
+  .case(unPinEvent, (state, { id, eventId }) => ({
+    ...state,
+    timelineById: unPinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
+  }))
+  .case(updateDescription, (state, { id, description }) => ({
+    ...state,
+    timelineById: updateTimelineDescription({ id, description, timelineById: state.timelineById }),
+  }))
+  .case(updateIsFavorite, (state, { id, isFavorite }) => ({
+    ...state,
+    timelineById: updateTimelineIsFavorite({ id, isFavorite, timelineById: state.timelineById }),
+  }))
+  .case(updateIsLive, (state, { id, isLive }) => ({
+    ...state,
+    timelineById: updateTimelineIsLive({ id, isLive, timelineById: state.timelineById }),
+  }))
+  .case(updateKqlMode, (state, { id, kqlMode }) => ({
+    ...state,
+    timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
+  }))
+  .case(updateKqlQuery, (state, { id, kqlQuery }) => ({
+    ...state,
+    timelineById: updateTimelineKqlQuery({ id, kqlQuery, timelineById: state.timelineById }),
+  }))
+  .case(updateTitle, (state, { id, title }) => ({
+    ...state,
+    timelineById: updateTimelineTitle({ id, title, timelineById: state.timelineById }),
   }))
   .case(updateProviders, (state, { id, providers }) => ({
     ...state,

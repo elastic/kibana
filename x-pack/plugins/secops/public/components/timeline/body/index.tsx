@@ -4,47 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Range } from '../body/column_headers/range_picker/ranges';
+import { Theme } from '../../../store/local/app/model';
+import { StatefulEventDetails } from '../../event_details/stateful_event_details';
+import { LazyAccordion } from '../../lazy_accordion';
 import { ECS } from '../ecs';
-import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from '../events';
-import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { ColumnRenderer, getColumnRenderer, getRowRenderer, RowRenderer } from './renderers';
-import { Sort } from './sort';
 
 interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: ECS[];
-  height?: string;
-  onColumnSorted: OnColumnSorted;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onFilterChange: OnFilterChange;
-  onRangeSelected: OnRangeSelected;
-  range: Range;
+  height: number;
+  id: string;
   rowRenderers: RowRenderer[];
-  sort: Sort;
-  width: number;
+  theme: Theme;
 }
 
-const BodyDiv = styled.div<{ width: string; height: string }>`
-  display: flex;
-  flex-direction: column;
-  margin: 20px 5px 5px 8px;
+const ScrollableArea = styled.div<{
+  height: number;
+}>`
+  display: block;
+  height: ${({ height }) => `${height}px`};
   overflow: auto;
-  width: ${props => props.width};
-  height: ${props => props.height};
-`;
-
-const ScrollableArea = styled.div`
-  height: 100%;
-  overflow-y: scroll;
-  margin-top: 5px;
+  min-height: 0px;
 `;
 
 const Row = styled.div`
@@ -59,14 +47,21 @@ const FlexRow = styled.span`
   flex-direction: row;
 `;
 
+// NOTE: overflow-wrap: break-word is required below to render data that is too
+// long to fit in a cell, but has no breaks because, for example, it's a
+// single large value (e.g. 985205274836907)
 const Cell = styled(EuiText)`
   overflow: hidden;
   margin-right: 6px;
+  overflow-wrap: break-word;
 `;
 
-const TimeGutter = styled.span`
+const getBackgroundColor = (theme: Theme): string =>
+  theme === 'dark' ? 'rgb(63,63,63)' : '#F5F7FA';
+
+const TimeGutter = styled.span<{ themeName: Theme }>`
   min-width: 50px;
-  background-color: #f2f2f2;
+  background-color: ${({ themeName }) => getBackgroundColor(themeName)};
 `;
 
 const Pin = styled(EuiIcon)`
@@ -83,55 +78,46 @@ const DataDrivenColumns = styled.div`
   width: 100%;
 `;
 
-const ColumnRender = styled.div<{ minwidth: string; maxwidth: string }>`
+const ColumnRender = styled.div<{
+  minwidth: string;
+  maxwidth: string;
+  index: number;
+  themeName: Theme;
+}>`
   max-width: ${props => props.minwidth};
   min-width: ${props => props.maxwidth};
+  background: ${({ index, themeName }) =>
+    index % 2 !== 0 ? getBackgroundColor(themeName) : 'inherit'};
+  padding: 5px;
 `;
 
-const defaultHeight = '100%';
+export const defaultWidth = 1090;
 
-export const defaultWidth = 1125;
+const ExpandableDetails = styled.div`
+  width: 100%;
+`;
 
 /** Renders the timeline body */
 export const Body = pure<Props>(
-  ({
-    columnHeaders,
-    columnRenderers,
-    data,
-    height = defaultHeight,
-    onColumnSorted,
-    onFilterChange,
-    onRangeSelected,
-    range,
-    rowRenderers,
-    sort,
-    width,
-  }) => (
-    <BodyDiv data-test-subj="body" width={`${width - 10}px`} height={height}>
-      <ColumnHeaders
-        columnHeaders={columnHeaders}
-        onColumnSorted={onColumnSorted}
-        onFilterChange={onFilterChange}
-        onRangeSelected={onRangeSelected}
-        range={range}
-        sort={sort}
-      />
-      <EuiHorizontalRule margin="xs" />
-      <ScrollableArea>
-        {data.map(ecs => (
-          <Row key={ecs._id}>
-            <TimeGutter />
-            {getRowRenderer(ecs, rowRenderers).renderRow(
-              ecs,
+  ({ columnHeaders, columnRenderers, data, height, id, rowRenderers, theme }) => (
+    <ScrollableArea height={height} data-test-subj="scrollableArea">
+      {data.map(ecs => (
+        <Row key={ecs._id}>
+          <TimeGutter themeName={theme} />
+          {getRowRenderer(ecs, rowRenderers).renderRow(
+            ecs,
+            <>
               <FlexRow>
                 <Pin type="pin" size="l" />
                 <DataDrivenColumns data-test-subj="dataDrivenColumns">
-                  {columnHeaders.map(header => (
+                  {columnHeaders.map((header, index) => (
                     <ColumnRender
                       key={`cell-${header.id}`}
                       data-test-subj="cellContainer"
                       maxwidth={`${header.minWidth}px`}
                       minwidth={`${header.minWidth}px`}
+                      index={index}
+                      themeName={theme}
                     >
                       <Cell size="xs">
                         {getColumnRenderer(header.id, columnRenderers, ecs).renderColumn(
@@ -143,10 +129,21 @@ export const Body = pure<Props>(
                   ))}
                 </DataDrivenColumns>
               </FlexRow>
-            )}
-          </Row>
-        ))}
-      </ScrollableArea>
-    </BodyDiv>
+              <FlexRow>
+                <ExpandableDetails data-test-subj="expandableDetails">
+                  <LazyAccordion
+                    id={`timeline-${id}-row-${ecs._id}`}
+                    buttonContent={`${JSON.stringify(ecs.event) || {}}`} // TODO: this should be `event.message` or `event._source`
+                    paddingSize="none"
+                  >
+                    <StatefulEventDetails data={ecs} />
+                  </LazyAccordion>
+                </ExpandableDetails>
+              </FlexRow>
+            </>
+          )}
+        </Row>
+      ))}
+    </ScrollableArea>
   )
 );

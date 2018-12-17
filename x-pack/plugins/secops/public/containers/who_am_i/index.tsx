@@ -30,7 +30,7 @@ export const WhoAmI = ({ children, sourceId }: WHoAmIProps) => (
   >
     {({ data }) =>
       children({
-        appName: getOr('Who am I ?', 'source.whoAmI.appName', data),
+        appName: getOr('', 'source.whoAmI.appName', data),
       })
     }
   </Query>

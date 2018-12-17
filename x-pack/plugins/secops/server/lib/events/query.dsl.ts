@@ -81,7 +81,7 @@ export const buildQuery = (options: EventsRequestOptions) => {
           filter,
         },
       },
-      size: 100,
+      size: 25,
       sort: [
         {
           [options.sourceConfiguration.fields.timestamp]: 'desc',
