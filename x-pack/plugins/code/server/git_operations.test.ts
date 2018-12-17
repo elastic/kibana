@@ -6,7 +6,7 @@
 
 import { execSync } from 'child_process';
 import fs from 'fs';
-import Git, { CloneOptions } from 'nodegit';
+import { Clone, CloneOptions } from 'nodegit';
 import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -38,7 +38,6 @@ test('get default branch from a non master repo', async () => {
 
     expect(defaultBranch).toEqual('trunk');
     console.log('5');
-
   } finally {
     rimraf.sync(tmpDir);
     console.log('6');
@@ -57,7 +56,7 @@ test('nodegit should be able to clone a repo from github.com', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test_clone'));
   const url = 'https://github.com/Microsoft/TypeScript-Node-Starter.git';
   try {
-    await Git.Clone.clone(url, tmpDir, opts);
+    await Clone.clone(url, tmpDir, opts);
     expect(fs.existsSync(path.join(tmpDir, '.git'))).toBeTruthy();
   } finally {
     rimraf.sync(tmpDir);
