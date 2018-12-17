@@ -75,39 +75,39 @@ export function createPermissionFailureMessage(privilegeType) {
   let message = '';
   const licenseHasExpired = hasLicenseExpired();
   if (licenseHasExpired) {
-    message = i18n.translate('xpack.ml.privilege.licenseHasExpiredErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.licenseHasExpiredTooltip', {
       defaultMessage: 'Your license has expired.'
     });
   } else if (privilegeType === 'canCreateJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.createMLJobsErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.createMLJobsTooltip', {
       defaultMessage: 'You do not have permission to create Machine Learning jobs.'
     });
   } else if (privilegeType === 'canStartStopDatafeed') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDatafeedsErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDatafeedsTooltip', {
       defaultMessage: 'You do not have permission to start or stop datafeeds.'
     });
   } else if (privilegeType === 'canUpdateJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.editJobsErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.editJobsTooltip', {
       defaultMessage: 'You do not have permission to edit jobs.'
     });
   } else if (privilegeType === 'canDeleteJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.deleteJobsErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteJobsTooltip', {
       defaultMessage: 'You do not have permission to delete jobs.'
     });
   } else if (privilegeType === 'canCreateCalendar') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.createCalendarsErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.createCalendarsTooltip', {
       defaultMessage: 'You do not have permission to create calendars.'
     });
   } else if (privilegeType === 'canDeleteCalendar') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.deleteCalendarsErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteCalendarsTooltip', {
       defaultMessage: 'You do not have permission to delete calendars.'
     });
   } else if (privilegeType === 'canForecastJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsErrorMessage', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
       defaultMessage: 'You do not have permission to run forecasts.'
     });
   }
-  return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorErrorMessage', {
+  return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {
     defaultMessage: '{message} Please contact your administrator.',
     values: {
       message,
