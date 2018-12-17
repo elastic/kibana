@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { format, addDays } from 'date-fns';
+import moment from 'moment';
 
 const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => (
   {
@@ -30,9 +30,9 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
   leaderIndexPatterns,
   limit = 5,
   wildcardPlaceHolders = [
-    format(new Date(), 'YYYY-MM-DD'),
-    format(addDays(new Date(), 1), 'YYYY-MM-DD'),
-    format(addDays(new Date(), 2), 'YYYY-MM-DD'),
+    moment().format('YYYY-MM-DD'),
+    moment().add(1, 'days').format('YYYY-MM-DD'),
+    moment().add(2, 'days').format('YYYY-MM-DD'),
   ]
 }) => {
   const indicesPreview = [];
