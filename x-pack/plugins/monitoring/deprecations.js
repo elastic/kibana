@@ -51,11 +51,15 @@ export const deprecations = ({ rename }) => {
       if (!deprecatedUrl) {
         return;
       }
-      if (!hosts) {
+      if (hosts) {
+        log('Deprecated config key "xpack.monitoring.elasticsearch.url" ' +
+          'conflicts with "xpack.monitoring.elasticsearch.hosts".  Ignoring "elasticsearch.url"');
+      } else {
         set(settings, 'hosts', [deprecatedUrl]);
+        log('Config key "xpack.monitoring.elasticsearch.url" is deprecated.' +
+          'It has been replaced with "xpack.monitoring.elasticsearch.hosts"');
       }
       unset(settings, 'url');
-      log(`Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"`);
     }
   ];
 };

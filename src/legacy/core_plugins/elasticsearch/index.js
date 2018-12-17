@@ -95,11 +95,13 @@ export default function (kibana) {
           if (!deprecatedUrl) {
             return;
           }
-          if (!hosts) {
+          if (hosts) {
+            log('Deprecated config key "elasticsearch.url" conflicts with "elasticsearch.hosts".  Ignoring "elasticsearch.url"');
+          } else {
             set(settings, 'hosts', [deprecatedUrl]);
+            log('Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"');
           }
           unset(settings, 'url');
-          log(`Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"`);
         };
       };
 
