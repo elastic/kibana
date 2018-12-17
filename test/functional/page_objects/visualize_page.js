@@ -1165,6 +1165,43 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async filterForInspectorTableCell(column, row) {
+      await retry.try(async () => {
+        const table = await testSubjects.find('inspectorTable');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        await browser.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterForInspectorCellValue', cell);
+        await filterBtn.click();
+      });
+      await renderable.waitForRender();
+    }
+
+    async filterOutInspectorTableCell(column, row) {
+      await retry.try(async () => {
+        const table = await testSubjects.find('inspectorTable');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        await browser.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterOutInspectorCellValue', cell);
+        await filterBtn.click();
+      });
+      await renderable.waitForRender();
+    }
+
+    async toggleLegend(show = true) {
+      await retry.try(async () => {
+        const isVisible = find.byCssSelector('vislib-legend');
+        if ((show && !isVisible) || (!show && isVisible)) {
+          await testSubjects.click('vislibToggleLegend');
+        }
+      });
+    }
+
+    async filterLegend(name) {
+      await this.toggleLegend();
+      await testSubjects.click(`legend-${name}`);
+      await testSubjects.click(`legend-${name}-filterIn`);
+    }
+
     async doesLegendColorChoiceExist(color) {
       return await testSubjects.exists(`legendSelectColor-${color}`);
     }
