@@ -10,6 +10,7 @@
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
 
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 
@@ -38,6 +39,7 @@ import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { ml } from '../../services/ml_api_service';
+import { mlJobService } from '../../services/job_service';
 import { mlTableService } from '../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 
@@ -89,6 +91,18 @@ class AnnotationsTable extends Component {
     }
   }
 
+  getJob(jobId) {
+    // check if the job was supplied via props and matches the supplied jobId
+    if (Array.isArray(this.props.jobs) && this.props.jobs.length > 0) {
+      const job = this.props.jobs[0];
+      if (job.job_id === jobId) {
+        return job;
+      }
+    }
+
+    return mlJobService.getJob(jobId);
+  }
+
   componentDidMount() {
     if (this.props.annotations === undefined) {
       this.getAnnotations();
@@ -105,16 +119,18 @@ class AnnotationsTable extends Component {
     }
   }
 
-  openSingleMetricView(annotation) {
+  openSingleMetricView = (annotation) => {
     // Creates the link to the Single Metric Viewer.
-    // Set the total time range from the start to the end of the annotation,
-    const dataCounts = this.props.jobs[0].data_counts;
+    // Set the total time range from the start to the end of the annotation.
+    const jobId = annotation.job_id;
+    const job = this.getJob(jobId);
+    const dataCounts = job.data_counts;
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(dataCounts.latest_record_timestamp).toISOString();
 
     const _g = rison.encode({
       ml: {
-        jobIds: [this.props.jobs[0].job_id]
+        jobIds: [jobId]
       },
       refreshInterval: {
         display: 'Off',
@@ -150,7 +166,7 @@ class AnnotationsTable extends Component {
     const _a = rison.encode(appState);
 
     const url = `?_g=${_g}&_a=${_a}`;
-    addItemToRecentlyAccessed('timeseriesexplorer', this.props.jobs[0].job_id, url);
+    addItemToRecentlyAccessed('timeseriesexplorer', jobId, url);
     window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
   }
 
@@ -267,6 +283,14 @@ class AnnotationsTable extends Component {
         sortable: true,
       },
     ];
+
+    const jobIds = _.uniq(annotations.map(a => a.job_id));
+    if (jobIds.length > 1) {
+      columns.unshift({
+        field: 'job_id',
+        name: 'job ID'
+      });
+    }
 
     if (isNumberBadgeVisible) {
       columns.unshift({
