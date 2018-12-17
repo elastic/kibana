@@ -36,8 +36,8 @@ export class ESSourceDetails extends Component {
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type: </strong><span>{this.props.sourceType}</span><br/>
-          <strong className="gisLayerDetails__label">Index pattern: </strong><span>{this.state.indexPatternTitle}</span><br/>
+          <strong className="gisLayerDetails__label">Type </strong><span>{this.props.sourceType}</span><br/>
+          <strong className="gisLayerDetails__label">Index pattern </strong><span>{this.state.indexPatternTitle}</span><br/>
           <strong className="gisLayerDetails__label">{this.props.geoFieldType}</strong><span>{this.props.geoField}</span><br/>
         </p>
       </EuiText>

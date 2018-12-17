@@ -54,6 +54,10 @@ export class LayerPanel  extends React.Component {
     );
   }
 
+  _renderSourceDetails() {
+    return this.props.selectedLayer.renderSourceDetails();
+  }
+
   render() {
     const { selectedLayer } = this.props;
 
@@ -77,7 +81,7 @@ export class LayerPanel  extends React.Component {
           <LayerSettingsPanel/>
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
-          {selectedLayer.renderSourceDetails()}
+          {this._renderSourceDetails()}
         </EuiFlexItem>
 
         <EuiFlexItem grow={false} className="gisViewPanel__footer">

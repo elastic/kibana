@@ -73,8 +73,8 @@ export class EMSFileSource extends VectorSource {
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source:</strong><span>Elastic Maps Service</span><br/>
-          <strong className="gisLayerDetails__label">Name:</strong><span>{this._descriptor.name}</span><br/>
+          <strong className="gisLayerDetails__label">Source </strong><span>Elastic Maps Service</span><br/>
+          <strong className="gisLayerDetails__label">Name </strong><span>{this._descriptor.name}</span><br/>
           <EuiLink href={emsHotLink} target="_blank">Preview on landing page</EuiLink><br/>
         </p>
       </EuiText>

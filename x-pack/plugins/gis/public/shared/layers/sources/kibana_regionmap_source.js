@@ -58,9 +58,9 @@ export class KibanaRegionmapSource extends VectorSource {
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source: </strong><span>Kibana Region Map</span><br/>
-          <strong className="gisLayerDetails__label">Type: </strong><span>Vector</span><br/>
-          <strong className="gisLayerDetails__label">Name: </strong><span>{this._descriptor.name}</span><br/>
+          <strong className="gisLayerDetails__label">Source </strong><span>Kibana Region Map</span><br/>
+          <strong className="gisLayerDetails__label">Type </strong><span>Vector</span><br/>
+          <strong className="gisLayerDetails__label">Name </strong><span>{this._descriptor.name}</span><br/>
         </p>
       </EuiText>
     );

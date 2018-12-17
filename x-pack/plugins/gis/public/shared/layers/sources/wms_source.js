@@ -43,12 +43,12 @@ export class WMSSource extends TMSSource {
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type: </strong><span>WMSSource.typeDisplayName</span><br/>
-          <strong className="gisLayerDetails__label">Service: </strong>
+          <strong className="gisLayerDetails__label">Type </strong><span>WMSSource.typeDisplayName</span><br/>
+          <strong className="gisLayerDetails__label">Service </strong>
           <span className="eui-textBreakAll">{this._descriptor.serviceUrl}</span><br/>
-          <strong className="gisLayerDetails__label">Layers: </strong>
+          <strong className="gisLayerDetails__label">Layers </strong>
           <span className="eui-textBreakAll">{this._descriptor.layers}</span><br/>
-          <strong className="gisLayerDetails__label">Styles: </strong>
+          <strong className="gisLayerDetails__label">Styles </strong>
           <span className="eui-textBreakAll">{this._descriptor.styles}</span><br/>
         </p>
       </EuiText>

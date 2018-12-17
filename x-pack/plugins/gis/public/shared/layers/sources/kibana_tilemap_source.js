@@ -37,9 +37,9 @@ export class KibanaTilemapSource extends  TMSSource {
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source: </strong><span>Kibana Tilemap Configuration</span><br/>
-          <strong className="gisLayerDetails__label">Type: </strong><span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Id: </strong><span>{this._descriptor.id}</span><br/>
+          <strong className="gisLayerDetails__label">Source </strong><span>Kibana Tilemap Configuration</span><br/>
+          <strong className="gisLayerDetails__label">Type </strong><span>Tile</span><br/>
+          <strong className="gisLayerDetails__label">Id </strong><span>{this._descriptor.id}</span><br/>
         </p>
       </EuiText>
     );
