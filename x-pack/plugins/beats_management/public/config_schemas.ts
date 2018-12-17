@@ -330,10 +330,6 @@ const outputConfig: YamlConfigSchema[] = [
         value: 'kafka',
         text: 'Kafka',
       },
-      {
-        value: 'console',
-        text: 'Console',
-      },
     ],
     error: 'outputConfig.output.error',
     required: true,

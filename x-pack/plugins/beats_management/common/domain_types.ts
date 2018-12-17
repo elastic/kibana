@@ -25,8 +25,10 @@ export enum OutputType {
   elasticsearch = 'elasticsearch',
   logstash = 'logstash',
   kafka = 'kafka',
-  console = 'console',
 }
+
+// TODO convery above enum to an array dynamicly here
+export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka'];
 
 export interface FilebeatInputsConfig {
   paths: string[];
