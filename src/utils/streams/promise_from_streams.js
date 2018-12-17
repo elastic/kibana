@@ -33,54 +33,32 @@
  *  @param  {Array<Stream>} streams
  *  @return {Promise<any>}
  */
+
+import { pipeline, Writable } from 'stream';
+
 export async function createPromiseFromStreams(streams) {
+  let finalChunk;
   const last = streams[streams.length - 1];
-
-  // reject if any of the streams emits an error
-  const anyStreamFailure = new Promise((resolve, reject) => {
-    streams.forEach((stream, i) => {
-      if (i > 0) streams[i - 1].pipe(stream);
-      stream.on('error', reject);
-      return stream;
-    });
-  });
-
-  // resolve when the last stream has finished writing, or
-  // immediately if the last stream is not writable
-  const lastFinishedWriting = new Promise(resolve => {
-    if (typeof last.write !== 'function') {
-      resolve();
-      return;
-    }
-
-    last.on('finish', resolve);
-  });
-
-  // resolve with the final value provided by the last stream
-  // after the last stream has provided it, or immediately if the
-  // stream is not readable
-  const lastFinishedReading = new Promise(resolve => {
-    if (typeof last.read !== 'function') {
-      resolve();
-      return;
-    }
-
-    let finalChunk;
-    last.on('data', (chunk) => {
-      finalChunk = chunk;
-    });
-    last.on('end', () => {
+  if (typeof last.read !== 'function' && streams.length === 1) {
+    // For a nicer error than what stream.pipeline throws
+    throw new Error('A minimum of 2 streams is required when a non-readable stream is given');
+  }
+  if (typeof last.read === 'function') {
+    // We are pushing a writable stream to capture the last chunk
+    streams.push(new Writable({
+      // Use object mode even when "last" stream isn't. This allows to
+      // capture the last chunk as-is.
+      objectMode: true,
+      write(chunk, enc, done) {
+        finalChunk = chunk;
+        done();
+      }
+    }));
+  }
+  return new Promise((resolve, reject) => {
+    pipeline(...streams, (err) => {
+      if (err) return reject(err);
       resolve(finalChunk);
     });
   });
-
-  // wait (and rethrow) the first error, or for the last stream
-  // to both finish writing and providing values to read
-  await Promise.race([
-    anyStreamFailure,
-    Promise.all([lastFinishedWriting, lastFinishedReading])
-  ]);
-
-  // return the final chunk read from the last stream
-  return await lastFinishedReading;
 }

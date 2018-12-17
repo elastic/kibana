@@ -4,31 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceResolvers, QueryResolvers } from '../../../common/graphql/types';
-import { InfraResolvedResult, InfraResolverWithFields } from '../../lib/adapters/framework';
-import { InfraContext } from '../../lib/infra_types';
+import { InfraSourceResolvers, QueryResolvers } from '../../graphql/types';
 import { InfraSourceStatus } from '../../lib/source_status';
 import { InfraSources } from '../../lib/sources';
+import {
+  ChildResolverOf,
+  InfraResolverOf,
+  InfraResolverWithFields,
+  ResultOf,
+} from '../../utils/typed_resolvers';
 
 export type QuerySourceResolver = InfraResolverWithFields<
   QueryResolvers.SourceResolver,
-  null,
-  InfraContext,
   'id' | 'configuration'
 >;
 
 export type QueryAllSourcesResolver = InfraResolverWithFields<
   QueryResolvers.AllSourcesResolver,
-  null,
-  InfraContext,
   'id' | 'configuration'
 >;
 
-export type InfraSourceStatusResolver = InfraResolverWithFields<
-  InfraSourceResolvers.StatusResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext,
-  never
+export type InfraSourceStatusResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.StatusResolver<ResultOf<QuerySourceResolver>>>,
+  QuerySourceResolver
 >;
 
 interface SourcesResolversDeps {

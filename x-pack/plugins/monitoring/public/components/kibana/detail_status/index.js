@@ -22,7 +22,7 @@ function DetailStatusUI({ stats, intl }) {
   const metrics = [
     {
       value: transportAddress,
-      dataTestSubj: 'transportAddress'
+      'data-test-subj': 'transportAddress'
     },
     {
       label: intl.formatMessage({
@@ -30,7 +30,7 @@ function DetailStatusUI({ stats, intl }) {
         defaultMessage: 'OS Free Memory'
       }),
       value: formatMetric(osFreeMemory, 'byte'),
-      dataTestSubj: 'osFreeMemory'
+      'data-test-subj': 'osFreeMemory'
     },
     {
       label: intl.formatMessage({
@@ -38,7 +38,7 @@ function DetailStatusUI({ stats, intl }) {
         defaultMessage: 'Version'
       }),
       value: version,
-      dataTestSubj: 'version'
+      'data-test-subj': 'version'
     },
     {
       label: intl.formatMessage({
@@ -46,7 +46,7 @@ function DetailStatusUI({ stats, intl }) {
         defaultMessage: 'Uptime'
       }),
       value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
+      'data-test-subj': 'uptime'
     }
   ];
 

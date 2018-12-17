@@ -20,7 +20,7 @@ export const LegacyHeader: React.SFC<LegacyHeaderProps> = ({
   breadcrumbs = [],
 }) => (
   <HeaderWrapper>
-    <EuiHeaderSection>
+    <EuiHeaderSection grow>
       <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />
     </EuiHeaderSection>
     {appendSections}
