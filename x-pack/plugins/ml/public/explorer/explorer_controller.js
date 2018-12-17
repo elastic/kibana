@@ -43,6 +43,7 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { timefilter } from 'ui/timefilter';
+import { formatHumanReadableDateTime } from '../util/date_utils';
 import {
   DRAG_SELECT_ACTION,
   SWIMLANE_DEFAULT_LIMIT,
@@ -1074,7 +1075,7 @@ module.controller('MlExplorerController', function (
           // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
           // to show the top 'view by' values for the selected time.
           loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
-          $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
+          $scope.viewByLoadedForTimeFormatted = formatHumanReadableDateTime(timerange.earliestMs);
         }
 
         if (influencers.length === 0) {
