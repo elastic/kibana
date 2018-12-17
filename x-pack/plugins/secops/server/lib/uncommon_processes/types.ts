@@ -28,6 +28,7 @@ export interface UncommonProcessesRequestOptions {
   fields: string[];
 }
 
+type StringOrNumber = string | number;
 export interface UncommonProcessHit {
   _index: string;
   _type: string;
@@ -46,7 +47,7 @@ export interface UncommonProcessHit {
     };
   };
   cursor: string;
-  sort: string[] | number[];
+  sort: StringOrNumber[];
 }
 
 export interface UncommonProcessBucket {

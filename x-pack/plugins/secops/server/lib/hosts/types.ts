@@ -25,6 +25,8 @@ export interface HostsRequestOptions {
   fields: string[];
 }
 
+type StringOrNumber = string | number;
+
 export interface HostHit {
   _index: string;
   _type: string;
@@ -43,7 +45,7 @@ export interface HostHit {
     };
   };
   cursor: string;
-  sort: string[] | number[];
+  sort: StringOrNumber[];
 }
 
 export interface HostBucket {
