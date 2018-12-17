@@ -22,7 +22,16 @@ import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { onBrushEvent } from '../utils/brush_event';
 
-const getTerms = (table, columnIndex, rowIndex) => {
+/**
+ * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
+ * terms based on a specific cell in the tabified data.
+ *
+ * @param  {object} table - tabified table data
+ * @param  {number} columnIndex - current column index
+ * @param  {number} rowIndex - current row index
+ * @return {array} - array of terms to filter against
+ */
+const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
   if (rowIndex === -1) {
     return [];
   }
@@ -42,15 +51,25 @@ const getTerms = (table, columnIndex, rowIndex) => {
   }))];
 };
 
-const createFilter = (data, columnIndex, rowIndex, cellValue) => {
-  const { aggConfig, id: columnId } = data.columns[columnIndex];
+/**
+ * Assembles the filters needed to apply filtering against a specific cell value, while accounting
+ * for cases like if the value is a terms agg in an `__other__` or `__missing__` bucket.
+ *
+ * @param  {object} table - tabified table data
+ * @param  {number} columnIndex - current column index
+ * @param  {number} rowIndex - current row index
+ * @param  {string} cellValue - value of the current cell
+ * @return {array|string} - filter or list of filters to provide to queryFilter.addFilters()
+ */
+const createFilter = (table, columnIndex, rowIndex, cellValue) => {
+  const { aggConfig, id: columnId } = table.columns[columnIndex];
   let filter = [];
-  const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
+  const value = rowIndex > -1 ? table.rows[rowIndex][columnId] : cellValue;
   if (value === null || value === undefined) {
     return;
   }
   if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
-    const terms = getTerms(data, columnIndex, rowIndex);
+    const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
     filter = aggConfig.createFilter(value, { terms });
   } else {
     filter = aggConfig.createFilter(value);

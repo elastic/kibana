@@ -14,7 +14,7 @@
         },
         {
           "exists": {
-            "field":"docker.container.id"
+            "field": "docker.container.id"
           }
         }
       ]
