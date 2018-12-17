@@ -75,7 +75,7 @@ Design::
 * Adds EUI 5.6.0 {pull}26839[#26839]
 * Moves elastic/eui typings to single file {pull}23950[#23950]
 Index Lifecycle Management::
-* Implements a CRUD UI for index lifecycle management policies {pull}25553[#25553]
+* Implements a CRUD UI for Index Lifecycle Management policies {pull}25553[#25553]
 Kibana App::
 * Maps inspector requests by id so single requests can be reset at a time {pull}26770[#26770]
 * Moves Canvas interpreter to OSS in Kibana core {pull}25711[#25711]
@@ -113,7 +113,7 @@ by name, rather than creation date {pull}26491[#26491]
 * Updates the Account Settings screen to show the change password form only when
 a password change is possible for the authentication realm {pull}26779[#26779]
 Visualizations::
-* Removes experimental flag from Visual Builder {pull}25634[#25634]
+* Removes experimental flag from Visual Builder (TSVB) {pull}25634[#25634]
 * Implements new visualization type selection {pull}23833[#23833]
 * Removes `lab` stage for visualizations, making `experimental` the only non-production 
 stage available {pull}25702[#25702]
