@@ -45,6 +45,7 @@ export const CopySourceTask = {
         'webpackShims/**',
         'config/kibana.yml',
         'tsconfig*.json',
+        'kibana.d.ts'
       ],
     });
   },
