@@ -29,14 +29,13 @@ export class FileLayer {
 
 
   getHTMLAttribution() {
-
     const attributions = this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
       const html = url ? `<a href=${url}>${label}</a>` : label;
       return this._emsClient.sanitizeHtml(html);
     });
-    return attributions.join('|');
+    return attributions.join(' | ');//!!!this is the current convention used in Kibana
   }
 
   getFieldsInLanguage() {

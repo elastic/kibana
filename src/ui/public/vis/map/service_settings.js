@@ -80,8 +80,7 @@ uiModules.get('kibana')
             id: fileLayer.getId(),
             format: fileLayer.getDefaultFormatType(),
             created_at: fileLayer.getCreatedAt(),
-            // attribution: fileLayer.getHTMLAttribution(),
-            attribution: '<p>foobar</p>', //todo
+            attribution: fileLayer.getHTMLAttribution(),
             fields: fileLayer.getFieldsInLanguage()
           };
 

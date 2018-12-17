@@ -91,9 +91,9 @@ describe('ems_client', () => {
     expect(layer.hasId('world_countries')).to.be(true);
 
     // expect(layer.hasId('World Countries')).to.be(true);//todo
-    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a> | <a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
 
-    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a> | <a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
 
     expect(layer.getDisplayName()).to.be('World Countries');
 
@@ -113,7 +113,7 @@ describe('ems_client', () => {
     expect(layer.hasId('world_countries')).to.be(true);
 
     // expect(layer.hasId('World Countries')).to.be(true);//todo
-    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a> | <a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
     expect(layer.getDisplayName()).to.be('pays');
 
 
@@ -143,7 +143,7 @@ describe('ems_client', () => {
     expect(layer.hasId('world_countries')).to.be(true);
 
     // expect(layer.hasId('World Countries')).to.be(true);//todo
-    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a> | <a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
     expect(layer.getDisplayName()).to.be('World Countries');
 
     const fields = layer.getFieldsInLanguage();
