@@ -3,17 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Request } from 'hapi';
 import { get } from 'lodash';
+
+import { Legacy } from 'kibana';
+import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;
 }
 
 export async function getDeprecationLoggingStatus(
-  callWithRequest: any,
-  req: Request
+  callWithRequest: CallClusterWithRequest,
+  req: Legacy.Request
 ): Promise<DeprecationLoggingStatus> {
   const response = await callWithRequest(req, 'cluster.getSettings', {
     includeDefaults: true,
@@ -25,8 +26,8 @@ export async function getDeprecationLoggingStatus(
 }
 
 export async function setDeprecationLogging(
-  callWithRequest: any,
-  req: Request,
+  callWithRequest: CallClusterWithRequest,
+  req: Legacy.Request,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
   const response = await callWithRequest(req, 'cluster.putSettings', {

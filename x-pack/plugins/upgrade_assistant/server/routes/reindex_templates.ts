@@ -5,11 +5,11 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
+import { Legacy } from 'kibana';
 
 import { getReindexTemplate } from '../lib/reindex_console_template';
 
-export function registerReindexTemplateRoutes(server: Server) {
+export function registerReindexTemplateRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   server.route({

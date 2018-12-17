@@ -5,11 +5,11 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
+import { Legacy } from 'kibana';
 
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 
-export function registerClusterCheckupRoutes(server: Server) {
+export function registerClusterCheckupRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const basePath = server.config().get<string>('server.basePath');
 

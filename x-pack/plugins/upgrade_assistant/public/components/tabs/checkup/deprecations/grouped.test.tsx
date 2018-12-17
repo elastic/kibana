@@ -10,7 +10,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { EuiBadge, EuiPagination } from '@elastic/eui';
 
-import { DeprecationInfo } from '../../../../../common/types';
+import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_apis';
 import { GroupByOption, LevelFilterOption } from '../../../types';
 import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped';

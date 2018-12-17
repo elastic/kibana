@@ -5,10 +5,16 @@
  */
 
 import Boom from 'boom';
-import { Request } from 'hapi';
 import _ from 'lodash';
 
-export async function getReindexTemplate(callWithRequest: any, req: Request, indexName: string) {
+import { Legacy } from 'kibana';
+import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
+
+export async function getReindexTemplate(
+  callWithRequest: CallClusterWithRequest,
+  req: Legacy.Request,
+  indexName: string
+) {
   const newIndexName = `${indexName}-updated`;
   const indexInfo = await callWithRequest(req, 'transport.request', {
     path: `/${encodeURIComponent(indexName)}?flat_settings`,

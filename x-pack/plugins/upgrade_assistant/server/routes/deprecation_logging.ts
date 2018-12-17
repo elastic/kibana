@@ -5,15 +5,15 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
 import Joi from 'joi';
+import { Legacy } from 'kibana';
 
 import {
   getDeprecationLoggingStatus,
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
 
-export function registerDeprecationLoggingRoutes(server: Server) {
+export function registerDeprecationLoggingRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   server.route({

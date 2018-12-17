@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { Request } from 'hapi';
-import { DeprecationAPIResponse, DeprecationInfo } from '../../common/types';
+import { DeprecationAPIResponse, DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 
 import { CURRENT_MAJOR_VERSION } from '../../common/version';
 
