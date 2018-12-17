@@ -84,6 +84,9 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files', `/etc/kibana/kibana.yml`,
+    
+    // Babel Cache gets regenerated. Mark it as a config so it doesn't flag on verify.
+    '--config-files', `/usr/share/kibana/optimize/.babelcache.json`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
