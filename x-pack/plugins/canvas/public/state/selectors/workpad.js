@@ -116,7 +116,7 @@ export function getNodes(state, pageId, withAst = true) {
   if (!id) return [];
 
   const page = getPageById(state, id);
-  const elements = get(page, 'elements').concat(get(page, 'groups'));
+  const elements = get(page, 'elements').concat(get(page, 'groups') || []);
 
   if (!elements) return [];
 
