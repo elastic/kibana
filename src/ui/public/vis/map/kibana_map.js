@@ -18,18 +18,12 @@
  */
 
 import { EventEmitter } from 'events';
-import React from 'react';
+import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from 'ui/notify';
-import {
-  EuiSpacer,
-  EuiButtonEmpty
-} from '@elastic/eui';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -101,86 +95,6 @@ function makeLegendControl(container, kibanaMap, position) {
 
   return new LegendControl(container, kibanaMap, position);
 }
-
-const makeZoomWarningMsg = (function () {
-  let disableZoomMsg = false;
-  const setZoomMsg = boolDisableMsg => disableZoomMsg = boolDisableMsg;
-
-  class ZoomWarning extends React.Component {
-
-    constructor(props) {
-      super(props);
-      this.state = {
-        disabled: false
-      };
-    }
-
-    render() {
-      return (
-        <div>
-          <p>
-            <FormattedMessage
-              id="common.ui.vis.kibanaMap.zoomWarning"
-              defaultMessage="You've reached the maximum number of zoom
-              levels. To zoom all the way in, upgrade to the
-              {defaultDistribution} of Elasticsearch and Kibana. You'll get
-              access to additional zoom levels for free through the {ems}.
-              Or, you can configure a custom WMS compliant server."
-              values={{
-                defaultDistribution: (
-                  <a
-                    target="_blank"
-                    href="https://www.elastic.co/downloads/kibana"
-                  >
-                    {`default distribution `}
-                  </a>
-                ),
-                ems: (
-                  <a
-                    target="_blank"
-                    href="https://www.elastic.co/elastic-maps-service"
-                  >
-                    {`Elastic Maps Service`}
-                  </a>
-                )
-              }}
-            />
-          </p>
-          <EuiSpacer size="xs"/>
-          <EuiButtonEmpty
-            size="s"
-            flush="left"
-            isDisabled={this.state.disabled}
-            onClick={() => {
-              this.setState({
-                disabled: true
-              }, () => this.props.onChange(this.state.disabled));
-            }}
-            data-test-subj="suppressZoomWarnings"
-          >
-            {`Don't show again`}
-          </EuiButtonEmpty>
-        </div>
-      );
-    }
-  }
-
-  const zoomToast = ({
-    title: 'No additional zoom levels',
-    text: <ZoomWarning onChange={setZoomMsg}/>,
-    'data-test-subj': 'maxZoomWarning',
-  });
-
-  return (getZoomLevel, getMaxZoomLevel) => {
-    return () => {
-      const zoomLevel = getZoomLevel();
-      const maxMapZoom = getMaxZoomLevel();
-      if (!disableZoomMsg && zoomLevel === maxMapZoom) {
-        toastNotifications.addDanger(zoomToast);
-      }
-    };
-  };
-}());
 
 /**
  * Collects map functionality required for Kibana.
@@ -571,7 +485,7 @@ export class KibanaMap extends EventEmitter {
   }
 
   _addMaxZoomMessage = layer => {
-    const zoomWarningMsg = makeZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
+    const zoomWarningMsg = createZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
 
     this._leafletMap.on('zoomend', zoomWarningMsg);
     this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
