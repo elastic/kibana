@@ -37,6 +37,7 @@ import {
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
@@ -1265,7 +1266,7 @@ export class TimeseriesChart extends React.Component {
 
     // Show the time and metric values in the tooltip.
     // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
-    const formattedDate = moment(marker.date).format('MMMM Do YYYY, HH:mm');
+    const formattedDate = formatHumanReadableDateTimeSeconds(marker.date);
     let contents = formattedDate + '<br/><hr/>';
 
     if (_.has(marker, 'anomalyScore')) {
