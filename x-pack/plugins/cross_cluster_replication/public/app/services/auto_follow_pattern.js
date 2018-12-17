@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
 import { format, addDays } from 'date-fns';
 
-export const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => (
-  <Fragment>
-    <span style={{ fontWeight: 'bold' }}>{prefix}</span>
-    {template}
-    <span style={{ fontWeight: 'bold' }}>{suffix}</span>
-  </Fragment>
+const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => (
+  {
+    followPattern: {
+      prefix,
+      suffix,
+      template,
+    },
+    toString: prefix + template + suffix
+  }
 );
 
 /**
@@ -42,7 +44,7 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
       leaderIndexTemplate = leaderIndexPattern.replace(/\*/g, placeHolder);
       indexPreview = getFollowPattern(prefix, suffix, leaderIndexTemplate);
 
-      if (!indicesPreview.includes(indexPreview)) {
+      if (!indicesPreview.some((_indexPreview) => indexPreview.toString === _indexPreview.toString)) {
         indicesPreview.push(indexPreview);
       }
     });

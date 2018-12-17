@@ -32,7 +32,11 @@ export const AutoFollowPatternIndicesPreview = injectI18n(({ prefix, suffix, lea
         defaultMessage="The above settings will generate index names that look like this:"
       />
       <ul>
-        {indicesPreview.map((followerIndex, i) => <li key={i}>{followerIndex}</li>)}
+        {indicesPreview.map(({ followPattern: { prefix, suffix, template } }, i) => (
+          <li key={i}>
+            {prefix}<strong>{template}</strong>{suffix}
+          </li>
+        ))}
       </ul>
     </EuiCallOut>
   );

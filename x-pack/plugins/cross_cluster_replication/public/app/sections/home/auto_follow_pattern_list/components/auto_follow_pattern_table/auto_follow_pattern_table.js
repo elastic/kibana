@@ -97,6 +97,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
           defaultMessage="Follower pattern prefix"
         />
       ),
+      sortable: true,
     }, {
       field: 'followIndexPatternSuffix',
       name: (
@@ -105,6 +106,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
           defaultMessage="Follower pattern suffix"
         />
       ),
+      sortable: true,
     }, {
       name: '',
       actions: [
