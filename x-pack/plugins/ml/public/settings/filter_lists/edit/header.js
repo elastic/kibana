@@ -52,9 +52,6 @@ export const EditFilterListHeader = injectI18n(function ({
     <FormattedMessage
       id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
       defaultMessage="Create new filter list"
-      values={{
-        filterId,
-      }}
     />
   );
 
