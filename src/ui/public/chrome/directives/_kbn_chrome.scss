@@ -1,12 +1,9 @@
-
-@import (reference) "~ui/styles/mixins";
-@import (reference) "~ui/styles/variables";
-
 /**
  * stretch the root element of the Kibana application to set the base-size that
  * flexed children should keep. Only works when paired with root styles applied
  * by core service from new platform
  */
+// SASSTODO: Naming here is too embedded and high up that changing them could cause major breaks
 #kibana-body {
   overflow-x: hidden;
   min-height: 100%;
@@ -16,16 +13,16 @@
   display: flex;
   flex-flow: column nowrap;
   position: absolute;
-  left: @global-nav-closed-width;
+  left: $kbnGlobalNavClosedWidth;
   top: 0;
   right: 0;
   bottom: 0;
   z-index: 5;
   margin: 0 auto;
-  background-color: #fff;
+  background-color: $euiColorEmptyShade;
 
   /**
-   * 1. Dirty, but we need to override the .is-global-nav-open state
+   * 1. Dirty, but we need to override the .kbnGlobalNav-isOpen state
    *    when we're looking at the log-in screen.
    */
   &.hidden-chrome {

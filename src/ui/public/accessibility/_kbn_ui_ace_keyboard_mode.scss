@@ -1,12 +1,10 @@
-@import (reference) "~ui/styles/variables";
-
-.uiAceKeyboardHint {
+.kbnUiAceKeyboardHint {
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
   left: 0;
-  background: rgba(255, 255, 255, 0.7);
+  background: transparentize($euiColorEmptyShade, 0.3);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -16,11 +14,11 @@
 
   &:focus {
     opacity: 1;
-    border: 2px solid @globalColorBlue;
+    border: 2px solid $euiColorPrimary;
     z-index: 1000;
   }
 
-  &.uiAceKeyboardHint-isInactive {
+  &.kbnUiAceKeyboardHint-isInactive {
     display: none;
   }
 }
