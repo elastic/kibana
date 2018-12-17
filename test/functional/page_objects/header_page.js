@@ -28,7 +28,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
-
     async clickSelector(selector) {
       log.debug(`clickSelector(${selector})`);
       await find.clickByCssSelector(selector);
@@ -54,8 +53,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('click Visualize tab');
       await this.clickSelector('a[href*=\'visualize\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.confirmTopNavTextContains('visualize');
       await this.awaitGlobalLoadingIndicatorHidden();
+      await this.confirmTopNavTextContains('visualize');
     }
 
     async clickDashboard() {
@@ -198,7 +197,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     // check if the auto refresh state is active and to pause it
     async pauseAutoRefresh() {
       let result = false;
-      if (await this.getAutoRefreshState() === 'active') {
+      if ((await this.getAutoRefreshState()) === 'active') {
         await testSubjects.click('globalTimepickerAutoRefreshButton');
         result = true;
       }
@@ -208,7 +207,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     // check if the auto refresh state is inactive and to resume it
     async resumeAutoRefresh() {
       let result = false;
-      if (await this.getAutoRefreshState() === 'inactive') {
+      if ((await this.getAutoRefreshState()) === 'inactive') {
         await testSubjects.click('globalTimepickerAutoRefreshButton');
         result = true;
       }
@@ -216,8 +215,10 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async getToastMessage(findTimeout = defaultFindTimeout) {
-      const toastMessage =
-        await find.displayedByCssSelector('kbn-truncated.toast-message', findTimeout);
+      const toastMessage = await find.displayedByCssSelector(
+        'kbn-truncated.kbnToast__message',
+        findTimeout
+      );
       const messageText = await toastMessage.getVisibleText();
       log.debug(`getToastMessage: ${messageText}`);
       return messageText;
