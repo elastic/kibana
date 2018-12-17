@@ -67,8 +67,8 @@ class AnnotationsTable extends Component {
       // Load annotations for the selected job.
       ml.annotations.getAnnotations({
         jobIds: [job.job_id],
-        earliestMs: dataCounts.earliest_record_timestamp,
-        latestMs: dataCounts.latest_record_timestamp,
+        earliestMs: null,
+        latestMs: null,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
       }).then((resp) => {
         this.setState((prevState, props) => ({
