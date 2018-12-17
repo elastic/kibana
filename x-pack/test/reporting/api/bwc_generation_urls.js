@@ -26,7 +26,7 @@ export default function ({ getService }) {
       }).timeout(500000);
     });
 
-    describe.skip('6_2', () => {
+    describe('6_2', () => {
       before(async () => {
         await reportingAPI.deleteAllReportingIndexes();
       });

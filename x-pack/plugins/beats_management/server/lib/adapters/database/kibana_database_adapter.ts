@@ -32,7 +32,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
   public async putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any> {
     const callES = this.getCallType(user);
-    const result = await callES('indices.putTemplate', params);
+    const result: { acknowledged: boolean } = await callES('indices.putTemplate', params);
     return result;
   }
 

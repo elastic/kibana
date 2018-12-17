@@ -103,6 +103,7 @@ export default function ({ getService }) {
         'cluster_stats.nodes.count.ingest',
         'cluster_stats.nodes.count.master',
         'cluster_stats.nodes.count.total',
+        'cluster_stats.nodes.discovery_types.single-node',
         'cluster_stats.nodes.fs.available_in_bytes',
         'cluster_stats.nodes.fs.free_in_bytes',
         'cluster_stats.nodes.fs.total_in_bytes',

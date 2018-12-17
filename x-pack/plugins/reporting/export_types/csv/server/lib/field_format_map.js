@@ -22,7 +22,10 @@ export function fieldFormatMapFactory(indexPatternSavedObject, fieldFormats) {
     const fieldFormatMap = JSON.parse(indexPatternSavedObject.attributes.fieldFormatMap);
     Object.keys(fieldFormatMap).forEach((fieldName) => {
       const formatConfig = fieldFormatMap[fieldName];
-      formatsMap.set(fieldName, fieldFormats.getInstance(formatConfig));
+
+      if (!_.isEmpty(formatConfig)) {
+        formatsMap.set(fieldName, fieldFormats.getInstance(formatConfig));
+      }
     });
   }
 
