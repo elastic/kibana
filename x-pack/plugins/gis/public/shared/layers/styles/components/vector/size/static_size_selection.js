@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import _ from 'lodash';
 
 import {
   EuiRange
@@ -18,12 +19,19 @@ export class StaticSizeSelection extends React.Component {
   }
 
   render() {
-    const onChange = (event) => {
-      const size = parseInt(event.target.value, 10);
+
+
+    const debouncedChange = _.debounce((size) => {
       this.props.changeOptions({
         size: size
       });
+    }, 250);
+
+    const onChange = (event) => {
+      const size = parseInt(event.target.value, 10);
+      debouncedChange(size);
     };
+
     const selectedValue = (
       this.props.selectedOptions && typeof this.props.selectedOptions.size === 'number'
     ) ? this.props.selectedOptions.size : 0;

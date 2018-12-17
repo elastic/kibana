@@ -301,6 +301,7 @@ class Editor extends React.Component {
     }, this.previewLayer);
   };
 
+
   onLimitChange = e => {
     const sanitizedValue = parseInt(e.target.value, 10);
     this.setState({

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 import {
   EuiFormRow,
@@ -14,25 +15,28 @@ import {
   EuiRange
 } from '@elastic/eui';
 
+
+
 const DEFAULT_MIN_SIZE = 1;
 const DEFAULT_MAX_SIZE = 100;
 
 export function SizeRangeSelector({ minSize, maxSize, onChange }) {
 
+  const debouncedSizeChange = _.debounce((minSize, maxSize)=>{
+    onChange({
+      minSize: minSize,
+      maxSize: maxSize
+    });
+  }, 250);
+
   const onMinSizeChange = (e) => {
     const updatedMinSize = parseInt(e.target.value, 10);
-    onChange({
-      minSize: updatedMinSize,
-      maxSize: updatedMinSize > maxSize ? updatedMinSize : maxSize,
-    });
+    debouncedSizeChange(updatedMinSize, updatedMinSize > maxSize ? updatedMinSize : maxSize);
   };
 
   const onMaxSizeChange = (e) => {
     const updatedMaxSize = parseInt(e.target.value, 10);
-    onChange({
-      minSize: updatedMaxSize < minSize ? updatedMaxSize : minSize,
-      maxSize: updatedMaxSize,
-    });
+    debouncedSizeChange(updatedMaxSize < minSize ? updatedMaxSize : minSize, updatedMaxSize);
   };
 
   return (
