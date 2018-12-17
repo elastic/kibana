@@ -52,6 +52,7 @@ import {
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation
 } from './timeseries_chart_annotations';
+import { ANNOTATION_MASK_ID } from '../../../../common/constants/annotations';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
@@ -382,6 +383,21 @@ export class TimeseriesChart extends React.Component {
     const context = svg.append('g')
       .attr('class', 'context-chart')
       .attr('transform', 'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')');
+
+    // Mask to hide annotations overflow
+    if (mlAnnotationsEnabled) {
+      const annotationsMask = svg
+        .append('defs')
+        .append('mask')
+        .attr('id', ANNOTATION_MASK_ID);
+
+      annotationsMask.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', this.vizWidth)
+        .attr('height', focusHeight)
+        .style('fill', 'white');
+    }
 
     // Draw each of the component elements.
     createFocusChart(focus, this.vizWidth, focusHeight);

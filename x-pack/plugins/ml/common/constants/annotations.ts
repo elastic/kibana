@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
+
 export enum ANNOTATION_TYPE {
   ANNOTATION = 'annotation',
   COMMENT = 'comment',
