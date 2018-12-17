@@ -6,13 +6,14 @@
 
 import { execSync } from 'child_process';
 import fs from 'fs';
-import { Clone, CloneOptions } from 'nodegit';
 import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
 import { getDefaultBranch } from './git_operations';
 
 jest.setTimeout(10000);
+
+describe('my beverage 2', () => {
 
 test('get default branch from a non master repo 2', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test_git2'));
@@ -43,22 +44,4 @@ test('get default branch from a non master repo 2', async () => {
     console.log('6');
   }
 });
-
-test('nodegit should be able to clone a repo from github.com 2', async () => {
-  const opts: CloneOptions = {
-    fetchOpts: {
-      callbacks: {
-        certificateCheck: () => 1,
-      },
-    },
-  };
-
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test_clone2'));
-  const url = 'https://github.com/Microsoft/TypeScript-Node-Starter.git';
-  try {
-    await Clone.clone(url, tmpDir, opts);
-    expect(fs.existsSync(path.join(tmpDir, '.git'))).toBeTruthy();
-  } finally {
-    rimraf.sync(tmpDir);
-  }
 });
