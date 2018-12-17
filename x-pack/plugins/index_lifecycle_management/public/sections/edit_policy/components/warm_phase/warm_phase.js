@@ -164,6 +164,7 @@ class WarmPhaseUi extends PureComponent {
                       phase={PHASE_WARM}
                       isShowingErrors={isShowingErrors}
                       setPhaseData={setPhaseData}
+                      rolloverEnabled={hotPhaseRolloverEnabled}
                     />
                   ) : null}
 
@@ -194,6 +195,12 @@ class WarmPhaseUi extends PureComponent {
                         errorKey={PHASE_REPLICA_COUNT}
                         isShowingErrors={isShowingErrors}
                         errors={errors}
+                        helpText={
+                          intl.formatMessage({
+                            id: 'xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText',
+                            defaultMessage: 'By default, the number of replicas remains the same.'
+                          })
+                        }
                       >
                         <EuiFieldNumber
                           id={`${PHASE_WARM}-${PHASE_REPLICA_COUNT}`}

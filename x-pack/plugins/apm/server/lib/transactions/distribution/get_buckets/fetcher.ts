@@ -15,7 +15,7 @@ import {
   TRANSACTION_TYPE
 } from 'x-pack/plugins/apm/common/constants';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 interface Bucket {
   key: number;

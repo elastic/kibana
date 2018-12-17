@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 
 import {
   EuiHideFor,
@@ -12,18 +11,17 @@ import {
   EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar,
-  EuiShowFor,
-  EuiSideNav,
   EuiTitle,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import React from 'react';
 import styled, { withTheme } from 'styled-components';
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+
 import { AutoSizer } from '../../components/auto_sizer';
 import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
+import { MetricsSideNav } from '../../components/metrics/side_nav';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
 import { WithMetadata } from '../../containers/metadata/with_metadata';
@@ -33,6 +31,7 @@ import {
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
 import { WithOptions } from '../../containers/with_options';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
@@ -61,9 +60,6 @@ export const MetricDetail = withTheme(
   injectI18n(
     class extends React.PureComponent<Props> {
       public static displayName = 'MetricDetailPage';
-      public readonly state = {
-        isSideNavOpenOnMobile: false,
-      };
 
       public render() {
         const { intl } = this.props;
@@ -112,7 +108,7 @@ export const MetricDetail = withTheme(
                         nodeType={nodeType}
                         nodeId={nodeName}
                       >
-                        {({ filteredLayouts }) => {
+                        {({ filteredLayouts, loading: metadataLoading }) => {
                           return (
                             <WithMetrics
                               layouts={filteredLayouts}
@@ -125,34 +121,14 @@ export const MetricDetail = withTheme(
                                 if (error) {
                                   return <ErrorPageBody message={error} />;
                                 }
-                                const sideNav = filteredLayouts.map(item => {
-                                  return {
-                                    name: item.label,
-                                    id: item.id,
-                                    items: item.sections.map(section => ({
-                                      id: section.id as string,
-                                      name: section.label,
-                                      onClick: this.handleClick(section),
-                                    })),
-                                  };
-                                });
                                 return (
                                   <EuiPage style={{ flex: '1 0 auto' }}>
-                                    <EuiPageSideBar>
-                                      <EuiHideFor sizes={['xs', 's']}>
-                                        <EuiSideNavContainer>
-                                          <EuiSideNav items={sideNav} />
-                                        </EuiSideNavContainer>
-                                      </EuiHideFor>
-                                      <EuiShowFor sizes={['xs', 's']}>
-                                        <EuiSideNav
-                                          items={sideNav}
-                                          mobileTitle={nodeName}
-                                          toggleOpenOnMobile={this.toggleOpenOnMobile}
-                                          isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-                                        />
-                                      </EuiShowFor>
-                                    </EuiPageSideBar>
+                                    <MetricsSideNav
+                                      layouts={filteredLayouts}
+                                      loading={metadataLoading}
+                                      nodeName={nodeName}
+                                      handleClick={this.handleClick}
+                                    />
                                     <AutoSizer content={false} bounds detectAnyWindowResize>
                                       {({ measureRef, bounds: { width = 0 } }) => {
                                         return (
@@ -218,26 +194,9 @@ export const MetricDetail = withTheme(
           el.scrollIntoView();
         }
       };
-
-      private toggleOpenOnMobile = () => {
-        this.setState({
-          isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
-        });
-      };
     }
   )
 );
-
-const EuiSideNavContainer = styled.div`
-  position: fixed;
-  z-index: 1;
-  height: 88vh;
-  background-color: #f5f5f5;
-  padding-left: 16px;
-  margin-left: -16px;
-  overflow-y: auto;
-  overflow-x: hidden;
-`;
 
 const MetricsDetailsPageColumn = styled.div`
   flex: 1 0 0%;
