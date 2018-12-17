@@ -48,8 +48,6 @@ export const populateServerRegistries = types => {
   const remainingTypes = types;
   const populatedTypes = {};
 
-  const globalKeys = Object.keys(global);
-
   const loadType = () => {
     const type = remainingTypes.pop();
     getPluginPaths(type).then(paths => {
@@ -58,12 +56,6 @@ export const populateServerRegistries = types => {
 
       paths.forEach(path => {
         require(path);
-      });
-
-      Object.keys(global).forEach(key => {
-        if (!globalKeys.includes(key)) {
-          delete global[key];
-        }
       });
 
       populatedTypes[type] = registries[type];
