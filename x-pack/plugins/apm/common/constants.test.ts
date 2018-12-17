@@ -107,6 +107,14 @@ describe('Transaction v2', () => {
       result: 'transaction result',
       sampled: true,
       type: 'transaction type'
+    },
+    kubernetes: {
+      pod: {
+        uid: 'pod1234567890abcdef'
+      }
+    },
+    container: {
+      id: 'container1234567890abcdef'
     }
   };
 

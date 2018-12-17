@@ -13,7 +13,7 @@ import {
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { DiscoverButton } from './DiscoverButton';
 
-function getDiscoverQuery(transaction: Transaction) {
+export function getDiscoverQuery(transaction: Transaction) {
   const transactionId = transaction.transaction.id;
   const traceId =
     transaction.version === 'v2' ? transaction.trace.id : undefined;

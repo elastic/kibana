@@ -150,6 +150,27 @@ export function RelativeLinkComponent({
   );
 }
 
+export function getUnconnectedKibanaHref(
+  kibanaLinkArgs: KibanaLinkArgs
+): string {
+  const { location, pathname, hash, query = {} } = kibanaLinkArgs;
+  // Preserve current _g and _a
+  const currentQuery = toQuery(location.search);
+  const g = decodeAndMergeG(currentQuery._g, query._g);
+  const nextQuery = {
+    ...query,
+    _g: rison.encode(g),
+    _a: query._a ? rison.encode(query._a) : ''
+  };
+
+  const search = stringifyWithoutEncoding(nextQuery);
+  const href = url.format({
+    pathname: chrome.addBasePath(pathname),
+    hash: `${hash}?${search}`
+  });
+  return href;
+}
+
 // TODO:
 // Both KibanaLink and RelativeLink does similar things, are too magic, and have different APIs.
 // The initial idea with KibanaLink was to automatically preserve the timestamp (_g) when making links. RelativeLink went a bit overboard and preserves all query args
@@ -186,21 +207,12 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   query = {},
   ...props
 }) => {
-  // Preserve current _g and _a
-  const currentQuery = toQuery(location.search);
-  const g = decodeAndMergeG(currentQuery._g, query._g);
-  const nextQuery = {
-    ...query,
-    _g: rison.encode(g),
-    _a: query._a ? rison.encode(query._a) : ''
-  };
-
-  const search = stringifyWithoutEncoding(nextQuery);
-  const href = url.format({
-    pathname: chrome.addBasePath(pathname),
-    hash: `${hash}?${search}`
+  const href = getUnconnectedKibanaHref({
+    location,
+    pathname,
+    hash,
+    query
   });
-
   return <EuiLink {...props} href={href} />;
 };
 
