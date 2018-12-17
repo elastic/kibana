@@ -9,6 +9,7 @@
 import React, {
   Component
 } from 'react';
+import { PropTypes } from 'prop-types';
 
 import {
   EuiConfirmModal,
@@ -143,3 +144,8 @@ export class CalendarsList extends Component {
     );
   }
 }
+
+CalendarsListTable.propTypes = {
+  canCreateCalendar: PropTypes.bool.isRequired,
+  canDeleteCalendar: PropTypes.bool.isRequired,
+};

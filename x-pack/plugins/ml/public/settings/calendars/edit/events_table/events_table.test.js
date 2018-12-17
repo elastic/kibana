@@ -16,6 +16,7 @@ import React from 'react';
 import { EventsTable } from './events_table';
 
 const testProps = {
+  canCreateCalendar: true,
   eventsList: [{
     calendar_id: 'test-calendar',
     description: 'test description',

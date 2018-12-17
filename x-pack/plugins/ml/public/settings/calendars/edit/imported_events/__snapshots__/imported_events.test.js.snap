@@ -24,6 +24,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
     grow={false}
   >
     <EventsTable
+      canCreateCalendar={true}
       eventsList={
         Array [
           Object {

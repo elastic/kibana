@@ -76,11 +76,15 @@ const calendars = [
     }]
   }];
 
+const props = {
+  canCreateCalendar: true,
+};
+
 describe('NewCalendar', () => {
 
   test('Renders new calendar form', () => {
     const wrapper = shallow(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -88,7 +92,7 @@ describe('NewCalendar', () => {
 
   test('Import modal shown on Import Events button click', () => {
     const wrapper = mount(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_import_events"]');
@@ -100,7 +104,7 @@ describe('NewCalendar', () => {
 
   test('New event modal shown on New event button click', () => {
     const wrapper = mount(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_new_event"]');
@@ -112,7 +116,7 @@ describe('NewCalendar', () => {
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', () => {
     const wrapper = mount(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     const instance = wrapper.instance();

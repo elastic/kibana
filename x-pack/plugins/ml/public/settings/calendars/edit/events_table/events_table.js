@@ -136,7 +136,7 @@ export function EventsTable({
 }
 
 EventsTable.propTypes = {
-  canCreateCalendar: PropTypes.bool.isRequired,
+  canCreateCalendar: PropTypes.bool,
   eventsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   showImportModal: PropTypes.func,
@@ -146,4 +146,5 @@ EventsTable.propTypes = {
 
 EventsTable.defaultProps = {
   showSearchBar: false,
+  canCreateCalendar: true,
 };
