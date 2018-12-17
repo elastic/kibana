@@ -19,15 +19,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getSeverityColor } from '../../../../../../common/util/anomaly_utils';
+import { SEVERITY_OPTIONS } from '../../../../../../common/util/anomaly_utils';
 
-// Move these to shared util?
-const OPTIONS = [
-  { val: 0, display: 'warning', color: getSeverityColor(0) },
-  { val: 25, display: 'minor', color: getSeverityColor(25) },
-  { val: 50, display: 'major', color: getSeverityColor(50) },
-  { val: 75, display: 'critical', color: getSeverityColor(75) },
-];
 
 const optionsMap = {
   'warning': 0,
@@ -38,10 +31,10 @@ const optionsMap = {
 
 function optionValueToThreshold(value) {
   // Get corresponding threshold object with required display and val properties from the specified value.
-  let threshold = OPTIONS.find(opt => (opt.val === value));
+  let threshold = SEVERITY_OPTIONS.find(opt => (opt.val === value));
   // Default to warning if supplied value doesn't map to one of the options.
   if (threshold === undefined) {
-    threshold = OPTIONS[0];
+    threshold = SEVERITY_OPTIONS[0];
   }
   return threshold;
 }
@@ -51,12 +44,12 @@ export class SeverityControl extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      valueDisplay: OPTIONS[3].display,
+      valueDisplay: SEVERITY_OPTIONS[3].display,
     };
   }
 
   getOptions = () =>
-    OPTIONS.map(({ color, display, val }) => ({
+    SEVERITY_OPTIONS.map(({ color, display, val }) => ({
       value: display,
       inputDisplay: (
         <Fragment>
