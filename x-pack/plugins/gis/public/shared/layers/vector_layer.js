@@ -481,20 +481,16 @@ export class VectorLayer extends ALayer {
       return;
     }
 
-    mbMap.on('mouseenter', mbLayerId, async (e) => {
-      mbMap.getCanvas().style.cursor = 'pointer';
-
-      const feature = e.features[0];
-
-      let popupAnchorLocation = e.lngLat; // default popup location to mouse location
+    const showTooltip = async (feature, eventLngLat) => {
+      let popupAnchorLocation = eventLngLat; // default popup location to mouse location
       if (feature.geometry.type === 'Point') {
         const coordinates = feature.geometry.coordinates.slice();
 
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
         // over the copy being pointed to.
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        while (Math.abs(eventLngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += eventLngLat.lng > coordinates[0] ? 360 : -360;
         }
 
         popupAnchorLocation = coordinates;
@@ -514,9 +510,44 @@ export class VectorLayer extends ALayer {
       VectorLayer.popup.setLngLat(popupAnchorLocation)
         .setDOMContent(VectorLayer.tooltipContainer)
         .addTo(mbMap);
+    };
+
+    let activeFeature;
+    let isTooltipOpen = false;
+    mbMap.on('mousemove', mbLayerId, _.debounce((e) => {
+      if (!isTooltipOpen) {
+        return;
+      }
+
+      const features = mbMap.queryRenderedFeatures(e.point)
+        .filter(feature => {
+          return feature.layer.source === this.getId();
+        });
+      if (features.length === 0) {
+        return;
+      }
+
+      const propertiesUnchanged = _.isEqual(activeFeature.properties, features[0].properties);
+      const geometryUnchanged = _.isEqual(activeFeature.geometry, features[0].geometry);
+      if(propertiesUnchanged && geometryUnchanged) {
+        // mouse over same feature, no need to update tooltip
+        return;
+      }
+
+      activeFeature = features[0];
+      showTooltip(activeFeature, e.lngLat);
+    }, 100));
+
+    mbMap.on('mouseenter', mbLayerId, (e) => {
+      isTooltipOpen = true;
+      mbMap.getCanvas().style.cursor = 'pointer';
+
+      activeFeature = e.features[0];
+      showTooltip(activeFeature, e.lngLat);
     });
 
     mbMap.on('mouseleave', mbLayerId, () => {
+      isTooltipOpen = false;
       mbMap.getCanvas().style.cursor = '';
       VectorLayer.popup.remove();
       ReactDOM.unmountComponentAtNode(VectorLayer.tooltipContainer);
