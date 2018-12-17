@@ -5,54 +5,54 @@
  */
 
 import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { find, get } from 'lodash';
+import { getOr } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
 import { DateType, RecentlyUsedI } from '..';
 
-export enum DatePickerDateOptions {
+export enum DatePickerOptions {
   today = 'today',
   yesterday = 'yesterday',
-  thisWeek = 'this_week',
-  weekToDate = 'week_to_date',
-  thisMonth = 'this_month',
-  monthToDate = 'month_to_date',
-  thisYear = 'this_year',
-  yearToDate = 'year_to_date',
+  thisWeek = 'this-week',
+  weekToDate = 'week-to-date',
+  thisMonth = 'this-month',
+  monthToDate = 'month-to-date',
+  thisYear = 'this-year',
+  yearToDate = 'year-to-date',
 }
 
 const commonDates: Array<{ id: string; label: string }> = [
   {
-    id: DatePickerDateOptions.today,
+    id: DatePickerOptions.today,
     label: 'Today',
   },
   {
-    id: DatePickerDateOptions.yesterday,
+    id: DatePickerOptions.yesterday,
     label: 'Yesterday',
   },
   {
-    id: DatePickerDateOptions.thisWeek,
+    id: DatePickerOptions.thisWeek,
     label: 'This week',
   },
   {
-    id: DatePickerDateOptions.weekToDate,
+    id: DatePickerOptions.weekToDate,
     label: 'Week to date',
   },
   {
-    id: DatePickerDateOptions.thisMonth,
+    id: DatePickerOptions.thisMonth,
     label: 'This month',
   },
   {
-    id: DatePickerDateOptions.monthToDate,
+    id: DatePickerOptions.monthToDate,
     label: 'Month to date',
   },
   {
-    id: DatePickerDateOptions.thisYear,
+    id: DatePickerOptions.thisYear,
     label: 'This year',
   },
   {
-    id: DatePickerDateOptions.yearToDate,
+    id: DatePickerOptions.yearToDate,
     label: 'Year to date',
   },
 ];
@@ -68,7 +68,7 @@ export const CommonlyUsed = pure<Props>(({ setRangeDatePicker }) => {
         <EuiLink
           onClick={updateRangeDatePickerByCommonUsed.bind(
             null,
-            date.id as DatePickerDateOptions,
+            date.id as DatePickerOptions,
             setRangeDatePicker
           )}
         >
@@ -95,17 +95,19 @@ export const CommonlyUsed = pure<Props>(({ setRangeDatePicker }) => {
 });
 
 export const updateRangeDatePickerByCommonUsed = (
-  type: DatePickerDateOptions,
-  setRangeDatePicker: (from: Moment, to: Moment, type: DateType, msg: RecentlyUsedI) => void
+  option: DatePickerOptions,
+  setRangeDatePicker: (from: Moment, to: Moment, kind: DateType, msg: RecentlyUsedI) => void
 ) => {
   let from = null;
   let to = null;
-  if (type === DatePickerDateOptions.today) {
+  let kind: DateType = 'absolute';
+  if (option === DatePickerOptions.today) {
     from = moment().startOf('day');
     to = moment()
       .startOf('day')
       .add(24, 'hour');
-  } else if (type === DatePickerDateOptions.yesterday) {
+    kind = 'absolute';
+  } else if (option === DatePickerOptions.yesterday) {
     from = moment()
       .subtract(1, 'day')
       .startOf('day');
@@ -113,35 +115,43 @@ export const updateRangeDatePickerByCommonUsed = (
       .subtract(1, 'day')
       .startOf('day')
       .add(24, 'hour');
-  } else if (type === DatePickerDateOptions.thisWeek) {
+    kind = 'absolute';
+  } else if (option === DatePickerOptions.thisWeek) {
     from = moment().startOf('week');
     to = moment()
       .startOf('week')
       .add(1, 'week');
-  } else if (type === DatePickerDateOptions.weekToDate) {
-    from = moment().subtract(1, 'week');
+    kind = 'absolute';
+  } else if (option === DatePickerOptions.weekToDate) {
+    from = moment().startOf('week');
     to = moment();
-  } else if (type === DatePickerDateOptions.thisMonth) {
+    kind = 'relative';
+  } else if (option === DatePickerOptions.thisMonth) {
     from = moment().startOf('month');
     to = moment()
       .startOf('month')
       .add(1, 'month');
-  } else if (type === DatePickerDateOptions.monthToDate) {
-    from = moment().subtract(1, 'month');
+    kind = 'absolute';
+  } else if (option === DatePickerOptions.monthToDate) {
+    from = moment().startOf('month');
     to = moment();
-  } else if (type === DatePickerDateOptions.thisYear) {
+    kind = 'relative';
+  } else if (option === DatePickerOptions.thisYear) {
     from = moment().startOf('year');
     to = moment()
       .startOf('year')
       .add(1, 'year');
-  } else if (type === DatePickerDateOptions.yearToDate) {
-    from = moment().subtract(1, 'year');
+    kind = 'absolute';
+  } else if (option === DatePickerOptions.yearToDate) {
+    from = moment().startOf('year');
     to = moment();
+    kind = 'relative';
   }
   if (from && to) {
-    setRangeDatePicker(from, to, 'absolute', {
-      type,
-      text: get(find(commonDates, { id: type }), 'label'),
+    const text = getOr('', 'label', commonDates.filter(i => i.id === option)[0]);
+    setRangeDatePicker(from, to, kind, {
+      kind: option,
+      text,
     });
   }
 };

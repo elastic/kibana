@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './actions';
-export * from './reducer';
-export * from './selectors';
-export * from './epic';
-export * from './model';
+import { combineEpics } from 'redux-observable';
+
+import { createGlobalTimeEpic } from './inputs';
+
+export const createLocalEpic = <State>() => combineEpics(createGlobalTimeEpic<State>());

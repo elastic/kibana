@@ -5,6 +5,9 @@
  */
 
 import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   // @ts-ignore
   EuiHeaderLogo,
   EuiHealth,
@@ -17,6 +20,17 @@ import { WhoAmI } from '../../containers/who_am_i';
 
 export const Footer = pure(() => (
   <FooterContainer data-test-subj="footer">
-    <WhoAmI sourceId="default">{() => <EuiHealth color="success">Live data</EuiHealth>}</WhoAmI>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+      <EuiFlexItem grow={false}>
+        <WhoAmI sourceId="default">
+          {({ appName }) => <EuiHealth color="success">Live {appName} data</EuiHealth>}
+        </WhoAmI>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton href="kibana#home/tutorial_directory/security" target="_blank">
+          Add data
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </FooterContainer>
 ));

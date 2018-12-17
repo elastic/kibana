@@ -4,51 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
+import { get, unionBy } from 'lodash/fp';
 import moment from 'moment';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { setInterval, setRangeDatePicker, startAutoReload, stopAutoReload } from './actions';
+import {
+  setAbsoluteRangeDatePicker,
+  setDuration,
+  setQuery,
+  setRelativeRangeDatePicker,
+  startAutoReload,
+  stopAutoReload,
+} from './actions';
 import { InputsModel } from './model';
 
 export type InputsState = InputsModel;
 
 export const initialInputsState: InputsState = {
-  kql: {
+  global: {
     timerange: {
-      type: 'relative',
+      kind: 'absolute',
       from: moment()
         .subtract(1, 'hour')
         .valueOf(),
       to: moment().valueOf(),
     },
+    query: [],
     policy: {
-      type: 'manual',
-      interval: 5,
-      intervalType: 'minutes',
+      kind: 'manual',
+      duration: 5000,
     },
   },
 };
 
 export const inputsReducer = reducerWithInitialState(initialInputsState)
-  .case(setRangeDatePicker, (state, { id, from, to }) => ({
+  .case(setAbsoluteRangeDatePicker, (state, { id, from, to }) => ({
     ...state,
     [id]: {
       ...get(id, state),
       timerange: {
+        kind: 'absolute',
         from,
         to,
       },
     },
   }))
-  .case(setInterval, (state, { id, interval, intervalType }) => ({
+  .case(setRelativeRangeDatePicker, (state, { id, option, from, to }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      timerange: {
+        kind: 'relative',
+        option,
+        from,
+        to,
+      },
+    },
+  }))
+  .case(setQuery, (state, { id, isLoading, refetch }) => ({
+    ...state,
+    global: {
+      ...state.global,
+      query: unionBy('id', [{ id, isLoading, refetch }], state.global.query),
+    },
+  }))
+  .case(setDuration, (state, { id, duration }) => ({
     ...state,
     [id]: {
       ...get(id, state),
       policy: {
         ...get(`${id}.policy`, state),
-        interval,
-        intervalType,
+        duration,
       },
     },
   }))
@@ -58,7 +84,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       ...get(id, state),
       policy: {
         ...get(`${id}.policy`, state),
-        type: 'interval',
+        kind: 'interval',
       },
     },
   }))
@@ -66,9 +92,9 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     ...state,
     [id]: {
       ...get(id, state),
-      olicy: {
+      policy: {
         ...get(`${id}.policy`, state),
-        type: 'manual',
+        kind: 'manual',
       },
     },
   }))

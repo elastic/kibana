@@ -9,39 +9,35 @@ import moment, { Moment } from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
 import { DateType, RecentlyUsedI } from '../index';
-import { DatePickerDateOptions, updateRangeDatePickerByCommonUsed } from './commonly_used';
+import { DatePickerOptions, updateRangeDatePickerByCommonUsed } from './commonly_used';
 import { updateRangeDatePickerByQuickSelect } from './quick_select';
 
 interface Props {
   recentlyUsed: RecentlyUsedI[];
-  setRangeDatePicker: (from: Moment, to: Moment, type: DateType) => void;
+  setRangeDatePicker: (from: Moment, to: Moment, kind: DateType) => void;
 }
 
 export const MyRecentlyUsed = pure<Props>(({ setRangeDatePicker, recentlyUsed }) => {
   const links = recentlyUsed.map((date: RecentlyUsedI) => {
     let dateRange;
     let dateLink = (
-      <EuiLink onClick={updateRangeDatePicker.bind(null, date.type, setRangeDatePicker, date.text)}>
-        {dateRange || date.text}
+      <EuiLink onClick={updateRangeDatePicker.bind(null, date.kind, setRangeDatePicker, date.text)}>
+        {date.text}
       </EuiLink>
     );
     if (typeof date.text !== 'string') {
-      dateRange = `${date.text[0]} – ${date.text[1]}`;
+      dateRange = `${moment(date.text[0]).format('L LTS')} – ${moment(date.text[1]).format(
+        'L LTS'
+      )}`;
       dateLink = (
-        <EuiLink
-          onClick={setRangeDatePicker.bind(
-            null,
-            moment(date.text[0]),
-            moment(date.text[1], 'absolute')
-          )}
-        >
-          {dateRange || date.type}
+        <EuiLink onClick={setRangeDatePicker.bind(null, date.text[0], date.text[1], 'absolute')}>
+          {dateRange}
         </EuiLink>
       );
     }
 
     return (
-      <EuiFlexItem grow={false} key={`${dateRange || date.type}`}>
+      <EuiFlexItem grow={false} key={`${dateRange || date.kind}`}>
         {dateLink}
       </EuiFlexItem>
     );
@@ -63,14 +59,14 @@ export const MyRecentlyUsed = pure<Props>(({ setRangeDatePicker, recentlyUsed })
 });
 
 const updateRangeDatePicker = (
-  type: string,
-  setRangeDatePicker: (from: Moment, to: Moment, type: DateType, msg?: RecentlyUsedI) => void,
+  option: string,
+  setRangeDatePicker: (from: Moment, to: Moment, kind: DateType, msg?: RecentlyUsedI) => void,
   text?: string
 ) => {
-  if (type === 'quick-select') {
+  if (option === 'quick-select') {
     const options = text!.split(' ');
     updateRangeDatePickerByQuickSelect(parseInt(options[1], 10), options[2], setRangeDatePicker);
   } else {
-    updateRangeDatePickerByCommonUsed(type as DatePickerDateOptions, setRangeDatePicker);
+    updateRangeDatePickerByCommonUsed(option as DatePickerOptions, setRangeDatePicker);
   }
 };

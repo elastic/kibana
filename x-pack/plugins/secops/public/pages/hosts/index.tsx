@@ -18,73 +18,84 @@ import {
   UncommonProcessTable,
 } from '../../components/page/hosts';
 
+import { manageQuery } from '../../components/page/manage_query';
 import { EventsQuery } from '../../containers/events';
+import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 
 const basePath = chrome.getBasePath();
 
-// TODO: wire up the date picker to remove the hard-coded start/end dates, which show good data for the KPI event type
-const startDate = 1514782800000;
-const endDate = 1546318799999;
+const HostsTableManage = manageQuery(HostsTable);
+const EventsTableManage = manageQuery(EventsTable);
 
 export const Hosts = pure(() => (
   <WithSource sourceId="default">
     {({ auditbeatIndicesExist }) =>
       auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
-        <>
-          <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
-            {({ kpiEventType, loading }) => (
-              <TypesBar
-                loading={loading}
-                data={kpiEventType!.map((i: KpiItem) => ({
-                  x: i.count,
-                  y: i.value,
-                }))}
-              />
-            )}
-          </EventsQuery>
-          <HostsQuery sourceId="default" startDate={startDate} endDate={endDate} cursor={null}>
-            {({ hosts, totalCount, loading, pageInfo, loadMore }) => (
-              <HostsTable
-                loading={loading}
-                data={hosts}
-                totalCount={totalCount}
-                hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                loadMore={loadMore}
-              />
-            )}
-          </HostsQuery>
-          <UncommonProcessesQuery
-            sourceId="default"
-            startDate={0} // TODO: Wire this up to the date-time picker
-            endDate={1544817214088} // TODO: Wire this up to the date-time picker
-            cursor={null}
-          >
-            {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore }) => (
-              <UncommonProcessTable
-                loading={loading}
-                data={uncommonProcesses}
-                totalCount={totalCount}
-                hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                loadMore={loadMore}
-              />
-            )}
-          </UncommonProcessesQuery>
-          <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
-            {({ events, loading }) => (
-              <EventsTable
-                data={events!}
-                loading={loading}
-                startDate={startDate}
-                endDate={endDate}
-              />
-            )}
-          </EventsQuery>
-        </>
+        <GlobalTime>
+          {({ poll, to, from, setQuery }) => (
+            <>
+              <EventsQuery sourceId="default" startDate={to} endDate={from}>
+                {({ kpiEventType, loading }) => (
+                  <TypesBar
+                    loading={loading}
+                    data={kpiEventType!.map((i: KpiItem) => ({
+                      x: i.count,
+                      y: i.value,
+                    }))}
+                  />
+                )}
+              </EventsQuery>
+              <HostsQuery sourceId="default" startDate={to} endDate={from} poll={poll}>
+                {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                  <HostsTableManage
+                    id={id}
+                    refetch={refetch}
+                    setQuery={setQuery}
+                    loading={loading}
+                    data={hosts}
+                    totalCount={totalCount}
+                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    loadMore={loadMore}
+                  />
+                )}
+              </HostsQuery>
+              <UncommonProcessesQuery
+                sourceId="default"
+                startDate={0} // TODO: Wire this up to the date-time picker
+                endDate={1544817214088} // TODO: Wire this up to the date-time picker
+                cursor={null}
+              >
+                {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore }) => (
+                  <UncommonProcessTable
+                    loading={loading}
+                    data={uncommonProcesses}
+                    totalCount={totalCount}
+                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    loadMore={loadMore}
+                  />
+                )}
+              </UncommonProcessesQuery>
+              <EventsQuery sourceId="default" startDate={to} endDate={from}>
+                {({ events, loading, id, refetch }) => (
+                  <EventsTableManage
+                    id={id}
+                    refetch={refetch}
+                    setQuery={setQuery}
+                    data={events!}
+                    loading={loading}
+                    startDate={from}
+                    endDate={to}
+                  />
+                )}
+              </EventsQuery>
+            </>
+          )}
+        </GlobalTime>
       ) : (
         <EmptyPage
           title="Looks like you don't have any auditbeat indices."

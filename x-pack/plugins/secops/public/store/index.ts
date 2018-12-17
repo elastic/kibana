@@ -7,5 +7,7 @@
 export * from './actions';
 export * from './reducer';
 export * from './selectors';
+export * from './epic';
+export * from './model';
 
 export { createStore } from './store';

@@ -5,6 +5,10 @@
  */
 
 import * as inputsActions from './actions';
+import * as inputsModel from './model';
 
 export { inputsActions };
 export * from './reducer';
+export * from './selectors';
+export * from './epic';
+export { inputsModel };

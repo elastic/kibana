@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './actions';
-export * from './reducer';
-export * from './selectors';
-export * from './epic';
-export * from './model';
+export { inputsModel } from './inputs';

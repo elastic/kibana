@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { find, get } from 'lodash';
+import { getOr } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
@@ -118,7 +118,6 @@ export const QuickSelect = pure<Props>(
           <EuiFormRow>
             <EuiFieldNumber
               aria-label="Count of"
-              defaultValue="1"
               value={quickSelectTime}
               step={0}
               onChange={arg => {
@@ -165,15 +164,15 @@ export const updateRangeDatePickerByQuickSelect = (
 ) => {
   const quickSelectUnitStr =
     quickSelectTime === 1
-      ? get(find(singleLastOptions, { value: quickSelectUnit }), 'text')
-      : get(find(pluralLastOptions, { value: quickSelectUnit }), 'text');
+      ? getOr('', 'text', singleLastOptions.filter(i => i.value === quickSelectUnit)[0])
+      : getOr('', 'text', pluralLastOptions.filter(i => i.value === quickSelectUnit)[0]);
   const from = moment().subtract(
     quickSelectTime,
     quickSelectUnit as moment.unitOfTime.DurationConstructor
   );
   const to = moment();
   setRangeDatePicker(from, to, 'relative', {
-    type: 'quick-select',
+    kind: 'quick-select',
     text: `Last ${quickSelectTime} ${quickSelectUnitStr}`,
   });
 };

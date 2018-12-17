@@ -19,8 +19,7 @@ import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
-import { ThemeProvider } from 'styled-components';
-import styled from 'styled-components';
+import styled, { ThemeProvider } from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { AutoSizer } from '../../components/auto_sizer';
@@ -38,6 +37,7 @@ import {
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { RangeDatePicker } from '../../components/range_date_picker';
+import { ThemeSwitcher } from '../../components/theme_switcher';
 import { StatefulTimeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { themeSelector } from '../../store/local/app';
@@ -106,7 +106,10 @@ const HomePageComponent = pure<Props>(({ theme }) => (
                   headers={headers}
                 />
               </Flyout>
-              <MyEuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <MyEuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <ThemeSwitcher />
+                </EuiFlexItem>
                 <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
                   <RangeDatePicker id="global" />
                 </EuiFlexItem>

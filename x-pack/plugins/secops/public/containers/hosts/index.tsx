@@ -12,24 +12,27 @@ import { pure } from 'recompose';
 import { GetHostsQuery, HostsEdges, PageInfo } from '../../../common/graphql/types';
 
 import { connect } from 'react-redux';
-import { hostsSelector, State } from '../../store';
+import { hostsSelector, inputsModel, State } from '../../store';
 import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
+  id: string;
   hosts: HostsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
   loadMore: (cursor: string) => void;
+  refetch: inputsModel.Refetch;
 }
 
 export interface OwnProps {
+  id?: string;
   children: (args: HostsArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
   filterQuery?: string;
-  cursor: string | null;
+  poll: number;
 }
 
 export interface HostsComponentReduxProps {
@@ -39,31 +42,35 @@ export interface HostsComponentReduxProps {
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
 const HostsComponentQuery = pure<HostsProps>(
-  ({ children, filterQuery, sourceId, startDate, endDate, limit = 2, cursor }) => (
+  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit = 2, poll }) => (
     <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
       query={hostsQuery}
       fetchPolicy="cache-and-network"
+      pollInterval={poll}
       notifyOnNetworkStatusChange
       variables={{
         sourceId,
         timerange: {
           interval: '12h',
-          from: endDate,
-          to: startDate,
+          from: startDate,
+          to: endDate,
         },
         pagination: {
           limit,
-          cursor,
+          cursor: null,
           tiebreaker: null,
         },
         filterQuery,
       }}
     >
-      {({ data, loading, fetchMore }) =>
-        children({
+      {({ data, loading, fetchMore, refetch }) => {
+        const hosts = getOr([], 'source.Hosts.edges', data);
+        return children({
+          id,
+          refetch,
           loading,
           totalCount: getOr(0, 'source.Hosts.totalCount', data),
-          hosts: getOr([], 'source.Hosts.edges', data),
+          hosts,
           pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
           loadMore: (newCursor: string) =>
             fetchMore({
@@ -89,8 +96,8 @@ const HostsComponentQuery = pure<HostsProps>(
                 };
               },
             }),
-        })
-      }
+        });
+      }}
     </Query>
   )
 );

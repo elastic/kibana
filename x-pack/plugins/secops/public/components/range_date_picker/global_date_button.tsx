@@ -92,6 +92,7 @@ export class GlobalDateButton extends React.PureComponent<Props, State> {
             selected={date}
             dateFormat="L LTS"
             inline
+            fullWidth
             showTimeSelect
             shadow={false}
             onChange={onChange}

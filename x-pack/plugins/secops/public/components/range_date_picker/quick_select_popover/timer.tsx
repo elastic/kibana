@@ -46,8 +46,8 @@ export const pluralLastOptions: Options[] = [
 
 interface Props {
   timerIsOn: boolean;
-  interval: number;
-  intervalType: string;
+  duration: number;
+  durationKind: string;
   onChange: (
     stateType: string,
     args: React.FormEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>
@@ -55,22 +55,21 @@ interface Props {
   toggleTimer: (timerIsOn: boolean) => void;
 }
 
-export const Timer = pure<Props>(({ onChange, timerIsOn, interval, intervalType, toggleTimer }) => (
+export const Timer = pure<Props>(({ onChange, timerIsOn, duration, durationKind, toggleTimer }) => (
   <>
     <EuiTitle size="xxxs">
       <span>Refresh every</span>
     </EuiTitle>
     <EuiSpacer size="s" />
-    <EuiFlexGroup gutterSize="s" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem>
         <EuiFormRow>
           <EuiFieldNumber
             aria-label="Count of"
-            defaultValue="1"
-            value={interval}
+            value={duration}
             step={0}
             onChange={arg => {
-              onChange('interval', arg);
+              onChange('duration', arg);
             }}
           />
         </EuiFormRow>
@@ -79,11 +78,10 @@ export const Timer = pure<Props>(({ onChange, timerIsOn, interval, intervalType,
         <EuiFormRow>
           <EuiSelect
             aria-label="Count Type"
-            defaultValue="minutes"
-            value={intervalType}
-            options={interval === 1 ? singleLastOptions : pluralLastOptions}
+            value={durationKind}
+            options={duration === 1 ? singleLastOptions : pluralLastOptions}
             onChange={arg => {
-              onChange('intervalType', arg);
+              onChange('durationKind', arg);
             }}
           />
         </EuiFormRow>
@@ -92,9 +90,8 @@ export const Timer = pure<Props>(({ onChange, timerIsOn, interval, intervalType,
         <EuiFormRow>
           <EuiButton
             iconType={timerIsOn ? 'stop' : 'play'}
-            size="s"
-            onClick={toggleTimer.bind(!timerIsOn)}
-            style={{ minWidth: 90 }}
+            onClick={toggleTimer.bind(null, !timerIsOn)}
+            style={{ minWidth: 0 }}
           >
             {timerIsOn ? 'Stop' : 'Start'}
           </EuiButton>

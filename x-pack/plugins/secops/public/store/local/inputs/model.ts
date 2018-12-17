@@ -4,19 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface TimeRange {
-  timerange: {
-    type: 'absolute' | 'relative';
-    from: number;
-    to: number;
-  };
-  policy: {
-    type: 'manual' | 'interval';
-    interval: number;
-    intervalType: string;
-  };
+interface AbsoluteTimeRange {
+  kind: 'absolute';
+  from: number;
+  to: number;
+}
+
+interface RelativeTimeRange {
+  kind: 'relative';
+  option: 'week-to-date' | 'month-to-date' | 'year-to-date' | 'quick-select';
+  from: number;
+  to: number;
+}
+
+export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
+
+export interface Policy {
+  kind: 'manual' | 'interval';
+  duration: number; // in ms
+}
+
+export type Refetch = () => void;
+export interface GlobalQuery {
+  id: string;
+  isLoading: boolean;
+  refetch: null | Refetch;
+}
+
+export interface InputsRange {
+  timerange: TimeRange;
+  policy: Policy;
+  query: GlobalQuery[];
 }
 
 export interface InputsModel {
-  kql: TimeRange;
+  global: InputsRange;
 }

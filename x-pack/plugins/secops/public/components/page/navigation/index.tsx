@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  EuiButton,
   // @ts-ignore
   EuiTab,
   // @ts-ignore
   EuiTabs,
 } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
-import { ThemeSwitcher } from '../../theme_switcher';
 
 interface NavTab {
   id: string;
@@ -49,30 +46,6 @@ interface NavigationState {
   selectedTabId: string;
 }
 
-const AddSources = styled.div`
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  top: -48px;
-`;
-
-const AddData = pure(() => (
-  <AddSources data-test-subj="add-sources">
-    <EuiButton href="kibana#home/tutorial_directory/security" target="_blank">
-      Add data
-    </EuiButton>
-    <ThemeSwitcher />
-  </AddSources>
-));
-
-const AddDataContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  height: 0px;
-  justify-content: flex-end;
-  width: 100%;
-`;
-
 const NavigationContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -93,9 +66,6 @@ export class Navigation extends React.PureComponent<{}, NavigationState> {
     return (
       <NavigationContainer>
         <EuiTabs>{this.renderTabs()}</EuiTabs>
-        <AddDataContainer>
-          <AddData />
-        </AddDataContainer>
       </NavigationContainer>
     );
   }

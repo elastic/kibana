@@ -28,6 +28,20 @@ describe('Load More Table Component', () => {
       hosts: {
         limit: 2,
       },
+      inputs: {
+        global: {
+          timerange: {
+            kind: 'absolute',
+            from: 0,
+            to: 1,
+          },
+          query: [],
+          policy: {
+            kind: 'manual',
+            duration: 5000,
+          },
+        },
+      },
       dragAndDrop: {
         dataProviders: {},
       },

@@ -39,23 +39,22 @@ interface Props {
 interface State {
   quickSelectTime: number;
   quickSelectUnit: string;
-}
-
-interface TogglePopoverState {
+  duration: number;
+  durationKind: string;
   isPopoverOpen: boolean;
 }
 
-export class QuickSelectPopover extends React.PureComponent<Props, State & TogglePopoverState> {
+export class QuickSelectPopover extends React.PureComponent<Props, State> {
   public readonly state = {
     isPopoverOpen: false,
     quickSelectTime: 1,
     quickSelectUnit: 'hours',
-    interval: 5,
-    intervalType: 'minutes',
+    duration: 5,
+    durationKind: 'minutes',
   };
 
   public render() {
-    const { quickSelectTime, quickSelectUnit, interval, intervalType } = this.state;
+    const { quickSelectTime, quickSelectUnit, duration, durationKind } = this.state;
     const { disabled, isTimerOn, recentlyUsed, updateAutoReload } = this.props;
     const quickSelectButton = (
       <EuiButtonEmpty
@@ -94,11 +93,11 @@ export class QuickSelectPopover extends React.PureComponent<Props, State & Toggl
           <MyRecentlyUsed recentlyUsed={recentlyUsed} setRangeDatePicker={this.onChange} />
           <EuiHorizontalRule margin="s" />
           <Timer
-            interval={interval}
-            intervalType={intervalType}
+            duration={duration}
+            durationKind={durationKind}
             timerIsOn={isTimerOn}
             onChange={this.updateState}
-            toggleTimer={isOn => updateAutoReload(isOn, interval, intervalType)}
+            toggleTimer={isOn => updateAutoReload(isOn, duration, durationKind)}
           />
         </div>
       </MyEuiPopover>
@@ -111,7 +110,7 @@ export class QuickSelectPopover extends React.PureComponent<Props, State & Toggl
   ) => {
     let value: string | number = args!.currentTarget.value;
 
-    if (stateType === 'quickSelectTime' && value !== '') {
+    if ((stateType === 'quickSelectTime' || stateType === 'duration') && value !== '') {
       value = parseInt(args!.currentTarget.value, 10);
     }
     this.setState({
