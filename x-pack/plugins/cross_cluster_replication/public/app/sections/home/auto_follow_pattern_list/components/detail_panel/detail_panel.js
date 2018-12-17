@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 
 import {
-  FollowerIndicesPreview,
+  AutoFollowPatternIndicesPreview,
   AutoFollowPatternDeleteProvider,
 } from '../../../../../components';
 
@@ -120,7 +120,14 @@ export class DetailPanelUi extends Component {
                 </EuiDescriptionListTitle>
 
                 <EuiDescriptionListDescription>
-                  {followIndexPatternPrefix}
+                  {followIndexPatternPrefix || (
+                    <em>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixEmptyValue"
+                        defaultMessage="No prefix"
+                      />
+                    </em>
+                  )}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
 
@@ -135,14 +142,21 @@ export class DetailPanelUi extends Component {
                 </EuiDescriptionListTitle>
 
                 <EuiDescriptionListDescription>
-                  {followIndexPatternSuffix}
+                  {followIndexPatternSuffix || (
+                    <em>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixEmptyValue"
+                        defaultMessage="No suffix"
+                      />
+                    </em>
+                  )}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 
-            <FollowerIndicesPreview
+            <AutoFollowPatternIndicesPreview
               prefix={followIndexPatternPrefix}
               suffix={followIndexPatternSuffix}
               leaderIndexPatterns={leaderIndexPatterns}
