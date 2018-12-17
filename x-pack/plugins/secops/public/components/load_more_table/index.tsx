@@ -19,7 +19,6 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { EventItem } from '../../../common/graphql/types';
 import { LoadingPanel } from '../loading';
 
 export interface HoryzontalBarChartData {
@@ -32,10 +31,10 @@ export interface ItemsPerRow {
   numberOfRow: number;
 }
 
-interface BasicTableProps {
+interface BasicTableProps<T> {
   // tslint:disable-next-line:no-any
   pageOfItems: any[];
-  columns: Columns[];
+  columns: Array<Columns<T>>;
   title: string | React.ReactNode;
   loading: boolean;
   loadingTitle?: string;
@@ -50,17 +49,17 @@ interface BasicTableState {
   isPopoverOpen: boolean;
 }
 
-export interface Columns {
+export interface Columns<T> {
   field?: string;
   name: string;
   isMobileHeader?: boolean;
   sortable?: boolean;
   truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: EventItem) => void;
+  render?: (item: T) => void;
 }
 
-export class LoadMoreTable extends React.PureComponent<BasicTableProps, BasicTableState> {
+export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
   public readonly state = {
     isPopoverOpen: false,
   };

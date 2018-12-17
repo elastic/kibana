@@ -5,19 +5,22 @@
  */
 
 import {
-  HostsData,
   PaginationInput,
   SourceConfiguration,
   TimerangeInput,
+  UncommonProcessesData,
 } from '../../../common/graphql/types';
 import { FrameworkRequest } from '../framework';
 import { ESQuery, SearchHit } from '../types';
 
-export interface HostsAdapter {
-  getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;
+export interface UncommonProcessesAdapter {
+  getUncommonProcesses(
+    req: FrameworkRequest,
+    options: UncommonProcessesRequestOptions
+  ): Promise<UncommonProcessesData>;
 }
 
-export interface HostsRequestOptions {
+export interface UncommonProcessesRequestOptions {
   sourceConfiguration: SourceConfiguration;
   pagination: PaginationInput;
   timerange: TimerangeInput;
@@ -26,48 +29,50 @@ export interface HostsRequestOptions {
 }
 
 type StringOrNumber = string | number;
-
-export interface HostHit {
+export interface UncommonProcessHit {
   _index: string;
   _type: string;
   _id: string;
   _score: number | null;
+  total: number;
+  hosts: string[];
   _source: {
     '@timestamp': string;
-    system: {
-      host: {
-        name: string;
-        os: {
-          name: string;
-          version: string;
-        };
-      };
+    process: {
+      name: string;
+      title: string;
+    };
+    host: {
+      name: string;
     };
   };
   cursor: string;
   sort: StringOrNumber[];
 }
 
-export interface HostBucket {
-  key: { host_name: string };
-  host: {
+export interface UncommonProcessBucket {
+  key: string;
+  hosts: {
+    buckets: [];
+  };
+  process: {
     hits: {
       total: number;
       max_score: number | null;
-      hits: HostHit[];
+      hits: UncommonProcessHit[];
     };
   };
 }
 
-export interface HostData extends SearchHit {
+export interface UncommonProcessData extends SearchHit {
   sort: string[];
   aggregations: {
-    host_count: {
+    process_count: {
       value: number;
     };
-    group_by_host: {
+    group_by_process: {
       after_key: string;
-      buckets: HostBucket[];
+      buckets: UncommonProcessBucket[];
     };
   };
 }

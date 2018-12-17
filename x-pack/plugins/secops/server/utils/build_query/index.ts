@@ -6,3 +6,4 @@
 
 export * from './fields';
 export * from './filters';
+export * from './merge_fields_with_hits';

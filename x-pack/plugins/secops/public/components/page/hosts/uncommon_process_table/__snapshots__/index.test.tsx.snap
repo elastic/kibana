@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UncommonProcess Table Component rendering it renders the default Uncommon process table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "uncommonProcess": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "hosts": Array [
+            "Hello World",
+            "Hello World",
+          ],
+          "instances": 93,
+          "name": "elrond.elstc.co",
+          "title": "Hello World",
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "uncommonProcess": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "hosts": Array [
+            "Hello World",
+            "Hello World",
+          ],
+          "instances": 97,
+          "name": "siem-kibana",
+          "title": "Hello World",
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+  totalCount={4}
+/>
+`;

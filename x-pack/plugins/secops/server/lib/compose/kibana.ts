@@ -14,6 +14,7 @@ import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
+import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
 
 export function compose(server: Server): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);
@@ -25,6 +26,7 @@ export function compose(server: Server): AppBackendLibs {
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
+    uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {

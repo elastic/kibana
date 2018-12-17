@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, getOr } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { GetHostsQuery, HostsEdges, PageInfo } from '../../../common/graphql/types';
+import {
+  GetUncommonProcessesQuery,
+  PageInfo,
+  UncommonProcessesEdges,
+} from '../../../common/graphql/types';
 
 import { connect } from 'react-redux';
-import { hostsSelector, State } from '../../store';
-import { hostsQuery } from './index.gql_query';
+import { State } from '../../store';
+import { uncommonProcessesQuery } from './index.gql_query';
 
-export interface HostsArgs {
-  hosts: HostsEdges[];
+export interface UncommonProcessesArgs {
+  uncommonProcesses: UncommonProcessesEdges[];
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
@@ -24,7 +28,7 @@ export interface HostsArgs {
 }
 
 export interface OwnProps {
-  children: (args: HostsArgs) => React.ReactNode;
+  children: (args: UncommonProcessesArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
@@ -32,16 +36,16 @@ export interface OwnProps {
   cursor: string | null;
 }
 
-export interface HostsComponentReduxProps {
+export interface UncommonProcessesComponentReduxProps {
   limit: number;
 }
 
-type HostsProps = OwnProps & HostsComponentReduxProps;
+type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
 
-const HostsComponentQuery = pure<HostsProps>(
-  ({ children, filterQuery, sourceId, startDate, endDate, limit = 2, cursor }) => (
-    <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
-      query={hostsQuery}
+const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
+  ({ children, filterQuery, sourceId, startDate, endDate, limit, cursor }) => (
+    <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
+      query={uncommonProcessesQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
       variables={{
@@ -62,9 +66,9 @@ const HostsComponentQuery = pure<HostsProps>(
       {({ data, loading, fetchMore }) =>
         children({
           loading,
-          totalCount: getOr(0, 'source.Hosts.totalCount', data),
-          hosts: getOr([], 'source.Hosts.edges', data),
-          pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
+          totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
+          uncommonProcesses: getOr([], 'source.UncommonProcesses.edges', data),
+          pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
           loadMore: (newCursor: string) =>
             fetchMore({
               variables: {
@@ -81,9 +85,12 @@ const HostsComponentQuery = pure<HostsProps>(
                   ...fetchMoreResult,
                   source: {
                     ...fetchMoreResult.source,
-                    Hosts: {
-                      ...fetchMoreResult.source.Hosts,
-                      edges: [...prev.source.Hosts.edges, ...fetchMoreResult.source.Hosts.edges],
+                    UncommonProcesses: {
+                      ...fetchMoreResult.source.UncommonProcesses,
+                      edges: [
+                        ...prev.source.UncommonProcesses.edges,
+                        ...fetchMoreResult.source.UncommonProcesses.edges,
+                      ],
                     },
                   },
                 };
@@ -96,8 +103,11 @@ const HostsComponentQuery = pure<HostsProps>(
 );
 
 const mapStateToProps = (state: State) => {
-  const limit = defaultTo(2, hostsSelector(state));
+  // TODO: This is hard coded without a reducer and state until
+  // we can determine if we can get a cursor object with the aggregate or not
+  // of uncommon_processes
+  const limit = 5;
   return { limit };
 };
 
-export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);
+export const UncommonProcessesQuery = connect(mapStateToProps)(UncommonProcessesComponentQuery);

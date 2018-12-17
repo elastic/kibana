@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './events_table';
-export * from './hosts_table';
-export * from './types_bar';
-export * from './uncommon_process_table';
+export { createUncommonProcessesResolvers } from './resolvers';
+export { uncommonProcessesSchema } from './schema.gql';

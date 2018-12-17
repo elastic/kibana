@@ -40,6 +40,7 @@ export interface Source {
   status: SourceStatus /** The status of the source */;
   getEvents?: EventsData | null /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
   Hosts: HostsData /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+  UncommonProcesses: UncommonProcessesData /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */;
   whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
@@ -137,12 +138,12 @@ export interface SuricataAlertData {
 }
 
 export interface HostsData {
-  edges: (HostsEdges | null)[];
+  edges: HostsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
 }
 
-export interface HostsEdges {
+export interface HostsEdges extends Record<string, {}> {
   host: HostItem;
   cursor: CursorType;
 }
@@ -165,6 +166,25 @@ export interface PageInfo {
   hasNextPage?: boolean | null;
 }
 
+export interface UncommonProcessesData {
+  edges: UncommonProcessesEdges[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface UncommonProcessesEdges extends Record<string, {}> {
+  uncommonProcess: UncommonProcessItem;
+  cursor: CursorType;
+}
+
+export interface UncommonProcessItem {
+  _id: string;
+  name: string;
+  title?: string | null;
+  instances: number;
+  hosts?: (string | null)[] | null;
+}
+
 export interface SayMyName {
   appName: string /** The id of the source */;
 }
@@ -176,7 +196,7 @@ export interface TimerangeInput {
 }
 
 export interface PaginationInput {
-  limit: number /** The size parameter allows you to configure the maximum amount of items to be returned */;
+  limit: number /** The limit parameter allows you to configure the maximum amount of items to be returned */;
   cursor?: string | null /** The cursor parameter defines the next result you want to fetch */;
   tiebreaker?:
     | string
@@ -190,6 +210,11 @@ export interface GetEventsSourceArgs {
   filterQuery?: string | null;
 }
 export interface HostsSourceArgs {
+  timerange: TimerangeInput;
+  pagination: PaginationInput;
+  filterQuery?: string | null;
+}
+export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
   pagination: PaginationInput;
   filterQuery?: string | null;
@@ -250,6 +275,11 @@ export namespace SourceResolvers {
       any,
       Context
     > /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+    UncommonProcesses?: UncommonProcessesResolver<
+      UncommonProcessesData,
+      any,
+      Context
+    > /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */;
     whoAmI?: WhoAmIResolver<
       SayMyName | null,
       any,
@@ -286,6 +316,17 @@ export namespace SourceResolvers {
     HostsArgs
   >;
   export interface HostsArgs {
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  }
+
+  export type UncommonProcessesResolver<
+    R = UncommonProcessesData,
+    Parent = any,
+    Context = any
+  > = Resolver<R, Parent, Context, UncommonProcessesArgs>;
+  export interface UncommonProcessesArgs {
     timerange: TimerangeInput;
     pagination: PaginationInput;
     filterQuery?: string | null;
@@ -706,12 +747,12 @@ export namespace SuricataAlertDataResolvers {
 
 export namespace HostsDataResolvers {
   export interface Resolvers<Context = any> {
-    edges?: EdgesResolver<(HostsEdges | null)[], any, Context>;
+    edges?: EdgesResolver<HostsEdges[], any, Context>;
     totalCount?: TotalCountResolver<number, any, Context>;
     pageInfo?: PageInfoResolver<PageInfo, any, Context>;
   }
 
-  export type EdgesResolver<R = (HostsEdges | null)[], Parent = any, Context = any> = Resolver<
+  export type EdgesResolver<R = HostsEdges[], Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
@@ -814,6 +855,76 @@ export namespace PageInfoResolvers {
   >;
 }
 
+export namespace UncommonProcessesDataResolvers {
+  export interface Resolvers<Context = any> {
+    edges?: EdgesResolver<UncommonProcessesEdges[], any, Context>;
+    totalCount?: TotalCountResolver<number, any, Context>;
+    pageInfo?: PageInfoResolver<PageInfo, any, Context>;
+  }
+
+  export type EdgesResolver<R = UncommonProcessesEdges[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TotalCountResolver<R = number, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PageInfoResolver<R = PageInfo, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace UncommonProcessesEdgesResolvers {
+  export interface Resolvers<Context = any> {
+    uncommonProcess?: UncommonProcessResolver<UncommonProcessItem, any, Context>;
+    cursor?: CursorResolver<CursorType, any, Context>;
+  }
+
+  export type UncommonProcessResolver<
+    R = UncommonProcessItem,
+    Parent = any,
+    Context = any
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<R = CursorType, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace UncommonProcessItemResolvers {
+  export interface Resolvers<Context = any> {
+    _id?: IdResolver<string, any, Context>;
+    name?: NameResolver<string, any, Context>;
+    title?: TitleResolver<string | null, any, Context>;
+    instances?: InstancesResolver<number, any, Context>;
+    hosts?: HostsResolver<(string | null)[] | null, any, Context>;
+  }
+
+  export type IdResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type NameResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type TitleResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type InstancesResolver<R = number, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type HostsResolver<R = (string | null)[] | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace SayMyNameResolvers {
   export interface Resolvers<Context = any> {
     appName?: AppNameResolver<string, any, Context> /** The id of the source */;
@@ -840,6 +951,7 @@ export namespace GetEventsQuery {
 
   export type Source = {
     __typename?: 'Source';
+    id: string;
     getEvents?: GetEvents | null;
   };
 
@@ -934,13 +1046,14 @@ export namespace GetHostsQuery {
 
   export type Source = {
     __typename?: 'Source';
+    id: string;
     Hosts: Hosts;
   };
 
   export type Hosts = {
     __typename?: 'HostsData';
     totalCount: number;
-    edges: (Edges | null)[];
+    edges: Edges[];
     pageInfo: PageInfo;
   };
 
@@ -1013,6 +1126,64 @@ export namespace SourceQuery {
     searchable: boolean;
     type: string;
     aggregatable: boolean;
+  };
+}
+
+export namespace GetUncommonProcessesQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+    id: string;
+    UncommonProcesses: UncommonProcesses;
+  };
+
+  export type UncommonProcesses = {
+    __typename?: 'UncommonProcessesData';
+    totalCount: number;
+    edges: Edges[];
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'UncommonProcessesEdges';
+    uncommonProcess: UncommonProcess;
+    cursor: Cursor;
+  };
+
+  export type UncommonProcess = {
+    __typename?: 'UncommonProcessItem';
+    _id: string;
+    name: string;
+    title?: string | null;
+    instances: number;
+    hosts?: (string | null)[] | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+    endCursor?: EndCursor | null;
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+    value: string;
   };
 }
 
