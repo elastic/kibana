@@ -32,7 +32,8 @@ export interface ItemsPerRow {
 }
 
 interface BasicTableProps<T> {
-  pageOfItems: T[];
+  // tslint:disable-next-line:no-any
+  pageOfItems: any[];
   columns: Array<Columns<T>>;
   title: string | React.ReactNode;
   loading: boolean;
