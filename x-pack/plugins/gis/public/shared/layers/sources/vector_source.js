@@ -81,7 +81,7 @@ export class VectorSource extends ASource {
 
   // Allow source to filter and format feature properties before displaying to user
   async filterAndFormatProperties(properties) {
-    //todo :this is quick hack... should revise (should model proeprties explicitly in layer)s
+    //todo :this is quick hack... should revise (should model proeprties explicitly in vector_layer
     const props = {};
     for (const key in properties) {
       if (key.startsWith('__kbn')) {//these are system proeprties and should be ignored

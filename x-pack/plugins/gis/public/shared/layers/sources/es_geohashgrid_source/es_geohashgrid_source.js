@@ -288,4 +288,19 @@ export class ESGeohashGridSource extends VectorSource {
     const indexPattern = await this._getIndexPattern();
     return indexPattern.title;
   }
+
+  canFormatFeatureProperties() {
+    return true;
+  }
+
+  async filterAndFormatProperties(properties) {
+    properties = await super.filterAndFormatProperties(properties);
+    const allProps = {};
+    for  (const key in properties) {
+      if (key !== 'geohash_meta') {
+        allProps[key] = properties[key];
+      }
+    }
+    return allProps;
+  }
 }
