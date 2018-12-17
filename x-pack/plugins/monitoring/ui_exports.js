@@ -16,7 +16,7 @@ export const getUiExports = () => ({
   app: {
     title: i18n.translate('xpack.monitoring.monitoringTitle', { defaultMessage: 'Monitoring' }),
     order: 9002,
-    description: i18n.translate('xpack.monitoring.monitoringDescription', {
+    description: i18n.translate('xpack.monitoring.uiExportsDescription', {
       defaultMessage: 'Monitoring for Elastic Stack',
     }),
     icon: 'plugins/monitoring/icons/monitoring.svg',
