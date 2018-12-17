@@ -90,7 +90,7 @@ export async function BrowserProvider({ getService }) {
      * position.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
      *
-     * @param {Element} element Optional
+     * @param {WebElementWrapper} element Optional
      * @param {number} xOffset Optional
      * @param {number} yOffset Optional
      * @return {Promise<void>}
@@ -111,18 +111,23 @@ export async function BrowserProvider({ getService }) {
      * Does a drag-and-drop action from one point to another
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
      *
-     * @param {WebElementWrapper|{x: number, y: number}} from
-     * @param {WebElementWrapper|{x: number, y: number}} to
+     * @param {{element: WebElementWrapper} from
+     * @param {{element: WebElementWrapper, xOffset: number, yOffset: number}} to
      * @return {Promise<void>}
      */
     async dragAndDrop(from, to) {
       const actions = driver.actions({ bridge: true });
-      const _from = (from instanceof WebElementWrapper) ? from._webElement : from;
-      const _to = (to instanceof WebElementWrapper) ? to._webElement : to;
-      await actions.dragAndDrop(_from, _to).perform();
+      let _to = { x: 0, y: 0 };
+      const _from = from.element._webElement;
+
+      if (to.element) {
+        const position = await to.element.getPosition();
+        _to = { x: position.x, y: position.y };
+      }
+      const _toWithOffset = { x: _to.x + (to.xOffset || 0),  y: _to.y + (to.yOffset || 0) };
+
+      await actions.dragAndDrop(_from, _toWithOffset).perform();
     }
-
-
 
     /**
      * Reloads the current browser window/frame.
@@ -163,7 +168,7 @@ export async function BrowserProvider({ getService }) {
      * of a specific WebElement. Then adds an action for left-click (down/up) with the mouse.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
      *
-     * @param {Element} element Optional
+     * @param {WebElementWrapper} element Optional
      * @param {number} xOffset Optional
      * @param {number} yOffset Optional
      * @return {Promise<void>}
@@ -178,30 +183,6 @@ export async function BrowserProvider({ getService }) {
       } else {
         throw new Error('Element or coordinates should be provided');
       }
-    }
-
-    /**
-     * Depresses a mouse button without releasing it.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#press
-     *
-     * @param {number} button Optional, default LEFT
-     * @return {Promise<void>}
-     */
-    async pressMouseButton(...args) {
-      const actions = driver.actions({ bridge: true });
-      await actions.press(...args).perform();
-    }
-
-    /**
-     * Releases a previously depressed mouse button.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#release
-     *
-     * @param {number} button Optional, default LEFT
-     * @return {Promise<void>}
-     */
-    async releaseMouseButton(...args) {
-      const actions = driver.actions({ bridge: true });
-      await actions.release(...args).perform();
     }
 
     /**
@@ -240,7 +221,7 @@ export async function BrowserProvider({ getService }) {
     /**
      * Inserts action for performing a double left-click with the mouse.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
-     * @param {Element} element
+     * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
     async doubleClick(element) {

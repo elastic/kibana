@@ -96,6 +96,21 @@ export async function FindProvider({ getService }) {
       });
     }
 
+    async _filterElementIsDisplayed(elements) {
+      if (elements.length === 0) {
+        return [];
+      } else {
+        const displayed = [];
+        for (let i = 0; i < elements.length; i++) {
+          const isDisplayed = await elements[i].isDisplayed();
+          if (isDisplayed) {
+            displayed.push(elements[i]);
+          }
+        }
+        return displayed;
+      }
+    }
+
     async allByCustom(findAllFunction, timeout = defaultFindTimeout) {
       await this._withTimeout(timeout);
       return await retry.try(async () => {
@@ -155,9 +170,7 @@ export async function FindProvider({ getService }) {
     async allDescendantDisplayedByCssSelector(selector, parentElement) {
       log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
       const allElements = await wrapAll(await parentElement._webElement.findElements(By.css(selector)));
-      return await Promise.all(
-        allElements.map(async (element) => {return await element.isDisplayed(); })
-      );
+      return await this._filterElementIsDisplayed(allElements);
     }
 
     async displayedByLinkText(linkText, timeout = defaultFindTimeout) {
@@ -199,18 +212,7 @@ export async function FindProvider({ getService }) {
       log.debug(`existsByDisplayedByCssSelector ${selector}`);
       return await this.exists(async (driver) => {
         const elements = wrapAll(await driver.findElements(By.css(selector)));
-        if (elements.length === 0) {
-          return [];
-        } else {
-          const displayed = [];
-          for (let i = 0; i < elements.length; i++) {
-            const isDisplayed = await elements[i].isDisplayed();
-            if (isDisplayed) {
-              displayed.push(elements[i]);
-            }
-          }
-          return displayed;
-        }
+        return await this._filterElementIsDisplayed(elements);
       }, timeout);
     }
 
