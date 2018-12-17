@@ -25,18 +25,18 @@ interface Props {
 
 export const NodeContextMenu = injectI18n(
   ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl }: Props) => {
-    const nodeId = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
-    const nodeLogsUrl = nodeId
+    const nodeField = options.fields ? options.fields[nodeType] : null;
+    const nodeLogsUrl = node.id
       ? getNodeLogsUrl({
           nodeType,
-          nodeId,
+          nodeId: node.id,
           time: timeRange.to,
         })
       : undefined;
-    const nodeDetailUrl = nodeId
+    const nodeDetailUrl = node.id
       ? getNodeDetailUrl({
           nodeType,
-          nodeId,
+          nodeId: node.id,
           from: timeRange.from,
           to: timeRange.to,
         })
