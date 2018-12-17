@@ -11,9 +11,6 @@ import {
   EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar,
-  EuiShowFor,
-  EuiSideNav,
   EuiTitle,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -24,6 +21,7 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
+import { MetricsSideNav } from '../../components/metrics/side_nav';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
 import { WithMetadata } from '../../containers/metadata/with_metadata';
@@ -62,9 +60,6 @@ export const MetricDetail = withTheme(
   injectI18n(
     class extends React.PureComponent<Props> {
       public static displayName = 'MetricDetailPage';
-      public readonly state = {
-        isSideNavOpenOnMobile: false,
-      };
 
       public render() {
         const { intl } = this.props;
@@ -87,34 +82,34 @@ export const MetricDetail = withTheme(
           );
         }
         const layouts = layoutCreator(this.props.theme);
+        const breadcrumbs = [{ text: nodeId }];
 
         return (
-          <WithOptions>
-            {({ sourceId }) => (
-              <WithMetricsTime resetOnUnmount>
-                {({
-                  currentTimeRange,
-                  isAutoReloading,
-                  setRangeTime,
-                  startMetricsAutoReload,
-                  stopMetricsAutoReload,
-                }) => (
-                  <WithMetadata
-                    layouts={layouts}
-                    sourceId={sourceId}
-                    nodeType={nodeType}
-                    nodeId={nodeId}
-                  >
-                    {({ name, filteredLayouts }) => {
-                      const breadcrumbs = [{ text: name }];
-                      return (
-                        <ColumnarPage>
-                          <Header
-                            appendSections={<InfrastructureBetaBadgeHeaderSection />}
-                            breadcrumbs={breadcrumbs}
-                          />
-                          <WithMetricsTimeUrlState />
-                          <DetailPageContent>
+          <ColumnarPage>
+            <Header
+              appendSections={<InfrastructureBetaBadgeHeaderSection />}
+              breadcrumbs={breadcrumbs}
+            />
+            <WithMetricsTimeUrlState />
+            <DetailPageContent>
+              <WithOptions>
+                {({ sourceId }) => (
+                  <WithMetricsTime resetOnUnmount>
+                    {({
+                      currentTimeRange,
+                      isAutoReloading,
+                      setRangeTime,
+                      startMetricsAutoReload,
+                      stopMetricsAutoReload,
+                    }) => (
+                      <WithMetadata
+                        layouts={layouts}
+                        sourceId={sourceId}
+                        nodeType={nodeType}
+                        nodeId={nodeId}
+                      >
+                        {({ filteredLayouts, loading: metadataLoading }) => {
+                          return (
                             <WithMetrics
                               layouts={filteredLayouts}
                               sourceId={sourceId}
@@ -126,34 +121,14 @@ export const MetricDetail = withTheme(
                                 if (error) {
                                   return <ErrorPageBody message={error} />;
                                 }
-                                const sideNav = filteredLayouts.map(item => {
-                                  return {
-                                    name: item.label,
-                                    id: item.id,
-                                    items: item.sections.map(section => ({
-                                      id: section.id as string,
-                                      name: section.label,
-                                      onClick: this.handleClick(section),
-                                    })),
-                                  };
-                                });
                                 return (
                                   <EuiPage style={{ flex: '1 0 auto' }}>
-                                    <EuiPageSideBar>
-                                      <EuiHideFor sizes={['xs', 's']}>
-                                        <EuiSideNavContainer>
-                                          <EuiSideNav items={sideNav} />
-                                        </EuiSideNavContainer>
-                                      </EuiHideFor>
-                                      <EuiShowFor sizes={['xs', 's']}>
-                                        <EuiSideNav
-                                          items={sideNav}
-                                          mobileTitle={name}
-                                          toggleOpenOnMobile={this.toggleOpenOnMobile}
-                                          isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-                                        />
-                                      </EuiShowFor>
-                                    </EuiPageSideBar>
+                                    <MetricsSideNav
+                                      layouts={filteredLayouts}
+                                      loading={metadataLoading}
+                                      nodeName={nodeId}
+                                      handleClick={this.handleClick}
+                                    />
                                     <AutoSizer content={false} bounds detectAnyWindowResize>
                                       {({ measureRef, bounds: { width = 0 } }) => {
                                         return (
@@ -201,15 +176,15 @@ export const MetricDetail = withTheme(
                                 );
                               }}
                             </WithMetrics>
-                          </DetailPageContent>
-                        </ColumnarPage>
-                      );
-                    }}
-                  </WithMetadata>
+                          );
+                        }}
+                      </WithMetadata>
+                    )}
+                  </WithMetricsTime>
                 )}
-              </WithMetricsTime>
-            )}
-          </WithOptions>
+              </WithOptions>
+            </DetailPageContent>
+          </ColumnarPage>
         );
       }
 
@@ -220,26 +195,9 @@ export const MetricDetail = withTheme(
           el.scrollIntoView();
         }
       };
-
-      private toggleOpenOnMobile = () => {
-        this.setState({
-          isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
-        });
-      };
     }
   )
 );
-
-const EuiSideNavContainer = styled.div`
-  position: fixed;
-  z-index: 1;
-  height: 88vh;
-  background-color: #f5f5f5;
-  padding-left: 16px;
-  margin-left: -16px;
-  overflow-y: auto;
-  overflow-x: hidden;
-`;
 
 const MetricsDetailsPageColumn = styled.div`
   flex: 1 0 0%;

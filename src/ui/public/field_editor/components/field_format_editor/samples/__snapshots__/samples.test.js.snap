@@ -14,7 +14,7 @@ exports[`FormatEditorSamples should render normally 1`] = `
   }
 >
   <EuiBasicTable
-    className="fieldFormatEditor__samples"
+    className="kbnFieldFormatEditor__samples"
     columns={
       Array [
         Object {
