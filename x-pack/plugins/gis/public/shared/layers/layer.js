@@ -49,7 +49,9 @@ export class ALayer {
   }
 
   destroy() {
-    this._source.destroy();
+    if(this._source) {
+      this._source.destroy();
+    }
   }
 
   isJoinable() {

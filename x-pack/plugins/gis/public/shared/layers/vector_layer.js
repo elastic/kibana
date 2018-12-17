@@ -89,7 +89,9 @@ export class VectorLayer extends ALayer {
   }
 
   destroy() {
-    this._source.destroy();
+    if (this._source) {
+      this._source.destroy();
+    }
     this._joins.forEach(joinSource => {
       joinSource.destroy();
     });
