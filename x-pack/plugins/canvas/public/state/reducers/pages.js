@@ -29,12 +29,7 @@ function addPage(workpadState, payload, srcIndex = workpadState.pages.length - 1
 
 const getParent = element => element.position.parent;
 
-function clonePage(page) {
-  // TODO: would be nice if we could more reliably know which parameters need to get a unique id
-  // this makes a pretty big assumption about the shape of the page object
-  const elements = page.elements;
-  const groups = page.groups;
-  const nodes = elements.concat(groups);
+const cloneSubgraphs = nodes => {
   const groupIdMap = arrayToMap(nodes.filter(getParent).map(getParent));
   const postfix = getId(''); // will just return a '-e5983ef1-9c7d-4b87-b70a-f34ea199e50c' or so
   // remove the possibly preexisting postfix (otherwise it can keep growing...), then append the new postfix
@@ -46,6 +41,16 @@ function clonePage(page) {
     id: uniquify(element.id),
     position: { ...element.position, parent: getParent(element) && uniquify(getParent(element)) },
   }));
+  return newNodes;
+};
+
+function clonePage(page) {
+  // TODO: would be nice if we could more reliably know which parameters need to get a unique id
+  // this makes a pretty big assumption about the shape of the page object
+  const elements = page.elements;
+  const groups = page.groups;
+  const nodes = elements.concat(groups);
+  const newNodes = cloneSubgraphs(nodes);
   return {
     ...page,
     id: getId('page'),
