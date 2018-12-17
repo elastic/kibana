@@ -5,8 +5,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { InfraMetricInput, InfraPathInput } from '../../../../common/graphql/types';
-import { InfraNodeType } from '../../../../server/lib/adapters/nodes';
+
+import { InfraMetricInput, InfraNodeType, InfraPathInput } from '../../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_options');
 
