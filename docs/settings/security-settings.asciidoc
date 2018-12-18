@@ -41,7 +41,7 @@ Sets the name of the cookie used for the session. The default value is `"sid"`
 An arbitrary string of 32 characters or more that is used to encrypt credentials
 in a cookie. It is crucial that this key is not exposed to users of {kib}. By
 default, a value is automatically generated in memory. If you use that default
-behavior, all sessions are invalidated when {kib} restarts.
+behavior, all sessions are invalidated when {kib} restarts or using session clustering.
 
 `xpack.security.secureCookies`::
 Sets the `secure` flag of the session cookie. The default value is `false`. It
