@@ -47,6 +47,7 @@ interface BasicTableProps<T> {
 
 interface BasicTableState {
   isPopoverOpen: boolean;
+  paginationLoading: boolean;
 }
 
 export interface Columns<T> {
@@ -62,7 +63,19 @@ export interface Columns<T> {
 export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
   public readonly state = {
     isPopoverOpen: false,
+    paginationLoading: false,
   };
+
+  public componentDidUpdate(prevProps: BasicTableProps<T>) {
+    const { paginationLoading } = this.state;
+    const { loading } = this.props;
+    if (paginationLoading && prevProps.loading && !loading) {
+      this.setState({
+        ...this.state,
+        paginationLoading: false,
+      });
+    }
+  }
 
   public render() {
     const {
@@ -73,12 +86,12 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       loadingTitle,
       pageOfItems,
       title,
-      loadMore,
       limit,
       updateLimitPagination,
     } = this.props;
+    const { paginationLoading } = this.state;
 
-    if (loading && isEmpty(pageOfItems)) {
+    if (loading && !paginationLoading) {
       return (
         <LoadingPanel
           height="auto"
@@ -153,7 +166,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                     <EuiButton
                       data-test-subj="loadingMoreButton"
                       isLoading={loading}
-                      onClick={loadMore}
+                      onClick={this.loadMore}
                     >
                       {loading ? 'Loading...' : 'Load More'}
                     </EuiButton>
@@ -167,14 +180,25 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
     );
   }
 
+  private loadMore = () => {
+    this.setState({
+      ...this.state,
+      paginationLoading: true,
+      didItFetchData: false,
+    });
+    this.props.loadMore();
+  };
+
   private onButtonClick = () => {
     this.setState({
+      ...this.state,
       isPopoverOpen: !this.state.isPopoverOpen,
     });
   };
 
   private closePopover = () => {
     this.setState({
+      ...this.state,
       isPopoverOpen: false,
     });
   };
