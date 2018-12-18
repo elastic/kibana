@@ -83,6 +83,10 @@ function generateDLL(config) {
           // Self calling function with the equivalent logic
           // from maybeAddCacheLoader one from base optimizer
           use: ((babelLoaderCacheDirPath, loaders) => {
+            // Only deactivate cache-loader and thread-loader on
+            // distributable. It is valid when running from source
+            // both with dev or prod bundles or even when running
+            // kibana for dev only.
             if (IS_KIBANA_DISTRIBUTABLE) {
               return loaders;
             }
@@ -155,8 +159,9 @@ function generateDLL(config) {
 
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
-  const dllAlias = rawConfig.alias;
-  const dllNoParseRules = rawConfig.noParseRules;
+  const dllAlias = rawConfig.uiBundles.getAliases();
+  const dllNoParseRules = rawConfig.uiBundles.getWebpackNoParseRules();
+  const dllDevMode = rawConfig.uiBundles.isDevMode();
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -184,6 +189,7 @@ function extendRawConfig(rawConfig) {
   return {
     dllAlias,
     dllNoParseRules,
+    dllDevMode,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -266,9 +272,9 @@ function unoptimized() {
 export function configModel(rawConfig = {}) {
   const config = extendRawConfig(rawConfig);
 
-  if (IS_KIBANA_DISTRIBUTABLE) {
-    return webpackMerge(common(config), optimized(config));
+  if (config.dllDevMode) {
+    return webpackMerge(common(config), unoptimized());
   }
 
-  return webpackMerge(common(config), unoptimized());
+  return webpackMerge(common(config), optimized(config));
 }
