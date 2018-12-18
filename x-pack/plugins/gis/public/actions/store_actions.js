@@ -33,6 +33,7 @@ export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_LAYER_ALPHA_VALUE = 'UPDATE_LAYER_ALPHA_VALUE';
+export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -235,6 +236,15 @@ export function addPreviewLayer(layer, position) {
     const dataFilters = getDataFilters(getState());
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
     await layer.syncData({ ...loadingFunctions, dataFilters });
+  };
+}
+
+export function updateSourceProp(layerId, propName, value) {
+  return {
+    type: UPDATE_SOURCE_PROP,
+    layerId,
+    propName,
+    value,
   };
 }
 

@@ -50,6 +50,10 @@ export class ASource {
   hasCompleteConfig() {
     throw new Error(`Source#hasCompleteConfig not implemented`);
   }
+
+  renderSourceSettingsEditor() {
+    return null;
+  }
 }
 
 

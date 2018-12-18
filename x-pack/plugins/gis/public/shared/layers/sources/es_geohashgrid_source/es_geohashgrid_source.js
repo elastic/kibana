@@ -27,6 +27,7 @@ import { ZOOM_TO_PRECISION } from '../../../utils/zoom_to_precision';
 import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
+import { UpdateSourceEditor } from './update_source_editor';
 
 const aggSchemas = new Schemas([
   {
@@ -73,6 +74,17 @@ export class ESGeohashGridSource extends VectorSource {
     };
 
     return (<CreateSourceEditor onSelect={onSelect}/>);
+  }
+
+  renderSourceSettingsEditor({ onChange }) {
+    return (
+      <UpdateSourceEditor
+        indexPatternId={this._descriptor.indexPatternId}
+        onChange={onChange}
+        metrics={this._descriptor.metrics}
+        renderAs={this._descriptor.requestType}
+      />
+    );
   }
 
   renderDetails() {

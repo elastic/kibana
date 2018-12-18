@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
@@ -22,7 +22,7 @@ function filterGeoField({ type }) {
   return ['geo_point'].includes(type);
 }
 
-export class CreateSourceEditor extends React.Component {
+export class CreateSourceEditor extends Component {
 
   static propTypes = {
     onSelect: PropTypes.func.isRequired,

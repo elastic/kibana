@@ -128,6 +128,10 @@ export class ALayer {
     return this._source.renderDetails();
   }
 
+  renderSourceSettingsEditor = ({ onChange }) => {
+    return this._source.renderSourceSettingsEditor({ onChange });
+  }
+
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }

@@ -51,6 +51,10 @@ export class SettingsPanel extends Component {
     this.props.updateAlphaValue(this.props.layerId, alphaValue);
   }
 
+  onSourceChange = ({ propName, value }) => {
+    this.props.updateSourceProp(this.props.layerId, propName, value);
+  }
+
   renderZoomSliders() {
     return (
       <EuiFormRow
@@ -162,6 +166,8 @@ export class SettingsPanel extends Component {
         {this.renderZoomSliders()}
 
         {this.renderAlphaSlider()}
+
+        {this.props.renderSourceSettingsEditor({ onChange: this.onSourceChange })}
 
       </EuiPanel>
     );

@@ -22,8 +22,11 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
-  CLEAR_TEMPORARY_STYLES, SET_JOINS, TOUCH_LAYER,
-  UPDATE_LAYER_ALPHA_VALUE
+  CLEAR_TEMPORARY_STYLES,
+  SET_JOINS,
+  TOUCH_LAYER,
+  UPDATE_LAYER_ALPHA_VALUE,
+  UPDATE_SOURCE_PROP
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -36,6 +39,24 @@ const updateLayerInList = (state, id, attribute, newValue) => {
     // Update layer w/ new value. If no value provided, toggle boolean value
     // allow empty strings, 0-value
     [attribute]: (newValue || newValue === '' || newValue === 0) ? newValue : !layerList[layerIdx][attribute]
+  };
+  const updatedList = [
+    ...layerList.slice(0, layerIdx),
+    updatedLayer,
+    ...layerList.slice(layerIdx + 1)
+  ];
+  return { ...state, layerList: updatedList };
+};
+
+const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
+  const { layerList } = state;
+  const layerIdx = getLayerIndex(layerList, layerId);
+  const updatedLayer = {
+    ...layerList[layerIdx],
+    sourceDescriptor: {
+      ...layerList[layerIdx].sourceDescriptor,
+      [propName]: value,
+    }
   };
   const updatedList = [
     ...layerList.slice(0, layerIdx),
@@ -112,6 +133,8 @@ export function map(state = INITIAL_STATE, action) {
         });
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
+    case UPDATE_SOURCE_PROP:
+      return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
       console.warn('when setting joins, must remove all corresponding datarequests as well');
       const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
