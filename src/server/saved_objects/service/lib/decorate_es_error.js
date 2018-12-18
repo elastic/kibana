@@ -21,16 +21,10 @@ import elasticsearch from '@elastic/elasticsearch';
 import { get } from 'lodash';
 
 const {
-  ConnectionFault,
-  ServiceUnavailable,
-  NoConnections,
-  RequestTimeout,
-  Conflict,
-  401: NotAuthorized,
-  403: Forbidden,
-  413: RequestEntityTooLarge,
-  NotFound,
-  BadRequest
+  ConnectionError,
+  TimeoutError,
+  NoLivingConnectionsError,
+  ResponseError
 } = elasticsearch.errors;
 
 import {
@@ -51,36 +45,47 @@ export function decorateEsError(error) {
 
   const { reason } = get(error, 'body.error', {});
   if (
-    error instanceof ConnectionFault ||
-    error instanceof ServiceUnavailable ||
-    error instanceof NoConnections ||
-    error instanceof RequestTimeout
+    error instanceof ConnectionError ||
+    error instanceof NoLivingConnectionsError ||
+    error instanceof TimeoutError ||
+    // TODO: The new client considers as "service unavailable"
+    // (so worth of request retry) errors with status codes 502, 503, and 504.
+    // Do we want to handle them as well?
+    error.statusCode === 503 // Service Unavailable
   ) {
     return decorateEsUnavailableError(error, reason);
   }
 
-  if (error instanceof Conflict) {
-    return decorateConflictError(error, reason);
-  }
+  if (error instanceof ResponseError) {
+    // Conflict
+    if (error.statusCode === 409) {
+      return decorateConflictError(error, reason);
+    }
 
-  if (error instanceof NotAuthorized) {
-    return decorateNotAuthorizedError(error, reason);
-  }
+    // Not Authorized
+    if (error.statusCode === 401) {
+      return decorateNotAuthorizedError(error, reason);
+    }
 
-  if (error instanceof Forbidden) {
-    return decorateForbiddenError(error, reason);
-  }
+    // Forbidden
+    if (error.statusCode === 403) {
+      return decorateForbiddenError(error, reason);
+    }
 
-  if (error instanceof RequestEntityTooLarge) {
-    return decorateRequestEntityTooLargeError(error, reason);
-  }
+    // Request Entity Too Large
+    if (error.statusCode === 413) {
+      return decorateRequestEntityTooLargeError(error, reason);
+    }
 
-  if (error instanceof NotFound) {
-    return createGenericNotFoundError();
-  }
+    // Not Found
+    if (error.statusCode === 404) {
+      return createGenericNotFoundError();
+    }
 
-  if (error instanceof BadRequest) {
-    return decorateBadRequestError(error, reason);
+    // Bas Request
+    if (error.statusCode === 400) {
+      return decorateBadRequestError(error, reason);
+    }
   }
 
   return decorateGeneralError(error, reason);
