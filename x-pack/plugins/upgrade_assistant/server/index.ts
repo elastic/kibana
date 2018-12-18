@@ -7,10 +7,8 @@
 import { Legacy } from 'kibana';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
-import { registerReindexTemplateRoutes } from './routes/reindex_templates';
 
 export function initServer(server: Legacy.Server) {
   registerClusterCheckupRoutes(server);
   registerDeprecationLoggingRoutes(server);
-  registerReindexTemplateRoutes(server);
 }

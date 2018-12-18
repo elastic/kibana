@@ -22,7 +22,7 @@ const $ = require('jquery');
 const history = require('./history');
 const mappings = require('./mappings');
 
-export default function init(input, output, sourceLocation = 'stored', source) {
+export default function init(input, output, sourceLocation = 'stored') {
   $(document.body).removeClass('fouc');
 
   // set the value of the input and clear the output
@@ -66,16 +66,16 @@ export default function init(input, output, sourceLocation = 'stored', source) {
         input.autoIndent();
       }
     }
-    else if (sourceLocation === 'http') {
+    else if (/^https?:\/\//.test(sourceLocation)) {
       const loadFrom = {
-        url: source,
+        url: sourceLocation,
         // Having dataType here is required as it doesn't allow jQuery to `eval` content
         // coming from the external source thereby preventing XSS attack.
         dataType: 'text',
         kbnXsrfToken: false
       };
 
-      if (/https?:\/\/api.github.com/.test(source)) {
+      if (/https?:\/\/api.github.com/.test(sourceLocation)) {
         loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
       }
 

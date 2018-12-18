@@ -38,29 +38,4 @@ describe('getUpgradeAssistantStatus', () => {
     const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/');
     expect(resp).toMatchSnapshot();
   });
-
-  it('adds reindexing button with basePath', async () => {
-    deprecationsResponse = {
-      index_settings: {
-        myIndex: [
-          {
-            level: 'critical',
-            message: `Index created before ${CURRENT_MAJOR_VERSION}.0`,
-            url: '',
-          },
-        ],
-      },
-      cluster_settings: [],
-      node_settings: [],
-    };
-    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/mybasepath');
-
-    // Adds a uiButtons property with the documentation label.
-    expect(resp.indices[0].actions![0]).toMatchInlineSnapshot(`
-Object {
-  "label": "Reindex in Console",
-  "url": "/mybasepath/app/kibana#/dev_tools/console?load_from=%2Fmybasepath%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2FmyIndex.json",
-}
-`);
-  });
 });

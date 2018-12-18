@@ -46,14 +46,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   $timeout(async () => {
     output = initializeOutput($('#ConAppOutput'));
     input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), output, $scope.openDocumentation);
-
-    const urlParams = $location.search();
-    if (urlParams.load_from) {
-      init(input, output, 'http', urlParams.load_from);
-    } else {
-      init(input, output);
-    }
-
+    init(input, output, $location.search().load_from);
     kbnUiAceKeyboardModeService.initialize($scope, $('#ConAppEditor'));
     const session = input.getSession();
     session.getSelection().on('changeCursor', () => {

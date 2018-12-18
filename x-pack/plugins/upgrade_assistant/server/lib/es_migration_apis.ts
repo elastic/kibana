@@ -6,11 +6,8 @@
 
 import _ from 'lodash';
 
-import { i18n } from '@kbn/i18n';
 import { Request } from 'hapi';
 import { DeprecationAPIResponse, DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
-
-import { CURRENT_MAJOR_VERSION } from '../../common/version';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
@@ -49,45 +46,14 @@ export async function getUpgradeAssistantStatus(
 // Combines the information from the migration assistance api and the deprecation api into a single array.
 // Enhances with information about which index the deprecation applies to and adds buttons for accessing the
 // reindex UI.
-const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse, basePath: string) => {
-  const combinedIndexInfo: EnrichedDeprecationInfo[] = [];
-
-  Object.keys(deprecations.index_settings).forEach(indexName => {
-    deprecations.index_settings[indexName]
-      .map(d => ({ ...d, index: indexName } as EnrichedDeprecationInfo))
-      .map(d => {
-        // Add reindexing action if it's the old index deprecation warning.
-        if (d.message === `Index created before ${CURRENT_MAJOR_VERSION}.0`) {
-          d.actions = [
-            {
-              label: i18n.translate(
-                'xpack.upgradeAssistant.checkupTab.indices.reindexInConsoleButtonLabel',
-                {
-                  defaultMessage: 'Reindex in Console',
-                  description:
-                    '"Console" should be the same name used to label the app under Dev Tools -> Console',
-                }
-              ),
-              url: consoleTemplateUrl(basePath, indexName),
-            },
-          ];
-        }
-
-        return d;
-      })
-      .forEach(d => combinedIndexInfo.push(d));
-  });
-
-  return combinedIndexInfo;
-};
-
-// Returns a URL to open Console up with the reindex commands for the given index.
-const consoleTemplateUrl = (basePath: string, indexName: string) => {
-  const reindexTemplateUrl = `${basePath}/api/upgrade_assistant/reindex/console_template/${encodeURIComponent(
-    indexName
-  )}.json`;
-
-  return `${basePath}/app/kibana#/dev_tools/console?load_from=${encodeURIComponent(
-    reindexTemplateUrl
-  )}`;
-};
+const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse, basePath: string) =>
+  Object.keys(deprecations.index_settings).reduce(
+    (indexDeprecations, indexName) => {
+      return indexDeprecations.concat(
+        deprecations.index_settings[indexName].map(
+          d => ({ ...d, index: indexName } as EnrichedDeprecationInfo)
+        )
+      );
+    },
+    [] as EnrichedDeprecationInfo[]
+  );
