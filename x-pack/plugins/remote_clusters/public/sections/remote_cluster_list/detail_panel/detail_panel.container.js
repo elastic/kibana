@@ -16,7 +16,6 @@ import {
 
 import {
   closeDetailPanel,
-  copyCluster,
 } from '../../../store/actions';
 
 const mapStateToProps = (state) => {
@@ -32,9 +31,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
-    },
-    copyCluster: (clusterConfig) => {
-      dispatch(copyCluster(clusterConfig));
     },
   };
 };
