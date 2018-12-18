@@ -12,5 +12,8 @@ export const getUrlService = () => {
   return urlService;
 };
 export const getFilteredIndicesUri = (filter) => {
-  return encodeURI(`#${BASE_PATH}indices/filter/${encodeURIComponent(filter)}`);
+  if(filter) {
+    return encodeURI(`#${BASE_PATH}indices/filter/${encodeURIComponent(filter)}`);
+  }
+  return encodeURI(`#${BASE_PATH}indices`);
 };

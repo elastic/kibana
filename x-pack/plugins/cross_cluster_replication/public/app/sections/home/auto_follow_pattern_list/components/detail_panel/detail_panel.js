@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { getFilteredIndicesUri } from '../../../../../../../../index_management/public/services/navigation';
+
 
 import {
   EuiButton,
@@ -20,6 +22,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -54,6 +57,14 @@ export class DetailPanelUi extends Component {
         leaderIndexPatterns,
       },
     } = this.props;
+
+    let indexManagementFilter;
+    if(followIndexPatternPrefix) {
+      indexManagementFilter = `name:${followIndexPatternPrefix}`;
+    } else if(followIndexPatternSuffix) {
+      indexManagementFilter = `name:${followIndexPatternSuffix}`;
+    }
+    const indexManagementUri = getFilteredIndicesUri(indexManagementFilter);
 
     return (
       <Fragment>
@@ -157,6 +168,17 @@ export class DetailPanelUi extends Component {
               suffix={followIndexPatternSuffix}
               leaderIndexPatterns={leaderIndexPatterns}
             />
+
+            <EuiSpacer size="l" />
+
+            <EuiLink
+              href={indexManagementUri}
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
+                defaultMessage="View your follower indices in Index Management"
+              />
+            </EuiLink>
           </EuiDescriptionList>
         </EuiFlyoutBody>
       </Fragment>
