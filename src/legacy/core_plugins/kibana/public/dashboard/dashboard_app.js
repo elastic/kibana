@@ -217,8 +217,13 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.updateQueryAndFetch = function (query) {
-        $scope.model.query = migrateLegacyQuery(query);
-        dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
+        const oldQuery = $scope.model.query;
+        if (oldQuery === query) {
+          dashboardStateManager.requestReload();
+        } else {
+          $scope.model.query = migrateLegacyQuery(query);
+          dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
+        }
         $scope.refresh();
       };
 
