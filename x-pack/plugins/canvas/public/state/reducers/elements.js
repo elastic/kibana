@@ -12,7 +12,8 @@ import * as actions from '../actions/elements';
 const getLocation = type => (type === 'group' ? 'groups' : 'elements');
 
 const getLocationFromIds = (workpadState, pageId, nodeId) => {
-  const groups = workpadState.pages.find(p => p.id === pageId).groups || [];
+  const page = workpadState.pages.find(p => p.id === pageId);
+  const groups = page == null ? [] : page.groups || [];
   return groups.find(e => e.id === nodeId) ? 'groups' : 'elements';
 };
 
