@@ -49,7 +49,6 @@ export const validateName = (name = '') => {
       );
     }
   }
-
   return errorMsg;
 };
 
@@ -176,9 +175,11 @@ export const validateAutoFollowPattern = (autoFollowPattern = {}) => {
 
       case 'leaderIndexPatterns':
         if (!fieldValue.length) {
-          error = i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
-            defaultMessage: 'At least one leader index pattern is required.',
-          });
+          error = {
+            message: i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
+              defaultMessage: 'At least one leader index pattern is required.',
+            })
+          };
         }
         break;
 
