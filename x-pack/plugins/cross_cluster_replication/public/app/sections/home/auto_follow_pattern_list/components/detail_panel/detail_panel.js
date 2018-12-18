@@ -32,13 +32,13 @@ import {
   AutoFollowPatternDeleteProvider,
 } from '../../../../../components';
 
-import { getPrefixSuffixFromFollowPattern } from '../../../../../services/auto_follow_pattern';
+import { API_STATUS } from '../../../../../constants';
 import routing from '../../../../../services/routing';
 
 export class DetailPanelUi extends Component {
   static propTypes = {
     isDetailPanelOpen: PropTypes.bool.isRequired,
-    isLoading: PropTypes.bool,
+    apiStatus: PropTypes.string,
     autoFollowPattern: PropTypes.object,
     autoFollowPatternName: PropTypes.string,
     closeDetailPanel: PropTypes.func.isRequired,
@@ -48,16 +48,12 @@ export class DetailPanelUi extends Component {
   renderAutoFollowPattern() {
     const {
       autoFollowPattern: {
-        followIndexPattern,
+        followIndexPatternPrefix,
+        followIndexPatternSuffix,
         remoteCluster,
         leaderIndexPatterns,
       },
     } = this.props;
-
-    const {
-      followIndexPatternPrefix,
-      followIndexPatternSuffix,
-    } = getPrefixSuffixFromFollowPattern(followIndexPattern);
 
     return (
       <Fragment>
@@ -169,11 +165,11 @@ export class DetailPanelUi extends Component {
 
   renderContent() {
     const {
-      isLoading,
+      apiStatus,
       autoFollowPattern,
     } = this.props;
 
-    if (isLoading) {
+    if(apiStatus === API_STATUS.LOADING) {
       return (
         <EuiFlyoutBody>
           <EuiFlexGroup

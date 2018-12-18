@@ -33,7 +33,7 @@ export const openAutoFollowPatternDetailPanel = (name) => {
   if (patternName !== name) {
     // Allow the user to share a deep link to this job.
     history.replace({
-      search: `?pattern=${name}`,
+      search: `?pattern=${encodeURIComponent(name)}`,
     });
   }
 
@@ -92,7 +92,7 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isEditing = false) 
 
       toastNotifications.addSuccess(successMessage);
       routing.navigate(`/auto_follow_patterns`, undefined, {
-        pattern: id,
+        pattern: encodeURIComponent(id),
       });
     },
   })

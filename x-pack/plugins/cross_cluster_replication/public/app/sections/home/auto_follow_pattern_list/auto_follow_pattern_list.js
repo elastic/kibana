@@ -29,32 +29,6 @@ export const AutoFollowPatternList = injectI18n(
       isDetailPanelOpen: PropTypes.bool,
     }
 
-    static getDerivedStateFromProps(props) {
-      const {
-        openDetailPanel,
-        closeDetailPanel,
-        isDetailPanelOpen,
-        history: {
-          location: {
-            search,
-          },
-        },
-      } = props;
-
-      const { pattern: patternName } = extractQueryParams(search);
-
-      // Show deeplinked auto follow pattern whenever patterns get loaded or the URL changes.
-      if (patternName != null) {
-        openDetailPanel(patternName);
-      } else if (isDetailPanelOpen) {
-        closeDetailPanel();
-      }
-
-      return null;
-    }
-
-    state = {};
-
     componentDidMount() {
       this.props.loadAutoFollowPatterns();
 
@@ -68,6 +42,28 @@ export const AutoFollowPatternList = injectI18n(
       // Close the panel, otherwise it will default to already being open when we navigate back to
       // this page.
       this.props.closeDetailPanel();
+    }
+
+    componentDidUpdate() {
+      const {
+        openDetailPanel,
+        closeDetailPanel,
+        isDetailPanelOpen,
+        history: {
+          location: {
+            search,
+          },
+        },
+      } = this.props;
+
+      const { pattern: patternName } = extractQueryParams(search);
+
+      // Show deeplinked auto follow pattern whenever patterns get loaded or the URL changes.
+      if (patternName != null) {
+        openDetailPanel(patternName);
+      } else if (isDetailPanelOpen) {
+        closeDetailPanel();
+      }
     }
 
     renderEmpty() {
