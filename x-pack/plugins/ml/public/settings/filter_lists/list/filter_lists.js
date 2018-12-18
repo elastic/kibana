@@ -12,6 +12,7 @@
 import React, {
   Component
 } from 'react';
+import { PropTypes } from 'prop-types';
 
 import {
   EuiPage,
@@ -72,6 +73,7 @@ export class FilterLists extends Component {
 
   render() {
     const { filterLists, selectedFilterLists } = this.state;
+    const { canCreateFilter, canDeleteFilter } = this.props;
 
     return (
       <EuiPage className="ml-list-filter-lists">
@@ -85,6 +87,8 @@ export class FilterLists extends Component {
             refreshFilterLists={this.refreshFilterLists}
           />
           <FilterListsTable
+            canCreateFilter={canCreateFilter}
+            canDeleteFilter={canDeleteFilter}
             filterLists={filterLists}
             selectedFilterLists={selectedFilterLists}
             setSelectedFilterLists={this.setSelectedFilterLists}
@@ -96,3 +100,7 @@ export class FilterLists extends Component {
   }
 }
 
+FilterLists.propTypes = {
+  canCreateFilter: PropTypes.bool.isRequired,
+  canDeleteFilter: PropTypes.bool.isRequired
+};

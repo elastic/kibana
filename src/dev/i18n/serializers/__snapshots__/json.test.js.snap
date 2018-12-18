@@ -56,6 +56,26 @@ exports[`dev/i18n/serializers/json should serialize default messages to JSON 1`]
         \\"second\\": \\"numeric\\",
         \\"timeZoneName\\": \\"short\\"
       }
+    },
+    \\"relative\\": {
+      \\"years\\": {
+        \\"units\\": \\"year\\"
+      },
+      \\"months\\": {
+        \\"units\\": \\"month\\"
+      },
+      \\"days\\": {
+        \\"units\\": \\"day\\"
+      },
+      \\"hours\\": {
+        \\"units\\": \\"hour\\"
+      },
+      \\"minutes\\": {
+        \\"units\\": \\"minute\\"
+      },
+      \\"seconds\\": {
+        \\"units\\": \\"second\\"
+      }
     }
   },
   \\"messages\\": {
