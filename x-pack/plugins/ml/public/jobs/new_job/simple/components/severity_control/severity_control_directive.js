@@ -28,7 +28,8 @@ module.directive('mlSeverityControl', function () {
       };
 
       const props = {
-        onChangeHandler: $scope.handleThresholdChange
+        onChangeHandler: $scope.handleThresholdChange,
+        classNames: 'form-control dropdown-toggle',
       };
 
       ReactDOM.render(

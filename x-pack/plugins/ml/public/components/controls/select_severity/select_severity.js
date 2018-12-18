@@ -111,6 +111,7 @@ class SelectSeverity extends Component {
 
     return (
       <EuiSuperSelect
+        className={this.props.classNames}
         hasDividers
         options={options}
         valueOfSelected={valueDisplay}
@@ -123,11 +124,13 @@ class SelectSeverity extends Component {
 SelectSeverity.propTypes = {
   mlSelectSeverityService: PropTypes.object,
   onChangeHandler: PropTypes.func,
+  classNames: PropTypes.string
 };
 
 SelectSeverity.defaultProps = {
   mlSelectSeverityService: undefined,
-  onChangeHandler: () => {}
+  onChangeHandler: () => {},
+  classNames: ''
 };
 
 export { SelectSeverity };
