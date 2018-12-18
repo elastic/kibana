@@ -8,16 +8,11 @@
 
 			<div class="sub-form-group">
 				<label for="selectSeverity" class="kuiFormLabel kuiVerticalRhythm">Severity threshold</label><br />
-		    <div class="dropdown-group" dropdown>
-		      <button id="selectSeverity" type="button" class="form-control dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-		        <span><i class="fa fa-exclamation-triangle ml-icon-severity-{{config.threshold.display}}"></i> {{config.threshold.display}}</span> <span class="caret"></span>
-		      </button>
-		      <ul class="dropdown-menu" role="menu">
-		        <li ng-repeat="thresholdOption in ui.thresholdOptions">
-		        	<a href="" ng-click="ui.setThreshold(thresholdOption)"><i class="fa fa-exclamation-triangle ml-icon-severity-{{thresholdOption.display}}"></i> {{thresholdOption.display}}</a>
-		        </li>
-		      </ul>
-		    </div>
+					<div class="dropdown-group">
+						<ml-severity-control
+							config='config'
+						/>
+					</div>
 	    </div>
 		</div>
 		<div ng-show="ui.emailEnabled" class="form-group">
