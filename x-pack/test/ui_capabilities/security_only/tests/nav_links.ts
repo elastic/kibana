@@ -7,6 +7,7 @@
 import expect from 'expect.js';
 import { SecurityService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
+import { navLinksBuilder } from '../../common/nav_links_builder';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { isCustomRoleSpecification } from '../../common/types';
 import { UserScenarios } from '../scenarios';
@@ -51,40 +52,12 @@ export default function navLinksTests({ getService }: TestInvoker) {
           case 'superuser':
           case 'all':
             expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql({
-              apm: true,
-              canvas: true,
-              graph: true,
-              'infra:home': true,
-              'infra:logs': true,
-              'kibana:dashboard': true,
-              'kibana:dev_tools': true,
-              'kibana:discover': true,
-              'kibana:management': true,
-              'kibana:visualize': true,
-              ml: true,
-              monitoring: true,
-              timelion: true,
-            });
+            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'discover_all':
           case 'discover_read':
             expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql({
-              apm: false,
-              canvas: false,
-              graph: false,
-              'infra:home': false,
-              'infra:logs': false,
-              'kibana:dashboard': false,
-              'kibana:dev_tools': false,
-              'kibana:discover': true,
-              'kibana:management': true,
-              'kibana:visualize': false,
-              ml: false,
-              monitoring: false,
-              timelion: false,
-            });
+            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.only('discover', 'management'));
             break;
           default:
             throw new UnreachableError(scenario);
