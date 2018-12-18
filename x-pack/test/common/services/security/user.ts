@@ -3,40 +3,44 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Wreck from 'wreck';
+import axios, { AxiosInstance } from 'axios';
 import { LogService } from '../../../types/services';
 
 export class User {
   private log: LogService;
-  private wreck: any;
+  private axios: AxiosInstance;
 
   constructor(url: string, log: LogService) {
     this.log = log;
-    this.wreck = Wreck.defaults({
+    this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/user' },
-      baseUrl: url,
-      redirects: 3,
+      baseURL: url,
+      maxRedirects: 3,
     });
   }
 
   public async create(username: string, user: any) {
     this.log.debug(`creating user ${username}`);
-    const { res, payload } = await this.wreck.post(`/api/security/v1/users/${username}`, {
-      payload: {
+    const { data, status, statusText } = await this.axios.post(
+      `/api/security/v1/users/${username}`,
+      {
         username,
         ...user,
-      },
-    });
-    if (res.statusCode !== 200) {
-      throw new Error(`Expected status code of 200, received ${res.statusCode}: ${payload}`);
+      }
+    );
+    if (status !== 200) {
+      throw new Error(`Expected status code of 200, received ${status} ${statusText}: ${data}`);
     }
+    this.log.debug(`created user ${username}`);
   }
 
   public async delete(username: string) {
     this.log.debug(`deleting user ${username}`);
-    const { res, payload } = await this.wreck.delete(`/api/security/v1/users/${username}`);
-    if (res.statusCode !== 204) {
-      throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
+    const { data, status, statusText } = await this.axios.delete(
+      `/api/security/v1/users/${username}`
+    );
+    if (status !== 204) {
+      throw new Error(`Expected status code of 204, received ${status} ${statusText}: ${data}`);
     }
     this.log.debug(`deleted user ${username}`);
   }

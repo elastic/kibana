@@ -189,7 +189,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
     });
 
     UsersAtSpaces.forEach(userAtSpace => {
-      it(`returns appropriate navLinks for ${userAtSpace}`, async () => {
+      it(`${userAtSpace.id}`, async () => {
         const { user, space } = userAtSpace;
 
         const uiCapabilities = await uiCapabilitiesService.get(

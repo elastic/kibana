@@ -3,35 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Wreck from 'wreck';
+import axios, { AxiosInstance } from 'axios';
 import { LogService } from '../../../types/services';
 
 export class Role {
   private log: LogService;
-  private wreck: any;
+  private axios: AxiosInstance;
 
   constructor(url: string, log: LogService) {
     this.log = log;
-    this.wreck = Wreck.defaults({
+    this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/role' },
-      baseUrl: url,
-      redirects: 3,
+      baseURL: url,
+      maxRedirects: 3,
     });
   }
 
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);
-    const { res, payload } = await this.wreck.put(`/api/security/role/${name}`, { payload: role });
-    if (res.statusCode !== 204) {
-      throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
+    const { data, status, statusText } = await this.axios.put(`/api/security/role/${name}`, role);
+    if (status !== 204) {
+      throw new Error(`Expected status code of 204, received ${status} ${statusText}: ${data}`);
     }
+    this.log.debug(`created role ${name}`);
   }
 
   public async delete(name: string) {
     this.log.debug(`deleting role ${name}`);
-    const { res, payload } = await this.wreck.delete(`/api/security/role/${name}`);
-    if (res.statusCode !== 204) {
-      throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
+    const { data, status, statusText } = await this.axios.delete(`/api/security/role/${name}`);
+    if (status !== 204) {
+      throw new Error(`Expected status code of 204, received ${status} ${statusText}: ${data}`);
     }
     this.log.debug(`deleted role ${name}`);
   }

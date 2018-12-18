@@ -3,42 +3,42 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import axios, { AxiosInstance } from 'axios';
 import { format as formatUrl } from 'url';
-import Wreck from 'wreck';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { LogService } from '../../../types/services';
 
 export class SpacesService {
   private log: LogService;
-  private wreck: any;
+  private axios: AxiosInstance;
 
   constructor(url: string, log: LogService) {
     this.log = log;
-    this.wreck = Wreck.defaults({
+    this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/spaces/space' },
-      baseUrl: url,
-      redirects: 3,
+      baseURL: url,
+      maxRedirects: 3,
     });
   }
 
   public async create(space: any) {
     this.log.debug('creating space');
-    const { res, payload } = await this.wreck.post('/api/spaces/space', {
-      payload: space,
-    });
+    const { data, status, statusText } = await this.axios.post('/api/spaces/space', space);
 
-    if (res.statusCode !== 200) {
-      throw new Error(`Expected status code of 200, received ${res.statusCode}: ${payload}`);
+    if (status !== 200) {
+      throw new Error(`Expected status code of 200, received ${status} ${statusText}: ${data}`);
     }
+    this.log.debug('created space');
   }
 
   public async delete(spaceId: string) {
     this.log.debug(`deleting space: ${spaceId}`);
-    const { res, payload } = await this.wreck.delete(`/api/spaces/space/${spaceId}`);
+    const { data, status, statusText } = await this.axios.delete(`/api/spaces/space/${spaceId}`);
 
-    if (res.statusCode !== 204) {
-      throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
+    if (status !== 204) {
+      throw new Error(`Expected status code of 204, received ${status} ${statusText}: ${data}`);
     }
+    this.log.debug(`deleted space: ${spaceId}`);
   }
 }
 
