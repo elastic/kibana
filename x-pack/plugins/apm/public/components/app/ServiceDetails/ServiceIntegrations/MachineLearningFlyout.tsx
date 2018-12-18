@@ -24,10 +24,7 @@ import {
   getMlPrefix,
   startMLJob
 } from 'x-pack/plugins/apm/public/services/rest/ml';
-import {
-  getAPMIndexPattern,
-  ISavedObject
-} from 'x-pack/plugins/apm/public/services/rest/savedObjects';
+import { getAPMIndexPattern } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
 import { MLJobsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/machineLearningJobs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { KibanaLink, ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
@@ -57,7 +54,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public async componentDidMount() {
-    const indexPattern: ISavedObject | undefined = await getAPMIndexPattern();
+    const indexPattern = await getAPMIndexPattern();
     this.setState({ hasIndexPattern: !!indexPattern });
   }
 

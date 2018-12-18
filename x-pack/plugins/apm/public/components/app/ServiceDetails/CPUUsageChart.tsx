@@ -8,37 +8,30 @@ import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
-import {
-  HoverXHandlers,
-  SyncChartGroup
-} from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
+import { HoverXHandlers } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
 import { CPUChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_cpu_chart_data/transformer';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 
 interface Props {
   data: CPUChartAPIResponse;
-  hoverXHandlers?: HoverXHandlers;
+  hoverXHandlers: HoverXHandlers;
 }
 
-const CPUUsageChart: React.SFC<Props> = ({ data, hoverXHandlers }) => (
-  <SyncChartGroup
-    render={localHoverXHandlers => (
-      <React.Fragment>
-        <EuiTitle size="s">
-          <span>CPU usage</span>
-        </EuiTitle>
-        <CustomPlot
-          {...hoverXHandlers || localHoverXHandlers}
-          noHits={data.totalHits === 0}
-          series={data.series}
-          tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
-          formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0)}
-          yMax={1}
-        />
-      </React.Fragment>
-    )}
-  />
-);
-
-export { CPUUsageChart };
+export function CPUUsageChart({ data, hoverXHandlers }: Props) {
+  return (
+    <React.Fragment>
+      <EuiTitle size="s">
+        <span>CPU usage</span>
+      </EuiTitle>
+      <CustomPlot
+        {...hoverXHandlers}
+        noHits={data.totalHits === 0}
+        series={data.series}
+        tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
+        formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0)}
+        yMax={1}
+      />
+    </React.Fragment>
+  );
+}
