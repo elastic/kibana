@@ -26,7 +26,7 @@ export function DeleteAnnotationModal({
           <EuiConfirmModal
             title="Delete this annotation?"
             onCancel={cancelAction}
-            onConfirm={() => deleteAction(this)}
+            onConfirm={deleteAction}
             cancelButtonText="Cancel"
             confirmButtonText="Delete"
             buttonColor="danger"
