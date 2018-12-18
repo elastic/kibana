@@ -1014,10 +1014,16 @@ baz",
             "width": "25%",
           },
           Object {
+            "fieldName": "transaction.id",
+            "label": "Transaction sample ID",
+            "val": "N/A",
+            "width": "25%",
+          },
+          Object {
             "fieldName": "context.user.id",
             "label": "User ID",
             "val": "N/A",
-            "width": "50%",
+            "width": "25%",
           },
         ]
       }
