@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AutoFollowPatternTable } from './auto_follow_pattern_table';
-export { DetailPanel } from './detail_panel';
+export { DetailPanel } from './detail_panel.container';

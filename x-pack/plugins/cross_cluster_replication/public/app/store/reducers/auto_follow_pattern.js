@@ -11,6 +11,7 @@ import { getPrefixSuffixFromFollowPattern } from '../../services/auto_follow_pat
 const initialState = {
   byId: {},
   selectedId: null,
+  detailPanelId: null,
 };
 
 const success = action => `${action}_SUCCESS`;
@@ -30,8 +31,11 @@ export const reducer = (state = initialState, action) => {
     case success(t.AUTO_FOLLOW_PATTERN_GET): {
       return { ...state, byId: { ...state.byId, [action.payload.name]: parseAutoFollowPattern(action.payload) } };
     }
-    case t.AUTO_FOLLOW_PATTERN_SELECT: {
+    case t.AUTO_FOLLOW_PATTERN_EDIT: {
       return { ...state, selectedId: action.payload };
+    }
+    case t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL: {
+      return { ...state, detailPanelId: action.payload };
     }
     case success(t.AUTO_FOLLOW_PATTERN_DELETE): {
       const byId = { ...state.byId };

@@ -63,7 +63,7 @@ export const CrossClusterReplicationHome = injectI18n(
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup justifyContent="spaceBetween" alignItem="center">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="m">
                 <h2>

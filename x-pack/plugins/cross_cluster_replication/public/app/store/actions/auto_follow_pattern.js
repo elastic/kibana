@@ -15,12 +15,25 @@ import {
 import routing from '../../services/routing';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
+import { getDetailPanelAutoFollowPatternName } from '../selectors';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 
-export const selectAutoFollowPattern = (name) => ({
-  type: t.AUTO_FOLLOW_PATTERN_SELECT,
+export const editAutoFollowPattern = (name) => ({
+  type: t.AUTO_FOLLOW_PATTERN_EDIT,
   payload: name
+});
+
+export const openAutoFollowPatternDetailPanel = (name) => {
+  return {
+    type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
+    payload: name
+  };
+};
+
+export const closeAutoFollowPatternDetailPanel = () => ({
+  type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
+  payload: null
 });
 
 export const loadAutoFollowPatterns = (isUpdating = false) =>
@@ -40,7 +53,7 @@ export const getAutoFollowPattern = (id) =>
     handler: async (dispatch) => (
       getAutoFollowPatternRequest(id)
         .then((response) => {
-          dispatch(selectAutoFollowPattern(id));
+          dispatch(editAutoFollowPattern(id));
           return response;
         })
     )
@@ -66,7 +79,9 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isEditing = false) 
         });
 
       toastNotifications.addSuccess(successMessage);
-      routing.navigate('/auto_follow_patterns');
+      routing.navigate(`/auto_follow_patterns`, undefined, {
+        pattern: encodeURIComponent(id),
+      });
     },
   })
 );
@@ -79,7 +94,7 @@ export const deleteAutoFollowPattern = (id) => (
     handler: async () => (
       deleteAutoFollowPatternRequest(id)
     ),
-    onSuccess(response) {
+    onSuccess(response, dispatch, getState) {
       /**
        * We can have 1 or more auto-follow pattern delete operation
        * that can fail or succeed. We will show 1 toast notification for each.
@@ -104,15 +119,21 @@ export const deleteAutoFollowPattern = (id) => (
 
         const successMessage = hasMultipleDelete
           ? i18n.translate('xpack.crossClusterReplication.autoFollowPattern.removeAction.successMultipleNotificationTitle', {
-            defaultMessage: `{count} auto-follow patterns were removeed`,
+            defaultMessage: `{count} auto-follow patterns were removed`,
             values: { count: response.itemsDeleted.length },
           })
           : i18n.translate('xpack.crossClusterReplication.autoFollowPattern.removeAction.successSingleNotificationTitle', {
-            defaultMessage: `Auto-follow pattern '{name}' was removeed`,
+            defaultMessage: `Auto-follow pattern '{name}' was removed`,
             values: { name: response.itemsDeleted[0] },
           });
 
         toastNotifications.addSuccess(successMessage);
+      }
+
+      // If we've just deleted a pattern we were looking at, we need to close the panel.
+      const detailPanelAutoFollowPatternName = getDetailPanelAutoFollowPatternName(getState());
+      if (detailPanelAutoFollowPatternName && response.itemsDeleted.includes(detailPanelAutoFollowPatternName)) {
+        dispatch(closeAutoFollowPatternDetailPanel());
       }
     }
   })

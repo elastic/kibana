@@ -32,6 +32,10 @@ export class App extends Component {
     this.registerRouter();
   }
 
+  componentWillMount() {
+    routing.userHasLeftApp = false;
+  }
+
   componentWillUnmount() {
     routing.userHasLeftApp = true;
   }

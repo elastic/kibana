@@ -9,12 +9,13 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiInMemoryTable,
   EuiButton,
   EuiButtonIcon,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiLoadingKibana,
   EuiToolTip,
   EuiOverlayMask,
-  EuiLoadingKibana
 } from '@elastic/eui';
 import { API_STATUS } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
@@ -24,6 +25,7 @@ export const AutoFollowPatternTable = injectI18n(
   class extends PureComponent {
     static propTypes = {
       autoFollowPatterns: PropTypes.array,
+      openDetailPanel: PropTypes.func.isRequired,
     }
 
     state = {
@@ -59,7 +61,7 @@ export const AutoFollowPatternTable = injectI18n(
     };
 
     getTableColumns() {
-      const { intl, selectAutoFollowPattern } = this.props;
+      const { intl, editAutoFollowPattern, openDetailPanel } = this.props;
 
       return [{
         field: 'name',
@@ -69,6 +71,13 @@ export const AutoFollowPatternTable = injectI18n(
         }),
         sortable: true,
         truncateText: false,
+        render: (name) => {
+          return (
+            <EuiLink onClick={() => openDetailPanel(name)}>
+              {name}
+            </EuiLink>
+          );
+        }
       }, {
         field: 'remoteCluster',
         name: intl.formatMessage({
@@ -143,7 +152,7 @@ export const AutoFollowPatternTable = injectI18n(
             }),
             icon: 'pencil',
             onClick: ({ name }) => {
-              selectAutoFollowPattern(name);
+              editAutoFollowPattern(name);
               routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
             },
             type: 'icon',

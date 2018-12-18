@@ -10,9 +10,10 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import routing from '../../../services/routing';
+import { extractQueryParams } from '../../../services/query_params';
 import { API_STATUS } from '../../../constants';
 import { SectionLoading, SectionError } from '../../../components';
-import { AutoFollowPatternTable } from './components';
+import { AutoFollowPatternTable, DetailPanel } from './components';
 
 const REFRESH_RATE_MS = 30000;
 
@@ -23,6 +24,9 @@ export const AutoFollowPatternList = injectI18n(
       autoFollowPatterns: PropTypes.array,
       apiStatus: PropTypes.string,
       apiError: PropTypes.object,
+      openDetailPanel: PropTypes.func.isRequired,
+      closeDetailPanel: PropTypes.func.isRequired,
+      isDetailPanelOpen: PropTypes.bool,
     }
 
     componentDidMount() {
@@ -34,6 +38,32 @@ export const AutoFollowPatternList = injectI18n(
 
     componentWillUnmount() {
       clearInterval(this.interval);
+
+      // Close the panel, otherwise it will default to already being open when we navigate back to
+      // this page.
+      this.props.closeDetailPanel();
+    }
+
+    componentDidUpdate() {
+      const {
+        openDetailPanel,
+        closeDetailPanel,
+        isDetailPanelOpen,
+        history: {
+          location: {
+            search,
+          },
+        },
+      } = this.props;
+
+      const { pattern: patternName } = extractQueryParams(search);
+
+      // Show deeplinked auto follow pattern whenever patterns get loaded or the URL changes.
+      if (patternName != null) {
+        openDetailPanel(patternName);
+      } else if (isDetailPanelOpen) {
+        closeDetailPanel();
+      }
     }
 
     renderEmpty() {
@@ -89,7 +119,12 @@ export const AutoFollowPatternList = injectI18n(
         );
       }
 
-      return <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />;
+      return (
+        <Fragment>
+          <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
+          <DetailPanel />
+        </Fragment>
+      );
     }
 
     render() {

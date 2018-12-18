@@ -337,7 +337,7 @@ export const DetailPanel = injectI18n(
         clusterName,
       } = this.props;
 
-      // Remote clusters configured by a node's elasticsearch.yml file can't be edited or removeed.
+      // Remote clusters configured by a node's elasticsearch.yml file can't be edited or removed.
       if (!cluster || cluster.isConfiguredByNode) {
         return null;
       }

@@ -7,8 +7,18 @@
 import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../../constants';
-import { getListAutoFollowPatterns, getApiStatus, getApiError, isApiAuthorized } from '../../../store/selectors';
-import { loadAutoFollowPatterns } from '../../../store/actions';
+import {
+  getListAutoFollowPatterns,
+  getApiStatus,
+  getApiError,
+  isApiAuthorized,
+  isAutoFollowPatternDetailPanelOpen as isDetailPanelOpen,
+} from '../../../store/selectors';
+import {
+  loadAutoFollowPatterns,
+  openAutoFollowPatternDetailPanel as openDetailPanel,
+  closeAutoFollowPatternDetailPanel as closeDetailPanel,
+} from '../../../store/actions';
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
@@ -17,11 +27,18 @@ const mapStateToProps = (state) => ({
   autoFollowPatterns: getListAutoFollowPatterns(state),
   apiStatus: getApiStatus(scope)(state),
   apiError: getApiError(scope)(state),
-  isAuthorized: isApiAuthorized(scope)(state)
+  isAuthorized: isApiAuthorized(scope)(state),
+  isDetailPanelOpen: isDetailPanelOpen(state),
 });
 
 const mapDispatchToProps = dispatch => ({
   loadAutoFollowPatterns: (inBackground) => dispatch(loadAutoFollowPatterns(inBackground)),
+  openDetailPanel: (name) => {
+    dispatch(openDetailPanel(name));
+  },
+  closeDetailPanel: () => {
+    dispatch(closeDetailPanel());
+  },
 });
 
 export const AutoFollowPatternList = connect(
