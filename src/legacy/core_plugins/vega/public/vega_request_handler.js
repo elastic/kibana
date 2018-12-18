@@ -21,7 +21,7 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 
 export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
   const buildEsQuery = Private(BuildESQueryProvider);
