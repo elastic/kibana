@@ -104,7 +104,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
 
     return (
       <SyncChartGroup
-        render={chartGroupProps => (
+        render={hoverXHandlers => (
           <EuiFlexGrid columns={2}>
             <EuiFlexItem>
               <ChartWrapper>
@@ -119,7 +119,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
                 <CustomPlot
                   noHits={noHits}
                   series={responseTimeSeries}
-                  {...chartGroupProps}
+                  {...hoverXHandlers}
                   tickFormatY={this.getResponseTimeTickFormatter}
                   formatTooltipValue={this.getResponseTimeTooltipFormatter}
                 />
@@ -134,7 +134,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
                 <CustomPlot
                   noHits={noHits}
                   series={tpmSeries}
-                  {...chartGroupProps}
+                  {...hoverXHandlers}
                   tickFormatY={this.getTPMFormatter}
                   formatTooltipValue={this.getTPMTooltipFormatter}
                   truncateLegends

@@ -83,13 +83,13 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
         render={({ data }) => {
           return (
             <SyncChartGroup
-              render={chartGroupProps => (
+              render={hoverXHandlers => (
                 <EuiFlexGrid columns={2}>
                   <EuiFlexItem>
                     <ChartWrapper>
                       <CPUUsageChart
                         data={data.cpu}
-                        chartGroupProps={chartGroupProps}
+                        hoverXHandlers={hoverXHandlers}
                       />
                     </ChartWrapper>
                   </EuiFlexItem>
@@ -97,7 +97,7 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
                     <ChartWrapper>
                       <MemoryUsageChart
                         data={data.memory}
-                        chartGroupProps={chartGroupProps}
+                        hoverXHandlers={hoverXHandlers}
                       />
                     </ChartWrapper>
                   </EuiFlexItem>

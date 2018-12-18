@@ -18,7 +18,7 @@ type OnHoverHandler = (hoverX: HoverX) => void;
 type OnMouseLeaveHandler = () => void;
 type OnSelectionEndHandler = (range: RangeSelection) => void;
 
-export interface ChartGroupRenderProps {
+export interface HoverXHandlers {
   onHover: OnHoverHandler;
   onMouseLeave: OnMouseLeaveHandler;
   onSelectionEnd: OnSelectionEndHandler;
@@ -26,7 +26,7 @@ export interface ChartGroupRenderProps {
 }
 
 interface SyncChartGroupProps {
-  render: (props: ChartGroupRenderProps) => React.ReactNode;
+  render: (props: HoverXHandlers) => React.ReactNode;
 }
 
 interface SyncChartState {

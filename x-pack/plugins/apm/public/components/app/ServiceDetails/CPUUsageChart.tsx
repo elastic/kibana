@@ -9,7 +9,7 @@ import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
 import {
-  ChartGroupRenderProps,
+  HoverXHandlers,
   SyncChartGroup
 } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
@@ -18,18 +18,18 @@ import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 
 interface Props {
   data: CPUChartAPIResponse;
-  chartGroupProps?: ChartGroupRenderProps;
+  hoverXHandlers?: HoverXHandlers;
 }
 
-const CPUUsageChart: React.SFC<Props> = ({ data, chartGroupProps }) => (
+const CPUUsageChart: React.SFC<Props> = ({ data, hoverXHandlers }) => (
   <SyncChartGroup
-    render={syncProps => (
+    render={localHoverXHandlers => (
       <React.Fragment>
         <EuiTitle size="s">
           <span>CPU usage</span>
         </EuiTitle>
         <CustomPlot
-          {...chartGroupProps || syncProps}
+          {...hoverXHandlers || localHoverXHandlers}
           noHits={data.totalHits === 0}
           series={data.series}
           tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
