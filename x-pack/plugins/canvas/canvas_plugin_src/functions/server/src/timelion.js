@@ -19,8 +19,9 @@ function parseConfig(sslConfig = {}) {
     },
   };
 
-  if (_.size(_.get(sslConfig, 'certificateAuthorities')))
+  if (_.size(_.get(sslConfig, 'certificateAuthorities'))) {
     config.ssl.ca = sslConfig.certificateAuthorities.map(readFile);
+  }
 
   return config;
 }
