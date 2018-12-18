@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import handleESError from '../handle_es_error';
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 describe('handleESError', function () {
 

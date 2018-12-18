@@ -19,7 +19,7 @@
 
 import url from 'url';
 import Promise from 'bluebird';
-import elasticsearch from 'elasticsearch';
+import elasticsearch from '@elastic/elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 

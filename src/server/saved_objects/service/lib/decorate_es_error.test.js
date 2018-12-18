@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { decorateEsError } from './decorate_es_error';
 import {

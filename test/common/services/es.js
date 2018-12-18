@@ -19,7 +19,7 @@
 
 import { format as formatUrl } from 'url';
 
-import elasticsearch from 'elasticsearch';
+import elasticsearch from '@elastic/elasticsearch';
 
 export function EsProvider({ getService }) {
   const config = getService('config');

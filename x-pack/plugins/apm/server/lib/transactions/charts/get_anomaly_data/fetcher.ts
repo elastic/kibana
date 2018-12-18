@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse } from '@elastic/elasticsearch';
 import { Setup } from '../../../helpers/setup_request';
 
 export interface ESBucket {

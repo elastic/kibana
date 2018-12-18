@@ -5,7 +5,7 @@
  */
 
 import * as Boom from 'boom';
-import { SearchParams } from 'elasticsearch';
+import { SearchParams } from '@elastic/elasticsearch';
 import * as Joi from 'joi';
 
 import { SearchSummaryApiPostPayload, SearchSummaryApiPostResponse } from '../../common/http_api';

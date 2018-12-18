@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MSearchParams, MSearchResponse, SearchParams, SearchResponse } from 'elasticsearch';
+import { MSearchParams, MSearchResponse, SearchParams, SearchResponse } from '@elastic/elasticsearch';
 
 export interface ESCluster {
   callWithRequest(

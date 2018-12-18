@@ -24,7 +24,7 @@ import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { KIBANA_ROOT } from '../';
-import elasticsearch from 'elasticsearch';
+import elasticsearch from '@elastic/elasticsearch';
 const path = require('path');
 const del = require('del');
 
@@ -100,7 +100,7 @@ export function createEsTestCluster(options = {}) {
      */
     getClient() {
       return new elasticsearch.Client({
-        host: this.getUrl(),
+        node: this.getUrl(),
       });
     }
 

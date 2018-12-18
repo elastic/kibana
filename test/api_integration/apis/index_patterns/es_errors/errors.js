@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import Boom from 'boom';
 
 import {

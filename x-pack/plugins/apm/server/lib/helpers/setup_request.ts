@@ -5,7 +5,7 @@
  */
 
 /* tslint:disable no-console */
-import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
+import { AggregationSearchResponse, SearchParams } from '@elastic/elasticsearch';
 import { Request } from 'hapi';
 import moment from 'moment';
 

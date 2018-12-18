@@ -28,7 +28,7 @@ import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 
 import { Command } from 'commander';
-import elasticsearch from 'elasticsearch';
+import elasticsearch from '@elastic/elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 import { ToolingLog } from '@kbn/dev-utils';

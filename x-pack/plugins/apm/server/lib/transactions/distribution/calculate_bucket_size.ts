@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
+import { SearchParams } from '@elastic/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import { SearchResponse } from '@elastic/elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { InfraMetricModel } from '../metrics/adapter_types';

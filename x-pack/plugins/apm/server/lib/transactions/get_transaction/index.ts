@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
+import { SearchParams } from '@elastic/elasticsearch';
 import { oc } from 'ts-optchain';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {

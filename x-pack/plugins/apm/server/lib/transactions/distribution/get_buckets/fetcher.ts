@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse, SearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse, SearchResponse } from '@elastic/elasticsearch';
 import {
   SERVICE_NAME,
   TRACE_ID,

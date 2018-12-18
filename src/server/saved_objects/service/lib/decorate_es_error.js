@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import elasticsearch from 'elasticsearch';
+import elasticsearch from '@elastic/elasticsearch';
 import { get } from 'lodash';
 
 const {

@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 export default function handleESError(error) {
   if (!(error instanceof Error)) {

@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 import { Cluster } from '../cluster';
 import sinon from 'sinon';
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { set, partial } from 'lodash';
 
 describe('plugins/elasticsearch', function () {
