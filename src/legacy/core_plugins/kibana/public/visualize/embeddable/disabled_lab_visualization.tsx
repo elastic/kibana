@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
 export function DisabledLabVisualization({ title }: { title: string }) {
   return (
@@ -27,10 +28,17 @@ export function DisabledLabVisualization({ title }: { title: string }) {
         aria-hidden="true"
       />
       <div className="kuiVerticalRhythm">
-        <em className="visDisabledLabVisualization__title">{title}</em> is a lab visualization.
+        <FormattedMessage
+          id="common.ui.share.urlPanel.canNotShareAsSavedObjectHelpText"
+          defaultMessage="{title} is a lab visualization."
+          values={{ title }}
+        />
       </div>
       <div className="kuiVerticalRhythm">
-        Please turn on lab-mode in the advanced settings to see lab visualizations.
+        <FormattedMessage
+          id="kbn.visualize.disabledLabVsualization"
+          defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
+        />
       </div>
     </div>
   );
