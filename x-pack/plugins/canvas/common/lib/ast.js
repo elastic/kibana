@@ -38,7 +38,9 @@ function getExpressionArgs(block, level = 0) {
   const args = block.arguments;
   const hasValidArgs = typeof args === 'object' && args != null && !Array.isArray(args);
 
-  if (!hasValidArgs) throw new Error('Arguments can only be an object');
+  if (!hasValidArgs) {
+    throw new Error('Arguments can only be an object');
+  }
 
   const argKeys = Object.keys(args);
   const MAX_LINE_LENGTH = 80; // length before wrapping arguments
@@ -48,11 +50,14 @@ function getExpressionArgs(block, level = 0) {
       const lineLength = acc.split('\n').pop().length;
 
       // if arg values are too long, move it to the next line
-      if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH)
+      if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH) {
         return `${acc}\n  ${argString}`;
+      }
 
       // append arg values to existing arg values
-      if (lineLength > 0) return `${acc} ${argString}`;
+      if (lineLength > 0) {
+        return `${acc} ${argString}`;
+      }
 
       // start the accumulator with the first arg value
       return argString;
@@ -61,12 +66,16 @@ function getExpressionArgs(block, level = 0) {
 }
 
 function fnWithArgs(fnName, args) {
-  if (!args || args.length === 0) return fnName;
+  if (!args || args.length === 0) {
+    return fnName;
+  }
   return `${fnName} ${args.join(' ')}`;
 }
 
 function getExpression(chain, level = 0) {
-  if (!chain) throw new Error('Expressions must contain a chain');
+  if (!chain) {
+    throw new Error('Expressions must contain a chain');
+  }
 
   // break new functions onto new lines if we're not in a nested/sub-expression
   const separator = level > 0 ? ' | ' : '\n| ';
@@ -77,7 +86,9 @@ function getExpression(chain, level = 0) {
 
       if (type === 'function') {
         const fn = chainObj.function;
-        if (!fn || fn.length === 0) throw new Error('Functions must have a function name');
+        if (!fn || fn.length === 0) {
+          throw new Error('Functions must have a function name');
+        }
 
         const expArgs = getExpressionArgs(chainObj, level);
 
@@ -114,13 +125,19 @@ Thanks for understanding,
 
 // TODO: Respect the user's existing formatting
 export function toExpression(astObj, type = 'expression') {
-  if (type === 'argument') return getArgumentString(astObj);
+  if (type === 'argument') {
+    return getArgumentString(astObj);
+  }
 
   const validType = ['expression', 'function'].includes(getType(astObj));
-  if (!validType) throw new Error('Expression must be an expression or argument function');
+  if (!validType) {
+    throw new Error('Expression must be an expression or argument function');
+  }
 
   if (getType(astObj) === 'expression') {
-    if (!Array.isArray(astObj.chain)) throw new Error('Expressions must contain a chain');
+    if (!Array.isArray(astObj.chain)) {
+      throw new Error('Expressions must contain a chain');
+    }
 
     return getExpression(astObj.chain);
   }

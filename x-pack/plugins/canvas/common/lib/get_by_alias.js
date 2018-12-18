@@ -12,7 +12,9 @@
 export function getByAlias(specs, name) {
   const lowerCaseName = name.toLowerCase();
   return Object.values(specs).find(({ name, aliases }) => {
-    if (name.toLowerCase() === lowerCaseName) return true;
+    if (name.toLowerCase() === lowerCaseName) {
+      return true;
+    }
     return (aliases || []).some(alias => {
       return alias.toLowerCase() === lowerCaseName;
     });

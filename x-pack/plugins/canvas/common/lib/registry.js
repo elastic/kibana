@@ -8,7 +8,9 @@ import clone from 'lodash.clone';
 
 export class Registry {
   constructor(prop = 'name') {
-    if (typeof prop !== 'string') throw new Error('Registry property name must be a string');
+    if (typeof prop !== 'string') {
+      throw new Error('Registry property name must be a string');
+    }
     this._prop = prop;
     this._indexed = new Object();
   }
@@ -18,12 +20,15 @@ export class Registry {
   }
 
   register(fn) {
-    if (typeof fn !== 'function') throw new Error(`Register requires an function`);
+    if (typeof fn !== 'function') {
+      throw new Error(`Register requires an function`);
+    }
 
     const obj = fn();
 
-    if (typeof obj !== 'object' || !obj[this._prop])
+    if (typeof obj !== 'object' || !obj[this._prop]) {
       throw new Error(`Registered functions must return an object with a ${this._prop} property`);
+    }
 
     this._indexed[obj[this._prop].toLowerCase()] = this.wrapper(obj);
   }
@@ -40,7 +45,9 @@ export class Registry {
   }
 
   get(name) {
-    if (name === undefined) return null;
+    if (name === undefined) {
+      return null;
+    }
     const lowerCaseName = name.toLowerCase();
     return this._indexed[lowerCaseName] ? clone(this._indexed[lowerCaseName]) : null;
   }

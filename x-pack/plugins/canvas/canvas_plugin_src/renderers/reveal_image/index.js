@@ -42,8 +42,11 @@ export const revealImage = () => ({
 
     function finish() {
       const firstChild = domNode.firstChild;
-      if (firstChild) domNode.replaceChild(aligner, firstChild);
-      else domNode.appendChild(aligner);
+      if (firstChild) {
+        domNode.replaceChild(aligner, firstChild);
+      } else {
+        domNode.appendChild(aligner);
+      }
       handlers.done();
     }
 

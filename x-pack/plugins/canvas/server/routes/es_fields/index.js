@@ -16,7 +16,9 @@ export function esFields(server) {
     path: '/api/canvas/es_fields',
     handler: function(request, reply) {
       const { index, fields } = request.query;
-      if (!index) return reply({ error: '"index" query is required' }).code(400);
+      if (!index) {
+        return reply({ error: '"index" query is required' }).code(400);
+      }
 
       reply(getESFieldTypes(index, fields, partial(callWithRequest, request)));
     },

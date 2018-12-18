@@ -52,10 +52,15 @@ module.exports = {
       });
 
       this.plugin('done', function(stats) {
-        if (!stats.hasErrors()) return;
+        if (!stats.hasErrors()) {
+          return;
+        }
         const errorMessage = stats.toString('errors-only');
-        if (isWatch) console.error(errorMessage);
-        else throw new Error(errorMessage);
+        if (isWatch) {
+          console.error(errorMessage);
+        } else {
+          throw new Error(errorMessage);
+        }
       });
     },
     new CopyWebpackPlugin([

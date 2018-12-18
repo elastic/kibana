@@ -12,7 +12,9 @@ const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
 let socket;
 
 export async function createSocket(basePath) {
-  if (socket != null) return socket;
+  if (socket != null) {
+    return socket;
+  }
 
   return new Promise((resolve, rej) => {
     const reject = p => {
@@ -57,6 +59,8 @@ export async function createSocket(basePath) {
 }
 
 export function getSocket() {
-  if (!socket) throw new Error('getSocket failed, socket has not been created');
+  if (!socket) {
+    throw new Error('getSocket failed, socket has not been created');
+  }
   return socket;
 }

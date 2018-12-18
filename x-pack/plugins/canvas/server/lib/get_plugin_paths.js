@@ -26,7 +26,9 @@ const getKibanaPluginsPath = () => {
   const basePluginPath = path.resolve(__dirname, '..', '..', '..', '..', '..');
 
   // find the kibana path in dev mode
-  if (isDirname(basePluginPath, 'kibana')) return path.join(basePluginPath, 'plugins');
+  if (isDirname(basePluginPath, 'kibana')) {
+    return path.join(basePluginPath, 'plugins');
+  }
 
   // find the kibana path in the build, which lives in node_modules and requires going 1 path up
   const buildPluginPath = path.join(basePluginPath, '..');
@@ -46,11 +48,15 @@ const paths = [
 
 export const getPluginPaths = type => {
   const typePath = pluginPaths[type];
-  if (!typePath) throw new Error(`Unknown type: ${type}`);
+  if (!typePath) {
+    throw new Error(`Unknown type: ${type}`);
+  }
 
   async function findPlugins(directory) {
     const isDir = await isDirectory(directory);
-    if (!isDir) return;
+    if (!isDir) {
+      return;
+    }
 
     const names = await readdir(directory); // Get names of everything in the directory
     return names
@@ -61,7 +67,9 @@ export const getPluginPaths = type => {
   return Promise.all(paths.map(findPlugins))
     .then(dirs =>
       dirs.reduce((list, dir) => {
-        if (!dir) return list;
+        if (!dir) {
+          return list;
+        }
         return list.concat(dir);
       }, [])
     )

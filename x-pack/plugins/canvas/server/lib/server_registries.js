@@ -26,9 +26,13 @@ export const getServerRegistries = () => {
 };
 
 export const populateServerRegistries = types => {
-  if (called) throw new Error('function should only be called once per process');
+  if (called) {
+    throw new Error('function should only be called once per process');
+  }
   called = true;
-  if (!types || !types.length) throw new Error('types is required');
+  if (!types || !types.length) {
+    throw new Error('types is required');
+  }
 
   const remainingTypes = types;
   const populatedTypes = {};
@@ -45,11 +49,16 @@ export const populateServerRegistries = types => {
 
       global.canvas = undefined;
       populatedTypes[type] = registries[type];
-      if (remainingTypes.length) loadType();
-      else resolve(populatedTypes);
+      if (remainingTypes.length) {
+        loadType();
+      } else {
+        resolve(populatedTypes);
+      }
     });
   };
 
-  if (remainingTypes.length) loadType();
+  if (remainingTypes.length) {
+    loadType();
+  }
   return populatePromise;
 };

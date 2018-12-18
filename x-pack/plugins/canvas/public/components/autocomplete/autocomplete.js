@@ -47,10 +47,13 @@ export class Autocomplete extends React.Component {
       prevProps.items !== this.props.items &&
       this.props.items.length === 1 &&
       this.state.selectedIndex !== 0
-    )
+    ) {
       this.selectFirst();
+    }
 
-    if (prevState.selectedIndex !== this.state.selectedIndex) this.scrollIntoView();
+    if (prevState.selectedIndex !== this.state.selectedIndex) {
+      this.scrollIntoView();
+    }
   }
 
   selectFirst() {
@@ -77,16 +80,21 @@ export class Autocomplete extends React.Component {
   selectPrevious() {
     const { items } = this.props;
     const { selectedIndex } = this.state;
-    if (selectedIndex > 0) this.setState({ selectedIndex: selectedIndex - 1 });
-    else this.setState({ selectedIndex: items.length - 1 });
+    if (selectedIndex > 0) {
+      this.setState({ selectedIndex: selectedIndex - 1 });
+    } else {
+      this.setState({ selectedIndex: items.length - 1 });
+    }
   }
 
   selectNext() {
     const { items } = this.props;
     const { selectedIndex } = this.state;
-    if (selectedIndex >= 0 && selectedIndex < items.length - 1)
+    if (selectedIndex >= 0 && selectedIndex < items.length - 1) {
       this.setState({ selectedIndex: selectedIndex + 1 });
-    else this.setState({ selectedIndex: 0 });
+    } else {
+      this.setState({ selectedIndex: 0 });
+    }
   }
 
   scrollIntoView() {
@@ -96,7 +104,9 @@ export class Autocomplete extends React.Component {
       state: { selectedIndex },
     } = this;
     const itemRef = itemRefs[selectedIndex];
-    if (!containerRef || !itemRef) return;
+    if (!containerRef || !itemRef) {
+      return;
+    }
     containerRef.scrollTop = Math.max(
       Math.min(containerRef.scrollTop, itemRef.offsetTop),
       itemRef.offsetTop + itemRef.offsetHeight - containerRef.offsetHeight
@@ -120,7 +130,9 @@ export class Autocomplete extends React.Component {
     const { items } = this.props;
     const { isOpen, selectedIndex } = this.state;
 
-    if ([ESCAPE, LEFT, RIGHT].includes(keyCode)) this.setState({ isOpen: false });
+    if ([ESCAPE, LEFT, RIGHT].includes(keyCode)) {
+      this.setState({ isOpen: false });
+    }
 
     if ([TAB, ENTER].includes(keyCode) && isOpen && selectedIndex >= 0) {
       e.preventDefault();

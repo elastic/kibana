@@ -44,8 +44,9 @@ process.on('message', msg => {
       },
     });
 
-    if (type === 'getFunctions')
+    if (type === 'getFunctions') {
       process.send({ type: 'functionList', value: Object.keys(commonFunctions.toJS()) });
+    }
 
     if (type === 'msgSuccess') {
       heap[id].resolve(deserialize(value));

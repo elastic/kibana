@@ -46,8 +46,12 @@ export const Workpad = compose(
   withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
   withProps(({ selectedPageNumber, prevSelectedPageNumber, transition }) => {
     function getAnimation(pageNumber) {
-      if (!transition || !transition.name) return null;
-      if (![selectedPageNumber, prevSelectedPageNumber].includes(pageNumber)) return null;
+      if (!transition || !transition.name) {
+        return null;
+      }
+      if (![selectedPageNumber, prevSelectedPageNumber].includes(pageNumber)) {
+        return null;
+      }
       const { enter, exit } = transitionsRegistry.get(transition.name);
       const laterPageNumber = Math.max(selectedPageNumber, prevSelectedPageNumber);
       const name = pageNumber === laterPageNumber ? enter : exit;
@@ -59,11 +63,15 @@ export const Workpad = compose(
   }),
   withHandlers({
     onPageChange: props => pageNumber => {
-      if (pageNumber === props.selectedPageNumber) return;
+      if (pageNumber === props.selectedPageNumber) {
+        return;
+      }
       props.setPrevSelectedPageNumber(props.selectedPageNumber);
       const transitionPage = Math.max(props.selectedPageNumber, pageNumber) - 1;
       const { transition } = props.workpad.pages[transitionPage];
-      if (transition) props.setTransition(transition);
+      if (transition) {
+        props.setTransition(transition);
+      }
       props.router.navigateTo('loadWorkpad', { id: props.workpad.id, page: pageNumber });
     },
   }),

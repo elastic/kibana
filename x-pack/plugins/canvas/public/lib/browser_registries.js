@@ -44,7 +44,9 @@ export const getBrowserRegistries = () => {
 };
 
 export const populateBrowserRegistries = () => {
-  if (called) throw new Error('function should only be called once per process');
+  if (called) {
+    throw new Error('function should only be called once per process');
+  }
   called = true;
 
   // loadPrivateBrowserFunctions is sync. No biggie.
@@ -64,11 +66,16 @@ export const populateBrowserRegistries = () => {
     $script(pluginPath, () => {
       populatedTypes[type] = registries[type];
 
-      if (remainingTypes.length) loadType();
-      else resolve(populatedTypes);
+      if (remainingTypes.length) {
+        loadType();
+      } else {
+        resolve(populatedTypes);
+      }
     });
   }
 
-  if (remainingTypes.length) loadType();
+  if (remainingTypes.length) {
+    loadType();
+  }
   return populatePromise;
 };
