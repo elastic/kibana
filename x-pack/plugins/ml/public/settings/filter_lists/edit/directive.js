@@ -13,7 +13,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { checkFullLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { initPromise } from 'plugins/ml/util/promise';
 
@@ -56,7 +56,9 @@ module.directive('mlEditFilterList', function ($route) {
     scope: {},
     link: function (scope, element) {
       const props = {
-        filterId: $route.current.params.filterId
+        filterId: $route.current.params.filterId,
+        canCreateFilter: checkPermission('canCreateFilter'),
+        canDeleteFilter: checkPermission('canDeleteFilter'),
       };
 
       ReactDOM.render(
