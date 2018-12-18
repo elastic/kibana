@@ -31,9 +31,13 @@ import {
   createJavaAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
+function getIfExists(config, key) {
+  return config.has(key) && config.get(key);
+}
+
 export function createElasticCloudInstructions(config) {
-  const apmServerUrl = config.get('xpack.cloud.apm.url');
-  const secretToken = config.get('xpack.cloud.apm.secret_token');
+  const apmServerUrl = getIfExists(config, 'xpack.cloud.apm.url');
+  const secretToken = getIfExists(config, 'xpack.cloud.apm.secret_token');
 
   return {
     instructionSets: [
