@@ -31,7 +31,7 @@ import {
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
 
-import { ConnectionStatus, RemoveClusterButton } from '../components';
+import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 export const DetailPanel = injectI18n(
   class extends Component {
@@ -363,10 +363,19 @@ export const DetailPanel = injectI18n(
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <RemoveClusterButton
-                    clusterNames={[clusterName]}
-                    isSmallButton={true}
-                  />
+                  <RemoveClusterButtonProvider clusterNames={[clusterName]}>
+                    {(removeCluster) => (
+                      <EuiButtonEmpty
+                        color="danger"
+                        onClick={removeCluster}
+                      >
+                        <FormattedMessage
+                          id="xpack.remoteClusters.detailPanel.removeButtonLabel"
+                          defaultMessage="Remove"
+                        />
+                      </EuiButtonEmpty>
+                    )}
+                  </RemoveClusterButtonProvider>
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>

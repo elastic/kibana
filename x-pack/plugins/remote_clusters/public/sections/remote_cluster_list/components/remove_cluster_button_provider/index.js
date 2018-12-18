@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RemoveClusterButton } from './remove_cluster_button.container';
+export { RemoveClusterButtonProvider } from './remove_cluster_button_provider.container';

@@ -10,7 +10,7 @@ import {
   removeClusters,
 } from '../../../../store/actions';
 
-import { RemoveClusterButton as RemoveClusterButtonComponent } from './remove_cluster_button';
+import { RemoveClusterButtonProvider as RemoveClusterButtonProviderComponent } from './remove_cluster_button_provider';
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -20,7 +20,7 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export const RemoveClusterButton = connect(
+export const RemoveClusterButtonProvider = connect(
   undefined,
   mapDispatchToProps,
-)(RemoveClusterButtonComponent);
+)(RemoveClusterButtonProviderComponent);
