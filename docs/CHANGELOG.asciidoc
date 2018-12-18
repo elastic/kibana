@@ -60,7 +60,7 @@ For more details about breaking changes in this release, see
 <<breaking-changes-7.0, Breaking changes in 7.0>>.
 
 [float]
-[[enhancement-7.0.0-alpha2]]
+[[highlight-7.0.0-alpha2]]
 === Highlights
 Canvas::
 * Adds a template tab to the workpad manager where users can find workpad templates, 
@@ -73,6 +73,8 @@ Management::
 * Implements a user interface to create, update, edit, or delete index lifecyle policies.
 See {pull}25553[#25553] for more information.
 
+[float]
+[[enhancement-7.0.0-alpha2]]
 === Enhancements
 Canvas::
 * Implements a clipboard and stores the copied elements in `localStorage` {pull}25890[#25890]
