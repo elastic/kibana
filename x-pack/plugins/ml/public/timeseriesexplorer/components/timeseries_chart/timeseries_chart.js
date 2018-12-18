@@ -1353,7 +1353,7 @@ export class TimeseriesChart extends React.Component {
     }
 
     if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
-      contents = marker.annotation;
+      contents = mlEscape(marker.annotation);
       contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
 
       if (typeof marker.end_timestamp !== 'undefined') {

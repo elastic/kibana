@@ -9,7 +9,8 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
-import { isAnnotationsFeatureAvailable } from './server/lib/check_annotations';
+import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
+
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { annotationRoutes } from './server/routes/annotations';
 import { jobRoutes } from './server/routes/anomaly_detectors';
@@ -78,14 +79,12 @@ export const ml = (kibana) => {
         ]
       };
 
-      const mlAnnotationsEnabled = await isAnnotationsFeatureAvailable(server);
-
       server.injectUiAppVars('ml', () => {
         const config = server.config();
         return {
           kbnIndex: config.get('kibana.index'),
           esServerUrl: config.get('elasticsearch.url'),
-          mlAnnotationsEnabled,
+          mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
         };
       });
 
