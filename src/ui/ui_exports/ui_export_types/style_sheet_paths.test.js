@@ -21,6 +21,10 @@ import { resolve } from 'path';
 import { tmpdir } from 'os';
 import { styleSheetPaths } from './style_sheet_paths';
 
+jest.mock('../../../utils', () => ({
+  fromRoot: (...relativeBits) => `fromRoot(${relativeBits.join('/')})`
+}));
+
 describe('uiExports.styleSheetPaths', () => {
   const dir = tmpdir();
   const pluginSpec = {
@@ -43,22 +47,24 @@ describe('uiExports.styleSheetPaths', () => {
       .toThrowError('[plugin:test] uiExports.styleSheetPaths supported extensions [.css, .scss], got ".bad"');
   });
 
-  it('provides publicPath for scss extensions', () => {
+  it('provides publicPath/cssPath for scss extensions', () => {
     const localPath = resolve(dir, 'kibana/public/bar.scss');
     const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
 
     expect(uiExports.styleSheetPaths).toHaveLength(1);
     expect(uiExports.styleSheetPaths[0].localPath).toEqual(localPath);
     expect(uiExports.styleSheetPaths[0].publicPath).toEqual('plugins/test/bar.css');
+    expect(uiExports.styleSheetPaths[0].cssPath).toEqual(`fromRoot(built_assets/css/plugins/test/bar.css)`);
   });
 
-  it('provides publicPath for css extensions', () => {
-    const localPath = resolve(dir, 'kibana/public/bar.scss');
+  it('provides publicPath/cssPath for css extensions', () => {
+    const localPath = resolve(dir, 'kibana/public/bar.css');
     const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
 
     expect(uiExports.styleSheetPaths).toHaveLength(1);
     expect(uiExports.styleSheetPaths[0].localPath).toEqual(localPath);
     expect(uiExports.styleSheetPaths[0].publicPath).toEqual('plugins/test/bar.css');
+    expect(uiExports.styleSheetPaths[0].cssPath).toEqual(localPath);
   });
 
   it('should normalize mixed slashes', () => {

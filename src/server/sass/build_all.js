@@ -26,7 +26,7 @@ export async function buildAll(styleSheets = []) {
       return;
     }
 
-    const bundle = new Build(styleSheet.localPath);
+    const bundle = new Build(styleSheet.localPath, styleSheet.cssPath);
     await bundle.build();
 
     return bundle;

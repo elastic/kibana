@@ -20,6 +20,7 @@
 import path from 'path';
 import { flatConcatAtType } from './reduce';
 import { mapSpec, wrap } from './modify_reduce';
+import { fromRoot } from '../../../utils';
 
 const OK_EXTNAMES = ['.css', '.scss'];
 
@@ -60,7 +61,8 @@ function normalize(localPath, type, pluginSpec) {
 
   return {
     localPath,
-    publicPath
+    publicPath: extname === '.css' ? publicPath : `built_assets/css/${publicPath}`,
+    cssPath: extname === '.css' ? localPath : fromRoot('built_assets/css', publicPath)
   };
 }
 

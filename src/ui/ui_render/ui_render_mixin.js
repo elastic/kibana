@@ -23,6 +23,7 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
+import { fromRoot } from '../../utils';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -49,6 +50,9 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
+
+  // expose built css
+  server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
 
   server.route({
     path: '/bundles/app/{id}/bootstrap.js',
