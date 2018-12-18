@@ -25,7 +25,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { formatDate } from '@elastic/eui/lib/services/format';
+import {
+  formatHumanReadableDate,
+  formatHumanReadableDateTime,
+  formatHumanReadableDateTimeSeconds
+} from '../../util/date_utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
@@ -47,11 +51,11 @@ const INFLUENCERS_LIMIT = 5;    // Maximum number of influencers to display befo
 
 function renderTime(date, aggregationInterval) {
   if (aggregationInterval === 'hour') {
-    return formatDate(date, 'MMMM Do YYYY, HH:mm');
+    return formatHumanReadableDateTime(date);
   } else if (aggregationInterval === 'second') {
-    return formatDate(date, 'MMMM Do YYYY, HH:mm:ss');
+    return formatHumanReadableDateTimeSeconds(date);
   } else {
-    return formatDate(date, 'MMMM Do YYYY');
+    return formatHumanReadableDate(date);
   }
 }
 

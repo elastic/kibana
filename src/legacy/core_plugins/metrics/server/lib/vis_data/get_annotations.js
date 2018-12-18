@@ -50,7 +50,9 @@ export default async (req, panel) => {
 
   if (!bodies.length) return { responses: [] };
   try {
+    const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
     const resp = await callWithRequest(req, 'msearch', {
+      ignore_throttled: !includeFrozen,
       rest_total_hits_as_int: true,
       body: bodies.reduce((acc, item) => acc.concat(item), [])
     });

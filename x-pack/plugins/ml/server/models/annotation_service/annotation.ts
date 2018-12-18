@@ -102,6 +102,8 @@ export function annotationProvider(
       annotations: {},
     };
 
+    const boolCriteria: object[] = [];
+
     // Build the criteria to use in the bool filter part of the request.
     // Adds criteria for the time range plus any specified job IDs.
     // The nested must_not time range filter queries make sure that we fetch:
@@ -110,8 +112,8 @@ export function annotationProvider(
     // - annotations that start before and end after the given time range
     // - but skip annotation that are completely outside the time range
     //   (the ones that start and end before or after the time range)
-    const boolCriteria: object[] = [
-      {
+    if (earliestMs !== null && latestMs !== null) {
+      boolCriteria.push({
         bool: {
           must_not: [
             {
@@ -160,11 +162,12 @@ export function annotationProvider(
             },
           ],
         },
-      },
-      {
-        exists: { field: 'annotation' },
-      },
-    ];
+      });
+    }
+
+    boolCriteria.push({
+      exists: { field: 'annotation' },
+    });
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';

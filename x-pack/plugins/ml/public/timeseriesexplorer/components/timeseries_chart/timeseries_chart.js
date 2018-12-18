@@ -37,6 +37,7 @@ import {
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
@@ -45,6 +46,7 @@ import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 import {
+  ANNOTATION_MASK_ID,
   getAnnotationBrush,
   getAnnotationLevels,
   renderAnnotations,
@@ -382,6 +384,21 @@ export class TimeseriesChart extends React.Component {
     const context = svg.append('g')
       .attr('class', 'context-chart')
       .attr('transform', 'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')');
+
+    // Mask to hide annotations overflow
+    if (mlAnnotationsEnabled) {
+      const annotationsMask = svg
+        .append('defs')
+        .append('mask')
+        .attr('id', ANNOTATION_MASK_ID);
+
+      annotationsMask.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', this.vizWidth)
+        .attr('height', focusHeight)
+        .style('fill', 'white');
+    }
 
     // Draw each of the component elements.
     createFocusChart(focus, this.vizWidth, focusHeight);
@@ -1265,7 +1282,7 @@ export class TimeseriesChart extends React.Component {
 
     // Show the time and metric values in the tooltip.
     // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
-    const formattedDate = moment(marker.date).format('MMMM Do YYYY, HH:mm');
+    const formattedDate = formatHumanReadableDateTimeSeconds(marker.date);
     let contents = formattedDate + '<br/><hr/>';
 
     if (_.has(marker, 'anomalyScore')) {
