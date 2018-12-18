@@ -63,7 +63,7 @@ export const MetricDetail = withTheme(
 
       public render() {
         const { intl } = this.props;
-        const nodeName = this.props.match.params.node;
+        const nodeId = this.props.match.params.node;
         const nodeType = this.props.match.params.type as InfraNodeType;
         const layoutCreator = layoutCreators[nodeType];
         if (!layoutCreator) {
@@ -82,40 +82,40 @@ export const MetricDetail = withTheme(
           );
         }
         const layouts = layoutCreator(this.props.theme);
-        const breadcrumbs = [{ text: nodeName }];
 
         return (
-          <ColumnarPage>
-            <Header
-              appendSections={<InfrastructureBetaBadgeHeaderSection />}
-              breadcrumbs={breadcrumbs}
-            />
-            <WithMetricsTimeUrlState />
-            <DetailPageContent>
-              <WithOptions>
-                {({ sourceId }) => (
-                  <WithMetricsTime resetOnUnmount>
-                    {({
-                      currentTimeRange,
-                      isAutoReloading,
-                      setRangeTime,
-                      startMetricsAutoReload,
-                      stopMetricsAutoReload,
-                    }) => (
-                      <WithMetadata
-                        layouts={layouts}
-                        sourceId={sourceId}
-                        nodeType={nodeType}
-                        nodeId={nodeName}
-                      >
-                        {({ filteredLayouts, loading: metadataLoading }) => {
-                          return (
+          <WithOptions>
+            {({ sourceId }) => (
+              <WithMetricsTime resetOnUnmount>
+                {({
+                  currentTimeRange,
+                  isAutoReloading,
+                  setRangeTime,
+                  startMetricsAutoReload,
+                  stopMetricsAutoReload,
+                }) => (
+                  <WithMetadata
+                    layouts={layouts}
+                    sourceId={sourceId}
+                    nodeType={nodeType}
+                    nodeId={nodeId}
+                  >
+                    {({ name, filteredLayouts, loading: metadataLoading }) => {
+                      const breadcrumbs = [{ text: name }];
+                      return (
+                        <ColumnarPage>
+                          <Header
+                            appendSections={<InfrastructureBetaBadgeHeaderSection />}
+                            breadcrumbs={breadcrumbs}
+                          />
+                          <WithMetricsTimeUrlState />
+                          <DetailPageContent>
                             <WithMetrics
                               layouts={filteredLayouts}
                               sourceId={sourceId}
                               timerange={currentTimeRange as InfraTimerangeInput}
                               nodeType={nodeType}
-                              nodeId={nodeName}
+                              nodeId={nodeId}
                             >
                               {({ metrics, error, loading }) => {
                                 if (error) {
@@ -126,7 +126,7 @@ export const MetricDetail = withTheme(
                                     <MetricsSideNav
                                       layouts={filteredLayouts}
                                       loading={metadataLoading}
-                                      nodeName={nodeName}
+                                      nodeName={name}
                                       handleClick={this.handleClick}
                                     />
                                     <AutoSizer content={false} bounds detectAnyWindowResize>
@@ -139,7 +139,7 @@ export const MetricDetail = withTheme(
                                                   <MetricsTitleTimeRangeContainer>
                                                     <EuiHideFor sizes={['xs', 's']}>
                                                       <EuiTitle size="m">
-                                                        <h1>{nodeName}</h1>
+                                                        <h1>{name}</h1>
                                                       </EuiTitle>
                                                     </EuiHideFor>
                                                     <MetricsTimeControls
@@ -155,7 +155,8 @@ export const MetricDetail = withTheme(
 
                                               <EuiPageContentWithRelative>
                                                 <Metrics
-                                                  nodeName={nodeName}
+                                                  label={name}
+                                                  nodeId={nodeId}
                                                   layouts={filteredLayouts}
                                                   metrics={metrics}
                                                   loading={
@@ -175,15 +176,15 @@ export const MetricDetail = withTheme(
                                 );
                               }}
                             </WithMetrics>
-                          );
-                        }}
-                      </WithMetadata>
-                    )}
-                  </WithMetricsTime>
+                          </DetailPageContent>
+                        </ColumnarPage>
+                      );
+                    }}
+                  </WithMetadata>
                 )}
-              </WithOptions>
-            </DetailPageContent>
-          </ColumnarPage>
+              </WithMetricsTime>
+            )}
+          </WithOptions>
         );
       }
 

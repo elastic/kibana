@@ -56,7 +56,9 @@ export const pointseries = () => ({
     const columnNames = context.columns.map(col => col.name);
     const mathScope = pivotObjectArray(context.rows, columnNames);
     const autoQuoteColumn = col => {
-      if (!columnNames.includes(col)) return col;
+      if (!columnNames.includes(col)) {
+        return col;
+      }
       return col.match(/\s/) ? `'${col}'` : col;
     };
 
@@ -78,7 +80,9 @@ export const pointseries = () => ({
 
         if (isColumnReference(mathExp)) {
           // TODO: Do something better if the column does not exist
-          if (!columnExists(columnNames, mathExp)) return;
+          if (!columnExists(columnNames, mathExp)) {
+            return;
+          }
 
           dimensions.push({
             name: arg,
@@ -147,8 +151,9 @@ export const pointseries = () => ({
       const measureValues = measureNames.map(measure => {
         try {
           const ev = evaluate(args[measure], subScope);
-          if (Array.isArray(ev))
+          if (Array.isArray(ev)) {
             throw new Error('Expressions must be wrapped in a function such as sum()');
+          }
 
           return ev;
         } catch (e) {
