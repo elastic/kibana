@@ -483,7 +483,7 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Color mapping',
       }),
       value: JSON.stringify({
-        Count: '#017D73'
+        Count: '#00A69B'
       }),
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.visualization.colorMappingText', {
