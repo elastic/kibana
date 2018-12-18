@@ -89,43 +89,48 @@ export function getTransactionCharts(
 }
 
 export interface IMemoryChartData extends MetricsChartAPIResponse {
-  series: TimeSerie[];
+  series: TimeSerie[] | IEmptySeries[];
 }
 
 export function getMemorySeries(
+  urlParams: IUrlParams,
   memoryChartResponse: MetricsChartAPIResponse['memory']
 ) {
-  const { series, overallValues } = memoryChartResponse;
-  const seriesList: IMemoryChartData['series'] = [
-    {
-      title: 'System total mem.',
-      data: series.totalMemory,
-      type: 'area',
-      color: colors.apmPink,
-      legendValue: asGB(overallValues.totalMemory)
-    },
-    {
-      title: 'System avail. mem.',
-      data: series.freeMemory,
-      type: 'area',
-      color: colors.apmPurple,
-      legendValue: asGB(overallValues.freeMemory)
-    },
-    {
-      title: 'Process RSS',
-      data: series.processMemoryRss,
-      type: 'area',
-      color: colors.apmGreen,
-      legendValue: asGB(overallValues.processMemoryRss)
-    },
-    {
-      title: 'Process mem. size',
-      data: series.processMemorySize,
-      type: 'area',
-      color: colors.apmBlue,
-      legendValue: asGB(overallValues.freeMemory)
-    }
-  ];
+  const { start, end } = urlParams;
+  const { series, overallValues, totalHits } = memoryChartResponse;
+  const seriesList: IMemoryChartData['series'] =
+    totalHits === 0
+      ? getEmptySerie(start, end)
+      : [
+          {
+            title: 'System total mem.',
+            data: series.totalMemory,
+            type: 'area',
+            color: colors.apmPink,
+            legendValue: asGB(overallValues.totalMemory)
+          },
+          {
+            title: 'System avail. mem.',
+            data: series.freeMemory,
+            type: 'area',
+            color: colors.apmPurple,
+            legendValue: asGB(overallValues.freeMemory)
+          },
+          {
+            title: 'Process RSS',
+            data: series.processMemoryRss,
+            type: 'area',
+            color: colors.apmGreen,
+            legendValue: asGB(overallValues.processMemoryRss)
+          },
+          {
+            title: 'Process mem. size',
+            data: series.processMemorySize,
+            type: 'area',
+            color: colors.apmBlue,
+            legendValue: asGB(overallValues.freeMemory)
+          }
+        ];
 
   return {
     ...memoryChartResponse,
