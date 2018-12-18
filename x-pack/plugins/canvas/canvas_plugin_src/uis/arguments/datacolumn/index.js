@@ -58,14 +58,20 @@ class DatacolumnArgInput extends Component {
       // if setting size, auto-select the first column if no column is already set
       if (fn === 'size') {
         const col = column || (columns[0] && columns[0].name);
-        if (col) return onValueChange(`${fn}(${maybeQuoteValue(col)})`);
+        if (col) {
+          return onValueChange(`${fn}(${maybeQuoteValue(col)})`);
+        }
       }
 
       // this.inputRefs.column is the column selection, if there is no value, do nothing
-      if (valueNotSet(column)) return setMathFunction(fn);
+      if (valueNotSet(column)) {
+        return setMathFunction(fn);
+      }
 
       // this.inputRefs.fn is the math function to use, if it's not set, just use the value input
-      if (valueNotSet(fn)) return onValueChange(column);
+      if (valueNotSet(fn)) {
+        return onValueChange(column);
+      }
 
       // this.inputRefs.fn has a value, so use it as a math.js expression
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
@@ -76,7 +82,9 @@ class DatacolumnArgInput extends Component {
     const options = [{ value: '', text: 'select column', disabled: true }];
 
     sortBy(columns, 'name').forEach(column => {
-      if (allowedTypes && !allowedTypes.includes(column.type)) return;
+      if (allowedTypes && !allowedTypes.includes(column.type)) {
+        return;
+      }
       options.push({ value: column.name, text: column.name });
     });
 
@@ -108,7 +116,9 @@ class DatacolumnArgInput extends Component {
 const EnhancedDatacolumnArgInput = compose(
   withPropsOnChange(['argValue', 'columns'], ({ argValue, columns }) => ({
     mathValue: (argValue => {
-      if (getType(argValue) !== 'string') return { error: 'argValue is not a string type' };
+      if (getType(argValue) !== 'string') {
+        return { error: 'argValue is not a string type' };
+      }
       try {
         const matchedCol = columns.find(({ name }) => argValue === name);
         const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;

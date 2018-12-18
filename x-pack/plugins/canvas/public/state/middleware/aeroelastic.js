@@ -95,7 +95,9 @@ const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, uns
           angle: Math.round(matrixToAngle(shape.transformMatrix)),
         };
 
-        if (1 / newProps.angle === -Infinity) newProps.angle = 0; // recompose.shallowEqual discerns between 0 and -0
+        if (1 / newProps.angle === -Infinity) {
+          newProps.angle = 0;
+        } // recompose.shallowEqual discerns between 0 and -0
 
         return shallowEqual(oldProps, newProps)
           ? null
@@ -103,7 +105,9 @@ const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, uns
       }
     })
     .filter(identity);
-  if (repositionings.length) setMultiplePositions(repositionings);
+  if (repositionings.length) {
+    setMultiplePositions(repositionings);
+  }
 };
 
 const id = element => element.id;
@@ -113,7 +117,9 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
   const onChangeCallback = ({ state }) => {
     const nextScene = state.currentScene;
-    if (!nextScene.gestureEnd) return; // only update redux on gesture end
+    if (!nextScene.gestureEnd) {
+      return;
+    } // only update redux on gesture end
     // TODO: check for gestureEnd on element selection
 
     // read current data out of redux
@@ -130,8 +136,9 @@ export const aeroelastic = ({ dispatch, getState }) => {
     // set the selected element on the global store, if one element is selected
     const selectedShape = nextScene.selectedPrimaryShapes[0];
     if (nextScene.selectedShapes.length === 1) {
-      if (selectedShape && selectedShape !== selectedElement)
+      if (selectedShape && selectedShape !== selectedElement) {
         dispatch(selectElement(selectedShape));
+      }
     } else {
       // otherwise, clear the selected element state
       dispatch(selectElement(null));
@@ -188,7 +195,9 @@ export const aeroelastic = ({ dispatch, getState }) => {
     let lastPageRemoved = false;
     if (action.type === removePage.toString()) {
       const preRemoveState = getState();
-      if (getPages(preRemoveState).length <= 1) lastPageRemoved = true;
+      if (getPages(preRemoveState).length <= 1) {
+        lastPageRemoved = true;
+      }
 
       aero.removeStore(action.payload);
     }
@@ -209,7 +218,9 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case duplicatePage.toString():
         const newPage = getSelectedPage(getState());
         createStore(newPage);
-        if (action.type === duplicatePage.toString()) dispatch(fetchAllRenderables());
+        if (action.type === duplicatePage.toString()) {
+          dispatch(fetchAllRenderables());
+        }
 
         populateWithElements(newPage);
         break;
@@ -225,8 +236,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case selectElement.toString():
         // without this condition, a mouse release anywhere will trigger it, leading to selection of whatever is
         // underneath the pointer (maybe nothing) when the mouse is released
-        if (action.payload) selectShape(prevPage, action.payload);
-        else unselectShape(prevPage);
+        if (action.payload) {
+          selectShape(prevPage, action.payload);
+        } else {
+          unselectShape(prevPage);
+        }
 
         break;
 
@@ -241,9 +255,13 @@ export const aeroelastic = ({ dispatch, getState }) => {
         // TODO: add a better check for elements changing, including their position, ids, etc.
         const shouldResetState =
           prevPage !== page || !shallowEqual(prevElements.map(id), elements.map(id));
-        if (shouldResetState) populateWithElements(page);
+        if (shouldResetState) {
+          populateWithElements(page);
+        }
 
-        if (action.type !== setMultiplePositions.toString()) unselectShape(prevPage);
+        if (action.type !== setMultiplePositions.toString()) {
+          unselectShape(prevPage);
+        }
 
         break;
     }
