@@ -80,10 +80,7 @@ export class DeleteJobModal extends Component {
       if (this.el && this.state.deleting === true) {
         // work around to disable the modal's buttons if the jobs are being deleted
         this.el.confirmButton.style.display = 'none';
-        this.el.cancelButton.textContent = (<FormattedMessage
-          id="xpack.ml.jobsList.deleteJobModal.closeButtonLabel"
-          defaultMessage="Close"
-        />);
+        this.el.cancelButton.style.display = 'none';
       }
 
       const title = (
