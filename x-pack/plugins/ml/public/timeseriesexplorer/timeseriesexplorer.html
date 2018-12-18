@@ -86,6 +86,15 @@
           <label for="toggleShowModelBoundsCheckbox" class="kuiCheckBoxLabel">show model bounds</label>
         </div>
 
+        <div ng-show="showAnnotationsCheckbox === true">
+          <input id="toggleAnnotationsCheckbox"
+            type="checkbox"
+            class="kuiCheckBox"
+            ng-click="toggleShowAnnotations()"
+            ng-checked="showAnnotations === true">
+          <label for="toggleAnnotationsCheckbox" class="kuiCheckBoxLabel">annotations</label>
+        </div>
+
         <div ng-show="showForecastCheckbox === true">
           <input id="toggleShowForecastCheckbox"
             type="checkbox"
@@ -98,7 +107,7 @@
 
       <div class="ml-timeseries-chart">
 
-        <ml-timeseries-chart  style="width: 1200px; height: 400px;"
+        <ml-timeseries-chart style="width: 1200px; height: 400px;"
           selected-job="selectedJob"
           detector-index="detectorId"
           model-plot-enabled="modelPlotEnabled"
@@ -106,16 +115,33 @@
           context-forecast-data="contextForecastData"
           context-aggregation-interval="contextAggregationInterval"
           swimlane-data="swimlaneData"
+          focus-annotation-data="focusAnnotationData"
           focus-chart-data="focusChartData"
           focus-forecast-data="focusForecastData"
           focus-aggregation-interval="focusAggregationInterval"
+          show-annotations="showAnnotations"
           show-model-bounds="showModelBounds"
           show-forecast="showForecast"
           zoom-from="zoomFrom"
           zoom-to="zoomTo"
-          auto-zoom-duration="autoZoomDuration">
+          auto-zoom-duration="autoZoomDuration"
+          refresh="refresh">
         </ml-timeseries-chart>
 
+      </div>
+
+      <div ng-show="showAnnotations && focusAnnotationData.length > 0">
+        <span class="panel-title euiText">
+          Annotations
+        </span>
+  
+        <ml-annotation-table
+          annotations="focusAnnotationData"
+          drill-down="false"
+          jobs="[selectedJob]"
+        />
+
+        <br /><br />
       </div>
 
       <span class="panel-title euiText">

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { YamlConfigSchema } from './lib/lib';
+import { YamlConfigSchema } from './lib/types';
 
 const filebeatInputConfig: YamlConfigSchema[] = [
   {

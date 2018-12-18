@@ -27,7 +27,10 @@ export interface JobInfo {
   jobtype: string;
   created_by: string;
   timeout: number;
-  output: { content_type: string };
+  output: {
+    content_type: string;
+    size: number;
+  };
   process_expiration: string;
   completed_at: string;
   payload: {

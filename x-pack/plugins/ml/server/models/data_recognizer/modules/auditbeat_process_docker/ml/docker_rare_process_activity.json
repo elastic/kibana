@@ -1,0 +1,40 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "Auditbeat: Detect Rare Process Executions in Docker Containers",
+  "groups": ["auditbeat"],
+  "analysis_config": {
+    "bucket_span": "1h",
+    "detectors": [
+      {
+        "function": "rare",
+        "by_field_name": "process.exe",
+        "partition_field_name": "docker.container.id"
+      }
+    ],
+    "influencers": [
+      "docker.container.id",
+      "process.exe"
+    ]
+  },
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "custom_settings": {
+    "custom_urls": [
+      {
+        "url_name": "Raw Data",
+        "time_range": "1h",
+        "url_value": "kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:'INDEX_PATTERN_ID\u0027,query:(language:lucene,query:\u0027docker.container.id:\u0022$docker.container.id$\u0022 AND process.exe:\u0022$process.exe$\u0022\u0027))"
+      },
+      {
+        "url_name": "Process Explorer",
+        "time_range": "1h",
+        "url_value": "kibana#/dashboard/ml_auditbeat_docker_process_explorer?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(),query:(language:lucene,query:\u0027docker.container.id:\u0022$docker.container.id$\u0022\u0027))"
+      }
+    ]
+  }
+}
