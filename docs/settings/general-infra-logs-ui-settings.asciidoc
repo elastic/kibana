@@ -6,7 +6,7 @@
 
 `xpack.infra.sources.default.fields.timestamp`:: Timestamp used to for sorting log entries. Defaults to `@timestamp`.
 
-`xpack.infra.sources.default.fields.message`:: Fields used for the message for Logs UI. Defaults to `['message', '@message']`.
+`xpack.infra.sources.default.fields.message`:: Fields used to display messages in the Logs UI. Defaults to `['message', '@message']`.
 
 `xpack.infra.sources.default.fields.tiebreaker`:: Field used to break ties between two entries with the same timestamp. Defaults to `_doc`.
 
