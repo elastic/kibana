@@ -113,7 +113,6 @@ class DashboardGridUi extends React.Component {
     // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
     // item.
     this.gridItems = {};
-    this.embeddables = {};
 
     let isLayoutInvalid = false;
     let layout;
@@ -170,19 +169,8 @@ class DashboardGridUi extends React.Component {
     });
   }
 
-  registerEmbeddable = (id, embeddable) => {
-    this.embeddables[id] = embeddable;
-  };
-
-  deregisterEmbeddable = (id) => {
-    delete this.embeddables[id];
-  };
-
   componentWillMount() {
     this.createEmbeddableFactoriesMap(this.props.panels);
-    this.props.getReloadProvider(() => {
-      Object.values(this.embeddables).forEach(embeddable => embeddable.reload());
-    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -248,8 +236,6 @@ class DashboardGridUi extends React.Component {
             embeddableFactory={this.embeddableFactoryMap[panel.type]}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
-            registerEmbeddable={this.registerEmbeddable}
-            deregisterEmbeddable={this.deregisterEmbeddable}
           />
         </div>
       );
@@ -280,7 +266,6 @@ class DashboardGridUi extends React.Component {
 DashboardGridUi.propTypes = {
   panels: PropTypes.object.isRequired,
   getEmbeddableFactory: PropTypes.func.isRequired,
-  getReloadProvider: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   onPanelsUpdated: PropTypes.func.isRequired,
   maximizedPanelId: PropTypes.string,

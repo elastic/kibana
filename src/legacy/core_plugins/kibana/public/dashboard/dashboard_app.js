@@ -102,7 +102,6 @@ app.directive('dashboardApp', function ($injector) {
 
       const visTypes = Private(VisTypesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
-      $scope.getReloadProvider = reload => $scope.reload = reload;
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
@@ -221,7 +220,6 @@ app.directive('dashboardApp', function ($injector) {
         $scope.model.query = migrateLegacyQuery(query);
         dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
         $scope.refresh();
-        if ($scope.reload) $scope.reload();
       };
 
       updateTheme();
@@ -232,8 +230,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.removePanel(panelIndex);
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
-
-      $scope.$watch('model.query', $scope.updateQueryAndFetch);
 
       $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
         dashboardStateManager.handleTimeChange(timefilter.getTime());

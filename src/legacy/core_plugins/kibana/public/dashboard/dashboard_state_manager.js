@@ -39,6 +39,7 @@ import {
   updateFilters,
   updateQuery,
   closeContextMenu,
+  requestReload,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -220,6 +221,7 @@ export class DashboardStateManager {
     )) {
       store.dispatch(updateFilters(dashboardFilters));
     }
+    store.dispatch(requestReload());
   }
 
   _handleStoreChanges() {

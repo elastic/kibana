@@ -61,7 +61,6 @@ class DashboardPanelUi extends React.Component {
         .then((embeddable) => {
           if (this.mounted) {
             this.embeddable = embeddable;
-            this.props.registerEmbeddable(this.props.panel.panelIndex, embeddable);
             embeddableIsInitialized(embeddable.metadata);
             this.embeddable.render(this.panelElement, this.props.containerState);
           } else {
@@ -80,7 +79,6 @@ class DashboardPanelUi extends React.Component {
     this.props.destroy();
     this.mounted = false;
     if (this.embeddable) {
-      this.props.deregisterEmbeddable(this.props.panel.panelIndex);
       this.embeddable.destroy();
     }
   }
@@ -117,6 +115,10 @@ class DashboardPanelUi extends React.Component {
   shouldComponentUpdate(nextProps) {
     if (this.embeddable && !_.isEqual(nextProps.containerState, this.props.containerState)) {
       this.embeddable.onContainerStateChanged(nextProps.containerState);
+    }
+
+    if (this.embeddable && nextProps.lastReloadRequestTime !== this.props.lastReloadRequestTime) {
+      this.embeddable.reload();
     }
 
     return nextProps.error !== this.props.error ||
@@ -179,6 +181,7 @@ DashboardPanelUi.propTypes = {
   embeddableFactory: PropTypes.shape({
     create: PropTypes.func,
   }).isRequired,
+  lastReloadRequestTime: PropTypes.number.isRequired,
   embeddableStateChanged: PropTypes.func.isRequired,
   embeddableIsInitialized: PropTypes.func.isRequired,
   embeddableError: PropTypes.func.isRequired,
@@ -187,8 +190,6 @@ DashboardPanelUi.propTypes = {
   panel: PropTypes.shape({
     panelIndex: PropTypes.string,
   }).isRequired,
-  registerEmbeddable: PropTypes.func.isRequired,
-  deregisterEmbeddable: PropTypes.func.isRequired,
 };
 
 export const DashboardPanel = injectI18n(DashboardPanelUi);
