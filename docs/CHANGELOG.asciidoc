@@ -107,7 +107,9 @@ Canvas::
 
 Kibana App::
 * Fixes vertical scroll on long legends {pull}23806[#23806]
-* Adds shardTimeout params to body only if not 0 {pull}27217[#27217]
+* Fixes a problem that caused {kib} to set the {es} timeout to 0,
+instead of excluding it. As a result, visualizations 
+returned partial data or errors. {pull}27217[#27217]
 
 Machine Learning::
 * Fixes population chart marker positions and swimlane race 
