@@ -48,7 +48,7 @@ type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
 
 const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
   ({
-    id = 'UncommonProcessesQuery',
+    id = 'uncommonProcessesQuery',
     children,
     filterQuery,
     sourceId,
