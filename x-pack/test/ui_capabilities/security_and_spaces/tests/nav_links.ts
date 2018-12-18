@@ -9,145 +9,8 @@ import { SpacesService } from '../../../common/services';
 import { SecurityService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
-
-// TODO: Consolidate the following type definitions
-interface CustomRoleSpecification {
-  name: string;
-  kibana: {
-    global: {
-      minimum?: string[];
-      feature?: {
-        [featureName: string]: string[];
-      };
-    };
-    space?: {
-      [spaceId: string]: {
-        minimum?: string[];
-        feature?: {
-          [featureName: string]: string[];
-        };
-      };
-    };
-  };
-}
-
-interface ReservedRoleSpecification {
-  name: string;
-}
-
-function isCustomRoleSpecification(
-  roleSpecification: CustomRoleSpecification | ReservedRoleSpecification
-): roleSpecification is CustomRoleSpecification {
-  return (roleSpecification as CustomRoleSpecification).kibana !== undefined;
-}
-
-interface User {
-  username: string;
-  fullName: string;
-  password: string;
-  role: ReservedRoleSpecification | CustomRoleSpecification;
-}
-
-// these are the users that we care about
-const Superuser: User = {
-  username: 'superuser',
-  fullName: 'superuser',
-  password: 'superuser-password',
-  role: {
-    name: 'superuser',
-  },
-};
-
-const GlobalAll: User = {
-  username: 'global_all',
-  fullName: 'global_all',
-  password: 'global_all-password',
-  role: {
-    name: 'global_all_role',
-    kibana: {
-      global: {
-        minimum: ['all'],
-      },
-    },
-  },
-};
-
-const Users: User[] = [Superuser, GlobalAll];
-
-// these are the spaces that we care about
-interface Space {
-  id: string;
-  name: string;
-  disabledFeatures: string[];
-}
-const Space1: Space = {
-  id: 'space_1',
-  name: 'space_1',
-  disabledFeatures: [],
-};
-
-const Space2: Space = {
-  id: 'space_2',
-  name: 'space_2',
-  disabledFeatures: ['discover'],
-};
-
-const Spaces: Space[] = [Space1, Space2];
-
-interface Scenario {
-  user: User;
-  space: Space;
-}
-
-interface SuperuserAtSpace1 extends Scenario {
-  id: 'superuser_at_space_1';
-}
-const SuperuserAtSpace1: SuperuserAtSpace1 = {
-  id: 'superuser_at_space_1',
-  user: Superuser,
-  space: Space1,
-};
-
-interface SuperuserAtSpace2 extends Scenario {
-  id: 'superuser_at_space_2';
-}
-const SuperuserAtSpace2: SuperuserAtSpace2 = {
-  id: 'superuser_at_space_2',
-  user: Superuser,
-  space: Space2,
-};
-
-interface GlobalAllAtSpace1 extends Scenario {
-  id: 'global_all_at_space_1';
-}
-const GlobalAllAtSpace1: GlobalAllAtSpace1 = {
-  id: 'global_all_at_space_1',
-  user: GlobalAll,
-  space: Space1,
-};
-
-interface GlobalAllAtSpace2 extends Scenario {
-  id: 'global_all_at_space_2';
-}
-const GlobalAllAtSpace2: GlobalAllAtSpace2 = {
-  id: 'global_all_at_space_2',
-  user: GlobalAll,
-  space: Space2,
-};
-
-type UsersAtSpaces = SuperuserAtSpace1 | SuperuserAtSpace2 | GlobalAllAtSpace1 | GlobalAllAtSpace2;
-const UsersAtSpaces: UsersAtSpaces[] = [
-  SuperuserAtSpace1,
-  SuperuserAtSpace2,
-  GlobalAllAtSpace1,
-  GlobalAllAtSpace2,
-];
-
-class UnreachableError extends Error {
-  constructor(val: never) {
-    super(`Unreachable: ${val}`);
-  }
-}
+import { isCustomRoleSpecification } from '../../common/types';
+import { Spaces, UserAtSpaceScenarios, Users } from '../scenarios';
 
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: TestInvoker) {
@@ -188,15 +51,15 @@ export default function navLinksTests({ getService }: TestInvoker) {
       }
     });
 
-    UsersAtSpaces.forEach(userAtSpace => {
-      it(`${userAtSpace.id}`, async () => {
-        const { user, space } = userAtSpace;
+    UserAtSpaceScenarios.forEach(scenario => {
+      it(`${scenario.id}`, async () => {
+        const { user, space } = scenario;
 
         const uiCapabilities = await uiCapabilitiesService.get(
           { username: user.username, password: user.password },
           space.id
         );
-        switch (userAtSpace.id) {
+        switch (scenario.id) {
           case 'superuser_at_space_1':
           case 'global_all_at_space_1':
             expect(uiCapabilities).to.have.property('navLinks');
@@ -236,7 +99,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
             });
             break;
           default:
-            throw new UnreachableError(userAtSpace);
+            throw new UnreachableError(scenario);
         }
       });
     });
