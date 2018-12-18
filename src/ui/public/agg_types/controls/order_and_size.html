@@ -1,7 +1,11 @@
 <div>
   <div class="visEditorAgg__formRow--flex">
     <div ng-if="agg.type.params.byName.order && aggParam.options" class="form-group">
-      <label for="visEditorOrderByOrder{{agg.id}}">Order</label>
+      <label
+        for="visEditorOrderByOrder{{agg.id}}"
+        i18n-id="common.ui.aggTypes.orderLabel"
+        i18n-default-message="Order"
+      ></label>
       <select
         id="visEditorOrderByOrder{{agg.id}}"
         name="order"
@@ -12,7 +16,11 @@
       </select>
     </div>
     <div class="form-group">
-      <label for="visEditorOrderBySize{{agg.id}}">Size</label>
+      <label
+        for="visEditorOrderBySize{{agg.id}}"
+        i18n-id="common.ui.aggTypes.sizeLabel"
+        i18n-default-message="Size"
+      ></label>
       <input
         id="visEditorOrderBySize{{agg.id}}"
         name="size"
