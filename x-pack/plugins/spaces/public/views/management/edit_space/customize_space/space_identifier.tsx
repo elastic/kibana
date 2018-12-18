@@ -99,23 +99,19 @@ class SpaceIdentifierUI extends Component<Props, State> {
     );
   };
 
-  public getHelpText = (identifier: string) => {
+  public getHelpText = (
+    identifier: string = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.spaceIdentifier.emptySpaceIdentifierText',
+      defaultMessage: 'awesome-space',
+    })
+  ) => {
     return (
       <p>
         <FormattedMessage
           id="xpack.spaces.management.spaceIdentifier.kibanaURLForEngineeringIdentifierDescription"
           defaultMessage="Example: https://my-kibana.example{spaceIdentifier}/app/kibana."
           values={{
-            spaceIdentifier: (
-              <strong>
-                /s/
-                <FormattedMessage
-                  id="xpack.spaces.management.spaceIdentifier.spaceIdentifierText"
-                  defaultMessage={'{identifier}'}
-                  values={{ identifier: identifier || 'awesome-space' }}
-                />
-              </strong>
-            ),
+            spaceIdentifier: <strong>/s/{identifier}</strong>,
           }}
         />
       </p>
