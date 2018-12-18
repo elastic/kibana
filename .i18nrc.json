@@ -16,6 +16,7 @@
     "timelion": "src/legacy/core_plugins/timelion",
     "tagCloud": "src/legacy/core_plugins/tagcloud",
     "tsvb": "src/legacy/core_plugins/metrics",
+    "xpack.apm": "x-pack/plugins/apm",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
