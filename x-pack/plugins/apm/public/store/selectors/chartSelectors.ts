@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { difference, memoize, zipObject } from 'lodash';
 import mean from 'lodash.mean';
@@ -82,21 +83,33 @@ export function getResponseTimeSeries(
 
   const series: TimeSerie[] = [
     {
-      title: 'Avg.',
+      title: i18n.translate('xpack.apm.transactions.chart.averageLabel', {
+        defaultMessage: 'Avg.'
+      }),
       data: avg,
       legendValue: asMillis(overallAvgDuration),
       type: 'line',
       color: colors.apmBlue
     },
     {
-      title: '95th percentile',
+      title: i18n.translate(
+        'xpack.apm.transactions.chart.95thPercentileLabel',
+        {
+          defaultMessage: '95th percentile'
+        }
+      ),
       titleShort: '95th',
       data: p95,
       type: 'line',
       color: colors.apmYellow
     },
     {
-      title: '99th percentile',
+      title: i18n.translate(
+        'xpack.apm.transactions.chart.99thPercentileLabel',
+        {
+          defaultMessage: '99th percentile'
+        }
+      ),
       titleShort: '99th',
       data: p99,
       type: 'line',
@@ -119,7 +132,9 @@ export function getResponseTimeSeries(
 
 export function getAnomalyScoreSeries(data: RectCoordinate[]) {
   return {
-    title: 'Anomaly score',
+    title: i18n.translate('xpack.apm.series.anomalyScoreLabel', {
+      defaultMessage: 'Anomaly score'
+    }),
     hideLegend: true,
     hideTooltipValue: true,
     data,
@@ -131,7 +146,9 @@ export function getAnomalyScoreSeries(data: RectCoordinate[]) {
 
 function getAnomalyBoundariesSeries(data: Coordinate[]) {
   return {
-    title: 'Anomaly Boundaries',
+    title: i18n.translate('xpack.apm.series.anomalyBoundariesLabel', {
+      defaultMessage: 'Anomaly Boundaries'
+    }),
     hideLegend: true,
     hideTooltipValue: true,
     data,
