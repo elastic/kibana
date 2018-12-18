@@ -112,7 +112,7 @@ export default class BaseOptimizer {
       BABEL_PRESET_PATH
     ];
 
-    const devOnlyModules = !IS_KIBANA_DISTRIBUTABLE
+    const nonDistributableOnlyModules = !IS_KIBANA_DISTRIBUTABLE
       ? ['ts-loader']
       : [];
 
@@ -123,7 +123,7 @@ export default class BaseOptimizer {
       [
         // modules to load on the pool
         ...baseModules,
-        ...devOnlyModules
+        ...nonDistributableOnlyModules
       ]
     );
   }
@@ -139,7 +139,7 @@ export default class BaseOptimizer {
       1,
       Math.min(
         cpus.length - 1,
-        10
+        7
       )
     );
   }
@@ -159,7 +159,7 @@ export default class BaseOptimizer {
       // are used to, into NODE_OPTIONS, it won't affect the workers.
       workerNodeArgs: parsedNodeOptions,
       poolParallelJobs: this.getThreadPoolCpuCount() * 20,
-      poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 5000
+      poolTimeout: this.uiBundles.isDevMode() ? Infinity : 2000
     };
   }
 

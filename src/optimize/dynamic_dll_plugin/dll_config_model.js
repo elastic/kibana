@@ -197,20 +197,23 @@ function extendRawConfig(rawConfig) {
   };
 }
 
-function common(rawConfig) {
+function common(config) {
   return webpackMerge(
-    generateDLL(extendRawConfig(rawConfig))
+    generateDLL(config)
   );
 }
 
-function optimized() {
+function optimized(config) {
   return webpackMerge(
     {
       mode: 'production',
       optimization: {
         minimizer: [
           new TerserPlugin({
-            parallel: true,
+            // Apply the same logic used to calculate the
+            // threadLoaderPool workers number to spawn
+            // the parallel processes on terser
+            parallel: config.threadLoaderPoolConfig.workers,
             sourceMap: false,
             terserOptions: {
               compress: {
@@ -261,9 +264,11 @@ function unoptimized() {
 }
 
 export function configModel(rawConfig = {}) {
+  const config = extendRawConfig(rawConfig);
+
   if (IS_KIBANA_DISTRIBUTABLE) {
-    return webpackMerge(common(rawConfig), optimized());
+    return webpackMerge(common(config), optimized(config));
   }
 
-  return webpackMerge(common(rawConfig), unoptimized());
+  return webpackMerge(common(config), unoptimized());
 }
