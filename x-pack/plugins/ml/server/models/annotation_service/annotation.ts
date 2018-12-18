@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import _ from 'lodash';
 
-import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { ANNOTATION_DOC_TYPE, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -78,7 +78,7 @@ export function annotationProvider(
 
     const params: IndexParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-      type: 'doc',
+      type: ANNOTATION_DOC_TYPE,
       body: annotation,
       refresh: 'wait_for',
     };
@@ -232,7 +232,7 @@ export function annotationProvider(
   async function deleteAnnotation(id: string) {
     const param: DeleteParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-      type: 'doc',
+      type: ANNOTATION_DOC_TYPE,
       id,
       refresh: 'wait_for',
     };
