@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import _ from 'lodash';
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
@@ -31,7 +31,8 @@ export function annotationRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexAnnotation } = annotationServiceProvider(callWithRequest);
-      return indexAnnotation(request.payload)
+      const username = _.get(request, 'auth.credentials.username', '<user unknown>');
+      return indexAnnotation(request.payload, username)
         .catch(resp => wrapError(resp));
     },
     config: {
