@@ -87,7 +87,7 @@ export const CrossClusterReplicationHome = injectI18n(
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              {isAutoFollowApiAuthorized ? (
+              {isAutoFollowApiAuthorized && (
                 <EuiButton
                   {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
                   fill
@@ -97,7 +97,7 @@ export const CrossClusterReplicationHome = injectI18n(
                     defaultMessage="Create an auto-follow pattern"
                   />
                 </EuiButton>
-              ) : null}
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
 
