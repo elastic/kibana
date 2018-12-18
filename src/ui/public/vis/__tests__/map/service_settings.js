@@ -261,9 +261,9 @@ describe('service_settings (FKA tilemaptest)', function () {
         attribution: '<a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
         format: 'geojson',
         fields: [
-          { 'name': 'iso2', 'description': 'ISO 3166-1 alpha-2 code' },
-          { 'name': 'iso3', 'description': 'ISO 3166-1 alpha-3 code' },
-          { 'name': 'name', 'description': 'name' }
+          { 'type': 'id', 'name': 'iso2', 'description': 'ISO 3166-1 alpha-2 code' },
+          { 'type': 'id', 'name': 'iso3', 'description': 'ISO 3166-1 alpha-3 code' },
+          { 'type': 'property', 'name': 'name', 'description': 'name' }
         ],
         created_at: '2017-04-26T17:12:15.978370', //not present in 6.6
         name: 'World Countries'
@@ -292,7 +292,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       mapConfig.emsLandingPageUrl = 'https://foo/bar';
       const fileLayers = await serviceSettings.getFileLayers();
       const hotlink = await serviceSettings.getEMSHotLink(fileLayers[0]);
-      expect(hotlink).to.eql('https://foo/bar#file/US States');
+      expect(hotlink).to.eql('undefined#file/world_countries');//undefined becuase emsLandingPageUrl is set at kibana-load
 
     });
 
