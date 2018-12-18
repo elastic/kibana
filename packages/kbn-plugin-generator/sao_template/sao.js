@@ -72,6 +72,7 @@ module.exports = function({ name }) {
     filters: {
       'public/**/*': 'generateApp',
       'translations/**/*': 'generateTranslations',
+      '.i18nrc.json': 'generateTranslations',
       'public/hack.js': 'generateHack',
       'server/**/*': 'generateApi',
       'public/app.scss': 'generateScss',

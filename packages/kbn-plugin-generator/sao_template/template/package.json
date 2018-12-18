@@ -20,6 +20,9 @@
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "link:../../kibana/packages/kbn-eslint-import-resolver-kibana",
+    <%_ if (generateTranslations) { _%>
+    "@kbn/i18n": "link:../../kibana/packages/kbn-i18n",
+    <%_ } _%>
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "babel-eslint": "^9.0.0",
     "eslint": "^5.6.0",
