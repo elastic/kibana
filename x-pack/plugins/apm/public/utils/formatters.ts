@@ -70,13 +70,13 @@ export function asMicros(
     return defaultValue;
   }
 
-  const milcrosLabel =
+  const microsLabel =
     SPACE +
     i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
       defaultMessage: 'μs'
     });
   const formatted = asInteger(value);
-  return `${formatted}${withUnit ? milcrosLabel : ''}`;
+  return `${formatted}${withUnit ? microsLabel : ''}`;
 }
 
 type TimeFormatter = (
