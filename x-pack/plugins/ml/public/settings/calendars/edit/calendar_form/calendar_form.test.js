@@ -18,6 +18,7 @@ import { CalendarForm } from './calendar_form';
 const testProps = {
   calendarId: '',
   canCreateCalendar: true,
+  canDeleteCalendar: true,
   description: '',
   eventsList: [],
   groupIds: [],

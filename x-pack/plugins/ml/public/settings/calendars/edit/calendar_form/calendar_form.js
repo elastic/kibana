@@ -153,6 +153,7 @@ export function CalendarForm({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-testid="ml_save_calendar_button"
             fill
             onClick={isEdit ? onEdit : onCreate}
             isDisabled={saveButtonDisabled}

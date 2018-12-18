@@ -115,6 +115,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     >
       <EuiButton
         color="primary"
+        data-testid="ml_save_calendar_button"
         fill={true}
         iconSide="left"
         isDisabled={true}

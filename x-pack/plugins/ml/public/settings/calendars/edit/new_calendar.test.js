@@ -78,6 +78,7 @@ const calendars = [
 
 const props = {
   canCreateCalendar: true,
+  canDeleteCalendar: true
 };
 
 describe('NewCalendar', () => {
@@ -126,6 +127,22 @@ describe('NewCalendar', () => {
     });
     wrapper.update();
     expect(instance.isDuplicateId()).toBe(true);
+  });
+
+  test('Save button is disabled if canCreateCalendar is false', () => {
+    const noCreateProps = {
+      ...props,
+      canCreateCalendar: false,
+    };
+
+    const wrapper = mount(
+      <NewCalendar {...noCreateProps} />
+    );
+
+    const buttons = wrapper.find('[data-testid="ml_save_calendar_button"]');
+    const saveButton = buttons.find('EuiButton');
+
+    expect(saveButton.prop('isDisabled')).toBe(true);
   });
 
 });
