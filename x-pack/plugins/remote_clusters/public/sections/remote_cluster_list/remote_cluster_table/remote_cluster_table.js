@@ -229,6 +229,7 @@ export const RemoteClusterTable = injectI18n(
 
       const selection = {
         onSelectionChange: (selectedItems) => this.setState({ selectedItems }),
+        selectable: ({ isConfiguredByNode }) => !isConfiguredByNode,
       };
 
       const filteredClusters = this.getFilteredClusters();
