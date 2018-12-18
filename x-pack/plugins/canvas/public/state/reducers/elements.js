@@ -71,6 +71,22 @@ function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
   return set(workpadState, ['pages', pageIndex, location], newNodes);
 }
 
+const trimPosition = ({ left, top, width, height, angle, parent }) => ({
+  left,
+  top,
+  width,
+  height,
+  angle,
+  parent,
+});
+
+const trimElement = ({ id, position, expression, filter }) => ({
+  id,
+  position: trimPosition(position),
+  ...(position.type !== 'group' && { expression }),
+  ...(filter !== void 0 && { filter }),
+});
+
 export const elementsReducer = handleActions(
   {
     // TODO: This takes the entire element, which is not necessary, it could just take the id.
@@ -85,7 +101,9 @@ export const elementsReducer = handleActions(
     [actions.setMultiplePositions]: (workpadState, { payload }) =>
       payload.repositionedElements.reduce(
         (previousWorkpadState, { position, pageId, elementId }) =>
-          assignNodeProperties(previousWorkpadState, pageId, elementId, { position }),
+          assignNodeProperties(previousWorkpadState, pageId, elementId, {
+            position: trimPosition(position),
+          }),
         workpadState
       ),
     [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
@@ -97,21 +115,33 @@ export const elementsReducer = handleActions(
       if (pageIndex < 0) {
         return workpadState;
       }
-      return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
+      return push(
+        workpadState,
+        ['pages', pageIndex, getLocation(element.position.type)],
+        trimElement(element)
+      );
     },
     [actions.duplicateElement]: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) {
         return workpadState;
       }
-      return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
+      return push(
+        workpadState,
+        ['pages', pageIndex, getLocation(element.position.type)],
+        trimElement(element)
+      );
     },
     [actions.rawDuplicateElement]: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) {
         return workpadState;
       }
-      return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
+      return push(
+        workpadState,
+        ['pages', pageIndex, getLocation(element.position.type)],
+        trimElement(element)
+      );
     },
     [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);

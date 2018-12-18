@@ -112,6 +112,17 @@ export function getElements(state, pageId, withAst = true) {
   return elements.map(appendAst);
 }
 
+const augment = type => n => ({
+  ...n,
+  position: { ...n.position, type },
+  ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
+});
+
+const getNodesOfPage = page =>
+  get(page, 'elements')
+    .map(augment('element'))
+    .concat((get(page, 'groups') || []).map(augment('group')));
+
 // todo unify or DRY up with `getElements`
 export function getNodes(state, pageId, withAst = true) {
   const id = pageId || getSelectedPage(state);
@@ -120,7 +131,7 @@ export function getNodes(state, pageId, withAst = true) {
   }
 
   const page = getPageById(state, id);
-  const elements = get(page, 'elements').concat(get(page, 'groups') || []);
+  const elements = getNodesOfPage(page);
 
   if (!elements) {
     return [];
