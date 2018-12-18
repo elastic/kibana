@@ -9,7 +9,7 @@ export interface BucketAgg<T = string> {
   doc_count: number;
 }
 
-declare module 'elasticsearch' {
+declare module '@elastic/elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
   export interface AggregationSearchResponse<T, U = void>
     extends SearchResponse<T> {
