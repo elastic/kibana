@@ -67,8 +67,8 @@ const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
         sourceId,
         timerange: {
           interval: '12h',
-          from: endDate,
-          to: startDate,
+          from: startDate,
+          to: endDate,
         },
         pagination: {
           limit,

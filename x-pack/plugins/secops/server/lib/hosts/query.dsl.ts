@@ -30,8 +30,8 @@ export const buildQuery = (options: HostsRequestOptions) => {
     {
       range: {
         [options.sourceConfiguration.fields.timestamp]: {
-          gte: to,
-          lte: from,
+          gte: from,
+          lte: to,
         },
       },
     },
