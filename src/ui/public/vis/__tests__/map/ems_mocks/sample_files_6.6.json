@@ -23,7 +23,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -429,7 +429,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/australia_states_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -628,7 +628,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/canada_provinces_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -907,7 +907,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/china_provinces_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -1265,7 +1265,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/finland_regions_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -1633,7 +1633,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/france_departments_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -1983,7 +1983,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/germany_states_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -2327,7 +2327,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/ireland_counties_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -2636,7 +2636,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/japan_prefectures_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -3002,7 +3002,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/netherlands_provinces_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -3308,7 +3308,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/norway_counties_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -3670,7 +3670,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/spain_provinces_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -4001,7 +4001,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/sweden_counties_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -4310,7 +4310,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/switzerland_cantons_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -4826,7 +4826,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/uk_subdivisions_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -5073,7 +5073,7 @@
       ],
       "formats": [
         {
-          "format": "topojson",
+          "type": "topojson",
           "url": "https://vector-staging.maps.elastic.co/files/usa_counties_v2.topo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -5440,7 +5440,7 @@
       ],
       "formats": [
         {
-          "format": "geojson",
+          "type": "geojson",
           "url": "https://vector-staging.maps.elastic.co/files/usa_states_v1.geo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }
@@ -5730,7 +5730,7 @@
       ],
       "formats": [
         {
-          "format": "topojson",
+          "type": "topojson",
           "url": "https://vector-staging.maps.elastic.co/files/usa_zip_codes_v2.topo.json?elastic_tile_service_tos=agree",
           "legacy_default": true
         }

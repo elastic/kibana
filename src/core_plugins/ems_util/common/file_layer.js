@@ -41,6 +41,7 @@ export class FileLayer {
   getFieldsInLanguage() {
     return this._config.fields.map(field => {
       return {
+        type: field.type,
         name: field.id,
         description: this._emsClient.getValueInLanguage(field.label)
       };
