@@ -29,6 +29,7 @@ import { FORECAST_REQUEST_STATE } from 'plugins/ml/../common/constants/states';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { isTimeSeriesViewJob } from '../../../../../../common/util/job_utils';
 
 const MAX_FORECASTS = 500;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -160,22 +161,24 @@ class ForecastsTableUI extends Component {
           />)}
           iconType="iInCircle"
         >
-          <p>
-            <FormattedMessage
-              id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsDescription"
-              defaultMessage="To run a forecast, open the {singleMetricViewerLink}"
-              values={{
-                singleMetricViewerLink: (
-                  <EuiLink onClick={() => this.openSingleMetricView()}>
-                    <FormattedMessage
-                      id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsDescription.linkText"
-                      defaultMessage="Single Metric Viewer"
-                    />
-                  </EuiLink>
-                )
-              }}
-            />
-          </p>
+          {isTimeSeriesViewJob(this.props.job) &&
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsDescription"
+                defaultMessage="To run a forecast, open the {singleMetricViewerLink}"
+                values={{
+                  singleMetricViewerLink: (
+                    <EuiLink onClick={() => this.openSingleMetricView()}>
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsDescription.linkText"
+                        defaultMessage="Single Metric Viewer"
+                      />
+                    </EuiLink>
+                  )
+                }}
+              />
+            </p>
+          }
         </EuiCallOut>
       );
     }

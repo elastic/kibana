@@ -11,7 +11,9 @@ import { templateFromReactComponent } from '../../../public/lib/template_from_re
 
 const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
   const handleChange = () => onValueChange(!argValue);
-  if (typeof argValue !== 'boolean') renderError();
+  if (typeof argValue !== 'boolean') {
+    renderError();
+  }
   return <EuiSwitch id={argId} checked={argValue} onChange={handleChange} />;
 };
 
