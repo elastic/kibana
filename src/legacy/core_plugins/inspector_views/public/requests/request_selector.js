@@ -107,7 +107,6 @@ class RequestSelector extends Component {
         repositionOnScroll
       >
         <EuiContextMenuPanel
-          className="insRequestSelector__menuPanel"
           items={this.props.requests.map(this.renderRequestDropdownItem)}
         />
       </EuiPopover>

@@ -13,6 +13,8 @@ exports[`NewCalendar Renders new calendar form 1`] = `
   >
     <CalendarForm
       calendarId=""
+      canCreateCalendar={true}
+      canDeleteCalendar={true}
       description=""
       eventsList={Array []}
       groupIds={Array []}
