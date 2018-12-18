@@ -11,7 +11,7 @@
           i18n-values="{ pageTitle: ui.pageTitle }"
         ></h3>
 
-        <div  class="euiCallOut euiCallOut--warning">
+        <div ng-if="displayQueryWarning === true" class="euiCallOut euiCallOut--warning">
             <div class="euiCallOutHeader">
               <svg class="euiIcon euiCallOutHeader__icon euiIcon--medium" xmlns="http://www.w3.org/2000/svg"
                   width="16" height="16" viewBox="0 0 16 16">
@@ -171,7 +171,7 @@
                       class="euiButton__content"
                       i18n-id="xpack.ml.newJob.simple.recognize.createJobButtonLabel"
                       i18n-default-message="Create {numberOfJobs, plural, one {Job} other {Jobs}}"
-                      i18n-values="{ numberOfJobs: ui.numberOfJobs === 1 }"
+                      i18n-values="{ numberOfJobs: ui.numberOfJobs }"
                     ></span>
                   </button>
 
@@ -189,7 +189,7 @@
                 <div ng-show="overallState === SAVE_STATE.SAVED || overallState === SAVE_STATE.PARTIAL_FAILURE">
                   <h3 ng-if="overallState === SAVE_STATE.SAVED" class="euiTitle euiTitle--large">
                     <span
-                      i18n-id="xpack.ml.newJob.simple.recognize.jobsCreatedLabel"
+                      i18n-id="xpack.ml.newJob.simple.recognize.jobsCreatedTitle"
                       i18n-default-message="Jobs created"
                     ></span>
                     <i
@@ -201,7 +201,7 @@
 
                   <h3 ng-if="overallState === SAVE_STATE.PARTIAL_FAILURE" class="euiTitle euiTitle--large">
                     <span
-                      i18n-id="xpack.ml.newJob.simple.recognize.someJobsCreationFailedLabel"
+                      i18n-id="xpack.ml.newJob.simple.recognize.someJobsCreationFailedTitle"
                       i18n-default-message="Some jobs failed to be created"
                     ></span>
                     <i
@@ -227,11 +227,11 @@
                   <a
                     href='{{resultsUrl}}'
                     ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
-                    aria-label="{{ ::'xpack.ml.newJob.simple.recognize.viewResultsLinkTextAriaLabel' | i18n: {defaultMessage: 'View Results'} }}"
+                    aria-label="{{ ::'xpack.ml.newJob.simple.recognize.viewResultsAriaLabel' | i18n: {defaultMessage: 'View Results'} }}"
                     class="euiButton euiButton--primary euiButton--small euiButton--fill">
                     <span
                       class="euiButton__content"
-                      i18n-id="xpack.ml.newJob.simple.recognize.viewResultsLinkTextLabel"
+                      i18n-id="xpack.ml.newJob.simple.recognize.viewResultsLinkText"
                       i18n-default-message="View Results"
                     ></span>
                   </a>
@@ -240,7 +240,7 @@
                 <div ng-show="overallState === SAVE_STATE.FAILED">
                   <h3 class="euiTitle euiTitle--large">
                     <span
-                      i18n-id="xpack.ml.newJob.simple.recognize.jobsCreationFailedLabel"
+                      i18n-id="xpack.ml.newJob.simple.recognize.jobsCreationFailedTitle"
                       i18n-default-message="Jobs creation failed"
                     ></span>
                     <i
@@ -272,7 +272,7 @@
         <div class="row charts-container">
           <h4
             class="euiTitle euiTitle--small"
-            i18n-id="xpack.ml.newJob.simple.recognize.jobsLabel"
+            i18n-id="xpack.ml.newJob.simple.recognize.jobsTitle"
             i18n-default-message="Jobs"
           ></h4>
           <div class='jobs-list'>
@@ -347,7 +347,7 @@
                     <i ng-show="obj.saveState === SAVE_STATE.NOT_SAVED" aria-label="{{ ::'xpack.ml.newJob.simple.recognize.results.notSavedAriaLabel' | i18n: {defaultMessage: 'Not saved'} }}" ></i>
                     <i ng-show="obj.saveState === SAVE_STATE.FAILED" style="color:red;" class="fa fa-remove" aria-label="{{ ::'xpack.ml.newJob.simple.recognize.results.saveFailedAriaLabel' | i18n: {defaultMessage: 'Save failed'} }}" ></i>
                     <i ng-show="obj.saveState === SAVE_STATE.SAVING" class="fa fa-spinner fa-spin" aria-label="{{ ::'xpack.ml.newJob.simple.recognize.results.savingAriaLabel' | i18n: {defaultMessage: 'Saving'} }}" ></i>
-                    <i ng-show="obj.saveState === SAVE_STATE.SAVED  && !obj.exists" style="color:green;" class="fa fa-check" aria-label="{{ ::'xpack.ml.newJob.simple.recognize.results.savingAriaLabel' | i18n: {defaultMessage: 'Saving'} }}" ></i>
+                    <i ng-show="obj.saveState === SAVE_STATE.SAVED  && !obj.exists" style="color:green;" class="fa fa-check" aria-label="{{ ::'xpack.ml.newJob.simple.recognize.results.savedAriaLabel' | i18n: {defaultMessage: 'Saved'} }}" ></i>
                     <i ng-show="obj.saveState === SAVE_STATE.SAVED && obj.exists" style="color:#BBBBBB;" class="fa fa-check" aria-label="{{ ::'xpack.ml.newJob.simple.recognize.results.alreadySavedAriaLabel' | i18n: {defaultMessage: 'Already saved'} }}" ></i>
                   </div>
                 </div>

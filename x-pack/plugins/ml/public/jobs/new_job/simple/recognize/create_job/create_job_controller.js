@@ -324,7 +324,7 @@ module
                   job.datafeedState = SAVE_STATE.FAILED;
                   job.errors.push(
                     i18n('xpack.ml.newJob.simple.recognize.datafeed.couldNotSaveDatafeedErrorMessage', {
-                      defaultMessage: 'Could not save datafeed ${datafeedId}',
+                      defaultMessage: 'Could not save datafeed {datafeedId}',
                       values: { datafeedId }
                     })
                   );
@@ -537,7 +537,7 @@ module
       if (isJobIdValid(label) === false) {
         valid = false;
         checks.jobLabel.valid = false;
-        const msg = i18n('xpack.ml.newJob.simple.recognize.jobLabelValidationDescription', {
+        const msg = i18n('xpack.ml.newJob.simple.recognize.jobLabelAllowedCharactersDescription', {
           defaultMessage: 'Job label can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
           'must start and end with an alphanumeric character'
         });
@@ -547,7 +547,7 @@ module
         if (isJobIdValid(group) === false) {
           valid = false;
           checks.groupIds.valid = false;
-          const msg = i18n('xpack.ml.newJob.simple.recognize.jobGroupValidationDescription', {
+          const msg = i18n('xpack.ml.newJob.simple.recognize.jobGroupAllowedCharactersDescription', {
             defaultMessage: 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
             'must start and end with an alphanumeric character'
           });
