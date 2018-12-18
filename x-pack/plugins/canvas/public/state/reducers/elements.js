@@ -30,7 +30,9 @@ function assignNodeProperties(workpadState, pageId, nodeId, props) {
   const nodesPath = ['pages', pageIndex, location];
   const nodeIndex = get(workpadState, nodesPath, []).findIndex(node => node.id === nodeId);
 
-  if (pageIndex === -1 || nodeIndex === -1) return workpadState;
+  if (pageIndex === -1 || nodeIndex === -1) {
+    return workpadState;
+  }
 
   // remove any AST value from the element caused by https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this after a bit of time
@@ -46,13 +48,21 @@ function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
   const from = nodeIndex;
 
   const to = (function() {
-    if (movement < Infinity && movement > -Infinity) return nodeIndex + movement;
-    if (movement === Infinity) return nodes.length - 1;
-    if (movement === -Infinity) return 0;
+    if (movement < Infinity && movement > -Infinity) {
+      return nodeIndex + movement;
+    }
+    if (movement === Infinity) {
+      return nodes.length - 1;
+    }
+    if (movement === -Infinity) {
+      return 0;
+    }
     throw new Error('Invalid element layer movement');
   })();
 
-  if (to > nodes.length - 1 || to < 0) return workpadState;
+  if (to > nodes.length - 1 || to < 0) {
+    return workpadState;
+  }
 
   // Common
   const newNodes = nodes.slice(0);
@@ -84,22 +94,30 @@ export const elementsReducer = handleActions(
     },
     [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
       return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
     },
     [actions.duplicateElement]: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
       return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
     },
     [actions.rawDuplicateElement]: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
       return push(workpadState, ['pages', pageIndex, getLocation(element.position.type)], element);
     },
     [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
 
       const nodeIndices = elementIds
         .map(nodeId => {

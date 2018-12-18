@@ -34,7 +34,9 @@ const mapDispatchToProps = dispatch => {
 };
 
 const getRootElementId = (lookup, id) => {
-  if (!lookup.has(id)) return null;
+  if (!lookup.has(id)) {
+    return null;
+  }
 
   const element = lookup.get(id);
   return element.parent && element.parent.subtype !== 'adHocGroup'
@@ -49,12 +51,16 @@ export const WorkpadPage = compose(
   ),
   withProps(({ isSelected, animation }) => {
     function getClassName() {
-      if (animation) return animation.name;
+      if (animation) {
+        return animation.name;
+      }
       return isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
     }
 
     function getAnimationStyle() {
-      if (!animation) return {};
+      if (!animation) {
+        return {};
+      }
       return {
         animationDirection: animation.direction,
         // TODO: Make this configurable
@@ -98,8 +104,9 @@ export const WorkpadPage = compose(
         let element = null;
         if (elementLookup.has(shape.id)) {
           element = elementLookup.get(shape.id);
-          if (selectedElementIds.indexOf(shape.id) > -1)
+          if (selectedElementIds.indexOf(shape.id) > -1) {
             selectedElements.push({ ...element, id: shape.id });
+          }
         }
         // instead of just combining `element` with `shape`, we make property transfer explicit
         return element ? { ...shape, filter: element.filter } : shape;
@@ -114,7 +121,9 @@ export const WorkpadPage = compose(
         },
         remove: () => {
           // currently, handle the removal of one element, exploiting multiselect subsequently
-          if (selectedElementIds.length) removeElements(page.id)(selectedElementIds);
+          if (selectedElementIds.length) {
+            removeElements(page.id)(selectedElementIds);
+          }
         },
         copyElements: () => {
           if (selectedElements.length) {
@@ -132,7 +141,9 @@ export const WorkpadPage = compose(
         pasteElements: () => {
           const elements = JSON.parse(getClipboardData());
           const clonedElements = elements && cloneSubgraphs(elements);
-          if (clonedElements) clonedElements.map(element => rawDuplicateElement(page.id)(element));
+          if (clonedElements) {
+            clonedElements.map(element => rawDuplicateElement(page.id)(element));
+          }
         },
       };
     }
