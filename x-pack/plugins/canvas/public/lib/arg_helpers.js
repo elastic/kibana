@@ -23,14 +23,20 @@ const isAllowed = type => includes(allowedTypes, type);
 
 export function validateArg(value) {
   const type = getType(value);
-  if (!isAllowed(type)) throw badType();
+  if (!isAllowed(type)) {
+    throw badType();
+  }
   return value;
 }
 
 export function getSimpleArg(name, args) {
-  if (!args[name]) return [];
+  if (!args[name]) {
+    return [];
+  }
   return args[name].map(astVal => {
-    if (!isAllowed(getType(astVal))) throw badType();
+    if (!isAllowed(getType(astVal))) {
+      throw badType();
+    }
     return astVal;
   });
 }

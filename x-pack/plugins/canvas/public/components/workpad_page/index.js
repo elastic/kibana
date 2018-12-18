@@ -28,7 +28,9 @@ const mapDispatchToProps = dispatch => {
 };
 
 const getRootElementId = (lookup, id) => {
-  if (!lookup.has(id)) return null;
+  if (!lookup.has(id)) {
+    return null;
+  }
 
   const element = lookup.get(id);
   return element.parent && element.parent.subtype !== 'adHocGroup'
@@ -43,12 +45,16 @@ export const WorkpadPage = compose(
   ),
   withProps(({ isSelected, animation }) => {
     function getClassName() {
-      if (animation) return animation.name;
+      if (animation) {
+        return animation.name;
+      }
       return isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
     }
 
     function getAnimationStyle() {
-      if (!animation) return {};
+      if (!animation) {
+        return {};
+      }
       return {
         animationDirection: animation.direction,
         // TODO: Make this configurable
@@ -83,7 +89,9 @@ export const WorkpadPage = compose(
       },
       remove: () => {
         // currently, handle the removal of one element, exploiting multiselect subsequently
-        if (selectedElements.length) removeElements(page.id)(selectedElements);
+        if (selectedElements.length) {
+          removeElements(page.id)(selectedElements);
+        }
       },
     };
   }), // Updates states; needs to have both local and global

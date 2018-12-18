@@ -15,7 +15,9 @@ const heap = {};
 let worker = null;
 
 export function getWorker() {
-  if (worker) return worker;
+  if (worker) {
+    return worker;
+  }
   worker = fork(workerPath, {});
 
   // 'exit' happens whether we kill the worker or it just dies.
@@ -40,10 +42,14 @@ export function getWorker() {
         .catch(e => heap[threadId].reject(e));
     }
 
-    if (type === 'msgSuccess' && heap[id]) heap[id].resolve(value);
+    if (type === 'msgSuccess' && heap[id]) {
+      heap[id].resolve(value);
+    }
 
     // TODO: I don't think it is even possible to hit this
-    if (type === 'msgError' && heap[id]) heap[id].reject(new Error(value));
+    if (type === 'msgError' && heap[id]) {
+      heap[id].reject(new Error(value));
+    }
   });
 
   return worker;
@@ -55,7 +61,9 @@ export const thread = ({ onFunctionNotFound, serialize, deserialize }) => {
     const worker = getWorker();
     worker.send({ type: 'getFunctions' });
     worker.on('message', msg => {
-      if (msg.type === 'functionList') resolve(msg.value);
+      if (msg.type === 'functionList') {
+        resolve(msg.value);
+      }
     });
   });
 
@@ -83,8 +91,12 @@ export const thread = ({ onFunctionNotFound, serialize, deserialize }) => {
 
           //
           setTimeout(() => {
-            if (!heap[id]) return; // Looks like this has already been cleared from the heap.
-            if (worker) worker.kill();
+            if (!heap[id]) {
+              return;
+            } // Looks like this has already been cleared from the heap.
+            if (worker) {
+              worker.kill();
+            }
 
             // The heap will be cleared because the reject on heap will delete its own id
             heap[id].reject(new Error('Request timed out'));

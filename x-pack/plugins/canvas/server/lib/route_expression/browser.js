@@ -24,7 +24,9 @@ export const browser = ({ socket, serialize, deserialize }) => {
               const { value } = resp;
               // cast error strings back into error instances
               const err = value instanceof Error ? value : new Error(value);
-              if (value.stack) err.stack = value.stack;
+              if (value.stack) {
+                err.stack = value.stack;
+              }
               // Reject's with a legit error. Check! Environments should always reject with an error when something bad happens
               reject(err);
             } else {

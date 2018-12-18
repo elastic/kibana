@@ -24,8 +24,9 @@ export const createHandlers = (request, server) => {
       if (isSecurityEnabled(server)) {
         try {
           const authenticationResult = await server.plugins.security.authenticate(request);
-          if (!authenticationResult.succeeded())
+          if (!authenticationResult.succeeded()) {
             throw boom.unauthorized(authenticationResult.error);
+          }
         } catch (e) {
           // if authenticate throws, show error in development
           if (process.env.NODE_ENV !== 'production') {

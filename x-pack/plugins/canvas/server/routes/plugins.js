@@ -14,7 +14,9 @@ export function plugins(server) {
     handler: function(request, reply) {
       const { type } = request.query;
 
-      if (!pluginPaths[type]) return reply({ error: 'Invalid type' }).code(400);
+      if (!pluginPaths[type]) {
+        return reply({ error: 'Invalid type' }).code(400);
+      }
 
       reply(getPluginStream(type));
     },

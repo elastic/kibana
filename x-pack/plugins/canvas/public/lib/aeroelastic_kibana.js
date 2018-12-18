@@ -16,7 +16,9 @@ export const aeroelastic = {
   },
 
   createStore(initialState, onChangeCallback = () => {}, page) {
-    if (stores.has(page)) throw new Error('Only a single aeroelastic store per page should exist');
+    if (stores.has(page)) {
+      throw new Error('Only a single aeroelastic store per page should exist');
+    }
 
     stores.set(page, aero.state.createStore(initialState, onChangeCallback));
 
@@ -30,12 +32,16 @@ export const aeroelastic = {
   },
 
   removeStore(page) {
-    if (stores.has(page)) stores.delete(page);
+    if (stores.has(page)) {
+      stores.delete(page);
+    }
   },
 
   getStore(page) {
     const store = stores.get(page);
-    if (!store) throw new Error('An aeroelastic store should exist for page ' + page);
+    if (!store) {
+      throw new Error('An aeroelastic store should exist for page ' + page);
+    }
 
     return store.getCurrentState();
   },

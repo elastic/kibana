@@ -58,10 +58,15 @@ const cursorPosition = selectReduce((previous, position) => position || previous
 
 const mouseButton = selectReduce(
   (prev, next) => {
-    if (!next) return prev;
+    if (!next) {
+      return prev;
+    }
     const { event, uid } = next;
-    if (event === 'mouseDown') return { down: true, uid };
-    else return event === 'mouseUp' ? { down: false, uid } : prev;
+    if (event === 'mouseDown') {
+      return { down: true, uid };
+    } else {
+      return event === 'mouseUp' ? { down: false, uid } : prev;
+    }
   },
   { down: false, uid: null }
 )(mouseButtonEvent);
@@ -98,8 +103,11 @@ const mouseButtonStateTransitions = (state, mouseIsDown, movedAlready) => {
     case 'up':
       return mouseIsDown ? 'downed' : 'up';
     case 'downed':
-      if (mouseIsDown) return movedAlready ? 'dragging' : 'downed';
-      else return 'up';
+      if (mouseIsDown) {
+        return movedAlready ? 'dragging' : 'downed';
+      } else {
+        return 'up';
+      }
 
     case 'dragging':
       return mouseIsDown ? 'dragging' : 'up';

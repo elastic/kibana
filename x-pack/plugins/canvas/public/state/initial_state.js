@@ -31,7 +31,9 @@ export const getInitialState = path => {
     },
   };
 
-  if (!path) return state;
+  if (!path) {
+    return state;
+  }
 
   return get(state, path);
 };

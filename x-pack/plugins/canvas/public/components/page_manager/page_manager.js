@@ -44,7 +44,9 @@ export class PageManager extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     // scrolls to the active page on the next tick, otherwise new pages don't scroll completely into view
-    if (prevProps.selectedPage !== this.props.selectedPage) setTimeout(this.scrollToActivePage, 0);
+    if (prevProps.selectedPage !== this.props.selectedPage) {
+      setTimeout(this.scrollToActivePage, 0);
+    }
   }
 
   componentWillUnmount() {
@@ -55,7 +57,9 @@ export class PageManager extends React.PureComponent {
     if (this.activePageRef && this.pageListRef) {
       // not all target browsers support element.scrollTo
       // TODO: replace this with something more cross-browser, maybe scrollIntoView
-      if (!this.pageListRef.scrollTo) return;
+      if (!this.pageListRef.scrollTo) {
+        return;
+      }
 
       const pageOffset = this.activePageRef.offsetLeft;
       const {
@@ -93,13 +97,17 @@ export class PageManager extends React.PureComponent {
   doDelete = () => {
     const { previousPage, removePage, deleteId, selectedPage } = this.props;
     this.resetDelete();
-    if (deleteId === selectedPage) previousPage();
+    if (deleteId === selectedPage) {
+      previousPage();
+    }
     removePage(deleteId);
   };
 
   onDragEnd = ({ draggableId: pageId, source, destination }) => {
     // dropped outside the list
-    if (!destination) return;
+    if (!destination) {
+      return;
+    }
 
     const position = destination.index - source.index;
 
@@ -119,7 +127,9 @@ export class PageManager extends React.PureComponent {
               page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
             }`}
             ref={el => {
-              if (page.id === selectedPage) this.activePageRef = el;
+              if (page.id === selectedPage) {
+                this.activePageRef = el;
+              }
               provided.innerRef(el);
             }}
             {...provided.draggableProps}

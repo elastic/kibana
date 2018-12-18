@@ -19,7 +19,11 @@ export const resolveFromArgs = (args, defaultDataurl = null) => {
 };
 
 export const resolveWithMissingImage = (img, alt = null) => {
-  if (isValid(img)) return img;
-  if (img === null) return alt;
+  if (isValid(img)) {
+    return img;
+  }
+  if (img === null) {
+    return alt;
+  }
   return missingImage;
 };

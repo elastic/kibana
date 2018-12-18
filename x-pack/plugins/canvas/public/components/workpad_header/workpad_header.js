@@ -33,7 +33,9 @@ export const WorkpadHeader = ({
   showElementModal,
 }) => {
   const keyHandler = action => {
-    if (action === 'EDITING') toggleWriteable();
+    if (action === 'EDITING') {
+      toggleWriteable();
+    }
   };
 
   const elementAdd = (
@@ -61,8 +63,11 @@ export const WorkpadHeader = ({
 
   let readOnlyToolTip = '';
 
-  if (!canUserWrite) readOnlyToolTip = "You don't have permission to edit this workpad";
-  else readOnlyToolTip = isWriteable ? 'Hide editing controls' : 'Show editing controls';
+  if (!canUserWrite) {
+    readOnlyToolTip = "You don't have permission to edit this workpad";
+  } else {
+    readOnlyToolTip = isWriteable ? 'Hide editing controls' : 'Show editing controls';
+  }
 
   return (
     <div>

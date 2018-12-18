@@ -35,7 +35,9 @@ export function interpretProvider(config) {
   }
 
   async function invokeChain(chainArr, context) {
-    if (!chainArr.length) return Promise.resolve(context);
+    if (!chainArr.length) {
+      return Promise.resolve(context);
+    }
 
     const chain = clone(chainArr);
     const link = chain.shift(); // Every thing in the chain will always be a function right?
@@ -61,7 +63,9 @@ export function interpretProvider(config) {
       const newContext = await invokeFunction(fnDef, context, resolvedArgs);
 
       // if something failed, just return the failure
-      if (getType(newContext) === 'error') return newContext;
+      if (getType(newContext) === 'error') {
+        return newContext;
+      }
 
       // Continue re-invoking chain until it's empty
       return await invokeChain(chain, newContext);
@@ -112,8 +116,9 @@ export function interpretProvider(config) {
       (argAsts, argAst, argName) => {
         const argDef = getByAlias(argDefs, argName);
         // TODO: Implement a system to allow for undeclared arguments
-        if (!argDef)
+        if (!argDef) {
           throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
+        }
 
         argAsts[argDef.name] = (argAsts[argDef.name] || []).concat(argAst);
         return argAsts;
@@ -142,8 +147,9 @@ export function interpretProvider(config) {
     const argAstsWithDefaults = reduce(
       argDefs,
       (argAsts, argDef, argName) => {
-        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined')
+        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined') {
           argAsts[argName] = [fromExpression(argDef.default, 'argument')];
+        }
 
         return argAsts;
       },
@@ -157,7 +163,9 @@ export function interpretProvider(config) {
         return async (ctx = context) => {
           const newContext = await interpret(argAst, ctx);
           // This is why when any sub-expression errors, the entire thing errors
-          if (getType(newContext) === 'error') throw newContext.error;
+          if (getType(newContext) === 'error') {
+            throw newContext.error;
+          }
           return cast(newContext, argDefs[argName].types);
         };
       });
@@ -169,7 +177,9 @@ export function interpretProvider(config) {
     const resolvedArgValues = await Promise.all(
       argNames.map(argName => {
         const interpretFns = resolveArgFns[argName];
-        if (!argDefs[argName].resolve) return interpretFns;
+        if (!argDefs[argName].resolve) {
+          return interpretFns;
+        }
         return Promise.all(interpretFns.map(fn => fn()));
       })
     );
@@ -178,7 +188,9 @@ export function interpretProvider(config) {
 
     // Just return the last unless the argument definition allows multiple
     const resolvedArgs = mapValues(resolvedMultiArgs, (argValues, argName) => {
-      if (argDefs[argName].multi) return argValues;
+      if (argDefs[argName].multi) {
+        return argValues;
+      }
       return last(argValues);
     });
 

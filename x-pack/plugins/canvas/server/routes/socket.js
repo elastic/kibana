@@ -40,7 +40,9 @@ export function socketApi(server) {
   io.on('connection', async socket => {
     // 'request' is the modified hapi request object
     const request = await getModifiedRequest(server, socket);
-    if (!request) return; // do nothing without the request object
+    if (!request) {
+      return;
+    } // do nothing without the request object
 
     const types = typesRegistry.toJS();
     const { serialize, deserialize } = serializeProvider(types);
