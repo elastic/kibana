@@ -5,7 +5,6 @@
  */
 
 import { createSelector } from 'reselect';
-
 import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
 import {

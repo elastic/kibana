@@ -6,7 +6,7 @@
 
 import { createSelector } from 'reselect';
 
-import { fromKueryExpression } from 'ui/kuery';
+import { fromKueryExpression } from '@kbn/es-query';
 
 import { WaffleFilterState } from './reducer';
 
