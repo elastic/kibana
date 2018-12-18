@@ -803,17 +803,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-<<<<<<< HEAD
 "@elastic/eui@5.8.1":
   version "5.8.1"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.8.1.tgz#33467c059699a4626256d7197451400500831a66"
   integrity sha512-y1hn27p9lm5P1sru8jHFbdKx6FzG5mQXc2cyS2Fc/T0SVH1n9Pj44OilM/NyVQNiR2pHKat+Hqc2SRrCcpeDmQ==
-=======
-"@elastic/eui@5.6.2":
-  version "5.6.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.2.tgz#c3308591f83167a0f7e94909a75af45d4d043047"
-  integrity sha512-gN0HtzAVu37RuHp2iYbDBEFfjTp1mdbR3lRWjP5eA88L+EeA+JVRxdy7Tgit+P73ZCyyLgAWlcQxMJIREqzXeg==
->>>>>>> upstream/master
   dependencies:
     "@types/numeral" "^0.0.25"
     classnames "^2.2.5"

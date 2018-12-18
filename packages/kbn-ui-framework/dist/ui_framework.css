@@ -539,6 +539,25 @@ main {
 .text-center > .kuiButtonGroup {
   display: inline-block; }
 
+.kuiCollapseButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  line-height: 1;
+  font-size: 16px;
+  color: #2D2D2D !important;
+  /* 1 */
+  cursor: pointer;
+  opacity: 0.35; }
+  .kuiCollapseButton:hover {
+    opacity: 1; }
+  .theme-dark .kuiCollapseButton {
+    color: #DDD !important;
+    /* 1 */ }
+
 .kuiExpression {
   padding: 20px;
   white-space: nowrap; }
