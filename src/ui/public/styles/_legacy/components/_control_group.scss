@@ -4,10 +4,10 @@
   flex-direction: row;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: $padding-base-vertical $padding-base-horizontal;
+  padding: $euiSizeXS $euiSize;
 
   > * {
-    padding-right: $padding-base-horizontal;
+    padding-right: $euiSize;
     flex: 0 0 auto;
 
     &:last-child {
@@ -25,13 +25,13 @@
     }
 
     > :first-child {
-      border-bottom-left-radius: $input-border-radius-base;
-      border-top-left-radius: $input-border-radius-base;
+      border-bottom-left-radius: $euiBorderRadius;
+      border-top-left-radius: $euiBorderRadius;
     }
 
     > :last-child {
-      border-bottom-right-radius: $input-border-radius-base;
-      border-top-right-radius: $input-border-radius-base;
+      border-bottom-right-radius: $euiBorderRadius;
+      border-top-right-radius: $euiBorderRadius;
     }
   }
 

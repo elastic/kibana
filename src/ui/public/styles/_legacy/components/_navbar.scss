@@ -1,22 +1,21 @@
 navbar {
   @extend .control-group;
 
-  max-height: $navbar-collapse-max-height;
-  margin-bottom: $navbar-margin-bottom;
-  // top and bottom padding are normally calculated and stored in $navbar-padding-vertical, but flexbox
-  padding: 0 $navbar-padding-horizontal 6px;
-  color: $navbar-default-color;
-  background-color: $navbar-default-bg;
+  max-height: 340px;
+  margin-bottom: 0;
+  padding: 0 $euiSizeS $euiSizeXS;
+  color: $euiColorDarkShade;
+  background-color: $euiColorLightShade;
   border: none;
-  z-index: $zindex-navbar;
+  z-index: $euiZLevel1;
 
   > * {
-    padding-right: $navbar-padding-horizontal;
+    padding-right: $euiSizeS;
   }
 
   .navbar-text {
-    margin-top: $navbar-margin;
-    margin-bottom: $navbar-margin;
+    margin-top: $euiSizeXS;
+    margin-bottom: $euiSizeXS;
   }
 
   // the "brand" that is displayed, usually on the left of the navbar
@@ -24,35 +23,32 @@ navbar {
     @include euiTextTruncate;
 
     align-self: center;
-    font-size: $font-size-large;
+    font-size: $euiFontSizeL;
   }
 
   button {
-    color: $navbar-default-link-color;
+    color: $euiColorDarkShade;
     background-color: transparent;
 
-    &:hover {
-      color: $navbar-default-link-hover-color;
-      background-color: $navbar-default-link-hover-bg;
-    }
-
+    &:hover,
     &:focus {
-      color: $navbar-default-link-color;
+      color: $euiColorDarkShade;
       background-color: transparent;
     }
 
     &:active, &.active {
-      color: $navbar-default-link-active-color;
-      background-color: $navbar-default-link-active-bg;
+      color: $euiColorDarkestShade;
+      background-color: transparent;
       box-shadow: none;
+
       &:focus {
         outline: none;
       }
     }
 
     &[disabled] {
-      color: $navbar-default-link-disabled-color;
-      background-color: $navbar-default-link-disabled-bg;
+      color: $euiColorMediumShade;
+      background-color: transparent;
     }
   }
 

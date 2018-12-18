@@ -64,11 +64,12 @@
   height: 18px;
   margin-top: $euiSizeS;
 }
+
 .kbnGlobalNavLink__euiIcon {
   svg {
-    width: 20px;
-    height: 20px;
+    @include size($euiSize + $euiSizeXS);
   }
+
   .euiIcon--app .euiIcon__fillSecondary {
     fill: $euiColorGhost;
   }
