@@ -10,7 +10,10 @@ import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
-import { loadOverviewCharts } from '../../services/rest/apm/transaction_groups';
+import {
+  loadOverviewCharts,
+  loadOverviewChartsForAllTypes
+} from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { getUrlParams, IUrlParams } from '../urlParams';
@@ -64,6 +67,29 @@ export function TransactionOverviewChartsRequest({ urlParams, render }: Props) {
       id={ID}
       fn={loadOverviewCharts}
       args={[{ serviceName, start, end, transactionType, kuery }]}
+      selector={getTransactionOverviewCharts}
+      render={render}
+    />
+  );
+}
+
+// Ignores transaction type from urlParams and requests charts
+// for ALL transaction types within this service
+export function TransactionOverviewChartsRequestForAllTypes({
+  urlParams,
+  render
+}: Props) {
+  const { serviceName, start, end, kuery } = urlParams;
+
+  if (!(serviceName && start && end)) {
+    return null;
+  }
+
+  return (
+    <Request
+      id={ID}
+      fn={loadOverviewChartsForAllTypes}
+      args={[{ serviceName, start, end, kuery }]}
       selector={getTransactionOverviewCharts}
       render={render}
     />

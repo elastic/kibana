@@ -18,7 +18,7 @@ import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/char
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
 import { MetricsChartDataRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceMetricsCharts';
-import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
+import { TransactionOverviewChartsRequestForAllTypes } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { CPUUsageChart } from './CPUUsageChart';
 import { MemoryUsageChart } from './MemoryUsageChart';
@@ -32,7 +32,7 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
 }) => {
   return (
     <React.Fragment>
-      <TransactionOverviewChartsRequest
+      <TransactionOverviewChartsRequestForAllTypes
         urlParams={urlParams}
         render={({ data }) => (
           <TransactionCharts
