@@ -73,7 +73,9 @@ describe('StubBrowserStorage', () => {
       store.setItem('abc', 'def'); // store size is 6, key.length + val.length
       expect(() => {
         store.setItem('ghi', 'jkl');
-      }).toThrowErrorMatchingInlineSnapshot();
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"something about quota exceeded, browsers are not consistent here"`
+      );
     });
 
     it('allows defining the limit as infinity', () => {
