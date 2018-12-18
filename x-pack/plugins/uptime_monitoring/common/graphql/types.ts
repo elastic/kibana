@@ -285,7 +285,7 @@ export interface Snapshot {
 
   total?: number | null;
 
-  histogram: (HistogramSeries | null)[];
+  histogram?: (HistogramSeries | null)[] | null;
 }
 
 export interface HistogramSeries {

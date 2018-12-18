@@ -68,9 +68,17 @@ const disjunctiveUnion = (keyFun, set1, set2) =>
 const mean = (a, b) => (a + b) / 2;
 
 const shallowEqual = (a, b) => {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  if (a === b) {
+    return true;
+  }
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
   return true;
 };
 

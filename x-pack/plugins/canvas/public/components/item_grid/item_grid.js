@@ -11,11 +11,15 @@ import { last } from 'lodash';
 const defaultPerRow = 6;
 
 export const ItemGrid = ({ items, itemsPerRow, children }) => {
-  if (!items) return null;
+  if (!items) {
+    return null;
+  }
 
   const rows = items.reduce(
     (rows, item) => {
-      if (last(rows).length >= (itemsPerRow || defaultPerRow)) rows.push([]);
+      if (last(rows).length >= (itemsPerRow || defaultPerRow)) {
+        rows.push([]);
+      }
 
       last(rows).push(children({ item }));
 
