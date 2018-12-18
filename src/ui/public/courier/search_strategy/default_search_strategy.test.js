@@ -55,6 +55,11 @@ describe('defaultSearchStrategy', function () {
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
     });
 
+    test('should set ignore_throttled=false when including frozen indices', async () => {
+      await search({ ...searchArgs, includeFrozen: true });
+      expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
+    });
+
   });
 
 });
