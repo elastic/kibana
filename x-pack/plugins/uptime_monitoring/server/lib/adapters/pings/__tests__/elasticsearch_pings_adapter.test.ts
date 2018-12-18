@@ -118,4 +118,85 @@ describe('ElasticsearchPingsAdapter class', () => {
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
   });
+
+  describe('getLatestMonitorDocs', () => {
+    let getLatestSearchMock: (request: any, params: any) => Promise<any>;
+    let expectedGetLatestSearchParams: any;
+    beforeEach(() => {
+      getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsResult);
+      expectedGetLatestSearchParams = {
+        index: 'heartbeat*',
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 100,
+                      lte: 200,
+                    },
+                  },
+                },
+              ],
+              must: [
+                {
+                  term: { 'monitor.id': 'testmonitor' },
+                },
+              ],
+            },
+          },
+          aggs: {
+            by_id: {
+              terms: {
+                field: 'monitor.id',
+              },
+              aggs: {
+                latest: {
+                  top_hits: {
+                    size: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+      mockEsResult = {
+        aggregations: {
+          by_id: {
+            buckets: [
+              {
+                latest: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          '@timestamp': 123456,
+                          monitor: {
+                            id: 'testmonitor',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+    });
+
+    it('returns data in expected shape', async () => {
+      database.search = getLatestSearchMock;
+      const result = await adapter.getLatestMonitorDocs(serverRequest, 100, 200, 'testmonitor');
+      expect(result).toHaveLength(1);
+      expect(result[0].timestamp).toBe(123456);
+      expect(result[0].monitor).not.toBeFalsy();
+      // @ts-ignore monitor will be defined
+      expect(result[0].monitor.id).toBe('testmonitor');
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetLatestSearchParams);
+    });
+  });
 });
