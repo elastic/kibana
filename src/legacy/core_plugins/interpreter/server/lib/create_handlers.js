@@ -27,7 +27,7 @@ export const createHandlers = (request, server) => {
 
   return {
     environment: 'server',
-    // A temporary measure to allow the timelion data source to negotiate secure connections to the Kibana server.
+     // TODO: https://github.com/elastic/kibana/issues/27437 - A temporary measure to allow the timelion data source to negotiate secure connections to the Kibana server, to be removed by 6.7
     // See https://github.com/elastic/kibana/pull/26809 and https://github.com/elastic/kibana/issues/26812
     __dangerouslyUnsupportedSslConfig: server.config().get('server.ssl'),
     serverUri:
