@@ -41,6 +41,6 @@ exports[`ViewMLJob should render component 1`] = `
     }
   }
 >
-  View job
+  View Job
 </Component>
 `;

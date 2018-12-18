@@ -124,7 +124,7 @@ export function asInteger(value: number) {
   return numeral(value).format('0,0');
 }
 
-export function tpmUnit(type: string) {
+export function tpmUnit(type?: string) {
   return type === 'request'
     ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
         defaultMessage: 'rpm'

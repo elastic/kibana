@@ -33,23 +33,6 @@ describe('urlParams', () => {
     });
   });
 
-  it('should check for transactionType in query string first, then in path', () => {
-    const state = urlParamsReducer(
-      {},
-      {
-        type: LOCATION_UPDATE,
-        location: {
-          pathname:
-            'myServiceName/transactions/myTransactionType/myTransactionName/b/c',
-          search:
-            '?transactionId=myTransactionId&detailTab=request&spanId=10&transactionType=query_type'
-        }
-      }
-    );
-
-    expect(state.transactionType).toEqual('query_type');
-  });
-
   it('should handle LOCATION_UPDATE for error section', () => {
     const state = urlParamsReducer(
       {},

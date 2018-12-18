@@ -45,7 +45,7 @@ const setup = () => {
     history: {
       push: jest.fn()
     },
-    urlParams: { transactionType: 'request', serviceName: 'MyServiceName' }
+    urlParams: { transactionType: 'test-type', serviceName: 'MyServiceName' }
   };
 
   const wrapper = shallow(<TransactionOverviewView {...props} />);
@@ -55,19 +55,18 @@ const setup = () => {
 describe('TransactionOverviewView', () => {
   it('should render null if there is no transaction type in the search string', () => {
     const { wrapper } = setup();
+    wrapper.setProps({ urlParams: { serviceName: 'MyServiceName' } });
     expect(wrapper).toMatchInlineSnapshot(`""`);
   });
 
   it('should render with type filter controls', () => {
     const { wrapper } = setup();
-    wrapper.setProps({ location: { search: '?transactionType=test-type' } });
     expect(wrapper).toMatchSnapshot();
   });
 
   it('should render without type filter controls if there is just a single type', () => {
     const { wrapper } = setup();
     wrapper.setProps({
-      location: { search: '?transactionType=test-type' },
       serviceTransactionTypes: ['a']
     });
     expect(wrapper).toMatchSnapshot();

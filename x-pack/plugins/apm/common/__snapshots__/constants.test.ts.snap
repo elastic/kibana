@@ -14,6 +14,18 @@ exports[`Error v2 ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error v2 ERROR_LOG_STACKTRACE 1`] = `undefined`;
 
+exports[`Error v2 METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Error v2 METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
+
+exports[`Error v2 METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
+
+exports[`Error v2 METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Error v2 METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
+
+exports[`Error v2 METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
 exports[`Error v2 PARENT_ID 1`] = `"parentId"`;
 
 exports[`Error v2 PROCESSOR_EVENT 1`] = `"error"`;
