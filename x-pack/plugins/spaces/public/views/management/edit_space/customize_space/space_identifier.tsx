@@ -111,7 +111,8 @@ class SpaceIdentifierUI extends Component<Props, State> {
                 /s/
                 <FormattedMessage
                   id="xpack.spaces.management.spaceIdentifier.spaceIdentifierText"
-                  defaultMessage={identifier || 'awesome-space'}
+                  defaultMessage={'{identifier}'}
+                  values={{ identifier: identifier || 'awesome-space' }}
                 />
               </strong>
             ),
