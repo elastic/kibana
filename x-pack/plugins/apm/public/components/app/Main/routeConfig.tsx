@@ -91,6 +91,8 @@ export const routes = [
     component: ServiceDetails,
     breadcrumb: 'Transactions'
   },
+  // Have to split this out as its own route to prevent duplicate breadcrumbs from both matching
+  // if we use :transactionType? as a single route here
   {
     exact: true,
     path: '/:serviceName/transactions/:transactionType',
