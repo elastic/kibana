@@ -67,8 +67,8 @@ class AnnotationsTable extends Component {
       // Load annotations for the selected job.
       ml.annotations.getAnnotations({
         jobIds: [job.job_id],
-        earliestMs: dataCounts.earliest_record_timestamp,
-        latestMs: dataCounts.latest_record_timestamp,
+        earliestMs: null,
+        latestMs: null,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
       }).then((resp) => {
         this.setState((prevState, props) => ({
@@ -112,7 +112,7 @@ class AnnotationsTable extends Component {
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(dataCounts.latest_record_timestamp).toISOString();
 
-    const _g = rison.encode({
+    const globalSettings = {
       ml: {
         jobIds: [this.props.jobs[0].job_id]
       },
@@ -126,7 +126,7 @@ class AnnotationsTable extends Component {
         to,
         mode: 'absolute'
       }
-    });
+    };
 
     const appState = {
       filters: [],
@@ -145,8 +145,17 @@ class AnnotationsTable extends Component {
           to: new Date(annotation.end_timestamp).toISOString()
         }
       };
+
+      if (annotation.timestamp < dataCounts.earliest_record_timestamp) {
+        globalSettings.time.from = new Date(annotation.timestamp).toISOString();
+      }
+
+      if (annotation.end_timestamp > dataCounts.latest_record_timestamp) {
+        globalSettings.time.to = new Date(annotation.end_timestamp).toISOString();
+      }
     }
 
+    const _g = rison.encode(globalSettings);
     const _a = rison.encode(appState);
 
     const url = `?_g=${_g}&_a=${_a}`;
