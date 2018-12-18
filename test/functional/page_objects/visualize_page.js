@@ -384,8 +384,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickBucket(bucketName, type = 'bucket') {
       const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
       const locator = `[data-test-subj="${testSubject}"] .list-group-menu-item[data-test-subj="${bucketName}"]`;
-      const chart = await find.byCssSelector(locator);
-      await chart.click();
+      await find.clickByCssSelector(locator);
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
