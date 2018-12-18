@@ -60,8 +60,8 @@ export default function navLinksTests({ getService }: TestInvoker) {
           space.id
         );
         switch (scenario.id) {
-          case 'superuser_at_space_1':
-          case 'global_all_at_space_1':
+          case 'superuser_at_space_with_all_features':
+          case 'global_all_at_space_with_all_features':
             expect(uiCapabilities).to.have.property('navLinks');
             expect(uiCapabilities!.navLinks).to.eql({
               apm: true,
@@ -79,23 +79,23 @@ export default function navLinksTests({ getService }: TestInvoker) {
               timelion: true,
             });
             break;
-          case 'superuser_at_space_2':
-          case 'global_all_at_space_2':
+          case 'superuser_at_space_with_no_features':
+          case 'global_all_at_space_with_no_features':
             expect(uiCapabilities).to.have.property('navLinks');
             expect(uiCapabilities!.navLinks).to.eql({
-              apm: true,
-              canvas: true,
-              graph: true,
-              'infra:home': true,
-              'infra:logs': true,
-              'kibana:dashboard': true,
-              'kibana:dev_tools': true,
+              apm: false,
+              canvas: false,
+              graph: false,
+              'infra:home': false,
+              'infra:logs': false,
+              'kibana:dashboard': false,
+              'kibana:dev_tools': false,
               'kibana:discover': false,
               'kibana:management': true,
-              'kibana:visualize': true,
-              ml: true,
-              monitoring: true,
-              timelion: true,
+              'kibana:visualize': false,
+              ml: false,
+              monitoring: false,
+              timelion: false,
             });
             break;
           default:

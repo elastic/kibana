@@ -32,69 +32,83 @@ const GlobalAll: User = {
 export const Users: User[] = [Superuser, GlobalAll];
 
 // these are the spaces that we care about
-const Space1: Space = {
-  id: 'space_1',
-  name: 'space_1',
+const SpaceWithAllFeatures: Space = {
+  id: 'space_with_all_features',
+  name: 'space_with_all_features',
   disabledFeatures: [],
 };
 
-const Space2: Space = {
-  id: 'space_2',
-  name: 'space_2',
-  disabledFeatures: ['discover'],
+const SpaceWithNoFeatures: Space = {
+  id: 'space_with_no_features',
+  name: 'space_with_no_features',
+  disabledFeatures: [
+    'advancedSettings',
+    'apm',
+    'canvas',
+    'dashboard',
+    'dev_tools',
+    'discover',
+    'graph',
+    'infrastructure',
+    'logs',
+    'ml',
+    'monitoring',
+    'timelion',
+    'visualize',
+  ],
 };
 
-export const Spaces: Space[] = [Space1, Space2];
+export const Spaces: Space[] = [SpaceWithAllFeatures, SpaceWithNoFeatures];
 
 interface Scenario {
   user: User;
   space: Space;
 }
 
-interface SuperuserAtSpace1 extends Scenario {
-  id: 'superuser_at_space_1';
+interface SuperuserAtSpaceWithAllFeatures extends Scenario {
+  id: 'superuser_at_space_with_all_features';
 }
-const SuperuserAtSpace1: SuperuserAtSpace1 = {
-  id: 'superuser_at_space_1',
+const SuperuserAtSpaceWithAllFeatures: SuperuserAtSpaceWithAllFeatures = {
+  id: 'superuser_at_space_with_all_features',
   user: Superuser,
-  space: Space1,
+  space: SpaceWithAllFeatures,
 };
 
-interface SuperuserAtSpace2 extends Scenario {
-  id: 'superuser_at_space_2';
+interface SuperuserAtSpaceWithNoFeatures extends Scenario {
+  id: 'superuser_at_space_with_no_features';
 }
-const SuperuserAtSpace2: SuperuserAtSpace2 = {
-  id: 'superuser_at_space_2',
+const SuperuserAtSpaceWithNoFeatures: SuperuserAtSpaceWithNoFeatures = {
+  id: 'superuser_at_space_with_no_features',
   user: Superuser,
-  space: Space2,
+  space: SpaceWithNoFeatures,
 };
 
-interface GlobalAllAtSpace1 extends Scenario {
-  id: 'global_all_at_space_1';
+interface GlobalAllAtSpaceWithAllFeatures extends Scenario {
+  id: 'global_all_at_space_with_all_features';
 }
-const GlobalAllAtSpace1: GlobalAllAtSpace1 = {
-  id: 'global_all_at_space_1',
+const GlobalAllAtSpaceWithAllFeatures: GlobalAllAtSpaceWithAllFeatures = {
+  id: 'global_all_at_space_with_all_features',
   user: GlobalAll,
-  space: Space1,
+  space: SpaceWithAllFeatures,
 };
 
-interface GlobalAllAtSpace2 extends Scenario {
-  id: 'global_all_at_space_2';
+interface GlobalAllAtSpaceWithNoFeatures extends Scenario {
+  id: 'global_all_at_space_with_no_features';
 }
-const GlobalAllAtSpace2: GlobalAllAtSpace2 = {
-  id: 'global_all_at_space_2',
+const GlobalAllAtSpaceWithNoFeatures: GlobalAllAtSpaceWithNoFeatures = {
+  id: 'global_all_at_space_with_no_features',
   user: GlobalAll,
-  space: Space2,
+  space: SpaceWithNoFeatures,
 };
 
 export type UserAtSpaceScenarios =
-  | SuperuserAtSpace1
-  | SuperuserAtSpace2
-  | GlobalAllAtSpace1
-  | GlobalAllAtSpace2;
+  | SuperuserAtSpaceWithAllFeatures
+  | SuperuserAtSpaceWithNoFeatures
+  | GlobalAllAtSpaceWithAllFeatures
+  | GlobalAllAtSpaceWithNoFeatures;
 export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
-  SuperuserAtSpace1,
-  SuperuserAtSpace2,
-  GlobalAllAtSpace1,
-  GlobalAllAtSpace2,
+  SuperuserAtSpaceWithAllFeatures,
+  SuperuserAtSpaceWithNoFeatures,
+  GlobalAllAtSpaceWithAllFeatures,
+  GlobalAllAtSpaceWithNoFeatures,
 ];
