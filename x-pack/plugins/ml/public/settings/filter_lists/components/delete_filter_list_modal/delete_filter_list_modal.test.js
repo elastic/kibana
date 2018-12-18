@@ -25,14 +25,15 @@ const testSelectedLists = [
 ];
 
 const testProps = {
-  selectedFilterLists: testSelectedLists
+  selectedFilterLists: testSelectedLists,
+  canDeleteFilter: true
 };
 
 describe('DeleteFilterListModal', () => {
 
   test('renders as disabled delete button when no lists selected', () => {
     const component = shallow(
-      <DeleteFilterListModal />
+      <DeleteFilterListModal {...testProps}/>
     );
 
     expect(component).toMatchSnapshot();
