@@ -26,8 +26,11 @@ export const TimeFilter = ({ compact, filter, setFilter, commit }) => {
     commit(filter);
   }
 
-  if (compact) return <TimePickerMini from={from} to={to} onSelect={doSetFilter} />;
-  else return <TimePicker from={from} to={to} onSelect={doSetFilter} />;
+  if (compact) {
+    return <TimePickerMini from={from} to={to} onSelect={doSetFilter} />;
+  } else {
+    return <TimePicker from={from} to={to} onSelect={doSetFilter} />;
+  }
 };
 
 TimeFilter.propTypes = {

@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AssignmentActionType, AssignmentOptions, KueryBarProps, Table } from './table';
-export {
-  AssignmentControlSchema,
-  beatsListAssignmentOptions,
-  tagConfigAssignmentOptions,
-} from './assignment_schema';
-export { ControlBar } from './controls';
+export { beatsListActions, tagConfigActions } from './action_schema';
+export { AssignmentActionType, KueryBarProps, Table } from './table';
 export {
   ActionDefinition,
   BeatDetailTagsTable,

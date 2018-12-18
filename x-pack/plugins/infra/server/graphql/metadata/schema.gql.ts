@@ -9,12 +9,18 @@ import gql from 'graphql-tag';
 export const metadataSchema = gql`
   "One metadata entry for a node."
   type InfraNodeMetadata {
+    id: ID!
+    name: String!
+    features: [InfraNodeFeature!]!
+  }
+
+  type InfraNodeFeature {
     name: String!
     source: String!
   }
 
   extend type InfraSource {
     "A hierarchy of metadata entries by node"
-    metadataByNode(nodeName: String!, nodeType: InfraNodeType!): [InfraNodeMetadata]!
+    metadataByNode(nodeId: String!, nodeType: InfraNodeType!): InfraNodeMetadata!
   }
 `;

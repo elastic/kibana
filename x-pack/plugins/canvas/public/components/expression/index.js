@@ -46,7 +46,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId } = stateProps;
   const allProps = { ...ownProps, ...stateProps, ...dispatchProps };
 
-  if (!element) return allProps;
+  if (!element) {
+    return allProps;
+  }
 
   const { expression } = element;
 
