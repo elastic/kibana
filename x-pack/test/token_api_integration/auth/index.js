@@ -9,5 +9,7 @@ export default function ({ loadTestFile }) {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./login'));
     loadTestFile(require.resolve('./logout'));
+    loadTestFile(require.resolve('./header'));
+    loadTestFile(require.resolve('./session'));
   });
 }
