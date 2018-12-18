@@ -17,7 +17,9 @@ export class AssetPicker extends PureComponent {
 
   componentDidMount() {
     const selectedAsset = document.getElementById('canvasAssetPicker__selectedAsset');
-    if (selectedAsset) selectedAsset.scrollIntoView();
+    if (selectedAsset) {
+      selectedAsset.scrollIntoView();
+    }
   }
 
   render() {
