@@ -10,17 +10,17 @@ import { isKnownError, handleKnownError } from '../known_errors';
 
 describe('Error handling for 503 errors', () => {
   it('ignores an unknown type', () => {
-    const err = new errors.Generic();
+    const err = new Error();
     expect(isKnownError(err)).to.be(false);
   });
 
-  it('handles ConnectionFault', () => {
-    const err = new errors.ConnectionFault();
+  it('handles ConnectionError', () => {
+    const err = new errors.ConnectionError();
     expect(isKnownError(err)).to.be(true);
 
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
-      'Connection Failure: ' +
+      'Connection Error: ' +
       'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
     );
     expect(wrappedErr.isBoom).to.be(true);
@@ -32,7 +32,7 @@ describe('Error handling for 503 errors', () => {
         statusCode: 503,
         error: 'Service Unavailable',
         message: (
-          'Connection Failure: ' +
+          'Connection Error: ' +
           'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
         )
       },
@@ -40,13 +40,13 @@ describe('Error handling for 503 errors', () => {
     });
   });
 
-  it('handles NoConnections', () => {
-    const err = new errors.NoConnections();
+  it('handles NoLivingConnectionsError', () => {
+    const err = new errors.NoLivingConnectionsError();
     expect(isKnownError(err)).to.be(true);
 
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
-      'No Living connections: ' +
+      'No Living Connections Error: ' +
       'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
     );
     expect(wrappedErr.isBoom).to.be(true);
@@ -58,7 +58,7 @@ describe('Error handling for 503 errors', () => {
         statusCode: 503,
         error: 'Service Unavailable',
         message: (
-          'No Living connections: ' +
+          'No Living Connections Error: ' +
           'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
         )
       },
@@ -66,13 +66,13 @@ describe('Error handling for 503 errors', () => {
     });
   });
 
-  it('handles RequestTimeout', () => {
-    const err = new errors.RequestTimeout();
+  it('handles TimeoutError', () => {
+    const err = new errors.TimeoutError();
     expect(isKnownError(err)).to.be(true);
 
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
-      'Request Timeout: ' +
+      'Timeout Error: ' +
       'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.');
     expect(wrappedErr.isBoom).to.be(true);
     expect(wrappedErr.isServer).to.be(true);
@@ -82,7 +82,29 @@ describe('Error handling for 503 errors', () => {
       payload: {
         statusCode: 503,
         error: 'Service Unavailable',
-        message: 'Request Timeout: Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.'
+        message: 'Timeout Error: Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.'
+      },
+      headers: {}
+    });
+  });
+
+  it('handles ResponseError', () => {
+    const err = new errors.ResponseError({ statusCode: 408 }); // timeout, lol!
+    expect(isKnownError(err)).to.be(true);
+
+    const wrappedErr = handleKnownError(err);
+    expect(wrappedErr.message).to.be(
+      'Response Error: ' +
+      'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.');
+    expect(wrappedErr.isBoom).to.be(true);
+    expect(wrappedErr.isServer).to.be(true);
+    expect(wrappedErr.data).to.be(null);
+    expect(wrappedErr.output).to.eql({
+      statusCode: 503,
+      payload: {
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: 'Response Error: Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.'
       },
       headers: {}
     });

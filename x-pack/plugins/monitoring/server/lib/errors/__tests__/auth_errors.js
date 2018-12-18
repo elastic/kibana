@@ -5,13 +5,12 @@
  */
 
 import expect from 'expect.js';
-import { errors } from '@elastic/elasticsearch';
 import { forbidden, unauthorized } from 'boom';
 import { isAuthError, handleAuthError } from '../auth_errors';
 
 describe('Error handling for 401/403 errors', () => {
   it('ignores an unknown type', () => {
-    const err = new errors.Generic();
+    const err = new Error();
     expect(isAuthError(err)).to.be(false);
   });
 
