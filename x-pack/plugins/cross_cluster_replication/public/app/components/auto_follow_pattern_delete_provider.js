@@ -79,17 +79,17 @@ class Provider extends PureComponent {
           }
           onMouseOver={this.onMouseOverModal}
         >
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.multipleDeletionDescription"
-                defaultMessage="You are about to remove {isSingle, plural, one
-                  {this auto-follow pattern.} other {these auto-follow patterns:}}"
-                values={{ isSingle: isSingle ? 1 : 0 }}
-              />
-            </p>
-            { isSingle ? null : (<ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>)}
-          </Fragment>
+          {!isSingle && (
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.multipleDeletionDescription"
+                  defaultMessage="You are about to remove these auto-follow patterns:"
+                />
+              </p>
+              <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>
+            </Fragment>
+          )}
         </EuiConfirmModal>
       </EuiOverlayMask>
     );

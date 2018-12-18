@@ -113,12 +113,10 @@ export const RemoveClusterButton = injectI18n(
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.removeButton.confirmModal.multipleDeletionDescription"
-                defaultMessage="You are about to remove {isSingleCluster, plural, one
-                  {this remote cluster.} other {these remote clusters:}}"
-                values={{ isSingleCluster: isSingleCluster ? 1 : 0 }}
+                defaultMessage="You are about to remove these remote clusters:"
               />
             </p>
-            { isSingleCluster ? null : (<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>)}
+            <ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>
           </Fragment>
         );
 
@@ -144,7 +142,7 @@ export const RemoveClusterButton = injectI18n(
               }
               onMouseOver={this.onMouseOverModal}
             >
-              {content}
+              {!isSingleCluster && content}
             </EuiConfirmModal>
           </EuiOverlayMask>
         );

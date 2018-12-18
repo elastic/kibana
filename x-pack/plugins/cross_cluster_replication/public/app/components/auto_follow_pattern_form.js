@@ -168,6 +168,11 @@ export class AutoFollowPatternFormUI extends PureComponent {
       };
 
       this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
+    } else {
+      this.setState(({ fieldsErrors, autoFollowPattern }) => {
+        const errors = validateAutoFollowPattern(autoFollowPattern);
+        return updateFormErrors(errors, fieldsErrors);
+      });
     }
   };
 
@@ -409,7 +414,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               />
             )}
             isInvalid={isInvalid}
-            error={fieldsErrors.leaderIndexPatterns}
+            error={fieldsErrors.leaderIndexPatterns && fieldsErrors.leaderIndexPatterns.message}
             fullWidth
           >
             <EuiComboBox
