@@ -33,9 +33,11 @@ export class User {
   }
 
   public async delete(username: string) {
+    this.log.debug(`deleting user ${username}`);
     const { res, payload } = await this.wreck.delete(`/api/security/v1/users/${username}`);
     if (res.statusCode !== 204) {
       throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
     }
+    this.log.debug(`deleted user ${username}`);
   }
 }

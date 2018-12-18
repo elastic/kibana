@@ -33,9 +33,9 @@ export class UICapabilitiesService {
     });
   }
 
-  public async get(credentials: BasicCredentials): Promise<UICapabilities | null> {
+  public async get(credentials: BasicCredentials, spaceId: string): Promise<UICapabilities | null> {
     this.log.debug('requesting /app/kibana to parse the uiCapabilities');
-    const { res, payload } = await this.wreck.get('/app/kibana', {
+    const { res, payload } = await this.wreck.get(`/s/${spaceId}/app/kibana`, {
       headers: {
         Authorization: `Basic ${Buffer.from(
           `${credentials.username}:${credentials.password}`

@@ -33,5 +33,6 @@ export class Role {
     if (res.statusCode !== 204) {
       throw new Error(`Expected status code of 204, received ${res.statusCode}: ${payload}`);
     }
+    this.log.debug(`deleted role ${name}`);
   }
 }
