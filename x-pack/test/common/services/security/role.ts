@@ -13,7 +13,7 @@ export class Role {
   constructor(url: string, log: LogService) {
     this.log = log;
     this.wreck = Wreck.defaults({
-      headers: { 'kbn-xsrf': 'ftr/services/uiSettings' },
+      headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/role' },
       baseUrl: url,
       redirects: 3,
     });

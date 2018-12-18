@@ -10,6 +10,7 @@ import { SecurityService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 
+// TODO: Consolidate the following type definitions
 interface CustomRoleSpecification {
   name: string;
   kibana: {

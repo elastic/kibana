@@ -5,16 +5,11 @@
  */
 
 import cheerio from 'cheerio';
+import { UICapabilities } from 'ui/capabilities';
 import { format as formatUrl } from 'url';
 import Wreck from 'wreck';
 import { TestInvoker } from '../../../common/types';
 import { LogService } from '../../../types/services';
-
-export interface UICapabilities {
-  navLinks: {
-    [navLinkId: string]: boolean;
-  };
-}
 
 export interface BasicCredentials {
   username: string;

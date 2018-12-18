@@ -13,7 +13,7 @@ export class User {
   constructor(url: string, log: LogService) {
     this.log = log;
     this.wreck = Wreck.defaults({
-      headers: { 'kbn-xsrf': 'ftr/services/uiSettings' },
+      headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/user' },
       baseUrl: url,
       redirects: 3,
     });
