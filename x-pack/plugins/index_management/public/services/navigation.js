@@ -13,7 +13,12 @@ export const getUrlService = () => {
 };
 export const getIndexListUri = (filter) => {
   if(filter) {
+    // React router tries to decode url params but it can't because the browser partially
+    // decodes them. So we have to encode both the URL and the filter to get it all to
+    // work correctly for filters with URL unsafe characters in them.
     return encodeURI(`#${BASE_PATH}indices/filter/${encodeURIComponent(filter)}`);
   }
+
+  // If no filter, URI is already safe so no need to encode.
   return `#${BASE_PATH}indices`;
 };
