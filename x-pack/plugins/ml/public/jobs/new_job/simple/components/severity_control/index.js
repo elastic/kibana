@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import styled from 'styled-components';
 
-export const Background = styled.div`
-  flex-grow: 1;
-  height: 100vh;
-  background: #f5f7fa;
-`;
+import './severity_control_directive.js';

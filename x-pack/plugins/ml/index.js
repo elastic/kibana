@@ -83,7 +83,6 @@ export const ml = (kibana) => {
         const config = server.config();
         return {
           kbnIndex: config.get('kibana.index'),
-          esServerUrl: config.get('elasticsearch.url'),
           mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
         };
       });
