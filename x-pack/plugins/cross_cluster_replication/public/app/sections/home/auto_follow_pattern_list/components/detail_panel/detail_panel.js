@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { getFilteredIndicesUri } from '../../../../../../../../index_management/public/services/navigation';
+import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
 
 
 import {
@@ -64,7 +64,7 @@ export class DetailPanelUi extends Component {
     } else if(followIndexPatternSuffix) {
       indexManagementFilter = `name:${followIndexPatternSuffix}`;
     }
-    const indexManagementUri = getFilteredIndicesUri(indexManagementFilter);
+    const indexManagementUri = getIndexListUri(indexManagementFilter);
 
     return (
       <Fragment>
