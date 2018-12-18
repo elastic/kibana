@@ -17,10 +17,9 @@ import {
 import { get } from 'lodash';
 import React from 'react';
 import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { setApmIndexPatternQuery } from '../DiscoverButtons/DiscoverButton';
 import { getDiscoverQuery } from '../DiscoverButtons/DiscoverTransactionButton';
+import { QueryWithIndexPattern } from '../DiscoverButtons/QueryWithIndexPattern';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -50,13 +49,11 @@ interface Props {
 
 interface State {
   readonly isOpen: boolean;
-  discoverQuery: StringMap;
 }
 
 export class TransactionActionMenu extends React.Component<Props, State> {
   public state: State = {
-    isOpen: false,
-    discoverQuery: getDiscoverQuery(this.props.transaction)
+    isOpen: false
   };
 
   public toggle = () => {
@@ -148,53 +145,50 @@ export class TransactionActionMenu extends React.Component<Props, State> {
       });
   }
 
-  public async componentDidMount() {
-    const discoverQuery = await setApmIndexPatternQuery(
-      this.state.discoverQuery
-    );
-    this.setState({ discoverQuery });
-  }
-
   public render() {
     const { transaction, location } = this.props;
-    const { discoverQuery } = this.state;
-
-    const discoverTransactionHref = getKibanaHref({
-      location,
-      pathname: '/app/kibana',
-      hash: '/discover',
-      query: discoverQuery
-    });
-
-    const items = [
-      ...this.getInfraActions(transaction),
-      <EuiContextMenuItem
-        icon="discoverApp"
-        href={discoverTransactionHref}
-        key="discover-transaction"
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiLink>View sample document</EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="popout" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiContextMenuItem>
-    ];
-
     return (
-      <EuiPopover
-        id="transactionActionMenu"
-        button={<ActionMenuButton onClick={this.toggle} />}
-        isOpen={this.state.isOpen}
-        closePopover={this.close}
-        anchorPosition="downRight"
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel items={items} title="Actions" />
-      </EuiPopover>
+      <QueryWithIndexPattern query={getDiscoverQuery(transaction)}>
+        {query => {
+          const discoverTransactionHref = getKibanaHref({
+            location,
+            pathname: '/app/kibana',
+            hash: '/discover',
+            query
+          });
+
+          const items = [
+            ...this.getInfraActions(transaction),
+            <EuiContextMenuItem
+              icon="discoverApp"
+              href={discoverTransactionHref}
+              key="discover-transaction"
+            >
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiLink>View sample document</EuiLink>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="popout" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiContextMenuItem>
+          ];
+
+          return (
+            <EuiPopover
+              id="transactionActionMenu"
+              button={<ActionMenuButton onClick={this.toggle} />}
+              isOpen={this.state.isOpen}
+              closePopover={this.close}
+              anchorPosition="downRight"
+              panelPaddingSize="none"
+            >
+              <EuiContextMenuPanel items={items} title="Actions" />
+            </EuiPopover>
+          );
+        }}
+      </QueryWithIndexPattern>
     );
   }
 }

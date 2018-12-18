@@ -6,53 +6,28 @@
 
 import React from 'react';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 import { KibanaLink } from '../../../utils/url';
+import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
   query: StringMap;
 }
 
-interface State {
-  query: StringMap;
-}
-
-export async function setApmIndexPatternQuery(query: StringMap) {
-  if (query._a && query._a.index) {
-    return query;
-  }
-
-  const indexPattern = await getAPMIndexPattern();
-  const id = indexPattern && indexPattern.id;
-
-  if (!query._a) {
-    query._a = {};
-  }
-
-  query._a.index = id;
-
-  return query;
-}
-
-export class DiscoverButton extends React.Component<Props, State> {
-  public state: State = { query: this.props.query };
-  public async componentDidMount() {
-    const query = await setApmIndexPatternQuery(this.state.query);
-    this.setState({ query });
-  }
-
+export class DiscoverButton extends React.Component<Props> {
   public render() {
-    const { children, ...rest } = this.props;
-    const { query } = this.state;
-
+    const { query, children, ...rest } = this.props;
     return (
-      <KibanaLink
-        pathname={'/app/kibana'}
-        hash={'/discover'}
-        query={query}
-        children={children}
-        {...rest}
-      />
+      <QueryWithIndexPattern query={query}>
+        {queryWithIndexPattern => (
+          <KibanaLink
+            pathname={'/app/kibana'}
+            hash={'/discover'}
+            query={queryWithIndexPattern}
+            children={children}
+            {...rest}
+          />
+        )}
+      </QueryWithIndexPattern>
     );
   }
 }

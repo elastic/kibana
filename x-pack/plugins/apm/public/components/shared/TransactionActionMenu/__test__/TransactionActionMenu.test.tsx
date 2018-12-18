@@ -19,7 +19,7 @@ describe('TransactionActionMenu component', () => {
     expect(
       shallow(
         <TransactionActionMenu transaction={transaction} location={location} />
-      )
+      ).shallow()
     ).toMatchSnapshot();
   });
 });
