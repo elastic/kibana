@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,18 +19,18 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { buildListBreadcrumb, editBreadcrumb } from '../../services';
-import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
+import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
 const disabledFields = {
   name: true,
 };
-
 
 export const RemoteClusterEdit = injectI18n(
   class extends Component {
@@ -121,7 +122,9 @@ export const RemoteClusterEdit = injectI18n(
             </EuiFlexItem>
           </EuiFlexGroup>
         );
-      } else if (!cluster) {
+      }
+
+      if (!cluster) {
         return (
           <EuiFlexGroup
             justifyContent="flexStart"
@@ -143,6 +146,28 @@ export const RemoteClusterEdit = injectI18n(
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
+        );
+      }
+
+      const { isConfiguredByNode } = cluster;
+
+      if (isConfiguredByNode) {
+        return (
+          <Fragment>
+            <ConfiguredByNodeWarning />
+
+            <EuiSpacer size="s" />
+
+            <EuiButtonEmpty
+              color="primary"
+              onClick={this.cancel}
+            >
+              <FormattedMessage
+                id="xpack.remoteClusters.edit.backToRemoteClustersButtonLabel"
+                defaultMessage="Back to remote clusters"
+              />
+            </EuiButtonEmpty>
+          </Fragment>
         );
       }
 

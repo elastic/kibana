@@ -103,8 +103,8 @@ export const RemoteClusterTable = injectI18n(
 
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
-                    type="alert"
-                    color="warning"
+                    type="iInCircle"
+                    color="subdued"
                     content={(
                       <FormattedMessage
                         id="xpack.remoteClusters.remoteClusterList.table.isConfiguredByNodeMessage"
