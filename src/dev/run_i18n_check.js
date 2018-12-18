@@ -45,12 +45,17 @@ run(async ({ flags: { path, output, 'output-format': outputFormat, include = [] 
     const configJson = await readFileAsync(resolve(configPath));
     const additionalConfig = JSON.parse(configJson);
 
-    fullConfig.paths = {
-      ...fullConfig.paths,
-      ...Object.entries(additionalConfig.paths).reduce((acc, [pluginNamespace, subPath]) => {
+    const additionalConfigPaths = Object.entries(additionalConfig.paths).reduce(
+      (acc, [pluginNamespace, subPath]) => {
         acc[pluginNamespace] = normalizePath(resolve(configPath, '..', subPath));
         return acc;
-      }, {}),
+      },
+      {}
+    );
+
+    fullConfig.paths = {
+      ...fullConfig.paths,
+      ...additionalConfigPaths,
     };
 
     fullConfig.exclude = [
