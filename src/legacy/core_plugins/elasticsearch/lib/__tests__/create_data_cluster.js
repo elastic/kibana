@@ -31,7 +31,7 @@ describe('plugins/elasticsearch', function () {
     beforeEach(() => {
       config = {
         elasticsearch: {
-          url: 'http://localhost:9200',
+          hosts: ['http://localhost:9200'],
           logQueries: true
         }
       };
@@ -62,7 +62,7 @@ describe('plugins/elasticsearch', function () {
 
     it('creates the cluster with elasticsearch.tribe config', () => {
       config.elasticsearch.tribe = {
-        url: 'http://localhost:9201'
+        hosts: ['http://localhost:9201']
       };
 
       createDataCluster(server);
