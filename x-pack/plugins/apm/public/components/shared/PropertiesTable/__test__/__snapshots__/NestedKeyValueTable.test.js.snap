@@ -66,7 +66,7 @@ exports[`FormattedKey component should render when the value is null or undefine
 
 exports[`FormattedKey component should render when the value is null or undefined 3`] = `
 .c0 {
-  color: #999999;
+  color: #98A2B3;
 }
 
 <FormattedKey
@@ -186,7 +186,7 @@ exports[`FormattedValue component should render undefined 1`] = `
 
 exports[`FormattedValue component should render undefined 2`] = `
 .c0 {
-  color: #999999;
+  color: #98A2B3;
 }
 
 <FormattedValue>
