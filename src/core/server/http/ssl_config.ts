@@ -47,7 +47,7 @@ const sslSchema = schema.object(
     redirectHttpFromPort: schema.maybe(schema.number()),
     supportedProtocols: schema.arrayOf(
       schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
-      { defaultValue: ['TLSv1.1', 'TLSv1.2'] }
+      { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
     ),
   },
   {
@@ -97,7 +97,7 @@ export class SslConfig {
   public getSecureOptions() {
     // our validation should ensure that this.supportedProtocols is at least an empty array,
     // which the following logic depends upon.
-    if (this.supportedProtocols == null) {
+    if (this.supportedProtocols == null || this.supportedProtocols.length === 0) {
       throw new Error(`supportedProtocols should be specified`);
     }
 
