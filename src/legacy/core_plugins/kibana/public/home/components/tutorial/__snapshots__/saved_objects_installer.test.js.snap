@@ -5,7 +5,16 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
   bulkCreate={[Function]}
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -37,6 +46,26 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -61,15 +90,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -314,7 +334,16 @@ exports[`bulkCreate should display success message when bulkCreate is successful
   bulkCreate={[Function]}
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -346,6 +375,26 @@ exports[`bulkCreate should display success message when bulkCreate is successful
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -370,15 +419,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -506,11 +546,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   className="euiIcon euiIcon--medium euiStepNumber__icon"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   title="complete"
                   viewBox="0 0 16 16"
                   width="16"
@@ -520,11 +556,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                     className="euiIcon euiIcon--medium euiStepNumber__icon"
                     focusable="false"
                     height="16"
-                    style={
-                      Object {
-                        "fill": undefined,
-                      }
-                    }
+                    style={null}
                     title="complete"
                     viewBox="0 0 16 16"
                     width="16"

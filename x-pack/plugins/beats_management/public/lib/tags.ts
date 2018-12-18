@@ -20,8 +20,10 @@ export class TagsLib {
   public async delete(tagIds: string[]): Promise<boolean> {
     return await this.adapter.delete(tagIds);
   }
-  public async getAll(): Promise<BeatTag[]> {
-    return this.jsonConfigToUserYaml(await this.adapter.getAll());
+
+  // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
+  public async getAll(ESQuery?: string): Promise<BeatTag[]> {
+    return this.jsonConfigToUserYaml(await this.adapter.getAll(ESQuery));
   }
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
     tag.id = tag.id.replace(' ', '-');

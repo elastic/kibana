@@ -10,8 +10,11 @@ function combineColumns(arrayOfColumnsArrays) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
     if (columns) {
       columns.forEach(column => {
-        if (resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) return;
-        else resultingColumns.push(column);
+        if (resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) {
+          return;
+        } else {
+          resultingColumns.push(column);
+        }
       });
     }
 
@@ -27,8 +30,9 @@ function combineAcross(datatableArray) {
 
   // Sanity check
   datatableArray.forEach(datatable => {
-    if (datatable.rows.length !== targetRowLength)
+    if (datatable.rows.length !== targetRowLength) {
       throw new Error('All expressions must return the same number of rows');
+    }
   });
 
   // Merge columns and rows.
@@ -81,14 +85,18 @@ export const ply = () => ({
     // The way the function below is written you can add as many arbitrary named args as you want.
   },
   fn: (context, args) => {
-    if (!args) return context;
+    if (!args) {
+      return context;
+    }
     let byColumns;
     let originalDatatables;
 
     if (args.by) {
       byColumns = args.by.map(by => {
         const column = context.columns.find(column => column.name === by);
-        if (!column) throw new Error(`No such column: ${by}`);
+        if (!column) {
+          throw new Error(`No such column: ${by}`);
+        }
         return column;
       });
       const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
@@ -103,9 +111,11 @@ export const ply = () => ({
     const datatablePromises = originalDatatables.map(originalDatatable => {
       let expressionResultPromises = [];
 
-      if (args.expression)
+      if (args.expression) {
         expressionResultPromises = args.expression.map(expression => expression(originalDatatable));
-      else expressionResultPromises.push(Promise.resolve(originalDatatable));
+      } else {
+        expressionResultPromises.push(Promise.resolve(originalDatatable));
+      }
 
       return Promise.all(expressionResultPromises).then(combineAcross);
     });

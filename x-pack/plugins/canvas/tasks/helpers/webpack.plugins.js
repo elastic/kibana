@@ -26,6 +26,8 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
       'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
       'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
+      'templates/all': path.join(sourceDir, 'templates/register.js'),
+      'uis/tags/all': path.join(sourceDir, 'uis/tags/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually
@@ -59,10 +61,15 @@ export function getWebpackConfig({ devtool, watch } = {}) {
         // bails on error, including loader errors
         // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
         this.hooks.done.tapPromise('LoaderFailHandlerPlugin', async stats => {
-          if (!stats.hasErrors()) return;
+          if (!stats.hasErrors()) {
+            return;
+          }
           const errorMessage = stats.toString('errors-only');
-          if (watch) console.error(errorMessage);
-          else throw new Error(errorMessage);
+          if (watch) {
+            console.error(errorMessage);
+          } else {
+            throw new Error(errorMessage);
+          }
         });
       },
       new CopyWebpackPlugin([

@@ -46,7 +46,9 @@ export class PageManager extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     // scrolls to the active page on the next tick, otherwise new pages don't scroll completely into view
-    if (prevProps.selectedPage !== this.props.selectedPage) setTimeout(this.scrollToActivePage, 0);
+    if (prevProps.selectedPage !== this.props.selectedPage) {
+      setTimeout(this.scrollToActivePage, 0);
+    }
   }
 
   componentWillUnmount() {
@@ -57,7 +59,9 @@ export class PageManager extends React.PureComponent {
     if (this.activePageRef && this.pageListRef) {
       // not all target browsers support element.scrollTo
       // TODO: replace this with something more cross-browser, maybe scrollIntoView
-      if (!this.pageListRef.scrollTo) return;
+      if (!this.pageListRef.scrollTo) {
+        return;
+      }
 
       const pageOffset = this.activePageRef.offsetLeft;
       const {
@@ -95,13 +99,17 @@ export class PageManager extends React.PureComponent {
   doDelete = () => {
     const { previousPage, removePage, deleteId, selectedPage } = this.props;
     this.resetDelete();
-    if (deleteId === selectedPage) previousPage();
+    if (deleteId === selectedPage) {
+      previousPage();
+    }
     removePage(deleteId);
   };
 
   onDragEnd = ({ draggableId: pageId, source, destination }) => {
     // dropped outside the list
-    if (!destination) return;
+    if (!destination) {
+      return;
+    }
 
     const position = destination.index - source.index;
 
@@ -109,7 +117,14 @@ export class PageManager extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { isWriteable, selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const {
+      isWriteable,
+      selectedPage,
+      workpadId,
+      movePage,
+      duplicatePage,
+      workpadCSS,
+    } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -121,7 +136,9 @@ export class PageManager extends React.PureComponent {
               page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
             }`}
             ref={el => {
-              if (page.id === selectedPage) this.activePageRef = el;
+              if (page.id === selectedPage) {
+                this.activePageRef = el;
+              }
               provided.innerRef(el);
             }}
             {...provided.draggableProps}
@@ -139,16 +156,19 @@ export class PageManager extends React.PureComponent {
                   params={{ id: workpadId, page: pageNumber }}
                   aria-label={`Load page number ${pageNumber}`}
                 >
-                  <PagePreview
-                    isWriteable={isWriteable}
-                    page={page}
-                    height={100}
-                    pageNumber={pageNumber}
-                    movePage={movePage}
-                    selectedPage={selectedPage}
-                    duplicatePage={duplicatePage}
-                    confirmDelete={this.confirmDelete}
-                  />
+                  {Style.it(
+                    workpadCSS,
+                    <PagePreview
+                      isWriteable={isWriteable}
+                      page={page}
+                      height={100}
+                      pageNumber={pageNumber}
+                      movePage={movePage}
+                      selectedPage={selectedPage}
+                      duplicatePage={duplicatePage}
+                      confirmDelete={this.confirmDelete}
+                    />
+                  )}
                 </Link>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -159,7 +179,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId, isWriteable, workpadCSS } = this.props;
+    const { pages, addPage, deleteId, isWriteable } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -179,7 +199,7 @@ export class PageManager extends React.PureComponent {
                     }}
                     {...provided.droppableProps}
                   >
-                    {Style.it(workpadCSS, <div>{pages.map(this.renderPage)}</div>)}
+                    {pages.map(this.renderPage)}
                     {provided.placeholder}
                   </div>
                 )}

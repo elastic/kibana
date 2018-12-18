@@ -5,9 +5,9 @@
  */
 
 import expect from 'expect.js';
-import { SourceQuery } from '../../../../plugins/infra/common/graphql/types';
-import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
 
+import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
+import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const sourcesTests: KbnTestProvider = ({ getService }) => {
@@ -33,9 +33,9 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           // shipped default values
           expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
           expect(sourceConfiguration.logAlias).to.be('filebeat-*');
-          expect(sourceConfiguration.fields.container).to.be('docker.container.name');
-          expect(sourceConfiguration.fields.host).to.be('beat.hostname');
-          expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.name');
+          expect(sourceConfiguration.fields.container).to.be('docker.container.id');
+          expect(sourceConfiguration.fields.host).to.be('host.name');
+          expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
 
           // test data in x-pack/test/functional/es_archives/infra/data.json.gz
           expect(sourceStatus.indexFields.length).to.be(1765);

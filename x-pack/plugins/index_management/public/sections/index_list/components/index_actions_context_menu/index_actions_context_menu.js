@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../common/constants';
+import { getActionExtensions } from '../../../../index_management_extensions';
+import { getHttpClient } from '../../../../services/api';
 
 class IndexActionsContextMenuUi extends Component {
   constructor(props) {
@@ -29,8 +31,14 @@ class IndexActionsContextMenuUi extends Component {
 
     this.state = {
       isPopoverOpen: false,
-      showDeleteConfirmation: false
+      renderConfirmModal: null,
     };
+  }
+  closeConfirmModal = () => {
+    this.setState({
+      renderConfirmModal: null
+    });
+    this.props.resetSelection && this.props.resetSelection();
   }
   panels() {
     const {
@@ -46,7 +54,10 @@ class IndexActionsContextMenuUi extends Component {
       detailPanel,
       indexNames,
       indexStatusByName,
-      intl
+      performExtensionAction,
+      indices,
+      intl,
+      reloadIndices
     } = this.props;
     const allOpen = all(indexNames, indexName => {
       return indexStatusByName[indexName] === INDEX_OPEN;
@@ -118,7 +129,7 @@ class IndexActionsContextMenuUi extends Component {
         icon: <EuiIcon type="merge" />,
         onClick: () => {
           this.closePopover();
-          this.openForcemergeSegmentsModal();
+          this.setState({ renderConfirmModal: this.renderForcemergeSegmentsModal });
         }
       });
       items.push({
@@ -171,7 +182,33 @@ class IndexActionsContextMenuUi extends Component {
       icon: <EuiIcon type="trash" />,
       onClick: () => {
         this.closePopover();
-        this.openDeleteConfirmationModal();
+        this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
+      }
+    });
+    getActionExtensions().forEach((actionExtension) => {
+      const actionExtensionDefinition = actionExtension(indices, reloadIndices);
+      if (actionExtensionDefinition) {
+        const { buttonLabel, requestMethod, successMessage, icon, renderConfirmModal } = actionExtensionDefinition;
+        if (requestMethod) {
+          items.push({
+            name: buttonLabel,
+            icon: <EuiIcon type={icon} />,
+            onClick: () => {
+              this.closePopoverAndExecute(async () => {
+                await performExtensionAction(requestMethod, successMessage);
+              });
+            },
+          });
+        } else {
+          items.push({
+            name: buttonLabel,
+            icon: <EuiIcon type={icon} />,
+            onClick: () => {
+              this.closePopover();
+              this.setState({ renderConfirmModal });
+            }
+          });
+        }
       }
     });
     items.forEach(item => {
@@ -197,7 +234,7 @@ class IndexActionsContextMenuUi extends Component {
   closePopoverAndExecute = func => {
     this.setState({
       isPopoverOpen: false,
-      showDeleteConfirmation: false
+      renderConfirmModal: false
     });
     func();
     this.props.resetSelection && this.props.resetSelection();
@@ -207,22 +244,6 @@ class IndexActionsContextMenuUi extends Component {
     this.setState({
       isPopoverOpen: false
     });
-  };
-
-  closeDeleteConfirmationModal = () => {
-    this.setState({ showDeleteConfirmation: false });
-  };
-
-  openDeleteConfirmationModal = () => {
-    this.setState({ showDeleteConfirmation: true });
-  };
-
-  openForcemergeSegmentsModal = () => {
-    this.setState({ showForcemergeSegmentsModal: true });
-  };
-
-  closeForcemergeSegmentsModal = () => {
-    this.setState({ showForcemergeSegmentsModal: false });
   };
 
   forcemergeSegmentsError = () => {
@@ -237,7 +258,7 @@ class IndexActionsContextMenuUi extends Component {
       });
     }
   };
-  forcemergeSegmentsModal = () => {
+  renderForcemergeSegmentsModal = () => {
     const { forcemergeIndices, indexNames, intl } = this.props;
     const helpText = intl.formatMessage({
       id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeSegmentsHelpText',
@@ -245,10 +266,6 @@ class IndexActionsContextMenuUi extends Component {
     });
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
-    const { showForcemergeSegmentsModal } = this.state;
-    if (!showForcemergeSegmentsModal) {
-      return null;
-    }
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -256,7 +273,7 @@ class IndexActionsContextMenuUi extends Component {
             id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle',
             defaultMessage: 'Force merge',
           })}
-          onCancel={this.closeForcemergeSegmentsModal}
+          onCancel={this.closeConfirmModal}
           onConfirm={() => {
             if (!this.forcemergeSegmentsError()) {
               this.closePopoverAndExecute(() => {
@@ -341,14 +358,10 @@ class IndexActionsContextMenuUi extends Component {
     );
   };
 
-  confirmDeleteModal = () => {
+  renderConfirmDeleteModal = () => {
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
     const { deleteIndices, indexNames, intl } = this.props;
-    const { showDeleteConfirmation } = this.state;
-    if (!showDeleteConfirmation) {
-      return null;
-    }
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -358,7 +371,7 @@ class IndexActionsContextMenuUi extends Component {
               defaultMessage: 'Confirm Delete {entity}',
             }, { entity })
           }
-          onCancel={this.closeDeleteConfirmationModal}
+          onCancel={this.closeConfirmModal}
           onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
           cancelButtonText={
             intl.formatMessage({
@@ -417,7 +430,18 @@ class IndexActionsContextMenuUi extends Component {
     return this.props.indexNames.length === 1;
   };
   getEntity = oneIndexSelected => {
-    return oneIndexSelected ? 'index' : 'indices';
+    const { intl } = this.props;
+    return oneIndexSelected ? (
+      intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.indexMessage',
+        defaultMessage: 'index'
+      })
+    ) : (
+      intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.indicesMessage',
+        defaultMessage: 'indices'
+      })
+    );
   };
   render() {
     const { intl } = this.props;
@@ -449,8 +473,7 @@ class IndexActionsContextMenuUi extends Component {
 
     return (
       <div>
-        {this.confirmDeleteModal()}
-        {this.forcemergeSegmentsModal()}
+        {this.state.renderConfirmModal ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient()) : null}
         <EuiPopover
           id={`contextMenu${entity}`}
           button={button}

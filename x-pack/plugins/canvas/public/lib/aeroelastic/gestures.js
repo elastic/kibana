@@ -31,17 +31,16 @@ const primaryUpdate = state => state.primaryUpdate;
  */
 
 // dispatch the various types of actions
-const rawCursorPosition = select(
-  action => (action.type === 'cursorPosition' ? action.payload : null)
+const rawCursorPosition = select(action =>
+  action.type === 'cursorPosition' ? action.payload : null
 )(primaryUpdate);
 
 const mouseButtonEvent = select(action => (action.type === 'mouseEvent' ? action.payload : null))(
   primaryUpdate
 );
 
-const keyFromMouse = select(
-  ({ type, payload: { altKey, metaKey, shiftKey, ctrlKey } }) =>
-    type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey, ctrlKey } : {}
+const keyFromMouse = select(({ type, payload: { altKey, metaKey, shiftKey, ctrlKey } }) =>
+  type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey, ctrlKey } : {}
 )(primaryUpdate);
 
 const metaHeld = select(appleKeyboard ? e => e.metaKey : e => e.altKey)(keyFromMouse);
@@ -58,10 +57,15 @@ const cursorPosition = selectReduce((previous, position) => position || previous
 
 const mouseButton = selectReduce(
   (prev, next) => {
-    if (!next) return prev;
+    if (!next) {
+      return prev;
+    }
     const { event, uid } = next;
-    if (event === 'mouseDown') return { down: true, uid };
-    else return event === 'mouseUp' ? { down: false, uid } : prev;
+    if (event === 'mouseDown') {
+      return { down: true, uid };
+    } else {
+      return event === 'mouseUp' ? { down: false, uid } : prev;
+    }
   },
   { down: false, uid: null }
 )(mouseButtonEvent);
@@ -98,8 +102,11 @@ const mouseButtonStateTransitions = (state, mouseIsDown, movedAlready) => {
     case 'up':
       return mouseIsDown ? 'downed' : 'up';
     case 'downed':
-      if (mouseIsDown) return movedAlready ? 'dragging' : 'downed';
-      else return 'up';
+      if (mouseIsDown) {
+        return movedAlready ? 'dragging' : 'downed';
+      } else {
+        return 'up';
+      }
 
     case 'dragging':
       return mouseIsDown ? 'dragging' : 'up';

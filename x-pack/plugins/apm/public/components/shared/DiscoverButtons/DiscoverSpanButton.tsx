@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { SPAN_HEX_ID, SPAN_ID } from 'x-pack/plugins/apm/common/constants';
-import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import { DiscoverButton } from './DiscoverButton';
 
 function getDiscoverQuery(span: Span) {

@@ -71,11 +71,17 @@ export const progress = () => ({
     },
   },
   fn: (value, args) => {
-    if (args.max <= 0) throw new Error(`'max' must be greater than 0`);
-    if (value > args.max || value < 0) throw new Error(`Context must be between 0 and ${args.max}`);
+    if (args.max <= 0) {
+      throw new Error(`'max' must be greater than 0`);
+    }
+    if (value > args.max || value < 0) {
+      throw new Error(`Context must be between 0 and ${args.max}`);
+    }
 
     let label = '';
-    if (args.label) label = typeof args.label === 'string' ? args.label : `${value}`;
+    if (args.label) {
+      label = typeof args.label === 'string' ? args.label : `${value}`;
+    }
 
     let font = {};
 
