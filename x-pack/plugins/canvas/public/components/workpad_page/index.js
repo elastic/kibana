@@ -27,8 +27,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    rawDuplicateElement: pageId => selectedElement =>
-      dispatch(rawDuplicateElement(selectedElement, pageId)),
+    rawDuplicateElement: pageId => (selectedElement, root) =>
+      dispatch(rawDuplicateElement(selectedElement, pageId, root)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
   };
 };
@@ -127,22 +127,25 @@ export const WorkpadPage = compose(
         },
         copyElements: () => {
           if (selectedElements.length) {
-            setClipboardData(selectedElements);
+            setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
             notify.success('Copied element to clipboard');
           }
         },
         cutElements: () => {
           if (selectedElements.length) {
-            setClipboardData(selectedElements);
+            setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
             removeElements(page.id)(selectedElementIds);
             notify.success('Copied element to clipboard');
           }
         },
         pasteElements: () => {
-          const elements = JSON.parse(getClipboardData());
-          const clonedElements = elements && cloneSubgraphs(elements);
+          const { selectedElements, rootShapes } = JSON.parse(getClipboardData());
+          const indices = rootShapes.map(r => selectedElements.findIndex(s => s.id === r));
+          const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
           if (clonedElements) {
-            clonedElements.map(element => rawDuplicateElement(page.id)(element));
+            clonedElements.map((element, index) =>
+              rawDuplicateElement(page.id)(element, indices.indexOf(index) >= 0)
+            );
           }
         },
       };

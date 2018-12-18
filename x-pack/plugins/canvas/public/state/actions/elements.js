@@ -216,11 +216,13 @@ export const duplicateElement = createThunk(
 
 export const rawDuplicateElement = createThunk(
   'rawDuplicateElement',
-  ({ dispatch, type }, element, pageId) => {
+  ({ dispatch, type }, element, pageId, root) => {
     const newElement = cloneDeep(element);
-    // move the element so users can see that it was added
-    //newElement.position.top = newElement.position.top + 10;
-    //newElement.position.left = newElement.position.left + 10;
+    // move the root element so users can see that it was added
+    if (root) {
+      newElement.position.top = newElement.position.top + 10;
+      newElement.position.left = newElement.position.left + 10;
+    }
     const _rawDuplicateElement = createAction(type);
     dispatch(_rawDuplicateElement({ pageId, element: newElement }));
 
@@ -232,7 +234,9 @@ export const rawDuplicateElement = createThunk(
     }
 
     // select the new element
-    //dispatch(selectElement(newElement.id));
+    if (root) {
+      window.setTimeout(() => dispatch(selectElement(newElement.id)));
+    }
   }
 );
 
