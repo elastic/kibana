@@ -1,0 +1,21 @@
+{
+  "upgrade-assistant-reindex-operation": {
+    "properties": {
+      "indexName": {
+        "type": "text"
+      },
+      "newIndexName": {
+        "type": "text"
+      },
+      "status": {
+        "type": "integer"
+      },
+      "locked": {
+        "type": "text"
+      },
+      "reindexTaskId": {
+        "type": "text"
+      }
+    }
+  }
+}

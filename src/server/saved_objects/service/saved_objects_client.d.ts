@@ -70,7 +70,7 @@ export interface BulkGetResponse<T extends SavedObjectAttributes> {
 }
 
 export interface SavedObjectAttributes {
-  [key: string]: string | number | boolean | null | undefined;
+  [key: string]: string | number | boolean | null;
 }
 
 export interface SavedObject<T extends SavedObjectAttributes> {
