@@ -10,10 +10,6 @@ export {
 } from './add_cluster';
 
 export {
-  copyCluster,
-} from './copy_cluster';
-
-export {
   openDetailPanel,
   closeDetailPanel,
 } from './detail_panel';

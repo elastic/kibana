@@ -42,7 +42,7 @@ import {
 
 import { ConfirmDelete } from './confirm_delete';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
-import { getFilteredIndicesUri } from '../../../../../../index_management/public/services/navigation';
+import { getIndexListUri } from '../../../../../../index_management/public/services/navigation';
 const COLUMNS = {
   name: {
     label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
@@ -243,7 +243,7 @@ export class PolicyTableUi extends Component {
         name: viewIndicesLabel,
         icon: 'list',
         onClick: () => {
-          window.location.hash = getFilteredIndicesUri(`ilm.policy:${policy.name}`);
+          window.location.hash = getIndexListUri(`ilm.policy:${policy.name}`);
         },
       });
     }

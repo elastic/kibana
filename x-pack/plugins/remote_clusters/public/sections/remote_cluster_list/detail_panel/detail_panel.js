@@ -11,7 +11,6 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -30,7 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
-
+import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 export const DetailPanel = injectI18n(
@@ -41,28 +40,10 @@ export const DetailPanel = injectI18n(
       cluster: PropTypes.object,
       closeDetailPanel: PropTypes.func.isRequired,
       clusterName: PropTypes.string,
-      copyCluster: PropTypes.func.isRequired,
-    }
-
-    copyCluster = () => {
-      const { copyCluster, cluster } = this.props;
-      const {
-        name,
-        seeds,
-        skipUnavailable,
-      } = cluster;
-
-      const clusterConfig = {
-        name,
-        seeds,
-        skipUnavailable,
-      };
-
-      copyCluster(clusterConfig);
     }
 
     renderSkipUnavailableValue(skipUnavailable) {
-      if(skipUnavailable === true) {
+      if (skipUnavailable === true) {
         return (
           <FormattedMessage
             id="xpack.remoteClusters.detailPanel.skipUnavailableTrueValue"
@@ -71,7 +52,7 @@ export const DetailPanel = injectI18n(
         );
       }
 
-      if(skipUnavailable === false) {
+      if (skipUnavailable === false) {
         return (
           <FormattedMessage
             id="xpack.remoteClusters.detailPanel.skipUnavailableFalseValue"
@@ -108,40 +89,7 @@ export const DetailPanel = injectI18n(
       if (isConfiguredByNode) {
         configuredByNodeWarning = (
           <Fragment>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.configuredByNodeWarningTitle"
-                  defaultMessage="This remote cluster is defined in a node's elasticsearch.yml
-                    configuration file"
-                />
-              }
-              color="warning"
-              iconType="help"
-            >
-              <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.configuredByNodeWarningMessage"
-                    defaultMessage="This can result in unexpected behavior if nodes have defined
-                      different remote clusters in their configuration files. You can fix this by
-                      manually removing this remote cluster from the configuration file or by
-                      creating a persistent copy of it."
-                  />
-                </p>
-
-                <EuiButton
-                  onClick={this.copyCluster}
-                  color="warning"
-                >
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.createPersistentCopyButtonLabel"
-                    defaultMessage="Create persistent copy"
-                  />
-                </EuiButton>
-              </Fragment>
-            </EuiCallOut>
-
+            <ConfiguredByNodeWarning />
             <EuiSpacer size="l" />
           </Fragment>
         );
