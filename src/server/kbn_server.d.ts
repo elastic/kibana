@@ -19,6 +19,7 @@
 
 import { Server } from 'hapi';
 import { ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
+import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -34,6 +35,11 @@ declare module 'hapi' {
 
   interface Server {
     config: () => KibanaConfig;
+    savedObjects: SavedObjectsService;
+  }
+
+  interface Request {
+    getSavedObjectsClient(): SavedObjectsClient;
   }
 }
 
