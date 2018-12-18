@@ -58,7 +58,7 @@ export class MonacoHelper {
           selectionHighlight: false,
           renderLineHighlight: 'none',
           contextmenu: false,
-          folding: false,
+          folding: true,
         },
         {
           textModelService: new TextModelResolverService(monaco),
