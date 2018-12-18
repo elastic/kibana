@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { SeverityControl } from './severity_control_view.js';
+import { SelectSeverity } from '../../../../../components/controls/select_severity/select_severity.js';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -28,11 +28,11 @@ module.directive('mlSeverityControl', function () {
       };
 
       const props = {
-        handleThresholdChange: $scope.handleThresholdChange
+        onChangeHandler: $scope.handleThresholdChange
       };
 
       ReactDOM.render(
-        React.createElement(SeverityControl, props),
+        React.createElement(SelectSeverity, props),
         $element[0]
       );
     }

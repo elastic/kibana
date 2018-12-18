@@ -47,17 +47,26 @@ class SelectSeverity extends Component {
     super(props);
 
     // Restore the threshold from the state, or default to warning.
-    this.mlSelectSeverityService = this.props.mlSelectSeverityService;
-    const thresholdState = this.mlSelectSeverityService.state.get('threshold');
-    const thresholdValue = _.get(thresholdState, 'val', 0);
-    const threshold = optionValueToThreshold(thresholdValue);
-    // set initial selected option equal to threshold value
-    const selectedOption = SEVERITY_OPTIONS.find(opt => (opt.val === threshold.val));
-    this.mlSelectSeverityService.state.set('threshold', threshold);
+    if (this.props.mlSelectSeverityService) {
+      this.mlSelectSeverityService = this.props.mlSelectSeverityService;
+    }
 
     this.state = {
-      valueDisplay: selectedOption.display,
+      valueDisplay: SEVERITY_OPTIONS[0].display,
     };
+  }
+
+  componentDidMount() {
+    // set initial state from service if available
+    if (this.mlSelectSeverityService !== undefined) {
+      const thresholdState = this.mlSelectSeverityService.state.get('threshold');
+      const thresholdValue = _.get(thresholdState, 'val', 0);
+      const threshold = optionValueToThreshold(thresholdValue);
+      // set initial selected option equal to threshold value
+      const selectedOption = SEVERITY_OPTIONS.find(opt => (opt.val === threshold.val));
+      this.mlSelectSeverityService.state.set('threshold', threshold);
+      this.setState({ valueDisplay: selectedOption.display, });
+    }
   }
 
   onChange = (valueDisplay) => {
@@ -65,7 +74,12 @@ class SelectSeverity extends Component {
       valueDisplay: valueDisplay,
     });
     const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
-    this.mlSelectSeverityService.state.set('threshold', threshold).changed();
+
+    if (this.mlSelectSeverityService !== undefined) {
+      this.mlSelectSeverityService.state.set('threshold', threshold).changed();
+    } else {
+      this.props.onChangeHandler(threshold);
+    }
   }
 
   getOptions = () =>
@@ -107,7 +121,13 @@ class SelectSeverity extends Component {
 }
 
 SelectSeverity.propTypes = {
-  mlSelectSeverityService: PropTypes.object.isRequired,
+  mlSelectSeverityService: PropTypes.object,
+  onChangeHandler: PropTypes.func,
+};
+
+SelectSeverity.defaultProps = {
+  mlSelectSeverityService: undefined,
+  onChangeHandler: () => {}
 };
 
 export { SelectSeverity };
