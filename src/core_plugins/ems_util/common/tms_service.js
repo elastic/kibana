@@ -17,12 +17,41 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { ORIGIN } from '../../../../core_plugins/ems_util/common/origin';
+import { ORIGIN } from './origin';
 
-export function mapToLayerWithId(prefix, layer) {
-  const clonedLayer = _.cloneDeep(layer);
-  clonedLayer.layerId = prefix + '.' + layer.name;
-  clonedLayer.isEMS = ORIGIN.EMS === prefix ?  true : false;
-  return clonedLayer;
+export class TMSService {
+
+  constructor(config,  emsClient) {
+    this._config = config;
+    this._emsClient = emsClient;
+  }
+
+  getUrlTemplate() {
+    return this._emsClient.extendUrlWithParams(this._config.url);
+  }
+
+  getHTMLAttribution() {
+    return this._emsClient.sanitizeMarkdown(this._config.attribution);
+  }
+
+  getMinZoom() {
+    return this._config.minZoom;
+  }
+
+  getMaxZoom() {
+    return this._config.maxZoom;
+  }
+
+  getId() {
+    return this._config.id;
+  }
+
+  hasId(id) {
+    return this._config.id === id;
+  }
+
+  getOrigin() {
+    return ORIGIN.EMS;
+  }
+
 }
