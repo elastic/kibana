@@ -59,7 +59,8 @@ module.directive('mlNewCalendar', function ($route) {
     link: function (scope, element) {
       const props = {
         calendarId: $route.current.params.calendarId,
-        canCreateCalendar: checkPermission('canCreateCalendar')
+        canCreateCalendar: checkPermission('canCreateCalendar'),
+        canDeleteCalendar: checkPermission('canDeleteCalendar')
       };
 
       ReactDOM.render(

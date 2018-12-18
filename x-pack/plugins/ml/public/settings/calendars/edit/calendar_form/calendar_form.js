@@ -48,6 +48,7 @@ function EditHeader({
 export function CalendarForm({
   calendarId,
   canCreateCalendar,
+  canDeleteCalendar,
   description,
   eventsList,
   groupIds,
@@ -140,6 +141,7 @@ export function CalendarForm({
       >
         <EventsTable
           canCreateCalendar={canCreateCalendar}
+          canDeleteCalendar={canDeleteCalendar}
           eventsList={eventsList}
           onDeleteClick={onEventDelete}
           showImportModal={showImportModal}
@@ -174,6 +176,7 @@ export function CalendarForm({
 CalendarForm.propTypes = {
   calendarId: PropTypes.string.isRequired,
   canCreateCalendar: PropTypes.bool.isRequired,
+  canDeleteCalendar: PropTypes.bool.isRequired,
   description: PropTypes.string.isRequired,
   groupIds: PropTypes.array.isRequired,
   isEdit: PropTypes.bool.isRequired,
