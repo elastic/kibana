@@ -10,7 +10,8 @@ export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
-    return (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    const cookie = (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    return cookie ? request.cookie(cookie) : undefined;
   }
 
   async function createSessionCookie() {
@@ -19,13 +20,12 @@ export default function ({ getService }) {
       .set('kbn-xsrf', 'true')
       .send({ username: 'elastic', password: 'changeme' });
 
-    const rawCookie = extractSessionCookie(response);
-    if (!rawCookie) {
+    const cookie = extractSessionCookie(response);
+    if (!cookie) {
       throw new Error('No session cookie set after login');
     }
 
-    const parsedCookie = request.cookie(rawCookie);
-    return `${parsedCookie.key}=${parsedCookie.value}`;
+    return cookie;
   }
 
   describe('logout', () => {
@@ -34,7 +34,7 @@ export default function ({ getService }) {
 
       await supertest
         .get('/api/security/v1/logout')
-        .set('cookie', cookie)
+        .set('cookie', cookie.cookieString())
         .expect(302)
         .expect('location', '/login');
     });
@@ -44,15 +44,13 @@ export default function ({ getService }) {
 
       const response = await supertest
         .get('/api/security/v1/logout')
-        .set('cookie', cookie);
+        .set('cookie', cookie.cookieString());
 
-      const rawCookie = extractSessionCookie(response);
-      if (!rawCookie) {
+      const newCookie = extractSessionCookie(response);
+      if (!newCookie) {
         throw new Error('Does not explicitly unset session cookie');
       }
-
-      const parsedCookie = request.cookie(rawCookie);
-      if (parsedCookie.value !== '') {
+      if (newCookie.value !== '') {
         throw new Error('Session cookie was not set to empty');
       }
     });
@@ -63,13 +61,13 @@ export default function ({ getService }) {
       // destroy it
       await supertest
         .get('/api/security/v1/logout')
-        .set('cookie', cookie);
+        .set('cookie', cookie.cookieString());
 
       // verify that the cookie no longer works
       await supertest
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'true')
-        .set('cookie', cookie)
+        .set('cookie', cookie.cookieString())
         .expect(400);
     });
   });

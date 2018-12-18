@@ -10,7 +10,8 @@ export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
-    return (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    const cookie = (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    return cookie ? request.cookie(cookie) : undefined;
   }
 
   describe('login', () => {
@@ -34,7 +35,7 @@ export default function ({ getService }) {
         throw new Error('No session cookie set');
       }
 
-      if (!request.cookie(cookie).httpOnly) {
+      if (!cookie.httpOnly) {
         throw new Error('Session cookie is not marked as HttpOnly');
       }
     });
