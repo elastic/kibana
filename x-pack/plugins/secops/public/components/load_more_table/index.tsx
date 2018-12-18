@@ -184,7 +184,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
     this.setState({
       ...this.state,
       paginationLoading: true,
-      didItFetchData: false,
     });
     this.props.loadMore();
   };
