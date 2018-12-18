@@ -48,5 +48,29 @@ export default function ({ getService }) {
         .set('authorization', `Bearer ${token}`)
         .expect(200);
     });
+
+    it('rejects invalid access token via authorization Bearer header', async () => {
+      await supertest
+        .get('/api/security/v1/me')
+        .set('kbn-xsrf', 'true')
+        .set('authorization', 'Bearer notreal')
+        .expect(401);
+    });
+
+    it('rejects expired access token via authorization Bearer header', async function () {
+      this.timeout(40000);
+
+      const token = await createToken();
+
+      // Access token expiration is set to 15s for API integration tests.
+      // Let's wait for 20s to make sure token expires.
+      await new Promise(resolve => setTimeout(() => resolve(), 20000));
+
+      await supertest
+        .get('/api/security/v1/me')
+        .set('kbn-xsrf', 'true')
+        .set('authorization', `Bearer ${token}`)
+        .expect(401);
+    });
   });
 }
