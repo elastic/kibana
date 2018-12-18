@@ -52,6 +52,9 @@ export interface VisSavedObject {
   vis: Vis;
   description?: string;
   searchSource: SearchSource;
+  title: string;
+  uiStateJSON?: string;
+  destroy: () => void;
 }
 
 /**

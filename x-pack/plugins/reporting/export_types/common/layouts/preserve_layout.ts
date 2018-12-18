@@ -18,6 +18,7 @@ export class PreserveLayout extends Layout {
     itemsCountAttribute: 'data-shared-items-count',
     timefilterFromAttribute: 'data-shared-timefilter-from',
     timefilterToAttribute: 'data-shared-timefilter-to',
+    toastHeader: '[data-test-subj="euiToastHeader"]',
   };
 
   public readonly groupCount = 1;

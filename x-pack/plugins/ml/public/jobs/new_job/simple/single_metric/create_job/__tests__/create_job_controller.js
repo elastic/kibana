@@ -11,7 +11,6 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 
 // Import this way to be able to stub/mock functions later on in the tests using sinon.
-import * as newJobUtils from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import * as indexUtils from 'plugins/ml/util/index_utils';
 
 describe('ML - Single Metric Wizard - Create Job Controller', () => {
@@ -20,26 +19,31 @@ describe('ML - Single Metric Wizard - Create Job Controller', () => {
   });
 
   it('Initialize Create Job Controller', (done) => {
-    const stub1 = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
-      indexPattern: {},
-      savedSearch: {},
-      combinedQuery: {}
-    }));
-    const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    ngMock.inject(function ($rootScope, $controller) {
+    const stub = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
+    ngMock.inject(function ($rootScope, $controller, $route) {
+      // Set up the $route current props required for the tests.
+      $route.current = {
+        locals: {
+          indexPattern: {},
+          savedSearch: {}
+        }
+      };
+
       const scope = $rootScope.$new();
-      $controller('MlCreateSingleMetricJob', {
-        $route: {
-          current: {
-            params: {}
-          }
-        },
-        $scope: scope
-      });
+
+      expect(() => {
+        $controller('MlCreateSingleMetricJob', {
+          $route: {
+            current: {
+              params: {}
+            }
+          },
+          $scope: scope
+        });
+      }).to.not.throwError();
 
       expect(scope.ui.showJobInput).to.eql(false);
-      stub1.restore();
-      stub2.restore();
+      stub.restore();
       done();
     });
   });

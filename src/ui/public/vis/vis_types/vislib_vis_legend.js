@@ -21,12 +21,14 @@ import _ from 'lodash';
 import html from './vislib_vis_legend.html';
 import { VislibLibDataProvider } from '../../vislib/lib/data';
 import { uiModules } from '../../modules';
+import { VisFiltersProvider } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
 
 uiModules.get('kibana')
   .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
+    const visFilters = Private(VisFiltersProvider);
 
     return {
       restrict: 'E',
@@ -104,7 +106,7 @@ uiModules.get('kibana')
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = $scope.vis.API.events.filter({ datum: legendData.values }, { simulate: true });
+          const filters = visFilters.filter({ datum: legendData.values }, { simulate: true });
           return filters.length;
         };
 

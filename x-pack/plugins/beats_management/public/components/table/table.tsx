@@ -5,16 +5,20 @@
  */
 
 import {
-  // @ts-ignore no typings for EuiInMemoryTable in EUI
+  EuiFlexGroup,
+  EuiFlexItem,
+  // @ts-ignore
   EuiInMemoryTable,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { AssignmentControlSchema } from './assignment_schema';
-import { ControlBar } from './controls';
+import { AutocompleteField } from '../autocomplete_field/index';
+import { ControlSchema } from './action_schema';
+import { OptionControl } from './controls/option_control';
 import { TableType } from './table_type_configs';
 
 export enum AssignmentActionType {
@@ -24,13 +28,6 @@ export enum AssignmentActionType {
   Edit,
   Reload,
   Search,
-}
-
-export interface AssignmentOptions {
-  schema: AssignmentControlSchema[];
-  items: any[];
-  type?: 'none' | 'primary' | 'assignment';
-  actionHandler(action: AssignmentActionType, payload?: any): void;
 }
 
 export interface KueryBarProps {
@@ -45,11 +42,15 @@ export interface KueryBarProps {
 }
 
 interface TableProps {
-  assignmentOptions?: AssignmentOptions;
+  actions?: ControlSchema[];
+  actionData?: {
+    [key: string]: any;
+  };
   hideTableControls?: boolean;
   kueryBarProps?: KueryBarProps;
   items: any[];
   type: TableType;
+  actionHandler?(action: AssignmentActionType, payload?: any): void;
 }
 
 interface TableState {
@@ -79,8 +80,14 @@ export class Table extends React.Component<TableProps, TableState> {
     });
   };
 
+  public actionHandler = (action: AssignmentActionType, payload?: any): void => {
+    if (this.props.actionHandler) {
+      this.props.actionHandler(action, payload);
+    }
+  };
+
   public render() {
-    const { assignmentOptions, hideTableControls, items, kueryBarProps, type } = this.props;
+    const { actionData, actions, hideTableControls, items, kueryBarProps, type } = this.props;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
@@ -92,21 +99,42 @@ export class Table extends React.Component<TableProps, TableState> {
       : {
           onSelectionChange: this.setSelection,
           selectable: () => true,
-          selectableMessage: () => 'Select this beat',
+          selectableMessage: () =>
+            i18n.translate('xpack.beatsManagement.table.selectThisBeatTooltip', {
+              defaultMessage: 'Select this beat',
+            }),
           selection: this.state.selection,
         };
 
     return (
       <TableContainer>
-        {!hideTableControls &&
-          assignmentOptions && (
-            <ControlBar
-              itemType={type.itemType}
-              assignmentOptions={assignmentOptions}
-              kueryBarProps={kueryBarProps}
-              selectionCount={this.state.selection.length}
-            />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          {actions &&
+            actions.map(action => (
+              <EuiFlexItem grow={false} key={action.name}>
+                <OptionControl
+                  {...action}
+                  actionData={actionData}
+                  actionHandler={this.actionHandler}
+                  disabled={this.state.selection.length === 0}
+                />
+              </EuiFlexItem>
+            ))}
+
+          {kueryBarProps && (
+            <EuiFlexItem>
+              <AutocompleteField
+                {...kueryBarProps}
+                placeholder={i18n.translate(
+                  'xpack.beatsManagement.table.filterResultsPlaceholder',
+                  {
+                    defaultMessage: 'Filter results',
+                  }
+                )}
+              />
+            </EuiFlexItem>
           )}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiInMemoryTable
           columns={type.columnDefinitions}

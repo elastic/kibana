@@ -14,12 +14,13 @@ interface BrowserClient {
 }
 
 export class PrintLayout extends Layout {
-  public selectors = {
+  public readonly selectors = {
     screenshot: '[data-shared-item]',
     renderComplete: '[data-shared-item]',
     itemsCountAttribute: 'data-shared-items-count',
     timefilterFromAttribute: 'data-shared-timefilter-from',
     timefilterToAttribute: 'data-shared-timefilter-to',
+    toastHeader: '[data-test-subj="euiToastHeader"]',
   };
 
   public readonly groupCount = 2;

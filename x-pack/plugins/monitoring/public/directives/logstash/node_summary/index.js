@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringLogstashNodeSummary', () => {
@@ -18,7 +19,7 @@ uiModule.directive('monitoringLogstashNodeSummary', () => {
     },
     link(scope, $el) {
       scope.$watch('logstash', logstash => {
-        render(<DetailStatus stats={logstash} />, $el[0]);
+        render(<I18nProvider><DetailStatus stats={logstash} /></I18nProvider>, $el[0]);
       });
     }
   };

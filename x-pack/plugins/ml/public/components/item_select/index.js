@@ -7,4 +7,3 @@
 
 
 import './item_select';
-import './styles/main.less';

@@ -9,19 +9,18 @@ exports[`Home component should render 1`] = `
     <SetupInstructionsLink />
   </styled.div>
   <Connect(KueryBarView) />
-  <EuiTabbedContent
-    className="k6Tab--large"
+  <withRouter(HistoryTabsWithoutRouter)
     tabs={
       Array [
         Object {
-          "content": <Connect(ServiceOverview) />,
-          "id": "services_overview",
+          "component": [Function],
           "name": "Services",
+          "path": "/services",
         },
         Object {
-          "content": <Connect(TraceOverview) />,
-          "id": "traces_overview",
+          "component": [Function],
           "name": "Traces",
+          "path": "/traces",
         },
       ]
     }

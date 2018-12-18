@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { jstz as tzDetect } from 'jstimezonedetect';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 export class XpackWatcherTimezoneService {
   constructor(config) {
@@ -19,7 +18,7 @@ export class XpackWatcherTimezoneService {
       return this.config.get(DATE_FORMAT_CONFIG_KEY);
     }
 
-    const detectedTimezone = tzDetect.determine().name();
+    const detectedTimezone = moment.tz.guess();
     if (detectedTimezone) {
       return detectedTimezone;
     }

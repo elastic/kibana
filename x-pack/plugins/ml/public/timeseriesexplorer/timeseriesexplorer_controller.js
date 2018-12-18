@@ -13,8 +13,9 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
+import 'plugins/ml/components/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
@@ -30,6 +31,7 @@ import {
   isModelPlotEnabled,
   mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
+import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 import {
   createTimeSeriesJobData,
   processForecastResults,
@@ -49,10 +51,19 @@ import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import { initPromise } from 'plugins/ml/util/promise';
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
+
+
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
     template,
+    k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
@@ -67,10 +78,10 @@ const module = uiModules.get('apps/ml');
 
 module.controller('MlTimeSeriesExplorerController', function (
   $scope,
-  $route,
   $timeout,
   Private,
   AppState,
+  config,
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
@@ -79,7 +90,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   timefilter.enableAutoRefreshSelector();
 
   const CHARTS_POINT_TARGET = 500;
-  const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
@@ -95,13 +105,20 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
+  $scope.showAnnotations = mlAnnotationsEnabled;// Toggles display of annotations in the focus chart
+  $scope.showAnnotationsCheckbox = mlAnnotationsEnabled;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
+
+  $scope.focusAnnotationData = [];
+
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = config.get('dateFormat:tz');
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
   };
-
 
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store the zoom range.
@@ -344,7 +361,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.refreshFocusData = function (fromDate, toDate) {
 
     // Counter to keep track of the queries to populate the chart.
-    let awaitingCount = 3;
+    let awaitingCount = 4;
 
     // This object is used to store the results of individual remote requests
     // before we transform it into the final data and apply it to $scope. Otherwise
@@ -414,7 +431,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       // Sort in descending time order before storing in scope.
       refreshFocusData.anomalyRecords = _.chain(resp.records)
@@ -439,6 +456,33 @@ module.controller('MlTimeSeriesExplorerController', function (
     }).catch((resp) => {
       console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
     });
+
+    // Query 4 - load any annotations for the selected job.
+    if (mlAnnotationsEnabled) {
+      ml.annotations.getAnnotations({
+        jobIds: [$scope.selectedJob.job_id],
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
+      }).then((resp) => {
+        refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
+          .sort((a, b) => {
+            return a.timestamp - b.timestamp;
+          })
+          .map((d, i) => {
+            d.key = String.fromCharCode(65 + i);
+            return d;
+          });
+
+        finish();
+      }).catch(() => {
+        // silent fail
+        refreshFocusData.focusAnnotationData = [];
+        finish();
+      });
+    } else {
+      finish();
+    }
 
     // Plus query for forecast data if there is a forecastId stored in the appState.
     const forecastId = _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId');
@@ -552,6 +596,14 @@ module.controller('MlTimeSeriesExplorerController', function (
       $scope.showModelBounds = !$scope.showModelBounds;
     }, 0);
   };
+
+  if (mlAnnotationsEnabled) {
+    $scope.toggleShowAnnotations = function () {
+      $timeout(() => {
+        $scope.showAnnotations = !$scope.showAnnotations;
+      }, 0);
+    };
+  }
 
   $scope.toggleShowForecast = function () {
     $timeout(() => {
@@ -673,14 +725,16 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
     mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
-      .finally(() => {
-        // Load the data - if the FieldFormats failed to populate
-        // the default formatting will be used for metric values.
+      .catch((err) => { console.log('Error populating field formats:', err); })
+      // Load the data - if the FieldFormats failed to populate
+      // the default formatting will be used for metric values.
+      .then(() => {
         $scope.refresh();
       });
   }
 
   function loadAnomaliesTableData(earliestMs, latestMs) {
+
     ml.results.getAnomaliesTableData(
       [$scope.selectedJob.job_id],
       $scope.criteriaFields,
@@ -689,7 +743,8 @@ module.controller('MlTimeSeriesExplorerController', function (
       mlSelectSeverityService.state.get('threshold').val,
       earliestMs,
       latestMs,
-      ANOMALIES_MAX_RESULTS
+      dateFormatTz,
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
@@ -774,7 +829,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       bounds.min.valueOf(),
       bounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS)
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE)
       .then((resp) => {
         if (resp.records && resp.records.length > 0) {
           const firstRec = resp.records[0];

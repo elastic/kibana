@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { checkParam } from '../../error_missing_required';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
+import { i18n } from '@kbn/i18n';
 
 export function handleResponse(shardStats, indexUuid) {
   return response => {
@@ -31,10 +32,13 @@ export function handleResponse(shardStats, indexUuid) {
       indexSummary = {
         unassignedShards,
         totalShards: get(_shardStats, 'primary', 0) + get(_shardStats, 'replica', 0) + unassignedShards,
-        status: _shardStats.status || 'Unknown',
+        status: _shardStats.status || i18n.translate('xpack.monitoring.es.indices.unknownStatusLabel', {
+          defaultMessage: 'Unknown' })
       };
     } else {
-      indexSummary = { status: 'Not Available', };
+      indexSummary = { status: i18n.translate('xpack.monitoring.es.indices.notAvailableStatusLabel', {
+        defaultMessage: 'Not Available' })
+      };
     }
 
     return {

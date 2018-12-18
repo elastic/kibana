@@ -5,6 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -39,13 +40,26 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
       return (
         <ProgressEntry alignment={alignment} className={className} color="primary" isLoading={true}>
           <ProgressMessage>
-            <EuiText color="subdued">Streaming new entries</EuiText>
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.infra.logs.streamingNewEntriesText"
+                defaultMessage="Streaming new entries"
+              />
+            </EuiText>
           </ProgressMessage>
           {lastStreamingUpdate ? (
             <ProgressMessage>
               <EuiText color="subdued">
-                <EuiIcon type="clock" /> last updated{' '}
-                <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} /> ago
+                <EuiIcon type="clock" />
+                <FormattedMessage
+                  id="xpack.infra.logs.lastStreamingUpdateText"
+                  defaultMessage=" last updated {lastUpdateTime} ago"
+                  values={{
+                    lastUpdateTime: (
+                      <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} />
+                    ),
+                  }}
+                />
               </EuiText>
             </ProgressMessage>
           ) : null}
@@ -54,7 +68,12 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
     } else if (isLoading) {
       return (
         <ProgressEntry alignment={alignment} className={className} color="subdued" isLoading={true}>
-          <ProgressMessage>Loading additional entries</ProgressMessage>
+          <ProgressMessage>
+            <FormattedMessage
+              id="xpack.infra.logs.loadingAdditionalEntriesText"
+              defaultMessage="Loading additional entries"
+            />
+          </ProgressMessage>
         </ProgressEntry>
       );
     } else if (!hasMore) {
@@ -65,10 +84,18 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
           color="subdued"
           isLoading={false}
         >
-          <ProgressMessage>No additional entries found</ProgressMessage>
+          <ProgressMessage>
+            <FormattedMessage
+              id="xpack.infra.logs.noAdditionalEntriesFoundText"
+              defaultMessage="No additional entries found"
+            />
+          </ProgressMessage>
           {onLoadMore ? (
             <EuiButtonEmpty size="xs" onClick={onLoadMore} iconType="refresh">
-              Load again
+              <FormattedMessage
+                id="xpack.infra.logs.loadAgainButtonLabel"
+                defaultMessage="Load again"
+              />
             </EuiButtonEmpty>
           ) : null}
         </ProgressEntry>

@@ -2,6 +2,8 @@
   "author": "Elastic",
   "name": "infra",
   "version": "7.0.0",
+  "private": true,
+  "license": "Elastic-License",
   "scripts": {
     "build-graphql-types": "node scripts/generate_types_from_graphql.js"
   },

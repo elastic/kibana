@@ -19,7 +19,7 @@ function tpmLabel(type) {
 }
 
 function avgLabel(agentName) {
-  return agentName === 'js-base' ? 'Page load time' : 'Avg. resp. time';
+  return agentName === 'js-base' ? 'Page load time' : 'Avg. duration';
 }
 
 const TransactionNameLink = styled(RelativeLink)`

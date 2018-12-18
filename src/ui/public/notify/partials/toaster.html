@@ -1,8 +1,7 @@
-<div class="toaster-container">
-  <ul class="toaster">
+<div class="kbnToaster__container">
+  <ul class="kbnToaster">
     <li ng-repeat="notif in list" kbn-toast notif="notif">
       <div ng-class="notif.getAlertClass()">
-
         <span ng-show="notif.count > 1" class="euiBadge euiBadge--default">
           <span class="euiBadge__content">
             <span class="euiBadge__text">{{ notif.count }}</span>
@@ -33,8 +32,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.cancelTimer(); notif.showStack = true"
+            i18n-id="common.ui.notify.toaster.moreInfoButtonLabel"
+            i18n-default-message="More Info"
           >
-            More Info
           </button>
           <button
             type="button"
@@ -42,8 +42,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.showStack = false"
+            i18n-id="common.ui.notify.toaster.lessInfoButtonLabel"
+            i18n-default-message="Less Info"
           >
-            Less Info
           </button>
           <button
             data-test-subj="notifierDismissButton"
@@ -52,8 +53,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.accept()"
+            i18n-id="common.ui.notify.toaster.okButtonLabel"
+            i18n-default-message="OK"
           >
-            OK
           </button>
           <button
             type="button"
@@ -61,8 +63,9 @@
             class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.address()"
+            i18n-id="common.ui.notify.toaster.fixItButtonLabel"
+            i18n-default-message="Fix it"
           >
-            Fix it
           </button>
           <button
             type="button"
@@ -80,14 +83,12 @@
           class="euiBadge euiBadge--default"
           type="button"
           ng-if="notif.isTimed()"
-          class="toaster-countdown"
+          class="kbnToaster__countdown"
           ng-click="notif.cancelTimer()"
           title="Stop"
         >
           <span class="euiBadge__content">
-            <span>
-              {{notif.timeRemaining}}s
-            </span>
+            <span> {{ notif.timeRemaining }}s </span>
           </span>
         </button>
       </div>
@@ -95,7 +96,6 @@
       <div ng-if="notif.stack && notif.showStack" ng-class="notif.getAlertClassStack()">
         <pre ng-repeat="stack in notif.stacks" ng-bind="stack"></pre>
       </div>
-
     </li>
   </ul>
 </div>

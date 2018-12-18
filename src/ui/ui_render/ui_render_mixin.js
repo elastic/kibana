@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { defaults } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
+import { mergeVariables } from './lib';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -40,7 +40,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
     defaultInjectedVars = defaultInjectedVarProviders
       .reduce((allDefaults, { fn, pluginSpec }) => (
-        defaults(
+        mergeVariables(
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
         )
@@ -62,17 +62,19 @@ export function uiRenderMixin(kbnServer, server, config) {
       }
 
       const basePath = config.get('server.basePath');
-      const bundlePath = `${basePath}/bundles`;
+      const regularBundlePath = `${basePath}/bundles`;
+      const dllBundlePath = `${basePath}/dlls`;
       const styleSheetPaths = [
-        `${bundlePath}/vendors.style.css`,
-        `${bundlePath}/commons.style.css`,
-        `${bundlePath}/${app.getId()}.style.css`,
+        `${dllBundlePath}/vendors.style.dll.css`,
+        `${regularBundlePath}/commons.style.css`,
+        `${regularBundlePath}/${app.getId()}.style.css`,
       ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
 
       const bootstrap = new AppBootstrap({
         templateData: {
           appId: app.getId(),
-          bundlePath,
+          regularBundlePath,
+          dllBundlePath,
           styleSheetPaths,
         }
       });
@@ -145,7 +147,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         basePath,
         vars: await replaceInjectedVars(
           request,
-          defaults(
+          mergeVariables(
             injectedVarsOverrides,
             await server.getInjectedUiAppVars(app.getId()),
             defaultInjectedVars,

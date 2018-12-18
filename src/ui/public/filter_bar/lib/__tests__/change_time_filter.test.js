@@ -36,31 +36,30 @@ jest.mock('ui/chrome',
     },
   }), { virtual: true });
 
-import moment from 'moment';
 import expect from 'expect.js';
 import { changeTimeFilter } from '../change_time_filter';
 import { timefilter } from 'ui/timefilter';
 
 describe('changeTimeFilter()', function () {
+  const gt = 1388559600000;
+  const lt = 1388646000000;
 
   test('should change the timefilter to match the range gt/lt', function () {
-    const filter = { range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } };
+    const filter = { range: { '@timestamp': { gt, lt } } };
     changeTimeFilter(filter);
-    expect(timefilter.getTime().mode).to.be('absolute');
-    expect(moment.isMoment(timefilter.getTime().to)).to.be(true);
-    expect(timefilter.getTime().to.isSame('2014-01-02'));
-    expect(moment.isMoment(timefilter.getTime().from)).to.be(true);
-    expect(timefilter.getTime().from.isSame('2014-01-01'));
+    const { mode, to, from } = timefilter.getTime();
+    expect(mode).to.be('absolute');
+    expect(to).to.be(new Date(lt).toISOString());
+    expect(from).to.be(new Date(gt).toISOString());
   });
 
   test('should change the timefilter to match the range gte/lte', function () {
-    const filter = { range: { '@timestamp': { gte: 1388559600000, lte: 1388646000000 } } };
+    const filter = { range: { '@timestamp': { gte: gt, lte: lt } } };
     changeTimeFilter(filter);
-    expect(timefilter.getTime().mode).to.be('absolute');
-    expect(moment.isMoment(timefilter.getTime().to)).to.be(true);
-    expect(timefilter.getTime().to.isSame('2014-01-02'));
-    expect(moment.isMoment(timefilter.getTime().from)).to.be(true);
-    expect(timefilter.getTime().from.isSame('2014-01-01'));
+    const { mode, to, from } = timefilter.getTime();
+    expect(mode).to.be('absolute');
+    expect(to).to.be(new Date(lt).toISOString());
+    expect(from).to.be(new Date(gt).toISOString());
   });
 
 });

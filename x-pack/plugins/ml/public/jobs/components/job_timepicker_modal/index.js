@@ -8,5 +8,4 @@
 
 import './datafeed_service';
 import './job_timepicker_modal_controller';
-import './styles/main.less';
 import 'plugins/ml/jobs/new_job/simple/components/watcher';

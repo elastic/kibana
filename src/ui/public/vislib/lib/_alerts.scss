@@ -1,0 +1,55 @@
+
+.visAlerts__tray {
+  position: absolute;
+  bottom: ($euiSizeXS+1px);
+  left: 0;
+  right: 0;
+  list-style: none;
+  padding: 0;
+
+  transition-property: opacity;
+  transition-delay: $euiAnimSpeedExtraFast;
+  transition-duration: $euiAnimSpeedExtraFast;
+}
+
+.visAlerts__icon {
+  margin: 0;
+  padding: 0 $euiSizeS;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.visAlerts__text {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+}
+
+.visAlerts__close {
+  cursor: pointer;
+}
+
+.visAlert {
+  margin: 0 $euiSizeS $euiSizeS;
+  padding: $euiSizeXS $euiSizeS $euiSizeXS $euiSizeXS;
+  display: flex;
+}
+
+// Modifier naming and colors.
+$visAlertTypes: (
+  info: $euiColorPrimary,
+  success: $euiColorSecondary,
+  warning: $euiColorWarning,
+  danger: $euiColorDanger,
+);
+
+// Create button modifiders based upon the map.
+@each $name, $color in $visAlertTypes {
+  .visAlert--#{$name} {
+    $backgroundColor: tintOrShade($color, 90%, 70%);
+    $textColor: makeHighContrastColor($color, $backgroundColor);
+
+    background-color: $backgroundColor;
+    color: $textColor;
+  }
+}

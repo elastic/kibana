@@ -21,7 +21,12 @@ export async function getTelemetry(req, config, start, end, { _getAllStats = get
   let response = [];
 
   if (config.get('xpack.monitoring.enabled')) {
-    response = await _getAllStats(req, start, end);
+    try {
+      // attempt to collect stats from multiple clusters in monitoring data
+      response = await _getAllStats(req, start, end);
+    } catch (err) {
+      // no-op
+    }
   }
 
   if (!Array.isArray(response) || response.length === 0) {
@@ -92,7 +97,7 @@ export function telemetryRoute(server) {
       } catch (err) {
         if (config.get('env.dev')) {
         // don't ignore errors when running in dev mode
-          return boomify(err);
+          return boomify(err, { statusCode: err.status });
         } else {
         // ignore errors, return empty set and a 200
           return h.response([]).code(200);

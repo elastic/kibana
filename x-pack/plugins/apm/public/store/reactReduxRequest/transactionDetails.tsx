@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { loadTransaction } from '../../services/rest/apm';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { loadTransaction } from '../../services/rest/apm/transactions';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
 // @ts-ignore

@@ -135,7 +135,7 @@ function responseTimeLabel(type) {
     case 'route-change':
       return 'Route change times';
     default:
-      return 'Response times';
+      return 'Transactions duration';
   }
 }
 

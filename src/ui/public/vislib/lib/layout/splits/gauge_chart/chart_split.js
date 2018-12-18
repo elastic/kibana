@@ -23,7 +23,7 @@ import d3 from 'd3';
 export default function ChartSplitFactory() {
 
   /*
-   * Adds div DOM elements to the `.chart-wrapper` element based on the data layout.
+   * Adds div DOM elements to the `.visWrapper__chart` element based on the data layout.
    * For example, if the data has rows, it returns the same number of
    * `.chart` elements as row objects.
    */
@@ -33,11 +33,11 @@ export default function ChartSplitFactory() {
       const div = d3.select(this)
         .attr('class', function () {
           if (data.rows) {
-            return 'chart-wrapper-row';
+            return 'visWrapper__splitCharts--row';
           } else if (data.columns) {
-            return 'chart-wrapper-column';
+            return 'visWrapper__splitCharts--column';
           } else {
-            return 'chart-wrapper';
+            return 'visWrapper__chart';
           }
         });
       let divClass;

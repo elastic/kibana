@@ -6,16 +6,14 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { RRRRenderResponse } from 'react-redux-request';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
-// @ts-ignore
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
 // @ts-ignore
 import TransactionCharts from '../../shared/charts/TransactionCharts';
-import EmptyMessage from '../../shared/EmptyMessage';
+import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 // @ts-ignore
@@ -39,7 +37,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <TransactionDetailsChartsRequest
         urlParams={urlParams}
-        render={({ data }: RRRRenderResponse<any>) => (
+        render={({ data }) => (
           <TransactionCharts
             charts={data}
             urlParams={urlParams}

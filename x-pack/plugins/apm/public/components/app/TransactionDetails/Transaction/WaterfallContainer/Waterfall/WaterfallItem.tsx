@@ -20,14 +20,39 @@ import {
 } from '../../../../../../style/variables';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
-interface ItemBarProps {
-  type: 'transaction' | 'span';
+type ItemType = 'transaction' | 'span';
+
+interface IContainerStyleProps {
+  type: ItemType;
+  timelineMargins: ITimelineMargins;
+  isSelected: boolean;
+}
+
+interface IBarStyleProps {
+  type: ItemType;
   left: number;
   width: number;
   color: string;
 }
 
-const ItemBar = styled<ItemBarProps, any>('div')`
+const Container = styled<IContainerStyleProps, 'div'>('div')`
+  position: relative;
+  display: block;
+  user-select: none;
+  padding-top: ${px(units.half)};
+  padding-bottom: ${props =>
+    px(props.type === 'span' ? units.plus + units.quarter : units.plus)};
+  margin-right: ${props => px(props.timelineMargins.right)};
+  margin-left: ${props => px(props.timelineMargins.left)};
+  border-top: 1px solid ${colors.gray4};
+  background-color: ${props => (props.isSelected ? colors.gray5 : 'initial')};
+  cursor: pointer;
+  &:hover {
+    background-color: ${colors.gray5};
+  }
+`;
+
+const ItemBar = styled<IBarStyleProps, any>('div')`
   box-sizing: border-box;
   position: relative;
   height: ${px(unit)};
@@ -35,44 +60,30 @@ const ItemBar = styled<ItemBarProps, any>('div')`
   background-color: ${props => props.color};
 `;
 
-// Note: "direction: rtl;" is here to prevent text from running off of
-// the right edge and instead pushing it to the left. For an example of
-// how this works, see here: https://codepen.io/sqren/pen/JrXNjY
-const SpanLabel = styled.div`
+const ItemLabel = styled.div`
   white-space: nowrap;
-  position: relative;
-  direction: rtl;
+  position: absolute;
+  right: 0;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
   text-align: left;
-  margin: ${px(units.quarter)} 0 0;
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
+  margin: 0;
 `;
 
-const TransactionLabel = styled(SpanLabel)`
+const SpanLabel = styled(ItemLabel)`
+  font-weight: normal;
+  font-family: ${fontFamilyCode};
+  font-size: ${fontSizes.small};
+  bottom: ${px(units.half)};
+`;
+
+const TransactionLabel = styled(ItemLabel)`
   font-weight: 600;
   font-family: ${fontFamily};
   font-size: ${fontSize};
-`;
-
-interface IContainerProps {
-  item: IWaterfallItem;
-  timelineMargins: ITimelineMargins;
-  isSelected: boolean;
-}
-
-const Container = styled<IContainerProps, 'div'>('div')`
-  position: relative;
-  display: block;
-  user-select: none;
-  padding: ${px(units.half)} ${props => px(props.timelineMargins.right)}
-    ${props => px(props.item.docType === 'span' ? units.half : units.quarter)}
-    ${props => px(props.timelineMargins.left)};
-  border-top: 1px solid ${colors.gray4};
-  background-color: ${props => (props.isSelected ? colors.gray5 : 'initial')};
-  cursor: pointer;
-  &:hover {
-    background-color: ${colors.gray5};
-  }
+  bottom: ${px(units.quarter)};
 `;
 
 interface ITimelineMargins {
@@ -117,29 +128,24 @@ export function WaterfallItem({
 
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
-  const Label = item.docType === 'transaction' ? TransactionLabel : SpanLabel;
+  const Label = item.docType === 'span' ? SpanLabel : TransactionLabel;
 
-  // Note: the <Prefix> appears *after* the item name in the DOM order
-  // because this label is styled with "direction: rtl;" so that the name
-  // itself doesn't flow outside the box to the right.
   return (
     <Container
-      item={item}
+      type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       onClick={onClick}
     >
-      <ItemBar
-        // using inline styles instead of props to avoid generating a css class for each item
+      <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={{ left: `${left}%`, width: `${width}%` }}
         color={color}
         type={item.docType}
       />
-      <Label
-        // using inline styles instead of props to avoid generating a css class for each item
-        style={{ left: `${left}%`, width: `${Math.max(100 - left, 0)}%` }}
+      <Label // using inline styles instead of props to avoid generating a css class for each item
+        style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
-        {item.name} <Prefix item={item} />
+        <Prefix item={item} /> {item.name}
       </Label>
     </Container>
   );

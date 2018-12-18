@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 
 import { http } from '../../services/http_service';
 
+import { annotations } from './annotations';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -258,7 +259,8 @@ export const ml = {
       'prefix',
       'groups',
       'indexPatternName',
-      'query'
+      'query',
+      'useDedicatedIndex'
     ]);
 
     return http({
@@ -418,6 +420,7 @@ export const ml = {
     });
   },
 
+  annotations,
   filters,
   results,
   jobs,

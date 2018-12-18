@@ -5,8 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { parse } from './grammar';
-import { getByAlias } from './get_by_alias';
+import { parse, getByAlias } from '@kbn/interpreter/common';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 
@@ -47,11 +46,17 @@ export function getAutocompleteSuggestions(specs, expression, position) {
     const { ast: newAst, fnIndex, argName, argIndex } = getFnArgAtPosition(ast, position);
     const fn = newAst.node.chain[fnIndex].node;
 
-    if (fn.function.includes(MARKER)) return getFnNameSuggestions(specs, newAst, fnIndex);
+    if (fn.function.includes(MARKER)) {
+      return getFnNameSuggestions(specs, newAst, fnIndex);
+    }
 
-    if (argName === '_') return getArgNameSuggestions(specs, newAst, fnIndex, argName, argIndex);
+    if (argName === '_') {
+      return getArgNameSuggestions(specs, newAst, fnIndex, argName, argIndex);
+    }
 
-    if (argName) return getArgValueSuggestions(specs, newAst, fnIndex, argName, argIndex);
+    if (argName) {
+      return getArgValueSuggestions(specs, newAst, fnIndex, argName, argIndex);
+    }
   } catch (e) {
     // Fail silently
   }
@@ -68,8 +73,9 @@ function getFnArgAtPosition(ast, position) {
     for (let argIndex = 0; argIndex < argValues.length; argIndex++) {
       const value = argValues[argIndex];
       if (value.start <= position && position <= value.end) {
-        if (value.node !== null && value.node.type === 'expression')
+        if (value.node !== null && value.node.type === 'expression') {
           return getFnArgAtPosition(value, position);
+        }
         return { ast, fnIndex, argName, argIndex };
       }
     }
@@ -104,7 +110,9 @@ function getArgNameSuggestions(specs, ast, fnIndex, argName, argIndex) {
   // Get the list of args from the function definition
   const fn = ast.node.chain[fnIndex].node;
   const fnDef = getByAlias(specs, fn.function);
-  if (!fnDef) return [];
+  if (!fnDef) {
+    return [];
+  }
 
   // We use the exact text instead of the value because it is always a string and might be quoted
   const { text, start, end } = fn.arguments[argName][argIndex];
@@ -118,7 +126,9 @@ function getArgNameSuggestions(specs, ast, fnIndex, argName, argIndex) {
     return [name, values.filter(value => !value.text.includes(MARKER))];
   });
   const unusedArgDefs = matchingArgDefs.filter(argDef => {
-    if (argDef.multi) return true;
+    if (argDef.multi) {
+      return true;
+    }
     return !argEntries.some(([name, values]) => {
       return values.length && (name === argDef.name || argDef.aliases.includes(name));
     });
@@ -142,9 +152,13 @@ function getArgValueSuggestions(specs, ast, fnIndex, argName, argIndex) {
   // Get the list of values from the argument definition
   const fn = ast.node.chain[fnIndex].node;
   const fnDef = getByAlias(specs, fn.function);
-  if (!fnDef) return [];
+  if (!fnDef) {
+    return [];
+  }
   const argDef = getByAlias(fnDef.args, argName);
-  if (!argDef) return [];
+  if (!argDef) {
+    return [];
+  }
 
   // Get suggestions from the argument definition, including the default
   const { start, end, node } = fn.arguments[argName][argIndex];
@@ -170,7 +184,9 @@ function textMatches(text, query) {
 
 function maybeQuote(value) {
   if (typeof value === 'string') {
-    if (value.match(/^\{.*\}$/)) return value;
+    if (value.match(/^\{.*\}$/)) {
+      return value;
+    }
     return `"${value.replace(/"/g, '\\"')}"`;
   }
   return value;
@@ -187,8 +203,12 @@ function unnamedArgComparator(a, b) {
 }
 
 function alphanumericalComparator(a, b) {
-  if (a < b) return -1;
-  if (a > b) return 1;
+  if (a < b) {
+    return -1;
+  }
+  if (a > b) {
+    return 1;
+  }
   return 0;
 }
 
@@ -199,7 +219,9 @@ function startsWithComparator(query) {
 function combinedComparator(...comparators) {
   return (a, b) =>
     comparators.reduce((acc, comparator) => {
-      if (acc !== 0) return acc;
+      if (acc !== 0) {
+        return acc;
+      }
       return comparator(a, b);
     }, 0);
 }

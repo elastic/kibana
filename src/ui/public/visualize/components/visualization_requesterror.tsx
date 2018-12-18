@@ -35,8 +35,8 @@ export class VisualizationRequestError extends React.Component<VisualizationRequ
     const errorMessage = (error && error.message) || error;
 
     return (
-      <div className="visualize-error visualize-chart" ref={this.containerDiv}>
-        <EuiText className="visualize-request-error" color="danger" size="xs">
+      <div className="visError visChart" ref={this.containerDiv}>
+        <EuiText className="visError--request" color="danger" size="xs">
           {errorMessage}
         </EuiText>
       </div>

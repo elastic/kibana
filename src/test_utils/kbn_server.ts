@@ -44,7 +44,7 @@ const DEFAULTS_SETTINGS = {
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-  plugins: { scanDirs: [resolve(__dirname, '../core_plugins')] },
+  plugins: { scanDirs: [resolve(__dirname, '../legacy/core_plugins')] },
   elasticsearch: {
     url: esTestConfig.getUrl(),
     username: kibanaServerTestUser.username,
@@ -83,7 +83,7 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
  * @param path
  */
 function getSupertest(root: Root, method: HttpMethod, path: string) {
-  const testUserCredentials = new Buffer(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
+  const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
   return supertest((root as any).server.http.service.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);

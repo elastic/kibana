@@ -21,6 +21,7 @@ function getAnomaliesTableData(callWithRequest, payload) {
     threshold,
     earliestMs,
     latestMs,
+    dateFormatTz,
     maxRecords,
     maxExamples } = payload;
   return rs.getAnomaliesTableData(
@@ -31,6 +32,7 @@ function getAnomaliesTableData(callWithRequest, payload) {
     threshold,
     earliestMs,
     latestMs,
+    dateFormatTz,
     maxRecords,
     maxExamples);
 }

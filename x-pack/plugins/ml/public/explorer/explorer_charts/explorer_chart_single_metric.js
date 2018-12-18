@@ -9,8 +9,6 @@
  * the Machine Learning Explorer dashboard.
  */
 
-import './styles/explorer_chart.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -21,6 +19,7 @@ import moment from 'moment';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
+import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import {
   getSeverityWithLow,
@@ -336,7 +335,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     function showLineChartTooltip(marker, circle) {
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
-      const formattedDate = moment(marker.date).format('MMMM Do YYYY, HH:mm');
+      const formattedDate = formatHumanReadableDateTime(marker.date);
       let contents = formattedDate + '<br/><hr/>';
 
       if (_.has(marker, 'anomalyScore')) {

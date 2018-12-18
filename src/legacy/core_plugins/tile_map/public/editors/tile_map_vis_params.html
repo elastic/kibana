@@ -1,0 +1,92 @@
+<!-- vis type specific options -->
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <label
+      for="coordinateMapOptionsMapType"
+      i18n-id="tileMap.visParams.mapTypeLabel"
+      i18n-default-message="Map type"
+    ></label>
+      <select
+        id="coordinateMapOptionsMapType"
+        name="agg"
+      class="form-control"
+      ng-model="editorState.params.mapType"
+      ng-init="editorState.params.mapType || vis.type.editorConfig.collections.mapTypes[0]"
+      ng-options="mapType as mapType for mapType in vis.type.editorConfig.collections.mapTypes"
+      >
+    </select>
+  </div>
+
+
+  <div class="kuiSideBarFormRow" >
+    <label
+      class="kuiSideBarFormRow__label"
+      for="colorSchema"
+      i18n-id="tileMap.visParams.colorSchemaLabel"
+      i18n-default-message="Color Schema"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="colorSchema"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="editorState.params.colorSchema"
+        ng-options="mode.id as mode.label for mode in vis.type.editorConfig.collections.colorSchemas"
+      ></select>
+    </div>
+  </div>
+
+  <div ng-if="editorState.params.mapType === 'Heatmap'" class="form-group">
+    <div>
+      <label
+        i18n-id="tileMap.visParams.clusterSizeLabel"
+        i18n-default-message="Cluster size"
+      ></label>
+      <div class="visEditorAgg__formRow--flex">
+        <input
+          name="heatClusterSize"
+          ng-model="editorState.params.heatClusterSize"
+          required
+          class="form-control"
+          type="range"
+          min="1.0"
+          max="3.0"
+          step="0.1"
+          >
+        <div class="visEditorAgg__sliderValue">
+          {{editorState.params.heatClusterSize}}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <vislib-basic-options></vislib-basic-options>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="desaturateMapTiles"
+      i18n-id="tileMap.visParams.desaturateTilesLabel"
+      i18n-default-message="Desaturate tiles"
+    ></label>
+
+    <div class="kuiSideBarFormRow__control">
+      <input
+        type="checkbox"
+        id="desaturateMapTiles"
+        name="isDesaturated"
+        ng-disabled="!vis.type.visConfig.canDesaturate"
+        ng-model="editorState.params.isDesaturated"
+      >
+      &nbsp;
+      <icon-tip
+        content="::'tileMap.visParams.reduceVibrancyOfTileColorsTip' | i18n: {
+          defaultMessage: 'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer.'
+        }"
+        position="'right'"
+      ></icon-tip>
+    </div>
+  </div>
+</div>
+
+<wms-options options="editorState.params.wms" collections="vis.type.editorConfig.collections"></wms-options>

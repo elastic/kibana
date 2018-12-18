@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
 import React from 'react';
 
-function EmptyMessage({
+interface Props {
+  heading?: string;
+  subheading?: EuiEmptyPromptProps['body'];
+  hideSubheading?: boolean;
+}
+
+const EmptyMessage: React.SFC<Props> = ({
   heading = 'No data found.',
   subheading = 'Try another time range or reset the search filter.',
   hideSubheading = false
-}) {
+}) => {
   return (
     <EuiEmptyPrompt
       titleSize="s"
@@ -19,7 +25,6 @@ function EmptyMessage({
       body={!hideSubheading && subheading}
     />
   );
-}
+};
 
-// tslint:disable-next-line:no-default-export
-export default EmptyMessage;
+export { EmptyMessage };

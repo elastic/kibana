@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 const path = require('path');
-process.env.NODE_PATH = path.join(__dirname, '..', '..', 'node_modules');
+process.env.NODE_PATH = path.resolve(__dirname, '..', '..', '..', 'node_modules');
 
 module.exports = function (wallaby) {
   return {
@@ -23,7 +23,10 @@ module.exports = function (wallaby) {
       type: 'node',
       runner: 'node',
     },
-    testFramework: 'jest',
+    testFramework: {
+      type: 'jest',
+      //path: jestPath,
+    },
     compilers: {
       '**/*.ts?(x)': wallaby.compilers.typeScript({
         typescript: require('typescript'), // eslint-disable-line
@@ -38,7 +41,6 @@ module.exports = function (wallaby) {
       const path = require('path');
 
       const kibanaDirectory = path.resolve(wallaby.localProjectDir, '..', '..', '..');
-
       wallaby.testFramework.configure({
         rootDir: wallaby.localProjectDir,
         moduleNameMapper: {

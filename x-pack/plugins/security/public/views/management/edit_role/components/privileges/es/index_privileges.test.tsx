@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { RoleValidator } from '../../../lib/validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { IndexPrivileges } from './index_privileges';
@@ -31,7 +31,7 @@ test('it renders without crashing', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = shallow(<IndexPrivileges {...props} />);
+  const wrapper = shallowWithIntl(<IndexPrivileges {...props} />);
   expect(wrapper).toMatchSnapshot();
 });
 
@@ -65,6 +65,6 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = mount(<IndexPrivileges {...props} />);
+  const wrapper = mountWithIntl(<IndexPrivileges {...props} />);
   expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(1);
 });

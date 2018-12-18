@@ -81,6 +81,7 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
     }
   }
 });
+
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'rollup_jobs',

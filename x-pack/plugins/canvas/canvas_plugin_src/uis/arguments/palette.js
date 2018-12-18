@@ -7,8 +7,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import { getType } from '@kbn/interpreter/common';
 import { PalettePicker } from '../../../public/components/palette_picker';
-import { getType } from '../../../common/lib/get_type';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
@@ -19,10 +19,14 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
   // TODO: This is weird, its basically a reimplementation of what the interpretter would return.
   // Probably a better way todo this, and maybe a better way to handle template stype objects in general?
   function astToPalette({ chain }) {
-    if (chain.length !== 1 || chain[0].function !== 'palette') throwNotParsed();
+    if (chain.length !== 1 || chain[0].function !== 'palette') {
+      throwNotParsed();
+    }
     try {
       const colors = chain[0].arguments._.map(astObj => {
-        if (getType(astObj) !== 'string') throwNotParsed();
+        if (getType(astObj) !== 'string') {
+          throwNotParsed();
+        }
         return astObj;
       });
 

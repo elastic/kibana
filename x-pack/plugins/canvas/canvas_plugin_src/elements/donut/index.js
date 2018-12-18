@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import header from './header.png';
 
 export const donut = () => ({
   name: 'donut',
-  displayName: i18n.translate('xpack.canvas.elements.donutChartDisplayName', {
-    defaultMessage: 'Donut chart',
-  }),
-  help: i18n.translate('xpack.canvas.elements.donutChartHelpText', {
-    defaultMessage: 'A customizable donut chart',
-  }),
+  displayName: 'Donut chart',
+  help: 'A customizable donut chart',
   image: header,
   expression: `filters
 | demodata

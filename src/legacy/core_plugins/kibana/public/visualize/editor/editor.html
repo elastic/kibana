@@ -1,0 +1,80 @@
+<visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
+  <!-- Local nav. -->
+  <kbn-top-nav name="visualize" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Breadcrumbs. -->
+      <bread-crumbs
+        data-transclude-slot="topLeftCorner"
+        page-title="getVisualizationTitle()"
+        use-links="true"
+        omit-current-page="true"
+        omit-pages="['edit']"
+      ></bread-crumbs>
+
+      <!-- Search. -->
+      <div
+        data-transclude-slot="bottomRow"
+        ng-show="chrome.getVisible()"
+        class="fullWidth"
+      >
+        <div ng-if="vis.type.requiresSearch && state.linked">
+          {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
+          <a
+            href="#/discover/{{savedVis.savedSearch.id}}"
+          >
+            {{ savedVis.savedSearch.title }}
+          </a>
+          &nbsp;
+          <a
+            data-test-subj="unlinkSavedSearch"
+            href=""
+            ng-dblclick="unlink()"
+            tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
+          >
+            <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
+          </a>
+        </div>
+
+        <div ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar" class="fullWidth">
+          <query-bar
+            query="state.query"
+            app-name="'visualize'"
+            on-submit="updateQueryAndFetch"
+            disable-auto-focus="true"
+            index-patterns="[indexPattern]"
+          ></query-bar>
+        </div>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <!-- Filters. -->
+  <filter-bar
+    ng-if="vis.type.options.showFilterBar"
+    state="state"
+    index-patterns="[indexPattern]"
+  ></filter-bar>
+
+  <div
+    class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"
+    ng-if="vis.type.shouldMarkAsExperimentalInUI()"
+    data-test-subj="experimentalVisInfo"
+  >
+    <div class="euiText">
+      <p ng-bind-html="getAdditionalMessage()"></p>
+    </div>
+  </div>
+
+  <div class="visualize" ng-if="!chrome.getVisible()"/>
+
+  <visualization-editor
+    ng-if="chrome.getVisible()"
+    saved-obj="savedVis"
+    ui-state="uiState"
+    time-range="timeRange"
+    filters="globalFilters"
+    class="visEditor__content"
+  />
+
+</visualize-app>

@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }) {
   return {
     ...functionalConfig,
     junit: {
-      reportName: 'X-Pack Phantom API Reporting Tests',
+      reportName: 'X-Pack Phantom Functional Reporting Tests',
     },
     testFiles: [require.resolve('../functional')],
     kbnTestServer: {
@@ -21,7 +21,6 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...functionalConfig.kbnTestServer.serverArgs,
         `--xpack.reporting.capture.browser.type=phantom`,
-        `--logging.verbose=true`,
       ],
     },
   };

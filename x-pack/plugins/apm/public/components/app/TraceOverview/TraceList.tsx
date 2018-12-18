@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { ITransactionGroup } from '../../../../typings/TransactionGroup';
+import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
@@ -22,7 +22,7 @@ const StyledTransactionLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  noItemsMessage: any;
+  noItemsMessage: React.ReactNode;
   isLoading: boolean;
 }
 

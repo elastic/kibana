@@ -22,18 +22,17 @@ import { defaultsDeep } from 'lodash';
 import { Config } from './config';
 import { transformDeprecations } from './transform_deprecations';
 
-async function getSettingsFromFile(log, path, settingOverrides) {
-  log.debug('Loading config file from %j', path);
+const cache = new WeakMap();
 
+async function getSettingsFromFile(log, path, settingOverrides) {
   const configModule = require(path);
   const configProvider = configModule.__esModule
     ? configModule.default
     : configModule;
 
-  const settingsWithDefaults = defaultsDeep(
-    {},
-    settingOverrides,
-    await configProvider({
+  if (!cache.has(configProvider)) {
+    log.debug('Loading config file from %j', path);
+    cache.set(configProvider, configProvider({
       log,
       async readConfigFile(...args) {
         return new Config({
@@ -42,7 +41,13 @@ async function getSettingsFromFile(log, path, settingOverrides) {
           path,
         });
       }
-    })
+    }));
+  }
+
+  const settingsWithDefaults = defaultsDeep(
+    {},
+    settingOverrides,
+    await cache.get(configProvider)
   );
 
   const logDeprecation = (...args) => log.error(...args);

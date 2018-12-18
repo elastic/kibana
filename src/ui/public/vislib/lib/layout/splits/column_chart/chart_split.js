@@ -21,7 +21,7 @@ import d3 from 'd3';
 
 export function VislibLibLayoutSplitsColumnChartChartSplitProvider() {
   /*
-   * Adds div DOM elements to the `.chart-wrapper` element based on the data layout.
+   * Adds div DOM elements to the `.visWrapper__chart` element based on the data layout.
    * For example, if the data has rows, it returns the same number of
    * `.chart` elements as row objects.
    */
@@ -30,14 +30,14 @@ export function VislibLibLayoutSplitsColumnChartChartSplitProvider() {
       const div = d3.select(this)
         .attr('class', function () {
           if (data.rows) {
-            return 'chart-wrapper-row';
+            return 'visWrapper__splitCharts--row';
           } else if (data.columns) {
-            return 'chart-wrapper-column';
+            return 'visWrapper__splitCharts--column';
           } else {
             if (parent) {
-              return 'chart-first chart-last chart-wrapper';
+              return 'visWrapper__chart--first visWrapper__chart--last visWrapper__chart';
             }
-            return this.className + ' chart-wrapper';
+            return this.className + ' visWrapper__chart';
           }
         });
       let divClass = '';
@@ -65,12 +65,12 @@ export function VislibLibLayoutSplitsColumnChartChartSplitProvider() {
           if (fullDivClass !== 'chart') {
             if (chartsNumber > 1) {
               if (i === 0) {
-                fullDivClass += ' chart-first';
+                fullDivClass += ' visWrapper__chart--first';
               } else if (i === chartsNumber - 1) {
-                fullDivClass += ' chart-last';
+                fullDivClass += ' visWrapper__chart--last';
               }
             } else {
-              fullDivClass += ' chart-first chart-last';
+              fullDivClass += ' visWrapper__chart--first visWrapper__chart--last';
             }
           }
           return fullDivClass;

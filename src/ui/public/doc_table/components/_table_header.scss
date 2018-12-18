@@ -1,0 +1,9 @@
+.kbnDocTableHeader__move,
+.kbnDocTableHeader__sortChange {
+  opacity: 0;
+
+  th:hover &,
+  &:focus {
+    opacity: 1;
+  }
+}

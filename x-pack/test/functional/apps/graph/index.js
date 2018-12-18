@@ -6,6 +6,8 @@
 
 export default function ({ loadTestFile }) {
   describe('graph app', function () {
+    this.tags('ciGroup1');
+
     loadTestFile(require.resolve('./graph'));
   });
 }

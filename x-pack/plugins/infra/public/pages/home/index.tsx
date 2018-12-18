@@ -6,6 +6,8 @@
 
 import React from 'react';
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
 
@@ -18,39 +20,69 @@ import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_fi
 import { WithWaffleOptionsUrlState } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
-import { WithSource } from '../../containers/with_source';
+import { SourceErrorPage, SourceLoadingPage, WithSource } from '../../containers/with_source';
 
-export class HomePage extends React.PureComponent {
-  public render() {
-    return (
-      <ColumnarPage>
-        <WithSource>
-          {({ metricIndicesExist }) =>
-            metricIndicesExist || metricIndicesExist === null ? (
-              <>
-                <WithWaffleTimeUrlState />
-                <WithWaffleFilterUrlState />
-                <WithWaffleOptionsUrlState />
-                <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
-                <HomeToolbar />
-                <HomePageContent />
-              </>
-            ) : (
-              <WithKibanaChrome>
-                {({ basePath }) => (
-                  <EmptyPage
-                    title="Looks like you don't have any metrics indices."
-                    message="Let's add some!"
-                    actionLabel="Setup Instructions"
-                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
-                    data-test-subj="noMetricsIndicesPrompt"
-                  />
-                )}
-              </WithKibanaChrome>
-            )
-          }
-        </WithSource>
-      </ColumnarPage>
-    );
-  }
+interface HomePageProps {
+  intl: InjectedIntl;
 }
+
+export const HomePage = injectI18n(
+  class extends React.Component<HomePageProps, {}> {
+    public static displayName = 'HomePage';
+
+    public render() {
+      const { intl } = this.props;
+
+      return (
+        <ColumnarPage>
+          <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
+          <WithSource>
+            {({
+              derivedIndexPattern,
+              hasFailed,
+              isLoading,
+              lastFailureMessage,
+              load,
+              metricIndicesExist,
+            }) =>
+              metricIndicesExist ? (
+                <>
+                  <WithWaffleTimeUrlState />
+                  <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
+                  <WithWaffleOptionsUrlState />
+                  <HomeToolbar />
+                  <HomePageContent />
+                </>
+              ) : isLoading ? (
+                <SourceLoadingPage />
+              ) : hasFailed ? (
+                <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
+              ) : (
+                <WithKibanaChrome>
+                  {({ basePath }) => (
+                    <EmptyPage
+                      title={intl.formatMessage({
+                        id: 'xpack.infra.homePage.noMetricsIndicesTitle',
+                        defaultMessage: "Looks like you don't have any metrics indices.",
+                      })}
+                      message={intl.formatMessage({
+                        id: 'xpack.infra.homePage.noMetricsIndicesDescription',
+                        defaultMessage: "Let's add some!",
+                      })}
+                      actionLabel={intl.formatMessage({
+                        id: 'xpack.infra.homePage.noMetricsIndicesActionLabel',
+                        defaultMessage: 'Setup Instructions',
+                      })}
+                      actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                      data-test-subj="noMetricsIndicesPrompt"
+                    />
+                  )}
+                </WithKibanaChrome>
+              )
+            }
+          </WithSource>
+        </ColumnarPage>
+      );
+    }
+  }
+);

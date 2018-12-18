@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { toJson } from '../../../../../../core_plugins/kibana/common/utils/aggressive_parse';
+import { toJson } from '../../../../../../legacy/core_plugins/kibana/common/utils/aggressive_parse';
 
 function emptySearch() {
   return {
@@ -72,7 +72,12 @@ export function serializeFetchParams(
         });
       })
       .then(function (indexList) {
-        let body = fetchParams.body || {};
+        let body = {
+          ...fetchParams.body || {},
+        };
+        if (esShardTimeout > 0) {
+          body.timeout = `${esShardTimeout}ms`;
+        }
         let index = [];
         // If we've reached this point and there are no indexes in the
         // index list at all, it means that we shouldn't expect any indexes
@@ -94,7 +99,6 @@ export function serializeFetchParams(
           type: fetchParams.type,
           search_type: fetchParams.search_type,
           ignore_unavailable: true,
-          timeout: esShardTimeout,
         };
         if (config.get('courier:setRequestPreference') === 'sessionId') {
           header.preference = sessionId;

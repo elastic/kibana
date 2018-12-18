@@ -8,9 +8,10 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
-import { createSearchItems, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { getCreateRecognizerJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
+import { SearchItemsProvider, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 
 
 import uiRoutes from 'ui/routes';
@@ -29,6 +30,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/jobs/new_job/simple/recognize', {
     template,
+    k7Breadcrumbs: getCreateRecognizerJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
@@ -81,11 +83,12 @@ module
     const moduleId = $route.current.params.id;
     $scope.moduleId = moduleId;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     const pageTitle = (savedSearch.id !== undefined) ?
       `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
@@ -122,7 +125,8 @@ module
       query,
       filters: [],
       useFullIndexData: true,
-      startDatafeedAfterSave: true
+      startDatafeedAfterSave: true,
+      useDedicatedIndex: false,
     };
 
     $scope.resultsUrl = '';
@@ -250,10 +254,11 @@ module
         const prefix = $scope.formConfig.jobLabel;
         const indexPatternName = $scope.formConfig.indexPattern.title;
         const groups = $scope.formConfig.jobGroups;
+        const useDedicatedIndex = $scope.formConfig.useDedicatedIndex;
         const tempQuery = (savedSearch.id === undefined) ?
           undefined : combinedQuery;
 
-        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName })
+        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName, useDedicatedIndex })
           .then((resp) => {
             if (resp.jobs) {
               $scope.formConfig.jobs.forEach((job) => {

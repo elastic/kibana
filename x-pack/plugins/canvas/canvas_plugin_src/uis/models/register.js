@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'babel-polyfill';
 import { modelSpecs } from './index';
 
 modelSpecs.forEach(canvas.register);

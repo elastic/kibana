@@ -44,6 +44,10 @@ include::canvas.asciidoc[]
 
 include::ml/index.asciidoc[]
 
+include::infrastructure/index.asciidoc[]
+
+include::logs/index.asciidoc[]
+
 include::apm/index.asciidoc[]
 
 include::graph/index.asciidoc[]

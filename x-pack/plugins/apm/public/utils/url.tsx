@@ -30,15 +30,14 @@ interface ViewMlJobArgs {
   serviceName: string;
   transactionType: string;
   location: any;
-  children?: any;
 }
 
-export function ViewMLJob({
+export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
   serviceName,
   transactionType,
   location,
   children = 'View Job'
-}: ViewMlJobArgs) {
+}) => {
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
   const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
@@ -59,7 +58,7 @@ export function ViewMLJob({
       children={children}
     />
   );
-}
+};
 
 export function toQuery(search?: string): StringMap<any> {
   return search ? qs.parse(search.slice(1)) : {};

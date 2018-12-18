@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function InfoTooltip({ series, bucketSize }) {
   const tableRows = series.map((item, index) => {
@@ -28,7 +29,12 @@ export function InfoTooltip({ series, bucketSize }) {
     <table>
       <tbody>
         <tr>
-          <td className="monChart__tooltipLabel">Interval</td>
+          <td className="monChart__tooltipLabel">
+            <FormattedMessage
+              id="xpack.monitoring.chart.infoTooltip.intervalLabel"
+              defaultMessage="Interval"
+            />
+          </td>
           <td className="monChart__tooltipValue">{bucketSize}</td>
         </tr>
         { tableRows }

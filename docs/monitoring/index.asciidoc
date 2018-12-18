@@ -9,9 +9,7 @@ The {kib} {monitor-features} serve two separate purposes:
 
 . To visualize monitoring data from across the {stack}. You can view health and 
 performance data for {es}, {ls}, and Beats in real time, as well as analyze past 
-performance. For more information, see 
-{stack-ov}/xpack-monitoring.html[Monitoring the {stack}].
-
+performance. 
 . To monitor {kib} itself and route that data to the monitoring cluster.
 
 If you enable monitoring across the {stack}, each {es} node, {ls} node, {kib} 
@@ -21,6 +19,9 @@ or instance starts.
 
 NOTE: Watcher must be enabled to view cluster alerts. If you have a Basic
 license, Top Cluster Alerts are not displayed.
+
+For more information, see <<configuring-monitoring>> and 
+{stack-ov}/xpack-monitoring.html[Monitoring the {stack}].  
 
 --
 

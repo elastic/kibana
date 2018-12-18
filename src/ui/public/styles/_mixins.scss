@@ -8,7 +8,7 @@
   }
 }
 
-// EUI TODO: Add this
+// EUITODO: Add this
 @mixin kibanaCircleLogo() {
   display: inline-block;
   @include size($euiSizeXXL * 2);
@@ -23,20 +23,31 @@
   }
 }
 
-@mixin kibana-resizer($size: ($euiSizeM + 2px), $cursor: ew-resize) {
+@mixin kibana-resizer($size: ($euiSizeM + 2px), $direction: horizontal) {
   display: flex;
   flex: 0 0 $size;
-  width: $size;
-  cursor: $cursor;
   background-color: $euiColorLightestShade;
   align-items: center;
+  justify-content: center;
   margin: 0;
   user-select: none;
+
+  @if ($direction == horizontal) {
+    cursor: ew-resize;
+    width: $size;
+  } @else if ($direction == vertical) {
+    cursor: ns-resize;
+    height: $size;
+    width: 100%;
+  } @else {
+    @warn("Direction unknown for kibana-resizer");
+  }
 
   &:hover {
     background-color: tintOrShade($euiColorPrimary, 80%, 60%);
   }
 
+  &:focus,
   &.active {
     background-color: $euiColorPrimary;
     color: $euiColorEmptyShade;

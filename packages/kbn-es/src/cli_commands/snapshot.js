@@ -35,6 +35,7 @@ exports.help = (defaults = {}) => {
       --install-path  Installation path, defaults to 'source' within base-path
       --password      Sets password for elastic user [default: ${password}]
       -E              Additional key=value settings to pass to Elasticsearch
+      --download-only Download the snapshot but don't actually start it
 
     Example:
 
@@ -51,10 +52,16 @@ exports.run = async (defaults = {}) => {
       esArgs: 'E',
     },
 
+    boolean: ['download-only'],
+
     default: defaults,
   });
 
   const cluster = new Cluster();
-  const { installPath } = await cluster.installSnapshot(options);
-  await cluster.run(installPath, { esArgs: options.esArgs });
+  if (options['download-only']) {
+    await cluster.downloadSnapshot(options);
+  } else {
+    const { installPath } = await cluster.installSnapshot(options);
+    await cluster.run(installPath, { esArgs: options.esArgs });
+  }
 };

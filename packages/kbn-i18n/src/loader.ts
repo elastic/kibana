@@ -18,7 +18,6 @@
  */
 
 import { readFile } from 'fs';
-import * as JSON5 from 'json5';
 import * as path from 'path';
 import { promisify } from 'util';
 
@@ -65,12 +64,12 @@ function getLocaleFromFileName(fullFileName: string) {
 }
 
 /**
- * Loads file and parses it as JSON5
+ * Loads file and parses it as JSON
  * @param pathToFile
  * @returns
  */
 async function loadFile(pathToFile: string): Promise<Translation> {
-  return JSON5.parse(await asyncReadFile(pathToFile, 'utf8'));
+  return JSON.parse(await asyncReadFile(pathToFile, 'utf8'));
 }
 
 /**

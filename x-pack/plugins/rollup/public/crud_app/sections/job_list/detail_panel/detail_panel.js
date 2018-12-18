@@ -209,9 +209,7 @@ export class DetailPanelUi extends Component {
           </EuiFlexGroup>
         </EuiFlyoutBody>
       );
-    }
-
-    if (job) {
+    } else if (job) {
       content = this.renderJob();
     } else {
       content = (

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './styles/explorer_chart_label.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 

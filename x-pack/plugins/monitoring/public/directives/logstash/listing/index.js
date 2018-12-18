@@ -21,16 +21,54 @@ import {
   formatNumber,
   formatPercentageUsage
 } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'logstash.name', 'logstash.host', 'logstash.http_address' ];
 const columns = [
-  { title: 'Name', sortKey: 'logstash.name', sortOrder: SORT_ASCENDING },
-  { title: 'CPU Usage', sortKey: 'process.cpu.percent' },
-  { title: 'Load Average', sortKey: 'os.cpu.load_average.1m', },
-  { title: 'JVM Heap Used', sortKey: 'jvm.mem.heap_used_percent' },
-  { title: 'Events Ingested', sortKey: 'events.out' },
-  { title: 'Config Reloads' },
-  { title: 'Version', sortKey: 'logstash.version' }
+  {
+    title: i18n.translate('xpack.monitoring.logstash.nodes.nameTitle', {
+      defaultMessage: 'Name'
+    }),
+    sortKey: 'logstash.name',
+    sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.nodes.cpuUsageTitle', {
+      defaultMessage: 'CPU Usage'
+    }),
+    sortKey: 'process.cpu.percent'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.nodes.loadAverageTitle', {
+      defaultMessage: 'Load Average'
+    }),
+    sortKey: 'os.cpu.load_average.1m',
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.nodes.jvmHeapUsedTitle', {
+      defaultMessage: '{javaVirtualMachine} Heap Used',
+      values: { javaVirtualMachine: 'JVM' }
+    }),
+    sortKey: 'jvm.mem.heap_used_percent'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.nodes.eventsIngestedTitle', {
+      defaultMessage: 'Events Ingested'
+    }),
+    sortKey: 'events.out'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.nodes.configReloadsTitle', {
+      defaultMessage: 'Config Reloads'
+    })
+  },
+  {
+    title: i18n.translate('xpack.monitoring.logstash.nodes.versionTitle', {
+      defaultMessage: 'Version'
+    }),
+    sortKey: 'logstash.version'
+  }
 ];
 const nodeRowFactory = (scope, kbnUrl) => {
   const goToNode = uuid => {
@@ -73,8 +111,20 @@ const nodeRowFactory = (scope, kbnUrl) => {
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monTableCell__splitNumber">{ props.reloads.successes } successes</div>
-          <div className="monTableCell__splitNumber">{ props.reloads.failures } failures</div>
+          <div className="monTableCell__splitNumber">
+            <FormattedMessage
+              id="xpack.monitoring.logstash.nodes.configReloadsSuccessCountLabel"
+              defaultMessage="{reloadsSuccesses} successes"
+              values={{ reloadsSuccesses: props.reloads.successes }}
+            />
+          </div>
+          <div className="monTableCell__splitNumber">
+            <FormattedMessage
+              id="xpack.monitoring.logstash.nodes.configReloadsFailuresCountLabel"
+              defaultMessage="{reloadsFailures} failures"
+              values={{ reloadsFailures: props.reloads.failures }}
+            />
+          </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
           <div className="monTableCell__version">
@@ -87,7 +137,7 @@ const nodeRowFactory = (scope, kbnUrl) => {
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringLogstashNodeListing', kbnUrl => {
+uiModule.directive('monitoringLogstashNodeListing', (kbnUrl, i18n) => {
   return {
     restrict: 'E',
     scope: {
@@ -101,20 +151,23 @@ uiModule.directive('monitoringLogstashNodeListing', kbnUrl => {
     link: function (scope, $el) {
 
       scope.$watch('nodes', (nodes = []) => {
+        const filterNodesPlaceholder = i18n('xpack.monitoring.logstash.filterNodesPlaceholder', { defaultMessage: 'Filter Nodes…' });
         const nodesTable = (
-          <MonitoringTable
-            className="logstashNodesTable"
-            rows={nodes}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Nodes..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={nodeRowFactory(scope, kbnUrl)}
-          />
+          <I18nProvider>
+            <MonitoringTable
+              className="logstashNodesTable"
+              rows={nodes}
+              pageIndex={scope.pageIndex}
+              filterText={scope.filterText}
+              sortKey={scope.sortKey}
+              sortOrder={scope.sortOrder}
+              onNewState={scope.onNewState}
+              placeholder={filterNodesPlaceholder}
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={nodeRowFactory(scope, kbnUrl)}
+            />
+          </I18nProvider>
         );
         render(nodesTable, $el[0]);
       });

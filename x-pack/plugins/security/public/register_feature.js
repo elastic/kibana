@@ -8,11 +8,15 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'security',
-    title: 'Security Settings',
-    description: 'Protect your data and easily manage who has access to what with users and roles.',
+    title: i18n('xpack.security.registerFeature.securitySettingsTitle', {
+      defaultMessage: 'Security Settings'
+    }),
+    description: i18n('xpack.security.registerFeature.securitySettingsDescription', {
+      defaultMessage: 'Protect your data and easily manage who has access to what with users and roles.'
+    }),
     icon: 'securityApp',
     path: '/app/kibana#/management/security',
     showOnHomePage: true,

@@ -50,26 +50,26 @@ export function VislibLibLayoutTypesPieLayoutProvider(Private) {
       {
         parent: el,
         type: 'div',
-        class: 'vis-wrapper',
+        class: 'visWrapper',
         datum: data,
         children: [
           {
             type: 'div',
-            class: 'y-axis-chart-title',
+            class: 'visAxis__splitTitles--y',
             splits: chartTitleSplit
           },
           {
             type: 'div',
-            class: 'vis-col-wrapper',
+            class: 'visWrapper__column',
             children: [
               {
                 type: 'div',
-                class: 'chart-wrapper',
+                class: 'visWrapper__chart',
                 splits: chartSplit
               },
               {
                 type: 'div',
-                class: 'x-axis-chart-title',
+                class: 'visAxis__splitTitles--x',
                 splits: chartTitleSplit
               }
             ]

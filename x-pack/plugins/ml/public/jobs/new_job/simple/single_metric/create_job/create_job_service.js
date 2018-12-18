@@ -132,12 +132,7 @@ export function SingleMetricJobServiceProvider() {
         function: func
       };
 
-      let query = {
-        match_all: {}
-      };
-      if (formConfig.query.query_string.query !== '*' || formConfig.filters.length) {
-        query = formConfig.combinedQuery;
-      }
+      const query = formConfig.combinedQuery;
 
       if (formConfig.field && formConfig.field.id) {
         dtr.field_name = formConfig.field.id;
@@ -174,9 +169,13 @@ export function SingleMetricJobServiceProvider() {
         job.results_index_name = job.job_id;
       }
 
-      job.custom_settings = {
-        created_by: WIZARD_TYPE.SINGLE_METRIC
-      };
+      if (formConfig.usesSavedSearch === false) {
+        // Jobs created from saved searches cannot be cloned in the wizard as the
+        // ML job config holds no reference to the saved search ID.
+        job.custom_settings = {
+          created_by: WIZARD_TYPE.SINGLE_METRIC
+        };
+      }
 
       // Use the original es agg type rather than the ML version
       // e.g. count rather than high_count
@@ -431,6 +430,7 @@ function getSearchJsonFromConfig(formConfig) {
   const json = {
     index: formConfig.indexPattern.title,
     size: 0,
+    rest_total_hits_as_int: true,
     body: {
       query: {},
       aggs: {

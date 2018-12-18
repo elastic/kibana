@@ -44,7 +44,7 @@ Object {
 exports[`kbn-pm production builds and copies projects for production: packages/foo/package.json 1`] = `
 Object {
   "dependencies": Object {
-    "@elastic/bar": "file:../bar",
+    "@elastic/bar": "link:../bar",
   },
   "devDependencies": Object {
     "babel-cli": "^6.26.0",

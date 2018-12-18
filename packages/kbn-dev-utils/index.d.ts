@@ -18,3 +18,4 @@
  */
 
 export * from './src/tooling_log';
+export * from './src/serializers';

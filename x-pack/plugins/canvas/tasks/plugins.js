@@ -8,7 +8,7 @@ import path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import webpack from 'webpack';
 import del from 'del';
-import webpackConfig from './helpers/webpack.plugins';
+import { getWebpackConfig } from './helpers/webpack.plugins';
 
 const devtool = 'inline-cheap-module-source-map';
 const buildDir = path.resolve(__dirname, '../canvas_plugin');
@@ -26,20 +26,20 @@ export default function pluginsTasks(gulp, { log, colors }) {
   };
 
   gulp.task('canvas:plugins:build', function(done) {
-    del(buildDir).then(() => webpack({ ...webpackConfig, devtool }, onComplete(done)));
+    del(buildDir).then(() => webpack(getWebpackConfig({ devtool }), onComplete(done)));
   });
 
   // eslint-disable-next-line no-unused-vars
   gulp.task('canvas:plugins:dev', function(done /* added to make gulp async */) {
     log(`${colors.green.bold('canvas:plugins')} Starting initial build, this will take a while`);
     del(buildDir).then(() =>
-      webpack({ ...webpackConfig, devtool, watch: true }, (err, stats) => {
+      webpack(getWebpackConfig({ devtool, watch: true }), (err, stats) => {
         onComplete()(err, stats);
       })
     );
   });
 
   gulp.task('canvas:plugins:build-prod', function(done) {
-    del(buildDir).then(() => webpack(webpackConfig, onComplete(done)));
+    del(buildDir).then(() => webpack(getWebpackConfig(), onComplete(done)));
   });
 }

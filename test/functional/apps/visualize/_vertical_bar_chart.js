@@ -111,8 +111,54 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.visualize.openInspector();
       const data = await PageObjects.visualize.getInspectorTableData();
+      await PageObjects.visualize.closeInspector();
       log.debug(data);
       expect(data).to.eql(expectedChartData);
+    });
+
+    it('should have `drop partial buckets` option', async () => {
+      const fromTime = '2015-09-20 06:31:44.000';
+      const toTime = '2015-09-22 18:31:44.000';
+
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+
+      let expectedChartValues = [
+        82, 218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4,
+        11, 14, 17, 38, 49, 115, 152, 216, 315, 402, 446, 513, 520, 474, 421, 307, 230,
+        170, 99, 48, 30, 15, 10, 2, 8, 7, 17, 34, 37, 104, 153, 241, 313, 404, 492, 512,
+        503, 473, 379, 293, 277, 156, 56
+      ];
+
+      // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
+      // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
+      // try sleeping a bit before getting that data
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData();
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        expect(data).to.eql(expectedChartValues);
+      });
+
+      await PageObjects.visualize.toggleOpenEditor(2);
+      await PageObjects.visualize.clickDropPartialBuckets();
+      await PageObjects.visualize.clickGo();
+
+      expectedChartValues = [
+        218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4,
+        11, 14, 17, 38, 49, 115, 152, 216, 315, 402, 446, 513, 520, 474, 421, 307, 230,
+        170, 99, 48, 30, 15, 10, 2, 8, 7, 17, 34, 37, 104, 153, 241, 313, 404, 492, 512,
+        503, 473, 379, 293, 277, 156
+      ];
+
+      // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
+      // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
+      // try sleeping a bit before getting that data
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData();
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        expect(data).to.eql(expectedChartValues);
+      });
     });
 
     describe.skip('switch between Y axis scale types', () => {

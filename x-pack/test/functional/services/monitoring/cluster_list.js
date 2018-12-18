@@ -10,7 +10,6 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring']);
 
   const SUBJ_TABLE_CONTAINER = 'clusterTableContainer';
-  const SUBJ_TABLE_BODY = 'clusterTableBody';
   const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} monitoringTableNoData`;
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
 
@@ -27,11 +26,11 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
     }
 
     assertNoData() {
-      return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
+      return PageObjects.monitoring.assertEuiTableNoData(SUBJ_TABLE_NO_DATA);
     }
 
     getRows() {
-      return PageObjects.monitoring.tableGetRows(SUBJ_TABLE_BODY);
+      return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_CONTAINER);
     }
 
     setFilter(text) {

@@ -225,7 +225,7 @@
         <div class="row charts-container" ng-repeat='(key, value) in formConfig.kibanaObjects'>
           <h4 class="euiTitle euiTitle--small">{{ui.kibanaLabels[key]}}</h4>
           <div class='save-objects-list'>
-            <div ng-repeat='obj in value' class='job-container'>
+            <div ng-repeat='obj in value | orderBy:"title"' class='job-container'>
               <div class='labels'>
                 <div class='title' ng-class="{exists: obj.exists}">
                   {{obj.title}}

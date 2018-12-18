@@ -58,7 +58,7 @@ export function createEsTestCluster(options = {}) {
       const second = 1000;
       const minute = second * 60;
 
-      return esFrom === 'snapshot' ? minute : minute * 6;
+      return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
     async start(esArgs = []) {
@@ -78,7 +78,7 @@ export function createEsTestCluster(options = {}) {
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
-          `discovery.zen.ping.unicast.hosts=localhost:${port}`,
+          'discovery.type=single-node',
           ...esArgs,
         ],
       });

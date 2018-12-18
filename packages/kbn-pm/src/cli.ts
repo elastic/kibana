@@ -65,6 +65,7 @@ export async function run(argv: string[]) {
       h: 'help',
       i: 'include',
     },
+    boolean: ['prefer-offline', 'frozen-lockfile'],
   });
 
   const args = options._;

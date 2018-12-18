@@ -13,6 +13,7 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
 import { timefilter } from 'ui/timefilter';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/apm', {
   template,
@@ -54,10 +55,12 @@ uiRoutes.when('/apm', {
 
     renderReact(data, onBrush) {
       const component = (
-        <ApmOverview
-          {...data}
-          onBrush={onBrush}
-        />
+        <I18nProvider>
+          <ApmOverview
+            {...data}
+            onBrush={onBrush}
+          />
+        </I18nProvider>
       );
       super.renderReact(component);
     }

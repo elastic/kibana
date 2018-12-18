@@ -26,7 +26,7 @@ import chrome from '../chrome';
 import { KFetchError } from './kfetch_error';
 
 interface KFetchQuery {
-  [key: string]: string | number | boolean;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface KFetchOptions extends RequestInit {

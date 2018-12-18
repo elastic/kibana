@@ -1,0 +1,111 @@
+<div class="dscFieldDetails">
+  <div class="kuiVerticalRhythmSmall">
+    <p class="euiText euiText--extraSmall euiTextColor--subdued" ng-show="!field.details.error">
+      <span
+        i18n-id="kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription"
+        i18n-default-message="Top 5 values in"
+      ></span>
+      <span ng-if="!field.details.error">
+        <a
+          class="kuiLink"
+          kbn-accessible-click
+          ng-show="!field.indexPattern.metaFields.includes(field.name) && !field.scripted"
+          ng-click="onAddFilter('_exists_', field.name, '+')">
+          {{::field.details.exists}}
+        </a>
+        <span
+          ng-show="field.indexPattern.metaFields.includes(field.name) || field.scripted">
+          {{::field.details.exists}}
+        </span>
+        / {{::field.details.total}}
+        <span
+          i18n-id="kbn.discover.fieldChooser.detailViews.recordsText"
+          i18n-default-message="records"
+        ></span>
+      </span>
+    </p>
+
+    <div class="clearfix"></div>
+
+    <div ng-if="field.details.error" class="euiText euiText--extraSmall euiTextColor--subdued">{{field.details.error}}</div>
+
+    <div ng-if="!field.details.error">
+      <div ng-repeat="bucket in ::field.details.buckets" class="dscFieldDetailsItem">
+        <div class="dscFieldDetailsItem__title">
+          <!-- Field value -->
+          <div
+            css-truncate
+            css-truncate-expandable="true"
+            class="dscFieldDetails__value"
+            aria-label="{{::getBucketAriaLabel(bucket)}}"
+          >
+            {{::bucket.display}}
+            <em
+              ng-show="bucket.display === ''"
+              i18n-id="kbn.discover.fieldChooser.detailViews.emptyStringText"
+              i18n-default-message="Empty string"
+            ></em>
+          </div>
+
+          <!-- Add/remove filter buttons -->
+          <div
+            class="dscFieldDetailsItem__buttonGroup"
+            ng-show="field.filterable"
+          >
+            <button
+              class="dscFieldDetailsItem__button"
+              ng-click="onAddFilter(field, bucket.value, '+')"
+              aria-label="{{::'kbn.discover.fieldChooser.detailViews.filterValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter for this value'} }}"
+              data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"
+            >
+              <span
+                aria-hidden="true"
+                class="kuiIcon fa-search-plus dscFieldDetails__filter"
+              ></span>
+            </button>
+
+            <button
+              class="dscFieldDetailsItem__button"
+              ng-click="onAddFilter(field, bucket.value, '-')"
+              aria-label="{{::'kbn.discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter out this value'} }}"
+              data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"
+            >
+              <span
+                aria-hidden="true"
+                class="kuiIcon fa-search-minus dscFieldDetails__filter"
+              ></span>
+            </button>
+          </div>
+        </div>
+        <kbn-tooltip text="{{::bucket.count}}" placement="right" append-to-body="1">
+          <progressbar
+            value="bucket.percent"
+            max="100"
+            animate="false"
+          >
+            <span class="dscFieldDetails__progress">{{bucket.percent}}%</span>
+          </progressbar>
+        </kbn-tooltip>
+      </div>
+    </div>
+  </div>
+
+  <a
+    ng-href="{{field.details.visualizeUrl}}"
+    ng-show="field.visualizable"
+    class="kuiButton kuiButton--secondary kuiButton--small kuiButton--fullWidth kuiVerticalRhythmSmall"
+    data-test-subj="fieldVisualize-{{::field.name}}"
+  >
+    <span
+      i18n-id="kbn.discover.fieldChooser.detailViews.visualizeLinkText"
+      i18n-default-message="Visualize"
+    ></span>
+    <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
+    ( <span
+      i18n-id="kbn.discover.fieldChooser.detailViews.warningsText"
+      i18n-default-message="{warningsLength, plural, one {# warning} other {# warnings}}"
+      i18n-values="{ warningsLength: warnings.length }"
+    ></span> <i aria-hidden="true" class="fa fa-warning"></i> )
+    </span>
+  </a>
+</div>

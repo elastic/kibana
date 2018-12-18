@@ -19,34 +19,26 @@
 
 export function MonitoringPageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-
-  const getRemote = (timeout) =>
-    getService('remote')
-      .setFindTimeout(
-        timeout || getService('config').get('timeouts.find')
-      );
+  const find = getService('find');
 
   class MonitoringPage {
-    getWelcome() {
-      return getRemote()
-        .findDisplayedByCssSelector('render-directive')
-        .getVisibleText();
+    async getWelcome() {
+      const el = await find.displayedByCssSelector('render-directive');
+      return await el.getVisibleText();
     }
 
     dismissWelcome() {
       return testSubjects.click('notifierDismissButton');
     }
 
-    getToasterContents() {
-      return getRemote()
-        .findByCssSelector('div.toaster-container')
-        .getVisibleText();
+    async getToasterContents() {
+      const el = await find.byCssSelector('div.kbnToaster__container');
+      return await el.getVisibleText();
     }
 
-    clickOptOut() {
-      return getRemote().findByLinkText('Opt out here').click();
+    async clickOptOut() {
+      return find.clickByLinkText('Opt out here');
     }
-
   }
 
   return new MonitoringPage();

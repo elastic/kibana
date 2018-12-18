@@ -1,0 +1,91 @@
+// LEGEND
+
+.tvbLegend {
+  @include euiFontSizeXS;
+  display: flex;
+  width: 200px;
+  padding: $euiSizeXS 0;
+  overflow: auto;
+}
+
+.tvbLegend__toggle {
+  align-self: flex-start;
+  color: $tvbValueColor;
+
+  .tvbVisTimeSeries--reversed & {
+    color: $tvbValueColorReversed;
+  }
+}
+
+.tvbLegend__series {
+  flex-grow: 1;
+}
+
+.tvbLegend__item {
+  cursor: pointer;
+  padding: $euiSizeXS;
+  border-bottom: 1px solid $tvbLineColor;
+  display: flex;
+  max-width: 170px;
+
+  &.disabled {
+    opacity: 0.5;
+  }
+
+  &:first-child {
+    border-top: 1px solid $tvbLineColor;
+  }
+
+  .tvbVisTimeSeries--reversed & {
+    border-color: $tvbLineColorReversed;
+  }
+}
+
+.tvbLegend__button {
+  text-align: left;
+  display: flex;
+  width: 100%;
+}
+
+.tvbLegend__itemLabel {
+  flex-grow: 1;
+  @include euiTextTruncate;
+
+  span {
+    color: $euiTextColor;
+    margin-left: $euiSizeXS;
+
+    .tvbVisTimeSeries--reversed & {
+      color: $tvbTextColorReversed;
+    }
+  }
+}
+
+.tvbLegend__itemValue {
+  color: $tvbValueColor;
+  margin-left: $euiSizeXS;
+
+  .tvbVisTimeSeries--reversed & {
+    color: $tvbValueColorReversed;
+  }
+}
+
+.tvbLegend--horizontal {
+  width: auto;
+  display: flex;
+
+  .tvbLegend__series {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .tvbLegend__item {
+    max-width: inherit;
+    margin-right: $euiSizeM;
+    border: none;
+  }
+
+  .tvbLegend__itemLabel {
+    flex: 0 1 auto;
+  }
+}

@@ -18,7 +18,7 @@ export interface ITableColumn {
   align?: string;
   width?: string;
   sortable?: boolean;
-  render?: (value: any, item?: any) => any;
+  render?: (value: any, item?: any) => unknown;
 }
 
 export interface IManagedTableProps {
@@ -31,7 +31,7 @@ export interface IManagedTableProps {
     field: string;
     direction: 'asc' | 'desc';
   };
-  noItemsMessage?: any;
+  noItemsMessage?: React.ReactNode;
 }
 
 export class ManagedTable extends Component<IManagedTableProps, any> {

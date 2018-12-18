@@ -13,16 +13,25 @@ exports[`SecureSpaceMessage renders if user profile allows security to be manage
     size="m"
   >
     <p>
-      Want to assign a role to a space? Go to Management and select
-       
-      <EuiLink
-        color="primary"
-        href="#/management/security/roles"
-        type="button"
-      >
-        Roles
-      </EuiLink>
-      .
+      <FormattedMessage
+        defaultMessage="Want to assign a role to a space? Go to Management and select {rolesLink}."
+        id="xpack.spaces.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
+        values={
+          Object {
+            "rolesLink": <EuiLink
+              color="primary"
+              href="#/management/security/roles"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Roles"
+                id="xpack.spaces.management.secureSpaceMessage.rolesLinkText"
+                values={Object {}}
+              />
+            </EuiLink>,
+          }
+        }
+      />
     </p>
   </EuiText>
 </React.Fragment>

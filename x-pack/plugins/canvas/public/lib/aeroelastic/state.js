@@ -23,12 +23,15 @@ const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs
     if (
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state)))) &&
       value === prevValue
-    )
+    ) {
       return mappedValue;
+    }
 
     prevValue = value;
     value = fun(prevValue, ...argumentValues);
-    if (logFun) logFun(value, argumentValues);
+    if (logFun) {
+      logFun(value, argumentValues);
+    }
     mappedValue = mapFun(value);
     return mappedValue;
   };
@@ -45,12 +48,15 @@ const select = (fun, logFun) => (...inputs) => {
     if (
       actionId === lastActionId ||
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
-    )
+    ) {
       return value;
+    }
 
     value = fun(...argumentValues);
     actionId = lastActionId;
-    if (logFun) logFun(value, argumentValues);
+    if (logFun) {
+      logFun(value, argumentValues);
+    }
     return value;
   };
 };
@@ -70,7 +76,9 @@ const createStore = (initialState, onChangeCallback = () => {}) => {
         payload: { ...payload, uid: makeUid() },
       },
     });
-    if (!meta.silent) onChangeCallback({ type, state: currentState }, meta);
+    if (!meta.silent) {
+      onChangeCallback({ type, state: currentState }, meta);
+    }
   };
 
   const dispatch = (type, payload) => setTimeout(() => commit(type, payload));
