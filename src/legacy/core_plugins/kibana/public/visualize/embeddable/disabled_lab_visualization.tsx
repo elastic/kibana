@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 
 export function DisabledLabVisualization({ title }: { title: string }) {
   return (

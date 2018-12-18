@@ -21,11 +21,11 @@ import { EmbeddableFactory } from 'ui/embeddable';
 import { getVisualizeLoader, VisualizeLoader } from 'ui/visualize/loader';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
+import { Legacy } from 'kibana';
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
 import { VisSavedObject } from 'ui/visualize/loader/types';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-import { Legacy } from 'kibana';
 
 export interface VisualizeEmbeddableInstanceConfiguration {
   id: string;

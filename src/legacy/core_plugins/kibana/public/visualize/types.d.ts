@@ -23,4 +23,3 @@ export interface SavedVisualizations {
   urlFor: (id: string) => string;
   get: (id: string) => Promise<VisSavedObject>;
 }
-

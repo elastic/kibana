@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { Legacy } from 'kibana';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { IPrivate } from 'ui/private';
 import { SavedVisualizations } from '../types';
 import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
-import { Legacy } from 'kibana';
-import { IPrivate } from 'ui/private';
 
 export function visualizeEmbeddableFactoryProvider(Private: IPrivate) {
   const VisualizeEmbeddableFactoryProvider = (
