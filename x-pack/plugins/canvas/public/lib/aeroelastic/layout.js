@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const { select, makeUid } = require('./state');
+const { select } = require('./state');
+const { getId } = require('./../../lib/get_id');
 
 const {
   actionEvent,
@@ -1192,7 +1193,7 @@ const idsMatch = selectedShapes => shape => selectedShapes.find(idMatch(shape));
 const axisAlignedBoundingBoxShape = (configuration, shapesToBox) => {
   const axisAlignedBoundingBox = getAABB(shapesToBox);
   const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
-  const id = configuration.groupName + '_' + makeUid();
+  const id = getId(configuration.groupName);
   const aabbShape = {
     id,
     type: configuration.groupName,

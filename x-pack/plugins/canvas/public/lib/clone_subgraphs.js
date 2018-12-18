@@ -7,19 +7,18 @@
 import { arrayToMap } from './aeroelastic/functional';
 import { getId } from './get_id';
 
-const getParent = element => element.position.parent;
-
 export const cloneSubgraphs = nodes => {
-  const groupIdMap = arrayToMap(nodes.filter(getParent).map(getParent));
-  const postfix = getId(''); // will just return a '-e5983ef1-9c7d-4b87-b70a-f34ea199e50c' or so
-  // remove the possibly preexisting postfix (otherwise it can keep growing...), then append the new postfix
-  const uniquify = id => (groupIdMap[id] ? id.split('-')[0] + postfix : getId('element'));
+  const idMap = arrayToMap(nodes.map(n => n.id));
   // We simultaneously provide unique id values for all elements (across all pages)
   // AND ensure that parent-child relationships are retained (via matching id values within page)
+  Object.entries(idMap).forEach(([key]) => (idMap[key] = getId(key.split('-')[0]))); // new group names to which we can map
   const newNodes = nodes.map(element => ({
     ...element,
-    id: uniquify(element.id),
-    position: { ...element.position, parent: getParent(element) && uniquify(getParent(element)) },
+    id: idMap[element.id],
+    position: {
+      ...element.position,
+      parent: element.position.parent ? idMap[element.position.parent] : null,
+    },
   }));
   return newNodes;
 };

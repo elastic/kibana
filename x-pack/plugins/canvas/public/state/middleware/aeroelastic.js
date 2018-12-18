@@ -25,7 +25,7 @@ import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
 
-const isGroupId = id => id.startsWith('group_');
+const isGroupId = id => id.startsWith(defaultConfiguration.groupName);
 
 /**
  * elementToShape
