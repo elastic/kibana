@@ -17,54 +17,52 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-
-import StubBrowserStorage from '../stub_browser_storage';
+import { StubBrowserStorage } from './stub_browser_storage';
 
 describe('StubBrowserStorage', () => {
   describe('#getItem() / #setItem()', () => {
     it('stores items as strings', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      expect(store.getItem(1)).to.be('1');
+      store.setItem('1', '1');
+      expect(store.getItem('1')).toBe('1');
     });
 
     it('stores keys as strings', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      expect(store.key(0)).to.be('1');
+      store.setItem('1', '1');
+      expect(store.key(0)).toBe('1');
     });
 
     it('returns null for missing keys', () => {
       const store = new StubBrowserStorage();
-      expect(store.getItem('unknown key')).to.be(null);
+      expect(store.getItem('unknown key')).toBe(null);
     });
   });
 
   describe('#length', () => {
     it('reports the number of items stored', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      store.setItem(2, 2);
-      store.setItem(3, 3);
-      store.setItem(4, 4);
-      expect(store).to.have.length(4);
+      store.setItem('1', '1');
+      store.setItem('2', '2');
+      store.setItem('3', '3');
+      store.setItem('4', '4');
+      expect(store).toHaveLength(4);
     });
 
     it('does not trip on items getting reset', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      store.setItem(1, 2);
-      expect(store).to.have.length(1);
+      store.setItem('1', '1');
+      store.setItem('1', '2');
+      expect(store).toHaveLength(1);
     });
   });
 
   describe('#key()', () => {
     it('returns the key as a specific index', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 2);
-      expect(store.key(0)).to.be('1');
-      expect(store.key(1)).to.be(undefined);
+      store.setItem('1', '2');
+      expect(store.key(0)).toBe('1');
+      expect(store.key(1)).toBeUndefined();
     });
   });
 
@@ -75,7 +73,9 @@ describe('StubBrowserStorage', () => {
       store.setItem('abc', 'def'); // store size is 6, key.length + val.length
       expect(() => {
         store.setItem('ghi', 'jkl');
-      }).throwError(/quota/);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"something about quota exceeded, browsers are not consistent here"`
+      );
     });
 
     it('allows defining the limit as infinity', () => {
@@ -90,7 +90,7 @@ describe('StubBrowserStorage', () => {
       store.setItem('key', 'val');
       expect(() => {
         store.setStubbedSizeLimit(5);
-      }).throwError(Error);
+      }).toThrowError(Error);
     });
 
     it('respects removed items', () => {
@@ -106,15 +106,15 @@ describe('StubBrowserStorage', () => {
     it('returns the size limit', () => {
       const store = new StubBrowserStorage();
       store.setStubbedSizeLimit(10);
-      expect(store.getStubbedSizeLimit()).to.equal(10);
+      expect(store.getStubbedSizeLimit()).toBe(10);
     });
   });
 
   describe('#getStubbedSize', () => {
     it('returns the size', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      expect(store.getStubbedSize()).to.equal(2);
+      store.setItem('1', '1');
+      expect(store.getStubbedSize()).toBe(2);
     });
   });
 });
