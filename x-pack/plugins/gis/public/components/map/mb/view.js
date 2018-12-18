@@ -17,16 +17,14 @@ export class MBMapContainer extends React.Component {
     super();
     this._mbMap = null;
     this._listeners = new Map(); // key is mbLayerId, value eventHandlers map
-
-
-    this._debouncedSync = _.debounce(() => {
-      if (this._isMounted) {
-        this._syncMbMapWithMapState();
-        this._syncMbMapWithLayerList();
-        this._syncMbMapWithInspector();
-      }
-    }, 256);
   }
+
+  _debouncedSync = _.debounce(() => {
+    if (this._isMounted) {
+      this._syncMbMapWithLayerList();
+      this._syncMbMapWithInspector();
+    }
+  }, 256);
 
   _getMapState() {
     const zoom = this._mbMap.getZoom();
@@ -203,6 +201,8 @@ export class MBMapContainer extends React.Component {
   }
 
   render() {
+    // do not debounce syncing zoom and center
+    this._syncMbMapWithMapState();
     this._debouncedSync();
     return (
       <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
