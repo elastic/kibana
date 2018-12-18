@@ -290,7 +290,8 @@ class AnnotationsTable extends Component {
     if (jobIds.length > 1) {
       columns.unshift({
         field: 'job_id',
-        name: 'job ID'
+        name: 'job ID',
+        sortable: true,
       });
     }
 
