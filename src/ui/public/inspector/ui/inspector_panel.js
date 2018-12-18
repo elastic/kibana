@@ -34,10 +34,6 @@ function hasAdaptersChanged(oldAdapters, newAdapters) {
     || Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key]);
 }
 
-const adapterChangedError = i18n.translate('common.ui.inspector.adapterChangedError', {
-  defaultMessage: 'Adapters are not allowed to be changed on an open InspectorPanel.',
-});
-
 const inspectorTitle = i18n.translate('common.ui.inspector.title', {
   defaultMessage: 'Inspector',
 });
@@ -56,7 +52,7 @@ class InspectorPanel extends Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (hasAdaptersChanged(prevState.adapters, nextProps.adapters)) {
-      throw new Error(adapterChangedError);
+      throw new Error('Adapters are not allowed to be changed on an open InspectorPanel.');
     }
     const selectedViewMustChange = nextProps.views !== prevState.views
         && !nextProps.views.includes(prevState.selectedView);
@@ -123,10 +119,7 @@ InspectorPanel.propTypes = {
   views: (props, propName, componentName) => {
     if (!Array.isArray(props[propName]) || props[propName].length < 1) {
       throw new Error(
-        i18n.translate('common.ui.inspector.propMustBeArrayError', {
-          defaultMessage: '{propName} prop must be an array of at least one element in {componentName}.',
-          values: { propName, componentName },
-        })
+        `${propName} prop must be an array of at least one element in ${componentName}.`
       );
     }
   },

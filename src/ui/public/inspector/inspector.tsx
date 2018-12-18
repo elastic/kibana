@@ -24,12 +24,6 @@ import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
 
-const openErrorMessage = i18n.translate('common.ui.inspector.openError', {
-  defaultMessage: `Tried to open an inspector without views being available.
-    Make sure to call Inspector.isAvailable() with the same adapters before to check
-    if an inspector can be shown.`,
-});
-
 const closeButtonLabel = i18n.translate('common.ui.inspector.closeButton', {
   defaultMessage: 'Close Inspector',
 });
@@ -73,7 +67,9 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
 
   // Don't open inspector if there are no views available for the passed adapters
   if (!views || views.length === 0) {
-    throw new Error(openErrorMessage);
+    throw new Error(`Tried to open an inspector without views being available.
+      Make sure to call Inspector.isAvailable() with the same adapters before to check
+      if an inspector can be shown.`);
   }
 
   return openFlyout(<InspectorPanel views={views} adapters={adapters} title={options.title} />, {

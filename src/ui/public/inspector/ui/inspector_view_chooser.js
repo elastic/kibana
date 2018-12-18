@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -28,10 +28,6 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-
-const viewLabel = i18n.translate('common.ui.inspector.view', {
-  defaultMessage: 'View',
-});
 
 class InspectorViewChooser extends Component {
 
@@ -77,7 +73,11 @@ class InspectorViewChooser extends Component {
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"
       >
-        {viewLabel}: { this.props.selectedView.title }
+        <FormattedMessage
+          id="common.ui.inspector.view"
+          defaultMessage="View: {viewName}"
+          values={{ viewName: this.props.selectedView.title }}
+        />
       </EuiButtonEmpty>
     );
   }
@@ -88,7 +88,11 @@ class InspectorViewChooser extends Component {
         position="bottom"
         content={this.props.selectedView.help}
       >
-        <span>{viewLabel}: { this.props.selectedView.title }</span>
+        <FormattedMessage
+          id="common.ui.inspector.view"
+          defaultMessage="View: {viewName}"
+          values={{ viewName: this.props.selectedView.title }}
+        />
       </EuiToolTip>
     );
   }
