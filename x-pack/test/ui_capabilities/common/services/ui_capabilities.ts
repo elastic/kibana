@@ -28,9 +28,13 @@ export class UICapabilitiesService {
     });
   }
 
-  public async get(credentials: BasicCredentials, spaceId: string): Promise<UICapabilities | null> {
+  public async get(
+    credentials: BasicCredentials,
+    spaceId?: string
+  ): Promise<UICapabilities | null> {
+    const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug('requesting /app/kibana to parse the uiCapabilities');
-    const { res, payload } = await this.wreck.get(`/s/${spaceId}/app/kibana`, {
+    const { res, payload } = await this.wreck.get(`${spaceUrlPrefix}/app/kibana`, {
       headers: {
         Authorization: `Basic ${Buffer.from(
           `${credentials.username}:${credentials.password}`
