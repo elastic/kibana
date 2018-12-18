@@ -10,50 +10,6 @@ import { SecurityService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 
-// these are the users that we care about
-enum Users {
-  superuser = 1,
-  global_all = 2,
-}
-
-// these are the spaces that we care about
-enum Spaces {
-  space_1 = 128,
-  space_2 = 256,
-}
-
-// the manual combination of users and spaces so we can use TypeScript's exhaustive switch
-enum UsersAtSpaces {
-  superuser_at_space_1 = Users.superuser | Spaces.space_1, //@ts-ignore bit-wise
-  superuser_at_space_2 = Users.superuser | Spaces.space_2, //@ts-ignore bit-wise
-  global_all_at_space_1 = Users.global_all | Spaces.space_1, //@ts-ignore bit-wise
-  global_all_at_space_2 = Users.global_all | Spaces.space_2, //@ts-ignore bit-wise
-}
-
-class UnreachableError extends Error {
-  constructor(val: never) {
-    super(`Unreachable: ${val}`);
-  }
-}
-
-async function forEachStringEnumAsync<T>(
-  stringEnum: T,
-  callback: (value: T[keyof T]) => void
-): Promise<void> {
-  for (const value of Object.values(stringEnum).filter(f => typeof f === 'number')) {
-    await callback(value);
-  }
-}
-
-function forEachStringEnum<T>(
-  stringEnum: T,
-  callback: (value: T[keyof T]) => void
-): void {
-  for (const value of Object.values(stringEnum).filter(f => typeof f === 'number')) {
-    callback(value);
-  }
-}
-
 interface CustomRoleSpecification {
   name: string;
   kibana: {
@@ -84,90 +40,127 @@ function isCustomRoleSpecification(
   return (roleSpecification as CustomRoleSpecification).kibana !== undefined;
 }
 
-class UserSpecification {
-  public readonly username: string;
-  public readonly password: string;
-  public readonly fullName: string;
-  public readonly role: CustomRoleSpecification | ReservedRoleSpecification;
-
-  constructor(username: string, role: CustomRoleSpecification | ReservedRoleSpecification) {
-    this.username = username;
-    this.password = `${username}-password`;
-    this.fullName = username;
-    this.role = role;
-  }
+interface User {
+  fullName: string;
+  password: string;
+  role: ReservedRoleSpecification | CustomRoleSpecification;
 }
 
-class UserSpecificationFactory {
-  public static create(user: Users): UserSpecification {
-    const username = Users[user];
-    switch (user) {
-      case Users.superuser:
-        return new UserSpecification(username, { name: 'superuser' });
-      case Users.global_all:
-        return new UserSpecification(username, {
-          name: 'global_all_role',
-          kibana: {
-            global: {
-              minimum: ['all'],
-            },
-          },
-        });
-      default:
-        throw new UnreachableError(user);
-    }
-  }
+// these are the users that we care about
+interface Superuser extends User {
+  username: 'superuser';
 }
-
-class SpaceSpecification {
-  public readonly id: string;
-  public readonly name: string;
-  public readonly disabledFeatures: string[];
-  constructor(id: string, disabledFeatures: string[]) {
-    this.id = id;
-    this.name = id;
-    this.disabledFeatures = disabledFeatures;
-  }
-}
-
-class SpaceSpecificationFactory {
-  public static create(space: Spaces): SpaceSpecification {
-    const spaceId = Spaces[space];
-    switch (space) {
-      case Spaces.space_1:
-        return new SpaceSpecification(spaceId, []);
-      case Spaces.space_2:
-        return new SpaceSpecification(spaceId, ['discover']);
-      default:
-        throw new UnreachableError(space);
-    }
-  }
-}
-
-const getUser = (userAtSpace: UsersAtSpaces) : UserSpecification => {
-  let found: UserSpecification | null = null;
-  forEachStringEnum(Users, user => {
-    if (userAtSpace & user) {
-      found = UserSpecificationFactory.create(user);
-    }
-  })
-  if (!found) {
-    throw new Error('Unable to find user');
-  }
-  return found;
+const Superuser: Superuser = {
+  username: 'superuser',
+  fullName: 'superuser',
+  password: 'superuser-password',
+  role: {
+    name: 'superuser',
+  },
 };
 
-const getSpace = (userAtSpace: UsersAtSpaces) : SpaceSpecification => {
-  let found: SpaceSpecification | null = null;
-  forEachStringEnum(Spaces, space => {
-    if (userAtSpace & space) {
-      found = SpaceSpecificationFactory.create(space);
-    }
-  })
-  if (!found) {
-    throw new Error('Unable to find user');
+interface GlobalAll extends User {
+  username: 'global_all';
+}
+const GlobalAll: GlobalAll = {
+  username: 'global_all',
+  fullName: 'global_all',
+  password: 'global_all-password',
+  role: {
+    name: 'global_all_role',
+    kibana: {
+      global: {
+        minimum: ['all'],
+      },
+    },
+  },
+};
+
+type Users = Superuser | GlobalAll;
+const Users: Users[] = [Superuser, GlobalAll];
+
+interface Space {
+  name: string;
+  disabledFeatures: string[];
+}
+
+// these are the spaces that we care about
+interface Space1 extends Space {
+  id: 'space_1';
+}
+const Space1: Space1 = {
+  id: 'space_1',
+  name: 'space_1',
+  disabledFeatures: [],
+};
+
+interface Space2 extends Space {
+  id: 'space_2';
+}
+const Space2: Space2 = {
+  id: 'space_2',
+  name: 'space_2',
+  disabledFeatures: ['discover'],
+};
+
+type Spaces = Space1 | Space2;
+const Spaces: Spaces[] = [Space1, Space2];
+
+interface Scenario {
+  user: Users;
+  space: Spaces;
+}
+
+interface SuperuserAtSpace1 extends Scenario {
+  id: 'superuser_at_space_1';
+}
+const SuperuserAtSpace1: SuperuserAtSpace1 = {
+  id: 'superuser_at_space_1',
+  user: Superuser,
+  space: Space1,
+};
+
+interface SuperuserAtSpace2 extends Scenario {
+  id: 'superuser_at_space_2';
+  user: Superuser;
+  space: Space2;
+}
+const SuperuserAtSpace2: SuperuserAtSpace2 = {
+  id: 'superuser_at_space_2',
+  user: Superuser,
+  space: Space2,
+};
+
+interface GlobalAllAtSpace1 extends Scenario {
+  id: 'global_all_at_space_1';
+}
+const GlobalAllAtSpace1: GlobalAllAtSpace1 = {
+  id: 'global_all_at_space_1',
+  user: GlobalAll,
+  space: Space1,
+};
+
+interface GlobalAllAtSpace2 extends Scenario {
+  id: 'global_all_at_space_2';
+}
+const GlobalAllAtSpace2: GlobalAllAtSpace2 = {
+  id: 'global_all_at_space_2',
+  user: GlobalAll,
+  space: Space2,
+};
+
+type UsersAtSpaces = SuperuserAtSpace1 | SuperuserAtSpace2 | GlobalAllAtSpace1 | GlobalAllAtSpace2;
+const UsersAtSpaces: UsersAtSpaces[] = [
+  SuperuserAtSpace1,
+  SuperuserAtSpace2,
+  GlobalAllAtSpace1,
+  GlobalAllAtSpace2,
+];
+
+class UnreachableError extends Error {
+  constructor(val: never) {
+    super(`Unreachable: ${val}`);
   }
-  return found;
 }
 
 // tslint:disable:no-default-export
@@ -178,51 +171,48 @@ export default function navLinksTests({ getService }: TestInvoker) {
 
   describe('navLinks', () => {
     before(async () => {
-      await forEachStringEnumAsync(Spaces, async space => {
-        const spaceSpecification = SpaceSpecificationFactory.create(space);
-        await spacesService.create(spaceSpecification);
-      });
+      for (const space of Spaces) {
+        await spacesService.create(space);
+      }
 
-      await forEachStringEnumAsync(Users, async user => {
-        const userSpecification = UserSpecificationFactory.create(user);
-        await securityService.user.create(userSpecification.username, {
-          password: userSpecification.password,
-          full_name: userSpecification.fullName,
-          roles: [userSpecification.role.name],
+      for (const user of Users) {
+        await securityService.user.create(user.username, {
+          password: user.password,
+          full_name: user.fullName,
+          roles: [user.role.name],
         });
-        if (isCustomRoleSpecification(userSpecification.role)) {
-          await securityService.role.create(userSpecification.role.name, {
-            kibana: userSpecification.role.kibana,
+        if (isCustomRoleSpecification(user.role)) {
+          await securityService.role.create(user.role.name, {
+            kibana: user.role.kibana,
           });
         }
-      });
+      }
     });
 
     after(async () => {
-      await forEachStringEnumAsync(Spaces, async space => {
-        const spaceSpecification = SpaceSpecificationFactory.create(space);
-        await spacesService.delete(spaceSpecification.id);
-      });
+      for (const space of Spaces) {
+        await spacesService.delete(space.id);
+      }
 
-      await forEachStringEnumAsync(Users, async user => {
-        const userSpecification = UserSpecificationFactory.create(user);
-        await securityService.user.delete(userSpecification.username);
-        if (isCustomRoleSpecification(userSpecification.role)) {
-          await securityService.role.delete(userSpecification.role.name);
+      for (const user of Users) {
+        await securityService.user.delete(user.username);
+        if (isCustomRoleSpecification(user.role)) {
+          await securityService.role.delete(user.role.name);
         }
-      });
+      }
     });
 
-    forEachStringEnum(UsersAtSpaces, (userAtSpace) => {
-
+    UsersAtSpaces.forEach(userAtSpace => {
       it(`returns appropriate navLinks for ${userAtSpace}`, async () => {
-        const user = getUser(userAtSpace);
-        const space = getSpace(userAtSpace);
+        const { user, space } = userAtSpace;
 
-        const uiCapabilities = await uiCapabilitiesService.get({ username: user.username, password: user.password }, space.id);
-        switch(userAtSpace) {
-          case UsersAtSpaces.global_all_at_space_1:
-          case UsersAtSpaces.superuser_at_space_1:
+        const uiCapabilities = await uiCapabilitiesService.get(
+          { username: user.username, password: user.password },
+          space.id
+        );
+        switch (userAtSpace.id) {
+          case 'superuser_at_space_1':
+          case 'global_all_at_space_1':
             expect(uiCapabilities).to.have.property('navLinks');
             expect(uiCapabilities!.navLinks).to.eql({
               apm: true,
@@ -240,8 +230,8 @@ export default function navLinksTests({ getService }: TestInvoker) {
               timelion: true,
             });
             break;
-          case UsersAtSpaces.global_all_at_space_2:
-          case UsersAtSpaces.superuser_at_space_2:
+          case 'superuser_at_space_2':
+          case 'global_all_at_space_2':
             expect(uiCapabilities).to.have.property('navLinks');
             expect(uiCapabilities!.navLinks).to.eql({
               apm: true,
