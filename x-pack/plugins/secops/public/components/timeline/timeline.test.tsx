@@ -52,6 +52,20 @@ describe('Timeline', () => {
       hosts: {
         limit: 2,
       },
+      inputs: {
+        global: {
+          timerange: {
+            kind: 'absolute',
+            from: 0,
+            to: 1,
+          },
+          query: [],
+          policy: {
+            kind: 'manual',
+            duration: 5000,
+          },
+        },
+      },
       dragAndDrop: {
         dataProviders: {},
       },

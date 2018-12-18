@@ -23,6 +23,20 @@ describe('Header', () => {
         notesById: {},
         theme: 'dark',
       },
+      inputs: {
+        global: {
+          timerange: {
+            kind: 'absolute',
+            from: 0,
+            to: 1,
+          },
+          query: [],
+          policy: {
+            kind: 'manual',
+            duration: 5000,
+          },
+        },
+      },
       hosts: {
         limit: 2,
       },
