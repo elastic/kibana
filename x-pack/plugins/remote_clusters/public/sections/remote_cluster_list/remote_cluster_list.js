@@ -91,10 +91,6 @@ export const RemoteClusterList = injectI18n(
 
     componentWillUnmount() {
       clearInterval(this.interval);
-
-      // Close the panel, otherwise it will default to already being open when we navigate back to
-      // this page.
-      this.props.closeDetailPanel();
     }
 
     getHeaderSection() {
