@@ -27,6 +27,7 @@ export class WebElementWrapper {
     this._webDriver = webDriver;
     this._driver = webDriver.driver;
     this._By = webDriver.By;
+    this._Keys = webDriver.Key;
     this._defaultFindTimeout = timeout;
   }
 
@@ -119,6 +120,25 @@ export class WebElementWrapper {
     } else {
       await this._webElement.sendKeys(...values);
     }
+  }
+
+  /**
+   * Sends keyboard event into the element.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#sendKeys
+   *
+   * @param  {string|string[]} keys
+   * @return {Promise<void>}
+   */
+  async pressKeys(...args) {
+    let chord;
+    //leadfoot compatibility
+    if (Array.isArray(args[0])) {
+      chord = this._Keys.chord(...args[0]);
+    } else {
+      chord = this._Keys.chord(...args);
+    }
+
+    await this._webElement.sendKeys(chord);
   }
 
   /**

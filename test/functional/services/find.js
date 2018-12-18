@@ -199,8 +199,16 @@ export async function FindProvider({ getService }) {
 
     async exists(findFunction, timeout = WAIT_FOR_EXISTS_TIME) {
       await this._withTimeout(timeout);
-      const found = await findFunction(driver);
-      return found.length > 0;
+      try {
+        const found = await findFunction(driver);
+        if (Array.isArray(found)) {
+          return found.length > 0;
+        } else {
+          return found instanceof WebElementWrapper;
+        }
+      } catch (err) {
+        return false;
+      }
     }
 
     async existsByLinkText(linkText, timeout = WAIT_FOR_EXISTS_TIME) {
