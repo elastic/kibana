@@ -34,10 +34,17 @@ export class ServiceIntegrationsView extends React.Component<
   ServiceIntegrationState
 > {
   public state = { isPopoverOpen: false, activeFlyout: null };
-  public panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-  public addMlPanelItems = () => {
-    this.panelItems = this.panelItems.concat([
+  public getPanelItems = _.memoize((mlAvailable: boolean) => {
+    let panelItems: EuiContextMenuPanelItemDescriptor[] = [];
+    if (mlAvailable) {
+      panelItems = panelItems.concat(this.getMLPanelItems());
+    }
+    return panelItems.concat(this.getWatcherPanelItems());
+  });
+
+  public getMLPanelItems = () => {
+    return [
       {
         name: 'Enable ML anomaly detection',
         icon: 'machineLearningApp',
@@ -54,11 +61,11 @@ export class ServiceIntegrationsView extends React.Component<
         target: '_blank',
         onClick: () => this.closePopover()
       }
-    ]);
+    ];
   };
 
-  public addWatcherPanelItems = () => {
-    this.panelItems = this.panelItems.concat([
+  public getWatcherPanelItems = () => {
+    return [
       {
         name: 'Enable watcher error reports',
         icon: 'watchesApp',
@@ -76,26 +83,8 @@ export class ServiceIntegrationsView extends React.Component<
         target: '_blank',
         onClick: () => this.closePopover()
       }
-    ]);
+    ];
   };
-
-  public loadPanelItems = () => {
-    this.panelItems = [];
-    if (this.props.mlAvailable) {
-      this.addMlPanelItems();
-    }
-    this.addWatcherPanelItems();
-  };
-
-  public componentDidMount() {
-    this.loadPanelItems();
-  }
-
-  public componentDidUpdate(prevProps: ServiceIntegrationProps) {
-    if (prevProps.mlAvailable !== this.props.mlAvailable) {
-      this.loadPanelItems();
-    }
-  }
 
   public openPopover = () =>
     this.setState({
@@ -138,7 +127,7 @@ export class ServiceIntegrationsView extends React.Component<
             panels={[
               {
                 id: 0,
-                items: this.panelItems
+                items: this.getPanelItems(this.props.mlAvailable)
               }
             ]}
           />
