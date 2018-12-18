@@ -17,7 +17,9 @@ import {
 import { get } from 'lodash';
 import React from 'react';
 import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { setApmIndexPatternQuery } from '../DiscoverButtons/DiscoverButton';
 import { getDiscoverQuery } from '../DiscoverButtons/DiscoverTransactionButton';
 
 function getInfraMetricsQuery(transaction: Transaction) {
@@ -41,21 +43,20 @@ function ActionMenuButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-interface TransactionActionMenuProps {
+interface Props {
   readonly transaction: Transaction;
   readonly location: Location;
 }
 
-interface TransactionActionMenuState {
+interface State {
   readonly isOpen: boolean;
+  discoverQuery: StringMap;
 }
 
-export class TransactionActionMenu extends React.Component<
-  TransactionActionMenuProps,
-  TransactionActionMenuState
-> {
-  public state = {
-    isOpen: false
+export class TransactionActionMenu extends React.Component<Props, State> {
+  public state: State = {
+    isOpen: false,
+    discoverQuery: getDiscoverQuery(this.props.transaction)
   };
 
   public toggle = () => {
@@ -147,14 +148,22 @@ export class TransactionActionMenu extends React.Component<
       });
   }
 
+  public async componentDidMount() {
+    const discoverQuery = await setApmIndexPatternQuery(
+      this.state.discoverQuery
+    );
+    this.setState({ discoverQuery });
+  }
+
   public render() {
     const { transaction, location } = this.props;
+    const { discoverQuery } = this.state;
 
     const discoverTransactionHref = getKibanaHref({
       location,
       pathname: '/app/kibana',
       hash: '/discover',
-      query: getDiscoverQuery(transaction)
+      query: discoverQuery
     });
 
     const items = [
