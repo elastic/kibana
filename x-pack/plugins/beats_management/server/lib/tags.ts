@@ -54,7 +54,7 @@ export class CMTagsDomain {
     const outputTypes: string[] = configurationBlocks.reduce(
       (typesCollector: string[], block: any) => {
         if (block.type !== 'output') {
-          return;
+          return typesCollector;
         }
         // get all keys, where the key is the output type with the exception of the output key itself.
         const keys = flatten<string>(
