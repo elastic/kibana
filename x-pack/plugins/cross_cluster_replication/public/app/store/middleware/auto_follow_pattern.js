@@ -6,19 +6,29 @@
 
 import routing from '../../services/routing';
 import * as t from '../action_types';
+import { extractQueryParams } from '../../services/query_params';
 
 export const autoFollowPatternMiddleware = () => next => action => {
-  const { type, payload } = action;
+  const { type, payload: name } = action;
+  const { history } = routing.reactRouter;
+  const search = history.location.search;
+  const { pattern: patternName } = extractQueryParams(search);
 
   switch (type) {
     case t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL:
-      if (!routing.userHasLeftApp && !payload) {
-        const { history } = routing.reactRouter;
-
+      if (!routing.userHasLeftApp) {
         // Persist state to query params by removing deep link.
-        history.replace({
-          search: '',
-        });
+        if(!name) {
+          history.replace({
+            search: '',
+          });
+        }
+        // Allow the user to share a deep link to this job.
+        else if (patternName !== name) {
+          history.replace({
+            search: `?pattern=${encodeURIComponent(name)}`,
+          });
+        }
       }
 
       break;
