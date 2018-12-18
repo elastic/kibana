@@ -37,7 +37,6 @@ import {
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { RangeDatePicker } from '../../components/range_date_picker';
-import { ThemeSwitcher } from '../../components/theme_switcher';
 import { StatefulTimeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { themeSelector } from '../../store/local/app';
@@ -106,10 +105,7 @@ const HomePageComponent = pure<Props>(({ theme }) => (
                   headers={headers}
                 />
               </Flyout>
-              <MyEuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <ThemeSwitcher />
-                </EuiFlexItem>
+              <MyEuiFlexGroup justifyContent="flexEnd" alignItems="center">
                 <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
                   <RangeDatePicker id="global" />
                 </EuiFlexItem>

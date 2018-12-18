@@ -17,6 +17,7 @@ import { pure } from 'recompose';
 
 import { FooterContainer } from '.';
 import { WhoAmI } from '../../containers/who_am_i';
+import { ThemeSwitcher } from '../theme_switcher';
 
 export const Footer = pure(() => (
   <FooterContainer data-test-subj="footer">
@@ -27,9 +28,16 @@ export const Footer = pure(() => (
         </WhoAmI>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton href="kibana#home/tutorial_directory/security" target="_blank">
-          Add data
-        </EuiButton>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <ThemeSwitcher />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton href="kibana#home/tutorial_directory/security" target="_blank">
+              Add data
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </FooterContainer>
