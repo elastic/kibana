@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`stactraceUtils getGroupedStackframes should collapse the library frames into a set of grouped stackframes 1`] = `
+exports[`Stacktrace/index getGroupedStackframes should collapse the library frames into a set of grouped stackframes 1`] = `
 Array [
   Object {
+    "excludeFromGrouping": false,
     "isLibraryFrame": false,
     "stackframes": Array [
       Object {
@@ -29,6 +30,7 @@ Array [
     ],
   },
   Object {
+    "excludeFromGrouping": false,
     "isLibraryFrame": true,
     "stackframes": Array [
       Object {
@@ -94,6 +96,7 @@ Array [
     ],
   },
   Object {
+    "excludeFromGrouping": false,
     "isLibraryFrame": false,
     "stackframes": Array [
       Object {
@@ -141,6 +144,7 @@ Array [
     ],
   },
   Object {
+    "excludeFromGrouping": false,
     "isLibraryFrame": true,
     "stackframes": Array [
       Object {
@@ -286,6 +290,7 @@ Array [
     ],
   },
   Object {
+    "excludeFromGrouping": false,
     "isLibraryFrame": false,
     "stackframes": Array [
       Object {
@@ -312,6 +317,7 @@ Array [
     ],
   },
   Object {
+    "excludeFromGrouping": false,
     "isLibraryFrame": true,
     "stackframes": Array [
       Object {
@@ -357,6 +363,7 @@ Array [
     ],
   },
   Object {
+    "excludeFromGrouping": true,
     "isLibraryFrame": true,
     "stackframes": Array [
       Object {
@@ -372,6 +379,7 @@ Array [
     ],
   },
   Object {
+    "excludeFromGrouping": false,
     "isLibraryFrame": true,
     "stackframes": Array [
       Object {
