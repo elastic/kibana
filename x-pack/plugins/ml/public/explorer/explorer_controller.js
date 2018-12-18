@@ -959,7 +959,6 @@ module.controller('MlExplorerController', function (
       cellData.lanes : $scope.getSelectedJobIds();
     const timeRange = getSelectionTimeRange(cellData);
 
-
     if (mlAnnotationsEnabled) {
       const resp = await ml.annotations.getAnnotations({
         jobIds,
@@ -971,7 +970,10 @@ module.controller('MlExplorerController', function (
       $scope.$evalAsync(() => {
         const annotationsData = [];
         jobIds.forEach((jobId) => {
-          annotationsData.push(...resp.annotations[jobId]);
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
+          }
         });
 
         $scope.annotationsData = annotationsData
