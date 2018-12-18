@@ -55,7 +55,10 @@ class AnnotationsTable extends Component {
     super(props);
     this.state = {
       annotations: [],
-      isLoading: false
+      isLoading: false,
+      // Need to do a detailed check here because the angular wrapper could pass on something like `[undefined]`.
+      jobId: (Array.isArray(this.props.jobs) && this.props.jobs.length > 0 && this.props.jobs[0] !== undefined)
+        ? this.props.jobs[0].job_id : undefined,
     };
   }
 
@@ -82,7 +85,7 @@ class AnnotationsTable extends Component {
           jobId: props.jobs[0].job_id
         }));
       }).catch((resp) => {
-        console.log('Error loading list of annoations for jobs list:', resp);
+        console.log('Error loading list of annotations for jobs list:', resp);
         this.setState({
           annotations: [],
           errorMessage: 'Error loading the list of annotations for this job',
@@ -238,10 +241,12 @@ class AnnotationsTable extends Component {
           title="No annotations created for this job"
           iconType="iInCircle"
         >
-          <p>
-            To create an annotation,
-            open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
-          </p>
+          {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) &&
+            <p>
+              To create an annotation,
+              open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
+            </p>
+          }
         </EuiCallOut>
       );
     }
