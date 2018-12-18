@@ -133,7 +133,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     maxRetries: clientParams.maxRetries
   };
   return Bluebird.resolve(api.call(apiContext, clientParams, requestOptions))
-    .then((result) => result.body)
+    .then((result) => (result && result.body) ? result.body : result)
     .catch((err) => {
       if (!wrap401Errors || err.statusCode !== 401) {
         return Promise.reject(err);
