@@ -18,34 +18,6 @@ This section summarizes the changes in each release.
 
 --
 
-[[release-notes-7.0.0]]
-== {kib} 7.0.0
-
-//[float]
-//[[breaking-7.0.0]]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
-
-//[float]
-//=== Bug Fixes
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 
 [[release-notes-7.0.0-alpha2]]
 == {kib} 7.0.0-alpha2
@@ -63,13 +35,13 @@ For more details about breaking changes in this release, see
 [[highlight-7.0.0-alpha2]]
 === Highlights
 Canvas::
-* Adds a template tab to the workpad manager where users can find workpad templates, 
+* Canvas now has a template tab in the workpad manager where users can find workpad templates, 
 demos, and tutorials to help them get started. See {pull}23966[#23966] for more information.
 Kibana App:: 
 * Visualizations in Kibana will use a new data pipeline introduced as part of Canvas. 
 The change does not yet apply to Vega, Timelion, or Time Series Visual Builder (TSVB). 
 See {pull}25711[#25711] for more information.
-Management:: 
+Index Lifecyle Management:: 
 * Implements a user interface to create, update, edit, or delete index lifecyle policies.
 See {pull}25553[#25553] for more information.
 
@@ -80,7 +52,6 @@ Canvas::
 * Implements a clipboard and stores the copied elements in `localStorage` {pull}25890[#25890]
 * Adds the ability to reuse assets without editing an element's expression {pull}25764[#25764]
 * Adds the `clear` function {pull}26397[#26397]
-* Adds a template tab to the workpad manager {pull}23966[#23966]
 * Adds workpad-level CSS {pull}24143[#24143]
 Dashboard::
 * Adds `href` option in addition to `onClick` for navigational links {pull}25233[#25233]
@@ -88,11 +59,9 @@ Design::
 * Updates logos for marketing {pull}25489[#25489]
 * Adds Kibana 7.0 breadcrumbs to home screen {pull}26605[#26605]
 * Moves elastic/eui typings to single file {pull}23950[#23950]
-Index Lifecycle Management::
-* Implements a CRUD UI for Index Lifecycle Management policies {pull}25553[#25553]
 Kibana App::
 * Maps inspector requests by id so single requests can be reset at a time {pull}26770[#26770]
-* Moves Canvas interpreter to OSS in Kibana core {pull}25711[#25711]
+* Adds ODBC to blurb for start trail {pull}27223[#27223]
 Management::
 * Adds `Request timestamp` to request inspector stats {pull}25667[#25667]
 * Adds "Reload indices" button to Index Management {pull}27033[#27033]
@@ -103,6 +72,9 @@ detecting unusual processes on hosts and Docker containers {pull}25716[#25716]
 * Allows users to enter their own query in the Discover page; stops passing the query 
 from the job datafeed config in custom URLs {pull}26957[#26957]
 * Rewrites Calendar to React/EUI {pull}26741[#26741]
+* Converts Setting page to React/EUI {pull}27144[#27144]
+* Ensures loading indicator is present on initial jobs load {pull}27151[#27151]
+* Prevents a new calendar save if a calendar with that id already exists {pull}27104[#27104]
 Observability::
 * Adds a new plugin for Uptime Monitoring {pull}25480[#25480]
 Platform::
@@ -111,6 +83,7 @@ look up `hits.total` {pull}26432[#26432]
 * Adds `dist` flag to the configuration context {pull}26545[#26545]
 * Prepares `@kbn/datemath` to be republished as `@elastic/datemath` {pull}26559[#26559]
 * Wraps `remote` methods in `browser` service {pull}26394[#26394]
+* Uses `stream.pipeline` to manage error handling {pull}27246[#27246]
 Querying & Filtering::
 * Moves the `buildESQuery` module (including filters and Kuery) into a separate package {pull}23345[#23345]
 * Adds comment explaining why `getComputedFields` adds a `docvalue` to `docvalue_fields` 
@@ -179,6 +152,7 @@ Management::
 * Updates "Disenroll" text to be consistent with menu option "Unenroll" {pull}26816[#26816]
 * Fixes broken breadcrumb link for index management {pull}27164[#27164]
 * Fixes issue with multiple execution in Console {pull}26933[#26933]
+* Reloads full index list when reload hits missing index {pull}27197[#27197]
 Machine Learning::
 * Allows user to add/edit/delete annotations in the Single Series Viewer {pull}26034[#26034]
 * Does not pass datafeed query to Discover in custom URL {pull}26957[#26957]
@@ -207,10 +181,13 @@ Platform & Operations::
 * Changes kbn pm webpack config to generate dist files in mode=none {pull}26847[#26847]
 * Hides logs from deleteAll on task: clean client modules into dll {pull}26884[#26884]
 * Upgrades `resize-observer-polyfill` version {pull}26990[#26990]
+* Uses `single-node` discovery type for the test ES node/cluster {pull}27125[#27125]
+* Moves moment to peerDependency in elastic-datemath {pull}27264[#27264]
 Reporting::
 * Deletes `sortOrder` once items have been sorted and does not pass to `EuiContextMenuItem` 
 in the share context menu {pull}26890[#26890]
 * Fixes a regression bug in detection of Error and Warning toast notifications {pull}25482[#25482]
+* Stops passing an empty `formatConfig` to the fieldFormats helper {pull}27168[#27168]
 Rollups:: 
 * Shows loading state in Rollup Job detail panel. {pull}25752[#25752]
 * Specifies Rollup Jobs breadcrumbs in header. {pull}26590[#26590]
@@ -222,6 +199,7 @@ same location as the corresponding JavaScript source files {pull}26448[#26448]
 * Fixes `prettier` throw rule error  {pull}26071[#26071]
 * Fixes authentication logic to fail out of auth flow on first provider failure {pull}26648[#26648]
 * Fixes issues with the `url.search` being null in Node 10 {pull}26992[#26992]
+* Fixes DLS query toggle on the role management page {pull}27213[#27213]
 Visualizations::
 * Fixes filter function on pie chart segment {pull}26321[#26321]
 * Rewrites URL when closing vis type selection modal {pull}26327[#26327]
