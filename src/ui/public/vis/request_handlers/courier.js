@@ -72,7 +72,17 @@ const CourierRequestHandlerProvider = function () {
 
   return {
     name: 'courier',
-    handler: async function (vis, { searchSource, aggs, timeRange, query, filters, forceFetch, partialRows }) {
+    handler: async function (vis, {
+      searchSource,
+      aggs,
+      timeRange,
+      query,
+      filters,
+      forceFetch,
+      partialRows,
+      metricsAtAllLevels,
+      minimalColumns,
+    }) {
 
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
@@ -98,7 +108,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl(vis.isHierarchical());
+        return aggs.toDsl(metricsAtAllLevels);
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
@@ -167,7 +177,7 @@ const CourierRequestHandlerProvider = function () {
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
       const tabifyAggs = vis.getAggConfig();
       const tabifyParams = {
-        metricsAtAllLevels: vis.isHierarchical(),
+        minimalColumns,
         partialRows,
         timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
       };

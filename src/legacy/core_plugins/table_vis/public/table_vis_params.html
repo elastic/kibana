@@ -1,0 +1,64 @@
+
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <label
+      for="datatableVisualizationPerPage"
+      i18n-id="tableVis.params.perPageLabel"
+      i18n-default-message="Per Page"
+    ></label>
+    <input type="number" ng-model="editorState.params.perPage" class="form-control" id="datatableVisualizationPerPage">
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="editorState.params.showMetricsAtAllLevels" data-test-subj="showMetricsAtAllLevels">
+      <span
+        i18n-id="tableVis.params.showMetricsLabel"
+        i18n-default-message="Show metrics for every bucket/level"
+      ></span>
+    </label>
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="editorState.params.showPartialRows" data-test-subj="showPartialRows">
+      <span
+        i18n-id="tableVis.params.showPartialRowsLabel"
+        i18n-default-message="Show partial rows"
+      ></span>
+    </label>
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="metricsAtAllLevels" disabled>
+      <span
+        i18n-id="tableVis.params.calculateMetricsLabel"
+        i18n-default-message="Calculate metrics for every bucket/level"
+      ></span>
+    </label>
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="editorState.params.showTotal">
+      <span
+        i18n-id="tableVis.params.showTotalLabel"
+        i18n-default-message="Show total"
+      ></span>
+    </label>
+  </div>
+
+  <div>
+    <label
+      for="datatableVisualizationTotalFunction"
+      i18n-id="tableVis.params.totalFunctionLabel"
+      i18n-default-message="Total function"
+    ></label>
+    <select ng-disabled="!editorState.params.showTotal"
+            class="form-control"
+            ng-model="editorState.params.totalFunc"
+            ng-options="x for x in totalAggregations" id="datatableVisualizationTotalFunction">
+    </select>
+  </div>
+</div>
