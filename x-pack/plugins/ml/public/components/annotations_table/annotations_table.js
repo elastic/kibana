@@ -42,6 +42,8 @@ import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { mlTableService } from '../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
+
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -308,23 +310,30 @@ class AnnotationsTable extends Component {
     }
 
     if (isSingleMetricViewerLinkVisible) {
-      const openInSingleMetricViewerText = 'Open in Single Metric Viewer';
       columns.push({
         align: RIGHT_ALIGNMENT,
         width: '60px',
         name: 'View',
-        render: (annotation) => (
-          <EuiToolTip
-            position="bottom"
-            content={openInSingleMetricViewerText}
-          >
-            <EuiButtonIcon
-              onClick={() => this.openSingleMetricView(annotation)}
-              iconType="stats"
-              aria-label={openInSingleMetricViewerText}
-            />
-          </EuiToolTip>
-        )
+        render: (annotation) => {
+          const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
+          const openInSingleMetricViewerText = isDrillDownAvailable
+            ? 'Open in Single Metric Viewer'
+            : 'Job configuration not supported in Single Metric Viewer';
+
+          return (
+            <EuiToolTip
+              position="bottom"
+              content={openInSingleMetricViewerText}
+            >
+              <EuiButtonIcon
+                onClick={() => this.openSingleMetricView(annotation)}
+                disabled={!isDrillDownAvailable}
+                iconType="stats"
+                aria-label={openInSingleMetricViewerText}
+              />
+            </EuiToolTip>
+          );
+        }
       });
     }
 
