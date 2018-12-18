@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapRequest } from '../../../utils/wrap_request';
-import { FrameworkInternalUser } from './adapter_types';
+import { LicenseType } from './../../../../common/constants/security';
+import { KibanaServerRequest } from './adapter_types';
 import {
   BackendFrameworkAdapter,
+  FrameworkInfo,
+  FrameworkRequest,
   FrameworkResponse,
   FrameworkRouteOptions,
-  FrameworkWrappableRequest,
+  internalAuthData,
+  internalUser,
 } from './adapter_types';
 
 interface TestSettings {
@@ -19,10 +22,9 @@ interface TestSettings {
 }
 
 export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
-  public readonly internalUser: FrameworkInternalUser = {
-    kind: 'internal',
-  };
-  public version: string;
+  public info: null | FrameworkInfo = null;
+  public readonly internalUser = internalUser;
+
   private settings: TestSettings;
   private server: any;
 
@@ -31,13 +33,40 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
       encryptionKey: 'something_who_cares',
       enrollmentTokensTtlInSeconds: 10 * 60, // 10 minutes
     },
-    hapiServer?: any
+    hapiServer?: any,
+    license: LicenseType = 'trial',
+    securityEnabled: boolean = true,
+    licenseActive: boolean = true
   ) {
     this.server = hapiServer;
     this.settings = settings;
-    this.version = 'testing';
-  }
+    const now = new Date();
 
+    this.info = {
+      kibana: {
+        version: 'unknown',
+      },
+      license: {
+        type: license,
+        expired: !licenseActive,
+        expiry_date_in_millis: new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime(),
+      },
+      security: {
+        enabled: securityEnabled,
+        available: securityEnabled,
+      },
+      watcher: {
+        enabled: true,
+        available: true,
+      },
+    };
+  }
+  public log(text: string) {
+    this.server.log(text);
+  }
+  public on(event: 'xpack.status.green', cb: () => void) {
+    cb();
+  }
   public getSetting(settingPath: string) {
     switch (settingPath) {
       case 'xpack.beats.enrollmentTokensTtlInSeconds':
@@ -63,18 +92,18 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
+    RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     if (!this.server) {
       throw new Error('Must pass a hapi server into the adapter to use registerRoute');
     }
-    const wrappedHandler = (licenseRequired: boolean) => (request: any, h: any) => {
-      return route.handler(wrapRequest(request), h);
+    const wrappedHandler = (licenseRequired: string[]) => (request: any, h: any) => {
+      return route.handler(this.wrapRequest(request), h);
     };
 
     this.server.route({
-      handler: wrappedHandler(route.licenseRequired || false),
+      handler: wrappedHandler(route.licenseRequired || []),
       method: route.method,
       path: route.path,
       config: {
@@ -86,5 +115,34 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
   public async injectRequstForTesting({ method, url, headers, payload }: any) {
     return await this.server.inject({ method, url, headers, payload });
+  }
+
+  private wrapRequest<InternalRequest extends KibanaServerRequest>(
+    req: InternalRequest
+  ): FrameworkRequest<InternalRequest> {
+    const { params, payload, query, headers, info } = req;
+
+    const isAuthenticated = headers.authorization != null;
+
+    return {
+      user: isAuthenticated
+        ? {
+            kind: 'authenticated',
+            [internalAuthData]: headers,
+            username: 'elastic',
+            roles: ['superuser'],
+            full_name: null,
+            email: null,
+            enabled: true,
+          }
+        : {
+            kind: 'unauthenticated',
+          },
+      headers,
+      info,
+      params,
+      payload,
+      query,
+    };
   }
 }

@@ -14,12 +14,14 @@ import './components/threshold_watch_edit';
 import { WATCH_TYPES } from 'plugins/watcher/../common/constants';
 import { updateWatchSections } from 'plugins/watcher/lib/update_management_sections';
 import 'plugins/watcher/services/license';
+import { getWatchDetailBreadcrumbs } from '../../lib/breadcrumbs';
 
 routes
   .when('/management/elasticsearch/watcher/watches/watch/:id/edit')
   .when('/management/elasticsearch/watcher/watches/new-watch/:watchType')
   .defaults(/management\/elasticsearch\/watcher\/watches\/(new-watch\/:watchType|watch\/:id\/edit)/, {
     template: template,
+    k7Breadcrumbs: getWatchDetailBreadcrumbs,
     controller: class WatchEditRouteController {
       constructor($injector) {
         const $route = $injector.get('$route');

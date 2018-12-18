@@ -1,18 +1,14 @@
-.disabled {
-  color: $euiColorMediumShade;
-  cursor: pointer;
-}
+.mlSettingsPage {
 
-ml-settings {
-  .mgtPanel {
-    .mgtPanel__link {
-      font-size: $euiFontSizeM;
-      line-height: $euiSizeXL;
-      margin-left: $euiSizeXS;
-    }
-
-    .disabled {
-      color: $euiColorMediumShade;
-    }
+  .mlSettingsPage__body {
+    background: $euiColorLightestShade;
+    min-height: 100vh;
   }
+
+  .mlSettingsPage__content {
+    width: map-get($euiBreakpoints, 'xl');
+    margin-top: $euiSize;
+    margin-bottom: $euiSize;
+  }
+
 }

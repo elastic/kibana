@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { internalAuthData } from '../../../utils/wrap_request';
 import { FrameworkUser } from '../framework/adapter_types';
+import { internalAuthData } from './../framework/adapter_types';
 import {
   DatabaseAdapter,
   DatabaseBulkIndexDocumentsParams,
@@ -32,7 +32,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
   public async putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any> {
     const callES = this.getCallType(user);
-    const result = await callES('indices.putTemplate', params);
+    const result: { acknowledged: boolean } = await callES('indices.putTemplate', params);
     return result;
   }
 

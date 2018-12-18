@@ -8,6 +8,7 @@ import { createAction } from 'redux-actions';
 import { i18n }  from '@kbn/i18n';
 import { getIndexNamesForCurrentPage } from '../selectors';
 import { reloadIndices as request } from '../../services';
+import { loadIndices } from './load_indices';
 import { toastNotifications } from 'ui/notify';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
@@ -17,6 +18,10 @@ export const reloadIndices = (indexNames) => async (dispatch, getState) => {
   try {
     indices = await request(indexNames);
   } catch (error) {
+    // an index has been deleted, reload the full list
+    if (error.status === 404) {
+      return dispatch(loadIndices());
+    }
     return toastNotifications.addDanger(error.data.message);
   }
   if (indices && indices.length > 0) {

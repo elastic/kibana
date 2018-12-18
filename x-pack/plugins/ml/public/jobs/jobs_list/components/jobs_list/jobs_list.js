@@ -22,12 +22,13 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
-export class JobsList extends Component {
+class JobsListUI extends Component {
   constructor(props) {
     super(props);
 
@@ -97,9 +98,13 @@ export class JobsList extends Component {
   }
 
   render() {
+    const { intl, loading } = this.props;
     const selectionControls = {
       selectable: () => true,
-      selectableMessage: (selectable) => (!selectable) ? 'Cannot select job' : undefined,
+      selectableMessage: (selectable) => (!selectable) ? intl.formatMessage({
+        id: 'xpack.ml.jobsList.cannotSelectJobTooltip',
+        defaultMessage: 'Cannot select job' })
+        : undefined,
       onSelectionChange: this.props.selectJobChange
     };
 
@@ -110,13 +115,26 @@ export class JobsList extends Component {
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
-            aria-label={`${this.state.itemIdToExpandedRowMap[item.id] ? 'Hide' : 'Show'} details for ${item.id}`}
+            aria-label={this.state.itemIdToExpandedRowMap[item.id]
+              ? intl.formatMessage({
+                id: 'xpack.ml.jobsList.collapseJobDetailsAriaLabel',
+                defaultMessage: 'Hide details for {itemId}' },
+              { itemId: item.id }
+              )
+              : intl.formatMessage({
+                id: 'xpack.ml.jobsList.expandJobDetailsAriaLabel',
+                defaultMessage: 'Show details for {itemId}' },
+              { itemId: item.id }
+              )}
             data-row-id={item.id}
           />
         )
       }, {
         field: 'id',
-        name: 'ID',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.idLabel',
+          defaultMessage: 'ID'
+        }),
         sortable: true,
         truncateText: false,
 
@@ -127,36 +145,55 @@ export class JobsList extends Component {
           <JobIcon message={item} showTooltip={true} />
         )
       }, {
-        name: 'Description',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.descriptionLabel',
+          defaultMessage: 'Description'
+        }),
         sortable: true,
         field: 'description',
         render: (description, item) => (
           <JobDescription job={item} />
-        )
+        ),
+        textOnly: true,
       }, {
         field: 'processed_record_count',
-        name: 'Processed records',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.processedRecordsLabel',
+          defaultMessage: 'Processed records'
+        }),
         sortable: true,
         truncateText: false,
         dataType: 'number',
         render: count => toLocaleString(count)
       }, {
         field: 'memory_status',
-        name: 'Memory status',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.memoryStatusLabel',
+          defaultMessage: 'Memory status'
+        }),
         sortable: true,
         truncateText: false,
       }, {
         field: 'jobState',
-        name: 'Job state',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobStateLabel',
+          defaultMessage: 'Job state'
+        }),
         sortable: true,
         truncateText: false,
       }, {
         field: 'datafeedState',
-        name: 'Datafeed state',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.datafeedStateLabel',
+          defaultMessage: 'Datafeed state'
+        }),
         sortable: true,
         truncateText: false,
       }, {
-        name: 'Latest timestamp',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.latestTimestampLabel',
+          defaultMessage: 'Latest timestamp'
+        }),
         truncateText: false,
         field: 'latestTimestampSortValue',
         sortable: true,
@@ -168,7 +205,10 @@ export class JobsList extends Component {
           </span>
         )
       }, {
-        name: 'Actions',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.actionsLabel',
+          defaultMessage: 'Actions'
+        }),
         render: (item) => (
           <ResultLinks jobs={[item]} />
         )
@@ -213,6 +253,7 @@ export class JobsList extends Component {
 
     return (
       <EuiBasicTable
+        loading={loading === true}
         itemId="id"
         className={`jobs-list-table ${selectedJobsClass}`}
         items={pageOfItems}
@@ -228,7 +269,7 @@ export class JobsList extends Component {
     );
   }
 }
-JobsList.propTypes = {
+JobsListUI.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
   itemIdToExpandedRowMap: PropTypes.object.isRequired,
@@ -239,4 +280,10 @@ JobsList.propTypes = {
   showStartDatafeedModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
   selectedJobsCount: PropTypes.number.isRequired,
+  loading: PropTypes.bool,
 };
+JobsListUI.defaultProps = {
+  loading: false,
+};
+
+export const JobsList = injectI18n(JobsListUI);

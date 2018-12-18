@@ -76,7 +76,7 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
 
       return fsReadDir$(dir).pipe(
-        mergeMap(subDirs => subDirs.map(subDir => resolve(dir, subDir))),
+        mergeMap((subDirs: string[]) => subDirs.map(subDir => resolve(dir, subDir))),
         mergeMap(path =>
           fsStat$(path).pipe(
             // Filter out non-directory entries from target directories, it's expected that
