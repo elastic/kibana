@@ -543,7 +543,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           <EuiCallOut
             title={(
               <FormattedMessage
-                id="xpack.remoteClusters.autoFollowPatternForm.validationErrorTitle"
+                id="xpack.crossClusterReplication.autoFollowPatternForm.validationErrorTitle"
                 defaultMessage="Fix errors before continuing."
               />
             )}
