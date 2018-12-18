@@ -26,7 +26,7 @@ export const getInitialState = path => {
       // See the resolved_args reducer for more information.
     },
     persistent: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       workpad: getDefaultWorkpad(),
     },
   };
