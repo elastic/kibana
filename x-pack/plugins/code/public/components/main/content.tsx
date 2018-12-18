@@ -71,6 +71,10 @@ const BlameContainer = styled.div`
   overflow: auto;
 `;
 
+const DirectoryViewContainer = styled.div`
+  overflow: auto;
+`;
+
 interface Props extends RouteComponentProps<MainRouteParams> {
   tree: FileTree;
   file: FetchFileResponse | undefined;
@@ -151,14 +155,10 @@ class CodeContent extends React.PureComponent<Props, State> {
     if (pathType === PathTypes.tree) {
       const node = this.findNode(path ? path.split('/') : [], tree);
       return (
-        <div>
-          <div>
-            <Directory node={node} />
-          </div>
-          <div>
-            <CommitHistory commits={commits} repoUri={repoUri} />
-          </div>
-        </div>
+        <DirectoryViewContainer>
+          <Directory node={node} />
+          <CommitHistory commits={commits} repoUri={repoUri} />
+        </DirectoryViewContainer>
       );
     } else if (pathType === PathTypes.blob) {
       if (!file) {
