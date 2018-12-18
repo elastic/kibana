@@ -57,10 +57,9 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
       this.props.transactionType || this.props.serviceTransactionTypes[0]
   };
 
-  public componentDidMount() {
-    getAPMIndexPattern().then((indexPattern?: ISavedObject) => {
-      this.setState({ hasIndexPattern: !!indexPattern });
-    });
+  public async componentDidMount() {
+    const indexPattern: ISavedObject | undefined = await getAPMIndexPattern();
+    this.setState({ hasIndexPattern: !!indexPattern });
   }
 
   public componentDidUpdate(prevProps: FlyoutProps) {
@@ -113,11 +112,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public addSuccessToast = () => {
-    const {
-      serviceName,
-      transactionType = 'all transactions',
-      location
-    } = this.props;
+    const { serviceName, transactionType, location } = this.props;
     toastNotifications.addSuccess({
       title: 'Job successfully created',
       text: (

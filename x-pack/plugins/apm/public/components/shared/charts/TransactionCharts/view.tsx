@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { getMLJob } from 'x-pack/plugins/apm/public/services/rest/ml';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
@@ -30,9 +29,6 @@ interface TransactionChartProps {
   location: any;
   urlParams: IUrlParams;
   mlAvailable: boolean;
-}
-
-interface TransactionChartState {
   hasMLJob: boolean;
 }
 
@@ -48,42 +44,7 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-export class TransactionChartsView extends Component<
-  TransactionChartProps,
-  TransactionChartState
-> {
-  public state = {
-    hasMLJob: false
-  };
-
-  public componentDidMount() {
-    this.checkForMLJob();
-  }
-
-  public componentDidUpdate({
-    urlParams: prevUrlParams
-  }: TransactionChartProps) {
-    const { urlParams } = this.props;
-    if (
-      prevUrlParams.serviceName !== urlParams.serviceName ||
-      prevUrlParams.transactionType !== urlParams.transactionType
-    ) {
-      this.checkForMLJob();
-    }
-  }
-
-  public async checkForMLJob() {
-    const { serviceName, transactionType } = this.props.urlParams;
-    if (!serviceName) {
-      return;
-    }
-    const { count } = await getMLJob({
-      serviceName,
-      transactionType
-    });
-    this.setState({ hasMLJob: count > 0 });
-  }
-
+export class TransactionChartsView extends Component<TransactionChartProps> {
   public getResponseTimeTickFormatter = (t: number) => {
     return this.props.charts.noHits ? '- ms' : asMillis(t);
   };
@@ -105,7 +66,7 @@ export class TransactionChartsView extends Component<
   };
 
   public renderMLHeader() {
-    if (!this.props.mlAvailable || !this.state.hasMLJob) {
+    if (!this.props.mlAvailable || !this.props.hasMLJob) {
       return null;
     }
 

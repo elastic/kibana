@@ -18,7 +18,7 @@ interface TabsProps {
   location: any;
 }
 
-export class Tabs extends React.PureComponent<TabsProps> {
+export class Tabs extends React.Component<TabsProps> {
   public render() {
     const { transactionTypes, urlParams, serviceName, location } = this.props;
     const tabs = [

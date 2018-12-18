@@ -33,9 +33,7 @@ const CPUUsageChart: React.SFC<Props> = ({ data, chartGroupProps }) => (
           noHits={data.totalHits === 0}
           series={data.series}
           tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
-          formatTooltipValue={(c: Coordinate) => {
-            return asPercent(c.y || 0);
-          }}
+          formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0)}
           yMax={1}
         />
       </React.Fragment>

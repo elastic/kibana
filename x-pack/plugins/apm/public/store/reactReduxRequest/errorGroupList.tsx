@@ -20,7 +20,7 @@ export function getErrorGroupList(state: IReduxState) {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
-export function ErrorGroupDetailsRequest({
+export function ErrorGroupOverviewRequest({
   urlParams,
   render
 }: {

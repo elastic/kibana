@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroupList';
+import { ErrorGroupOverviewRequest } from '../../../store/reactReduxRequest/errorGroupList';
 // @ts-ignore
 import List from './List';
 
@@ -20,7 +20,7 @@ export const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   location
 }) => {
   return (
-    <ErrorGroupDetailsRequest
+    <ErrorGroupOverviewRequest
       urlParams={urlParams}
       render={({ data }) => (
         <List urlParams={urlParams} items={data} location={location} />

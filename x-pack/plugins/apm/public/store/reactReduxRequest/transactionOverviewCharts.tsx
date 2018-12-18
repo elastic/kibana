@@ -30,9 +30,10 @@ const INITIAL_DATA: TimeSeriesAPIResponse = {
   anomalyTimeseries: undefined
 };
 
+const selectChartData = (state: IReduxState) => state.reactReduxRequest[ID];
+
 export const getTransactionOverviewCharts = createSelector(
-  getUrlParams,
-  (state: IReduxState) => state.reactReduxRequest[ID],
+  [getUrlParams, selectChartData],
   (urlParams, overviewCharts = {}) => {
     return {
       ...overviewCharts,
@@ -41,11 +42,10 @@ export const getTransactionOverviewCharts = createSelector(
   }
 );
 
-export function hasDynamicBaseline(state: IReduxState) {
-  return (
-    get(state, `reactReduxRequest[${ID}].data.anomalyTimeseries`) !== undefined
-  );
-}
+export const selectHasMLJob = createSelector(
+  [selectChartData],
+  chartData => get(chartData, 'data.anomalyTimeseries') !== undefined
+);
 
 interface Props {
   urlParams: IUrlParams;
