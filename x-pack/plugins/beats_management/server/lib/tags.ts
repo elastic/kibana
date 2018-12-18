@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { intersection, uniq, values } from 'lodash';
+import { flatten, intersection, uniq, values } from 'lodash';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
 import { ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
 import { entries } from '../utils/polyfills';
@@ -56,7 +56,12 @@ export class CMTagsDomain {
         if (block.type !== 'output') {
           return;
         }
-        typesCollector = [...typesCollector, ...block.configs.map((config: any) => config.output)];
+        // get all keys, where the key is the output type with the exception of the output key itself.
+        const keys = flatten<string>(
+          block.configs.map((config: any) => Object.keys(config).filter(key => key !== 'output'))
+        );
+
+        typesCollector = [...typesCollector, ...keys];
         return typesCollector;
       },
       []
