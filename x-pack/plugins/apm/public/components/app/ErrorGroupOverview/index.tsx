@@ -15,7 +15,7 @@ interface ErrorGroupOverviewProps {
   location: any;
 }
 
-export const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
+const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   urlParams,
   location
 }) => {
@@ -28,3 +28,5 @@ export const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
     />
   );
 };
+
+export { ErrorGroupOverview };

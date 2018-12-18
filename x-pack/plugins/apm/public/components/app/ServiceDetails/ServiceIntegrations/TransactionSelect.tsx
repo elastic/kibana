@@ -15,10 +15,10 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import React from 'react';
-import { GetMLJobApiResponse } from 'x-pack/plugins/apm/public/services/rest/ml';
+import { MLJobApiResponse } from 'x-pack/plugins/apm/public/services/rest/ml';
 
 interface TransactionSelectProps {
-  existingJobs: GetMLJobApiResponse['jobs'];
+  existingJobs: MLJobApiResponse['jobs'];
   types: string[];
   selected: string;
   onChange: (value: string) => void;

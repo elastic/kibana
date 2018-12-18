@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { getMLJob, GetMLJobApiResponse } from '../../services/rest/ml';
+import { getMLJob, MLJobApiResponse } from '../../services/rest/ml';
 import { IReduxState } from '../rootReducer';
 import { createInitialDataSelector } from './helpers';
 
@@ -26,7 +26,7 @@ export function MLJobsRequest({
 }: {
   serviceName: string;
   transactionType?: string;
-  render: RRRRender<GetMLJobApiResponse>;
+  render: RRRRender<MLJobApiResponse>;
 }) {
   return (
     <Request

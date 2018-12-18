@@ -47,13 +47,6 @@ export default function TransactionList({
       }
     },
     {
-      field: 'transactionType',
-      name: 'Type',
-      sortable: false,
-      dataType: 'string',
-      render: (_, data) => data.sample.transaction.type
-    },
-    {
       field: 'averageResponseTime',
       name: 'Avg. duration',
       sortable: true,

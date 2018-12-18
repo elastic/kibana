@@ -27,7 +27,7 @@ interface MlResponseItem {
   };
 }
 
-interface StartMLJobApiResponse {
+interface StartedMLJobApiResponse {
   datafeeds: MlResponseItem[];
   jobs: MlResponseItem[];
 }
@@ -46,7 +46,7 @@ export async function startMLJob({
     groups.push(transactionType.toLowerCase());
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
-  return callApi<StartMLJobApiResponse>({
+  return callApi<StartedMLJobApiResponse>({
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
@@ -64,7 +64,7 @@ export async function startMLJob({
 }
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.5/ml-get-job.html
-export interface GetMLJobApiResponse {
+export interface MLJobApiResponse {
   count: number;
   jobs: Array<{
     job_id: string;
@@ -81,7 +81,7 @@ export async function getMLJob({
   transactionType?: string;
   anomalyName?: string;
 }) {
-  return callApi<GetMLJobApiResponse>({
+  return callApi<MLJobApiResponse>({
     method: 'GET',
     pathname: `/api/ml/anomaly_detectors/${getMlPrefix(
       serviceName,
