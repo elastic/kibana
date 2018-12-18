@@ -97,7 +97,7 @@ class AnnotationsTable extends Component {
     // check if the job was supplied via props and matches the supplied jobId
     if (Array.isArray(this.props.jobs) && this.props.jobs.length > 0) {
       const job = this.props.jobs[0];
-      if (job.job_id === jobId) {
+      if (jobId === undefined || job.job_id === jobId) {
         return job;
       }
     }
@@ -121,18 +121,17 @@ class AnnotationsTable extends Component {
     }
   }
 
-  openSingleMetricView = (annotation) => {
+  openSingleMetricView = (annotation = {}) => {
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start to the end of the annotation.
-    const jobId = annotation.job_id;
-    const job = this.getJob(jobId);
+    const job = this.getJob(annotation.job_id);
     const dataCounts = job.data_counts;
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(dataCounts.latest_record_timestamp).toISOString();
 
     const globalSettings = {
       ml: {
-        jobIds: [jobId]
+        jobIds: [job.job_id]
       },
       refreshInterval: {
         display: 'Off',
@@ -156,7 +155,7 @@ class AnnotationsTable extends Component {
       }
     };
 
-    if (annotation !== undefined) {
+    if (annotation.timestamp !== undefined && annotation.end_timestamp !== undefined) {
       appState.mlTimeSeriesExplorer = {
         zoom: {
           from: new Date(annotation.timestamp).toISOString(),
@@ -177,7 +176,7 @@ class AnnotationsTable extends Component {
     const _a = rison.encode(appState);
 
     const url = `?_g=${_g}&_a=${_a}`;
-    addItemToRecentlyAccessed('timeseriesexplorer', jobId, url);
+    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, url);
     window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
   }
 
@@ -241,7 +240,7 @@ class AnnotationsTable extends Component {
         >
           <p>
             To create an annotation,
-            open the <EuiLink onClick={this.openSingleMetricView}>Single Metric Viewer</EuiLink>
+            open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
           </p>
         </EuiCallOut>
       );
