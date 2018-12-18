@@ -39,7 +39,7 @@ describe('Esqueue class', function () {
 
     it('should throw with an invalid host', function () {
       const init = () => new Esqueue('esqueue', {
-        client: { host: 'nope://nope' }
+        client: { node: 'nope://nope' }
       });
 
       expect(init).to.throwException(/invalid.+protocol/i);
@@ -47,7 +47,7 @@ describe('Esqueue class', function () {
 
     it('should throw with invalid hosts', function () {
       const init = () => new Esqueue('esqueue', {
-        client: { hosts: [{ host: 'localhost', protocol: 'nope' }] }
+        client: { nodes: [{ host: 'localhost', protocol: 'nope' }] }
       });
 
       expect(init).to.throwException(/invalid.+protocol/i);

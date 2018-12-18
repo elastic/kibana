@@ -15,7 +15,7 @@ const { createClient, isClient } = proxyquire.noPreserveCache()('../../helpers/c
 describe('Create client helper', function () {
   it('should have a client', function () {
     const options = {
-      host: 'http://localhost:9200'
+      node: 'http://localhost:9200'
     };
     const client = createClient(options);
     expect(isClient(client)).to.be.ok();
