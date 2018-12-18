@@ -13,7 +13,7 @@
   "private": true,
   "version": "7.0.0",
   "branch": "master",
-  "types": "./target/types/type_exports.d.ts",
+  "types": "./kibana.d.ts",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -92,7 +92,7 @@
     ]
   },
   "dependencies": {
-    "@elastic/datemath": "5.0.1",
+    "@elastic/datemath": "5.0.2",
     "@elastic/eui": "5.8.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
@@ -113,7 +113,7 @@
     "angular-elastic": "2.5.0",
     "angular-recursion": "^1.0.5",
     "angular-route": "1.4.7",
-    "angular-sanitize": "1.5.7",
+    "angular-sanitize": "1.6.5",
     "angular-sortable-view": "0.0.15",
     "autoprefixer": "^9.1.0",
     "babel-core": "6.26.3",
@@ -264,7 +264,7 @@
     "@types/dedent": "^0.7.0",
     "@types/del": "^3.0.1",
     "@types/delete-empty": "^2.0.0",
-    "@types/elasticsearch": "^5.0.26",
+    "@types/elasticsearch": "^5.0.30",
     "@types/enzyme": "^3.1.12",
     "@types/eslint": "^4.16.2",
     "@types/execa": "^0.9.0",

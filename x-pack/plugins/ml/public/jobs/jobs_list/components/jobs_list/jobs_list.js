@@ -98,7 +98,7 @@ class JobsListUI extends Component {
   }
 
   render() {
-    const { intl } = this.props;
+    const { intl, loading } = this.props;
     const selectionControls = {
       selectable: () => true,
       selectableMessage: (selectable) => (!selectable) ? intl.formatMessage({
@@ -253,6 +253,8 @@ class JobsListUI extends Component {
 
     return (
       <EuiBasicTable
+        loading={loading === true}
+        noItemsMessage={loading ? 'Loading jobs...' : 'No jobs found'}
         itemId="id"
         className={`jobs-list-table ${selectedJobsClass}`}
         items={pageOfItems}
@@ -279,6 +281,10 @@ JobsListUI.propTypes = {
   showStartDatafeedModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
   selectedJobsCount: PropTypes.number.isRequired,
+  loading: PropTypes.bool,
+};
+JobsListUI.defaultProps = {
+  loading: false,
 };
 
 export const JobsList = injectI18n(JobsListUI);

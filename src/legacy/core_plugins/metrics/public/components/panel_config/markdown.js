@@ -264,10 +264,7 @@ class MarkdownPanelConfigUi extends Component {
             isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}
           >
-            <FormattedMessage
-              id="tsvb.markdown.markdownTab.markdownButtonLabel"
-              defaultMessage="Markdown"
-            />
+            Markdown
           </EuiTab>
           <EuiTab
             data-test-subj="markdownDataBtn"

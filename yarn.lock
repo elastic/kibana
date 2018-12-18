@@ -803,10 +803,17 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
+<<<<<<< HEAD
 "@elastic/eui@5.8.1":
   version "5.8.1"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.8.1.tgz#33467c059699a4626256d7197451400500831a66"
   integrity sha512-y1hn27p9lm5P1sru8jHFbdKx6FzG5mQXc2cyS2Fc/T0SVH1n9Pj44OilM/NyVQNiR2pHKat+Hqc2SRrCcpeDmQ==
+=======
+"@elastic/eui@5.6.2":
+  version "5.6.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.2.tgz#c3308591f83167a0f7e94909a75af45d4d043047"
+  integrity sha512-gN0HtzAVu37RuHp2iYbDBEFfjTp1mdbR3lRWjP5eA88L+EeA+JVRxdy7Tgit+P73ZCyyLgAWlcQxMJIREqzXeg==
+>>>>>>> upstream/master
   dependencies:
     "@types/numeral" "^0.0.25"
     classnames "^2.2.5"
@@ -1191,10 +1198,10 @@
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
 
-"@types/elasticsearch@^5.0.26":
-  version "5.0.28"
-  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.28.tgz#0e4cdf7d9c9a3fe901c0da4fb9ad824c6d3b4091"
-  integrity sha512-hM9Rs1trCkthBz1z9UwAJKQ4/ZaNnKbKB2Utf4iuY91OssLMUHzXZP8mBrkUif4kp/bNOPt6w92L9YmL2nSMuA==
+"@types/elasticsearch@^5.0.30":
+  version "5.0.30"
+  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.30.tgz#3c52f7119e3a20a47e2feb8e2b4cc54030a54e23"
+  integrity sha512-swxiNcLOtnHhJhAE5HcUL3WsKLHr8rEQ+fwpaJ0x4dfEE3oK2kGUoyz4wCcQfvulcMm2lShyxZ+2E4BQJzsAlg==
 
 "@types/enzyme@^3.1.12":
   version "3.1.12"
@@ -2157,15 +2164,10 @@ angular-route@1.4.7:
   resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.4.7.tgz#9796ac2527547158cd42d757d69d90a891a6d95f"
   integrity sha1-l5asJSdUcVjNQtdX1p2QqJGm2V8=
 
-angular-sanitize@1.4.9:
-  version "1.4.9"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.4.9.tgz#29e2f07dcf16b3c50a266a729ca754f58813ffc5"
-  integrity sha1-KeLwfc8Ws8UKJmpynKdU9YgT/8U=
-
-angular-sanitize@1.5.7:
-  version "1.5.7"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.5.7.tgz#36e78b7bba6e90233a9b908e597a05770356f290"
-  integrity sha1-NueLe7pukCM6m5COWXoFdwNW8pA=
+angular-sanitize@1.6.5:
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.6.5.tgz#b5625a817afad2ba58c333e98eef169a1c6f517a"
+  integrity sha1-tWJagXr60rpYwzPpju8WmhxvUXo=
 
 angular-sortable-view@0.0.15:
   version "0.0.15"
@@ -5101,19 +5103,12 @@ classnames@^2.2.3, classnames@^2.2.5:
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
   integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
 
-clean-css@4.2.x:
+clean-css@4.2.x, clean-css@^4.1.11:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/clean-css/-/clean-css-4.2.1.tgz#2d411ef76b8569b6d0c84068dabe85b0aa5e5c17"
   integrity sha512-4ZxI6dy4lrY6FHzfiy1aEOXgu4LIsW2MhwG0VBKdcoGoH/XLFgaHSdLTGr4O8Be6A8r3MOphEiI8Gc1n0ecf3g==
   dependencies:
     source-map "~0.6.0"
-
-clean-css@^4.1.11:
-  version "4.1.11"
-  resolved "https://registry.yarnpkg.com/clean-css/-/clean-css-4.1.11.tgz#2ecdf145aba38f54740f26cefd0ff3e03e125d6a"
-  integrity sha1-Ls3xRaujj1R0DybO/Q/z4D4SXWo=
-  dependencies:
-    source-map "0.5.x"
 
 clean-stack@^1.0.0:
   version "1.3.0"
@@ -19006,11 +19001,6 @@ source-map-url@^0.4.0:
   resolved "https://registry.yarnpkg.com/source-map-url/-/source-map-url-0.4.0.tgz#3e935d7ddd73631b97659956d55128e87b5084a3"
   integrity sha1-PpNdfd1zYxuXZZlW1VEo6HtQhKM=
 
-source-map@0.5.x, source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.3, source-map@^0.5.6, source-map@^0.5.7, source-map@~0.5.0, source-map@~0.5.1, source-map@~0.5.6:
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
-  integrity sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
-
 "source-map@>= 0.1.2", source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.0, source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
@@ -19022,6 +19012,11 @@ source-map@^0.4.2, source-map@^0.4.4:
   integrity sha1-66T12pwNyZneaAMti092FzZSA2s=
   dependencies:
     amdefine ">=0.0.4"
+
+source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.3, source-map@^0.5.6, source-map@^0.5.7, source-map@~0.5.0, source-map@~0.5.1, source-map@~0.5.6:
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
+  integrity sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
 
 source-map@~0.1.30, source-map@~0.1.33:
   version "0.1.43"

@@ -80,7 +80,7 @@ export default class Status extends EventEmitter {
   }
 }
 
-states.all.forEach(function (state) {
+states.getAll().forEach(function (state) {
   Status.prototype[state.id] = function (message) {
     if (this.state === 'disabled') return;
 

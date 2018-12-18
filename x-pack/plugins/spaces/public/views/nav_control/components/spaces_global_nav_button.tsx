@@ -10,10 +10,10 @@ import { ButtonProps } from '../types';
 export class SpacesGlobalNavButton extends Component<ButtonProps> {
   public render() {
     return (
-      <div className="global-nav-link">
-        <button className="global-nav-link__anchor" onClick={this.props.toggleSpaceSelector}>
-          <div className="global-nav-link__icon"> {this.props.linkIcon} </div>
-          <div className="global-nav-link__title"> {this.props.linkTitle} </div>
+      <div className="kbnGlobalNavLink">
+        <button className="kbnGlobalNavLink__anchor" onClick={this.props.toggleSpaceSelector}>
+          <span className="kbnGlobalNavLink__icon"> {this.props.linkIcon} </span>
+          <span className="kbnGlobalNavLink__title"> {this.props.linkTitle} </span>
         </button>
       </div>
     );
