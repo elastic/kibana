@@ -25,7 +25,7 @@ export class ServiceDetailTabs extends React.Component<TabsProps> {
       {
         name: 'Transactions',
         path: `/${serviceName}/transactions/${transactionTypes[0]}`,
-        routePath: `/${serviceName}/transactions/:transactionType`,
+        routePath: `/${serviceName}/transactions/:transactionType?`,
         component: () => (
           <TransactionOverview
             urlParams={urlParams}
