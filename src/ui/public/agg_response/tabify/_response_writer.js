@@ -25,22 +25,27 @@ import { tabifyGetColumns } from './_get_columns';
  * produces a table, or a series of tables.
  *
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
- * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
- * @param {boolean} partialRows - setting to true will not remove rows with missing values
+ * @param {boolean} minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
+ * @param {boolean} partialRows - vis.params.showPartialRows: determines whether to return rows with incomplete data
+ * @param {Object} timeRange - time range object, if provided
  */
-function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false, timeRange } = {}) {
+function TabbedAggResponseWriter(aggs, {
+  minimalColumns = true,
+  partialRows = false,
+  timeRange
+} = {}) {
+  // Private
+  this._removePartialRows = !partialRows;
+
+  // Public
   this.rowBuffer = {};
   this.bucketBuffer = [];
   this.metricBuffer = [];
-
-  this.metricsForAllBuckets = metricsAtAllLevels;
-  this.partialRows = partialRows;
   this.aggs = aggs;
-  this.columns = tabifyGetColumns(aggs.getResponseAggs(), !metricsAtAllLevels);
+  this.partialRows = partialRows;
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), minimalColumns);
   this.aggStack = [...this.columns];
-
   this.rows = [];
-
   // Extract the time range object if provided
   if (timeRange) {
     const timeRangeKey = Object.keys(timeRange)[0];
@@ -67,7 +72,7 @@ TabbedAggResponseWriter.prototype.row = function () {
     this.rowBuffer[metric.id] = metric.value;
   });
 
-  if (!toArray(this.rowBuffer).length || (!this.partialRows && this.isPartialRow(this.rowBuffer))) {
+  if (!toArray(this.rowBuffer).length || (this._removePartialRows && this.isPartialRow(this.rowBuffer))) {
     return;
   }
 

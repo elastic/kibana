@@ -73,10 +73,18 @@ export class VisualizeDataLoader {
     this.vis.showRequestError = false;
 
     try {
+      // Vis types that have a `showMetricsAtAllLevels` param (e.g. data table) should tell
+      // tabify whether to return columns for each bucket based on the param value. Vis types
+      // without this param should default to returning all columns if they are hierarchical.
+      const minimalColumns =
+        typeof this.vis.params.showMetricsAtAllLevels !== 'undefined'
+          ? !this.vis.params.showMetricsAtAllLevels
+          : !this.vis.isHierarchical();
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler({
-        partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
-        isHierarchical: this.vis.isHierarchical(),
+        partialRows: this.vis.type.requiresPartialRows || this.vis.params.showPartialRows,
+        minimalColumns,
+        metricsAtAllLevels: this.vis.isHierarchical(),
         visParams: this.vis.params,
         ...params,
         filters: params.filters
