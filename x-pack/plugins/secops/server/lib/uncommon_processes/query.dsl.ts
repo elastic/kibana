@@ -31,8 +31,8 @@ export const buildQuery = (options: UncommonProcessesRequestOptions) => {
     {
       range: {
         [options.sourceConfiguration.fields.timestamp]: {
-          gte: to,
-          lte: from,
+          gte: from,
+          lte: to,
         },
       },
     },

@@ -10,16 +10,19 @@ import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { EventItem, GetEventsQuery, KpiItem } from '../../../common/graphql/types';
-
+import { inputsModel } from '../../store';
 import { eventsQuery } from './index.gql_query';
 
 export interface EventsArgs {
+  id: string;
   events?: EventItem[];
   kpiEventType?: KpiItem[];
   loading: boolean;
+  refetch: inputsModel.Refetch;
 }
 
 export interface EventsProps {
+  id?: string;
   children?: (args: EventsArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
@@ -28,7 +31,7 @@ export interface EventsProps {
 }
 
 export const EventsQuery = pure<EventsProps>(
-  ({ children, filterQuery, sourceId, startDate, endDate }) => (
+  ({ id = 'eventsQuery', children, filterQuery, sourceId, startDate, endDate }) => (
     <Query<GetEventsQuery.Query, GetEventsQuery.Variables>
       query={eventsQuery}
       fetchPolicy="cache-and-network"
@@ -38,18 +41,22 @@ export const EventsQuery = pure<EventsProps>(
         sourceId,
         timerange: {
           interval: '12h',
-          from: endDate,
-          to: startDate,
+          from: startDate,
+          to: endDate,
         },
       }}
     >
-      {({ data, loading }) =>
-        children!({
+      {({ data, loading, refetch }) => {
+        const events = getOr([], 'source.getEvents.events', data);
+        const kpiEventType = getOr([], 'source.getEvents.kpiEventType', data);
+        return children!({
+          id,
+          refetch,
           loading,
-          events: getOr([], 'source.getEvents.events', data),
-          kpiEventType: getOr([], 'source.getEvents.kpiEventType', data),
-        })
-      }
+          events,
+          kpiEventType,
+        });
+      }}
     </Query>
   )
 );

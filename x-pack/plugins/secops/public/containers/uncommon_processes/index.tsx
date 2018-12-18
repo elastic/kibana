@@ -16,24 +16,28 @@ import {
 } from '../../../common/graphql/types';
 
 import { connect } from 'react-redux';
-import { State } from '../../store';
+import { inputsModel, State } from '../../store';
 import { uncommonProcessesQuery } from './index.gql_query';
 
 export interface UncommonProcessesArgs {
+  id: string;
   uncommonProcesses: UncommonProcessesEdges[];
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
   loadMore: (cursor: string) => void;
+  refetch: inputsModel.Refetch;
 }
 
 export interface OwnProps {
+  id?: string;
   children: (args: UncommonProcessesArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
   filterQuery?: string;
   cursor: string | null;
+  poll: number;
 }
 
 export interface UncommonProcessesComponentReduxProps {
@@ -43,17 +47,28 @@ export interface UncommonProcessesComponentReduxProps {
 type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
 
 const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
-  ({ children, filterQuery, sourceId, startDate, endDate, limit, cursor }) => (
+  ({
+    id = 'uncommonProcessesQuery',
+    children,
+    filterQuery,
+    sourceId,
+    startDate,
+    endDate,
+    limit,
+    cursor,
+    poll,
+  }) => (
     <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
       query={uncommonProcessesQuery}
       fetchPolicy="cache-and-network"
+      pollInterval={poll}
       notifyOnNetworkStatusChange
       variables={{
         sourceId,
         timerange: {
           interval: '12h',
-          from: endDate,
-          to: startDate,
+          from: startDate,
+          to: endDate,
         },
         pagination: {
           limit,
@@ -63,9 +78,11 @@ const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
         filterQuery,
       }}
     >
-      {({ data, loading, fetchMore }) =>
+      {({ data, loading, fetchMore, refetch }) =>
         children({
+          id,
           loading,
+          refetch,
           totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
           uncommonProcesses: getOr([], 'source.UncommonProcesses.edges', data),
           pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),

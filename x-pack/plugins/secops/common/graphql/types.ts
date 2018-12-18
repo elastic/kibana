@@ -143,7 +143,7 @@ export interface HostsData {
   pageInfo: PageInfo;
 }
 
-export interface HostsEdges extends Record<string, {}> {
+export interface HostsEdges {
   host: HostItem;
   cursor: CursorType;
 }
@@ -172,7 +172,7 @@ export interface UncommonProcessesData {
   pageInfo: PageInfo;
 }
 
-export interface UncommonProcessesEdges extends Record<string, {}> {
+export interface UncommonProcessesEdges {
   uncommonProcess: UncommonProcessItem;
   cursor: CursorType;
 }

@@ -39,8 +39,8 @@ export const buildQuery = (options: EventsRequestOptions) => {
     {
       range: {
         [options.sourceConfiguration.fields.timestamp]: {
-          gte: to,
-          lte: from,
+          gte: from,
+          lte: to,
         },
       },
     },

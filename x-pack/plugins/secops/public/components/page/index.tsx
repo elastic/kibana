@@ -47,19 +47,6 @@ export const FooterContainer = styled.div`
   width: 100%;
 `;
 
-export const SubHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  user-select: none;
-  width: 100%;
-`;
-
-export const SubHeaderDatePicker = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin: 5px 0 5px 0;
-`;
-
 export const PaneScrollContainer = styled.div`
   height: 100%;
   overflow-y: scroll;
