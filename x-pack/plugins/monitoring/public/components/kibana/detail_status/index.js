@@ -21,6 +21,10 @@ function DetailStatusUI({ stats, intl }) {
 
   const metrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.detailStatus.transportAddressLabel',
+        defaultMessage: 'Transport Address'
+      }),
       value: transportAddress,
       'data-test-subj': 'transportAddress'
     },

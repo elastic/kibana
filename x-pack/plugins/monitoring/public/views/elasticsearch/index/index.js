@@ -8,9 +8,6 @@
  * Controller for single index detail
  */
 import React from 'react';
-import { render } from 'react-dom';
-import { find } from 'lodash';
-import moment from 'moment';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
@@ -20,6 +17,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 import { Index } from '../../../components/elasticsearch/index/index';
+import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -53,69 +51,55 @@ uiRoutes.when('/elasticsearch/indices/:index', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope, i18n) {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controllerAs: 'monitoringElasticsearchIndexApp',
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope, i18n) {
+      const $route = $injector.get('$route');
+      const kbnUrl = $injector.get('kbnUrl');
+      const indexName = $route.current.params.index;
 
-    const $route = $injector.get('$route');
-    const kbnUrl = $injector.get('kbnUrl');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
-    $scope.indexName = $route.current.params.index;
+      super({
+        title: i18n('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
+          defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
+          values: {
+            indexName,
+          }
+        }),
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringElasticsearchIndexApp',
+        $scope,
+        $injector
+      });
 
-    const title = $injector.get('title');
-    const routeTitle = i18n('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
-      defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
-      values: {
-        indexName: $scope.indexName
-      }
-    });
+      this.indexName = indexName;
+      const transformer = indicesByNodes();
 
-    title($scope.cluster, routeTitle);
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.shards) {
+          return;
+        }
 
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => $scope.pageData = response
-    });
+        const shards = data.shards;
+        data.totalCount = shards.length;
+        data.showing = transformer(shards, data.nodes);
+        if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
+          data.labels = labels.indexWithUnassigned;
+        } else {
+          data.labels = labels.index;
+        }
 
-    $executor.start($scope);
-
-    $scope.$on('$destroy', $executor.destroy);
-
-    function onBrush({ xaxis }) {
-      timefilter.setTime({
-        from: moment(xaxis.from),
-        to: moment(xaxis.to),
-        mode: 'absolute',
+        this.renderReact(
+          <I18nProvider>
+            <Index
+              scope={$scope}
+              kbnUrl={kbnUrl}
+              onBrush={this.onBrush}
+              {...data}
+            />
+          </I18nProvider>
+        );
       });
     }
-
-    const transformer = indicesByNodes();
-    this.renderReact = () => {
-      const shards = $scope.pageData.shards;
-      $scope.totalCount = shards.length;
-      $scope.showing = transformer(shards, $scope.pageData.nodes);
-      if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
-        $scope.labels = labels.indexWithUnassigned;
-      } else {
-        $scope.labels = labels.index;
-      }
-
-      render(
-        <I18nProvider>
-          <Index
-            scope={$scope}
-            kbnUrl={kbnUrl}
-            onBrush={onBrush}
-            {...$scope.pageData}
-          />
-        </I18nProvider>,
-        document.getElementById('monitoringElasticsearchIndexApp')
-      );
-    };
-
-    $scope.$watch('pageData', this.renderReact);
   }
 });

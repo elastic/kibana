@@ -27,7 +27,7 @@ module.directive('mlAnnotationTable', function () {
 
   function link(scope, element) {
     function renderReactComponent() {
-      if (typeof scope.jobs === 'undefined') {
+      if (typeof scope.jobs === 'undefined' && typeof scope.annotations === 'undefined') {
         return;
       }
 
@@ -35,7 +35,7 @@ module.directive('mlAnnotationTable', function () {
         annotations: scope.annotations,
         jobs: scope.jobs,
         isSingleMetricViewerLinkVisible: scope.drillDown,
-        isNumberBadgeVisible: true
+        isNumberBadgeVisible: scope.numberBadge
       };
 
       ReactDOM.render(
@@ -69,7 +69,8 @@ module.directive('mlAnnotationTable', function () {
     scope: {
       annotations: '=',
       drillDown: '=',
-      jobs: '='
+      jobs: '=',
+      numberBadge: '='
     },
     link: link
   };

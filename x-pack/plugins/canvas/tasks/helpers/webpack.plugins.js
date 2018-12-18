@@ -61,10 +61,15 @@ export function getWebpackConfig({ devtool, watch } = {}) {
         // bails on error, including loader errors
         // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
         this.hooks.done.tapPromise('LoaderFailHandlerPlugin', async stats => {
-          if (!stats.hasErrors()) return;
+          if (!stats.hasErrors()) {
+            return;
+          }
           const errorMessage = stats.toString('errors-only');
-          if (watch) console.error(errorMessage);
-          else throw new Error(errorMessage);
+          if (watch) {
+            console.error(errorMessage);
+          } else {
+            throw new Error(errorMessage);
+          }
         });
       },
       new CopyWebpackPlugin([

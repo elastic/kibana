@@ -91,30 +91,42 @@ export function getSelectedElement(state) {
 
 export function getElements(state, pageId, withAst = true) {
   const id = pageId || getSelectedPage(state);
-  if (!id) return [];
+  if (!id) {
+    return [];
+  }
 
   const page = getPageById(state, id);
   const elements = get(page, 'elements');
 
-  if (!elements) return [];
+  if (!elements) {
+    return [];
+  }
 
   // explicitely strip the ast, basically a fix for corrupted workpads
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
-  if (!withAst) return elements.map(el => omit(el, ['ast']));
+  if (!withAst) {
+    return elements.map(el => omit(el, ['ast']));
+  }
 
   return elements.map(appendAst);
 }
 
 export function getElementById(state, id, pageId) {
   const element = getElements(state, pageId, []).find(el => el.id === id);
-  if (element) return appendAst(element);
+  if (element) {
+    return appendAst(element);
+  }
 }
 
 export function getResolvedArgs(state, elementId, path) {
-  if (!elementId) return;
+  if (!elementId) {
+    return;
+  }
   const args = get(state, ['transient', 'resolvedArgs', elementId]);
-  if (path) return get(args, path);
+  if (path) {
+    return get(args, path);
+  }
   return args;
 }
 

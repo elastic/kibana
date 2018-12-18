@@ -23,7 +23,10 @@ import {
 import chrome from 'ui/chrome';
 
 
-export function Settings({ canCreateFilter, canCreateCalendar }) {
+export function Settings({
+  canGetFilters,
+  canGetCalendars
+}) {
   return (
     <EuiPage className="mlSettingsPage">
       <EuiPageBody className="mlSettingsPage__body">
@@ -44,7 +47,7 @@ export function Settings({ canCreateFilter, canCreateCalendar }) {
                 size="l"
                 color="primary"
                 href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
-                isDisabled={canCreateCalendar === false}
+                isDisabled={canGetCalendars === false}
               >
                 Calendar management
               </EuiButtonEmpty>
@@ -56,7 +59,7 @@ export function Settings({ canCreateFilter, canCreateCalendar }) {
                 size="l"
                 color="primary"
                 href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists`}
-                isDisabled={canCreateFilter === false}
+                isDisabled={canGetFilters === false}
               >
                 Filter Lists
               </EuiButtonEmpty>
@@ -70,6 +73,6 @@ export function Settings({ canCreateFilter, canCreateCalendar }) {
 }
 
 Settings.propTypes = {
-  canCreateFilter: PropTypes.bool.isRequired,
-  canCreateCalendar: PropTypes.bool.isRequired,
+  canGetFilters: PropTypes.bool.isRequired,
+  canGetCalendars: PropTypes.bool.isRequired,
 };

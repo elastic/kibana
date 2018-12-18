@@ -803,10 +803,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.6.1":
-  version "5.6.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.1.tgz#468019d1d140b11b24d5e7e772132676d43678a8"
-  integrity sha512-UnExe+pgHPldz66EdZMVP0RZhBAKqaLMbEsAK/tMT+nFwXIiFqGfGftwozFP5ax8uxGzR9biuXvUHpuGd7/5Lw==
+"@elastic/eui@5.6.2":
+  version "5.6.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.6.2.tgz#c3308591f83167a0f7e94909a75af45d4d043047"
+  integrity sha512-gN0HtzAVu37RuHp2iYbDBEFfjTp1mdbR3lRWjP5eA88L+EeA+JVRxdy7Tgit+P73ZCyyLgAWlcQxMJIREqzXeg==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -1190,10 +1190,10 @@
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
 
-"@types/elasticsearch@^5.0.26":
-  version "5.0.28"
-  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.28.tgz#0e4cdf7d9c9a3fe901c0da4fb9ad824c6d3b4091"
-  integrity sha512-hM9Rs1trCkthBz1z9UwAJKQ4/ZaNnKbKB2Utf4iuY91OssLMUHzXZP8mBrkUif4kp/bNOPt6w92L9YmL2nSMuA==
+"@types/elasticsearch@^5.0.30":
+  version "5.0.30"
+  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.30.tgz#3c52f7119e3a20a47e2feb8e2b4cc54030a54e23"
+  integrity sha512-swxiNcLOtnHhJhAE5HcUL3WsKLHr8rEQ+fwpaJ0x4dfEE3oK2kGUoyz4wCcQfvulcMm2lShyxZ+2E4BQJzsAlg==
 
 "@types/enzyme@^3.1.12":
   version "3.1.12"
@@ -4490,11 +4490,6 @@ builtins@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/builtins/-/builtins-0.0.7.tgz#355219cd6cf18dbe7c01cc7fd2dce765cfdc549a"
   integrity sha1-NVIZzWzxjb58Acx/0tznZc/cVJo=
-
-byline@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/byline/-/byline-5.0.0.tgz#741c5216468eadc457b03410118ad77de8c1ddb1"
-  integrity sha1-dBxSFkaOrcRXsDQQEYrXfejB3bE=
 
 bytes@1:
   version "1.0.0"
@@ -19494,12 +19489,11 @@ strip-outer@^1.0.0:
   dependencies:
     escape-string-regexp "^1.0.2"
 
-strong-log-transformer@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/strong-log-transformer/-/strong-log-transformer-2.0.0.tgz#fa6d8e0a9e62b3c168c3cad5ae5d00dc97ba26cc"
-  integrity sha512-FQmNqAXJgOX8ygOcvPLlGWBNT41mvNJ9ALoYf0GTwVt9t30mGTqpmp/oJx5gLcu52DXK10kS7dVWhx8aPXDTlg==
+strong-log-transformer@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/strong-log-transformer/-/strong-log-transformer-2.1.0.tgz#0f5ed78d325e0421ac6f90f7f10e691d6ae3ae10"
+  integrity sha512-B3Hgul+z0L9a236FAUC9iZsL+nVHgoCJnqCbN588DjYxvGXaXaaFbfmQ/JhvKjZwsOukuR72XbHv71Qkug0HxA==
   dependencies:
-    byline "^5.0.0"
     duplexer "^0.1.1"
     minimist "^1.2.0"
     through "^2.3.4"
@@ -20370,6 +20364,13 @@ tslint-config-prettier@^1.15.0:
   resolved "https://registry.yarnpkg.com/tslint-config-prettier/-/tslint-config-prettier-1.15.0.tgz#76b9714399004ab6831fdcf76d89b73691c812cf"
   integrity sha512-06CgrHJxJmNYVgsmeMoa1KXzQRoOdvfkqnJth6XUkNeOz707qxN0WfxfhYwhL5kXHHbYJRby2bqAPKwThlZPhw==
 
+tslint-microsoft-contrib@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/tslint-microsoft-contrib/-/tslint-microsoft-contrib-6.0.0.tgz#7bff73c9ad7a0b7eb5cdb04906de58f42a2bf7a2"
+  integrity sha512-R//efwn+34IUjTJeYgNDAJdzG0jyLWIehygPt/PHuZAieTolFVS56FgeFW7DOLap9ghXzMiFPTmDgm54qaL7QA==
+  dependencies:
+    tsutils "^2.27.2 <2.29.0"
+
 tslint-plugin-prettier@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/tslint-plugin-prettier/-/tslint-plugin-prettier-2.0.0.tgz#ade328b26c71f37418d4d01187dca232a7447b49"
@@ -20400,6 +20401,12 @@ tsutils@^2.27.2:
   version "2.29.0"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.29.0.tgz#32b488501467acbedd4b85498673a0812aca0b99"
   integrity sha512-g5JVHCIJwzfISaXpXE1qvNalca5Jwob6FjI4AoPlqMusJ6ftFE7IkkFoMhVLRgK+4Kx3gkzb8UZK5t5yTTvEmA==
+  dependencies:
+    tslib "^1.8.1"
+
+"tsutils@^2.27.2 <2.29.0":
+  version "2.28.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.28.0.tgz#6bd71e160828f9d019b6f4e844742228f85169a1"
   dependencies:
     tslib "^1.8.1"
 

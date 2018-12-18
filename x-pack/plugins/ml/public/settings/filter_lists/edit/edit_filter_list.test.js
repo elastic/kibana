@@ -38,10 +38,15 @@ import React from 'react';
 
 import { EditFilterList } from './edit_filter_list';
 
+const props = {
+  canCreateFilter: true,
+  canDeleteFilter: true
+};
+
 function prepareEditTest() {
 
   const wrapper = shallow(
-    <EditFilterList />
+    <EditFilterList {...props}/>
   );
 
   // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
@@ -59,7 +64,7 @@ describe('EditFilterList', () => {
 
   test('renders the edit page for a new filter list and updates ID', () => {
     const wrapper = shallow(
-      <EditFilterList />
+      <EditFilterList {...props}/>
     );
     expect(wrapper).toMatchSnapshot();
 
