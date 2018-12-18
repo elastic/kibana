@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { HistogramSeries, Ping } from '../../../../common/graphql/types';
+import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -223,5 +223,21 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     });
 
     return ret;
+  }
+
+  public async getDocCount(request: any): Promise<DocCount> {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          match_all: {},
+        },
+        size: 1,
+      },
+    };
+    const result = await this.database.search(request, params);
+    return {
+      count: get(result, 'hits.total.value', 0),
+    };
   }
 }

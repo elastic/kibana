@@ -186,7 +186,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    // NOTE: this doesn't solve the issue of HB being down
+    // TODO: this doesn't solve the issue of HB being down
     const res = await this.database.search(request, params);
     const hostBuckets = get(res, 'aggregations.hosts.buckets', []);
     const monitorStatuses = hostBuckets.map(bucket => {

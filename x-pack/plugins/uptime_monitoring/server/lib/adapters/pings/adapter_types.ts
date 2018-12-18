@@ -5,7 +5,7 @@
  */
 
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { HistogramSeries, Ping } from '../../../../common/graphql/types';
+import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
 
 export interface UMPingsAdapter {
   getAll(
@@ -30,4 +30,6 @@ export interface UMPingsAdapter {
     range: UMGqlRange,
     filters?: string
   ): Promise<HistogramSeries[] | null>;
+
+  getDocCount(request: any): Promise<DocCount>;
 }

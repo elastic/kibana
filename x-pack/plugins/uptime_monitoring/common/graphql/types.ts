@@ -17,6 +17,8 @@ export type UnsignedInteger = any;
 export interface Query {
   /** Get a list of all recorded pings for all monitors */
   allPings: Ping[];
+  /** Gets the number of documents in the target index */
+  getDocCount: DocCount;
 
   getMonitors?: LatestMonitorsResult | null;
 
@@ -248,6 +250,10 @@ export interface Tls {
   certificates?: string | null;
 
   rtt?: Rtt | null;
+}
+
+export interface DocCount {
+  count: UnsignedInteger;
 }
 
 export interface LatestMonitorsResult {
