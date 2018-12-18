@@ -20,7 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { SEVERITY_OPTIONS } from '../../../../common/util/anomaly_utils';
+import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
 
 const optionsMap = {
@@ -29,6 +29,13 @@ const optionsMap = {
   'major': 50,
   'critical': 75,
 };
+
+const SEVERITY_OPTIONS = [
+  { val: 0, display: 'warning', color: getSeverityColor(0) },
+  { val: 25, display: 'minor', color: getSeverityColor(25) },
+  { val: 50, display: 'major', color: getSeverityColor(50) },
+  { val: 75, display: 'critical', color: getSeverityColor(75) },
+];
 
 function optionValueToThreshold(value) {
   // Get corresponding threshold object with required display and val properties from the specified value.

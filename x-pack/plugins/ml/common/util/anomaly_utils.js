@@ -76,13 +76,6 @@ export function getSeverityColor(normalizedScore) {
   }
 }
 
-export const SEVERITY_OPTIONS = [
-  { val: 0, display: 'warning', color: getSeverityColor(0) },
-  { val: 25, display: 'minor', color: getSeverityColor(25) },
-  { val: 50, display: 'major', color: getSeverityColor(50) },
-  { val: 75, display: 'critical', color: getSeverityColor(75) },
-];
-
 // Returns a label to use for the multi-bucket impact of an anomaly
 // according to the value of the multi_bucket_impact field of a record,
 // which ranges from -5 to +5.
