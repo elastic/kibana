@@ -64,24 +64,6 @@ exports[`FormattedKey component should render when the value is null or undefine
 </FormattedKey>
 `;
 
-exports[`FormattedKey component should render when the value is null or undefined 3`] = `
-.c0 {
-  color: #999999;
-}
-
-<FormattedKey
-  k="testKey"
->
-  <styled.span>
-    <span
-      className="c0"
-    >
-      testKey
-    </span>
-  </styled.span>
-</FormattedKey>
-`;
-
 exports[`FormattedValue component should render a boolean 1`] = `
 <FormattedValue
   value={true}
@@ -169,22 +151,6 @@ exports[`FormattedValue component should render null 1`] = `
 `;
 
 exports[`FormattedValue component should render undefined 1`] = `
-.c0 {
-  color: #999999;
-}
-
-<FormattedValue>
-  <styled.span>
-    <span
-      className="c0"
-    >
-      N/A
-    </span>
-  </styled.span>
-</FormattedValue>
-`;
-
-exports[`FormattedValue component should render undefined 2`] = `
 .c0 {
   color: #999999;
 }

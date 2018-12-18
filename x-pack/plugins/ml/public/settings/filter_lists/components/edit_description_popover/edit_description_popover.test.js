@@ -14,7 +14,8 @@ function prepareTest(updateDescriptionFn) {
 
   const props = {
     description: 'A list of known safe domains',
-    updateDescription: updateDescriptionFn
+    updateDescription: updateDescriptionFn,
+    canCreateFilter: true
   };
 
   const wrapper = shallow(
@@ -30,7 +31,8 @@ describe('FilterListUsagePopover', () => {
     const updateDescription = jest.fn(() => {});
 
     const props = {
-      updateDescription
+      updateDescription,
+      canCreateFilter: true
     };
 
     const component = shallow(
