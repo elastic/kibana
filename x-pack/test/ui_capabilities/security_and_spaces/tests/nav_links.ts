@@ -41,16 +41,14 @@ function isCustomRoleSpecification(
 }
 
 interface User {
+  username: string;
   fullName: string;
   password: string;
   role: ReservedRoleSpecification | CustomRoleSpecification;
 }
 
 // these are the users that we care about
-interface Superuser extends User {
-  username: 'superuser';
-}
-const Superuser: Superuser = {
+const Superuser: User = {
   username: 'superuser',
   fullName: 'superuser',
   password: 'superuser-password',
@@ -59,10 +57,7 @@ const Superuser: Superuser = {
   },
 };
 
-interface GlobalAll extends User {
-  username: 'global_all';
-}
-const GlobalAll: GlobalAll = {
+const GlobalAll: User = {
   username: 'global_all',
   fullName: 'global_all',
   password: 'global_all-password',
@@ -76,39 +71,31 @@ const GlobalAll: GlobalAll = {
   },
 };
 
-type Users = Superuser | GlobalAll;
-const Users: Users[] = [Superuser, GlobalAll];
+const Users: User[] = [Superuser, GlobalAll];
 
+// these are the spaces that we care about
 interface Space {
+  id: string;
   name: string;
   disabledFeatures: string[];
 }
-
-// these are the spaces that we care about
-interface Space1 extends Space {
-  id: 'space_1';
-}
-const Space1: Space1 = {
+const Space1: Space = {
   id: 'space_1',
   name: 'space_1',
   disabledFeatures: [],
 };
 
-interface Space2 extends Space {
-  id: 'space_2';
-}
-const Space2: Space2 = {
+const Space2: Space = {
   id: 'space_2',
   name: 'space_2',
   disabledFeatures: ['discover'],
 };
 
-type Spaces = Space1 | Space2;
-const Spaces: Spaces[] = [Space1, Space2];
+const Spaces: Space[] = [Space1, Space2];
 
 interface Scenario {
-  user: Users;
-  space: Spaces;
+  user: User;
+  space: Space;
 }
 
 interface SuperuserAtSpace1 extends Scenario {
@@ -122,8 +109,6 @@ const SuperuserAtSpace1: SuperuserAtSpace1 = {
 
 interface SuperuserAtSpace2 extends Scenario {
   id: 'superuser_at_space_2';
-  user: Superuser;
-  space: Space2;
 }
 const SuperuserAtSpace2: SuperuserAtSpace2 = {
   id: 'superuser_at_space_2',
