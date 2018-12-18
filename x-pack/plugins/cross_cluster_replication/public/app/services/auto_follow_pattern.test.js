@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import moment from 'moment';
 import { getPreviewIndicesFromAutoFollowPattern, getPrefixSuffixFromFollowPattern } from './auto_follow_pattern';
 
 describe('Auto-follo pattern service', () => {
@@ -22,10 +22,10 @@ describe('Auto-follo pattern service', () => {
       const { indicesPreview, hasMore } = getPreviewIndicesFromAutoFollowPattern({ prefix, suffix, leaderIndexPatterns });
 
       expect(hasMore).toBe(false);
-      expect(indicesPreview).toEqual([
-        'prefix_logstash-0_suffix',
-        'prefix_logstash-1_suffix',
-        'prefix_logstash-2_suffix',
+      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+        `prefix_logstash-${moment().format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(2, 'days').format('YYYY-MM-DD')}_suffix`,
       ]);
     });
 
@@ -35,12 +35,12 @@ describe('Auto-follo pattern service', () => {
       const { indicesPreview, hasMore } = getPreviewIndicesFromAutoFollowPattern({ prefix, suffix, leaderIndexPatterns });
 
       expect(hasMore).toBe(true);
-      expect(indicesPreview).toEqual([
-        'prefix_logstash-0_suffix',
-        'prefix_logstash-1_suffix',
-        'prefix_logstash-2_suffix',
-        'prefix_other-0_suffix',
-        'prefix_other-1_suffix',
+      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+        `prefix_logstash-${moment().format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(2, 'days').format('YYYY-MM-DD')}_suffix`,
+        `prefix_other-${moment().format('YYYY-MM-DD')}_suffix`,
+        `prefix_other-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
       ]);
     });
 
@@ -55,7 +55,7 @@ describe('Auto-follo pattern service', () => {
         wildcardPlaceHolders
       });
 
-      expect(indicesPreview).toEqual([
+      expect(indicesPreview.map(preview => preview.toString)).toEqual([
         'prefix_logstash-A_suffix',
         'prefix_logstash-B_suffix',
       ]);
