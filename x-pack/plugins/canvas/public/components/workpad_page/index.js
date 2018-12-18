@@ -98,7 +98,17 @@ export const WorkpadPage = compose(
           ),
         ];
       };
-      const selectedElementIds = flatten(selectedPrimaryShapes.map(recurseGroupTree));
+      const selectedPrimaryShapeObjects = selectedPrimaryShapes.map(id =>
+        shapes.find(s => s.id === id)
+      );
+      const selectedPersistentPrimaryShapes = flatten(
+        selectedPrimaryShapeObjects.map(shape =>
+          shape.subtype === 'adHocGroup'
+            ? shapes.filter(s => s.parent === shape.id && s.type !== 'annotation').map(s => s.id)
+            : [shape.id]
+        )
+      );
+      const selectedElementIds = flatten(selectedPersistentPrimaryShapes.map(recurseGroupTree));
       const selectedElements = [];
       const elements = shapes.map(shape => {
         let element = null;

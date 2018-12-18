@@ -219,10 +219,8 @@ export const rawDuplicateElement = createThunk(
   ({ dispatch, type }, element, pageId, root) => {
     const newElement = cloneDeep(element);
     // move the root element so users can see that it was added
-    if (root) {
-      newElement.position.top = newElement.position.top + 10;
-      newElement.position.left = newElement.position.left + 10;
-    }
+    newElement.position.top = newElement.position.top + 10;
+    newElement.position.left = newElement.position.left + 10;
     const _rawDuplicateElement = createAction(type);
     dispatch(_rawDuplicateElement({ pageId, element: newElement }));
 
