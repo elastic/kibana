@@ -70,6 +70,7 @@ export class WorkpadPage extends PureComponent {
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
+      onWheel,
       copyElements,
       cutElements,
       pasteElements,
@@ -110,6 +111,7 @@ export class WorkpadPage extends PureComponent {
         onKeyUp={onKeyUp}
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
+        onWheel={onWheel}
         tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
         {isEditable && (
@@ -123,7 +125,9 @@ export class WorkpadPage extends PureComponent {
         {elements
           .map(element => {
             if (element.type === 'annotation') {
-              if (!isEditable) return;
+              if (!isEditable) {
+                return;
+              }
               const props = {
                 key: element.id,
                 type: element.type,

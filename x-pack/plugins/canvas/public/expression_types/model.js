@@ -12,8 +12,12 @@ const NO_NEXT_EXP = 'no next expression';
 const MISSING_MODEL_ARGS = 'missing model args';
 
 function getModelArgs(expressionType) {
-  if (!expressionType) return NO_NEXT_EXP;
-  if (!expressionType.modelArgs) return MISSING_MODEL_ARGS;
+  if (!expressionType) {
+    return NO_NEXT_EXP;
+  }
+  if (!expressionType.modelArgs) {
+    return MISSING_MODEL_ARGS;
+  }
   return expressionType.modelArgs.length > 0 ? expressionType.modelArgs : MISSING_MODEL_ARGS;
 }
 
@@ -45,12 +49,16 @@ export class Model extends FunctionForm {
     }
 
     // if there is no following expression, argument is skipped
-    if (modelArgs === NO_NEXT_EXP) return { skipRender: true };
+    if (modelArgs === NO_NEXT_EXP) {
+      return { skipRender: true };
+    }
 
     // if argument is missing from modelArgs, mark it as skipped
     const argName = get(dataArg, 'arg.name');
     const modelArg = modelArgs.find(modelArg => {
-      if (Array.isArray(modelArg)) return modelArg[0] === argName;
+      if (Array.isArray(modelArg)) {
+        return modelArg[0] === argName;
+      }
       return modelArg === argName;
     });
 

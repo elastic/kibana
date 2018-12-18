@@ -138,7 +138,16 @@ exports[`ilm summary extension should return extension when index has lifecycle 
   }
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -170,6 +179,26 @@ exports[`ilm summary extension should return extension when index has lifecycle 
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -194,15 +223,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -330,73 +350,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
               className="euiSpacer euiSpacer--s"
             />
           </EuiSpacer>
-          <EuiPopover
-            anchorPosition="downCenter"
-            button={
-              <EuiButtonEmpty
-                color="primary"
-                iconSide="left"
-                onClick={[Function]}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="Stack trace"
-                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                  values={Object {}}
-                />
-              </EuiButtonEmpty>
-            }
-            closePopover={[Function]}
-            hasArrow={true}
-            id="stackPopover"
-            isOpen={false}
-            ownFocus={false}
-            panelPaddingSize="m"
-          >
-            <EuiOutsideClickDetector
-              onOutsideClick={[Function]}
-            >
-              <div
-                className="euiPopover euiPopover--anchorDownCenter"
-                id="stackPopover"
-                onClick={[Function]}
-                onKeyDown={[Function]}
-              >
-                <div
-                  className="euiPopover__anchor"
-                >
-                  <EuiButtonEmpty
-                    color="primary"
-                    iconSide="left"
-                    onClick={[Function]}
-                    type="button"
-                  >
-                    <button
-                      className="euiButtonEmpty euiButtonEmpty--primary"
-                      onClick={[Function]}
-                      type="button"
-                    >
-                      <span
-                        className="euiButtonEmpty__content"
-                      >
-                        <span
-                          className="euiButtonEmpty__text"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Stack trace"
-                            id="xpack.idxMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                            values={Object {}}
-                          >
-                            Stack trace
-                          </FormattedMessage>
-                        </span>
-                      </span>
-                    </button>
-                  </EuiButtonEmpty>
-                </div>
-              </div>
-            </EuiOutsideClickDetector>
-          </EuiPopover>
         </div>
       </EuiText>
     </div>
@@ -474,7 +427,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action
+                    Current action
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -554,7 +507,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action time
+                    Current action time
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -564,7 +517,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 <dd
                   className="euiDescriptionList__description"
                 >
-                  1544187775891
+                  2018-12-07 13:02:55
                 </dd>
               </EuiDescriptionListDescription>
               <EuiPopover
@@ -666,7 +619,16 @@ exports[`ilm summary extension should return extension when index has lifecycle 
   }
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -698,6 +660,26 @@ exports[`ilm summary extension should return extension when index has lifecycle 
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -722,15 +704,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -836,7 +809,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action
+                    Current action
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -916,7 +889,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__title"
                 >
                   <strong>
-                    Next action time
+                    Current action time
                   </strong>
                 </dt>
               </EuiDescriptionListTitle>
@@ -926,7 +899,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 <dd
                   className="euiDescriptionList__description"
                 >
-                  1544187775867
+                  2018-12-07 13:02:55
                 </dd>
               </EuiDescriptionListDescription>
             </dl>

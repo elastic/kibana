@@ -342,6 +342,12 @@ export async function FindProvider({ getService }) {
         await this.byCssSelector(locator);
       });
     }
+    async waitForAttributeToChange(selector, attribute, value) {
+      retry.waitFor(`${attribute} to equal "${value}"`, async () => {
+        const el = await this.byCssSelector(selector);
+        return value === await el.getAttribute(attribute);
+      });
+    }
   }
 
   return new Find();

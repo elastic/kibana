@@ -33,12 +33,17 @@ import React from 'react';
 
 import { FilterLists } from './filter_lists';
 
+const props = {
+  canCreateFilter: true,
+  canDeleteFilter: true
+};
+
 describe('Filter Lists', () => {
 
   test('renders a list of filters', () => {
 
     const wrapper = shallow(
-      <FilterLists />
+      <FilterLists {...props}/>
     );
 
     // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters

@@ -20,7 +20,9 @@ export const formatdate = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args.format) return moment.utc(new Date(context)).toISOString();
+    if (!args.format) {
+      return moment.utc(new Date(context)).toISOString();
+    }
     return moment.utc(new Date(context)).format(args.format);
   },
 });

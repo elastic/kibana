@@ -24,7 +24,9 @@ function assignElementProperties(workpadState, pageId, elementId, props) {
     element => element.id === elementId
   );
 
-  if (pageIndex === -1 || elementIndex === -1) return workpadState;
+  if (pageIndex === -1 || elementIndex === -1) {
+    return workpadState;
+  }
 
   // remove any AST value from the element caused by https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this after a bit of time
@@ -40,13 +42,21 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
   const from = elementIndex;
 
   const to = (function() {
-    if (movement < Infinity && movement > -Infinity) return elementIndex + movement;
-    if (movement === Infinity) return elements.length - 1;
-    if (movement === -Infinity) return 0;
+    if (movement < Infinity && movement > -Infinity) {
+      return elementIndex + movement;
+    }
+    if (movement === Infinity) {
+      return elements.length - 1;
+    }
+    if (movement === -Infinity) {
+      return 0;
+    }
     throw new Error('Invalid element layer movement');
   })();
 
-  if (to > elements.length - 1 || to < 0) return workpadState;
+  if (to > elements.length - 1 || to < 0) {
+    return workpadState;
+  }
 
   // Common
   const newElements = elements.slice(0);
@@ -77,19 +87,25 @@ export const elementsReducer = handleActions(
     },
     [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
 
       return push(workpadState, ['pages', pageIndex, 'elements'], element);
     },
     [actions.duplicateElement]: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
 
       return push(workpadState, ['pages', pageIndex, 'elements'], element);
     },
     [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
 
       const elementIndices = elementIds
         .map(elementId => getElementIndexById(workpadState.pages[pageIndex], elementId))

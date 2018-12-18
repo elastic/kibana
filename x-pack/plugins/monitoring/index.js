@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import { init } from './init';
 import { config } from './config';
 import { deprecations } from './deprecations';
-import { uiExports } from './ui_exports';
+import { getUiExports } from './ui_exports';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
@@ -23,5 +23,5 @@ export const monitoring = (kibana) => new kibana.Plugin({
   init(server, _options) { init(this, server); },
   config,
   deprecations,
-  uiExports
+  uiExports: getUiExports(),
 });

@@ -127,7 +127,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async brushHistogram(from, to) {
       await this.waitVisualisationLoaded();
       const bars = await find.allByCssSelector('.series.histogram rect');
-      await browser.dragAndDrop(bars[from], bars[to], 0, -5);
+      await browser.dragAndDrop(
+        { element: bars[from], xOffset: 0, yOffset: -5 },
+        { element: bars[to], xOffset: 0, yOffset: -5 }
+      );
       await this.waitVisualisationLoaded();
     }
 

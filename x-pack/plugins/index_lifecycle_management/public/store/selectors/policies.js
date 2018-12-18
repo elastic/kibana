@@ -245,8 +245,6 @@ export const phaseToES = (state, phase) => {
   if (phase[PHASE_NODE_ATTRS]) {
     const [ name, value, ] = phase[PHASE_NODE_ATTRS].split(':');
     esPhase.actions.allocate = {
-      include: {},
-      exclude: {},
       require: {
         [name]: value
       }

@@ -19,7 +19,9 @@ export function Element(config) {
   // A sentence or few about what this element does
   this.help = config.help;
 
-  if (!config.expression) throw new Error('Element types must have a default expression');
+  if (!config.expression) {
+    throw new Error('Element types must have a default expression');
+  }
   this.expression = config.expression;
   this.filter = config.filter;
   this.width = config.width || 500;
