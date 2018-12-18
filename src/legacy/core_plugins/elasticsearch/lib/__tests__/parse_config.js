@@ -127,23 +127,29 @@ describe('plugins/elasticsearch', function () {
       describe('port', () => {
         it('uses the specified port', () => {
           const config1 = parseConfig(serverConfig);
-          expect(config1.host.port).to.be('9200');
+          expect(config1.node.url.port).to.be('9200');
 
           serverConfig.url = 'https://localhost:555';
           const config2 = parseConfig(serverConfig);
-          expect(config2.host.port).to.be('555');
+          expect(config2.node.url.port).to.be('555');
         });
 
-        it('uses port 80 if http and no specified port', () => {
+        // With the WHATWG URL API, default ports
+        // are automatically transformed to the empty strings.
+        // https://nodejs.org/api/url.html#url_url_port
+        it('uses an empty string as port if the protocol is HTTP and no port is specified', () => {
           serverConfig.url = 'http://localhost';
           const config2 = parseConfig(serverConfig);
-          expect(config2.host.port).to.be('80');
+          expect(config2.node.url.port).to.be('');
         });
 
-        it ('uses port 443 if https and no specified port', () => {
+        // With the WHATWG URL API, default ports
+        // are automatically transformed to the empty strings.
+        // https://nodejs.org/api/url.html#url_url_port
+        it ('uses an empty string as port if the protocol is HTTPS and no port is specified', () => {
           serverConfig.url = 'https://localhost';
           const config2 = parseConfig(serverConfig);
-          expect(config2.host.port).to.be('443');
+          expect(config2.node.url.port).to.be('');
         });
       });
     });

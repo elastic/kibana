@@ -32,18 +32,6 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
     ])
   };
 
-  // const uri = url.parse(serverConfig.url);
-  // const httpsURI = uri.protocol === 'https:';
-  // const httpURI = uri.protocol === 'http:';
-  // const protocolPort = httpsURI && '443' || httpURI && '80';
-  // config.host = {
-  //   host: uri.hostname,
-  //   port: uri.port || protocolPort,
-  //   protocol: uri.protocol,
-  //   path: uri.pathname,
-  //   query: uri.query,
-  //   headers: serverConfig.customHeaders
-  // };
   config.node = {
     url: new url.URL(serverConfig.url),
     id: serverConfig.id || null,
@@ -52,7 +40,6 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
 
   // Auth
   if (serverConfig.auth !== false && serverConfig.username && serverConfig.password) {
-    // config.host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
     config.node.url.username = serverConfig.username;
     config.node.url.password = serverConfig.password;
   }
@@ -88,8 +75,6 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
     config.ssl.key = readFile(serverConfig.ssl.key);
     config.ssl.passphrase = serverConfig.ssl.keyPassphrase;
   }
-
-  // config.defer = () => Bluebird.defer();
 
   return config;
 }
