@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import 'jest-styled-components';
+import React from 'react';
 import {
-  NestedKeyValueTable,
-  NestedValue,
+  FormattedKey,
   FormattedValue,
-  FormattedKey
+  NestedKeyValueTable,
+  NestedValue
 } from '../NestedKeyValueTable';
 
 describe('NestedKeyValueTable component', () => {
@@ -30,7 +30,7 @@ describe('NestedKeyValueTable component', () => {
 });
 
 describe('NestedValue component', () => {
-  let props;
+  let props: any;
 
   beforeEach(() => {
     props = {
@@ -84,18 +84,16 @@ describe('FormattedValue component', () => {
   });
 
   it('should render undefined', () => {
-    let b;
-    expect(mount(<FormattedValue value={b} />)).toMatchSnapshot();
-    expect(mount(<FormattedValue />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={undefined} />)).toMatchSnapshot();
   });
 });
 
 describe('FormattedKey component', () => {
   it('should render when the value is null or undefined', () => {
-    let nope;
     expect(mount(<FormattedKey k="testKey" value={null} />)).toMatchSnapshot();
-    expect(mount(<FormattedKey k="testKey" value={nope} />)).toMatchSnapshot();
-    expect(mount(<FormattedKey k="testKey" />)).toMatchSnapshot();
+    expect(
+      mount(<FormattedKey k="testKey" value={undefined} />)
+    ).toMatchSnapshot();
   });
 
   it('should render when the value is defined', () => {
