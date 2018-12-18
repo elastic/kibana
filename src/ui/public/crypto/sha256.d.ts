@@ -18,6 +18,6 @@
  */
 
 export class Sha256 {
-  public update(json: string, encoding: string): Sha256;
+  public update(json: string | Buffer, encoding?: string): Sha256;
   public digest(encoding: string): string;
 }

@@ -18,10 +18,10 @@
  */
 
 export class StubBrowserStorage {
-  private keys: string[] = [];
-  private values: string[] = [];
-  private size: number = 0;
-  private sizeLimit: number = 5000000; // 5mb, minimum browser storage size;
+  private readonly keys: string[] = [];
+  private readonly values: string[] = [];
+  private size = 0;
+  private sizeLimit = 5000000; // 5mb, minimum browser storage size;
 
   // -----------------------------------------------------------------------------------------------
   // Browser-specific methods.
@@ -35,7 +35,7 @@ export class StubBrowserStorage {
     return this.keys[i];
   }
 
-  public getItem(key: any) {
+  public getItem(key: string) {
     key = String(key);
 
     const i = this.keys.indexOf(key);
@@ -45,11 +45,11 @@ export class StubBrowserStorage {
     return this.values[i];
   }
 
-  public setItem(key: any, value: any) {
+  public setItem(key: string, value: string) {
     key = String(key);
     value = String(value);
-    const sizeOfAddition = this._getSizeOfAddition(key, value);
-    this._updateSize(sizeOfAddition);
+    const sizeOfAddition = this.getSizeOfAddition(key, value);
+    this.updateSize(sizeOfAddition);
 
     const i = this.keys.indexOf(key);
     if (i === -1) {
@@ -60,10 +60,10 @@ export class StubBrowserStorage {
     }
   }
 
-  public removeItem(key: any) {
+  public removeItem(key: string) {
     key = String(key);
-    const sizeOfRemoval = this._getSizeOfRemoval(key);
-    this._updateSize(sizeOfRemoval);
+    const sizeOfRemoval = this.getSizeOfRemoval(key);
+    this.updateSize(sizeOfRemoval);
 
     const i = this.keys.indexOf(key);
     if (i === -1) {
@@ -76,14 +76,6 @@ export class StubBrowserStorage {
   // -----------------------------------------------------------------------------------------------
   // Test-specific methods.
   // -----------------------------------------------------------------------------------------------
-
-  public getStubbedKeys() {
-    return this.keys.slice();
-  }
-
-  public getStubbedValues() {
-    return this.values.slice();
-  }
 
   public setStubbedSizeLimit(sizeLimit: number) {
     // We can't reconcile a size limit with the "stored" items, if the stored items size exceeds it.
@@ -102,7 +94,7 @@ export class StubBrowserStorage {
     return this.size;
   }
 
-  private _getSizeOfAddition(key: any, value: any) {
+  private getSizeOfAddition(key: string, value: string) {
     const i = this.keys.indexOf(key);
     if (i === -1) {
       return key.length + value.length;
@@ -111,7 +103,7 @@ export class StubBrowserStorage {
     return value.length - this.values[i].length;
   }
 
-  private _getSizeOfRemoval(key: any) {
+  private getSizeOfRemoval(key: string) {
     const i = this.keys.indexOf(key);
     if (i === -1) {
       return 0;
@@ -120,7 +112,7 @@ export class StubBrowserStorage {
     return -(key.length + this.values[i].length);
   }
 
-  private _updateSize(delta: number) {
+  private updateSize(delta: number) {
     if (this.size + delta > this.sizeLimit) {
       throw new Error('something about quota exceeded, browsers are not consistent here');
     }

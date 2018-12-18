@@ -23,13 +23,13 @@ describe('StubBrowserStorage', () => {
   describe('#getItem() / #setItem()', () => {
     it('stores items as strings', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      expect(store.getItem(1)).toBe('1');
+      store.setItem('1', '1');
+      expect(store.getItem('1')).toBe('1');
     });
 
     it('stores keys as strings', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
+      store.setItem('1', '1');
       expect(store.key(0)).toBe('1');
     });
 
@@ -42,27 +42,27 @@ describe('StubBrowserStorage', () => {
   describe('#length', () => {
     it('reports the number of items stored', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      store.setItem(2, 2);
-      store.setItem(3, 3);
-      store.setItem(4, 4);
-      expect(store.length).toBe(4);
+      store.setItem('1', '1');
+      store.setItem('2', '2');
+      store.setItem('3', '3');
+      store.setItem('4', '4');
+      expect(store).toHaveLength(4);
     });
 
     it('does not trip on items getting reset', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
-      store.setItem(1, 2);
-      expect(store.length).toBe(1);
+      store.setItem('1', '1');
+      store.setItem('1', '2');
+      expect(store).toHaveLength(1);
     });
   });
 
   describe('#key()', () => {
     it('returns the key as a specific index', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 2);
+      store.setItem('1', '2');
       expect(store.key(0)).toBe('1');
-      expect(store.key(1)).toBe(undefined);
+      expect(store.key(1)).toBeUndefined();
     });
   });
 
@@ -73,7 +73,7 @@ describe('StubBrowserStorage', () => {
       store.setItem('abc', 'def'); // store size is 6, key.length + val.length
       expect(() => {
         store.setItem('ghi', 'jkl');
-      }).toThrowError(/quota/);
+      }).toThrowErrorMatchingInlineSnapshot();
     });
 
     it('allows defining the limit as infinity', () => {
@@ -111,7 +111,7 @@ describe('StubBrowserStorage', () => {
   describe('#getStubbedSize', () => {
     it('returns the size', () => {
       const store = new StubBrowserStorage();
-      store.setItem(1, 1);
+      store.setItem('1', '1');
       expect(store.getStubbedSize()).toBe(2);
     });
   });
