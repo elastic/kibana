@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiConfirmModal,
   EuiOverlayMask,
 } from '@elastic/eui';
@@ -25,7 +25,7 @@ export const RemoveClusterButton = injectI18n(
 
     static defaultProps = {
       children: (
-        <EuiButton color="danger" />
+        <EuiButtonEmpty color="danger" />
       ),
     };
 
@@ -89,12 +89,13 @@ export const RemoveClusterButton = injectI18n(
     }
 
     render() {
-      const { intl, clusterNames, children } = this.props;
+      const { intl, clusterNames, children, ...rest } = this.props;
       const { isModalOpen } = this.state;
       const isSingleCluster = clusterNames.length === 1;
 
       const button = cloneElement(children, {
         onClick: this.showConfirmModal,
+        ...rest,
       }, this.renderButtonText());
 
       let modal;

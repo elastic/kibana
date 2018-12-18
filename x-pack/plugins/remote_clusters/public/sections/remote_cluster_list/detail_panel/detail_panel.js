@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -335,6 +336,7 @@ export const DetailPanel = injectI18n(
       const {
         cluster,
         clusterName,
+        closeDetailPanel,
       } = this.props;
 
       // Remote clusters configured by a node's elasticsearch.yml file can't be edited or removed.
@@ -344,25 +346,42 @@ export const DetailPanel = injectI18n(
 
       return (
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <RemoveClusterButton
-                clusterNames={[clusterName]}
-                isSmallButton={true}
-              />
+              <EuiButtonEmpty
+                iconType="cross"
+                flush="left"
+                onClick={closeDetailPanel}
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.closeButtonLabel"
+                  defaultMessage="Close"
+                />
+              </EuiButtonEmpty>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton
-                href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
-                fill
-                color="primary"
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.editButtonLabel"
-                  defaultMessage="Edit"
-                />
-              </EuiButton>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <RemoveClusterButton
+                    clusterNames={[clusterName]}
+                    isSmallButton={true}
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
+                    fill
+                    color="primary"
+                  >
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.editButtonLabel"
+                      defaultMessage="Edit"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
