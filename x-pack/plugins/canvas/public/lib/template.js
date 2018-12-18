@@ -26,7 +26,9 @@ export function Template(config) {
   this.tags = config.tags || [];
 
   this.tags.forEach(tag => {
-    if (!tagsRegistry.get(tag)) tagsRegistry.register(() => ({ name: tag, color: '#666666' }));
+    if (!tagsRegistry.get(tag)) {
+      tagsRegistry.register(() => ({ name: tag, color: '#666666' }));
+    }
   });
 
   this.width = config.width || defaultWorkpad.width;

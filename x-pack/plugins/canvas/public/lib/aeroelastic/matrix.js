@@ -227,7 +227,9 @@ const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
   } else {
     const recDet = 1 / det;
 
-    for (let index = 0; index < 16; index++) inv[index] *= recDet;
+    for (let index = 0; index < 16; index++) {
+      inv[index] *= recDet;
+    }
 
     return inv;
   }

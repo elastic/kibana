@@ -157,7 +157,7 @@ class TagPageComponent extends React.PureComponent<
     });
   };
   private saveTag = async () => {
-    await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
+    await this.props.containers.tags.upsertTag(this.state.tag);
     this.props.goTo(`/overview/configuration_tags`);
   };
   private getNumExclusiveConfigurationBlocks = () =>

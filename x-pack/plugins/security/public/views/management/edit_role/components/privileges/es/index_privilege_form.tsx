@@ -208,8 +208,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
               }
               // @ts-ignore
               compressed={true}
-              // @ts-ignore
-              value={this.state.queryExpanded}
+              checked={this.state.queryExpanded}
               onChange={this.toggleDocumentQuery}
             />
           </EuiFlexItem>

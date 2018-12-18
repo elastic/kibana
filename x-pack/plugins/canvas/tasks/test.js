@@ -12,8 +12,12 @@ export default function testTasks(gulp, { mocha }) {
   function runMocha(globs, { withEnzyme = false, withDOM = false } = {}) {
     const requires = [join(canvasRoot, 'tasks/helpers/babelhook')];
 
-    if (withDOM) requires.push(join(canvasRoot, 'tasks/helpers/dom_setup'));
-    if (withEnzyme) requires.push(join(canvasRoot, 'tasks/helpers/enzyme_setup'));
+    if (withDOM) {
+      requires.push(join(canvasRoot, 'tasks/helpers/dom_setup'));
+    }
+    if (withEnzyme) {
+      requires.push(join(canvasRoot, 'tasks/helpers/enzyme_setup'));
+    }
 
     return gulp.src(globs, { read: false }).pipe(
       mocha({

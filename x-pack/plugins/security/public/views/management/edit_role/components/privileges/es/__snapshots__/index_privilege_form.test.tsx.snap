@@ -203,6 +203,7 @@ exports[`it renders without crashing 1`] = `
             grow={true}
           >
             <EuiSwitch
+              checked={false}
               compressed={true}
               data-test-subj="restrictDocumentsQuery0"
               label={
@@ -213,7 +214,6 @@ exports[`it renders without crashing 1`] = `
                 />
               }
               onChange={[Function]}
-              value={false}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

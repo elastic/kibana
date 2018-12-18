@@ -383,25 +383,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
     async clickBucket(bucketName, type = 'bucket') {
       const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
-      await retry.try(async () => {
-        const chartTypes = await retry.try(
-          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`)
-        );
-        log.debug('found bucket types ' + chartTypes.length);
-
-        async function getChartType(chart) {
-          const chartString = await chart.getVisibleText();
-          if (chartString === bucketName) {
-            await chart.click();
-            return true;
-          }
-        }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        const clickResult = await Promise.all(getChartTypesPromises);
-        if (!clickResult.some(result => result === true)) {
-          throw new Error(`bucket ${bucketName} not found`);
-        }
-      });
+      const locator = `[data-test-subj="${testSubject}"] .list-group-menu-item[data-test-subj="${bucketName}"]`;
+      await find.clickByCssSelector(locator);
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
@@ -1013,11 +996,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.allByCssSelector(zoomSelector);
     }
 
-    async clickMapButton(zoomSelector) {
+    async clickMapButton(zoomSelector, waitForLoading) {
       await retry.try(async () => {
         const zooms = await this.getZoomSelectors(zoomSelector);
         await Promise.all(zooms.map(async zoom => await zoom.click()));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        if (waitForLoading) {
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        }
       });
     }
 
@@ -1045,12 +1030,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return requestObject.aggs.filter_agg.filter.geo_bounding_box['geo.coordinates'];
     }
 
-    async clickMapZoomIn() {
-      await this.clickMapButton('a.leaflet-control-zoom-in');
+    async clickMapZoomIn(waitForLoading = true) {
+      await this.clickMapButton('a.leaflet-control-zoom-in', waitForLoading);
     }
 
-    async clickMapZoomOut() {
-      await this.clickMapButton('a.leaflet-control-zoom-out');
+    async clickMapZoomOut(waitForLoading = true) {
+      await this.clickMapButton('a.leaflet-control-zoom-out', waitForLoading);
     }
 
     async getMapZoomEnabled(zoomSelector) {
@@ -1136,6 +1121,28 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
+    }
+
+    async filterForInspectorTableCell(column, row) {
+      await retry.try(async () => {
+        const table = await testSubjects.find('inspectorTable');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        await browser.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterForInspectorCellValue', cell);
+        await filterBtn.click();
+      });
+      await renderable.waitForRender();
+    }
+
+    async filterOutInspectorTableCell(column, row) {
+      await retry.try(async () => {
+        const table = await testSubjects.find('inspectorTable');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        await browser.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterOutInspectorCellValue', cell);
+        await filterBtn.click();
+      });
+      await renderable.waitForRender();
     }
 
     async toggleLegend(show = true) {
