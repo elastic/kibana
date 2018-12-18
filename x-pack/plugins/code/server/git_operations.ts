@@ -406,16 +406,9 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo> {
 }
 
 export async function getDefaultBranch(path: string): Promise<string> {
-  console.log('a');
-
   const repo = await Repository.open(path);
-  console.log('b');
-
   const ref = await repo.getReference(HEAD);
-  console.log('c');
-
   const name = ref.name();
-  repo.cleanup();
   if (name.startsWith(REFS_HEADS)) {
     return name.substr(REFS_HEADS.length);
   }
