@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { SecretStoreService } from './';
+import { secretstore } from './';
 
 class PluginSpec {
   constructor(object: any) {
@@ -18,7 +18,7 @@ describe('The SecretStore', function TestSecretStore() {
     Plugin: PluginSpec,
   };
   const mockKbn = sinon.mock(kbn);
-  const subject = SecretStoreService(kbn);
+  const subject = secretstore(kbn);
   beforeAll(() => {
     expect(subject).not.toBeNull();
     mockKbn.expects('Plugin').once();
@@ -32,8 +32,14 @@ describe('The SecretStore', function TestSecretStore() {
   });
 
   it('should expose a method to encrypt data', () => {
-    const core = { server: { expose: sinon.spy() } };
+    const core = {
+      expose: sinon.spy(),
+      log: sinon.spy(),
+      savedObjects: {
+        addScopedSavedObjectsClientWrapperFactory: sinon.spy(),
+      },
+    };
     subject.init(core);
-    core.server.expose.calledWith('hide', sinon.match.func);
+    core.expose.calledWith('secretstore', sinon.match.func);
   });
 });

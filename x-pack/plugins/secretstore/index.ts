@@ -18,7 +18,6 @@ export const secretstore = (kibana: any) => {
     publicDir: resolve(__dirname, 'public'),
     uiExports: {},
     init(server: any) {
-      server.expose('hide', () => null);
       server.expose('secretstore', new SecretStore());
       const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
       warn(existence(server.savedObjects, 'server.savedObjects'));
