@@ -150,9 +150,7 @@ export function RelativeLinkComponent({
   );
 }
 
-export function getUnconnectedKibanaHref(
-  kibanaLinkArgs: KibanaLinkArgs
-): string {
+export function getKibanaHref(kibanaLinkArgs: KibanaLinkArgs): string {
   const { location, pathname, hash, query = {} } = kibanaLinkArgs;
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
@@ -207,7 +205,7 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   query = {},
   ...props
 }) => {
-  const href = getUnconnectedKibanaHref({
+  const href = getKibanaHref({
     location,
     pathname,
     hash,

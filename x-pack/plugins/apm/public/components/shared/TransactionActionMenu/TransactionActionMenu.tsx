@@ -14,9 +14,9 @@ import {
   EuiLink,
   EuiPopover
 } from '@elastic/eui';
+import { get } from 'lodash';
 import React from 'react';
-import { oc } from 'ts-optchain';
-import { getUnconnectedKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
+import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { getDiscoverQuery } from '../DiscoverButtons/DiscoverTransactionButton';
 
@@ -67,27 +67,14 @@ export class TransactionActionMenu extends React.Component<
   };
 
   public getInfraActions(transaction: Transaction) {
-    const hostName = oc(transaction).host.name();
-    // @ts-ignore - TODO remove this ignore when support for TransactionV1 is dropped
-    const traceId = oc(transaction).trace.id();
-    // @ts-ignore - TODO remove this ignore when support for TransactionV1 is dropped
-    const podId = oc(transaction).kubernetes.pod.uid();
-    // @ts-ignore - TODO remove this ignore when support for TransactionV1 is dropped
-    const containerId = oc(transaction).container.id();
-
+    const hostName = get(transaction, 'context.system.hostname');
+    const podId = get(transaction, 'kubernetes.pod.uid');
+    const containerId = get(transaction, 'container.id');
     const pathname = '/app/infra';
     const time = new Date(transaction['@timestamp']).getTime();
     const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
     return [
-      {
-        icon: 'loggingApp',
-        label: 'Show trace logs',
-        target: traceId,
-        hash: `/link-to/host-logs/${hostName}`,
-        query: { time, traceId }
-      },
-
       {
         icon: 'loggingApp',
         label: 'Show pod logs',
@@ -138,7 +125,7 @@ export class TransactionActionMenu extends React.Component<
     ]
       .filter(({ target }) => Boolean(target))
       .map(({ icon, label, hash, query }, index) => {
-        const href = getUnconnectedKibanaHref({
+        const href = getKibanaHref({
           location,
           pathname,
           hash,
@@ -163,7 +150,7 @@ export class TransactionActionMenu extends React.Component<
   public render() {
     const { transaction, location } = this.props;
 
-    const discoverTransactionHref = getUnconnectedKibanaHref({
+    const discoverTransactionHref = getKibanaHref({
       location,
       pathname: '/app/kibana',
       hash: '/discover',
