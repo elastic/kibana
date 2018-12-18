@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -13,21 +12,9 @@ import {
   EuiPopoverTitle,
   EuiExpressionButton,
   EuiFormErrorText,
-  EuiFormRow,
-  EuiComboBox,
 } from '@elastic/eui';
 
-import { SingleFieldSelect } from '../../../../shared/components/single_field_select';
-
-// TODO put this in a more top level area.
-const AGG_OPTIONS = [
-  { label: 'Average', value: 'avg' },
-  { label: 'Count', value: 'count' },
-  { label: 'Max', value: 'max' },
-  { label: 'Min', value: 'min' },
-  { label: 'Sum', value: 'sum' },
-];
-const METRIC_AGGS = AGG_OPTIONS.map(({ value }) => { return value; });
+import { MetricsEditor } from '../../../../shared/components/metrics_editor';
 
 export class SelectExpression extends Component {
 
@@ -47,92 +34,24 @@ export class SelectExpression extends Component {
     });
   }
 
-  _onMetricChange(metric, index) {
-    this.props.onChange([
-      ...this.props.metrics.slice(0, index),
-      metric,
-      ...this.props.metrics.slice(index + 1)
-    ]);
-  }
-
-  _renderAggSelect = (index, type) => {
-    const onAggChange = (selectedOptions) => {
-      const metric = {
-        ...this.props.metrics[index],
-        type: _.get(selectedOptions, '0.value'),
-      };
-      this._onMetricChange(metric, index);
-    };
-    return (
-      <EuiFormRow
-        label="Aggregation"
-      >
-        <EuiComboBox
-          placeholder="Select aggregation"
-          singleSelection={true}
-          isClearable={false}
-          options={AGG_OPTIONS}
-          selectedOptions={AGG_OPTIONS.filter(({ value }) => {
-            return value === type;
-          })}
-          onChange={onAggChange}
-        />
-      </EuiFormRow>
-    );
-  }
-
-  _renderFieldSelect = (index, type, field) => {
-    if (type === 'count') {
-      return;
-    }
-
-    const onFieldChange = (fieldName) => {
-      const metric = {
-        ...this.props.metrics[index],
-        field: fieldName,
-      };
-      this._onMetricChange(metric, index);
-    };
-
-    const filterNumberFields = (field) => {
-      return field.type === 'number';
-    };
-
-    return (
-      <EuiFormRow
-        label="Field"
-      >
-        <SingleFieldSelect
-          placeholder="Select field"
-          value={field}
-          onChange={onFieldChange}
-          filterField={filterNumberFields}
-          fields={this.props.rightFields}
-          isClearable={false}
-        />
-      </EuiFormRow>
-    );
-  }
-
-  _renderMetrics = () => {
+  _renderMetricsEditor = () => {
     if (!this.props.rightFields) {
       return (
         <EuiFormErrorText>JOIN must be set</EuiFormErrorText>
       );
     }
 
-    return this.props.metrics.map(({ type,  field }, index) => {
-      return (
-        <Fragment key={index}>
-          {this._renderAggSelect(index, type)}
-          {this._renderFieldSelect(index, type, field)}
-        </Fragment>
-      );
-    });
+    return (
+      <MetricsEditor
+        fields={this.props.rightFields}
+        metrics={this.props.metrics}
+        onChange={this.props.onChange}
+      />
+    );
   }
 
   render() {
-    const metrics = this.props.metrics
+    const metricExpressions = this.props.metrics
       .filter(({ type, field }) => {
         if (type === 'count') {
           return true;
@@ -163,13 +82,13 @@ export class SelectExpression extends Component {
           <EuiExpressionButton
             onClick={this._togglePopover}
             description="SELECT"
-            buttonValue={metrics.length > 0 ? metrics.join(',') : 'count(*)'}
+            buttonValue={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count(*)'}
           />
         }
       >
-        <div style={{ width: 300 }}>
+        <div style={{ width: 400 }}>
           <EuiPopoverTitle>SELECT</EuiPopoverTitle>
-          {this._renderMetrics()}
+          {this._renderMetricsEditor()}
         </div>
       </EuiPopover>
     );
@@ -177,10 +96,7 @@ export class SelectExpression extends Component {
 }
 
 SelectExpression.propTypes = {
-  metrics: PropTypes.arrayOf(PropTypes.shape({
-    type: PropTypes.oneOf(METRIC_AGGS).isRequired,
-    field: PropTypes.string,
-  })),
+  metrics: PropTypes.array,
   rightFields: PropTypes.object,  // indexPattern.fields IndexedArray object
   onChange: PropTypes.func.isRequired,
 };
