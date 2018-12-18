@@ -220,8 +220,13 @@ export class DashboardStateManager {
       FilterUtils.cleanFiltersForComparison(getFilters(state))
     )) {
       store.dispatch(updateFilters(dashboardFilters));
+    } else {
+      // If the user clickes "refresh" query, it'll get here but without any changes, we still
+      // need to update the panels though.
+      // TODO: this should probably be hooked directly into the query bar once that can be
+      // wrapped inside redux.
+      store.dispatch(requestReload());
     }
-    store.dispatch(requestReload());
   }
 
   _handleStoreChanges() {

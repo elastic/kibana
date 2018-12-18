@@ -231,6 +231,8 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
+      $scope.$watch('model.query', $scope.updateQueryAndFetch);
+
       $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
         dashboardStateManager.handleTimeChange(timefilter.getTime());
         // Currently discover relies on this logic to re-fetch. We need to refactor it to rely instead on the
