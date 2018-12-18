@@ -18,12 +18,7 @@ const TransactionNameLink = styled(RelativeLink)`
   font-family: ${fontFamilyCode};
 `;
 
-export default function TransactionList({
-  items,
-  agentName,
-  serviceName,
-  ...rest
-}) {
+export default function TransactionList({ items, serviceName, ...rest }) {
   const columns = [
     {
       field: 'name',

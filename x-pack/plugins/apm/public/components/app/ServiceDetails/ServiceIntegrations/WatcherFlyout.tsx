@@ -30,6 +30,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
 import { UnconnectedKibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
@@ -53,7 +54,7 @@ const SmallInput = styled.div`
 `;
 
 interface WatcherFlyoutProps {
-  serviceName: string;
+  urlParams: IUrlParams;
   onClose: () => void;
   location: any;
   isOpen: boolean;
@@ -153,6 +154,12 @@ export class WatcherFlyout extends Component<
   };
 
   public createWatch = () => {
+    const { serviceName } = this.props.urlParams;
+
+    if (!serviceName) {
+      return;
+    }
+
     const emails = this.state.actions.email
       ? this.state.emails
           .split(',')
@@ -185,7 +192,7 @@ export class WatcherFlyout extends Component<
     return createErrorGroupWatch({
       emails,
       schedule,
-      serviceName: this.props.serviceName,
+      serviceName,
       slackUrl,
       threshold: this.state.threshold,
       timeRange
@@ -214,7 +221,7 @@ export class WatcherFlyout extends Component<
       text: (
         <p>
           The watch is now ready and will send error reports for{' '}
-          {this.props.serviceName}.{' '}
+          {this.props.urlParams.serviceName}.{' '}
           <UnconnectedKibanaLink
             location={this.props.location}
             pathname={'/app/kibana'}

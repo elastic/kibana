@@ -14,22 +14,21 @@ import { ServiceMetrics } from './ServiceMetrics';
 interface TabsProps {
   transactionTypes: string[];
   urlParams: IUrlParams;
-  serviceName: string;
   location: any;
 }
 
-export class Tabs extends React.Component<TabsProps> {
+export class ServiceDetailTabs extends React.Component<TabsProps> {
   public render() {
-    const { transactionTypes, urlParams, serviceName, location } = this.props;
+    const { transactionTypes, urlParams, location } = this.props;
+    const { serviceName } = urlParams;
     const tabs = [
       {
         name: 'Transactions',
-        path: `/${serviceName}/transactions`,
+        path: `/${serviceName}/transactions/${transactionTypes[0]}`,
+        routePath: `/${serviceName}/transactions/:transactionType`,
         component: () => (
           <TransactionOverview
             urlParams={urlParams}
-            serviceName={serviceName}
-            agentName="whatever"
             serviceTransactionTypes={transactionTypes}
           />
         )
@@ -46,13 +45,7 @@ export class Tabs extends React.Component<TabsProps> {
       {
         name: 'Metrics',
         path: `/${serviceName}/metrics`,
-        component: () => (
-          <ServiceMetrics
-            serviceName={serviceName}
-            urlParams={urlParams}
-            serviceTransactionTypes={transactionTypes}
-          />
-        )
+        component: () => <ServiceMetrics urlParams={urlParams} />
       }
     ];
 

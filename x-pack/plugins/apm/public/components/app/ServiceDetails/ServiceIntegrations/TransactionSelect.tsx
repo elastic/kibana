@@ -20,7 +20,7 @@ import { MLJobApiResponse } from 'x-pack/plugins/apm/public/services/rest/ml';
 interface TransactionSelectProps {
   existingJobs: MLJobApiResponse['jobs'];
   types: string[];
-  selected: string;
+  selected?: string;
   onChange: (value: string) => void;
 }
 

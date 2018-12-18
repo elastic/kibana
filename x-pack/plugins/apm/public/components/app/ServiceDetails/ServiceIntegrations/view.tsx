@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import chrome from 'ui/chrome';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 // @ts-ignore
 import { WatcherFlyout } from './WatcherFlyout';
@@ -19,9 +20,8 @@ import { WatcherFlyout } from './WatcherFlyout';
 interface ServiceIntegrationProps {
   mlAvailable: boolean;
   location: any;
-  serviceName: string;
-  transactionType?: string;
   serviceTransactionTypes: string[];
+  urlParams: IUrlParams;
 }
 interface ServiceIntegrationState {
   isPopoverOpen: boolean;
@@ -147,15 +147,14 @@ export class ServiceIntegrationsView extends React.Component<
           location={this.props.location}
           isOpen={this.state.activeFlyout === 'ML'}
           onClose={this.closeFlyouts}
-          serviceName={this.props.serviceName}
-          transactionType={this.props.transactionType}
+          urlParams={this.props.urlParams}
           serviceTransactionTypes={this.props.serviceTransactionTypes}
         />
         <WatcherFlyout
           location={this.props.location}
           isOpen={this.state.activeFlyout === 'Watcher'}
           onClose={this.closeFlyouts}
-          serviceName={this.props.serviceName}
+          urlParams={this.props.urlParams}
         />
       </React.Fragment>
     );

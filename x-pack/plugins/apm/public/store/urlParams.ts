@@ -34,7 +34,7 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         processorEvent,
         serviceName,
         transactionName,
-        transactionType: pathTransactionType,
+        transactionType,
         errorGroupId
       } = getPathParams(action.location.pathname);
 
@@ -48,7 +48,6 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         page,
         sortDirection,
         sortField,
-        transactionType: queryTransactionType,
         kuery
       } = toQuery(action.location.search);
 
@@ -70,9 +69,7 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         // path params
         processorEvent,
         serviceName,
-        transactionType: legacyDecodeURIComponent(
-          queryTransactionType || pathTransactionType
-        ),
+        transactionType: legacyDecodeURIComponent(transactionType),
         transactionName: legacyDecodeURIComponent(transactionName),
         errorGroupId
       });
@@ -129,6 +126,11 @@ function getPathParams(pathname: string) {
         processorEvent: 'error',
         serviceName: paths[0],
         errorGroupId: paths[2]
+      };
+    case 'metrics':
+      return {
+        processorEvent: 'metric',
+        serviceName: paths[0]
       };
     default:
       return {};

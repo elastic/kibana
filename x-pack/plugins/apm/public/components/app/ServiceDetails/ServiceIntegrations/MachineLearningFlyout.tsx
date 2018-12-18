@@ -29,14 +29,14 @@ import {
   ISavedObject
 } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
 import { MLJobsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/machineLearningJobs';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { KibanaLink, ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
 import { TransactionSelect } from './TransactionSelect';
 
 interface FlyoutProps {
   isOpen: boolean;
   onClose: () => void;
-  serviceName: string;
-  transactionType?: string;
+  urlParams: IUrlParams;
   location: any;
   serviceTransactionTypes: string[];
 }
@@ -45,7 +45,7 @@ interface FlyoutState {
   isLoading: boolean;
   hasMLJob: boolean;
   hasIndexPattern: boolean;
-  selectedTransactionType: string;
+  selectedTransactionType?: string;
 }
 
 export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
@@ -53,8 +53,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
     isLoading: false,
     hasIndexPattern: false,
     hasMLJob: false,
-    selectedTransactionType:
-      this.props.transactionType || this.props.serviceTransactionTypes[0]
+    selectedTransactionType: this.props.urlParams.transactionType
   };
 
   public async componentDidMount() {
@@ -63,10 +62,12 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   public componentDidUpdate(prevProps: FlyoutProps) {
-    if (prevProps.transactionType !== this.props.transactionType) {
+    if (
+      prevProps.urlParams.transactionType !==
+      this.props.urlParams.transactionType
+    ) {
       this.setState({
-        selectedTransactionType:
-          this.props.transactionType || this.props.serviceTransactionTypes[0]
+        selectedTransactionType: this.props.urlParams.transactionType
       });
     }
   }
@@ -74,7 +75,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   public createJob = async () => {
     this.setState({ isLoading: true });
     try {
-      const { serviceName, transactionType } = this.props;
+      const { serviceName, transactionType } = this.props.urlParams;
       if (serviceName) {
         const res = await startMLJob({ serviceName, transactionType });
         const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
@@ -92,7 +93,13 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public addErrorToast = () => {
-    const { serviceName, transactionType, location } = this.props;
+    const { location, urlParams } = this.props;
+    const { serviceName = 'unknown', transactionType } = urlParams;
+
+    if (!serviceName) {
+      return;
+    }
+
     toastNotifications.addWarning({
       title: 'Job already exists',
       text: (
@@ -112,7 +119,9 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public addSuccessToast = () => {
-    const { serviceName, transactionType, location } = this.props;
+    const { location, urlParams } = this.props;
+    const { serviceName = 'unknown', transactionType } = urlParams;
+
     toastNotifications.addSuccess({
       title: 'Job successfully created',
       text: (
@@ -133,10 +142,11 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public render() {
-    const { isOpen, onClose, serviceName, transactionType } = this.props;
+    const { isOpen, onClose, urlParams } = this.props;
+    const { serviceName, transactionType } = urlParams;
     const { isLoading, hasIndexPattern, selectedTransactionType } = this.state;
 
-    if (!isOpen) {
+    if (!isOpen || !serviceName) {
       return null;
     }
 

@@ -11,12 +11,8 @@ import { StringMap } from '../../../../typings/common';
 import { legacyDecodeURIComponent } from '../../../utils/url';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
-// @ts-ignore
-import ErrorGroupOverview from '../ErrorGroupOverview';
 import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
-// @ts-ignore
-import TransactionOverview from '../TransactionOverview';
 import { Home } from './Home';
 
 interface BreadcrumbArgs {
@@ -94,6 +90,12 @@ export const routes = [
     path: '/:serviceName/transactions',
     component: ServiceDetails,
     breadcrumb: 'Transactions'
+  },
+  {
+    exact: true,
+    path: '/:serviceName/transactions/:transactionType',
+    component: ServiceDetails,
+    breadcrumb: null
   },
   {
     exact: true,

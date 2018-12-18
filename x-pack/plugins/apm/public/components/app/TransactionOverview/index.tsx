@@ -11,13 +11,11 @@ import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/c
 import { TransactionListRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionList';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { fromQuery, toQuery } from 'x-pack/plugins/apm/public/utils/url';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/utils/url';
 // @ts-ignore
 import List from './List';
 
 interface TransactionOverviewProps {
-  agentName: string;
-  serviceName: string;
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
   // TODO: find better react-router-dom withRouter prop type handling?
@@ -29,44 +27,23 @@ interface TransactionOverviewProps {
 export class TransactionOverviewView extends React.Component<
   TransactionOverviewProps
 > {
-  public componentDidMount() {
-    const { transactionType } = toQuery(this.props.location.search);
-    if (!transactionType && this.props.serviceTransactionTypes.length > 0) {
-      this.updateQueryString(this.props.serviceTransactionTypes[0]);
-    }
-  }
-
-  public updateQueryString(type: string) {
-    const { history, location } = this.props;
+  public handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { urlParams, history, location } = this.props;
+    const type = legacyEncodeURIComponent(event.target.value);
     history.push({
       ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        transactionType: type
-      })
+      pathname: `/${urlParams.serviceName}/transactions/${type}`
     });
-  }
-
-  public handleTypeChange = (event: any) => {
-    this.updateQueryString(event.target.value);
   };
 
   public render() {
-    const {
-      agentName,
-      serviceName,
-      urlParams,
-      serviceTransactionTypes,
-      location
-    } = this.props;
-    const { transactionType } = toQuery(location.search);
+    const { urlParams, serviceTransactionTypes, location } = this.props;
+    const { serviceName, transactionType } = urlParams;
 
     // filtering by type is currently required
-    if (!transactionType) {
+    if (!serviceName || !transactionType) {
       return null;
     }
-
-    const updatedParams = { ...urlParams, transactionType };
 
     return (
       <React.Fragment>
@@ -84,12 +61,12 @@ export class TransactionOverviewView extends React.Component<
         ) : null}
 
         <TransactionOverviewChartsRequest
-          urlParams={updatedParams}
+          urlParams={urlParams}
           render={({ data }) => (
             <TransactionCharts
               charts={data}
               location={location}
-              urlParams={updatedParams}
+              urlParams={urlParams}
             />
           )}
         />
@@ -97,14 +74,8 @@ export class TransactionOverviewView extends React.Component<
         <EuiSpacer size="l" />
 
         <TransactionListRequest
-          urlParams={updatedParams}
-          render={({ data }) => (
-            <List
-              agentName={agentName}
-              items={data}
-              serviceName={serviceName}
-            />
-          )}
+          urlParams={urlParams}
+          render={({ data }) => <List items={data} serviceName={serviceName} />}
         />
       </React.Fragment>
     );

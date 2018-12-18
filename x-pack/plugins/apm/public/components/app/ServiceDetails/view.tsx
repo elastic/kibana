@@ -6,48 +6,56 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { ServiceDetailsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/utils/url';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
-import { Tabs } from './ServiceDetailTabs';
+import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 
 interface ServiceDetailsProps {
   urlParams: IUrlParams;
-  match: {
-    params: StringMap;
-  };
   location: any;
+  match: {
+    path: string;
+  };
 }
 
 export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
   public render() {
-    const { urlParams, match, location } = this.props;
-    const { serviceName } = match.params;
-
-    const params = { ...urlParams, serviceName };
-
+    const { urlParams, location, match } = this.props;
     return (
       <ServiceDetailsRequest
-        urlParams={params}
-        render={({ data }) =>
-          // don't want to let stale data cause UI flashes, so
-          // we wait until the request has returned before rendering
-          data.serviceName !== serviceName ? null : (
+        urlParams={urlParams}
+        render={({ data }) => {
+          const { serviceName, transactionType } = urlParams;
+          // redirect /service/transactions -> /service/transactions/type
+          if (match.path === '/:serviceName/transactions' && transactionType) {
+            return (
+              <Redirect
+                to={{
+                  ...location,
+                  pathname: `/${serviceName}/transactions/${legacyEncodeURIComponent(
+                    transactionType
+                  )}`
+                }}
+              />
+            );
+          }
+          return (
             <React.Fragment>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <EuiTitle size="l">
-                    <h1>{serviceName}</h1>
+                    <h1>{urlParams.serviceName}</h1>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <ServiceIntegrations
                     location={this.props.location}
-                    serviceName={serviceName}
-                    transactionType={params.transactionType}
+                    urlParams={urlParams}
                     serviceTransactionTypes={data.types}
                   />
                 </EuiFlexItem>
@@ -57,15 +65,14 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
 
               <KueryBar />
 
-              <Tabs
-                serviceName={serviceName}
+              <ServiceDetailTabs
                 location={location}
-                urlParams={params}
+                urlParams={urlParams}
                 transactionTypes={data.types}
               />
             </React.Fragment>
-          )
-        }
+          );
+        }}
       />
     );
   }
