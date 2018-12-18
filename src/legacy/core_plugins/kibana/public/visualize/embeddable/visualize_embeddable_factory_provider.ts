@@ -18,13 +18,15 @@
  */
 
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
-import { KibanaConfig, SavedVisualizations } from '../types';
+import { SavedVisualizations } from '../types';
 import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
+import { Legacy } from 'kibana';
+import { IPrivate } from 'ui/private';
 
-export function visualizeEmbeddableFactoryProvider(Private: any) {
+export function visualizeEmbeddableFactoryProvider(Private: IPrivate) {
   const VisualizeEmbeddableFactoryProvider = (
     savedVisualizations: SavedVisualizations,
-    config: KibanaConfig
+    config: Legacy.KibanaConfig
   ) => {
     return new VisualizeEmbeddableFactory(savedVisualizations, config);
   };

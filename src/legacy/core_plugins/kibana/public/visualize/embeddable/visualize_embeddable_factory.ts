@@ -23,8 +23,9 @@ import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
 import { VisSavedObject } from 'ui/visualize/loader/types';
-import { KibanaConfig, SavedVisualizations } from '../types';
+import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+import { Legacy } from 'kibana';
 
 export interface VisualizeEmbeddableInstanceConfiguration {
   id: string;
@@ -32,10 +33,10 @@ export interface VisualizeEmbeddableInstanceConfiguration {
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   private savedVisualizations: SavedVisualizations;
-  private config: KibanaConfig;
+  private config: Legacy.KibanaConfig;
 
-  constructor(savedVisualizations: SavedVisualizations, config: KibanaConfig) {
-    super('visualization');
+  constructor(savedVisualizations: SavedVisualizations, config: Legacy.KibanaConfig) {
+    super({ name: 'visualization' });
     this.config = config;
     this.savedVisualizations = savedVisualizations;
   }

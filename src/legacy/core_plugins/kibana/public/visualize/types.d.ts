@@ -24,8 +24,3 @@ export interface SavedVisualizations {
   get: (id: string) => Promise<VisSavedObject>;
 }
 
-// TODO: switch this out with the real imported Legacy.KibanaConfig type when ready
-// See https://github.com/elastic/kibana/pull/26045/files
-export interface KibanaConfig {
-  get<T>(path: string): T;
-}

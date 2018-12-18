@@ -21,6 +21,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Embeddable } from 'ui/embeddable';
 import { DisabledLabVisualization } from './disabled_lab_visualization';
+import { I18nProvider } from '@kbn/i18n/react';
 
 export class DisabledLabEmbeddable extends Embeddable {
   private domNode?: HTMLElement;
@@ -32,7 +33,7 @@ export class DisabledLabEmbeddable extends Embeddable {
   public render(domNode: HTMLElement) {
     if (this.metadata.title) {
       this.domNode = domNode;
-      ReactDOM.render(<DisabledLabVisualization title={this.metadata.title} />, domNode);
+      ReactDOM.render(<I18nProvider><DisabledLabVisualization title={this.metadata.title} /></I18nProvider>, domNode);
     }
   }
 
