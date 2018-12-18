@@ -23,6 +23,7 @@ import {
   extractMessagesFromPathToMap,
   validateMessageNamespace,
 } from './extract_default_translations';
+import { GlobalReporter } from './utils';
 
 const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_translations');
 const pluginsPaths = [
@@ -45,17 +46,17 @@ describe('dev/i18n/extract_default_translations', () => {
     const [pluginPath] = pluginsPaths;
     const resultMap = new Map();
 
-    await extractMessagesFromPathToMap(pluginPath, resultMap);
+    await extractMessagesFromPathToMap(pluginPath, resultMap, new GlobalReporter());
 
     expect([...resultMap].sort()).toMatchSnapshot();
   });
 
   test('throws on id collision', async () => {
     const [, , pluginPath] = pluginsPaths;
+    const reporter = new GlobalReporter();
 
-    await expect(
-      extractMessagesFromPathToMap(pluginPath, new Map())
-    ).rejects.toThrowErrorMatchingSnapshot();
+    await expect(extractMessagesFromPathToMap(pluginPath, new Map(), reporter)).rejects.toThrowErrorMatchingSnapshot();
+    expect(reporter.errors).toMatchSnapshot();
   });
 
   test('validates message namespace', () => {

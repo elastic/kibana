@@ -65,7 +65,13 @@ function f() {
 }
 `;
 
+const saveError = jest.fn();
+
 describe('dev/i18n/extractors/code', () => {
+  beforeEach(() => {
+    saveError.mockClear();
+  });
+
   test('extracts React, server-side and angular service default messages', () => {
     const actual = Array.from(extractCodeMessages(extractCodeMessagesSource));
     expect(actual.sort()).toMatchSnapshot();
@@ -73,12 +79,14 @@ describe('dev/i18n/extractors/code', () => {
 
   test('throws on empty id', () => {
     const source = Buffer.from(`i18n.translate('', { defaultMessage: 'Default message' });`);
-    expect(() => extractCodeMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractCodeMessages(source, { saveError }).next()).not.toThrow();
+    expect(saveError.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing defaultMessage', () => {
     const source = Buffer.from(`intl.formatMessage({ id: 'message-id' });`);
-    expect(() => extractCodeMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractCodeMessages(source, { saveError }).next()).not.toThrow();
+    expect(saveError.mock.calls).toMatchSnapshot();
   });
 });
 

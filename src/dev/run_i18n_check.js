@@ -28,6 +28,7 @@ import {
   writeFileAsync,
   serializeToJson,
   serializeToJson5,
+  GlobalReporter,
 } from './i18n/';
 
 run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
@@ -41,22 +42,35 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
     );
   }
 
+  const reporter = new GlobalReporter();
+
   const list = new Listr(
     filteredPaths.map(filteredPath => ({
-      task: messages => extractMessagesFromPathToMap(filteredPath, messages),
+      task: messages => extractMessagesFromPathToMap(filteredPath, messages, reporter),
       title: filteredPath,
-    }))
+    })),
+    {
+      exitOnError: false,
+    }
   );
 
-  // messages shouldn't be extracted to a file if output is not supplied
-  const messages = await list.run(new Map());
-  if (!output || !messages.size) {
-    return;
+  try {
+    // messages shouldn't be extracted to a file if output is not supplied
+    const messages = await list.run(new Map());
+    if (!output || !messages.size) {
+      return;
+    }
+
+    const sortedMessages = [...messages].sort(([key1], [key2]) => key1.localeCompare(key2));
+    await writeFileAsync(
+      resolve(output, 'en.json'),
+      outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
+    );
+  } catch (error) {
+    if (error.name === 'ListrError' && reporter.errors.length) {
+      reporter.reportErrors();
+    }
+
+    throw error;
   }
-
-  const sortedMessages = [...messages].sort(([key1], [key2]) => key1.localeCompare(key2));
-  await writeFileAsync(
-    resolve(output, 'en.json'),
-    outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
-  );
 });

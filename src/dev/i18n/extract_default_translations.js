@@ -31,6 +31,19 @@ import { globAsync, readFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
 import { createFailError, isFailError } from '../run';
 
+class LocalReporter {
+  constructor(globalReporter, context) {
+    this.errors = globalReporter.errors;
+    this.context = context;
+  }
+
+  saveError(error) {
+    this.errors.push(
+      `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(this.context.name)}\n${error}`
+    );
+  }
+}
+
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
 
@@ -89,7 +102,9 @@ See .i18nrc.json for the list of supported namespaces.`);
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap) {
+export async function extractMessagesFromPathToMap(inputPath, targetMap, globalReporter) {
+  const initialErrorsNumber = globalReporter.errors.length;
+
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -132,16 +147,17 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       );
 
       for (const { name, content } of files) {
+        const reporter = new LocalReporter(globalReporter, { name });
+
         try {
-          for (const [id, value] of extractFunction(content)) {
-            validateMessageNamespace(id, name);
-            addMessageToMap(targetMap, id, value);
+          for (const [id, value] of extractFunction(content, reporter)) {
+            validateMessageNamespace(id, name, reporter);
+            addMessageToMap(targetMap, id, value, reporter);
           }
         } catch (error) {
           if (isFailError(error)) {
-            throw createFailError(
-              `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
-            );
+            reporter.saveError(error);
+            continue;
           }
 
           throw error;
@@ -149,4 +165,8 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       }
     })
   );
+
+  if (globalReporter.errors.length > initialErrorsNumber) {
+    throw new Error();
+  }
 }
