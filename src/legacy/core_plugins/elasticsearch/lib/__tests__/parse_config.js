@@ -27,7 +27,7 @@ describe('plugins/elasticsearch', function () {
 
       beforeEach(function () {
         serverConfig = {
-          url: 'https://localhost:9200',
+          hosts: ['https://localhost:9200'],
           ssl: {
             verificationMode: 'full'
           }

@@ -18,12 +18,12 @@ Tribe nodes take all of the same configuration options used when configuring ela
 are prefixed with `elasticsearch.tribe` and at a minimum requires a url:
 [source,text]
 ----
-elasticsearch.url: "<your_administration_node>"
-elasticsearch.tribe.url: "<your_tribe_node>"
+elasticsearch.hosts: ["<your_administration_node>"]
+elasticsearch.tribe.hosts: ["<your_tribe_node>"]
 ----
 
-When configured to use a tribe node, actions that modify Kibana's state will be sent to the node at `elasticsearch.url`.  Searches and visualizations
-will retrieve data from the node at `elasticsearch.tribe.url`.  It's acceptable to use a node for `elasticsearch.url` that is part of one of the clusters that
+When configured to use a tribe node, actions that modify Kibana's state will be sent to the nodes at `elasticsearch.hosts`.  Searches and visualizations
+will retrieve data from the nodes configured at `elasticsearch.tribe.hosts`.  It's acceptable to use nodes for `elasticsearch.hosts` that is part of one of the clusters that
 a tribe node is pointing to.
 
 The full list of configurations can be found at {kibana-ref}/settings.html[Configuring

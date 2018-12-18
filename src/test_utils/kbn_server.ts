@@ -46,7 +46,7 @@ const DEFAULTS_SETTINGS = {
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
   plugins: { scanDirs: [resolve(__dirname, '../legacy/core_plugins')] },
   elasticsearch: {
-    url: esTestConfig.getUrl(),
+    hosts: [esTestConfig.getUrl()],
     username: kibanaServerTestUser.username,
     password: kibanaServerTestUser.password,
   },
