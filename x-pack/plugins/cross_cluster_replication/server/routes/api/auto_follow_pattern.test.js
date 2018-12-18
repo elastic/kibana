@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
@@ -34,8 +33,9 @@ const registerHandlers = () => {
   const HANDLER_INDEX_TO_ACTION = {
     0: 'list',
     1: 'create',
-    2: 'get',
-    3: 'delete'
+    2: 'update',
+    3: 'get',
+    4: 'delete'
   };
 
   const server = {
@@ -109,7 +109,44 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
   describe('create()', () => {
     beforeEach(() => {
+      resetHttpRequestResponses();
       routeHandler = routeHandlers.create;
+    });
+
+    it('should throw a 409 conflict error if id already exists', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({
+        payload: {
+          id: 'some-id',
+          foo: 'bar'
+        },
+      }).catch(err => err); // return the error
+
+      expect(response.output.statusCode).toEqual(409);
+    });
+
+    it('should return 200 status when the id does not exist', async () => {
+      const error = new Error('Resource not found.');
+      error.statusCode = 404;
+      setHttpRequestResponse(error);
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({
+        payload: {
+          id: 'some-id',
+          foo: 'bar'
+        },
+      });
+
+      expect(response).toEqual({ acknowledge: true });
+    });
+  });
+
+  describe('update()', () => {
+    beforeEach(() => {
+      routeHandler = routeHandlers.update;
     });
 
     it('should serialize the payload before sending it to Elasticsearch', async () => {

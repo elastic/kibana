@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import Boom from 'boom';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
@@ -50,7 +50,50 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Save an auto-follow pattern
+   * Create an auto-follow pattern
+   */
+  server.route({
+    path: `${API_BASE_PATH}/auto_follow_patterns`,
+    method: 'POST',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id, ...rest } = request.payload;
+      const body = serializeAutoFollowPattern(rest);
+
+      /**
+       * First let's make sur that an auto-follow pattern with
+       * the same id does not exist.
+       */
+      try {
+        await callWithRequest('ccr.autoFollowPattern', { id });
+        // If we get here it means that an auto-follow pattern with the same id exists
+        const error = Boom.conflict(`An auto-follow pattern with the name "${id}" already exists.`);
+        throw(error);
+      } catch (err) {
+        if (err.statusCode !== 404) {
+          if (isEsError(err)) {
+            throw wrapEsError(err);
+          }
+          throw wrapUnknownError(err);
+        }
+      }
+
+      try {
+        return await callWithRequest('ccr.saveAutoFollowPattern', { id, body });
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
+
+  /**
+   * Update an auto-follow pattern
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,

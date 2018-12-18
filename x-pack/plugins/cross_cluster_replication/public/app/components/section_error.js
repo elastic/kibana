@@ -14,6 +14,7 @@ export function SectionError({ title, error }) {
   const {
     error: errorString,
     cause, // wrapEsError() on the server add a "cause" array
+    message,
   } = error.data;
 
   return (
@@ -23,7 +24,7 @@ export function SectionError({ title, error }) {
         color="danger"
         iconType="alert"
       >
-        <div>{errorString}</div>
+        <div>{message || errorString}</div>
         { cause && (
           <Fragment>
             <EuiSpacer size="m" />

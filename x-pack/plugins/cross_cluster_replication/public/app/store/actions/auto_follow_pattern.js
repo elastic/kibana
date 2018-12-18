@@ -9,7 +9,8 @@ import { SECTIONS, API_STATUS } from '../../constants';
 import {
   loadAutoFollowPatterns as loadAutoFollowPatternsRequest,
   getAutoFollowPattern as getAutoFollowPatternRequest,
-  saveAutoFollowPattern as saveAutoFollowPatternRequest,
+  createAutoFollowPattern as createAutoFollowPatternRequest,
+  updateAutoFollowPattern as updateAutoFollowPatternRequest,
   deleteAutoFollowPattern as deleteAutoFollowPatternRequest,
 } from '../../services/api';
 import routing from '../../services/routing';
@@ -59,16 +60,19 @@ export const getAutoFollowPattern = (id) =>
     )
   });
 
-export const saveAutoFollowPattern = (id, autoFollowPattern, isEditing = false) => (
+export const saveAutoFollowPattern = (id, autoFollowPattern, isUpdating = false) => (
   sendApiRequest({
-    label: t.AUTO_FOLLOW_PATTERN_CREATE,
+    label: isUpdating ? t.AUTO_FOLLOW_PATTERN_UPDATE : t.AUTO_FOLLOW_PATTERN_CREATE,
     status: API_STATUS.SAVING,
     scope,
     handler: async () => {
-      await saveAutoFollowPatternRequest(id, autoFollowPattern);
+      if (isUpdating) {
+        return await updateAutoFollowPatternRequest(id, autoFollowPattern);
+      }
+      return await createAutoFollowPatternRequest({ id, ...autoFollowPattern });
     },
     onSuccess() {
-      const successMessage = isEditing
+      const successMessage = isUpdating
         ? i18n.translate('xpack.crossClusterReplication.autoFollowPattern.addAction.successMultipleNotificationTitle', {
           defaultMessage: `Auto-follow pattern '{name}' updated successfully`,
           values: { name: id },
