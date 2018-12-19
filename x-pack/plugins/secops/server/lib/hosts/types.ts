@@ -34,13 +34,11 @@ export interface HostHit {
   _score: number | null;
   _source: {
     '@timestamp': string;
-    system: {
-      host: {
+    host: {
+      name: string;
+      os: {
         name: string;
-        os: {
-          name: string;
-          version: string;
-        };
+        version: string;
       };
     };
   };

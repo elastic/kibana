@@ -16,13 +16,11 @@ describe('hosts elasticsearch_adapter', () => {
       _score: 10,
       _source: {
         '@timestamp': 'time-1',
-        system: {
-          host: {
-            name: 'host-name-1',
-            os: {
-              name: 'os-name-1',
-              version: 'version-1',
-            },
+        host: {
+          name: 'host-name-1',
+          os: {
+            name: 'os-name-1',
+            version: 'version-1',
           },
         },
       },
