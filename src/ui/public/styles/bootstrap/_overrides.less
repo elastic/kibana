@@ -1,5 +1,16 @@
 // Navbar =====================================================================
 
+.navbar > .container-fluid {
+  > .navbar-nav,
+  > .navbar-form {
+    &:not(.pull-right):first-child {
+      // This is how .navbar-brand accomplishes it's solid placement
+      margin-left: -15px;
+      margin-top: 4px;
+    }
+  }
+}
+
 .navbar {
   border-width: 0;
 }

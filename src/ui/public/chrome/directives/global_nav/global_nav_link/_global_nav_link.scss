@@ -53,7 +53,7 @@
   display: inline-block;
   width: $kbnGlobalNavClosedWidth;
   height: $kbnGlobalNavAppIconHeight;
-  line-height: $kbnGlobalNavAppIconHeight;
+  line-height: $kbnGlobalNavAppIconHeight - 2px;
   text-align: center;
 }
 

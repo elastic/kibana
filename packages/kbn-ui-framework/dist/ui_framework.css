@@ -718,7 +718,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -765,7 +765,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -850,7 +850,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -901,7 +901,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -1635,7 +1635,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -1670,7 +1670,7 @@ main {
     border-color: #e74C3c; }
 
 .kuiLocalSearchInput--secondary {
-  height: 30px;
+  height: 32px;
   -webkit-box-flex: 0;
   -webkit-flex: 0 0 auto;
       -ms-flex: 0 0 auto;
@@ -1728,7 +1728,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -1771,7 +1771,7 @@ main {
  */
 .kuiLocalSearchButton {
   width: 43px;
-  height: 30px;
+  height: 32px;
   font-size: 14px;
   line-height: 0;
   /* 1 */
