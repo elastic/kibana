@@ -14,10 +14,10 @@ about: Issues to help Elastic meet WCAG / Section 508 compliance
 [Screenshot here]
 
 **Actual Result**
-5. The announcements of many elements are simply "drop down" or "button"
+5.
 
 **Expected Result**
-5. Labeling should be consistent and informative. In the above image, the announcements should be "Select a Shape", "Fill", "Border", etc.
+5.
 
 [Link to meta issues here]
 
