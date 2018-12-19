@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty, set } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
@@ -17,6 +17,7 @@ import {
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
+import { uncommonProcessesSelector } from '../../store';
 import { uncommonProcessesQuery } from './index.gql_query';
 
 export interface UncommonProcessesArgs {
@@ -42,6 +43,7 @@ export interface OwnProps {
 
 export interface UncommonProcessesComponentReduxProps {
   limit: number;
+  upperLimit: number;
 }
 
 type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
@@ -55,6 +57,7 @@ const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
     startDate,
     endDate,
     limit,
+    upperLimit,
     cursor,
     poll,
   }) => (
@@ -71,60 +74,51 @@ const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
           to: endDate,
         },
         pagination: {
-          limit,
+          limit: upperLimit,
           cursor,
           tiebreaker: null,
         },
         filterQuery,
       }}
     >
-      {({ data, loading, fetchMore, refetch }) =>
-        children({
+      {({ data, loading, refetch, updateQuery }) => {
+        const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
+        const pageInfo = getOr(
+          { endCursor: { value: '' } },
+          'source.UncommonProcesses.pageInfo',
+          data
+        );
+
+        let endCursor = String(limit);
+        if (!isEmpty(pageInfo.endCursor.value)) {
+          endCursor = pageInfo.endCursor.value;
+        }
+
+        const hasNextPage = hasMoreData(parseInt(endCursor, 10), upperLimit, uncommonProcesses);
+        const slicedData = uncommonProcesses.slice(0, parseInt(endCursor, 10));
+        return children({
           id,
           loading,
           refetch,
           totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
-          uncommonProcesses: getOr([], 'source.UncommonProcesses.edges', data),
-          pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
+          uncommonProcesses: slicedData,
+          pageInfo: { hasNextPage, endCursor: { value: String(parseInt(endCursor, 10) + limit) } },
           loadMore: (newCursor: string) =>
-            fetchMore({
-              variables: {
-                pagination: {
-                  cursor: newCursor,
-                  limit,
-                },
-              },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (!fetchMoreResult) {
-                  return prev;
-                }
-                return {
-                  ...fetchMoreResult,
-                  source: {
-                    ...fetchMoreResult.source,
-                    UncommonProcesses: {
-                      ...fetchMoreResult.source.UncommonProcesses,
-                      edges: [
-                        ...prev.source.UncommonProcesses.edges,
-                        ...fetchMoreResult.source.UncommonProcesses.edges,
-                      ],
-                    },
-                  },
-                };
-              },
-            }),
-        })
-      }
+            updateQuery(prev =>
+              set('source.UncommonProcesses.pageInfo.endCursor.value', newCursor, prev)
+            ),
+        });
+      }}
     </Query>
   )
 );
 
-const mapStateToProps = (state: State) => {
-  // TODO: This is hard coded without a reducer and state until
-  // we can determine if we can get a cursor object with the aggregate or not
-  // of uncommon_processes
-  const limit = 5;
-  return { limit };
-};
+export const hasMoreData = (
+  limit: number,
+  upperLimit: number,
+  data: UncommonProcessesEdges[]
+): boolean => limit < upperLimit && limit < data.length;
+
+const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
 
 export const UncommonProcessesQuery = connect(mapStateToProps)(UncommonProcessesComponentQuery);

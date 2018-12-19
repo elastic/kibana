@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../../common/graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
@@ -38,20 +38,19 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     const uncommonProcessesEdges = hits.map(hit =>
       formatUncommonProcessesData(options.fields, hit, processFieldsMap)
     );
-    const hasNextPage = uncommonProcessesEdges.length === limit + 1;
-    const edges = hasNextPage ? uncommonProcessesEdges.splice(0, limit) : uncommonProcessesEdges;
-    const lastCursor = get('cursor', edges.slice(-1)[0]);
+    const edges = uncommonProcessesEdges.splice(0, limit);
 
     return {
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage,
-        endCursor: lastCursor,
+        hasNextPage: null,
+        endCursor: { value: '' },
       },
     };
   }
 }
+
 export const getHits = (
   buckets: ReadonlyArray<UncommonProcessBucket>
 ): ReadonlyArray<UncommonProcessHit> =>

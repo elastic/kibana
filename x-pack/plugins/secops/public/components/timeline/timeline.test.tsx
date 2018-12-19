@@ -52,6 +52,10 @@ describe('Timeline', () => {
       hosts: {
         limit: 2,
       },
+      uncommonProcesses: {
+        limit: 0,
+        upperLimit: 0,
+      },
       inputs: {
         global: {
           timerange: {

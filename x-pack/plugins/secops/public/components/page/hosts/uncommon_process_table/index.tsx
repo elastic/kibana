@@ -5,14 +5,14 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo, noop } from 'lodash/fp';
+import { defaultTo } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../../common/graphql/types';
-
 import { State } from '../../../../store';
+import { uncommonProcessesActions, uncommonProcessesSelector } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 interface OwnProps {
@@ -68,7 +68,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     loadMore,
     totalCount,
     nextCursor,
-    updateLimitPagination, // TODO: Remove this if we cannot do pagination with uncommon process
+    updateLimitPagination,
   }) => (
     <LoadMoreTable
       columns={getUncommonColumns()}
@@ -77,13 +77,9 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
       limit={limit}
-      hasNextPage={hasNextPage!}
+      hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newlimit => {
-        // TODO: Update this with pagination if we can get it to work with this widget
-        // with a cursor
-        // updateLimitPagination({ limit: newlimit });
-      }}
+      updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
       title={
         <h3>
           Uncommon Processes <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -93,20 +89,12 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => {
-  // TODO: This is hard coded without a reducer and state until
-  // we can determine if we can get a cursor object with the aggregate or not
-  // of uncommon_processes
-  const limit = 5;
-  return { limit };
-};
+const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
 
 export const UncommonProcessTable = connect(
   mapStateToProps,
   {
-    // TODO: Update this with pagination if we can get it to work
-    // updateLimitPagination: hostsActions.updateLimitOfPagination,
-    updateLimitPagination: noop,
+    updateLimitPagination: uncommonProcessesActions.updateLimitOfPagination,
   }
 )(UncommonProcessTableComponent);
 
@@ -133,6 +121,14 @@ const getUncommonColumns = () => [
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
       <>{defaultTo('--', uncommonProcess.instances)}</>
+    ),
+  },
+  {
+    name: 'Number of Hosts',
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
+      <>{uncommonProcess.hosts != null ? uncommonProcess.hosts.length : '--'}</>
     ),
   },
   {

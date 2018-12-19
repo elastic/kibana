@@ -10,4 +10,5 @@ export {
   timelineByIdSelector,
   globalTimeRangeSelector,
   globalPolicySelector,
+  uncommonProcessesSelector,
 } from './local';

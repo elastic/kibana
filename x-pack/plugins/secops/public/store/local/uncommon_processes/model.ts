@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './drag_and_drop';
-export * from './hosts';
-export * from './inputs';
-export * from './timeline';
-export * from './uncommon_processes';
+// TODO: This should be merged in with hosts (folder for stage 2 refactor)
+
+export interface UncommonProcessesModel {
+  limit: number;
+  upperLimit: number;
+}

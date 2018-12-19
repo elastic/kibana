@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { FilterQuery } from '../types';
@@ -21,7 +20,7 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
 
 export const buildQuery = (options: UncommonProcessesRequestOptions) => {
   const { to, from } = options.timerange;
-  const { limit, cursor } = options.pagination;
+  const { limit } = options.pagination;
   const { fields, filterQuery } = options;
   const processFields = reduceFields(fields, processFieldsMap);
   const hostFields = reduceFields(fields, hostFieldsMap);
@@ -59,6 +58,9 @@ export const buildQuery = (options: UncommonProcessesRequestOptions) => {
             field: 'process.name',
             order: [
               {
+                host_count: 'asc',
+              },
+              {
                 _count: 'asc',
               },
               {
@@ -71,6 +73,11 @@ export const buildQuery = (options: UncommonProcessesRequestOptions) => {
               top_hits: {
                 size: 1,
                 _source: processFields,
+              },
+            },
+            host_count: {
+              cardinality: {
+                field: 'host.id',
               },
             },
             hosts: {
@@ -98,23 +105,6 @@ export const buildQuery = (options: UncommonProcessesRequestOptions) => {
     size: 0,
     track_total_hits: false,
   };
-
-  // TODO: Implement cursors if it is possible
-  if (cursor) {
-    return merge(dslQuery, {
-      body: {
-        aggregations: {
-          group_by_process: {
-            composite: {
-              after: {
-                host_name: cursor,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
 
   return dslQuery;
 };
