@@ -1,10 +1,10 @@
-.cell-hover {
+.kbnTableCellFilter__hover {
   position: relative;
 
   /**
    * 1. Center vertically regardless of row height.
    */
-  .table-cell-filter {
+  .kbnTableCellFilter {
     position: absolute;
     white-space: nowrap;
     right: 0;
@@ -14,17 +14,17 @@
   }
 
   &:hover {
-    .table-cell-filter {
+    .kbnTableCellFilter {
       display: inline;
     }
 
-    .cell-hover-show {
+    .kbnTableCellFilter__hover-show {
       visibility: visible;
     }
   }
 }
 
-.cell-hover-show {
+.kbnTableCellFilter__hover-show {
   // so that the cell doesn't change size on hover
   visibility: hidden;
 }
