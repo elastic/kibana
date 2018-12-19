@@ -245,7 +245,7 @@ export class FilterEditor extends Component<Props, State> {
           <div>
             <EuiSpacer size="m" />
             <EuiFormRow label="Custom label">
-              <EuiFieldText value={this.state.customLabel} onChange={noop} />
+              <EuiFieldText value={`${this.state.customLabel}`} onChange={noop} />
             </EuiFormRow>
           </div>
         )}

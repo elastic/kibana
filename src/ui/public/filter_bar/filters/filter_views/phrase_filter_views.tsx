@@ -23,7 +23,7 @@ import { FilterViews } from './index';
 export function getPhraseFilterViews(filter: PhraseFilter): FilterViews {
   return {
     getDisplayText() {
-      return `${filter.meta.key} : ${filter.meta.value}`;
+      return `${filter.meta.key}: ${filter.meta.value}`;
     },
   };
 }
