@@ -13,7 +13,14 @@
       "details": "{.monitoring-logstash=[Coercion of boolean fields], .monitoring-es=[Coercion of boolean fields], .ml-anomalies-=[Coercion of boolean fields], .watch-history-6=[Coercion of boolean fields], .monitoring-kibana=[Coercion of boolean fields], security-index-template=[Coercion of boolean fields]}"
     }
   ],
-  "node_settings": [],
+  "node_settings": [
+    {
+      "level": "critical",
+      "message": "A node-level issue",
+      "url": "http://nodeissue.com",
+      "details": "This node thing is wrong"
+    }
+  ],
   "index_settings": {
     ".monitoring-es-6-2018.11.07": [
       {
