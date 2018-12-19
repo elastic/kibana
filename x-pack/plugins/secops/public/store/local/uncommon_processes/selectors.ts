@@ -6,7 +6,6 @@
 
 // TODO: This should be merged in with hosts (folder for stage 2 refactor)
 
-// TODO: Make these selectors just one selector
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
