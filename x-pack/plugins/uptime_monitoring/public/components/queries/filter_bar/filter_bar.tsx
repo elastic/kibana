@@ -35,6 +35,8 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
       const showFilterDisclaimer =
         (id.length && id.length > MAX_SELECTION_LENGTH) ||
         (port.length && port.length > MAX_SELECTION_LENGTH);
+
+      // TODO: add a factory function + type for these filter options
       const filters = [
         {
           type: 'field_value_toggle_group',
