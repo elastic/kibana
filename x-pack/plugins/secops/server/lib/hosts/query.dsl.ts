@@ -12,7 +12,7 @@ import { HostsRequestOptions } from './types';
 
 export const hostsFieldsMap: Readonly<Record<string, string>> = {
   firstSeen: '@timestamp',
-  name: 'host.os.name',
+  name: 'host.name',
   os: 'host.os.name',
   version: 'host.os.version',
 };
