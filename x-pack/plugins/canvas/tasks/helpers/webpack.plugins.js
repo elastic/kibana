@@ -76,26 +76,22 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       },
       new CopyWebpackPlugin([
         {
-          from: `${sourceDir}/functions/server/`,
-          to: `${buildDir}/functions/server/`,
-          ignore: '**/__tests__/**',
+          from: path.resolve(sourceDir, 'functions/server'),
+          to: path.resolve(buildDir, 'functions/server'),
           transform: createServerCodeTransformer(!!devtool),
+          ignore: '**/__tests__/**',
         },
-      ]),
-      new CopyWebpackPlugin([
         {
-          from: `${sourceDir}/functions/common/`,
-          to: `${buildDir}/functions/common/`,
-          ignore: '**/__tests__/**',
+          from: path.resolve(sourceDir, 'functions/common'),
+          to: path.resolve(buildDir, 'functions/common'),
           transform: createServerCodeTransformer(!!devtool),
+          ignore: '**/__tests__/**',
         },
-      ]),
-      new CopyWebpackPlugin([
         {
-          from: `${sourceDir}/lib/`,
-          to: `${buildDir}/lib/`,
-          ignore: '**/__tests__/**',
+          from: path.resolve(sourceDir, 'lib'),
+          to: path.resolve(buildDir, 'lib'),
           transform: createServerCodeTransformer(!!devtool),
+          ignore: '**/__tests__/**',
         },
       ]),
     ],
