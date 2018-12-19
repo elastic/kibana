@@ -29,17 +29,20 @@ export class UICapabilitiesService {
   }
 
   public async get(
-    credentials: BasicCredentials,
+    credentials: BasicCredentials | null,
     spaceId?: string
   ): Promise<UICapabilities | null> {
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug('requesting /app/kibana to parse the uiCapabilities');
+    const headers = credentials
+      ? {
+          Authorization: `Basic ${Buffer.from(
+            `${credentials.username}:${credentials.password}`
+          ).toString('base64')}`,
+        }
+      : {};
     const { res, payload } = await this.wreck.get(`${spaceUrlPrefix}/app/kibana`, {
-      headers: {
-        Authorization: `Basic ${Buffer.from(
-          `${credentials.username}:${credentials.password}`
-        ).toString('base64')}`,
-      },
+      headers,
     });
 
     if (res.statusCode !== 200) {
