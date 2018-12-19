@@ -77,11 +77,14 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       moment()
         .subtract(1, 'day')
         .valueOf();
+    // TODO: this will cause the date range to default to being greater than "now"
+    // when we start using the SuperDatePicker, we'll likely revise this.
     const dateRangeEnd =
-      initialDateRangeEnd ||
-      moment()
-        .add(1, 'hours')
-        .valueOf();
+      initialDateRangeEnd && initialDateRangeEnd > moment().valueOf()
+        ? initialDateRangeEnd
+        : moment()
+            .add(1, 'hours')
+            .valueOf();
 
     if (isUsingK7Design) {
       this.setBreadcrumbs = updateBreadcrumbs;
