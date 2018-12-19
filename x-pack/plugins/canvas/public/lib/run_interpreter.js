@@ -21,7 +21,9 @@ import { notify } from './notify';
 export function runInterpreter(ast, context = null, options = {}) {
   return interpretAst(ast, context)
     .then(renderable => {
-      if (getType(renderable) === 'render') return renderable;
+      if (getType(renderable) === 'render') {
+        return renderable;
+      }
 
       if (options.castToRender) {
         return runInterpreter(fromExpression('render'), renderable, {

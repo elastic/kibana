@@ -55,9 +55,8 @@ import {
 } from '../../common/constants/search';
 
 // TODO Fully support Annotations in Anomaly Explorer
-// import chrome from 'ui/chrome';
-// const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
-const mlAnnotationsEnabled = false;
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/explorer/?', {
@@ -960,7 +959,6 @@ module.controller('MlExplorerController', function (
       cellData.lanes : $scope.getSelectedJobIds();
     const timeRange = getSelectionTimeRange(cellData);
 
-
     if (mlAnnotationsEnabled) {
       const resp = await ml.annotations.getAnnotations({
         jobIds,
@@ -970,11 +968,13 @@ module.controller('MlExplorerController', function (
       });
 
       $scope.$evalAsync(() => {
-        const annotationsData = resp.annotations[jobIds[0]];
-
-        if (annotationsData === undefined) {
-          return;
-        }
+        const annotationsData = [];
+        jobIds.forEach((jobId) => {
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
+          }
+        });
 
         $scope.annotationsData = annotationsData
           .sort((a, b) => {

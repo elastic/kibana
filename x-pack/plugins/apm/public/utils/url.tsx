@@ -5,6 +5,7 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import createHistory from 'history/createHashHistory';
 import { get, isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';
@@ -26,6 +27,13 @@ const DEFAULT_KIBANA_TIME_RANGE = {
   }
 };
 
+const viewJobLabel: string = i18n.translate(
+  'xpack.apm.viewMLJob.viewJobLabel',
+  {
+    defaultMessage: 'View Job'
+  }
+);
+
 interface ViewMlJobArgs {
   serviceName: string;
   transactionType: string;
@@ -36,7 +44,7 @@ export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
   serviceName,
   transactionType,
   location,
-  children = 'View Job'
+  children = viewJobLabel
 }) => {
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
@@ -142,6 +150,25 @@ export function RelativeLinkComponent({
   );
 }
 
+export function getKibanaHref(kibanaLinkArgs: KibanaLinkArgs): string {
+  const { location, pathname, hash, query = {} } = kibanaLinkArgs;
+  // Preserve current _g and _a
+  const currentQuery = toQuery(location.search);
+  const g = decodeAndMergeG(currentQuery._g, query._g);
+  const nextQuery = {
+    ...query,
+    _g: rison.encode(g),
+    _a: query._a ? rison.encode(query._a) : ''
+  };
+
+  const search = stringifyWithoutEncoding(nextQuery);
+  const href = url.format({
+    pathname: chrome.addBasePath(pathname),
+    hash: `${hash}?${search}`
+  });
+  return href;
+}
+
 // TODO:
 // Both KibanaLink and RelativeLink does similar things, are too magic, and have different APIs.
 // The initial idea with KibanaLink was to automatically preserve the timestamp (_g) when making links. RelativeLink went a bit overboard and preserves all query args
@@ -178,21 +205,12 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   query = {},
   ...props
 }) => {
-  // Preserve current _g and _a
-  const currentQuery = toQuery(location.search);
-  const g = decodeAndMergeG(currentQuery._g, query._g);
-  const nextQuery = {
-    ...query,
-    _g: rison.encode(g),
-    _a: query._a ? rison.encode(query._a) : ''
-  };
-
-  const search = stringifyWithoutEncoding(nextQuery);
-  const href = url.format({
-    pathname: chrome.addBasePath(pathname),
-    hash: `${hash}?${search}`
+  const href = getKibanaHref({
+    location,
+    pathname,
+    hash,
+    query
   });
-
   return <EuiLink {...props} href={href} />;
 };
 

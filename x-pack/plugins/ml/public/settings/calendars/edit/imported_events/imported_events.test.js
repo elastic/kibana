@@ -27,6 +27,7 @@ const testProps = {
   includePastEvents: false,
   onCheckboxToggle: jest.fn(),
   onEventDelete: jest.fn(),
+  canCreateCalendar: true,
 };
 
 describe('ImportedEvents', () => {

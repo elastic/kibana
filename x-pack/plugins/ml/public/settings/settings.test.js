@@ -20,15 +20,15 @@ describe('Settings', () => {
 
   test('Renders settings page', () => {
     const wrapper = shallow(
-      <Settings canCreateFilter={true} canCreateCalendar={true}/>
+      <Settings canGetFilters={true} canGetCalendars={true}/>
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('Filter Lists button disabled if canCreateFilter is false', () => {
+  test('Filter Lists button disabled if canGetFilters is false', () => {
     const wrapper = mount(
-      <Settings canCreateFilter={false} canCreateCalendar={true}/>
+      <Settings canGetFilters={false} canGetCalendars={true}/>
     );
 
     const button = wrapper.find('[data-testid="ml_filter_lists_button"]');
@@ -36,9 +36,9 @@ describe('Settings', () => {
     expect(filterButton.prop('isDisabled')).toBe(true);
   });
 
-  test('Calendar management button disabled if canCreateCalendar is false', () => {
+  test('Calendar management button disabled if canGetCalendars is false', () => {
     const wrapper = mount(
-      <Settings canCreateFilter={true} canCreateCalendar={false} />
+      <Settings canGetFilters={true} canGetCalendars={false} />
     );
 
     const button = wrapper.find('[data-testid="ml_calendar_mng_button"]');

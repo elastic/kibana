@@ -14,7 +14,9 @@ const getToast = (err, opts = {}) => {
   const { title, ...rest } = opts;
   let text = null;
 
-  if (title) text = errMsg;
+  if (title) {
+    text = errMsg;
+  }
 
   return {
     ...rest,
