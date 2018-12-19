@@ -82,7 +82,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
     link(scope, _element, attributes, controller) {
       config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
 
-      controller.setup({
+      const setupObj = {
         licenseService: license,
         breadcrumbsService: breadcrumbs,
         kbnUrlService: kbnUrl,
@@ -99,10 +99,15 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
           pipelineVersions: get(scope, 'pageData.versions')
         },
         clusterName: get(scope, 'cluster.cluster_name')
-      });
+      };
+      controller.setup(setupObj);
 
-      attributes.$observe('instance', instance => controller.instance = instance);
-      attributes.$observe('resolver', resolver => controller.resolver = resolver);
+      Object.keys(setupObj.attributes).forEach(key => {
+        attributes.$observe(key, value => controller[key] = value);
+      });
+      scope.$watch('pageData.versions', versions => {
+        controller.pipelineVersions = versions;
+      });
     }
   };
 });
