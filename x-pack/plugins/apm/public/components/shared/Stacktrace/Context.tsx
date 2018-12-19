@@ -4,18 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import styled from 'styled-components';
-import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
-import { xcode } from 'react-syntax-highlighter/dist/styles';
 import { get, size } from 'lodash';
+import React from 'react';
+// TODO add dependency for @types/react-syntax-highlighter
+// @ts-ignore
+import javascript from 'react-syntax-highlighter/dist/languages/javascript';
+// @ts-ignore
+import python from 'react-syntax-highlighter/dist/languages/python';
+// @ts-ignore
+import ruby from 'react-syntax-highlighter/dist/languages/ruby';
+// @ts-ignore
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
+// @ts-ignore
+import { registerLanguage } from 'react-syntax-highlighter/dist/light';
+// @ts-ignore
+import { xcode } from 'react-syntax-highlighter/dist/styles';
 
+registerLanguage('javascript', javascript);
+registerLanguage('python', python);
+registerLanguage('ruby', ruby);
+
+import styled from 'styled-components';
+
+import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import {
-  unit,
-  units,
-  px,
+  borderRadius,
   colors,
-  borderRadius
+  px,
+  unit,
+  units
 } from '../../../style/variables';
 
 const ContextContainer = styled.div`
@@ -24,7 +41,7 @@ const ContextContainer = styled.div`
 `;
 
 const LINE_HEIGHT = units.eighth * 9;
-const LineHighlight = styled.div`
+const LineHighlight = styled.div<{ lineNumber: number }>`
   position: absolute;
   width: 100%;
   height: ${px(units.eighth * 9)};
@@ -33,7 +50,7 @@ const LineHighlight = styled.div`
   background-color: ${colors.yellow};
 `;
 
-const LineNumberContainer = styled.div`
+const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -41,7 +58,7 @@ const LineNumberContainer = styled.div`
   background: ${props => (props.isLibraryFrame ? colors.white : colors.gray5)};
 `;
 
-const LineNumber = styled.div`
+const LineNumber = styled.div<{ highlight: boolean }>`
   position: relative;
   min-width: ${px(units.eighth * 21)};
   padding-left: ${px(units.half)};
@@ -88,18 +105,25 @@ const Code = styled.code`
   z-index: 2;
 `;
 
-const getStackframeLines = stackframe => {
-  const preContext = get(stackframe, 'context.pre', []);
-  const postContext = get(stackframe, 'context.post', []);
-  return [...preContext, stackframe.line.context, ...postContext];
-};
+function getStackframeLines(stackframe: IStackframeWithLineContext) {
+  const line = stackframe.line.context;
+  const preLines: string[] = get(stackframe, 'context.pre', []);
+  const postLines: string[] = get(stackframe, 'context.post', []);
+  return [...preLines, line, ...postLines];
+}
 
-const getStartLineNumber = stackframe => {
+function getStartLineNumber(stackframe: IStackframeWithLineContext) {
   const preLines = size(get(stackframe, 'context.pre', []));
   return stackframe.line.number - preLines;
-};
+}
 
-export function Context({ stackframe, codeLanguage, isLibraryFrame }) {
+interface Props {
+  stackframe: IStackframeWithLineContext;
+  codeLanguage?: string;
+  isLibraryFrame: boolean;
+}
+
+export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
   const lines = getStackframeLines(stackframe);
   const startLineNumber = getStartLineNumber(stackframe);
   const highlightedLineIndex = size(get(stackframe, 'context.pre', []));
