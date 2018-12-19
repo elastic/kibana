@@ -152,7 +152,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
           timeseries: {
             auto_date_histogram: {
               field: '@timestamp',
-              buckets: 20,
+              buckets: 50,
             },
             aggs: {
               by_id: {

@@ -78,9 +78,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
     const aggs = {
       timeseries: {
-        date_histogram: {
+        auto_date_histogram: {
           field: '@timestamp',
-          interval: 'hour',
+          buckets: 50,
         },
         aggs: {
           max_content: { max: { field: 'http.rtt.content.us' } },
