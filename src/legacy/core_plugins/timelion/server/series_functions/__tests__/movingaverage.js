@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const fn = require(`../moving_average`);
+const fn = require(`../movingaverage`);
 const expect = require('chai').expect;
 
 import moment from 'moment';
@@ -33,7 +33,7 @@ function getFivePointSeries() {
   ]);
 }
 
-describe('moving_average.js', () => {
+describe('movingaverage.js', () => {
 
   let seriesList;
   beforeEach(() => {
