@@ -10,11 +10,12 @@ import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { getFilterBarQuery } from './get_filter_bar';
+import { filterBarSearchSchema } from './search_schema';
 
 interface FilterBarProps {
   dateRangeStart: number;
   dateRangeEnd: number;
-  updateQuery: (query: object) => void;
+  updateQuery: (query: object | undefined) => void;
 }
 
 const MAX_SELECTION_LENGTH = 20;
@@ -90,10 +91,19 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
           <EuiFlexItem grow>
             <EuiSearchBar
               // TODO: update typing
-              onChange={({ query }: { query?: object }) =>
-                updateQuery(EuiSearchBar.Query.toESQuery(query))
-              }
+              onChange={({ query }: { query?: { text: string } }) => {
+                try {
+                  let esQuery;
+                  if (query && query.text) {
+                    esQuery = EuiSearchBar.Query.toESQuery(query);
+                  }
+                  updateQuery(esQuery);
+                } catch (e) {
+                  updateQuery(undefined);
+                }
+              }}
               filters={filters}
+              schema={filterBarSearchSchema}
             />
           </EuiFlexItem>
           {showFilterDisclaimer && (

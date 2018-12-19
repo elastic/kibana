@@ -49,10 +49,8 @@ export class OverviewPage extends React.Component<OverviewPageProps, OverviewPag
           <FilterBar
             dateRangeStart={dateRangeStart}
             dateRangeEnd={dateRangeEnd}
-            updateQuery={(query: object) => {
-              if (query) {
-                this.setState({ currentFilterQuery: JSON.stringify(query) });
-              }
+            updateQuery={(query: object | undefined) => {
+              this.setState({ currentFilterQuery: query ? JSON.stringify(query) : query });
             }}
           />
           <Snapshot
