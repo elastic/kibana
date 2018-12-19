@@ -27,7 +27,6 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
-import { checkPermission } from '../../../privilege/check_privilege';
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
 
@@ -65,8 +64,7 @@ UsedByIcon.WrappedComponent.propTypes = {
   usedBy: PropTypes.object
 };
 
-function NewFilterButton() {
-  const canCreateFilter = checkPermission('canCreateFilter');
+function NewFilterButton({ canCreateFilter }) {
   return (
     <EuiButton
       key="new_filter_list"
@@ -127,15 +125,22 @@ function getColumns() {
   return columns;
 }
 
-function renderToolsRight(selectedFilterLists, refreshFilterLists) {
+function renderToolsRight(
+  canCreateFilter,
+  canDeleteFilter,
+  selectedFilterLists,
+  refreshFilterLists
+) {
   return [
     (
       <NewFilterButton
         key="new_filter_list"
+        canCreateFilter={canCreateFilter}
       />
     ),
     (
       <DeleteFilterListModal
+        canDeleteFilter={canDeleteFilter}
         selectedFilterLists={selectedFilterLists}
         refreshFilterLists={refreshFilterLists}
       />
@@ -144,6 +149,8 @@ function renderToolsRight(selectedFilterLists, refreshFilterLists) {
 
 
 export function FilterListsTable({
+  canCreateFilter,
+  canDeleteFilter,
   filterLists,
   selectedFilterLists,
   setSelectedFilterLists,
@@ -158,7 +165,12 @@ export function FilterListsTable({
   };
 
   const search = {
-    toolsRight: renderToolsRight(selectedFilterLists, refreshFilterLists),
+    toolsRight: renderToolsRight(
+      canCreateFilter,
+      canDeleteFilter,
+      selectedFilterLists,
+      refreshFilterLists
+    ),
     box: {
       incremental: true,
     },
@@ -214,6 +226,8 @@ export function FilterListsTable({
 
 }
 FilterListsTable.propTypes = {
+  canCreateFilter: PropTypes.bool.isRequired,
+  canDeleteFilter: PropTypes.bool.isRequired,
   filterLists: PropTypes.array,
   selectedFilterLists: PropTypes.array,
   setSelectedFilterLists: PropTypes.func.isRequired,

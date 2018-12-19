@@ -44,6 +44,7 @@ function getProps(props = {}) {
     viewOnlyMode: false,
     destroy: () => {},
     initialized: true,
+    lastReloadRequestTime: 0,
     embeddableIsInitialized: () => {},
     embeddableIsInitializing: () => {},
     embeddableStateChanged: () => {},

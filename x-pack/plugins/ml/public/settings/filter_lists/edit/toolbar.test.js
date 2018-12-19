@@ -20,6 +20,8 @@ describe('EditFilterListToolbar', () => {
     onSearchChange,
     addItems,
     deleteSelectedItems,
+    canCreateFilter: true,
+    canDeleteFilter: true
   };
 
   test('renders the toolbar with no items selected', () => {

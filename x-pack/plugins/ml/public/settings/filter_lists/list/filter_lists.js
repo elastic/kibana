@@ -12,6 +12,7 @@
 import React, {
   Component
 } from 'react';
+import { PropTypes } from 'prop-types';
 
 import {
   EuiPage,
@@ -29,6 +30,10 @@ import { ml } from '../../../services/ml_api_service';
 
 export const FilterLists = injectI18n(class extends Component {
   static displayName = 'FilterLists';
+  static propTypes = {
+    canCreateFilter: PropTypes.bool.isRequired,
+    canDeleteFilter: PropTypes.bool.isRequired
+  };
 
   constructor(props) {
     super(props);
@@ -80,6 +85,7 @@ export const FilterLists = injectI18n(class extends Component {
 
   render() {
     const { filterLists, selectedFilterLists } = this.state;
+    const { canCreateFilter, canDeleteFilter } = this.props;
 
     return (
       <EuiPage className="ml-list-filter-lists">
@@ -93,6 +99,8 @@ export const FilterLists = injectI18n(class extends Component {
             refreshFilterLists={this.refreshFilterLists}
           />
           <FilterListsTable
+            canCreateFilter={canCreateFilter}
+            canDeleteFilter={canDeleteFilter}
             filterLists={filterLists}
             selectedFilterLists={selectedFilterLists}
             setSelectedFilterLists={this.setSelectedFilterLists}

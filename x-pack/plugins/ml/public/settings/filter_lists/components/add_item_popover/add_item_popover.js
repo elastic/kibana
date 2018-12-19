@@ -31,7 +31,8 @@ import {
 export class AddItemPopover extends Component {
   static displayName = 'AddItemPopover';
   static propTypes = {
-    addItems: PropTypes.func.isRequired
+    addItems: PropTypes.func.isRequired,
+    canCreateFilter: PropTypes.bool.isRequired
   };
 
   constructor(props) {
@@ -86,6 +87,7 @@ export class AddItemPopover extends Component {
         iconType="arrowDown"
         iconSide="right"
         onClick={this.onButtonClick}
+        isDisabled={this.props.canCreateFilter === false}
       >
         <FormattedMessage
           id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"

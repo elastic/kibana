@@ -7,84 +7,77 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { Stackframe } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { px, units } from '../../../style/variables';
-import { CodePreview } from '../../shared/CodePreview';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
-import { FrameHeading } from './FrameHeading';
-import { hasSourceLines } from './stacktraceUtils';
+import { Stackframe } from './Stackframe';
 
 const LibraryFrameToggle = styled.div`
   margin: 0 0 ${px(units.plus)} 0;
   user-select: none;
 `;
 
-interface LibraryStackFrameProps {
-  codeLanguage?: string;
-  stackframe: Stackframe;
-}
-
-const LibraryStackFrame: React.SFC<LibraryStackFrameProps> = ({
-  codeLanguage,
-  stackframe
-}) => {
-  return hasSourceLines(stackframe) ? (
-    <CodePreview
-      stackframe={stackframe}
-      isLibraryFrame
-      codeLanguage={codeLanguage}
-    />
-  ) : (
-    <FrameHeading stackframe={stackframe} isLibraryFrame />
-  );
-};
-
 interface Props {
-  visible?: boolean;
-  stackframes: Stackframe[];
+  stackframes: IStackframe[];
   codeLanguage?: string;
-  onClick: () => void;
+  initialVisiblity: boolean;
 }
 
-export const LibraryStackFrames: React.SFC<Props> = ({
-  visible,
-  stackframes,
-  codeLanguage,
-  onClick
-}) => {
-  if (stackframes.length === 0) {
-    return null;
-  }
+interface State {
+  isVisible: boolean;
+}
 
-  if (stackframes.length === 1) {
+export class LibraryStackFrames extends React.Component<Props, State> {
+  public state = {
+    isVisible: this.props.initialVisiblity
+  };
+
+  public onClick = () => {
+    this.setState(({ isVisible }) => ({ isVisible: !isVisible }));
+  };
+
+  public render() {
+    const { stackframes, codeLanguage } = this.props;
+    const { isVisible } = this.state;
+    if (stackframes.length === 0) {
+      return null;
+    }
+
+    if (stackframes.length === 1) {
+      return (
+        <Stackframe
+          isLibraryFrame
+          codeLanguage={codeLanguage}
+          stackframe={stackframes[0]}
+        />
+      );
+    }
+
     return (
-      <LibraryStackFrame
-        codeLanguage={codeLanguage}
-        stackframe={stackframes[0]}
-      />
+      <div>
+        <LibraryFrameToggle>
+          <EuiLink onClick={this.onClick}>
+            <Ellipsis
+              horizontal={isVisible}
+              style={{ marginRight: units.half }}
+            />{' '}
+            {stackframes.length} library frames
+          </EuiLink>
+        </LibraryFrameToggle>
+
+        <div>
+          {isVisible &&
+            stackframes.map((stackframe, i) => (
+              <Stackframe
+                key={i}
+                isLibraryFrame
+                codeLanguage={codeLanguage}
+                stackframe={stackframe}
+              />
+            ))}
+        </div>
+      </div>
     );
   }
-
-  return (
-    <div>
-      <LibraryFrameToggle>
-        <EuiLink onClick={onClick}>
-          <Ellipsis horizontal={visible} style={{ marginRight: units.half }} />{' '}
-          {stackframes.length} library frames
-        </EuiLink>
-      </LibraryFrameToggle>
-
-      <div>
-        {visible &&
-          stackframes.map((stackframe, i) => (
-            <LibraryStackFrame
-              key={i}
-              codeLanguage={codeLanguage}
-              stackframe={stackframe}
-            />
-          ))}
-      </div>
-    </div>
-  );
-};
+}

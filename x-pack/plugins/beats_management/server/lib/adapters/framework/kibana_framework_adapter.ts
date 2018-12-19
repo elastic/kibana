@@ -131,6 +131,9 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     } catch (e) {
       return null;
     }
+    if (user === null) {
+      return null;
+    }
     const assertKibanaUser = RuntimeKibanaUser.decode(user);
     if (assertKibanaUser.isLeft()) {
       throw new Error(

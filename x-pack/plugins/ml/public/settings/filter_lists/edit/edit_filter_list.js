@@ -77,7 +77,9 @@ function returnToFiltersList() {
 export const EditFilterList = injectI18n(class extends Component {
   static displayName = 'EditFilterList';
   static propTypes = {
-    filterId: PropTypes.string
+    filterId: PropTypes.string,
+    canCreateFilter: PropTypes.bool.isRequired,
+    canDeleteFilter: PropTypes.bool.isRequired
   };
 
   constructor(props) {
@@ -302,6 +304,7 @@ export const EditFilterList = injectI18n(class extends Component {
       itemsPerPage,
       activePage,
       saveInProgress } = this.state;
+    const { canCreateFilter, canDeleteFilter } = this.props;
 
     const totalItemCount = (items !== undefined) ? items.length : 0;
 
@@ -313,6 +316,7 @@ export const EditFilterList = injectI18n(class extends Component {
           horizontalPosition="center"
         >
           <EditFilterListHeader
+            canCreateFilter={canCreateFilter}
             filterId={this.props.filterId}
             newFilterId={newFilterId}
             isNewFilterIdInvalid={isNewFilterIdInvalid}
@@ -323,6 +327,8 @@ export const EditFilterList = injectI18n(class extends Component {
             usedBy={loadedFilter.used_by}
           />
           <EditFilterListToolbar
+            canCreateFilter={canCreateFilter}
+            canDeleteFilter={canDeleteFilter}
             onSearchChange={this.onSearchChange}
             addItems={this.addItems}
             deleteSelectedItems={this.deleteSelectedItems}
@@ -353,7 +359,10 @@ export const EditFilterList = injectI18n(class extends Component {
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={this.save}
-                disabled={(saveInProgress === true) || (isNewFilterIdInvalid === true)}
+                disabled={(saveInProgress === true) ||
+                  (isNewFilterIdInvalid === true) ||
+                  (canCreateFilter === false)
+                }
                 fill
               >
                 <FormattedMessage

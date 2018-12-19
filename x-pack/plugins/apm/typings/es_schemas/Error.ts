@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2, ContextService, Stackframe } from './APMDoc';
+import { APMDocV1, APMDocV2 } from './APMDoc';
+import {
+  ContextProcess,
+  ContextRequest,
+  ContextService,
+  ContextSystem
+} from './Context';
+import { IStackframe } from './Stackframe';
 
 interface Agent {
   hostname: string;
@@ -18,10 +25,11 @@ interface Processor {
 }
 
 interface Context {
-  process?: {
-    pid: number;
-  };
+  process?: ContextProcess;
   service: ContextService;
+  system?: ContextSystem;
+  request?: ContextRequest;
+  [key: string]: unknown;
 }
 
 interface Exception {
@@ -31,7 +39,7 @@ interface Exception {
   module?: string;
   attributes?: unknown;
   handled?: boolean;
-  stacktrace?: Stackframe[];
+  stacktrace?: IStackframe[];
 }
 
 interface Log {
@@ -39,7 +47,7 @@ interface Log {
   param_message?: string;
   logger_name?: string;
   level?: string;
-  stacktrace?: Stackframe[];
+  stacktrace?: IStackframe[];
 }
 
 interface ErrorV1 extends APMDocV1 {
@@ -71,7 +79,6 @@ interface ErrorV2 extends APMDocV2 {
   };
   error: {
     id: string; // ID is required in v2
-    timestamp: string;
     culprit: string;
     grouping_key: string;
     // either exception or log are given

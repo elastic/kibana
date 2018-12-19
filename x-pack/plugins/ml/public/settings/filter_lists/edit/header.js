@@ -30,6 +30,7 @@ import { EditDescriptionPopover } from '../components/edit_description_popover';
 import { FilterListUsagePopover } from '../components/filter_list_usage_popover';
 
 export const EditFilterListHeader = injectI18n(function ({
+  canCreateFilter,
   filterId,
   totalItemCount,
   description,
@@ -190,6 +191,7 @@ export const EditFilterListHeader = injectI18n(function ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EditDescriptionPopover
+            canCreateFilter={canCreateFilter}
             description={description}
             updateDescription={updateDescription}
           />
@@ -199,9 +201,10 @@ export const EditFilterListHeader = injectI18n(function ({
       {usedByElement}
     </React.Fragment>
   );
-
 });
+
 EditFilterListHeader.WrappedComponent.propTypes = {
+  canCreateFilter: PropTypes.bool.isRequired,
   filterId: PropTypes.string,
   newFilterId: PropTypes.string,
   isNewFilterIdInvalid: PropTypes.bool,

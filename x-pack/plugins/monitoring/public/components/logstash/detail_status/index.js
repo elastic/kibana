@@ -22,6 +22,9 @@ function DetailStatusUi({ stats, intl }) {
 
   const firstMetrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.transportAddressLabel', defaultMessage: 'Transport Address'
+      }),
       value: httpAddress,
       'data-test-subj': 'httpAddress'
     },

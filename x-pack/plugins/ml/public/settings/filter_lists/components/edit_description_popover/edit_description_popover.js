@@ -29,7 +29,8 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
   static displayName = 'EditDescriptionPopover';
   static propTypes = {
     description: PropTypes.string,
-    updateDescription: PropTypes.func.isRequired
+    updateDescription: PropTypes.func.isRequired,
+    canCreateFilter: PropTypes.bool.isRequired
   };
 
   constructor(props) {
@@ -81,6 +82,7 @@ export const EditDescriptionPopover = injectI18n(class extends Component {
           id: 'xpack.ml.settings.filterLists.editDescriptionPopover.editDescriptionAriaLabel',
           defaultMessage: 'Edit description',
         })}
+        isDisabled={this.props.canCreateFilter === false}
       />
     );
 

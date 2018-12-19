@@ -47,6 +47,8 @@ function EditHeader({
 
 export function CalendarForm({
   calendarId,
+  canCreateCalendar,
+  canDeleteCalendar,
   description,
   eventsList,
   groupIds,
@@ -71,6 +73,7 @@ export function CalendarForm({
     must start and end with an alphanumeric character`;
   const helpText = (isNewCalendarIdValid === true && !isEdit) ? msg : undefined;
   const error = (isNewCalendarIdValid === false && !isEdit) ? [msg] : undefined;
+  const saveButtonDisabled = (canCreateCalendar === false || saving || !isNewCalendarIdValid || calendarId === '');
 
   return (
     <EuiForm>
@@ -114,7 +117,7 @@ export function CalendarForm({
           options={jobIds}
           selectedOptions={selectedJobOptions}
           onChange={onJobSelection}
-          disabled={saving === true}
+          isDisabled={saving === true || canCreateCalendar === false}
         />
       </EuiFormRow>
 
@@ -126,7 +129,7 @@ export function CalendarForm({
           options={groupIds}
           selectedOptions={selectedGroupOptions}
           onChange={onGroupSelection}
-          disabled={saving === true}
+          isDisabled={saving === true || canCreateCalendar === false}
         />
       </EuiFormRow>
 
@@ -137,6 +140,8 @@ export function CalendarForm({
         fullWidth
       >
         <EventsTable
+          canCreateCalendar={canCreateCalendar}
+          canDeleteCalendar={canDeleteCalendar}
           eventsList={eventsList}
           onDeleteClick={onEventDelete}
           showImportModal={showImportModal}
@@ -148,16 +153,17 @@ export function CalendarForm({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-testid="ml_save_calendar_button"
             fill
             onClick={isEdit ? onEdit : onCreate}
-            disabled={saving || !isNewCalendarIdValid || calendarId === ''}
+            isDisabled={saveButtonDisabled}
           >
             {saving ? 'Saving...' : 'Save'}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            disabled={saving}
+            isDisabled={saving}
             href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
           >
             Cancel
@@ -170,6 +176,8 @@ export function CalendarForm({
 
 CalendarForm.propTypes = {
   calendarId: PropTypes.string.isRequired,
+  canCreateCalendar: PropTypes.bool.isRequired,
+  canDeleteCalendar: PropTypes.bool.isRequired,
   description: PropTypes.string.isRequired,
   groupIds: PropTypes.array.isRequired,
   isEdit: PropTypes.bool.isRequired,

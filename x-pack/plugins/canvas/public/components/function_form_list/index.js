@@ -12,7 +12,9 @@ import { modelRegistry, viewRegistry, transformRegistry } from '../../expression
 import { FunctionFormList as Component } from './function_form_list';
 
 function normalizeContext(chain) {
-  if (!Array.isArray(chain) || !chain.length) return null;
+  if (!Array.isArray(chain) || !chain.length) {
+    return null;
+  }
   return {
     type: 'expression',
     chain,
