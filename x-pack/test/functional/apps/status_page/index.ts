@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestInvoker } from './lib/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable:no-default-export
-export default function statusPage({ loadTestFile }: TestInvoker) {
+export default function statusPage({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('Status page', function statusPageTestSuite() {
     this.tags('ciGroup4');
 

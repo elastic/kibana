@@ -24,7 +24,9 @@ const mapStateToProps = state => ({
 
 const getAbsoluteUrl = path => {
   const { location } = getWindow();
-  if (!location) return path; // fallback for mocked window object
+  if (!location) {
+    return path;
+  } // fallback for mocked window object
 
   const { protocol, hostname, port } = location;
   return `${protocol}//${hostname}:${port}${path}`;
@@ -34,13 +36,16 @@ export const WorkpadExport = compose(
   connect(mapStateToProps),
   withProps(({ workpad, pageCount }) => ({
     getExportUrl: type => {
-      if (type === 'pdf') return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+      if (type === 'pdf') {
+        return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+      }
 
       throw new Error(`Unknown export type: ${type}`);
     },
     onCopy: type => {
-      if (type === 'pdf')
+      if (type === 'pdf') {
         return notify.info('The PDF generation URL was copied to your clipboard.');
+      }
 
       throw new Error(`Unknown export type: ${type}`);
     },

@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { intersection, uniq, values } from 'lodash';
+import { flatten, intersection, uniq, values } from 'lodash';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
-import { ConfigurationBlock } from '../../common/domain_types';
-import { FrameworkUser } from './adapters/framework/adapter_types';
-
+import { ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
 import { entries } from '../utils/polyfills';
+import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
 
 export class CMTagsDomain {
@@ -51,6 +50,27 @@ export class CMTagsDomain {
   }
 
   private validateConfigurationBlocks(configurationBlocks: any) {
+    // Get all output types in the array of config blocks
+    const outputTypes: string[] = configurationBlocks.reduce(
+      (typesCollector: string[], block: any) => {
+        if (block.type !== 'output') {
+          return typesCollector;
+        }
+        // get all keys, where the key is the output type with the exception of the output key itself.
+        const keys = flatten<string>(
+          block.configs.map((config: any) => Object.keys(config).filter(key => key !== 'output'))
+        );
+
+        typesCollector = [...typesCollector, ...keys];
+        return typesCollector;
+      },
+      []
+    );
+
+    // If not a provided output type, fail validation
+    if (outputTypes.some((type: string) => !OutputTypesArray.includes(type))) {
+      return { isValid: false, message: 'Invalid output type' };
+    }
     const types = uniq(configurationBlocks.map((block: any) => block.type));
 
     // If none of the types in the given configuration blocks are uniqueness-enforcing,
