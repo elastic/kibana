@@ -52,8 +52,10 @@ export const MonitorCharts = ({
       if (error) {
         return `Error ${error.message}`;
       }
+
+      // TODO: this should not exist in the UI, update the GQL resolver/schema to return
+      // an object that contains these series already shaped in the way required by the visualizations.
       const { monitorChartsData } = data;
-      // console.log(monitorChartsData);
       const rttWriteRequestSeries: any[] = [];
       const rttValidateSeries: any[] = [];
       const rttContentSeries: any[] = [];
