@@ -7,6 +7,8 @@
 import {
   EuiButton,
   EuiComboBox,
+  EuiDatePicker,
+  EuiDatePickerRange,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,
@@ -26,7 +28,7 @@ import {
   EuiPopover,
   EuiSwitch,
 } from '@elastic/eui';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -38,6 +40,8 @@ import { MonitorPage, OverviewPage } from './pages';
 export interface UptimePersistedState {
   autorefreshEnabled: boolean;
   autorefreshInterval: number;
+  dateRangeStart: number;
+  dateRangeEnd: number;
 }
 
 interface UptimeAppState {
@@ -117,6 +121,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
   public render() {
     const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
+    const dateRangeIsInvalid = () => this.state.dateRangeStart > this.state.dateRangeEnd;
     return (
       <Router basename={routerBasename}>
         <ApolloProvider client={graphQLClient}>
@@ -145,6 +150,38 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 )}
               </EuiHeaderSection>
               <EuiHeaderSection side="right">
+                <EuiHeaderSectionItem border="none">
+                  <div style={{ marginTop: '10px', marginLeft: '8px' }}>
+                    <EuiDatePickerRange
+                      endDateControl={
+                        <EuiDatePicker
+                          selected={moment(this.state.dateRangeEnd)}
+                          isInvalid={dateRangeIsInvalid()}
+                          aria-label="End Date"
+                          onChange={(e: Moment | null) => {
+                            if (e) {
+                              this.setState({ dateRangeEnd: e.valueOf() }, this.persistState);
+                            }
+                          }}
+                          showTimeSelect
+                        />
+                      }
+                      startDateControl={
+                        <EuiDatePicker
+                          selected={moment(this.state.dateRangeStart)}
+                          isInvalid={dateRangeIsInvalid()}
+                          aria-label="Start Date"
+                          onChange={(e: Moment | null) => {
+                            if (e) {
+                              this.setState({ dateRangeStart: e.valueOf() }, this.persistState);
+                            }
+                          }}
+                          showTimeSelect
+                        />
+                      }
+                    />
+                  </div>
+                </EuiHeaderSectionItem>
                 <EuiHeaderSectionItem border="none">
                   <EuiPopover
                     id="autorefresPopover"
@@ -248,10 +285,14 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     const {
       autorefreshEnabled,
       selectedAutorefresh: { value },
+      dateRangeStart,
+      dateRangeEnd,
     } = this.state;
     this.props.persistState({
       autorefreshEnabled,
       autorefreshInterval: value,
+      dateRangeStart,
+      dateRangeEnd,
     });
   };
 }

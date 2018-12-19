@@ -41,7 +41,12 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
             : basePath + PLUGIN.ROUTER_BASE_NAME;
-          const { autorefreshEnabled, autorefreshInterval } = this.initializePersistedState();
+          const {
+            autorefreshEnabled,
+            autorefreshInterval,
+            dateRangeStart,
+            dateRangeEnd,
+          } = this.initializePersistedState();
           ReactDOM.render(
             component({
               isUsingK7Design: $scope.k7design,
@@ -51,6 +56,8 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               graphQLClient,
               initialAutorefreshEnabled: autorefreshEnabled,
               initialAutorefreshInterval: autorefreshInterval,
+              initialDateRangeStart: dateRangeStart,
+              initialDateRangeEnd: dateRangeEnd,
               persistState: this.updatePersistedState,
             }),
             elem
