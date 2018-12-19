@@ -31,6 +31,79 @@ interface MonitorListProps {
   filters?: string;
 }
 
+const MONITOR_LIST_DEFAULT_PAGINATION = 10;
+
+const monitorListColumns = [
+  {
+    field: 'ping.monitor.status',
+    name: 'Status',
+    render: (status: string) => (
+      <EuiHealth color={status === 'up' ? 'success' : 'danger'}>
+        {status === 'up' ? 'Up' : 'Down'}
+      </EuiHealth>
+    ),
+    sortable: true,
+  },
+  {
+    field: 'ping.timestamp',
+    name: 'Last updated',
+    render: (timestamp: string) => moment(timestamp).fromNow(),
+    sortable: true,
+  },
+  {
+    field: 'ping.monitor.host',
+    name: 'Host',
+    render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
+  },
+  {
+    field: 'key.port',
+    name: 'Port',
+    sortable: true,
+  },
+  {
+    field: 'ping.monitor.type',
+    name: 'Type',
+    sortable: true,
+  },
+  { field: 'ping.monitor.ip', name: 'IP', sortable: true },
+  {
+    field: 'upSeries',
+    name: 'Monitor History',
+    // @ts-ignore TODO fix typing
+    render: (upSeries, monitor) => {
+      const { downSeries } = monitor;
+      return (
+        <EuiSeriesChart
+          showDefaultAxis={false}
+          width={160}
+          height={70}
+          xType={EuiSeriesChartUtils.SCALE.TIME}
+        >
+          <EuiLineSeries
+            lineSize={2}
+            color="green"
+            name="Up"
+            data={upSeries}
+            showLineMarks={true}
+          />
+          <EuiLineSeries
+            lineSize={2}
+            color="red"
+            name="Down"
+            data={downSeries}
+            showLineMarks={true}
+          />
+        </EuiSeriesChart>
+      );
+    },
+  },
+];
+
+const monitorListPagination = {
+  initialPageSize: MONITOR_LIST_DEFAULT_PAGINATION,
+  pageSizeOptions: [5, 10, 20, 50],
+};
+
 export const MonitorList = ({
   autorefreshInterval,
   autorefreshEnabled,
@@ -60,70 +133,10 @@ export const MonitorList = ({
           </EuiTitle>
           <EuiPanel paddingSize="l">
             <EuiInMemoryTable
-              columns={[
-                {
-                  field: 'ping.monitor.status',
-                  name: 'Status',
-                  render: (status: string) => (
-                    <EuiHealth color={status === 'up' ? 'success' : 'danger'}>
-                      {status === 'up' ? 'Up' : 'Down'}
-                    </EuiHealth>
-                  ),
-                },
-                {
-                  field: 'ping.timestamp',
-                  name: 'Last updated',
-                  render: (timestamp: string) => moment(timestamp).fromNow(),
-                },
-                {
-                  field: 'ping.monitor.host',
-                  name: 'Host',
-                  render: (host: string, monitor: any) => (
-                    <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>
-                  ),
-                },
-                {
-                  field: 'key.port',
-                  name: 'Port',
-                },
-                {
-                  field: 'ping.monitor.type',
-                  name: 'Type',
-                },
-                { field: 'ping.monitor.ip', name: 'IP' },
-                {
-                  field: 'upSeries',
-                  name: 'Monitor History',
-                  // @ts-ignore TODO fix typing
-                  render: (upSeries, monitor) => {
-                    const { downSeries } = monitor;
-                    return (
-                      <EuiSeriesChart
-                        showDefaultAxis={false}
-                        width={160}
-                        height={70}
-                        xType={EuiSeriesChartUtils.SCALE.TIME}
-                      >
-                        <EuiLineSeries
-                          lineSize={2}
-                          color="green"
-                          name="Up"
-                          data={upSeries}
-                          showLineMarks={true}
-                        />
-                        <EuiLineSeries
-                          lineSize={2}
-                          color="red"
-                          name="Down"
-                          data={downSeries}
-                          showLineMarks={true}
-                        />
-                      </EuiSeriesChart>
-                    );
-                  },
-                },
-              ]}
+              columns={monitorListColumns}
               items={monitors}
+              pagination={monitorListPagination}
+              sorting={true}
             />
           </EuiPanel>
         </Fragment>
