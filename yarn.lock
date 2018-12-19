@@ -2858,7 +2858,7 @@ async@^2.0.0, async@^2.1.4:
   dependencies:
     lodash "^4.14.0"
 
-async@^2.3.0, async@^2.5.0, async@^2.6.0, async@^2.6.1:
+async@^2.5.0, async@^2.6.0, async@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.1.tgz#b245a23ca71930044ec53fa46aa00a3e87c6a610"
   integrity sha512-fNEiL2+AZt6AlAw/29Cr0UDe4sRAHCpEHh54WMz+Bb7QfNcFw4h3loofyJpLeQs4Yx7yuqu/2dLgM5hKOs6HlQ==
@@ -13093,6 +13093,11 @@ loader-runner@^2.3.0:
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-2.3.0.tgz#f482aea82d543e07921700d5a46ef26fdac6b8a2"
   integrity sha1-9IKuqC1UPgeSFwDVpG7yb9rGuKI=
 
+loader-runner@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-2.3.1.tgz#026f12fe7c3115992896ac02ba022ba92971b979"
+  integrity sha512-By6ZFY7ETWOc9RFaAIb23IjJVcM4dvJC/N57nmdz9RSkMXvAXGI7SyVlAw3v8vjtDRlqThgVDVmTnr9fqMlxkw==
+
 loader-utils@^1.0.0, loader-utils@^1.0.1, loader-utils@^1.0.2, loader-utils@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-1.1.0.tgz#c98aef488bcceda2ffb5e2de646d6a754429f5cd"
@@ -19985,13 +19990,13 @@ textextensions@2:
   resolved "https://registry.yarnpkg.com/textextensions/-/textextensions-2.2.0.tgz#38ac676151285b658654581987a0ce1a4490d286"
   integrity sha512-j5EMxnryTvKxwH2Cq+Pb43tsf6sdEgw6Pdwxk83mPaq0ToeFJt6WE4J3s5BqY7vmjlLgkgXvhtXUxo80FyBhCA==
 
-thread-loader@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/thread-loader/-/thread-loader-1.2.0.tgz#35dedb23cf294afbbce6c45c1339b950ed17e7a4"
-  integrity sha512-acJ0rvUk53+ly9cqYWNOpPqOgCkNpmHLPDGduNm4hDQWF7EDKEJXAopG9iEWsPPcml09wePkq3NF+ZUqnO6tbg==
+thread-loader@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/thread-loader/-/thread-loader-2.0.1.tgz#027e07a4adbc7c684c9c21eaedf937edd0897924"
+  integrity sha512-kO0nJOwxOVx6VFc498PDBWS+e4DEa2EwBUrFrBe5Ii7JUUL63W84gDj+0YR9mxtuJcYwQH8Z02g7xG+4/FdqwQ==
   dependencies:
-    async "^2.3.0"
-    loader-runner "^2.3.0"
+    async "^2.6.1"
+    loader-runner "^2.3.1"
     loader-utils "^1.1.0"
 
 throat@^4.0.0:
