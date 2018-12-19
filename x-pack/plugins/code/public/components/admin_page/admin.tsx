@@ -36,8 +36,11 @@ import { RootState } from '../../reducers';
 import { CallOutType } from '../../reducers/repository';
 import { FlexGrowContainer } from '../../styled_components/flex_grow_container';
 import { RelativeContainer } from '../../styled_components/relative_container';
+import { EmptyProject } from './empty_project';
 import { InlineProgressContainer } from './inline_progress_container';
 import { LanguageSeverTab } from './language_server_tab';
+import { ProjectItem } from './project_item';
+import { ProjectTab } from './project_tab';
 import { SideBar } from './side_bar';
 
 const Container = styled.div`
@@ -70,6 +73,7 @@ enum AdminTabs {
 interface Props {
   repositories: Repository[];
   importLoading: boolean;
+  repositoryLoading: boolean;
   deleteRepo: (uri: string) => void;
   indexRepo: (uri: string) => void;
   importRepo: (uri: string) => void;
@@ -332,79 +336,81 @@ class AdminPage extends React.PureComponent<Props, State> {
       case AdminTabs.projects: {
         const repos = this.filterRepos();
         const repositoriesCount = repos.length;
-        const items = [
-          {
-            name: '',
-            id: '',
-            items: this.getSideNavItems(),
-          },
-        ];
-        const { callOutMessage, status, showCallOut, callOutType, isAdmin } = this.props;
-
-        const callOut = showCallOut && (
-          <EuiCallOut title={callOutTitle[callOutType!]} color={callOutType} iconType="cross">
-            {callOutMessage}
-          </EuiCallOut>
-        );
-
-        const importRepositoryModal = (
-          <EuiOverlayMask>
-            <EuiModal onClose={this.closeModal} className="importModal">
-              <EuiTitle size="s" className="importModalTitle">
-                <h1>Import Repository</h1>
-              </EuiTitle>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiSideNav items={items} />
-                </EuiFlexItem>
-                <FlexGrowContainer>
-                  <EuiFlexItem className="tabContent">{this.getTabContent()}</EuiFlexItem>
-                  {callOut}
-                </FlexGrowContainer>
-              </EuiFlexGroup>
-            </EuiModal>
-          </EuiOverlayMask>
-        );
+        const showEmpty = repositoriesCount === 0 && !this.props.repositoryLoading;
+        if (showEmpty) {
+          return <EmptyProject />;
+        }
 
         const repoList = repos.map(repo => (
-          <RepositoryItem
+          <ProjectItem
             key={repo.uri}
-            repoName={repo.name || ''}
-            repoURI={repo.uri}
-            deleteRepo={this.getDeleteRepoHandler(repo.uri)}
-            indexRepo={this.getIndexRepoHandler(repo.uri)}
-            initRepoCommand={this.props.initRepoCommand.bind(this, repo.uri)}
-            hasInitCmd={this.hasInitCmd(repo)}
+            project={repo}
             status={status[repo.uri]}
-            isAdmin={isAdmin}
+            isAdmin={this.props.isAdmin}
           />
         ));
-        return (
-          <React.Fragment>
-            <EuiTitle>
-              <h2>{repositoriesCount} repositories</h2>
-            </EuiTitle>
-            <div>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiSearchBar className="searchBox" onChange={this.onSearchQueryChange} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    className="addRepoButton"
-                    onClick={this.openModal}
-                    iconType="plusInCircle"
-                    aria-label="add"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-            <EuiPageContentBody>
-              <div>{repoList}</div>
-            </EuiPageContentBody>
-            {this.state.isModalVisible && importRepositoryModal}
-          </React.Fragment>
-        );
+
+        return <ProjectTab />;
+        // const items = [
+        //   {
+        //     name: '',
+        //     id: '',
+        //     items: this.getSideNavItems(),
+        //   },
+        // ];
+        // const { callOutMessage, status, showCallOut, callOutType, isAdmin } = this.props;
+
+        // const callOut = showCallOut && (
+        //   <EuiCallOut title={callOutTitle[callOutType!]} color={callOutType} iconType="cross">
+        //     {callOutMessage}
+        //   </EuiCallOut>
+        // );
+
+        // const importRepositoryModal = (
+        //   <EuiOverlayMask>
+        //     <EuiModal onClose={this.closeModal} className="importModal">
+        //       <EuiTitle size="s" className="importModalTitle">
+        //         <h1>Import Repository</h1>
+        //       </EuiTitle>
+        //       <EuiFlexGroup>
+        //         <EuiFlexItem grow={false}>
+        //           <EuiSideNav items={items} />
+        //         </EuiFlexItem>
+        //         <FlexGrowContainer>
+        //           <EuiFlexItem className="tabContent">{this.getTabContent()}</EuiFlexItem>
+        //           {callOut}
+        //         </FlexGrowContainer>
+        //       </EuiFlexGroup>
+        //     </EuiModal>
+        //   </EuiOverlayMask>
+        // );
+
+        // return (
+        //   <React.Fragment>
+        //     <EuiTitle>
+        //       <h2>{repositoriesCount} repositories</h2>
+        //     </EuiTitle>
+        //     <div>
+        //       <EuiFlexGroup>
+        //         <EuiFlexItem>
+        //           <EuiSearchBar className="searchBox" onChange={this.onSearchQueryChange} />
+        //         </EuiFlexItem>
+        //         <EuiFlexItem grow={false}>
+        //           <EuiButtonIcon
+        //             className="addRepoButton"
+        //             onClick={this.openModal}
+        //             iconType="plusInCircle"
+        //             aria-label="add"
+        //           />
+        //         </EuiFlexItem>
+        //       </EuiFlexGroup>
+        //     </div>
+        //     <EuiPageContentBody>
+        //       <div>{repoList}</div>
+        //     </EuiPageContentBody>
+        //     {this.state.isModalVisible && importRepositoryModal}
+        //   </React.Fragment>
+        // );
       }
       case AdminTabs.languageServers: {
         return <LanguageSeverTab />;
@@ -435,6 +441,7 @@ class AdminPage extends React.PureComponent<Props, State> {
 
 const mapStateToProps = (state: RootState) => ({
   repositories: state.repository.repositories,
+  repositoryLoading: state.repository.loading,
   importLoading: state.repository.importLoading,
   repoConfigs: state.repository.repoConfigs,
   showCallOut: state.repository.showCallOut,
