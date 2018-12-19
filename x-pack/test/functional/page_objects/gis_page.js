@@ -19,8 +19,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async loadSavedMap(name) {
       log.debug(`Load Saved Map ${name}`);
 
-      await this.gotoMapListingPage();
-
       await retry.try(async () => {
         await this.searchForMapWithName(name);
         await this.selectMap(name);
@@ -78,6 +76,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await testSubjects.click(`mapOpenLayerButton${layerName}`);
+    }
+
+    async doesLayerExist(layerName) {
+      log.debug(`Open layer panel, layer: ${layerName}`);
+      return await testSubjects.exists(`mapOpenLayerButton${layerName}`);
     }
 
     /*
