@@ -102,7 +102,7 @@ services:
     image: {docker-image}
     environment:
       SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_URL: http://elasticsearch.example.org
+      ELASTICSEARCH_HOSTS: http://elasticsearch.example.org
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take
@@ -117,7 +117,7 @@ images:
 [horizontal]
 `server.name`:: `kibana`
 `server.host`:: `"0"`
-`elasticsearch.url`:: `http://elasticsearch:9200`
+`elasticsearch.hosts`:: `http://elasticsearch:9200`
 `xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
 
 NOTE: The setting `xpack.monitoring.ui.container.elasticsearch.enabled` is not
