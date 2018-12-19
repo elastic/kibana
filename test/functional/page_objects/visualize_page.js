@@ -20,7 +20,6 @@
 import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
-import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -535,17 +534,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getInterval() {
-      const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      const selectedIndex = await select.getProperty('selectedIndex');
       const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`);
+        `select[ng-model="agg.params.interval"] option[selected]`);
       return await intervalElement.getProperty('label');
     }
 
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
-      await browser.pressKeys(Keys.RETURN);
+      await browser.pressKeys(browser.getKeys().RETURN);
     }
 
     async setCustomInterval(newValue) {
@@ -611,7 +608,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async sizeUpEditor() {
       await testSubjects.click('visualizeEditorResizer');
-      await browser.pressKeys(Keys.ARROW_RIGHT);
+      await browser.pressKeys(browser.getKeys().ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -886,11 +883,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getPieChartLabels() {
-      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+      return await retry.try(async () => {
+        const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
-      return await Promise.all(getChartTypesPromises);
+        const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
+        return await Promise.all(getChartTypesPromises);
+      });
     }
+
     async expectPieChartError() {
       return await testSubjects.existOrFail('visLibVisualizeError');
     }
@@ -985,6 +985,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualization() {
+      await testSubjects.waitForAttributeToChange('visualizationLoader', 'data-render-complete', 'true');
       return await find.byCssSelector('.visualization');
     }
 
@@ -1182,9 +1183,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
-      // Since slice is an SVG element we can't simply use .click() for it
-      await browser.moveMouseTo(slice);
-      await browser.clickMouseButton();
+      await slice.click();
     }
 
     async getPieSlice(name) {

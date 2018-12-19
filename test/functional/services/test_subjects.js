@@ -40,6 +40,11 @@ export function TestSubjectsProvider({ getService }) {
       return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
+    async existsInDOM(selector, timeout = WAIT_FOR_EXISTS_TIME) {
+      log.debug(`TestSubjects.existsInDOM(${selector})`);
+      return await find.existsByCssSelector(testSubjSelector(selector), timeout);
+    }
+
     async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       await retry.try(async () => {
         log.debug(`TestSubjects.existOrFail(${selector})`);

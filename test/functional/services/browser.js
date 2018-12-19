@@ -117,16 +117,17 @@ export async function BrowserProvider({ getService }) {
      */
     async dragAndDrop(from, to) {
       const actions = driver.actions({ bridge: true });
-      let _to = { x: 0, y: 0 };
+      //let _to = { x: 0, y: 0 };
       const _from = from.element._webElement;
+      const _to = to.element._webElement;
 
-      if (to.element) {
-        const position = await to.element.getPosition();
-        _to = { x: position.x, y: position.y };
-      }
-      const _toWithOffset = { x: _to.x + (to.xOffset || 0),  y: _to.y + (to.yOffset || 0) };
+      // if (to.element) {
+      //   const position = await to.element.getPosition();
+      //   _to = { x: position.x, y: position.y };
+      // }
+      //const _toWithOffset = { x: _to.x + (to.xOffset || 0),  y: _to.y + (to.yOffset || 0) };
 
-      await actions.dragAndDrop(_from, _toWithOffset).perform();
+      await actions.dragAndDrop(_from, _to).perform();
     }
 
     /**

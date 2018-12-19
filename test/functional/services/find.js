@@ -327,26 +327,16 @@ export async function FindProvider({ getService }) {
       defaultFindTimeout,
       `The element ${selector} was still present when it should have disappeared.`);
     }
-    async waitForAttributeToChange(selector, attribute, value) {
-      await driver.wait(async () => {
-        const element = await driver.findElement(By.css(selector));
-        const attrValue = await element.getAttribute(attribute);
-        return attrValue === value;
-      },
-      defaultFindTimeout,
-      `The element '${selector}' attribute '${attribute}' has not become '${value}'`);
-    }
-    async waitForAttributeToChange(selector, attribute, value) {
-      const locator = `${selector}[${attribute}="${value}"]`;
-      await retry.try(async () => {
-        await this.byCssSelector(locator);
-      });
-    }
+
     async waitForAttributeToChange(selector, attribute, value) {
       retry.waitFor(`${attribute} to equal "${value}"`, async () => {
         const el = await this.byCssSelector(selector);
         return value === await el.getAttribute(attribute);
       });
+    }
+
+    async waitForElementStale(element, timeout = defaultFindTimeout) {
+      await driver.wait(until.stalenessOf(element._webElement), timeout);
     }
   }
 

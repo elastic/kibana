@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
@@ -120,22 +121,30 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.filterPieSlice('Other');
         await PageObjects.visualize.waitForVisualization();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await retry.try(async () => {
+          const pieData = await PageObjects.visualize.getPieChartLabels();
+          log.debug(`pieData.length = ${pieData.length}`);
+          expect(pieData).to.eql(expectedTableData);
+        });
+
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should apply correct filter on other bucket by clicking on a legend', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
+        await PageObjects.visualize.waitForVisualization();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.filterLegend('Other');
         await PageObjects.visualize.waitForVisualization();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await retry.try(async () => {
+          const pieData = await PageObjects.visualize.getPieChartLabels();
+          log.debug(`pieData.length = ${pieData.length}`);
+          expect(pieData).to.eql(expectedTableData);
+        });
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should show two levels of other buckets', async () => {
@@ -154,9 +163,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleMissingBucket();
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await retry.try(async () => {
+          const pieData = await PageObjects.visualize.getPieChartLabels();
+          log.debug(`pieData.length = ${pieData.length}`);
+          expect(pieData).to.eql(expectedTableData);
+        });
       });
     });
 
