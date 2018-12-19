@@ -21,6 +21,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         Object {
           "field": "events_length",
           "name": "Events",
+          "render": [Function],
           "sortable": true,
         },
       ]
