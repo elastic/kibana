@@ -247,12 +247,10 @@ export function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
 }
 
 export function getTabs(error: APMError) {
-  const logStackframes = get(error, ERROR_LOG_STACKTRACE, []).length;
-  const context = error.context;
-
-  const contextKeys = Object.keys(context);
+  const hasLogStacktrace = get(error, ERROR_LOG_STACKTRACE, []).length > 0;
+  const contextKeys = Object.keys(error.context);
   return [
-    ...(logStackframes > 0 ? [LOG_STACKTRACE_TAB] : []),
+    ...(hasLogStacktrace ? [LOG_STACKTRACE_TAB] : []),
     EXC_STACKTRACE_TAB,
     ...getPropertyTabNames(contextKeys)
   ];
