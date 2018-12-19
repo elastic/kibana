@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
 import moment from 'moment';
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
@@ -13,22 +11,28 @@ import chrome, { Breadcrumb } from 'ui/chrome';
 import { PLUGIN } from '../../../../common/constants';
 import { UptimePersistedState } from '../../../uptime_monitoring_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
+import { CreateGraphQLClient } from './framework_adapter_types';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
+  private xsrfHeader: string;
+  private uriPath: string;
 
   constructor(uiRoutes: any) {
     this.uiRoutes = uiRoutes;
+    this.xsrfHeader = chrome.getXsrfToken();
+    this.uriPath = `${chrome.getBasePath()}/api/uptime_monitoring/graphql`;
   }
 
   public render = (
-    component: BootstrapUptimeApp,
-    graphQLClient: ApolloClient<NormalizedCacheObject>
+    renderComponent: BootstrapUptimeApp,
+    createGraphQLClient: CreateGraphQLClient
   ) => {
     const route = {
       controllerAs: 'uptime',
       // @ts-ignore angular
       controller: ($scope, $route, $http, config) => {
+        const graphQLClient = createGraphQLClient(this.uriPath, this.xsrfHeader);
         config.bindToScope($scope, 'k7design');
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeMonitoringReactRoot');
@@ -50,7 +54,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
             dateRangeEnd,
           } = persistedState;
           ReactDOM.render(
-            component({
+            renderComponent({
               isUsingK7Design: $scope.k7design,
               updateBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,

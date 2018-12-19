@@ -9,6 +9,7 @@ import ApolloClient from 'apollo-client';
 import React from 'react';
 import { Breadcrumb } from 'ui/chrome';
 import { UptimePersistedState } from '../uptime_monitoring_app';
+import { CreateGraphQLClient } from './adapters/framework/framework_adapter_types';
 
 export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
@@ -32,5 +33,5 @@ export interface UptimeAppProps {
 export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<any>;
 
 export interface UMFrameworkAdapter {
-  render(component: BootstrapUptimeApp, graphQLClient: ApolloClient<NormalizedCacheObject>): void;
+  render(createComponent: BootstrapUptimeApp, createGraphQLClient: CreateGraphQLClient): void;
 }

@@ -8,7 +8,6 @@ import 'react-vis/dist/style.css';
 import 'ui-bootstrap';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
-import chrome from 'ui/chrome';
 import 'ui/courier';
 import 'ui/persisted_log';
 import 'uiExports/autocompleteProviders';
@@ -17,8 +16,5 @@ import { UMFrontendLibs } from '../lib/lib';
 import { UptimeMonitoringApp } from '../uptime_monitoring_app';
 
 export async function startApp(libs: UMFrontendLibs) {
-  const uriPath = `${chrome.getBasePath()}/api/uptime_monitoring/graphql`;
-  const xsrfHeader = chrome.getXsrfToken();
-  const graphQLClient = createApolloClient(uriPath, xsrfHeader);
-  libs.framework.render(UptimeMonitoringApp, graphQLClient);
+  libs.framework.render(UptimeMonitoringApp, createApolloClient);
 }
