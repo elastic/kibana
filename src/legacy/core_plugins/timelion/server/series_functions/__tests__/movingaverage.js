@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const fn = require(`../moving_acerage`);
+const fn = require(`../moving_average`);
 const expect = require('chai').expect;
 
 import moment from 'moment';
