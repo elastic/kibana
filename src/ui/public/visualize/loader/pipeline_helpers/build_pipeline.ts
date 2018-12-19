@@ -222,9 +222,24 @@ export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) 
   if (buildPipelineVisFunction[vis.type.name]) {
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
   } else if (vislibCharts.includes(vis.type.name)) {
-    pipeline += `vislib type='${vis.type.name}'
-      ${prepareJson('visConfig', visState.params)}
-      ${prepareJson('schemas', schemas)}`;
+    const visConfig = visState.params;
+    visConfig.dimensions = {
+      y: schemas.metric,
+      z: schemas.radius,
+      width: schemas.width,
+      series: schemas.group,
+    };
+    if (schemas.segment) {
+      visConfig.dimensions.x = schemas.segment[0];
+      const xAgg = vis.aggs.getResponseAggs()[visConfig.dimensions.x.accessor];
+      if (xAgg.type.name === 'date_histogram') {
+        visConfig.dimensions.x.params.date = true;
+        visConfig.dimensions.x.params.interval = xAgg.buckets.getInterval().asMilliseconds();
+        visConfig.dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
+        visConfig.dimensions.x.params.bounds = xAgg.buckets.getBounds();
+      }
+    }
+    pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
   } else {
     pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visState.params)}

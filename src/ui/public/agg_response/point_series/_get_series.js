@@ -25,13 +25,13 @@ export function getSeries(rows, chart) {
   const aspects = chart.aspects;
   const multiY = Array.isArray(aspects.y);
   const yScale = chart.yScale;
-  const partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
+  const partGetPoint = _.partial(getPoint, aspects.x[0], aspects.series, yScale);
 
   let series = _(rows)
     .transform(function (series, row) {
       if (!multiY) {
         const point = partGetPoint(row, aspects.y, aspects.z);
-        if (point) addToSiri(series, point, point.series, point.series, aspects.y.aggConfig);
+        if (point) addToSiri(series, point, point.series, point.series);
         return;
       }
 
@@ -42,7 +42,7 @@ export function getSeries(rows, chart) {
         // use the point's y-axis as it's series by default,
         // but augment that with series aspect if it's actually
         // available
-        let seriesId = y.aggConfig.id;
+        let seriesId = y.accessor;
         let seriesLabel = y.title;
 
         if (aspects.series) {
@@ -51,7 +51,7 @@ export function getSeries(rows, chart) {
           seriesLabel = prefix + seriesLabel;
         }
 
-        addToSiri(series, point, seriesId, seriesLabel, y.aggConfig);
+        addToSiri(series, point, seriesId, seriesLabel);
       });
 
     }, new Map())
@@ -64,9 +64,8 @@ export function getSeries(rows, chart) {
       let y;
 
       if (firstVal) {
-        const agg = firstVal.aggConfigResult.aggConfig;
         y = _.find(aspects.y, function (y) {
-          return y.aggConfig === agg;
+          return y.accessor === firstVal.accessor;
         });
       }
 

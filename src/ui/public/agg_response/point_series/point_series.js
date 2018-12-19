@@ -28,21 +28,37 @@ export function AggResponsePointSeriesProvider(Private) {
 
   const tooltipFormatter = Private(PointSeriesTooltipFormatter);
 
-  return function pointSeriesChartDataFromTable(table) {
-    const chart = {};
-    const aspects = chart.aspects = getAspects(table);
-
-    chart.tooltipFormatter = tooltipFormatter;
+  return function pointSeriesChartDataFromTable(table, dimensions) {
+    const chart = {
+      aspects: getAspects(table, dimensions),
+      tooltipFormatter
+    };
 
     initXAxis(chart);
     initYAxis(chart);
 
-    const datedX = aspects.x.aggConfig.type.ordered && aspects.x.aggConfig.type.ordered.date;
-    if (datedX) {
+
+    if (chart.aspects.x[0].params.date) {
       orderedDateAxis(chart);
     }
 
     chart.series = getSeries(table.rows, chart);
+
+    // todo: fix .. width auto we get interval 0ms ?
+    if (!chart.ordered.interval) {
+      chart.ordered.interval = Number.MAX_SAFE_INTEGER;
+      chart.series.forEach(series => {
+        series.values.forEach((value, index) => {
+          if (index === series.values.length - 1) {
+            return;
+          }
+          const interval = series.values[index + 1] - value;
+          if (interval < chart.ordered.interval) {
+            chart.ordered.itnerval = interval;
+          }
+        });
+      });
+    }
 
     delete chart.aspects;
     return chart;

@@ -18,13 +18,23 @@
  */
 
 import { identity } from 'lodash';
+import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
 
+const config = chrome.getUiSettingsClient();
+
+const defaultFormat = { convert: identity };
+const getConfig = (...args) => config.get(...args);
+
 export const getFieldFormat = (mapping: any) => {
   if (!mapping) {
-    return;
+    return defaultFormat;
   }
   const FieldFormat = fieldFormats.byId[mapping.id];
-  return FieldFormat && new FieldFormat(mapping.params, identity);
+  if (FieldFormat) {
+    return new FieldFormat(mapping.params, getConfig);
+  } else {
+    return defaultFormat;
+  }
 };

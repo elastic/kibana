@@ -37,8 +37,10 @@ export function makeFakeXAspect() {
   };
 
   return {
-    i: -1,
-    aggConfig: fake,
+    accessor: -1,
+    //aggConfig: fake,
     title: fake.makeLabel(),
+    params: {},
+    fieldFormatter: () => '',
   };
 }
