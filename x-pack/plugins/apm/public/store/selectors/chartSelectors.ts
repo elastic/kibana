@@ -132,7 +132,7 @@ export function getResponseTimeSeries(
 
 export function getAnomalyScoreSeries(data: RectCoordinate[]) {
   return {
-    title: i18n.translate('xpack.apm.transactions.series.anomalyScoreLabel', {
+    title: i18n.translate('xpack.apm.transactions.chart.anomalyScoreLabel', {
       defaultMessage: 'Anomaly score'
     }),
     hideLegend: true,
@@ -147,7 +147,7 @@ export function getAnomalyScoreSeries(data: RectCoordinate[]) {
 function getAnomalyBoundariesSeries(data: Coordinate[]) {
   return {
     title: i18n.translate(
-      'xpack.apm.transactions.series.anomalyBoundariesLabel',
+      'xpack.apm.transactions.chart.anomalyBoundariesLabel',
       {
         defaultMessage: 'Anomaly Boundaries'
       }
