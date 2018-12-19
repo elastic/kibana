@@ -64,7 +64,7 @@ export class HeatmapLayer extends ALayer {
     }
 
     const scaledPropertyName = '__kbn_heatmap_weight__';
-    const propertyName = 'value';
+    const propertyName = 'doc_count';
     const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       let max = 0;

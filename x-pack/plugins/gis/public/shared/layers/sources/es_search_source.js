@@ -63,8 +63,9 @@ export class ESSearchSource extends VectorSource {
 
   async getNumberFields() {
     const indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    const numberFields = indexPattern.fields.byType.number;
-    return numberFields.map(f => f.name);
+    return indexPattern.fields.byType.number.map(field => {
+      return { name: field.name, label: field.name };
+    });
   }
 
   isFieldAware() {

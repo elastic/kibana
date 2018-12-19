@@ -138,12 +138,11 @@ export class VectorLayer extends ALayer {
   }
 
   async getOrdinalFields() {
-
     const numberFields = await this._source.getNumberFields();
-    const numberFieldOptions = numberFields.map(name => {
+    const numberFieldOptions = numberFields.map(({ label, name }) => {
       return {
-        label: name,
-        name: name,
+        label,
+        name,
         origin: 'source'
       };
     });

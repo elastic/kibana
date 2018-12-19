@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
@@ -21,7 +22,7 @@ import {
 import { createExtentFilter, makeGeohashGridPolygon } from '../../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+import { convertToGeoJson } from './convert_to_geojson';
 import { ESSourceDetails } from '../../../components/es_source_details';
 import { ZOOM_TO_PRECISION } from '../../../utils/zoom_to_precision';
 import { VectorStyle } from '../../styles/vector_style';
@@ -29,14 +30,17 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 
+const COUNT_PROP_LABEL = 'Count';
+const COUNT_PROP_NAME = 'doc_count';
+
 const aggSchemas = new Schemas([
   {
     group: 'metrics',
     name: 'metric',
     title: 'Value',
     min: 1,
-    max: 1,  // TODO add support for multiple metric aggregations - convertToGeoJson will need to be tweeked
-    aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
+    max: Infinity,
+    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
     defaults: [
       { schema: 'metric', type: 'count' }
     ]
@@ -119,12 +123,6 @@ export class ESGeohashGridSource extends VectorSource {
       });
     }
 
-    featureCollection.features.forEach((feature) => {
-      //give this some meaningful name
-      feature.properties.doc_count = feature.properties.value;
-      delete feature.properties.value;
-    });
-
     return {
       data: featureCollection,
       meta: {
@@ -133,8 +131,20 @@ export class ESGeohashGridSource extends VectorSource {
     };
   }
 
+  isFieldAware() {
+    return true;
+  }
+
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
+    });
+  }
+
   async getNumberFields() {
-    return ['doc_count'];
+    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
+      return { label, name };
+    });
   }
 
   async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
@@ -202,18 +212,52 @@ export class ESGeohashGridSource extends VectorSource {
     return indexPattern;
   }
 
+  _getValidMetrics() {
+    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
+      if (type === 'count') {
+        return true;
+      }
+
+      if (field) {
+        return true;
+      }
+      return false;
+    });
+    if (metrics.length === 0) {
+      metrics.push({ type: 'count' });
+    }
+    return metrics;
+  }
+
+  getMetricFields() {
+    return this._getValidMetrics().map(metric => {
+      return {
+        ...metric,
+        propertyKey: metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME,
+        propertyLabel: metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL,
+      };
+    });
+  }
+
   _makeAggConfigs(precision) {
-    return [
-      // TODO allow user to configure metric(s) aggregations
-      {
-        id: '1',
+    const metricAggConfigs = this.getMetricFields().map(metric => {
+      const metricAggConfig = {
+        id: metric.propertyKey,
         enabled: true,
-        type: 'count',
+        type: metric.type,
         schema: 'metric',
         params: {}
-      },
+      };
+      if (metric.type !== 'count') {
+        metricAggConfig.params = { field: metric.field };
+      }
+      return metricAggConfig;
+    });
+
+    return [
+      ...metricAggConfigs,
       {
-        id: '2',
+        id: 'grid',
         enabled: true,
         type: 'geohash_grid',
         schema: 'segment',
@@ -242,44 +286,44 @@ export class ESGeohashGridSource extends VectorSource {
     });
     descriptor.style = {
       ...descriptor.style,
-      "type": "VECTOR",
-      "properties": {
-        "fillColor": {
-          "type": "DYNAMIC",
-          "options": {
-            "field": {
-              "label": "doc_count",
-              "name": "doc_count",
-              "origin": "source"
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: COUNT_PROP_LABEL,
+              name: COUNT_PROP_NAME,
+              origin: 'source'
             },
-            "color": "Blues"
+            color: 'Blues'
           }
         },
-        "lineColor": {
-          "type": "STATIC",
-          "options": {
-            "color": "#cccccc"
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#cccccc'
           }
         },
-        "lineWidth": {
-          "type": "STATIC",
-          "options": {
-            "size": 1
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 1
           }
         },
-        "iconSize": {
-          "type": "DYNAMIC",
-          "options": {
-            "field": {
-              "label": "doc_count",
-              "name": "doc_count",
-              "origin": "source"
+        iconSize: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: COUNT_PROP_LABEL,
+              name: COUNT_PROP_NAME,
+              origin: 'source'
             },
-            "minSize": 4,
-            "maxSize": 32,
+            minSize: 4,
+            maxSize: 32,
           }
         },
-        "alphaValue": 1
+        alphaValue: 1
       }
     };
     return descriptor;

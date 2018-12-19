@@ -231,20 +231,36 @@ export function addPreviewLayer(layer, position) {
 
   const layerDescriptor = layer.toLayerDescriptor();
 
-  return async (dispatch, getState) => {
-    await dispatch(addLayer(layerDescriptor, position));
-    const dataFilters = getDataFilters(getState());
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    await layer.syncData({ ...loadingFunctions, dataFilters });
+  return (dispatch) => {
+    dispatch(addLayer(layerDescriptor, position));
+    dispatch(syncDataForLayer(layer.getId()));
   };
 }
 
 export function updateSourceProp(layerId, propName, value) {
-  return {
-    type: UPDATE_SOURCE_PROP,
-    layerId,
-    propName,
-    value,
+
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_SOURCE_PROP,
+      layerId,
+      propName,
+      value,
+    });
+
+    dispatch(syncDataForLayer(layerId));
+  };
+}
+
+export function syncDataForLayer(layerId) {
+  return (dispatch, getState) => {
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
+    if (targetLayer) {
+      const dataFilters = getDataFilters(getState());
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
+      targetLayer.syncData({ ...loadingFunctions, dataFilters });
+    }
   };
 }
 
@@ -338,27 +354,21 @@ export function updateLayerStyleForSelectedLayer(style, temporary = true) {
         temporary
       },
     });
-    const state = getState();
-    const dataFilters = getDataFilters(state);
-    const layer = getSelectedLayer(state);
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    await layer.syncData({ ...loadingFunctions, dataFilters });
+    const layer = getSelectedLayer(getState());
+    dispatch(syncDataForLayer(layer.getId()));
   };
 }
 
 export function setJoinsForLayer(layer, joins) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     console.warn('Not Implemented: must remove any styles that are driven by join-fields that are no longer present');
     await dispatch({
       type: SET_JOINS,
       layer: layer,
       joins: joins
     });
-    const dataFilters = getDataFilters(getState());
-    const layersWithJoin = getLayerList(getState());
-    const layerWithJoin = layersWithJoin.find(lwj => lwj.getId() === layer.getId());
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    await layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
+
+    dispatch(syncDataForLayer(layer.getId()));
   };
 }
 
