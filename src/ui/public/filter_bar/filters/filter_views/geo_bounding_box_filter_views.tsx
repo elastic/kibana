@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { GeoBoundingBoxFilter } from '../geo_bounding_box_filter';
+import { FilterViews } from './index';
 
-export type PhraseFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-  value: string; // The formatted value
-  params: {
-    query: string; // The unformatted value
+export function getGeoBoundingBoxFilterViews(filter: GeoBoundingBoxFilter): FilterViews {
+  return {
+    getDisplayText() {
+      const { meta } = filter;
+      const { key, params } = meta;
+      const { bottom_right: bottomRight, top_left: topLeft } = params;
+      return `${key}: ${JSON.stringify(topLeft)} to ${JSON.stringify(bottomRight)}`;
+    },
   };
-};
-
-export type PhraseFilter = MetaFilter & {
-  meta: PhraseFilterMeta;
-};
+}

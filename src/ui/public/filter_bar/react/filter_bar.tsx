@@ -20,33 +20,93 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
-import { FilterItem } from 'ui/filter_bar/react/filter_item';
+import { FilterOptions } from 'ui/search_bar/components/filter_options';
+import {
+  disableFilter,
+  enableFilter,
+  MetaFilter,
+  pinFilter,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  toggleFilterPinned,
+  unpinFilter,
+} from '../filters';
+import { FilterItem } from './filter_item';
 
 interface Props {
   filters: MetaFilter[];
-  onToggleNegate: (filter: MetaFilter) => void;
-  onToggleDisabled: (filter: MetaFilter) => void;
-  onTogglePin: (filter: MetaFilter) => void;
-  onDelete: (filter: MetaFilter) => void;
+  onFiltersUpdated: (filters: MetaFilter[]) => void;
   className: string;
 }
 
 export class FilterBar extends Component<Props> {
-  public onToggleNegate = (filter: MetaFilter) => {
-    this.props.onToggleNegate(filter);
+  public onToggleNegated = (i: number) => {
+    const filters = [...this.props.filters];
+    filters[i] = toggleFilterNegated(filters[i]);
+    this.props.onFiltersUpdated(filters);
   };
 
-  public onTogglePin = (filter: MetaFilter) => {
-    this.props.onTogglePin(filter);
+  public onTogglePinned = (i: number) => {
+    const filters = [...this.props.filters];
+    filters[i] = toggleFilterPinned(filters[i]);
+    this.props.onFiltersUpdated(filters);
   };
 
-  public onToggleDisabled = (filter: MetaFilter) => {
-    this.props.onToggleDisabled(filter);
+  public onToggleDisabled = (i: number) => {
+    const filters = [...this.props.filters];
+    filters[i] = toggleFilterDisabled(filters[i]);
+    this.props.onFiltersUpdated(filters);
   };
 
-  public onDelete = (filter: MetaFilter) => {
-    this.props.onDelete(filter);
+  public onAdd = (filter: MetaFilter) => {
+    const filters = [...this.props.filters, filter];
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onRemove = (i: number) => {
+    const filters = [...this.props.filters];
+    filters.splice(i, 1);
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onUpdate = (i: number, filter: MetaFilter) => {
+    const filters = [...this.props.filters];
+    filters[i] = filter;
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onEnableAll = () => {
+    const filters = this.props.filters.map(filter => enableFilter(filter));
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onDisableAll = () => {
+    const filters = this.props.filters.map(filter => disableFilter(filter));
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onPinAll = () => {
+    const filters = this.props.filters.map(filter => pinFilter(filter));
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onUnpinAll = () => {
+    const filters = this.props.filters.map(filter => unpinFilter(filter));
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onToggleAllNegated = () => {
+    const filters = this.props.filters.map(filter => toggleFilterNegated(filter));
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onToggleAllDisabled = () => {
+    const filters = this.props.filters.map(filter => toggleFilterDisabled(filter));
+    this.props.onFiltersUpdated(filters);
+  };
+
+  public onRemoveAll = () => {
+    this.props.onFiltersUpdated([]);
   };
 
   public render() {
@@ -57,10 +117,10 @@ export class FilterBar extends Component<Props> {
         <EuiFlexItem key={i} grow={false}>
           <FilterItem
             filter={filter}
-            onToggleNegate={this.onToggleNegate}
-            onToggleDisabled={this.onToggleDisabled}
-            onTogglePin={this.onTogglePin}
-            onDelete={this.onDelete}
+            onTogglePinned={() => this.onTogglePinned(i)}
+            onToggleNegated={() => this.onToggleNegated(i)}
+            onToggleDisabled={() => this.onToggleDisabled(i)}
+            onRemove={() => this.onRemove(i)}
           />
         </EuiFlexItem>
       );
@@ -68,14 +128,35 @@ export class FilterBar extends Component<Props> {
 
     return (
       <EuiFlexGroup
-        className={classes}
-        wrap={true}
+        className="globalFilterGroup"
+        gutterSize="none"
+        alignItems="flexStart"
         responsive={false}
-        gutterSize="xs"
-        alignItems="center"
       >
-        {/* TODO display pinned filters first*/}
-        {filterItems}
+        <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
+          <FilterOptions
+            onEnableAll={this.onEnableAll}
+            onDisableAll={this.onDisableAll}
+            onPinAll={this.onPinAll}
+            onUnpinAll={this.onUnpinAll}
+            onToggleAllNegated={this.onToggleAllNegated}
+            onToggleAllDisabled={this.onToggleAllDisabled}
+            onRemoveAll={this.onRemoveAll}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFlexGroup
+            className={classes}
+            wrap={true}
+            responsive={false}
+            gutterSize="xs"
+            alignItems="center"
+          >
+            {/* TODO display pinned filters first*/}
+            {filterItems}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

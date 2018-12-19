@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { GeoPolygonFilter } from '../geo_polygon_filter';
+import { FilterViews } from './index';
 
-export type PhraseFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-  value: string; // The formatted value
-  params: {
-    query: string; // The unformatted value
+export function getGeoPolygonFilterViews(filter: GeoPolygonFilter): FilterViews {
+  return {
+    getDisplayText() {
+      const { meta } = filter;
+      const { key, params } = meta;
+      const { points } = params;
+      return `${key}: ${points.map(point => JSON.stringify(point)).join(', ')}`;
+    },
   };
-};
-
-export type PhraseFilter = MetaFilter & {
-  meta: PhraseFilterMeta;
-};
+}

@@ -65,12 +65,6 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { createPhraseFilter } from '../../../../../../ui/public/filter_bar/filters/phrase_filter';
-import {
-  createMetaFilter, enable, disable, pin, unpin,
-  toggleDisabled,
-  toggleNegation, togglePinned,
-} from '../../../../../../ui/public/filter_bar/filters/meta_filter';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -186,63 +180,6 @@ function discoverController(
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const inspectorAdapters = {
     requests: new RequestAdapter()
-  };
-
-
-  $scope.reactFilters = [
-    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'security', index: 'foo' })),
-    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'error', index: 'foo' })),
-    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'info', index: 'foo' })),
-    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'foo', index: 'foo' })),
-  ];
-
-  $scope.onToggleNegate = (filter) => {
-    const index = $scope.reactFilters.indexOf(filter);
-    $scope.reactFilters[index] = toggleNegation(filter);
-  };
-
-  $scope.onTogglePin = (filter) => {
-    const index = $scope.reactFilters.indexOf(filter);
-    $scope.reactFilters[index] = togglePinned(filter);
-  };
-
-  $scope.onToggleDisabled = (filter) => {
-    const index = $scope.reactFilters.indexOf(filter);
-    $scope.reactFilters[index] = toggleDisabled(filter);
-  };
-
-  $scope.onDelete = (filterToDelete) => {
-    $scope.reactFilters = $scope.reactFilters.filter((filter) => filter !== filterToDelete);
-  };
-
-  $scope.onAllFiltersAction = (action) => {
-    if (action === 'delete') {
-      $scope.reactFilters = [];
-    }
-    else {
-      $scope.reactFilters.forEach((filter, index) => {
-        switch (action) {
-          case 'enable':
-            $scope.reactFilters[index] = enable(filter);
-            break;
-          case 'disable':
-            $scope.reactFilters[index] = disable(filter);
-            break;
-          case 'pin':
-            $scope.reactFilters[index] = pin(filter);
-            break;
-          case 'unpin':
-            $scope.reactFilters[index] = unpin(filter);
-            break;
-          case 'toggleNegate':
-            $scope.reactFilters[index] = toggleNegation(filter);
-            break;
-          case 'toggleDisabled':
-            $scope.reactFilters[index] = toggleDisabled(filter);
-            break;
-        }
-      });
-    }
   };
 
   $scope.getDocLink = getDocLink;
@@ -413,6 +350,13 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
@@ -549,6 +493,7 @@ function discoverController(
 
         // update data source when filters update
         $scope.$listen(queryFilter, 'update', function () {
+          $scope.filters = queryFilter.getFilters();
           return $scope.updateDataSource().then(function () {
             $state.save();
           });

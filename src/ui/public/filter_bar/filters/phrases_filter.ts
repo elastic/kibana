@@ -19,14 +19,12 @@
 
 import { FilterMeta, MetaFilter } from './meta_filter';
 
-export type PhraseFilterMeta = FilterMeta & {
+export type PhrasesFilterMeta = FilterMeta & {
   key: string; // The name of the field
-  value: string; // The formatted value
-  params: {
-    query: string; // The unformatted value
-  };
+  params: string[]; // The unformatted values
+  value: string; // The formatted values concatenated together
 };
 
-export type PhraseFilter = MetaFilter & {
-  meta: PhraseFilterMeta;
+export type PhrasesFilter = MetaFilter & {
+  meta: PhrasesFilterMeta;
 };

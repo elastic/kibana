@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { FilterMeta, LatLon, MetaFilter } from './meta_filter';
 
-export type PhraseFilterMeta = FilterMeta & {
+export type GeoBoundingBoxFilterMeta = FilterMeta & {
   key: string; // The name of the field
-  value: string; // The formatted value
   params: {
-    query: string; // The unformatted value
+    bottom_right: LatLon;
+    top_left: LatLon;
   };
 };
 
-export type PhraseFilter = MetaFilter & {
-  meta: PhraseFilterMeta;
+export type GeoBoundingBoxFilter = MetaFilter & {
+  meta: GeoBoundingBoxFilterMeta;
 };

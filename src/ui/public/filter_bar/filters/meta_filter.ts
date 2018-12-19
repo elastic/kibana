@@ -17,103 +17,68 @@
  * under the License.
  */
 
-import { Filter } from 'ui/filter_bar/filters/index';
+export enum FilterStateStore {
+  APP_STATE = 'appState',
+  GLOBAL_STATE = 'globalState',
+}
 
-export interface MetaFilter {
-  filter: Filter;
+export interface FilterState {
+  store: FilterStateStore;
+}
+
+export interface FilterMeta {
+  type: string;
   disabled: boolean;
   negate: boolean;
-  pinned: boolean;
-  index?: string;
-  toElasticsearchQuery: () => void;
+  alias: string | null;
+  index: string;
 }
 
-interface CreateMetaFilterOptions {
-  disabled?: boolean;
-  negate?: boolean;
-  pinned?: boolean;
-  index?: string;
+export interface MetaFilter {
+  $state: FilterState;
+  meta: FilterMeta;
+  query?: any;
 }
 
-export function createMetaFilter(
-  filter: Filter,
-  { disabled = false, negate = false, pinned = false, index }: CreateMetaFilterOptions = {}
-): MetaFilter {
-  return {
-    filter,
-    disabled,
-    negate,
-    pinned,
-    index,
-    toElasticsearchQuery: () => {
-      // TODO implement me
-      // if negate === true then wrap filter in a `not` filter
-      // call underlying filter's toElasticsearchQuery
-      // e.g. Object.getPrototypeOf(this).toElasticsearchQuery();
-    },
-  };
+export interface LatLon {
+  lat: number;
+  lon: number;
 }
 
-export function enable(metaFilter: MetaFilter) {
-  return {
-    ...metaFilter,
-    disabled: false,
-  };
+export function isFilterPinned(filter: MetaFilter) {
+  return filter.$state.store === FilterStateStore.GLOBAL_STATE;
 }
 
-export function disable(metaFilter: MetaFilter) {
-  return {
-    ...metaFilter,
-    disabled: true,
-  };
+export function toggleFilterDisabled(filter: MetaFilter) {
+  const disabled = !filter.meta.disabled;
+  const meta = { ...filter.meta, disabled };
+  return { ...filter, meta };
 }
 
-export function pin(metaFilter: MetaFilter) {
-  return {
-    ...metaFilter,
-    pinned: true,
-  };
+export function toggleFilterNegated(filter: MetaFilter) {
+  const negate = !filter.meta.negate;
+  const meta = { ...filter.meta, negate };
+  return { ...filter, meta };
 }
 
-export function unpin(metaFilter: MetaFilter) {
-  return {
-    ...metaFilter,
-    pinned: false,
-  };
+export function toggleFilterPinned(filter: MetaFilter) {
+  const store = isFilterPinned(filter) ? FilterStateStore.APP_STATE : FilterStateStore.GLOBAL_STATE;
+  const $state = { ...filter.$state, store };
+  return { ...filter, $state };
 }
 
-export function toggleNegation(metaFilter: MetaFilter) {
-  const negate = !metaFilter.negate;
-  return {
-    ...metaFilter,
-    negate,
-  };
+export function enableFilter(filter: MetaFilter) {
+  return !filter.meta.disabled ? filter : toggleFilterDisabled(filter);
 }
 
-export function togglePinned(metaFilter: MetaFilter) {
-  const pinned = !metaFilter.pinned;
-  return {
-    ...metaFilter,
-    pinned,
-  };
+export function disableFilter(filter: MetaFilter) {
+  return filter.meta.disabled ? filter : toggleFilterDisabled(filter);
 }
 
-export function toggleDisabled(metaFilter: MetaFilter) {
-  const disabled = !metaFilter.disabled;
-  return {
-    ...metaFilter,
-    disabled,
-  };
+export function pinFilter(filter: MetaFilter) {
+  return isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
 }
 
-export function updateFilter(metaFilter: MetaFilter, updateObject: Partial<Filter>) {
-  const updatedFilter = {
-    ...metaFilter.filter,
-    ...updateObject,
-  };
-
-  return {
-    ...metaFilter,
-    filter: updatedFilter,
-  };
+export function unpinFilter(filter: MetaFilter) {
+  return !isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
 }

@@ -20,17 +20,17 @@
 import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { getFilterDisplayText } from 'ui/filter_bar/filters/filter_views';
-import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
-import { FilterEditor } from 'ui/filter_bar/react/filter_editor';
+import { isFilterPinned, MetaFilter } from '../filters';
+import { getFilterDisplayText } from '../filters/filter_views';
+import { FilterEditor } from './filter_editor';
 
 interface Props {
   filter: MetaFilter;
   className?: string;
-  onTogglePin: (filter: MetaFilter) => void;
-  onToggleNegate: (filter: MetaFilter) => void;
+  onTogglePinned: (filter: MetaFilter) => void;
+  onToggleNegated: (filter: MetaFilter) => void;
   onToggleDisabled: (filter: MetaFilter) => void;
-  onDelete: (filter: MetaFilter) => void;
+  onRemove: (filter: MetaFilter) => void;
 }
 
 interface State {
@@ -43,14 +43,14 @@ export class FilterItem extends Component<Props, State> {
   };
 
   public render() {
-    const filter = this.props.filter;
-    const { negate, disabled, pinned } = filter;
+    const { filter } = this.props;
+    const { negate, disabled } = filter.meta;
 
     const classes = classNames(
       'globalFilterItem',
       {
         'globalFilterItem-isDisabled': disabled,
-        'globalFilterItem-isPinned': pinned,
+        'globalFilterItem-isPinned': isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
       },
       this.props.className
@@ -61,7 +61,7 @@ export class FilterItem extends Component<Props, State> {
         id={'foo'}
         className={classes}
         title={'foo'}
-        iconOnClick={() => this.props.onDelete(filter)}
+        iconOnClick={() => this.props.onRemove(filter)}
         iconOnClickAriaLabel={`Delete filter`}
         iconType="cross"
         // @ts-ignore
@@ -83,11 +83,11 @@ export class FilterItem extends Component<Props, State> {
         id: 0,
         items: [
           {
-            name: `${pinned ? 'Unpin' : 'Pin across all apps'}`,
+            name: `${isFilterPinned(filter) ? 'Unpin' : 'Pin across all apps'}`,
             icon: 'pin',
             onClick: () => {
               this.closePopover();
-              this.props.onTogglePin(filter);
+              this.props.onTogglePinned(filter);
             },
           },
           {
@@ -100,7 +100,7 @@ export class FilterItem extends Component<Props, State> {
             icon: `${negate ? 'plusInCircle' : 'minusInCircle'}`,
             onClick: () => {
               this.closePopover();
-              this.props.onToggleNegate(filter);
+              this.props.onToggleNegated(filter);
             },
           },
           {
@@ -116,7 +116,7 @@ export class FilterItem extends Component<Props, State> {
             icon: 'trash',
             onClick: () => {
               this.closePopover();
-              this.props.onDelete(filter);
+              this.props.onRemove(filter);
             },
           },
         ],
@@ -126,7 +126,7 @@ export class FilterItem extends Component<Props, State> {
         width: 400,
         content: (
           <div style={{ padding: 16 }}>
-            <FilterEditor foo={'yo'} />
+            <FilterEditor filter={filter} />
           </div>
         ),
       },

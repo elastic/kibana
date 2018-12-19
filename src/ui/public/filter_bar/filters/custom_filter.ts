@@ -17,16 +17,8 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { MetaFilter } from './meta_filter';
 
-export type PhraseFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-  value: string; // The formatted value
-  params: {
-    query: string; // The unformatted value
-  };
-};
-
-export type PhraseFilter = MetaFilter & {
-  meta: PhraseFilterMeta;
+export type CustomFilter = MetaFilter & {
+  query: any;
 };

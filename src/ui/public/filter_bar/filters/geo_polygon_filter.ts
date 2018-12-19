@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { FilterMeta, LatLon, MetaFilter } from './meta_filter';
 
-export type PhraseFilterMeta = FilterMeta & {
+export type GeoPolygonFilterMeta = FilterMeta & {
   key: string; // The name of the field
-  value: string; // The formatted value
   params: {
-    query: string; // The unformatted value
+    points: LatLon[];
   };
 };
 
-export type PhraseFilter = MetaFilter & {
-  meta: PhraseFilterMeta;
+export type GeoPolygonFilter = MetaFilter & {
+  meta: GeoPolygonFilterMeta;
 };

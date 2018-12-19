@@ -26,7 +26,6 @@ import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
 import { FilterBar } from 'ui/filter_bar/react';
 import { IndexPattern } from 'ui/index_patterns';
 import { QueryBar } from 'ui/query_bar';
-import { FilterOptions } from 'ui/search_bar/components/filter_options';
 import { Storage } from 'ui/storage';
 
 // TODO combine all the filter actions into a single event handler?
@@ -41,11 +40,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   filters: MetaFilter[];
-  onToggleFilterNegate: (filter: MetaFilter) => void;
-  onToggleFilterDisabled: (filter: MetaFilter) => void;
-  onToggleFilterPin: (filter: MetaFilter) => void;
-  onFilterDelete: (filter: MetaFilter) => void;
-  onAllFiltersAction: (action: string) => void;
+  onFiltersUpdated: (filters: MetaFilter[]) => void;
 }
 
 interface State {
@@ -141,27 +136,11 @@ export class SearchBar extends Component<Props, State> {
               this.filterBarRef = node;
             }}
           >
-            <EuiFlexGroup
-              className="globalFilterGroup"
-              gutterSize="none"
-              alignItems="flexStart"
-              responsive={false}
-            >
-              <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
-                <FilterOptions onAction={this.props.onAllFiltersAction} />
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <FilterBar
-                  className="globalFilterGroup__filterBar"
-                  filters={this.props.filters}
-                  onTogglePin={this.props.onToggleFilterPin}
-                  onToggleDisabled={this.props.onToggleFilterDisabled}
-                  onDelete={this.props.onFilterDelete}
-                  onToggleNegate={this.props.onToggleFilterNegate}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <FilterBar
+              className="globalFilterGroup__filterBar"
+              filters={this.props.filters}
+              onFiltersUpdated={this.props.onFiltersUpdated}
+            />
           </div>
         </div>
       </div>

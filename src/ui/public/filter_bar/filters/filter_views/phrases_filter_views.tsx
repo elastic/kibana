@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { PhrasesFilter } from '../phrases_filter';
+import { FilterViews } from './index';
 
-export type PhraseFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-  value: string; // The formatted value
-  params: {
-    query: string; // The unformatted value
+export function getPhrasesFilterViews(filter: PhrasesFilter): FilterViews {
+  return {
+    getDisplayText() {
+      return `${filter.meta.key} is one of ${filter.meta.value}`;
+    },
   };
-};
-
-export type PhraseFilter = MetaFilter & {
-  meta: PhraseFilterMeta;
-};
+}

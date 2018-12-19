@@ -216,6 +216,16 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     executeOnFilters(pin);
   };
 
+  queryFilter.setFilters = filters => {
+    const appState = getAppState();
+    const [globalFilters, appFilters] = _.partition(filters, filter => {
+      return filter.$state.store === 'globalState';
+    });
+    globalState.filters = globalFilters;
+    if (appState) appState.filters = appFilters;
+    saveState();
+  };
+
   initWatchers();
 
   return queryFilter;

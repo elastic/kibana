@@ -33,12 +33,8 @@
           on-query-submit="updateQueryAndFetch"
           app-name="'discover'"
           index-patterns="[indexPattern]"
-          filters="reactFilters"
-          on-toggle-filter-negate="onToggleNegate"
-          on-toggle-filter-pin="onTogglePin"
-          on-toggle-filter-disabled="onToggleDisabled"
-          on-filter-delete="onDelete"
-          on-all-filters-action="onAllFiltersAction"
+          filters="filters"
+          on-filters-updated="onFiltersUpdated"
         ></search-bar>
       </div>
     </div>

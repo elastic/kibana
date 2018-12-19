@@ -22,7 +22,13 @@ import { Component } from 'react';
 import React from 'react';
 
 interface Props {
-  onAction: (action: string) => void;
+  onEnableAll: () => void;
+  onDisableAll: () => void;
+  onPinAll: () => void;
+  onUnpinAll: () => void;
+  onToggleAllNegated: () => void;
+  onToggleAllDisabled: () => void;
+  onRemoveAll: () => void;
 }
 
 interface State {
@@ -53,7 +59,7 @@ export class FilterOptions extends Component<Props, State> {
           icon: 'eye',
           onClick: () => {
             this.closePopover();
-            this.props.onAction('enable');
+            this.props.onEnableAll();
           },
         },
         {
@@ -61,7 +67,7 @@ export class FilterOptions extends Component<Props, State> {
           icon: 'eyeClosed',
           onClick: () => {
             this.closePopover();
-            this.props.onAction('disable');
+            this.props.onDisableAll();
           },
         },
         {
@@ -69,7 +75,7 @@ export class FilterOptions extends Component<Props, State> {
           icon: 'pin',
           onClick: () => {
             this.closePopover();
-            this.props.onAction('pin');
+            this.props.onPinAll();
           },
         },
         {
@@ -77,7 +83,7 @@ export class FilterOptions extends Component<Props, State> {
           icon: 'pin',
           onClick: () => {
             this.closePopover();
-            this.props.onAction('unpin');
+            this.props.onUnpinAll();
           },
         },
         {
@@ -85,7 +91,7 @@ export class FilterOptions extends Component<Props, State> {
           icon: 'invert',
           onClick: () => {
             this.closePopover();
-            this.props.onAction('toggleNegate');
+            this.props.onToggleAllNegated();
           },
         },
         {
@@ -93,7 +99,7 @@ export class FilterOptions extends Component<Props, State> {
           icon: 'eye',
           onClick: () => {
             this.closePopover();
-            this.props.onAction('toggleDisabled');
+            this.props.onToggleAllDisabled();
           },
         },
         {
@@ -101,7 +107,7 @@ export class FilterOptions extends Component<Props, State> {
           icon: 'trash',
           onClick: () => {
             this.closePopover();
-            this.props.onAction('delete');
+            this.props.onRemoveAll();
           },
         },
       ],

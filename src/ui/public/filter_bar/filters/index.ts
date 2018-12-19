@@ -17,7 +17,27 @@
  * under the License.
  */
 
-export interface Filter {
-  type: string;
-  toElasticsearchQuery: () => any;
-}
+// The interface the other filters extend
+export { MetaFilter } from './meta_filter';
+
+// Helper functions that can be invoked on any filter
+export {
+  isFilterPinned,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  toggleFilterPinned,
+  enableFilter,
+  disableFilter,
+  pinFilter,
+  unpinFilter,
+} from './meta_filter';
+
+// The actual filter types
+export { CustomFilter } from './custom_filter';
+export { ExistsFilter } from './exists_filter';
+export { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
+export { GeoPolygonFilter } from './geo_polygon_filter';
+export { PhraseFilter } from './phrase_filter';
+export { PhrasesFilter } from './phrases_filter';
+export { QueryFilter } from './query_filter';
+export { RangeFilter } from './range_filter';

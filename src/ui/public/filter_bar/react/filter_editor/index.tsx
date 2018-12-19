@@ -29,8 +29,9 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { noop } from 'lodash';
 import React, { Component } from 'react';
-import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
+import { MetaFilter } from '../../filters';
 
 const fieldOptions = [
   {
@@ -88,7 +89,6 @@ const valueOptions = [
 ];
 
 interface Props {
-  foo: string;
   filter: MetaFilter;
 }
 
@@ -245,7 +245,7 @@ export class FilterEditor extends Component<Props, State> {
           <div>
             <EuiSpacer size="m" />
             <EuiFormRow label="Custom label">
-              <EuiFieldText value={this.state.customLabel} onChange={() => {}} />
+              <EuiFieldText value={this.state.customLabel} onChange={noop} />
             </EuiFormRow>
           </div>
         )}
@@ -254,12 +254,12 @@ export class FilterEditor extends Component<Props, State> {
 
         <EuiFlexGroup direction="rowReverse" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton isDisabled={this.state.selectedValues.length < 1} fill onClick={() => {}}>
+            <EuiButton isDisabled={this.state.selectedValues.length < 1} fill onClick={noop}>
               Add
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" onClick={this.props.filter ? () => {} : this.resetForm}>
+            <EuiButtonEmpty flush="right" onClick={this.props.filter ? noop : this.resetForm}>
               {this.props.filter ? 'Cancel' : 'Reset form'}
             </EuiButtonEmpty>
           </EuiFlexItem>
