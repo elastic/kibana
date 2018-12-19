@@ -41,9 +41,9 @@ var ignore = [
   // is `x-pack` and `b` is not `node_modules`
   /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
 
-  // ignore paths matching `/canvas/canvas_plugin/{a}/{b}` unless
-  // `a` is `functions` and `b` is `server`
-  /\/canvas\/canvas_plugin\/(?!functions\/server)([^\/]+\/[^\/]+)/,
+  // ignore paths matching `/canvas/canvas_plugin/{a}` unless
+  // `a` is `functions/server` or `functions/common` or `lib`
+  /\/canvas\/canvas_plugin\/(?!functions\/(server|common)|lib)([^\/]+\/[^\/]+)/,
 ];
 
 if (global.__BUILT_WITH_BABEL__) {

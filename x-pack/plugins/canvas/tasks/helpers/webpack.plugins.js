@@ -25,7 +25,6 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       'uis/datasources/all': path.join(sourceDir, 'uis/datasources/register.js'),
       'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
       'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
-      'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
       'templates/all': path.join(sourceDir, 'templates/register.js'),
       'uis/tags/all': path.join(sourceDir, 'uis/tags/register.js'),
     },
@@ -76,6 +75,20 @@ export function getWebpackConfig({ devtool, watch } = {}) {
         {
           from: `${sourceDir}/functions/server/`,
           to: `${buildDir}/functions/server/`,
+          ignore: '**/__tests__/**',
+        },
+      ]),
+      new CopyWebpackPlugin([
+        {
+          from: `${sourceDir}/functions/common/`,
+          to: `${buildDir}/functions/common/`,
+          ignore: '**/__tests__/**',
+        },
+      ]),
+      new CopyWebpackPlugin([
+        {
+          from: `${sourceDir}/lib/`,
+          to: `${buildDir}/lib/`,
           ignore: '**/__tests__/**',
         },
       ]),
