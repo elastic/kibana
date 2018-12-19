@@ -20,7 +20,6 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
 
 export interface UpgradeAssistantStatus {
   cluster: EnrichedDeprecationInfo[];
-  nodes: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
 
   [checkupType: string]: EnrichedDeprecationInfo[];
@@ -37,8 +36,7 @@ export async function getUpgradeAssistantStatus(
   })) as DeprecationAPIResponse;
 
   return {
-    cluster: deprecations.cluster_settings,
-    nodes: deprecations.node_settings,
+    cluster: deprecations.cluster_settings.concat(deprecations.node_settings),
     indices: getCombinedIndexInfos(deprecations, basePath),
   };
 }
