@@ -1,15 +1,9 @@
 .kbnGlobalNavLink {
-  &:hover {
-    background-color: darken($euiColorPrimary, 2%);
-  }
-
-  &.active {
-    background-color: $euiColorPrimary;
-  }
-
+  &:hover,
+  &.active,
   &:focus {
     box-shadow: none !important;
-    background-color: darken($euiColorPrimary, 5%);
+    background-color: darken($euiColorPrimary, 2%);
   }
 }
 
