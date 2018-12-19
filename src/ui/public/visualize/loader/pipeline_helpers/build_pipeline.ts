@@ -42,7 +42,22 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis): Schemas => {
-  let cnt = 0;
+  const createSchemaConfig = (accessor: number, format: any, agg: AggConfig) => {
+    const schema = {
+      accessor,
+      format,
+      params: {},
+    };
+    if (agg.type.name === 'geohash_grid') {
+      schema.params = {
+        precision: agg.params.precision,
+        useGeocentroid: agg.params.useGeocentroid,
+      };
+    }
+    return schema;
+  };
+
+  let cnt = -1;
   const schemas: Schemas = {
     metric: [],
   };
@@ -50,6 +65,7 @@ export const getSchemas = (vis: Vis): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
+    cnt++;
     const format = agg.params.field ? agg.params.field.format : null;
     if (!agg.enabled) {
       return;
@@ -59,7 +75,11 @@ export const getSchemas = (vis: Vis): Schemas => {
       schemaName = null;
     }
     if (!schemaName) {
-      return;
+      if (agg.type.name === 'geo_centroid') {
+        schemaName = 'geo_centroid';
+      } else {
+        return;
+      }
     }
     if (schemaName === 'split') {
       schemaName = `split_${agg.params.row ? 'row' : 'column'}`;
@@ -68,17 +88,11 @@ export const getSchemas = (vis: Vis): Schemas => {
       schemas[schemaName] = [];
     }
     if (!isHierarchical || agg.type.type !== 'metrics') {
-      schemas[schemaName].push({
-        accessor: cnt++,
-        format,
-      });
+      schemas[schemaName].push(createSchemaConfig(cnt, format, agg));
     }
     if (isHierarchical && agg.type.type !== 'metrics') {
       metrics.forEach(() => {
-        schemas.metric.push({
-          accessor: cnt++,
-          format,
-        });
+        schemas.metric.push(createSchemaConfig(cnt, format, agg));
       });
     }
   });
@@ -145,8 +159,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   tagcloud: (visState, schemas) => {
     const visConfig = visState.params;
     visConfig.metrics = schemas.metric;
-    if (schemas.group) {
-      visConfig.bucket = schemas.group[0];
+    if (schemas.segment) {
+      visConfig.bucket = schemas.segment[0];
     }
     return `tagcloud ${prepareJson('visConfig', visState.params)}`;
   },
@@ -157,12 +171,11 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return pipeline;
   },
   tile_map: (visState, schemas) => {
-    let pipeline = `tilemap ${prepareJson('visConfig', visState.params)}`;
-    if (schemas.segment) {
-      pipeline += `bucket='${schemas.segment.map(row => row.id).join(',')}' `;
-    }
-    pipeline += `metric='${schemas.metric.map(row => row.id).join(',')}' `;
-    return pipeline;
+    const visConfig = visState.params;
+    visConfig.metric = schemas.metric[0];
+    visConfig.geohash = schemas.segment ? schemas.segment[0] : null;
+    visConfig.geocentroid = schemas.geo_centroid ? schemas.geo_centroid[0] : null;
+    return `tilemap ${prepareJson('visConfig', visState.params)}`;
   },
   pie: (visState, schemas) => {
     const visConfig = prepareJson('visConfig', visState.params);
