@@ -50,8 +50,7 @@
 .kuiLocalNav__popover {
   height: 100%;
 
-  // EUITODO: Add `anchorClassName` prop to popovers
-  .euiPopover__anchor {
+  .kuiLocalNav__popoverAnchor {
     height: 100%;
   }
 }

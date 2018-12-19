@@ -1612,7 +1612,7 @@ main {
 
 .kuiLocalNav__popover {
   height: 100%; }
-  .kuiLocalNav__popover .euiPopover__anchor {
+  .kuiLocalNav__popover .kuiLocalNav__popoverAnchor {
     height: 100%; }
 
 .kuiLocalSearch {
