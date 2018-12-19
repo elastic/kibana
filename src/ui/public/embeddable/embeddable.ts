@@ -58,6 +58,7 @@ interface EmbeddableOptions {
   render?: (domNode: HTMLElement, containerState: ContainerState) => void;
   destroy?: () => void;
   onContainerStateChanged?: (containerState: ContainerState) => void;
+  reload?: () => void;
 }
 
 export abstract class Embeddable {
@@ -78,6 +79,10 @@ export abstract class Embeddable {
     if (options.onContainerStateChanged) {
       this.onContainerStateChanged = options.onContainerStateChanged;
     }
+
+    if (options.reload) {
+      this.reload = options.reload;
+    }
   }
 
   public abstract onContainerStateChanged(containerState: ContainerState): void;
@@ -97,6 +102,10 @@ export abstract class Embeddable {
   }
 
   public destroy(): void {
+    return;
+  }
+
+  public reload(): void {
     return;
   }
 }
