@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment = require('moment');
+import moment from 'moment';
 
 import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';

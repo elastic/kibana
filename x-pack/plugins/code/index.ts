@@ -106,10 +106,14 @@ export const code = (kibana: any) =>
       const socketService = new SocketService(server, log);
 
       // Initialize search clients
+      // @ts-ignore
       const repoSearchClient = new RepositorySearchClient(dataCluster.getClient(), log);
+      // @ts-ignore
       const documentSearchClient = new DocumentSearchClient(dataCluster.getClient(), log);
+      // @ts-ignore
       const symbolSearchClient = new SymbolSearchClient(dataCluster.getClient(), log);
 
+      // @ts-ignore
       const esClient: EsClient = adminCluster.getClient();
 
       const installManager = new InstallManager(serverOptions);

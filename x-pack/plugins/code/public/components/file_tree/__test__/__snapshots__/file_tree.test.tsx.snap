@@ -19,11 +19,7 @@ exports[`render correctly 1`] = `
         className="euiIcon euiIcon--medium euiSideNav__mobileIcon"
         focusable="false"
         height="16"
-        style={
-          Object {
-            "fill": undefined,
-          }
-        }
+        style={null}
         viewBox="0 0 16 16"
         width="16"
         xmlns="http://www.w3.org/2000/svg"
@@ -81,16 +77,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -117,16 +110,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -153,16 +143,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -190,16 +177,13 @@ exports[`render correctly 1`] = `
               <div
                 className="fileNode"
                 onClick={[Function]}
+                role="button"
               >
                 <svg
                   className="euiIcon euiIcon--medium"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -226,6 +210,7 @@ exports[`render correctly 1`] = `
               <div
                 className="fileNode"
                 onClick={[Function]}
+                role="button"
               >
                 pom.xml
               </div>
@@ -236,16 +221,13 @@ exports[`render correctly 1`] = `
               <div
                 className="activeFileNode"
                 onClick={[Function]}
+                role="button"
               >
                 <svg
                   className="euiIcon euiIcon--medium"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -273,16 +255,13 @@ exports[`render correctly 1`] = `
                   <div
                     className="fileNode"
                     onClick={[Function]}
+                    role="button"
                   >
                     <svg
                       className="euiIcon euiIcon--medium"
                       focusable="false"
                       height="16"
-                      style={
-                        Object {
-                          "fill": undefined,
-                        }
-                      }
+                      style={null}
                       viewBox="0 0 16 16"
                       width="16"
                       xmlns="http://www.w3.org/2000/svg"
@@ -309,16 +288,13 @@ exports[`render correctly 1`] = `
                   <div
                     className="fileNode"
                     onClick={[Function]}
+                    role="button"
                   >
                     <svg
                       className="euiIcon euiIcon--medium"
                       focusable="false"
                       height="16"
-                      style={
-                        Object {
-                          "fill": undefined,
-                        }
-                      }
+                      style={null}
                       viewBox="0 0 16 16"
                       width="16"
                       xmlns="http://www.w3.org/2000/svg"
@@ -349,6 +325,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             guava-bom/pom.xml
           </div>
@@ -359,16 +336,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -395,16 +369,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -431,16 +402,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -467,16 +435,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -503,16 +468,13 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             <svg
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
@@ -539,6 +501,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             .gitattributes
           </div>
@@ -549,6 +512,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             .gitignore
           </div>
@@ -559,6 +523,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             .travis.yml
           </div>
@@ -569,6 +534,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             CONTRIBUTING.md
           </div>
@@ -579,6 +545,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             CONTRIBUTORS
           </div>
@@ -589,6 +556,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             COPYING
           </div>
@@ -599,6 +567,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             README.md
           </div>
@@ -609,6 +578,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             cycle_whitelist.txt
           </div>
@@ -619,6 +589,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             javadoc-stylesheet.css
           </div>
@@ -629,6 +600,7 @@ exports[`render correctly 1`] = `
           <div
             className="fileNode"
             onClick={[Function]}
+            role="button"
           >
             pom.xml
           </div>

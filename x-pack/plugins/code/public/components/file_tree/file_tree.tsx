@@ -68,7 +68,7 @@ export class CodeFileTree extends React.Component<Props> {
           }
         };
         return (
-          <div onClick={onFolderClick} className={className}>
+          <div onClick={onFolderClick} className={className} role="button">
             <EuiIcon type={forceOpen ? 'arrowDown' : 'arrowRight'} />
             {`${node.name}/`}
           </div>
@@ -76,14 +76,14 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.Submodule: {
         return (
-          <div onClick={onClick} className={className}>
+          <div onClick={onClick} className={className} role="button">
             {node.name}
           </div>
         );
       }
       case FileTreeItemType.File: {
         return (
-          <div onClick={onClick} className={className}>
+          <div onClick={onClick} className={className} role="button">
             {node.name}
           </div>
         );

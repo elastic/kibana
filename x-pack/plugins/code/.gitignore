@@ -1,5 +1,0 @@
-*.js
-!packages/esqueue/**/*.js
-!webpackShims/init-monaco.js
-!server/lib/**/*.js
-/public/styles.css

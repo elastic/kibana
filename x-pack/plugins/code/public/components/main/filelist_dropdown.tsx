@@ -44,7 +44,7 @@ class FileListDropdownComponent extends React.Component<Props, State> {
   public render() {
     const path = this.props.paths[this.props.paths.length - 1];
     const button = (
-      <span onClick={this.onClick} className="breadcrumbs">
+      <span onClick={this.onClick} className="breadcrumbs" role="button">
         {path}
       </span>
     );

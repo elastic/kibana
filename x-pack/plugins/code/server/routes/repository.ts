@@ -39,6 +39,7 @@ export function repositoryRoute(
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
       const repoObjectClient = new RepositoryObjectClient(
+        // @ts-ignore
         req.server.plugins.elasticsearch.getCluster('data').getClient()
       );
 
@@ -85,6 +86,7 @@ export function repositoryRoute(
       const repoUri: string = req.params.uri as string;
       const log = new Log(req.server);
       const repoObjectClient = new RepositoryObjectClient(
+        // @ts-ignore
         req.server.plugins.elasticsearch.getCluster('data').getClient()
       );
       try {
@@ -127,6 +129,7 @@ export function repositoryRoute(
       const log = new Log(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(
+          // @ts-ignore
           req.server.plugins.elasticsearch.getCluster('data').getClient()
         );
         return await repoObjectClient.getRepository(repoUri);
@@ -146,6 +149,7 @@ export function repositoryRoute(
       const log = new Log(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(
+          // @ts-ignore
           req.server.plugins.elasticsearch.getCluster('data').getClient()
         );
         return await repoObjectClient.getRepositoryGitStatus(repoUri);
@@ -165,6 +169,7 @@ export function repositoryRoute(
       const log = new Log(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(
+          // @ts-ignore
           req.server.plugins.elasticsearch.getCluster('data').getClient()
         );
         return await repoObjectClient.getAllRepositories();
@@ -187,6 +192,7 @@ export function repositoryRoute(
       const log = new Log(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(
+          // @ts-ignore
           req.server.plugins.elasticsearch.getCluster('data').getClient()
         );
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
@@ -223,6 +229,7 @@ export function repositoryRoute(
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
       const repoObjectClient = new RepositoryObjectClient(
+        // @ts-ignore
         req.server.plugins.elasticsearch.getCluster('data').getClient()
       );
 
@@ -256,6 +263,7 @@ export function repositoryRoute(
       const log = new Log(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(
+          // @ts-ignore
           req.server.plugins.elasticsearch.getCluster('data').getClient()
         );
         return await repoObjectClient.getRepositoryConfig(repoUri);

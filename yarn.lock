@@ -1108,13 +1108,6 @@
   dependencies:
     type-detect "4.0.8"
 
-"@sinonjs/formatio@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@sinonjs/formatio/-/formatio-2.0.0.tgz#84db7e9eb5531df18a8c5e0bfb6e449e55e654b2"
-  integrity sha512-ls6CAMA6/5gG+O/IdsBcblvnd8qcO/l1TYoNeAzp3wcISOxlPXQEus0mLcdwazEkWjaBdaJ3TaxmNgCLWwvWzg==
-  dependencies:
-    samsam "1.3.0"
-
 "@sinonjs/formatio@^3.1.0":
   version "3.1.0"
   resolved "http://registry.npm.taobao.org/@sinonjs/formatio/download/@sinonjs/formatio-3.1.0.tgz#6ac9d1eb1821984d84c4996726e45d1646d8cce5"
@@ -1904,10 +1897,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/sinon@^5.0.1":
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-5.0.3.tgz#2b1840122f372350c563e3ceda2f447b55f3a927"
-  integrity sha512-JvnfqYfBapg1Ktjjvb79myQ2A848yCdB+1g/okS9OyNqPrT/qWUIt71G0eyi7msZf0gC4fBd40Yu15Btw6BMfQ==
+"@types/sinon@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-7.0.0.tgz#84e707e157ec17d3e4c2a137f41fc3f416c0551e"
+  integrity sha512-kcYoPw0uKioFVC/oOqafk2yizSceIQXCYnkYts9vJIwQklFRsMubTObTDrjQamUyBRd47332s85074cd/hCwxg==
 
 "@types/socket.io-client@^1.4.32":
   version "1.4.32"
@@ -13283,11 +13276,6 @@ jszip@2.5.0:
   dependencies:
     pako "~0.2.5"
 
-just-extend@^1.1.27:
-  version "1.1.27"
-  resolved "https://registry.yarnpkg.com/just-extend/-/just-extend-1.1.27.tgz#ec6e79410ff914e472652abfa0e603c03d60e905"
-  integrity sha512-mJVp13Ix6gFo3SBAy9U/kL+oeZqzlYYYLQBwXVBlVzIsZwBqGREnOro24oC/8s8aox+rJhtZ2DiQof++IrkA+g==
-
 just-extend@^4.0.2:
   version "4.0.2"
   resolved "http://registry.npm.taobao.org/just-extend/download/just-extend-4.0.2.tgz#f3f47f7dfca0f989c55410a7ebc8854b07108afc"
@@ -14419,7 +14407,7 @@ loglevel@^1.4.1, loglevel@^1.6.1:
   resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.6.1.tgz#e0fc95133b6ef276cdc8887cdaf24aa6f156f8fa"
   integrity sha1-4PyVEztu8nbNyIh82vJKpvFW+Po=
 
-lolex@^2.2.0, lolex@^2.3.2:
+lolex@^2.3.2:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.6.0.tgz#cf9166f3c9dece3cdeb5d6b01fce50f14a1203e3"
   integrity sha512-e1UtIo1pbrIqEXib/yMjHciyqkng5lc0rrIbytgjmRgDR9+2ceNIAcwOWSgylRjoEP9VdVguCSRwnNmlbnOUwA==
@@ -15447,17 +15435,6 @@ nigel@3.x.x:
   dependencies:
     hoek "5.x.x"
     vise "3.x.x"
-
-nise@^1.2.0:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/nise/-/nise-1.3.3.tgz#c17a850066a8a1dfeb37f921da02441afc4a82ba"
-  integrity sha512-v1J/FLUB9PfGqZLGDBhQqODkbLotP0WtLo9R4EJY2PPu5f5Xg4o0rA8FDlmrjFSv9vBBKcfnOSpfYYuu5RTHqg==
-  dependencies:
-    "@sinonjs/formatio" "^2.0.0"
-    just-extend "^1.1.27"
-    lolex "^2.3.2"
-    path-to-regexp "^1.7.0"
-    text-encoding "^0.6.4"
 
 nise@^1.4.7:
   version "1.4.8"
@@ -19352,11 +19329,6 @@ safefs@^4.0.0:
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-samsam@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/samsam/-/samsam-1.3.0.tgz#8d1d9350e25622da30de3e44ba692b5221ab7c50"
-  integrity sha512-1HwIYD/8UlOtFS3QO3w7ey+SdSDFE4HRNLZoZRYVQefrOY3l17epswImeB1ijgJFQJodIaHcwkp3r/myBjFVbg==
-
 sane@^2.0.0:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/sane/-/sane-2.5.2.tgz#b4dc1861c21b427e929507a3e751e2a2cb8ab3fa"
@@ -19808,23 +19780,10 @@ simple-swizzle@^0.2.2:
   dependencies:
     is-arrayish "^0.3.1"
 
-sinon@^5.0.7:
-  version "5.0.7"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-5.0.7.tgz#3bded6a73613ccc9e512e20246ced69a27c27dab"
-  integrity sha512-GvNLrwpvLZ8jIMZBUhHGUZDq5wlUdceJWyHvZDmqBxnjazpxY1L0FNbGBX6VpcOEoQ8Q4XMWFzm2myJMvx+VjA==
-  dependencies:
-    "@sinonjs/formatio" "^2.0.0"
-    diff "^3.1.0"
-    lodash.get "^4.4.2"
-    lolex "^2.2.0"
-    nise "^1.2.0"
-    supports-color "^5.1.0"
-    type-detect "^4.0.5"
-
-sinon@v7.2.2:
+sinon@^7.2.2:
   version "7.2.2"
-  resolved "http://registry.npm.taobao.org/sinon/download/sinon-7.2.2.tgz#388ecabd42fa93c592bfc71d35a70894d5a0ca07"
-  integrity sha1-OI7KvUL6k8WSv8cdNacIlNWgygc=
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-7.2.2.tgz#388ecabd42fa93c592bfc71d35a70894d5a0ca07"
+  integrity sha512-WLagdMHiEsrRmee3jr6IIDntOF4kbI6N2pfbi8wkv50qaUQcBglkzkjtoOEbeJ2vf1EsrHhLI+5Ny8//WHdMoA==
   dependencies:
     "@sinonjs/commons" "^1.2.0"
     "@sinonjs/formatio" "^3.1.0"

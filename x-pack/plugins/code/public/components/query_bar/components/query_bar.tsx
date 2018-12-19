@@ -378,6 +378,7 @@ export class QueryBar extends Component<Props, State> {
               aria-haspopup="true"
               aria-expanded={this.state.isSuggestionsVisible}
               aria-owns="typeahead-items"
+              aria-controls="typeahead-items"
             >
               <form role="form" name="queryBarForm">
                 <div className="kuiLocalSearch" role="search">

@@ -48,6 +48,7 @@ export const OptimizeBuildTask = {
       cwd: build.resolvePath('.'),
       env: {
         FORCE_DLL_CREATION: 'true',
+        // To make DLL pass
         NODE_OPTIONS: '--max-old-space-size=4096'
       },
     });

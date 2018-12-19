@@ -7,7 +7,7 @@
 import fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import rimraf = require('rimraf');
+import rimraf from 'rimraf';
 import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { TYPESCRIPT } from './language_servers';

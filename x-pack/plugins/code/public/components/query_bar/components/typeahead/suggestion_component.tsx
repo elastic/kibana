@@ -128,6 +128,7 @@ export const SuggestionComponent: SFC<Props> = props => {
       active={props.selected}
       onMouseEnter={props.onMouseEnter}
       id={props.ariaId}
+      aria-selected={props.selected}
     >
       <SuggestionItemInner>
         {icon}
