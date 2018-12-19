@@ -39,8 +39,6 @@ uiModules.get('kibana')
 
     class ServiceSettings {
 
-      EMS_LOAD_TIMEOUT = 8000;
-
       constructor() {
 
         this._showZoomMessage = true;
@@ -118,11 +116,15 @@ uiModules.get('kibana')
 
 
         if  (mapConfig.includeElasticMapsService) {
+
           const servicesFromManifest = await this._emsClient.getTMSServices();
+
           const emsDefault = !allServices.length;
-          if (emsDefault && !servicesFromManifest.length) {
+          const manifestServicesUnavab = !servicesFromManifest.length;
+          if (emsDefault && manifestServicesUnavab) {
             defaultLayerLoadWarning();
           }
+
           const strippedServiceFromManifest = servicesFromManifest.map((service) => {
             //shim for compatibility
             const shim = {

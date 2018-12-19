@@ -48,8 +48,10 @@ const unescapeTemplateVars = url => {
 const DEFAULT_LANGUAGE = 'en';
 
 
+
 export class EMSClientV66 {
 
+  EMS_LOAD_TIMEOUT = 8000;
 
   constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language, landingPageUrl }) {
 
@@ -82,10 +84,24 @@ export class EMSClientV66 {
    */
   async _getManifest(manifestUrl) {
     const url = extendUrl(manifestUrl, { query: this._queryParams });
-    const result = await fetch(url);
+    const result = await this._fetchWithTimeout(url);
     return await result.json();
   }
 
+  _fetchWithTimeout(url) {
+    return new Promise(
+      (resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error(`Request to ${url} timed out`)),
+          this.EMS_LOAD_TIMEOUT
+        );
+        fetch(url)
+          .then(
+            response => resolve(response),
+            err => reject(err)
+          ).finally(() => clearTimeout(timer));
+      });
+  }
 
   /**
    * Add optional query-parameters to all requests
@@ -146,8 +162,13 @@ export class EMSClientV66 {
       if (!tmsService) {
         return [];
       }
-      const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
-
+      let tmsManifest;
+      try {
+        tmsManifest =
+          await this._getManifest(tmsService.manifest, this._queryParams);
+      } catch(e) {
+        tmsManifest = { services: [] };
+      }
 
       return tmsManifest.services.map(serviceConfig => {
         return new TMSService(serviceConfig, this);
