@@ -21,7 +21,7 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/maste
     Start kibana and have it include this plugin. You can pass any arguments that you would normally send to `bin/kibana`
 
       ```
-      yarn start --elasticsearch.url http://localhost:9220
+      yarn start --elasticsearch.hosts http://localhost:9220
       ```
 
   - `yarn build`

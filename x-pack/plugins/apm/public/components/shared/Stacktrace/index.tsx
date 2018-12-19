@@ -4,95 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import React, { PureComponent } from 'react';
-import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
-import { CodePreview } from '../../shared/CodePreview';
+import { isEmpty, last } from 'lodash';
+import React, { Fragment } from 'react';
+import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
-import { FrameHeading } from './FrameHeading';
 import { LibraryStackFrames } from './LibraryStackFrames';
-import { getGroupedStackframes, hasSourceLines } from './stacktraceUtils';
+import { Stackframe } from './Stackframe';
 
 interface Props {
-  stackframes?: Stackframe[];
+  stackframes?: IStackframe[];
   codeLanguage?: string;
 }
 
-interface State {
-  visibilityMap: {
-    [i: number]: boolean;
-  };
+export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
+  if (isEmpty(stackframes)) {
+    return <EmptyMessage heading="No stacktrace available." hideSubheading />;
+  }
+
+  const groups = getGroupedStackframes(stackframes);
+  return (
+    <Fragment>
+      {groups.map((group, i) => {
+        // library frame
+        if (group.isLibraryFrame) {
+          const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
+          return (
+            <LibraryStackFrames
+              key={i}
+              initialVisiblity={initialVisiblity}
+              stackframes={group.stackframes}
+              codeLanguage={codeLanguage}
+            />
+          );
+        }
+
+        // non-library frame
+        return group.stackframes.map((stackframe, idx) => (
+          <Stackframe
+            key={`${i}-${idx}`}
+            codeLanguage={codeLanguage}
+            stackframe={stackframe}
+          />
+        ));
+      })}
+    </Fragment>
+  );
 }
 
-export class Stacktrace extends PureComponent<Props, State> {
-  public state = {
-    visibilityMap: {}
-  };
+interface StackframesGroup {
+  isLibraryFrame: boolean;
+  excludeFromGrouping: boolean;
+  stackframes: IStackframe[];
+}
 
-  public componentDidMount() {
-    if (!this.props.stackframes) {
-      // Don't do anything, if there are no stackframes
-      return false;
-    }
+export function getGroupedStackframes(stackframes: IStackframe[]) {
+  return stackframes.reduce(
+    (acc, stackframe) => {
+      const prevGroup = last(acc);
+      const shouldAppend =
+        prevGroup &&
+        prevGroup.isLibraryFrame === stackframe.library_frame &&
+        !prevGroup.excludeFromGrouping &&
+        !stackframe.exclude_from_grouping;
 
-    const hasAnyAppFrames = this.props.stackframes.some(
-      frame => !frame.library_frame
-    );
+      // append to group
+      if (shouldAppend) {
+        prevGroup.stackframes.push(stackframe);
+        return acc;
+      }
 
-    if (!hasAnyAppFrames) {
-      // If there are no app frames available, always show the only existing group
-      this.setState({ visibilityMap: { 0: true } });
-    }
-  }
-
-  public toggle = (i: number) =>
-    this.setState(({ visibilityMap }) => {
-      return { visibilityMap: { ...visibilityMap, [i]: !visibilityMap[i] } };
-    });
-
-  public render() {
-    const { stackframes = [], codeLanguage } = this.props;
-    const { visibilityMap } = this.state as State;
-
-    if (isEmpty(stackframes)) {
-      return <EmptyMessage heading="No stacktrace available." hideSubheading />;
-    }
-
-    return (
-      <div>
-        <EuiTitle size="xs">
-          <h3>Stack traces</h3>
-        </EuiTitle>
-        {getGroupedStackframes(stackframes).map(
-          ({ isLibraryFrame, stackframes: groupedStackframes }, i) => {
-            if (isLibraryFrame) {
-              return (
-                <LibraryStackFrames
-                  key={i}
-                  visible={visibilityMap[i]}
-                  stackframes={groupedStackframes}
-                  codeLanguage={codeLanguage}
-                  onClick={() => this.toggle(i)}
-                />
-              );
-            }
-            return groupedStackframes.map((stackframe, idx) =>
-              hasSourceLines(stackframe) ? (
-                <CodePreview
-                  key={idx}
-                  stackframe={stackframe}
-                  codeLanguage={codeLanguage}
-                />
-              ) : (
-                <FrameHeading key={idx} stackframe={stackframe} />
-              )
-            );
-          }
-        )}
-      </div>
-    );
-  }
+      // create new group
+      acc.push({
+        isLibraryFrame: Boolean(stackframe.library_frame),
+        excludeFromGrouping: Boolean(stackframe.exclude_from_grouping),
+        stackframes: [stackframe]
+      });
+      return acc;
+    },
+    [] as StackframesGroup[]
+  );
 }

@@ -18,7 +18,8 @@
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
-import { Subject } from 'rxjs';
+import * as Rx from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 import { UiSettingsState } from './types';
 import { UiSettingsApi } from './ui_settings_api';
@@ -31,7 +32,7 @@ interface Params {
 }
 
 export class UiSettingsClient {
-  private readonly update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
+  private readonly update$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
 
   private readonly api: UiSettingsApi;
   private readonly onUpdateError: (error: Error) => void;
@@ -91,6 +92,20 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     }
 
     return value;
+  }
+
+  /**
+   * Gets an observable of the current value for a config key, and all updates to that config
+   * key in the future. Providing a `defaultOverride` argument behaves the same as it does in #get()
+   */
+  public get$(key: string, defaultOverride?: any) {
+    return Rx.concat(
+      Rx.defer(() => Rx.of(this.get(key, defaultOverride))),
+      this.update$.pipe(
+        filter(update => update.key === key),
+        map(() => this.get(key, defaultOverride))
+      )
+    );
   }
 
   /**

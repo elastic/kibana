@@ -80,6 +80,7 @@ export class AddItemPopover extends Component {
         iconType="arrowDown"
         iconSide="right"
         onClick={this.onButtonClick}
+        isDisabled={this.props.canCreateFilter === false}
       >
         Add item
       </EuiButton>
@@ -125,6 +126,7 @@ export class AddItemPopover extends Component {
   }
 }
 AddItemPopover.propTypes = {
-  addItems: PropTypes.func.isRequired
+  addItems: PropTypes.func.isRequired,
+  canCreateFilter: PropTypes.bool.isRequired
 };
 

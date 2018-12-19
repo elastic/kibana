@@ -26,6 +26,7 @@ import {
   getMultiBucketImpactLabel,
 } from '../../../../common/util/anomaly_utils';
 import { AnnotationFlyout } from '../annotation_flyout';
+import { DeleteAnnotationModal } from '../delete_annotation_modal';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -122,8 +123,12 @@ export class TimeseriesChart extends React.Component {
     this.state = {
       annotation: {},
       isFlyoutVisible: false,
-      isSwitchChecked: true,
+      isDeleteModalVisible: false,
     };
+  }
+
+  closeDeleteModal = () => {
+    this.setState({ isDeleteModalVisible: false });
   }
 
   closeFlyout = () => {
@@ -147,24 +152,31 @@ export class TimeseriesChart extends React.Component {
     });
   }
 
-  deleteAnnotation = (annotation) => {
+  deleteAnnotation = () => {
+    this.setState({ isDeleteModalVisible: true });
+  }
+
+  deleteAnnotationConfirmation = async () => {
     const {
       deleteAnnotation,
       refresh,
       toastNotifications
     } = this.props;
 
+    const { annotation } = this.state;
+
+    try {
+      await deleteAnnotation(annotation._id);
+      toastNotifications.addSuccess(`Deleted annotation for job with ID ${annotation.job_id}.`);
+    } catch (err) {
+      toastNotifications
+        .addDanger(`An error occured deleting the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(err)}`);
+    }
+
+    this.closeDeleteModal();
     this.closeFlyout();
 
-    deleteAnnotation(annotation._id)
-      .then(() => {
-        refresh();
-        toastNotifications.addSuccess(`Deleted annotation for job with ID ${annotation.job_id}.`);
-      })
-      .catch((resp) => {
-        toastNotifications
-          .addDanger(`An error occured deleting the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
-      });
+    refresh();
   }
 
   indexAnnotation = (annotation) => {
@@ -1341,7 +1353,7 @@ export class TimeseriesChart extends React.Component {
     }
 
     if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
-      contents = marker.annotation;
+      contents = mlEscape(marker.annotation);
       contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
 
       if (typeof marker.end_timestamp !== 'undefined') {
@@ -1416,19 +1428,27 @@ export class TimeseriesChart extends React.Component {
   }
 
   render() {
-    const { annotation, isFlyoutVisible } = this.state;
+    const { annotation, isDeleteModalVisible, isFlyoutVisible } = this.state;
 
     return (
       <React.Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
         {mlAnnotationsEnabled && isFlyoutVisible &&
-          <AnnotationFlyout
-            annotation={annotation}
-            cancelAction={this.closeFlyout}
-            controlFunc={this.handleAnnotationChange}
-            deleteAction={this.deleteAnnotation}
-            saveAction={this.indexAnnotation}
-          />
+          <React.Fragment>
+            <AnnotationFlyout
+              annotation={annotation}
+              cancelAction={this.closeFlyout}
+              controlFunc={this.handleAnnotationChange}
+              deleteAction={this.deleteAnnotation}
+              saveAction={this.indexAnnotation}
+            />
+            <DeleteAnnotationModal
+              annotation={annotation}
+              cancelAction={this.closeDeleteModal}
+              deleteAction={this.deleteAnnotationConfirmation}
+              isVisible={isDeleteModalVisible}
+            />
+          </React.Fragment>
         }
       </React.Fragment>
     );

@@ -12,7 +12,8 @@ import { ImportModal } from './import_modal';
 
 const testProps = {
   addImportedEvents: jest.fn(),
-  closeImportModal: jest.fn()
+  closeImportModal: jest.fn(),
+  canCreateCalendar: true
 };
 
 const events = [{

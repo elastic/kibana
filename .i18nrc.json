@@ -16,6 +16,7 @@
     "timelion": "src/legacy/core_plugins/timelion",
     "tagCloud": "src/legacy/core_plugins/tagcloud",
     "tsvb": "src/legacy/core_plugins/metrics",
+    "xpack.apm": "x-pack/plugins/apm",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
     "xpack.crossClusterReplication": "x-pack/plugins/cross_cluster_replication",
     "xpack.graph": "x-pack/plugins/graph",
@@ -32,6 +33,7 @@
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",
     "xpack.spaces": "x-pack/plugins/spaces",
+    "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [

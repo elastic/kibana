@@ -66,9 +66,12 @@ const testingState = {
   isDestroyModalVisible: false,
   calendarId: null,
   selectedForDeletion: [],
-  canCreateCalendar: true,
-  canDeleteCalendar: true,
   nodesAvailable: true,
+};
+
+const props = {
+  canCreateCalendar: true,
+  canDeleteCalendar: true
 };
 
 describe('CalendarsList', () => {
@@ -76,7 +79,7 @@ describe('CalendarsList', () => {
   test('loads calendars on mount', () => {
     ml.calendars = jest.fn();
     shallow(
-      <CalendarsList />
+      <CalendarsList {...props}/>
     );
 
     expect(ml.calendars).toHaveBeenCalled();
@@ -84,7 +87,7 @@ describe('CalendarsList', () => {
 
   test('Renders calendar list with calendars', () => {
     const wrapper = shallow(
-      <CalendarsList />
+      <CalendarsList {...props}/>
     );
 
     wrapper.instance().setState(testingState);
@@ -94,7 +97,7 @@ describe('CalendarsList', () => {
 
   test('Sets selected calendars list on checkbox change', () => {
     const wrapper = mount(
-      <CalendarsList />
+      <CalendarsList {...props}/>
     );
 
     const instance = wrapper.instance();
