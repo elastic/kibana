@@ -4,32 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { get } from 'lodash';
-import { HeaderLarge } from '../../shared/UIComponents';
-import DetailView from './DetailView';
-import Distribution from './Distribution';
-import { KueryBar } from '../../shared/KueryBar';
-
-import { EuiText, EuiBadge, EuiSpacer } from '@elastic/eui';
-import {
-  unit,
-  units,
-  px,
-  colors,
-  fontFamilyCode,
-  fontSizes
-} from '../../../style/variables';
 import {
   ERROR_CULPRIT,
-  ERROR_LOG_MESSAGE,
+  ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
-  ERROR_EXC_HANDLED
+  ERROR_LOG_MESSAGE
 } from '../../../../common/constants';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
+import { IUrlParams } from '../../../store/urlParams';
+import {
+  colors,
+  fontFamilyCode,
+  fontSizes,
+  px,
+  unit,
+  units
+} from '../../../style/variables';
+// @ts-ignore
+import { KueryBar } from '../../shared/KueryBar';
+// @ts-ignore
+import { HeaderLarge } from '../../shared/UIComponents';
+import { DetailView } from './DetailView';
+// @ts-ignore
+import Distribution from './Distribution';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -57,7 +59,7 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
-function getShortGroupId(errorGroupId) {
+function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
     return 'N/A';
   }
@@ -65,7 +67,12 @@ function getShortGroupId(errorGroupId) {
   return errorGroupId.slice(0, 5);
 }
 
-function ErrorGroupDetails({ urlParams, location }) {
+interface Props {
+  urlParams: IUrlParams;
+  location: any;
+}
+
+export function ErrorGroupDetails({ urlParams, location }: Props) {
   return (
     <ErrorGroupDetailsRequest
       urlParams={urlParams}
@@ -124,9 +131,3 @@ function ErrorGroupDetails({ urlParams, location }) {
     />
   );
 }
-
-ErrorGroupDetails.propTypes = {
-  location: PropTypes.object.isRequired
-};
-
-export default ErrorGroupDetails;

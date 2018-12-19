@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import DetailView from '../index';
+import { DetailView } from '../index';
 import props from './props.json';
 import { shallow } from 'enzyme';
 
