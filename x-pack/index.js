@@ -30,6 +30,9 @@ import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { rollup } from './plugins/rollup';
+import { remoteClusters } from './plugins/remote_clusters';
+import { crossClusterReplication } from './plugins/cross_cluster_replication';
+import { upgradeAssistant } from './plugins/upgrade_assistant';
 
 module.exports = function (kibana) {
   return [
@@ -59,5 +62,8 @@ module.exports = function (kibana) {
     kueryAutocomplete(kibana),
     infra(kibana),
     rollup(kibana),
+    remoteClusters(kibana),
+    crossClusterReplication(kibana),
+    upgradeAssistant(kibana),
   ];
 };

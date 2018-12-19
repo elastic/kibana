@@ -16,3 +16,4 @@ export { AccountSettingProvider } from './accountsetting_page';
 export { InfraHomePageProvider } from './infra_home_page';
 export { GisPageProvider } from './gis_page';
 export { StatusPagePageProvider } from './status_page';
+export { UpgradeAssistantProvider } from './upgrade_assistant';

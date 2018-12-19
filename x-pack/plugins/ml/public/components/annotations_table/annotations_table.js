@@ -311,8 +311,9 @@ class AnnotationsTable extends Component {
     if (isNumberBadgeVisible) {
       columns.unshift({
         field: 'key',
-        name: '',
-        width: '50px',
+        name: 'Label',
+        sortable: true,
+        width: '60px',
         render: (key) => {
           return (
             <EuiBadge color="default">
@@ -367,7 +368,11 @@ class AnnotationsTable extends Component {
         pagination={{
           pageSizeOptions: [5, 10, 25]
         }}
-        sorting={true}
+        sorting={{
+          sort: {
+            field: 'timestamp', direction: 'asc'
+          }
+        }}
         rowProps={getRowProps}
       />
     );

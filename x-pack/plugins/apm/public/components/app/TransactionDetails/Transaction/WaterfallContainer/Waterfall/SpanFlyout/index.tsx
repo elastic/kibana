@@ -120,10 +120,14 @@ export function SpanFlyout({
                     <EuiBasicTable
                       columns={[
                         {
+                          name: '',
                           field: 'key',
                           render: (key: string) => <TagName>{key}</TagName>
                         },
-                        { field: 'value' }
+                        {
+                          name: '',
+                          field: 'value'
+                        }
                       ]}
                       items={tags}
                     />
