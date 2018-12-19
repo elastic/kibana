@@ -10,7 +10,7 @@ import React from 'react';
 
 import moment = require('moment');
 import { EMPTY_VALUE, plainColumnRenderer } from '.';
-import { mockECSData } from '../../../../mock/mock_ecs';
+import { mockECSData } from '../../../../mock';
 import { ECS } from '../../ecs';
 
 describe('plain_column_renderer', () => {

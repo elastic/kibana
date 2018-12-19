@@ -11,8 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../../common/graphql/types';
-import { State } from '../../../../store';
-import { uncommonProcessesActions, uncommonProcessesSelector } from '../../../../store';
+import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 interface OwnProps {
@@ -89,12 +88,12 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
+const mapStateToProps = (state: State) => uncommonProcessesLimitSelector(state);
 
 export const UncommonProcessTable = connect(
   mapStateToProps,
   {
-    updateLimitPagination: uncommonProcessesActions.updateLimitOfPagination,
+    updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
   }
 )(UncommonProcessTableComponent);
 

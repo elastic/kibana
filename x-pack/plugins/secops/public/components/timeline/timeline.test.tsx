@@ -12,11 +12,11 @@ import { DragDropContext } from 'react-beautiful-dnd';
 
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { eventsQuery } from '../../containers/events/index.gql_query';
-import { mockECSData } from '../../mock/mock_ecs';
+import { mockGlobalState } from '../../mock';
+import { mockECSData } from '../../mock';
 import { createStore, State } from '../../store';
 import { DEFAULT_PAGE_COUNT } from '../../store/local/timeline/model';
 import { flyoutHeaderHeight } from '../flyout';
-import { defaultWidth } from './body';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
@@ -43,67 +43,7 @@ describe('Timeline', () => {
     },
   ];
 
-  const state: State = {
-    local: {
-      app: {
-        notesById: {},
-        theme: 'dark',
-      },
-      hosts: {
-        limit: 2,
-      },
-      uncommonProcesses: {
-        limit: 0,
-        upperLimit: 0,
-      },
-      inputs: {
-        global: {
-          timerange: {
-            kind: 'absolute',
-            from: 0,
-            to: 1,
-          },
-          query: [],
-          policy: {
-            kind: 'manual',
-            duration: 5000,
-          },
-        },
-      },
-      dragAndDrop: {
-        dataProviders: {},
-      },
-      timeline: {
-        timelineById: {
-          test: {
-            activePage: 0,
-            dataProviders: [],
-            description: '',
-            eventIdToNoteIds: {},
-            historyIds: [],
-            id: 'test',
-            isFavorite: false,
-            isLive: false,
-            itemsPerPage: 25,
-            itemsPerPageOptions: [10, 25, 50],
-            kqlMode: 'filter',
-            kqlQuery: '',
-            title: '',
-            noteIds: [],
-            pageCount: DEFAULT_PAGE_COUNT,
-            pinnedEventIds: {},
-            range: '1 Day',
-            show: false,
-            sort: {
-              columnId: 'timestamp',
-              sortDirection: 'descending',
-            },
-            width: defaultWidth,
-          },
-        },
-      },
-    },
-  };
+  const state: State = mockGlobalState;
 
   let store = createStore(state);
 

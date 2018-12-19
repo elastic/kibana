@@ -11,75 +11,14 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
-import { DEFAULT_PAGE_COUNT } from '../../../../store/local/timeline/model';
-import { defaultWidth } from '../../../timeline/body';
 import { HostsTable } from './index';
 import { mockData } from './index.mock';
 
 describe('Load More Table Component', () => {
   const loadMore = jest.fn();
-  const state: State = {
-    local: {
-      app: {
-        notesById: {},
-        theme: 'dark',
-      },
-      hosts: {
-        limit: 2,
-      },
-      uncommonProcesses: {
-        limit: 0,
-        upperLimit: 0,
-      },
-      inputs: {
-        global: {
-          timerange: {
-            kind: 'absolute',
-            from: 0,
-            to: 1,
-          },
-          query: [],
-          policy: {
-            kind: 'manual',
-            duration: 5000,
-          },
-        },
-      },
-      dragAndDrop: {
-        dataProviders: {},
-      },
-      timeline: {
-        timelineById: {
-          test: {
-            activePage: 0,
-            id: 'test',
-            itemsPerPage: 5,
-            dataProviders: [],
-            description: '',
-            eventIdToNoteIds: {},
-            historyIds: [],
-            isFavorite: false,
-            isLive: false,
-            kqlMode: 'filter',
-            kqlQuery: '',
-            title: '',
-            noteIds: [],
-            range: '1 Day',
-            show: false,
-            pageCount: DEFAULT_PAGE_COUNT,
-            pinnedEventIds: {},
-            itemsPerPageOptions: [5, 10, 20],
-            sort: {
-              columnId: 'timestamp',
-              sortDirection: 'descending',
-            },
-            width: defaultWidth,
-          },
-        },
-      },
-    },
-  };
+  const state: State = mockGlobalState;
 
   let store = createStore(state);
 

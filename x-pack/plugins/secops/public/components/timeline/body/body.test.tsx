@@ -10,7 +10,7 @@ import * as React from 'react';
 
 import moment = require('moment');
 import { Body } from '.';
-import { mockECSData } from '../../../mock/mock_ecs';
+import { mockECSData } from '../../../mock';
 import { headers } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
 

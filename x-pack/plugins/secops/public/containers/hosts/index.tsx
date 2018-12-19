@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, getOr } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { GetHostsQuery, HostsEdges, PageInfo } from '../../../common/graphql/types';
 
 import { connect } from 'react-redux';
-import { hostsSelector, inputsModel, State } from '../../store';
+import { hostsLimitSelector, inputsModel, State } from '../../store';
 import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
@@ -103,7 +103,7 @@ const HostsComponentQuery = pure<HostsProps>(
 );
 
 const mapStateToProps = (state: State) => {
-  const limit = defaultTo(2, hostsSelector(state));
+  const limit = hostsLimitSelector(state);
   return { limit };
 };
 
