@@ -17,14 +17,15 @@
  * under the License.
  */
 
-const Babel = require('babel-core');
-const Path = require('path');
+const { extname } = require('path');
+
+const { transform } = require('babel-core');
 
 exports.createServerCodeTransformer = (sourceMaps) => {
   return (content, path) => {
-    switch (Path.extname(path)) {
+    switch (extname(path)) {
       case '.js':
-        const { code = '' } = Babel.transform(content.toString('utf8'), {
+        const { code = '' } = transform(content.toString('utf8'), {
           filename: path,
           ast: false,
           code: true,
