@@ -131,9 +131,7 @@ const getUncommonColumns = () => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>
-        {defaultTo('--', uncommonProcess.hosts != null ? uncommonProcess.hosts.length : undefined)}
-      </>
+      <>{uncommonProcess.hosts != null ? uncommonProcess.hosts.length : '--'}</>
     ),
   },
   {
