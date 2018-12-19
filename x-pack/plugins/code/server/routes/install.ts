@@ -5,7 +5,7 @@
  */
 
 import * as Boom from 'boom';
-import hapi from 'hapi';
+import { Request, Server } from 'hapi';
 import { InstallManager } from '../lsp/install_manager';
 import { LanguageServerDefinition, LanguageServers } from '../lsp/language_servers';
 import { LspService } from '../lsp/lsp_service';
@@ -13,7 +13,7 @@ import { ServerOptions } from '../server_options';
 import { SocketService } from '../socket_service';
 
 export function installRoute(
-  server: hapi.Server,
+  server: Server,
   socketService: SocketService,
   lspService: LspService,
   installManager: InstallManager,
@@ -40,7 +40,7 @@ export function installRoute(
 
   server.route({
     path: '/api/code/install/{name}',
-    handler(req: hapi.Request) {
+    handler(req: Request) {
       const name = req.params.name;
       const def = LanguageServers.find(d => d.name === name);
       if (def) {
@@ -52,9 +52,10 @@ export function installRoute(
     method: 'GET',
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/install/{name}',
-    async handler(req: hapi.Request) {
+    requireAdmin: true,
+    async handler(req: Request) {
       const name = req.params.name;
       const def = LanguageServers.find(d => d.name === name);
       if (def) {

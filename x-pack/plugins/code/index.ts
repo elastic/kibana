@@ -41,6 +41,7 @@ import { userRoute } from './server/routes/user';
 import { workspaceRoute } from './server/routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './server/scheduler';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
+import { enableSecurity } from './server/security';
 import { ServerOptions } from './server/server_options';
 import { SocketService } from './server/socket_service';
 import { ServerLoggerFactory } from './server/utils/server_logger_factory';
@@ -103,6 +104,8 @@ export const code = (kibana: any) =>
         await redirectSocketRoute(server, options, log);
         return;
       }
+      // enable security check in routes
+      enableSecurity(server);
 
       const socketService = new SocketService(server, log);
 
