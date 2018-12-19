@@ -19,6 +19,7 @@ const TopBarContainer = styled.div`
   justify-content: space-between;
   padding: 8px;
   height: var(--topBarContainerHeight);
+  min-height: var(--topBarContainerHeight);
   border-bottom: 2px solid ${colors.borderGrey};
   nav {
     line-height: var(--topBarContainerHeight);
