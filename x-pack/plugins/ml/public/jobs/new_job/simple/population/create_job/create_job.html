@@ -284,22 +284,22 @@
                         <h4 class="euiTitle euiTitle--small">
                           <i class="fa fa-info-circle"></i>
                           <span
-                            i18n-id="xpack.ml.newJob.simple.population.noResultsFoundTitle"
+                            i18n-id="xpack.ml.newJob.simple.population.documentCountChart.noResultsFoundTitle"
                             i18n-default-message="No results found"
                           ></span>
                           </h4>
                         <span>
                           <span
-                            i18n-id="xpack.ml.newJob.simple.population.considerUsingText"
+                            i18n-id="xpack.ml.newJob.simple.population.documentCountChart.considerUsingText"
                             i18n-default-message="Consider using the"
-                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.considerUsingText + xpack.ml.newJob.simple.population.fullIndexPatternDataLinkText"
+                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.documentCountChart.considerUsingText + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
                           ></span>
                           <a
                             ng-click="setFullTimeRange()"
-                            i18n-id="xpack.ml.newJob.simple.population.fullIndexPatternDataLinkText"
+                            i18n-id="xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
                             i18n-default-message="full {indexPatternTitle} data"
                             i18n-values="{ indexPatternTitle: ui.indexPattern.title }"
-                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.considerUsingText + xpack.ml.newJob.simple.population.fullIndexPatternDataLinkText"
+                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.documentCountChart.considerUsingText + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
                           ></a>
                         </span>
                       </div>
@@ -317,21 +317,21 @@
                     <label
                       ng-if="formConfig.fields[id].splitField === undefined"
                       class="kuiFormLabel"
-                      i18n-id="xpack.ml.newJob.simple.population.chartWithoutSplitFieldLabel"
+                      i18n-id="xpack.ml.newJob.simple.population.chart.chartWithoutSplitFieldLabel"
                       i18n-default-message="{aggTypeTitle} {fieldName} over {overFieldName}"
                       i18n-values="{ aggTypeTitle: formConfig.fields[id].agg.type.title, fieldName: formConfig.fields[id].name, overFieldName: formConfig.overField.name }"
                     ></label>
                     <label
                       ng-if="formConfig.fields[id].splitField !== undefined"
                       class="kuiFormLabel"
-                      i18n-id="xpack.ml.newJob.simple.population.chartWithSplitFieldLabel"
+                      i18n-id="xpack.ml.newJob.simple.population.chart.chartWithSplitFieldLabel"
                       i18n-default-message="{aggTypeTitle} {fieldName} over {overFieldName} split by {splitFieldName}"
                       i18n-values="{ aggTypeTitle: formConfig.fields[id].agg.type.title, fieldName: formConfig.fields[id].name, overFieldName: formConfig.overField.name, splitFieldName: formConfig.fields[id].splitField.name }"
                     ></label>
                     <div class="split-controls">
                       <div
                         class="split-align"
-                        i18n-id="xpack.ml.newJob.simple.population.splitDataLabel"
+                        i18n-id="xpack.ml.newJob.simple.population.chart.splitDataLabel"
                         i18n-default-message="Split data:"
                       ></div>
                       <div class="split-field-container">
@@ -342,7 +342,7 @@
                           append-to-body="true"
                           ng-disabled="ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
                         >
-                            <ui-select-match placeholder="{{ ::'xpack.ml.newJob.simple.population.splitFieldPlaceholder' | i18n: {defaultMessage: 'Select a field'} }}">
+                            <ui-select-match placeholder="{{ ::'xpack.ml.newJob.simple.population.chart.splitFieldPlaceholder' | i18n: {defaultMessage: 'Select a field'} }}">
                               <ml-field-type-icon type="$select.selected.mlType"></ml-field-type-icon>{{$select.selected.name}}
                             </ui-select-match>
                             <ui-select-choices repeat="field in ui.splitFields | filter: { name: $select.search } | filter: ui.isOverField" group-by="'mlType'">
@@ -359,10 +359,10 @@
                       <button
                         ng-if="formConfig.fields[id].splitField !== undefined && (!ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)"
                         ng-click="splitReset(id)"
-                        aria-label="{{ ::'xpack.ml.newJob.simple.population.removeSplitButtonAriaLabel' | i18n: {defaultMessage: 'Remove split'} }}"
+                        aria-label="{{ ::'xpack.ml.newJob.simple.population.chart.removeSplitButtonAriaLabel' | i18n: {defaultMessage: 'Remove split'} }}"
                         ng-disabled="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
                         class="euiButton euiButton--primary euiButton--small split-align remove-split"
-                        i18n-id="xpack.ml.newJob.simple.population.removeSplitButtonLabel"
+                        i18n-id="xpack.ml.newJob.simple.population.chart.removeSplitButtonLabel"
                         i18n-default-message="Remove split"
                       ></button>
                     </div>
@@ -389,7 +389,7 @@
                               <h4 class="euiTitle euiTitle--small">
                                 <i class="fa fa-info-circle"></i>
                                 <span
-                                  i18n-id="xpack.ml.newJob.simple.population.noResultsFoundTitle"
+                                  i18n-id="xpack.ml.newJob.simple.population.chart.noResultsFoundTitle"
                                   i18n-default-message="No results found"
                                 ></span>
                                </h4>
