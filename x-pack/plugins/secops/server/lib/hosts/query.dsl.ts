@@ -12,9 +12,9 @@ import { HostsRequestOptions } from './types';
 
 export const hostsFieldsMap: Readonly<Record<string, string>> = {
   firstSeen: '@timestamp',
-  name: 'system.host.name',
-  os: 'system.host.os.name',
-  version: 'system.host.os.version',
+  name: 'host.name',
+  os: 'host.os.name',
+  version: 'host.os.version',
 };
 
 export const buildQuery = (options: HostsRequestOptions) => {
@@ -40,7 +40,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
   const agg = {
     host_count: {
       cardinality: {
-        field: 'system.host.id',
+        field: 'host.id',
       },
     },
   };
@@ -55,7 +55,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
         group_by_host: {
           composite: {
             size: limit + 1,
-            sources: [{ host_name: { terms: { field: 'system.host.id' } } }],
+            sources: [{ host_name: { terms: { field: 'host.id' } } }],
           },
           aggs: {
             time: {
@@ -70,7 +70,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
                 sort: [
                   {
                     '@timestamp': { order: 'asc' },
-                    'system.host.name': { order: 'asc' },
+                    'host.name': { order: 'asc' },
                   },
                 ],
               },
