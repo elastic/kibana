@@ -81,12 +81,13 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor]
   }
 
-  type ErrorList {
+  type ErrorListItem {
     latestMessage: String
     monitorId: String
-    type: String
+    type: String!
     count: Int
     statusCode: String
+    timestamp: String
   }
 
   extend type Query {
@@ -122,6 +123,6 @@ export const monitorsSchema = gql`
       dateRangeStart: UnsignedInteger!
       dateRangeEnd: UnsignedInteger!
       filters: String
-    ): [ErrorList]
+    ): [ErrorListItem]
   }
 `;

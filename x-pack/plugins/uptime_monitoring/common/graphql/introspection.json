@@ -301,7 +301,7 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "ErrorList", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "ErrorListItem", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1807,7 +1807,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "ErrorList",
+        "name": "ErrorListItem",
         "description": "",
         "fields": [
           {
@@ -1830,7 +1830,11 @@
             "name": "type",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1844,6 +1848,14 @@
           },
           {
             "name": "statusCode",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timestamp",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },

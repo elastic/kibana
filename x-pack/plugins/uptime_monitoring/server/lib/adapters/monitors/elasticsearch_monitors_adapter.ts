@@ -5,8 +5,9 @@
  */
 
 import { get, set } from 'lodash';
-import { UMGqlRange } from 'x-pack/plugins/uptime_monitoring/common/domain_types';
 import { INDEX_NAMES } from '../../../../common/constants';
+import { UMGqlRange } from '../../../../common/domain_types';
+import { ErrorListItem } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -372,7 +373,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeStart: number,
     dateRangeEnd: number,
     filters?: string | undefined
-  ): Promise<any> {
+  ): Promise<ErrorListItem[]> {
     const statusDown = {
       term: {
         'monitor.status': {
@@ -421,7 +422,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     } = await this.database.search(request, params);
 
-    const errorsList: any[] = [];
+    const errorsList: ErrorListItem[] = [];
     buckets.forEach(
       ({
         key: errorType,
@@ -436,12 +437,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           const source = get(bucket, 'latest.hits.hits[0]._source', null);
           const errorMessage = get(source, 'error.message', null);
           const statusCode = get(source, 'http.response.status_code', null);
+          const timestamp = get(source, '@timestamp', null);
           errorsList.push({
             latestMessage: errorMessage,
             monitorId,
             type: errorType,
             count,
             statusCode,
+            timestamp,
           });
         });
       }

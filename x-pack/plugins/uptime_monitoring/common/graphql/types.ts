@@ -30,7 +30,7 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: (ErrorList | null)[] | null;
+  getErrorsList?: (ErrorListItem | null)[] | null;
 }
 /** A request sent from a monitor to a host */
 export interface Ping {
@@ -360,16 +360,18 @@ export interface FilterBar {
   status?: (string | null)[] | null;
 }
 
-export interface ErrorList {
+export interface ErrorListItem {
   latestMessage?: string | null;
 
   monitorId?: string | null;
 
-  type?: string | null;
+  type: string;
 
   count?: number | null;
 
   statusCode?: string | null;
+
+  timestamp?: string | null;
 }
 
 // ====================================================

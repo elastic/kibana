@@ -6,6 +6,7 @@
 
 // @ts-ignore missing typings
 import { EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
@@ -45,6 +46,12 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
                   width: '25%',
                 },
                 { field: 'count', name: 'Count', sortable: true },
+                {
+                  field: 'timestamp',
+                  name: 'Latest error',
+                  sortable: true,
+                  render: (timestamp: string) => moment(timestamp).fromNow(),
+                },
                 { field: 'statusCode', name: 'Response code', sortable: true },
                 { field: 'latestMessage', name: 'Latest message', sortable: true, width: '40%' },
               ]}

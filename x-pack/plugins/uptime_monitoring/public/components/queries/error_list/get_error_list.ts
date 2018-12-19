@@ -22,6 +22,7 @@ export const getErrorListQuery = gql`
       type
       count
       statusCode
+      timestamp
     }
   }
 `;
