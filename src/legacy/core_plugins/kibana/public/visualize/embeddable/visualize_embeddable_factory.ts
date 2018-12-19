@@ -17,22 +17,31 @@
  * under the License.
  */
 
-import $ from 'jquery';
-import { Embeddable, EmbeddableFactory } from 'ui/embeddable';
-import { getVisualizeLoader } from 'ui/visualize/loader';
+import { EmbeddableFactory } from 'ui/embeddable';
+import { getVisualizeLoader, VisualizeLoader } from 'ui/visualize/loader';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
-import labDisabledTemplate from './visualize_lab_disabled.html';
+import { Legacy } from 'kibana';
+import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
+import { VisSavedObject } from 'ui/visualize/loader/types';
+import { SavedVisualizations } from '../types';
+import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+
+export interface VisualizeEmbeddableInstanceConfiguration {
+  id: string;
+}
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor(savedVisualizations, config) {
-    super();
-    this._config = config;
+  private savedVisualizations: SavedVisualizations;
+  private config: Legacy.KibanaConfig;
+
+  constructor(savedVisualizations: SavedVisualizations, config: Legacy.KibanaConfig) {
+    super({ name: 'visualization' });
+    this.config = config;
     this.savedVisualizations = savedVisualizations;
-    this.name = 'visualization';
   }
 
-  getEditPath(panelId) {
+  public getEditPath(panelId: string) {
     return this.savedVisualizations.urlFor(panelId);
   }
 
@@ -44,25 +53,22 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
    * @param {function} onEmbeddableStateChanged
    * @return {Promise.<{ metadata, onContainerStateChanged, render, destroy }>}
    */
-  create(panelMetadata, onEmbeddableStateChanged) {
+  public create(
+    panelMetadata: VisualizeEmbeddableInstanceConfiguration,
+    onEmbeddableStateChanged: OnEmbeddableStateChanged
+  ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
 
-    const waitFor = [getVisualizeLoader(), this.savedVisualizations.get(visId)];
-    return Promise.all(waitFor).then(([loader, savedObject]) => {
-      const isLabsEnabled = this._config.get('visualize:enableLabs');
+    const waitFor: [Promise<VisualizeLoader>, Promise<VisSavedObject>] = [
+      getVisualizeLoader(),
+      this.savedVisualizations.get(visId),
+    ];
+    return Promise.all(waitFor).then(([loader, savedObject]: [VisualizeLoader, VisSavedObject]) => {
+      const isLabsEnabled = this.config.get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
-        return new Embeddable({
-          metadata: {
-            title: savedObject.title,
-          },
-          render: domNode => {
-            const template = $(labDisabledTemplate);
-            template.find('.visDisabledLabVisualization__title').text(savedObject.title);
-            $(domNode).html(template);
-          },
-        });
+        return new DisabledLabEmbeddable(savedObject.title);
       } else {
         return new VisualizeEmbeddable({
           onEmbeddableStateChanged,
