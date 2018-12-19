@@ -34,13 +34,13 @@ const viewJobLabel: string = i18n.translate(
   }
 );
 
-interface ViewMlJobArgs {
+interface ViewMLJobArgs {
   serviceName: string;
-  transactionType: string;
+  transactionType?: string;
   location: any;
 }
 
-export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
+export const ViewMLJob: React.SFC<ViewMLJobArgs> = ({
   serviceName,
   transactionType,
   location,
@@ -48,7 +48,9 @@ export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
 }) => {
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
-  const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
+  const jobId = `${serviceName}-${
+    transactionType ? transactionType + '-' : ''
+  }high_mean_response_time`;
   const query = {
     _g: {
       ml: {
@@ -59,11 +61,11 @@ export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
 
   return (
     <UnconnectedKibanaLink
-      location={location}
       pathname={pathname}
       hash={hash}
       query={query}
       children={children}
+      location={location}
     />
   );
 };

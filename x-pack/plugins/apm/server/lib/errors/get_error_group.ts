@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESFilter } from 'elasticsearch';
 import { oc } from 'ts-optchain';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../common/constants';
@@ -24,6 +25,23 @@ export async function getErrorGroup({
   setup: Setup;
 }): Promise<ErrorGroupAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [ERROR_GROUP_ID]: groupId } },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
 
   const params = {
     index: config.get<string>('apm_oss.errorIndices'),
@@ -31,19 +49,7 @@ export async function getErrorGroup({
       size: 1,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [ERROR_GROUP_ID]: groupId } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       sort: [
@@ -53,10 +59,6 @@ export async function getErrorGroup({
       ]
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   const resp = await client<APMError>('search', params);
 
