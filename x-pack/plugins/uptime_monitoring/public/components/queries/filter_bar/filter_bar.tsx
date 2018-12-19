@@ -5,7 +5,8 @@
  */
 
 // @ts-ignore No typings for EuiSearchBar
-import { EuiSearchBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
+import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { getFilterBarQuery } from './get_filter_bar';
@@ -15,6 +16,9 @@ interface FilterBarProps {
   dateRangeEnd: number;
   updateQuery: (query: object) => void;
 }
+
+const MAX_SELECTION_LENGTH = 20;
+const SEARCH_THRESHOLD = 2;
 
 export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterBarProps) => (
   <Query query={getFilterBarQuery} variables={{ dateRangeStart, dateRangeEnd }}>
@@ -28,6 +32,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
       const {
         filterBar: { port, id, scheme },
       } = data;
+      const showFilterDisclaimer =
+        (id.length && id.length > MAX_SELECTION_LENGTH) ||
+        (port.length && port.length > MAX_SELECTION_LENGTH);
       const filters = [
         {
           type: 'field_value_toggle_group',
@@ -48,33 +55,57 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
           type: 'field_value_selection',
           field: 'monitor.id',
           name: 'Host',
-          multiSelect: 'or',
-          options: id.map((idValue: string) => ({ value: idValue, view: idValue })),
+          multiSelect: false,
+          options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
+            value: idValue,
+            view: idValue,
+          })),
+          searchThreshold: SEARCH_THRESHOLD,
         },
         {
           type: 'field_value_selection',
           field: 'tcp.port',
           name: 'Port',
-          multiSelect: 'or',
-          options: port.map((portValue: number) => ({ value: portValue, view: portValue })),
+          multiSelect: false,
+          options: take(port, MAX_SELECTION_LENGTH).map((portValue: any) => ({
+            value: portValue,
+            view: portValue,
+          })),
+          searchThreshold: SEARCH_THRESHOLD,
         },
         {
           type: 'field_value_selection',
           field: 'monitor.scheme',
           name: 'Type',
-          multiSelect: 'or',
+          multiSelect: false,
           options: scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
+          searchThreshold: SEARCH_THRESHOLD,
         },
       ];
 
       return (
-        <EuiSearchBar
-          // TODO: update typing
-          onChange={({ query }: { query?: object }) =>
-            updateQuery(EuiSearchBar.Query.toESQuery(query))
-          }
-          filters={filters}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem grow>
+            <EuiSearchBar
+              // TODO: update typing
+              onChange={({ query }: { query?: object }) =>
+                updateQuery(EuiSearchBar.Query.toESQuery(query))
+              }
+              filters={filters}
+            />
+          </EuiFlexItem>
+          {showFilterDisclaimer && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="left"
+                title="Filter limitations"
+                content={`The top ${MAX_SELECTION_LENGTH} filter options for each field are displayed, but you can modify the filters manually or search for additional values.`}
+              >
+                <EuiIcon type="iInCircle" size="l" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       );
     }}
   </Query>
