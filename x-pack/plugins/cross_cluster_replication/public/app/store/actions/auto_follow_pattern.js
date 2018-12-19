@@ -134,7 +134,6 @@ export const deleteAutoFollowPattern = (id) => (
       const ids = arrify(id);
       const autoFollowPatternId = getSelectedAutoFollowPatternId(getState());
       if (ids.some(_id => autoFollowPatternId === _id)) {
-        dispatch(toggleAutoFollowPatternDetailPanel(false));
         dispatch(selectAutoFollowPattern(null));
       }
     }

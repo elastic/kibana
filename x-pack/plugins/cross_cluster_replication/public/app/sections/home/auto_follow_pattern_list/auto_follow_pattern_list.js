@@ -54,7 +54,7 @@ export const AutoFollowPatternList = injectI18n(
         autoFollowPatternId,
         selectAutoFollowPattern,
         openDetailPanel,
-        closeDetailPanel
+        closeDetailPanel,
       } = this.props;
 
       if (newId !== autoFollowPatternId) {
