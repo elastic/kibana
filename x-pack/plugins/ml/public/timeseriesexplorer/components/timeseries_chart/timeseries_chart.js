@@ -489,6 +489,7 @@ export class TimeseriesChart extends React.Component {
       .attr('class', 'chart-border');
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
+    // Create the elements for annotations
     if (mlAnnotationsEnabled) {
       const annotateBrush = this.annotateBrush.bind(this);
 
@@ -499,6 +500,8 @@ export class TimeseriesChart extends React.Component {
         .attr('x', 0)
         .attr('y', focusZoomPanelHeight)
         .attr('height', focusChartHeight);
+
+      fcsGroup.append('g').classed('mlAnnotations', true);
     }
 
     // Add border round plot area.
@@ -557,11 +560,6 @@ export class TimeseriesChart extends React.Component {
         .attr('class', 'values-line forecast');
       fcsGroup.append('g')
         .attr('class', 'focus-chart-markers forecast');
-    }
-
-    // Create the elements for annotations
-    if (mlAnnotationsEnabled) {
-      fcsGroup.append('g').classed('mlAnnotations', true);
     }
 
     fcsGroup.append('rect')
