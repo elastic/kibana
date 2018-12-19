@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle
+} from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';
+import {
+  ERROR_EXC_STACKTRACE,
+  ERROR_LOG_STACKTRACE
+} from 'x-pack/plugins/apm/common/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
@@ -16,8 +26,6 @@ import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   ERROR_EXC_HANDLED,
-  ERROR_EXC_STACKTRACE,
-  ERROR_LOG_STACKTRACE,
   REQUEST_METHOD,
   REQUEST_URL_FULL,
   TRACE_ID,
@@ -32,13 +40,8 @@ import {
   unit,
   units
 } from '../../../../style/variables';
-import {
-  fromQuery,
-  history,
-  KibanaLink,
-  legacyEncodeURIComponent,
-  toQuery
-} from '../../../../utils/url';
+import { fromQuery, history, toQuery } from '../../../../utils/url';
+import { KibanaLink, legacyEncodeURIComponent } from '../../../../utils/url';
 import { DiscoverErrorButton } from '../../../shared/DiscoverButtons/DiscoverErrorButton';
 import {
   getPropertyTabNames,
@@ -46,8 +49,6 @@ import {
 } from '../../../shared/PropertiesTable';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { StickyProperties } from '../../../shared/StickyProperties';
-// @ts-ignore
-import { HeaderMedium, Tab } from '../../../shared/UIComponents';
 
 const Container = styled.div`
   position: relative;
@@ -64,17 +65,18 @@ const HeaderContainer = styled.div`
   margin-bottom: ${px(unit)};
 `;
 
-const TabContainer = styled.div`
-  padding: 0 ${px(units.plus)};
-  border-bottom: 1px solid ${colors.gray4};
-`;
-
-const TabContentContainer = styled.div`
+const PaddedContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
 `;
 
 const EXC_STACKTRACE_TAB = 'exception_stacktrace';
 const LOG_STACKTRACE_TAB = 'log_stacktrace';
+
+interface Props {
+  errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
+  urlParams: IUrlParams;
+  location: any;
+}
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {
   if (errorGroup.status !== STATUS.SUCCESS) {
@@ -86,7 +88,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     return null;
   }
 
-  const transactionLink = getTransactionLink(transaction, error);
+  const transactionLink = getTransactionLink(error, transaction);
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -133,13 +135,9 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   return (
     <Container>
       <HeaderContainer>
-        <HeaderMedium
-          css={`
-            margin: 0;
-          `}
-        >
-          Error occurrence
-        </HeaderMedium>
+        <EuiTitle size="s">
+          <h3>Error occurence</h3>
+        </EuiTitle>
         <DiscoverErrorButton error={error} kuery={urlParams.kuery}>
           <EuiButtonEmpty iconType="discoverApp">
             {`View ${occurrencesCount} occurences in Discover`}
@@ -147,14 +145,16 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         </DiscoverErrorButton>
       </HeaderContainer>
 
-      <TabContentContainer>
+      <PaddedContainer>
         <StickyProperties stickyProperties={stickyProperties} />
-      </TabContentContainer>
+      </PaddedContainer>
 
-      <TabContainer>
+      <EuiSpacer />
+
+      <EuiTabs>
         {tabs.map(key => {
           return (
-            <Tab
+            <EuiTab
               onClick={() => {
                 history.replace({
                   ...location,
@@ -164,47 +164,24 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
                   })
                 });
               }}
-              selected={currentTab === key}
+              isSelected={currentTab === key}
               key={key}
             >
               {capitalize(key.replace('_', ' '))}
-            </Tab>
+            </EuiTab>
           );
         })}
-      </TabContainer>
+      </EuiTabs>
 
-      <TabContentContainer>
-        <TabContent currentTab={currentTab} error={error} />
-      </TabContentContainer>
+      <PaddedContainer>
+        <TabContent error={error} currentTab={currentTab} />
+      </PaddedContainer>
     </Container>
   );
 }
 
-// Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
-  return tabs.includes(selectedTab!) ? selectedTab : tabs[0];
-}
-
-function getTabs(error: APMError) {
-  const logStackframes = get(error, ERROR_LOG_STACKTRACE, []).length;
-  const context = error.context;
-
-  const contextKeys = Object.keys(context);
-  return [
-    ...(logStackframes > 0 ? [LOG_STACKTRACE_TAB] : []),
-    EXC_STACKTRACE_TAB,
-    ...getPropertyTabNames(contextKeys)
-  ];
-}
-
-interface Props {
-  errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
-  urlParams: IUrlParams;
-  location: any;
-}
-
-function getTransactionLink(transaction?: Transaction, error: APMError) {
-  if (!transaction || !get(error, 'transaction.sampled') {
+function getTransactionLink(error: APMError, transaction?: Transaction) {
+  if (!transaction || !get(error, 'transaction.sampled')) {
     return;
   }
 
@@ -228,14 +205,15 @@ function getTransactionLink(transaction?: Transaction, error: APMError) {
   );
 }
 
-interface TabContentProps {
-  currentTab?: string;
-  error: APMError;
-}
-
 type MaybeStackframes = IStackframe[] | undefined;
 
-function TabContent({ currentTab, error }: TabContentProps) {
+export function TabContent({
+  error,
+  currentTab
+}: {
+  error: APMError;
+  currentTab?: string;
+}) {
   const codeLanguage = error.context.service.name;
   const agentName = error.context.service.agent.name;
   const excStackframes: MaybeStackframes = get(error, ERROR_EXC_STACKTRACE);
@@ -261,4 +239,21 @@ function TabContent({ currentTab, error }: TabContentProps) {
         />
       );
   }
+}
+
+// Ensure the selected tab exists or use the first
+export function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
+  return tabs.includes(selectedTab!) ? selectedTab : tabs[0];
+}
+
+export function getTabs(error: APMError) {
+  const logStackframes = get(error, ERROR_LOG_STACKTRACE, []).length;
+  const context = error.context;
+
+  const contextKeys = Object.keys(context);
+  return [
+    ...(logStackframes > 0 ? [LOG_STACKTRACE_TAB] : []),
+    EXC_STACKTRACE_TAB,
+    ...getPropertyTabNames(contextKeys)
+  ];
 }

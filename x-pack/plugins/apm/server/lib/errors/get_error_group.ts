@@ -52,24 +52,6 @@ export async function getErrorGroup({
     filter.push(esFilterQuery);
   }
 
-  const filter = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [ERROR_GROUP_ID]: groupId } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
-  ];
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
-
   const params = {
     index: config.get<string>('apm_oss.errorIndices'),
     body: {

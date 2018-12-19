@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
@@ -27,8 +27,6 @@ import {
 } from '../../../style/variables';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
-// @ts-ignore
-import { HeaderLarge } from '../../shared/UIComponents';
 import { DetailView } from './DetailView';
 // @ts-ignore
 import Distribution from './Distribution';
@@ -87,12 +85,16 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
 
         return (
           <div>
-            <HeaderLarge>
-              Error group {getShortGroupId(urlParams.errorGroupId)}
-              {isUnhandled && (
-                <UnhandledBadge color="warning">Unhandled</UnhandledBadge>
-              )}
-            </HeaderLarge>
+            <EuiTitle>
+              <span>
+                Error group {getShortGroupId(urlParams.errorGroupId)}
+                {isUnhandled && (
+                  <UnhandledBadge color="warning">Unhandled</UnhandledBadge>
+                )}
+              </span>
+            </EuiTitle>
+
+            <EuiSpacer size="m" />
 
             <KueryBar />
 

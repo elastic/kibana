@@ -32,7 +32,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
   };
 }
 
-export const DiscoverErrorButton: React.SFC<{
+const DiscoverErrorButton: React.SFC<{
   readonly error: APMError;
   readonly kuery?: string;
 }> = ({ error, kuery, children }) => {
@@ -43,3 +43,5 @@ export const DiscoverErrorButton: React.SFC<{
     />
   );
 };
+
+export { DiscoverErrorButton };
