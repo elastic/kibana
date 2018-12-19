@@ -60,7 +60,7 @@ function normalize(localPath, type, pluginSpec) {
 
   return {
     localPath,
-    publicPath,
+    publicPath
   };
 }
 
