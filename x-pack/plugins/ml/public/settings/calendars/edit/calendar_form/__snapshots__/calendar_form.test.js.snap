@@ -51,9 +51,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
   >
     <EuiComboBox
       compressed={false}
-      disabled={false}
       fullWidth={false}
       isClearable={true}
+      isDisabled={false}
       onChange={[MockFunction]}
       options={Array []}
       selectedOptions={Array []}
@@ -68,9 +68,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
   >
     <EuiComboBox
       compressed={false}
-      disabled={false}
       fullWidth={false}
       isClearable={true}
+      isDisabled={false}
       onChange={[MockFunction]}
       onCreateOption={[MockFunction]}
       options={Array []}
@@ -88,6 +88,8 @@ exports[`CalendarForm Renders calendar form 1`] = `
     label="Events"
   >
     <EventsTable
+      canCreateCalendar={true}
+      canDeleteCalendar={true}
       eventsList={Array []}
       onDeleteClick={[MockFunction]}
       showImportModal={[MockFunction]}
@@ -113,9 +115,10 @@ exports[`CalendarForm Renders calendar form 1`] = `
     >
       <EuiButton
         color="primary"
-        disabled={true}
+        data-testid="ml_save_calendar_button"
         fill={true}
         iconSide="left"
+        isDisabled={true}
         onClick={[MockFunction]}
         type="button"
       >
@@ -128,10 +131,10 @@ exports[`CalendarForm Renders calendar form 1`] = `
     >
       <EuiButton
         color="primary"
-        disabled={false}
         fill={false}
         href="undefined/app/ml#/settings/calendars_list"
         iconSide="left"
+        isDisabled={false}
         type="button"
       >
         Cancel

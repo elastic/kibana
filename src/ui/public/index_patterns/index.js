@@ -29,3 +29,9 @@ export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
 } from './constants';
+
+export {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern,
+} from './validate';

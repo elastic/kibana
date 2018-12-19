@@ -13,16 +13,11 @@ import React from 'react';
 
 import { EuiDescriptionList } from '@elastic/eui';
 
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { Annotation } from '../../../../common/types/annotations';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 interface Props {
   annotation: Annotation;
-}
-
-function formatListDate(ts: number) {
-  return formatDate(ts, 'MMMM Do YYYY, HH:mm:ss');
 }
 
 export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
@@ -33,21 +28,21 @@ export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
     },
     {
       title: 'Start',
-      description: formatListDate(annotation.timestamp),
+      description: formatHumanReadableDateTimeSeconds(annotation.timestamp),
     },
   ];
 
   if (annotation.end_timestamp !== undefined) {
     listItems.push({
       title: 'End',
-      description: formatListDate(annotation.end_timestamp),
+      description: formatHumanReadableDateTimeSeconds(annotation.end_timestamp),
     });
   }
 
   if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
     listItems.push({
       title: 'Created',
-      description: formatListDate(annotation.create_time),
+      description: formatHumanReadableDateTimeSeconds(annotation.create_time),
     });
     listItems.push({
       title: 'Created by',
@@ -55,7 +50,7 @@ export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
     });
     listItems.push({
       title: 'Last modified',
-      description: formatListDate(annotation.modified_time),
+      description: formatHumanReadableDateTimeSeconds(annotation.modified_time),
     });
     listItems.push({
       title: 'Modified by',

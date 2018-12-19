@@ -43,6 +43,7 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { timefilter } from 'ui/timefilter';
+import { formatHumanReadableDateTime } from '../util/date_utils';
 import {
   DRAG_SELECT_ACTION,
   SWIMLANE_DEFAULT_LIMIT,
@@ -54,9 +55,8 @@ import {
 } from '../../common/constants/search';
 
 // TODO Fully support Annotations in Anomaly Explorer
-// import chrome from 'ui/chrome';
-// const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
-const mlAnnotationsEnabled = false;
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/explorer/?', {
@@ -959,7 +959,6 @@ module.controller('MlExplorerController', function (
       cellData.lanes : $scope.getSelectedJobIds();
     const timeRange = getSelectionTimeRange(cellData);
 
-
     if (mlAnnotationsEnabled) {
       const resp = await ml.annotations.getAnnotations({
         jobIds,
@@ -969,11 +968,13 @@ module.controller('MlExplorerController', function (
       });
 
       $scope.$evalAsync(() => {
-        const annotationsData = resp.annotations[jobIds[0]];
-
-        if (annotationsData === undefined) {
-          return;
-        }
+        const annotationsData = [];
+        jobIds.forEach((jobId) => {
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
+          }
+        });
 
         $scope.annotationsData = annotationsData
           .sort((a, b) => {
@@ -1074,7 +1075,7 @@ module.controller('MlExplorerController', function (
           // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
           // to show the top 'view by' values for the selected time.
           loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
-          $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
+          $scope.viewByLoadedForTimeFormatted = formatHumanReadableDateTime(timerange.earliestMs);
         }
 
         if (influencers.length === 0) {

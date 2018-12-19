@@ -30,7 +30,9 @@ export class FunctionFormContextPending extends React.PureComponent {
   fetchContext = (props, force = false) => {
     // dispatch context update if none is provided
     const { expressionType, context, updateContext } = props;
-    if (force || (context == null && expressionType.requiresContext)) updateContext();
+    if (force || (context == null && expressionType.requiresContext)) {
+      updateContext();
+    }
   };
 
   render() {
