@@ -57,7 +57,7 @@ const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
     startDate,
     endDate,
     limit,
-    upperLimit = 100,
+    upperLimit,
     cursor,
     poll,
   }) => (

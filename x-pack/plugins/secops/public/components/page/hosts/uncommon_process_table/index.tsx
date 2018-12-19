@@ -72,26 +72,24 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
-  }) => {
-    return (
-      <LoadMoreTable
-        columns={getUncommonColumns()}
-        loadingTitle="Uncommon Processes"
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
-        hasNextPage={hasNextPage}
-        itemsPerRow={rowItems}
-        updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        title={
-          <h3>
-            Uncommon Processes <EuiBadge color="hollow">{totalCount}</EuiBadge>
-          </h3>
-        }
-      />
-    );
-  }
+  }) => (
+    <LoadMoreTable
+      columns={getUncommonColumns()}
+      loadingTitle="Uncommon Processes"
+      loading={loading}
+      pageOfItems={data}
+      loadMore={() => loadMore(nextCursor)}
+      limit={limit}
+      hasNextPage={hasNextPage}
+      itemsPerRow={rowItems}
+      updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+      title={
+        <h3>
+          Uncommon Processes <EuiBadge color="hollow">{totalCount}</EuiBadge>
+        </h3>
+      }
+    />
+  )
 );
 
 const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
