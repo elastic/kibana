@@ -19,16 +19,13 @@
 
 import { Readable } from 'stream';
 
-import sinon from 'sinon';
-import expect from 'expect.js';
-
-import { concatStreamProviders } from '../concat_stream_providers';
-import { createListStream } from '../list_stream';
-import { createConcatStream } from '../concat_stream';
-import { createPromiseFromStreams } from '../promise_from_streams';
+import { concatStreamProviders } from './concat_stream_providers';
+import { createListStream } from './list_stream';
+import { createConcatStream } from './concat_stream';
+import { createPromiseFromStreams } from './promise_from_streams';
 
 describe('concatStreamProviders() helper', () => {
-  it('writes the data from an array of stream providers into a destination stream in order', async () => {
+  test('writes the data from an array of stream providers into a destination stream in order', async () => {
     const results = await createPromiseFromStreams([
       concatStreamProviders([
         () => createListStream([
@@ -45,10 +42,10 @@ describe('concatStreamProviders() helper', () => {
       createConcatStream('')
     ]);
 
-    expect(results).to.be('foobarbazbug');
+    expect(results).toBe('foobarbazbug');
   });
 
-  it('emits the errors from a sub-stream to the destination', async () => {
+  test('emits the errors from a sub-stream to the destination', async () => {
     const dest = concatStreamProviders([
       () => createListStream([
         'foo',
@@ -61,19 +58,18 @@ describe('concatStreamProviders() helper', () => {
       }),
     ]);
 
-    const errorListener = sinon.stub();
+    const errorListener = jest.fn();
     dest.on('error', errorListener);
 
     try {
       await createPromiseFromStreams([dest]);
       throw new Error('Expected createPromiseFromStreams() to reject with error');
     } catch (error) {
-      expect(error).to.have.property('message', 'foo');
+      expect(error).toHaveProperty('message', 'foo');
     }
 
-    sinon.assert.calledOnce(errorListener);
-    sinon.assert.calledWithExactly(errorListener, sinon.match({
-      message: 'foo'
-    }));
+    expect(errorListener).toHaveBeenCalledTimes(1);
+    expect(errorListener.mock.calls[0][0]).toBeInstanceOf(Error);
+    expect(errorListener.mock.calls[0][0]).toHaveProperty('message', 'foo');
   });
 });
