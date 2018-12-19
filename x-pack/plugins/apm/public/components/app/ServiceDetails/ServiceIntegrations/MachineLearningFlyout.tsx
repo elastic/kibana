@@ -155,14 +155,12 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
             return null;
           }
 
-          const hasMLJob = Boolean(
-            data.jobs.find(
-              job =>
-                job.jobId &&
-                job.jobId.startsWith(
-                  getMlPrefix(serviceName, selectedTransactionType)
-                )
-            )
+          const hasMLJob = data.jobs.some(
+            job =>
+              job.jobId &&
+              job.jobId.startsWith(
+                getMlPrefix(serviceName, selectedTransactionType)
+              )
           );
 
           return (
