@@ -21,7 +21,7 @@ import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { uiModules } from 'ui/modules';
@@ -79,6 +79,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
 
   constructor(name, attribution, format, showAllShapes, meta, layerConfig) {
+
     super();
 
     this._metrics = null;
@@ -125,7 +126,15 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       try {
         const data = await this._makeJsonAjaxCall();
         let featureCollection;
-        const formatType = typeof format === 'string' ? format : format.type;
+        let formatType;
+        if (typeof format === 'string') {
+          formatType = format;
+        } else if (format && format.type) {
+          formatType = format.type;
+        } else {
+          formatType = 'geojson';
+        }
+
         if (formatType === 'geojson') {
           featureCollection = data;
         } else if (formatType === 'topojson') {
@@ -185,7 +194,7 @@ CORS configuration of the server permits requests from the Kibana application on
   //This method is stubbed in the tests to avoid network request during unit tests.
   async _makeJsonAjaxCall() {
     const serviceSettings = await emsServiceSettings;
-    return serviceSettings.getGeoJsonForRegionLayer(this._layerConfig);
+    return serviceSettings.getJsonForRegionLayer(this._layerConfig);
   }
 
   _invalidateJoin() {

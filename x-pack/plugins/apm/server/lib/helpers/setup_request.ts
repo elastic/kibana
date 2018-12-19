@@ -6,26 +6,11 @@
 
 /* tslint:disable no-console */
 import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
-import { Request } from 'hapi';
+import { Legacy } from 'kibana';
 import moment from 'moment';
 
 function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
-}
-
-interface KibanaConfig {
-  get: <T = void>(key: string) => T;
-}
-
-// Extend the defaults with the plugins and server methods we need.
-declare module 'hapi' {
-  interface PluginProperties {
-    elasticsearch: any;
-  }
-
-  interface Server {
-    config: () => KibanaConfig;
-  }
 }
 
 export type ESClient = <T = void, U = void>(
@@ -38,7 +23,7 @@ export interface Setup {
   end: number;
   esFilterQuery?: any;
   client: ESClient;
-  config: KibanaConfig;
+  config: Legacy.KibanaConfig;
 }
 
 interface APMRequestQuery {
@@ -48,7 +33,7 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-export function setupRequest(req: Request): Setup {
+export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 

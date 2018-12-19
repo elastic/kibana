@@ -103,17 +103,35 @@ export class NewCalendar extends Component {
     }
   }
 
-  onCreate = async () => {
-    const calendar = this.setUpCalendarForApi();
-    this.setState({ saving: true });
+  isDuplicateId = () => {
+    const { calendars, formCalendarId } = this.state;
 
-    try {
-      await ml.addCalendar(calendar);
-      window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
-    } catch (error) {
-      console.log('Error saving calendar', error);
-      this.setState({ saving: false });
-      toastNotifications.addDanger(`An error occurred creating calendar ${calendar.calendarId}`);
+    for (let i = 0; i < calendars.length; i++) {
+      if (calendars[i].calendar_id === formCalendarId) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  onCreate = async () => {
+    const { formCalendarId } = this.state;
+
+    if (this.isDuplicateId()) {
+      toastNotifications.addDanger(`Cannot create calendar with id [${formCalendarId}] as it already exists.`);
+    } else {
+      const calendar = this.setUpCalendarForApi();
+      this.setState({ saving: true });
+
+      try {
+        await ml.addCalendar(calendar);
+        window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+      } catch (error) {
+        console.log('Error saving calendar', error);
+        this.setState({ saving: false });
+        toastNotifications.addDanger(`An error occurred creating calendar ${calendar.calendarId}`);
+      }
     }
   }
 
@@ -285,6 +303,8 @@ export class NewCalendar extends Component {
         >
           <CalendarForm
             calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
+            canCreateCalendar={this.props.canCreateCalendar}
+            canDeleteCalendar={this.props.canDeleteCalendar}
             description={selectedCalendar ? selectedCalendar.description : description}
             eventsList={events}
             groupIds={groupIdOptions}
@@ -314,4 +334,6 @@ export class NewCalendar extends Component {
 
 NewCalendar.propTypes = {
   calendarId: PropTypes.string,
+  canCreateCalendar: PropTypes.bool.isRequired,
+  canDeleteCalendar: PropTypes.bool.isRequired,
 };

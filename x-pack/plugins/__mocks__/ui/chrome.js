@@ -33,6 +33,8 @@ function getInjected(key) {
       return true;
     case 'uiCapabilities':
       return uiCapabilities;
+    case 'isCloudEnabled':
+      return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }

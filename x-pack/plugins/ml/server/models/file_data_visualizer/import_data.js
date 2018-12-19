@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { INDEX_META_DATA_CREATED_BY  } from '../../../common/constants/file_datavisualizer';
 
 export function importDataProvider(callWithRequest) {
   async function importData(id, index, settings, mappings, ingestPipeline, data) {
@@ -81,8 +82,11 @@ export function importDataProvider(callWithRequest) {
       const body = {
         mappings: {
           _doc: {
+            _meta: {
+              created_by: INDEX_META_DATA_CREATED_BY
+            },
             properties: mappings
-          }
+          },
         }
       };
 
