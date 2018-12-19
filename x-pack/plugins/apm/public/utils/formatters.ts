@@ -124,7 +124,7 @@ export function asInteger(value: number) {
   return numeral(value).format('0,0');
 }
 
-export function tpmUnit(type: string) {
+export function tpmUnit(type?: string) {
   return type === 'request'
     ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
         defaultMessage: 'rpm'
@@ -136,11 +136,18 @@ export function tpmUnit(type: string) {
 
 export function asPercent(
   numerator: number,
-  denominator = 0,
+  denominator?: number,
   fallbackResult = ''
 ) {
   if (denominator === 0) {
     return fallbackResult;
   }
-  return numeral(numerator / denominator).format('0.00%');
+
+  const decimal = denominator ? numerator / denominator : numerator;
+
+  return numeral(decimal).format('0.00%');
+}
+
+export function asGB(bytes: number | null, places = 1) {
+  return ((bytes || 0) / 1e9).toFixed(places) + ' GB';
 }

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { HeaderSmall } from '../../../shared/UIComponents';
 
 export function getFormattedBuckets(buckets, bucketSize) {
   if (!buckets) {
@@ -23,7 +23,7 @@ export function getFormattedBuckets(buckets, bucketSize) {
   });
 }
 
-function Distribution({ distribution }) {
+function Distribution({ distribution, title = 'Occurrences' }) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
@@ -37,7 +37,9 @@ function Distribution({ distribution }) {
 
   return (
     <div>
-      <HeaderSmall>Occurrences</HeaderSmall>
+      <EuiTitle size="s">
+        <span>{title}</span>
+      </EuiTitle>
       <Histogram
         verticalLineHover={bucket => bucket.x}
         xType="time"
