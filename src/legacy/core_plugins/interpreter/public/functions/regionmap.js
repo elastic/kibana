@@ -31,14 +31,6 @@ export const regionmap = () => ({
     defaultMessage: 'Regionmap visualization'
   }),
   args: {
-    bucket: {
-      types: ['string'],
-      default: '0',
-    },
-    metric: {
-      types: ['string'],
-      default: '1',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
@@ -46,15 +38,6 @@ export const regionmap = () => ({
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-    const metricColumn = context.columns.find((column, i) =>
-      column.id === args.metric || column.name === args.metric || i === parseInt(args.metric)
-    );
-    const bucketColumn = context.columns.find((column, i) =>
-      column.id === args.bucket || column.name === args.bucket || i === parseInt(args.bucket)
-    );
-
-    metricColumn.aggConfig.schema = 'metric';
-    bucketColumn.aggConfig.schema = 'segment';
 
     return {
       type: 'render',

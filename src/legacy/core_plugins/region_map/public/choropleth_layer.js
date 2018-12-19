@@ -241,7 +241,7 @@ CORS configuration of the server permits requests from the Kibana application on
     return this._layerName;
   }
 
-  setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName) {
+  setTooltipFormatter(tooltipFormatter, fieldFormatter, fieldName, metricLabel) {
     this._tooltipFormatter = (geojsonFeature) => {
       if (!this._metrics) {
         return '';
@@ -249,7 +249,7 @@ CORS configuration of the server permits requests from the Kibana application on
       const match = this._metrics.find((bucket) => {
         return compareLexicographically(bucket.term, geojsonFeature.properties[this._joinField]) === 0;
       });
-      return tooltipFormatter(metricsAgg, match, fieldName);
+      return tooltipFormatter(match, fieldFormatter, fieldName, metricLabel);
     };
   }
 
@@ -268,8 +268,8 @@ CORS configuration of the server permits requests from the Kibana application on
     clonedLayer.setColorRamp(this._colorRamp);
     clonedLayer.setLineWeight(this._lineWeight);
     clonedLayer.setTooltipFormatter(this._tooltipFormatter);
-    if (this._metrics && this._metricsAgg) {
-      clonedLayer.setMetrics(this._metrics, this._metricsAgg);
+    if (this._metrics) {
+      clonedLayer.setMetrics(this._metrics, this._valueFormatter);
     }
     return clonedLayer;
   }
@@ -289,11 +289,9 @@ CORS configuration of the server permits requests from the Kibana application on
     return this._whenDataLoaded;
   }
 
-  setMetrics(metrics, metricsAgg) {
+  setMetrics(metrics, fieldFormatter) {
     this._metrics = metrics.slice();
-
-    this._metricsAgg = metricsAgg;
-    this._valueFormatter = this._metricsAgg.fieldFormatter();
+    this._valueFormatter = fieldFormatter;
 
     this._metrics.sort((a, b) => compareLexicographically(a.term, b.term));
     this._invalidateJoin();
@@ -346,7 +344,7 @@ CORS configuration of the server permits requests from the Kibana application on
 
   appendLegendContents(jqueryDiv) {
 
-    if (!this._legendColors || !this._legendQuantizer || !this._metricsAgg) {
+    if (!this._legendColors || !this._legendQuantizer) {
       return;
     }
 

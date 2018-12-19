@@ -165,10 +165,12 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `tagcloud ${prepareJson('visConfig', visState.params)}`;
   },
   region_map: (visState, schemas) => {
-    let pipeline = `regionmap ${prepareJson('visConfig', visState.params)}`;
-    pipeline += `bucket='${schemas.segment.map(row => row.id).join(',')}' `;
-    pipeline += `metric='${schemas.metric.map(row => row.id).join(',')}' `;
-    return pipeline;
+    const visConfig = visState.params;
+    visConfig.metric = schemas.metric[0];
+    if (schemas.segment) {
+      visConfig.bucket = schemas.segment[0];
+    }
+    return `regionmap ${prepareJson('visConfig', visState.params)}`;
   },
   tile_map: (visState, schemas) => {
     const visConfig = visState.params;

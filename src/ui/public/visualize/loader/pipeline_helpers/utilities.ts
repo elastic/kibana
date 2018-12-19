@@ -22,6 +22,9 @@ import { identity } from 'lodash';
 import { fieldFormats } from '../../../registry/field_formats';
 
 export const getFieldFormat = (mapping: any) => {
+  if (!mapping) {
+    return;
+  }
   const FieldFormat = fieldFormats.byId[mapping.id];
   return FieldFormat && new FieldFormat(mapping.params, identity);
 };
