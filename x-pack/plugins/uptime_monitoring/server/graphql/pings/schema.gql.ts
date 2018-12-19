@@ -13,7 +13,21 @@ export const pingsSchema = gql`
 
   type Query {
     "Get a list of all recorded pings for all monitors"
-    allPings(sort: String, size: Int): [Ping!]!
+    allPings(
+      sort: String
+      size: Int
+      monitorId: String
+      status: String
+      dateRangeStart: UnsignedInteger!
+      dateRangeEnd: UnsignedInteger!
+    ): [Ping!]!
+
+    "Gets the number of documents in the target index"
+    getDocCount: DocCount!
+  }
+
+  type DocCount {
+    count: UnsignedInteger!
   }
 
   "The monitor's status for a ping"
@@ -178,6 +192,7 @@ export const pingsSchema = gql`
     resolve: Resolve
     socks5: Socks5
     tags: String
+    tcp: TCP
     tls: TLS
   }
 `;

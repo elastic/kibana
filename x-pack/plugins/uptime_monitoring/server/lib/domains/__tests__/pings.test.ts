@@ -43,28 +43,60 @@ describe('Pings domain lib', () => {
 
     it('should sort asc and take a range', async () => {
       const request: any = {};
-      const apiResponse = await libs.pings.getAll(request, 'asc', 2);
+      const apiResponse = await libs.pings.getAll(
+        request,
+        100,
+        200,
+        undefined,
+        undefined,
+        'asc',
+        2
+      );
       expect(apiResponse).toHaveLength(2);
       testMonitorId('foo', apiResponse[0].monitor);
       testMonitorId('baz', apiResponse[1].monitor);
     });
 
     it('should sort desc and take a range', async () => {
-      const apiResponse = await libs.pings.getAll(undefined, 'desc', 2);
+      const apiResponse = await libs.pings.getAll(
+        undefined,
+        100,
+        200,
+        undefined,
+        undefined,
+        'desc',
+        2
+      );
       expect(apiResponse).toHaveLength(2);
       testMonitorId('bar', apiResponse[0].monitor);
       testMonitorId('baz', apiResponse[1].monitor);
     });
 
     it('should take range without sort', async () => {
-      const apiResponse = await libs.pings.getAll(undefined, undefined, 2);
+      const apiResponse = await libs.pings.getAll(
+        undefined,
+        100,
+        200,
+        undefined,
+        undefined,
+        undefined,
+        2
+      );
       expect(apiResponse).toHaveLength(2);
       testMonitorId('foo', apiResponse[0].monitor);
       testMonitorId('bar', apiResponse[1].monitor);
     });
 
     it('should sort without range', async () => {
-      const apiResponse = await libs.pings.getAll(undefined, 'desc', undefined);
+      const apiResponse = await libs.pings.getAll(
+        undefined,
+        100,
+        200,
+        undefined,
+        undefined,
+        'desc',
+        undefined
+      );
       expect(apiResponse).toHaveLength(3);
       testMonitorId('bar', apiResponse[0].monitor);
       testMonitorId('baz', apiResponse[1].monitor);
@@ -72,7 +104,15 @@ describe('Pings domain lib', () => {
     });
 
     it('should return unsorted, with default size of 10', async () => {
-      const apiResponse = await libs.pings.getAll(undefined);
+      const apiResponse = await libs.pings.getAll(
+        undefined,
+        100,
+        200,
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      );
       expect(apiResponse).toHaveLength(3);
       testMonitorId('foo', apiResponse[0].monitor);
       testMonitorId('bar', apiResponse[1].monitor);

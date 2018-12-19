@@ -14,13 +14,25 @@ export const createGetAllRoute = (libs: UMServerLibs) => ({
   options: {
     validate: {
       query: Joi.object({
+        dateRangeStart: Joi.number().required(),
+        dateRangeEnd: Joi.number().required(),
+        monitorId: Joi.string(),
         size: Joi.number(),
         sort: Joi.string(),
+        status: Joi.string(),
       }),
     },
   },
   handler: async (request: any): Promise<Ping[]> => {
-    const { size, sort } = request.query;
-    return await libs.pings.getAll(request, sort, size);
+    const { size, sort, dateRangeStart, dateRangeEnd, monitorId, status } = request.query;
+    return await libs.pings.getAll(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      monitorId,
+      status,
+      sort,
+      size
+    );
   },
 });
