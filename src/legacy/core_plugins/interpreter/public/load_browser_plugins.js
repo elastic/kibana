@@ -18,10 +18,11 @@
  */
 
 import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
+import { loadBrowserRegistries, createSocket } from '@kbn/interpreter/public';
 import { functions } from './functions';
 import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';
+import { initializeInterpreter } from './interpreter';
 
 const basePath = chrome.getBasePath();
 
@@ -36,7 +37,7 @@ function addFunction(fnDef) {
 
 functions.forEach(addFunction);
 
-createSocket(basePath, functionsRegistry).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter(typesRegistry, functionsRegistry);
+loadBrowserRegistries(types, basePath).then(async () => {
+  const socket = await createSocket(basePath, functionsRegistry);
+  await initializeInterpreter(socket, typesRegistry, functionsRegistry);
 });

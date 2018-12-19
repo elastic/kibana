@@ -17,6 +17,26 @@
  * under the License.
  */
 
-export { loadBrowserRegistries } from './browser_registries';
-export { createSocket } from './socket';
-export { initializeInterpreter } from './interpreter';
+
+import { initializeInterpreter as initialize } from '@kbn/interpreter/src/public';
+
+let _resolve;
+const interpreterPromise = new Promise(resolve => { _resolve = resolve; });
+let interpreter;
+
+export const initializeInterpreter = async (socket, typesRegistry, functionsRegistry) => {
+  interpreter = await initialize(socket, typesRegistry, functionsRegistry);
+  _resolve(interpreter);
+  return interpreter;
+};
+
+export const getInitializedFunctions = async () => {
+  await interpreterPromise;
+  return interpreter.getInitializedFunctions();
+};
+
+export const interpretAst = async (ast, context, handlers) => {
+  await interpreterPromise;
+  return interpreter.interpretAst(ast, context, handlers);
+};
+

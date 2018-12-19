@@ -18,13 +18,11 @@
  */
 
 import io from 'socket.io-client';
-import { getBrowserRegistries } from './browser_registries';
 
 const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
-let socket;
 
 export async function createSocket(basePath, functionsRegistry) {
-  if (socket != null) return socket;
+  let socket;
 
   return new Promise((resolve, rej) => {
     const reject = p => {
@@ -48,12 +46,11 @@ export async function createSocket(basePath, functionsRegistry) {
     });
 
     socket.on('getFunctionList', () => {
-      const pluginsLoaded = getBrowserRegistries();
-      pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
+      socket.emit('functionList', functionsRegistry.toJS());
     });
 
     socket.on('connect', () => {
-      resolve();
+      resolve(socket);
       socket.off('connectionFailed', errorHandler);
       socket.off('connect_error', errorHandler);
       socket.off('connect_timeout', errorHandler);
@@ -69,9 +66,4 @@ export async function createSocket(basePath, functionsRegistry) {
     socket.on('connect_error', errorHandler);
     socket.on('connect_timeout', errorHandler);
   });
-}
-
-export function getSocket() {
-  if (!socket) throw new Error('getSocket failed, socket has not been created');
-  return socket;
 }

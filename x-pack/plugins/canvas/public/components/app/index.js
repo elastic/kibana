@@ -5,7 +5,8 @@
  */
 
 import { functionsRegistry } from 'plugins/interpreter/functions_registry';
-import { populateBrowserRegistries, getInitializedFunctions } from '@kbn/interpreter/public';
+import { getInitializedFunctions } from 'plugins/interpreter/interpreter';
+import { loadBrowserRegistries } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
@@ -53,7 +54,7 @@ const mapDispatchToProps = dispatch => ({
     try {
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions(functionsRegistry);
-      await populateBrowserRegistries(types, basePath);
+      await loadBrowserRegistries(types, basePath);
       await getInitializedFunctions();
 
       // set app state to ready
