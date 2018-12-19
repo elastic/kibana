@@ -594,7 +594,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickGo() {
-      await testSubjects.click('visualizeEditorRenderButton');
+      await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
       const countOfDataCompleteFlags = 2;
@@ -886,10 +886,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getPieChartLabels() {
-      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+      // Outer retry is because because of stale element references getting thrown on grabbing the data-label.
+      // I suspect it's due to a rendering bug with pie charts not emitting the render-complete flag
+      // when actually done rendering.
+      return await retry.try(async () => {
+        const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
-      return await Promise.all(getChartTypesPromises);
+        const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
+        return await Promise.all(getChartTypesPromises);
+      });
     }
     async expectPieChartError() {
       return await testSubjects.existOrFail('visLibVisualizeError');

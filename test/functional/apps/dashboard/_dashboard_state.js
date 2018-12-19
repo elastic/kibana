@@ -153,7 +153,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMapZoomIn();
 
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.visualize.saveVisualizationExpectSuccess('Visualization TileMap');
 
