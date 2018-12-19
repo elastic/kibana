@@ -72,3 +72,10 @@ considered unique based on its persistent UUID, which is written to the path.dat
 The port is now protocol dependent: https ports will use 443, and http ports will use 80.
 
 *Impact:* If your `elasticsearch.url` was dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.
+
+[float]
+=== kibana.yml setting `server.ssl.supportedProtocols` excludes TLSv1 by default
+*Details:* TLSv1 support has been removed by default, it's still possible to opt-in to TLSv1 support by explicitly setting
+`server.ssl.supportedProtocols`
+
+*Impact:* Users relying upon TLSv1 will be unable to use Kibana unless `server.ssl.supportedProtocols` is explicitly set.

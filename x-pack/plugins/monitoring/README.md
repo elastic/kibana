@@ -107,5 +107,5 @@ cluster.
 
 1. Start a Kibana instance connected to the Monitoring cluster (for running queries in Sense on Monitoring data):
   ```
-  % ./bin/kibana --config config/kibana.dev.yml --elasticsearch.url http://localhost:9210 --server.name monitoring-kibana --server.port 5611
+  % ./bin/kibana --config config/kibana.dev.yml --elasticsearch.hosts http://localhost:9210 --server.name monitoring-kibana --server.port 5611
   ```
