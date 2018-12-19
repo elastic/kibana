@@ -11,8 +11,8 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { DEFAULT_PAGE_COUNT } from 'x-pack/plugins/secops/public/store/local/timeline/model';
 import { createStore, State } from '../../../../store';
+import { DEFAULT_PAGE_COUNT } from '../../../../store/local/timeline/model';
 import { defaultWidth } from '../../../timeline/body';
 import { HostsTable } from './index';
 import { mockData } from './index.mock';

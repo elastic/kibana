@@ -17,7 +17,7 @@ import {
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
-import { uncommonProcessesSelector } from '../../store/local/uncommon_processes';
+import { uncommonProcessesSelector } from '../../store';
 import { uncommonProcessesQuery } from './index.gql_query';
 
 export interface UncommonProcessesArgs {

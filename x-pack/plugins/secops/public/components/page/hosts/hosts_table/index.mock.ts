@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsData } from 'x-pack/plugins/secops/common/graphql/types';
+import { HostsData } from '../../../../../common/graphql/types';
 
 export const mockData: { Hosts: HostsData } = {
   Hosts: {

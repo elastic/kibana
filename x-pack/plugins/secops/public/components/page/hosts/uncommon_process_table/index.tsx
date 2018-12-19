@@ -10,12 +10,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import {
-  uncommonProcessesActions,
-  uncommonProcessesSelector,
-} from 'x-pack/plugins/secops/public/store/local/uncommon_processes';
 import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../../common/graphql/types';
 import { State } from '../../../../store';
+import { uncommonProcessesActions, uncommonProcessesSelector } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 interface OwnProps {

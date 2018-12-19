@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UncommonProcessesData } from 'x-pack/plugins/secops/common/graphql/types';
+import { UncommonProcessesData } from '../../../../../common/graphql/types';
 
 export const mockData: { UncommonProcess: UncommonProcessesData } = {
   UncommonProcess: {
