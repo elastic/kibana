@@ -6,11 +6,12 @@
 
 import { DatabaseAdapter } from './adapters/database';
 import { UMBackendFrameworkAdapter } from './adapters/framework';
-import { UMPingsDomain } from './domains';
+import { UMMonitorsDomain, UMPingsDomain } from './domains';
 import { UMAuthDomain } from './domains/auth';
 
 export interface UMDomainLibs {
   pings: UMPingsDomain;
+  monitors: UMMonitorsDomain;
   auth: UMAuthDomain;
 }
 

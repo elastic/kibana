@@ -49,14 +49,17 @@ describe('ElasticsearchPingsAdapter class', () => {
 
   describe('getAll', () => {
     let getAllSearchMock: (request: any, params: any) => Promise<any>;
-    let expectedEsParams: any;
+    let expectedGetAllParams: any;
     beforeEach(() => {
       getAllSearchMock = jest.fn(async (request: any, params: any) => mockEsResult);
-      expectedEsParams = {
+      expectedGetAllParams = {
         index: 'heartbeat*',
         body: {
           query: {
-            match_all: {},
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: 100, lte: 200 } } }],
+              must: [],
+            },
           },
           sort: [{ '@timestamp': { order: 'asc' } }],
           size: 12,
@@ -65,7 +68,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
 
     it('returns data in the appropriate shape', async () => {
-      const result = await adapter.getAll(serverRequest, 'asc', 12);
+      const result = await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
 
       expect(result).toHaveLength(3);
       expect(result[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
@@ -75,25 +78,125 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('creates appropriate sort and size parameters', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'asc', 12);
+
+      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
 
       expect(database.search).toHaveBeenCalledTimes(1);
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
     it('omits the sort param when no sort passed', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, undefined, 12);
-      delete expectedEsParams.body.sort;
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
+      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, undefined, 12);
+      delete expectedGetAllParams.body.sort;
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
     it('omits the size param when no size passed', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'desc', undefined);
-      delete expectedEsParams.body.size;
-      set(expectedEsParams, 'body.sort[0].@timestamp.order', 'desc');
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedEsParams);
+      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'desc');
+      delete expectedGetAllParams.body.size;
+      set(expectedGetAllParams, 'body.sort[0].@timestamp.order', 'desc');
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+    });
+
+    it('adds a filter for monitor ID', async () => {
+      database.search = getAllSearchMock;
+      await adapter.getAll(serverRequest, 100, 200, 'testmonitorid');
+      delete expectedGetAllParams.body.size;
+      delete expectedGetAllParams.body.sort;
+      expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.id': 'testmonitorid' } });
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+    });
+
+    it('adds a filter for monitor status', async () => {
+      database.search = getAllSearchMock;
+      await adapter.getAll(serverRequest, 100, 200, undefined, 'down');
+      delete expectedGetAllParams.body.size;
+      delete expectedGetAllParams.body.sort;
+      expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.status': 'down' } });
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+    });
+  });
+
+  describe('getLatestMonitorDocs', () => {
+    let getLatestSearchMock: (request: any, params: any) => Promise<any>;
+    let expectedGetLatestSearchParams: any;
+    beforeEach(() => {
+      getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsResult);
+      expectedGetLatestSearchParams = {
+        index: 'heartbeat*',
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 100,
+                      lte: 200,
+                    },
+                  },
+                },
+              ],
+              must: [
+                {
+                  term: { 'monitor.id': 'testmonitor' },
+                },
+              ],
+            },
+          },
+          aggs: {
+            by_id: {
+              terms: {
+                field: 'monitor.id',
+              },
+              aggs: {
+                latest: {
+                  top_hits: {
+                    size: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+      mockEsResult = {
+        aggregations: {
+          by_id: {
+            buckets: [
+              {
+                latest: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          '@timestamp': 123456,
+                          monitor: {
+                            id: 'testmonitor',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+    });
+
+    it('returns data in expected shape', async () => {
+      database.search = getLatestSearchMock;
+      const result = await adapter.getLatestMonitorDocs(serverRequest, 100, 200, 'testmonitor');
+      expect(result).toHaveLength(1);
+      expect(result[0].timestamp).toBe(123456);
+      expect(result[0].monitor).not.toBeFalsy();
+      // @ts-ignore monitor will be defined
+      expect(result[0].monitor.id).toBe('testmonitor');
+      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetLatestSearchParams);
     });
   });
 });

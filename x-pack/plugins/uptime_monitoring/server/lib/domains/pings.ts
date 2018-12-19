@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMPingSortDirectionArg } from '../../../common/domain_types';
-import { Ping } from '../../../common/graphql/types';
+import { UMGqlRange, UMPingSortDirectionArg } from '../../../common/domain_types';
+import { DocCount, HistogramSeries, Ping } from '../../../common/graphql/types';
 import { UMPingsAdapter } from '../adapters/pings';
 
 export class UMPingsDomain {
@@ -13,7 +13,44 @@ export class UMPingsDomain {
     this.adapter = adapter;
   }
 
-  public async getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]> {
-    return this.adapter.getAll(request, sort, size);
+  public async getAll(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    monitorId?: string,
+    status?: string,
+    sort?: UMPingSortDirectionArg,
+    size?: number
+  ): Promise<Ping[]> {
+    return this.adapter.getAll(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      monitorId,
+      status,
+      sort,
+      size
+    );
+  }
+
+  public async getLatestMonitorDocs(
+    request: any,
+    dateRangeStart: number,
+    dateRangeEnd: number,
+    monitorId?: string
+  ): Promise<Ping[]> {
+    return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd, monitorId);
+  }
+
+  public async getHist(
+    request: any,
+    range: UMGqlRange,
+    filters?: string
+  ): Promise<HistogramSeries[] | null> {
+    return this.adapter.getPingHistogram(request, range, filters);
+  }
+
+  public async getDocCount(request: any): Promise<DocCount> {
+    return this.adapter.getDocCount(request);
   }
 }

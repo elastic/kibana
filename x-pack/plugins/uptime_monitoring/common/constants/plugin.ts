@@ -6,4 +6,6 @@
 
 export const PLUGIN = {
   ID: 'uptime_monitoring',
+  ROUTER_BASE_NAME: '/app/uptime_monitoring#/',
+  LOCAL_STORAGE_KEY: 'xpack.uptime_monitoring',
 };
