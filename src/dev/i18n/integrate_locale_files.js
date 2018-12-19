@@ -39,18 +39,54 @@ export function verifyMessages(localizedMessagesMap, defaultMessagesMap) {
   const localizedMessagesIds = [...localizedMessagesMap.keys()];
 
   const unusedTranslations = difference(localizedMessagesIds, defaultMessagesIds);
-  const missingTranslations = difference(defaultMessagesIds, localizedMessagesIds);
-
   if (unusedTranslations.length > 0) {
     errorMessage += `\nUnused translations:\n${unusedTranslations.join(', ')}`;
   }
 
+  const missingTranslations = difference(defaultMessagesIds, localizedMessagesIds);
   if (missingTranslations.length > 0) {
     errorMessage += `\nMissing translations:\n${missingTranslations.join(', ')}`;
   }
 
   if (errorMessage) {
-    throw createFailError(`${errorMessage}`);
+    throw createFailError(errorMessage);
+  }
+}
+
+function groupMessagesByNamespace(localizedMessagesMap) {
+  const localizedMessagesByNamespace = new Map();
+  const knownNamespaces = Object.keys(paths);
+
+  for (const [messageId, messageValue] of localizedMessagesMap) {
+    const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
+
+    if (!namespace) {
+      throw createFailError(`Unknown namespace in id ${messageId}.`);
+    }
+
+    if (!localizedMessagesByNamespace.has(namespace)) {
+      localizedMessagesByNamespace.set(namespace, []);
+    }
+
+    localizedMessagesByNamespace.get(namespace).push([messageId, { message: messageValue }]);
+  }
+
+  return localizedMessagesByNamespace;
+}
+
+async function writeMessages(localizedMessagesByNamespace, fileName, formats, log) {
+  for (const [namespace, messages] of localizedMessagesByNamespace) {
+    const destPath = path.resolve(paths[namespace], 'translations');
+
+    try {
+      await accessAsync(destPath);
+    } catch (_) {
+      await makeDirAsync(destPath);
+    }
+
+    const writePath = path.resolve(destPath, fileName);
+    await writeFileAsync(writePath, serializeToJson(messages, formats));
+    log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
   }
 }
 
@@ -63,37 +99,10 @@ export async function integrateLocaleFiles(filePath, log) {
   }
 
   const localizedMessagesMap = new Map(Object.entries(localizedMessages.messages));
-
   verifyMessages(localizedMessagesMap, defaultMessagesMap);
 
-  const localizedMessagesByNamespace = new Map();
-  const knownNamespaces = Object.keys(paths);
-
-  for (const [messageId, messageValue] of localizedMessagesMap) {
-    const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
-
-    if (!namespace) {
-      throw createFailError(`Unknown namespace in id ${messageId}.`);
-    }
-
-    if (!localizedMessagesByNamespace.has(namespace)) {
-      localizedMessagesByNamespace.set(namespace, {});
-    }
-
-    localizedMessagesByNamespace.get(namespace)[messageId] = { message: messageValue };
-  }
-
-  for (const [namespace, messages] of localizedMessagesByNamespace) {
-    const destPath = paths[namespace];
-
-    try {
-      await accessAsync(path.resolve(destPath, 'translations'));
-    } catch (_) {
-      await makeDirAsync(path.resolve(destPath, 'translations'));
-    }
-
-    const writePath = path.resolve(destPath, 'translations', path.basename(filePath));
-    await writeFileAsync(writePath, serializeToJson(messages, localizedMessages.formats));
-    log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
-  }
+  // use basename of filePath to write the same locale name as the source file has
+  const fileName = path.basename(filePath);
+  const localizedMessagesByNamespace = groupMessagesByNamespace(localizedMessagesMap);
+  await writeMessages(localizedMessagesByNamespace, fileName, localizedMessages.formats, log);
 }

@@ -30,7 +30,7 @@ export function serializeToJson5(messages, formats = i18n.formats) {
       .concat('\n')
   );
 
-  for (const [mapKey, mapValue] of Array.isArray(messages) ? messages : Object.entries(messages)) {
+  for (const [mapKey, mapValue] of messages) {
     const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
     const formattedDescription = mapValue.description
       ? mapValue.description.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')

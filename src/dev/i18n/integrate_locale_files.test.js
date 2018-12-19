@@ -24,18 +24,15 @@ import { normalizePath } from './utils';
 
 const localePath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files', 'fr.json');
 
-jest.mock('./extract_default_translations.js', () => ({
-  getDefaultMessagesMap: () => {
-    return new Map([
-      ['plugin-1.message-id-1', 'Message text 1'],
-      ['plugin-1.message-id-2', 'Message text 2'],
-      ['plugin-2.message-id', 'Message text'],
-    ]);
-  },
-}));
+const mockDefaultMessagesMap = new Map([
+  ['plugin-1.message-id-1', 'Message text 1'],
+  ['plugin-1.message-id-2', 'Message text 2'],
+  ['plugin-2.message-id', 'Message text'],
+]);
 
-const { getDefaultMessagesMap } = require('./extract_default_translations.js');
-const defaultMessagesMap = getDefaultMessagesMap();
+jest.mock('./extract_default_translations.js', () => ({
+  getDefaultMessagesMap: () => mockDefaultMessagesMap,
+}));
 
 jest.mock('../../../.i18nrc.json', () => ({
   paths: {
@@ -51,16 +48,14 @@ utils.makeDirAsync = jest.fn();
 
 describe('dev/i18n/integrate_locale_files', () => {
   describe('verifyMessages', () => {
-    test('validates locale messages object', () => {
+    test('validates localized messages', () => {
       const localizedMessagesMap = new Map([
         ['plugin-1.message-id-1', 'Translated text 1'],
         ['plugin-1.message-id-2', 'Translated text 2'],
         ['plugin-2.message-id', 'Translated text'],
       ]);
 
-      expect(() =>
-        verifyMessages(localizedMessagesMap, defaultMessagesMap, 'translations/fr.json')
-      ).not.toThrow();
+      expect(() => verifyMessages(localizedMessagesMap, mockDefaultMessagesMap)).not.toThrow();
     });
 
     test('throws an error for unused id and missing id', () => {
@@ -85,19 +80,19 @@ describe('dev/i18n/integrate_locale_files', () => {
       expect(() =>
         verifyMessages(
           localizedMessagesMapWithMissingMessage,
-          defaultMessagesMap,
+          mockDefaultMessagesMap,
           'translations/fr.json'
         )
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
         verifyMessages(
           localizedMessagesMapWithUnusedMessage,
-          defaultMessagesMap,
+          mockDefaultMessagesMap,
           'translations/fr.json'
         )
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
-        verifyMessages(localizedMessagesMapWithIdTypo, defaultMessagesMap, 'translations/fr.json')
+        verifyMessages(localizedMessagesMapWithIdTypo, mockDefaultMessagesMap)
       ).toThrowErrorMatchingSnapshot();
     });
   });

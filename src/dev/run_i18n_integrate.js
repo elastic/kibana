@@ -29,7 +29,7 @@ run(async ({ flags: { path }, log }) => {
 
   if (Array.isArray(path)) {
     throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} --path value should be a single string`
+      `${chalk.white.bgRed(' I18N ERROR ')} --path should be specified only once`
     );
   }
 

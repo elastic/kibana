@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 export function serializeToJson(messages, formats = i18n.formats) {
   const resultJsonObject = { formats, messages: {} };
 
-  for (const [mapKey, mapValue] of Array.isArray(messages) ? messages : Object.entries(messages)) {
+  for (const [mapKey, mapValue] of messages) {
     if (mapValue.description) {
       resultJsonObject.messages[mapKey] = { text: mapValue.message, comment: mapValue.description };
     } else {
