@@ -12,6 +12,9 @@ export function setFullscreen(fullscreen, doc = document) {
   const bodyClassList = body.classList;
   const isFullscreen = bodyClassList.contains(fullscreenClass);
 
-  if (enabled && !isFullscreen) bodyClassList.add(fullscreenClass);
-  else if (!enabled && isFullscreen) bodyClassList.remove(fullscreenClass);
+  if (enabled && !isFullscreen) {
+    bodyClassList.add(fullscreenClass);
+  } else if (!enabled && isFullscreen) {
+    bodyClassList.remove(fullscreenClass);
+  }
 }

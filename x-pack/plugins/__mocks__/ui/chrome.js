@@ -29,6 +29,8 @@ function getInjected(key) {
       return 'apm*';
     case 'mlEnabled':
       return true;
+    case 'isCloudEnabled':
+      return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }

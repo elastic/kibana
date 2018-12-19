@@ -101,6 +101,20 @@
 
         </div>
 
+        <div ng-show="annotationsData.length > 0">
+          <span class="panel-title euiText">
+            Annotations
+          </span>
+    
+          <ml-annotation-table
+            annotations="annotationsData"
+            drill-down="true"
+            number-badge="false"
+          />
+  
+          <br /><br />
+        </div>
+  
         <span class="panel-title euiText">
           Anomalies
         </span>

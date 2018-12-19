@@ -138,7 +138,7 @@ export default () => Joi.object({
       }),
       keyPassphrase: Joi.string(),
       certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
-      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')).default(['TLSv1.1', 'TLSv1.2']),
       cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
     cors: Joi.when('$dev', {
@@ -240,7 +240,8 @@ export default () => Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
     tilemap: tilemapSchema,
     regionmap: regionmapSchema,
-    manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
+    // manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
+    manifestServiceUrl: Joi.string().default('https://catalogue-staging.maps.elastic.co/v6.6/manifest'),
     emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v2'),
   }).default(),
   tilemap: tilemapSchema.notes('Deprecated'),

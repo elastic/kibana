@@ -15,6 +15,7 @@ import {
   getSortField,
   isSortAscending,
   getIndicesAsArray,
+  indicesLoading,
 } from '../../../../store/selectors';
 import {
   filterChanged,
@@ -40,7 +41,8 @@ const mapStateToProps = (state) => {
     filter: getFilter(state),
     showSystemIndices: showSystemIndices(state),
     sortField: getSortField(state),
-    isSortAscending: isSortAscending(state)
+    isSortAscending: isSortAscending(state),
+    indicesLoading: indicesLoading(state),
   };
 };
 

@@ -6,15 +6,16 @@
 
 import Boom from 'boom';
 import { difference } from 'lodash';
-import { FrameworkRouteHandler } from './adapters/framework/adapter_types';
-import { FrameworkRequest } from './adapters/framework/adapter_types';
 import {
   BackendFrameworkAdapter,
+  FrameworkRequest,
   FrameworkResponse,
+  FrameworkRouteHandler,
   FrameworkRouteOptions,
 } from './adapters/framework/adapter_types';
 
 export class BackendFrameworkLib {
+  public log = this.adapter.log;
   public exposeStaticDir = this.adapter.exposeStaticDir;
   public internalUser = this.adapter.internalUser;
   constructor(private readonly adapter: BackendFrameworkAdapter) {

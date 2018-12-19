@@ -13,7 +13,8 @@ import { AddItemPopover } from './add_item_popover';
 function prepareTest(addItemsFn) {
 
   const props = {
-    addItems: addItemsFn
+    addItems: addItemsFn,
+    canCreateFilter: true
   };
 
   const wrapper = shallow(
