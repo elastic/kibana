@@ -34,147 +34,6 @@ Array [
 
 exports[`when response has data Initially should have correct markup 1`] = `
 Array [
-  .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  font-size: 12px;
-  color: #69707D;
-  cursor: pointer;
-  opacity: 1;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.c2 {
-  width: 11px;
-  height: 11px;
-  margin-right: 5.5px;
-  background: #3185fc;
-  border-radius: 100%;
-}
-
-.c5 {
-  width: 11px;
-  height: 11px;
-  margin-right: 5.5px;
-  background: #ecae23;
-  border-radius: 100%;
-}
-
-.c6 {
-  width: 11px;
-  height: 11px;
-  margin-right: 5.5px;
-  background: #f98510;
-  border-radius: 100%;
-}
-
-.c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: end;
-  -webkit-justify-content: flex-end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
-}
-
-.c0 div {
-  margin-right: 16px;
-}
-
-.c0 div:last-child {
-  margin-right: 0;
-}
-
-.c3 {
-  white-space: nowrap;
-  color: #98A2B3;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c4 {
-  margin-left: 4px;
-  color: #000000;
-  display: inline-block;
-}
-
-<div
-    className="c0"
-  >
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c2"
-        color="#3185fc"
-        radius={11}
-      />
-      <span
-        className="c3"
-      >
-        Avg.
-        <span
-          className="c4"
-        >
-          468 ms
-        </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c5"
-        color="#ecae23"
-        radius={11}
-      />
-      <span
-        className="c3"
-      >
-        95th percentile
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c6"
-        color="#f98510"
-        radius={11}
-      />
-      <span
-        className="c3"
-      >
-        99th percentile
-      </span>
-    </div>
-  </div>,
   <div
     style={
       Object {
@@ -1443,7 +1302,7 @@ Array [
 }
 
 .c4 {
-  color: #999999;
+  color: #98A2B3;
   padding-bottom: 0;
 }
 
@@ -2605,7 +2464,7 @@ Array [
   -ms-flex-align: center;
   align-items: center;
   font-size: 12px;
-  color: #666666;
+  color: #69707D;
   cursor: pointer;
   opacity: 1;
   -webkit-user-select: none;
@@ -2668,7 +2527,7 @@ Array [
 
 .c3 {
   white-space: nowrap;
-  color: #999999;
+  color: #98A2B3;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
