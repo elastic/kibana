@@ -87,11 +87,10 @@ const VislibSeriesResponseHandlerProvider = function (Private) {
 
 const VislibSlicesResponseHandlerProvider = function (Private) {
   const buildHierarchicalData = Private(BuildHierarchicalDataProvider);
-  const tableResponseProvider = Private(LegacyResponseHandlerProvider).handler;
 
   return {
     name: 'vislib_slices',
-    handler: handlerFunction(tableResponseProvider, buildHierarchicalData)
+    handler: buildHierarchicalData
   };
 };
 

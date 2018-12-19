@@ -107,6 +107,27 @@ const VisFiltersProvider = (Private, getAppState) => {
     return filters;
   };
 
+  const pieFilter = event => {
+    let data = event.datum;
+    const filters = [];
+    while (data.rawData) {
+      const { table, column, row, value } = data.rawData;
+      const filter = createFilter(table, column, row, value);
+      if (event.negate) {
+        if (Array.isArray(filter)) {
+          filter.forEach(f => f.meta.negate = !f.meta.negate);
+        } else {
+          filter.meta.negate = !filter.meta.negate;
+        }
+      }
+      filters.push(filter);
+      data = data.parent;
+    }
+    const appState = getAppState();
+    filterBarPushFilters(appState)(_.flatten(filters));
+    return filters;
+  };
+
   const addFilter = (event) => {
     const filter = createFilter(event.table, event.column, event.row, event.value);
     queryFilter.addFilters(filter);
@@ -115,6 +136,7 @@ const VisFiltersProvider = (Private, getAppState) => {
   return {
     addFilter,
     filter,
+    pieFilter,
     brush: (event) => {
       onBrushEvent(event, getAppState());
     },

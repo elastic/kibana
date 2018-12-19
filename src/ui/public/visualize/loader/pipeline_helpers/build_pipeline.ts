@@ -57,7 +57,7 @@ export const getSchemas = (vis: Vis): Schemas => {
     return schema;
   };
 
-  let cnt = -1;
+  let cnt = 0;
   const schemas: Schemas = {
     metric: [],
   };
@@ -65,9 +65,9 @@ export const getSchemas = (vis: Vis): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
-    cnt++;
     const format = agg.params.field ? agg.params.field.format : null;
     if (!agg.enabled) {
+      cnt++;
       return;
     }
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
@@ -78,6 +78,7 @@ export const getSchemas = (vis: Vis): Schemas => {
       if (agg.type.name === 'geo_centroid') {
         schemaName = 'geo_centroid';
       } else {
+        cnt++;
         return;
       }
     }
@@ -88,11 +89,12 @@ export const getSchemas = (vis: Vis): Schemas => {
       schemas[schemaName] = [];
     }
     if (!isHierarchical || agg.type.type !== 'metrics') {
-      schemas[schemaName].push(createSchemaConfig(cnt, format, agg));
+      schemas[schemaName].push(createSchemaConfig(cnt++, format, agg));
     }
     if (isHierarchical && agg.type.type !== 'metrics') {
-      metrics.forEach(() => {
-        schemas.metric.push(createSchemaConfig(cnt, format, agg));
+      metrics.forEach((metric: any) => {
+        const metricFormat = metric.params.field ? metric.params.field.format : null;
+        schemas.metric.push(createSchemaConfig(cnt++, metricFormat, metric));
       });
     }
   });
@@ -180,9 +182,10 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `tilemap ${prepareJson('visConfig', visState.params)}`;
   },
   pie: (visState, schemas) => {
-    const visConfig = prepareJson('visConfig', visState.params);
-    const visSchemas = prepareJson('schemas', schemas);
-    return `kibana_pie ${visConfig}${visSchemas}`;
+    const visConfig = visState.params;
+    visConfig.metric = schemas.metric[0];
+    visConfig.buckets = schemas.segment;
+    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
   },
 };
 
