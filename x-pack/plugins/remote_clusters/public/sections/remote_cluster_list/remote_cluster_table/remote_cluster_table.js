@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
-import { ConnectionStatus, RemoveClusterButton } from '../components';
+import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 export const RemoteClusterTable = injectI18n(
   class extends Component {
@@ -164,14 +165,17 @@ export const RemoteClusterTable = injectI18n(
                 content={label}
                 delay="long"
               >
-                <RemoveClusterButton clusterNames={[name]}>
-                  <EuiButtonIcon
-                    aria-label={label}
-                    iconType="trash"
-                    color="danger"
-                    isDisabled={isConfiguredByNode}
-                  />
-                </RemoveClusterButton>
+                <RemoveClusterButtonProvider clusterNames={[name]}>
+                  {(removeCluster) => (
+                    <EuiButtonIcon
+                      aria-label={label}
+                      iconType="trash"
+                      color="danger"
+                      isDisabled={isConfiguredByNode}
+                      onClick={removeCluster}
+                    />
+                  )}
+                </RemoveClusterButtonProvider>
               </EuiToolTip>
             );
           },
@@ -212,9 +216,22 @@ export const RemoteClusterTable = injectI18n(
 
       const search = {
         toolsLeft: selectedItems.length ? (
-          <RemoveClusterButton
-            clusterNames={selectedItems.map(({ name }) => name)}
-          />
+          <RemoveClusterButtonProvider clusterNames={selectedItems.map(({ name }) => name)}>
+            {(removeCluster) => (
+              <EuiButton
+                color="danger"
+                onClick={removeCluster}
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterList.table.removeButtonLabel"
+                  defaultMessage="Remove {count, plural, one {remote cluster} other {{count} remote clusters}}"
+                  values={{
+                    count: selectedItems.length
+                  }}
+                />
+              </EuiButton>
+            )}
+          </RemoveClusterButtonProvider>
         ) : undefined,
         onChange: this.onSearch,
         box: {

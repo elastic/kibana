@@ -12,6 +12,7 @@ import { getIndexListUri } from '../../../../../../../../index_management/public
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -253,6 +254,7 @@ export class DetailPanelUi extends Component {
       editAutoFollowPattern,
       autoFollowPattern,
       autoFollowPatternName,
+      closeDetailPanel,
     } = this.props;
 
     if (!autoFollowPattern) {
@@ -261,38 +263,54 @@ export class DetailPanelUi extends Component {
 
     return (
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <AutoFollowPatternDeleteProvider>
-              {(deleteAutoFollowPattern) => (
-                <EuiButton
-                  iconType="trash"
-                  color="danger"
-                  onClick={() => deleteAutoFollowPattern(autoFollowPatternName)}
-                >
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
-                    defaultMessage="Delete"
-                  />
-                </EuiButton>
-              )}
-            </AutoFollowPatternDeleteProvider>
+            <EuiButtonEmpty
+              iconType="cross"
+              flush="left"
+              onClick={closeDetailPanel}
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.closeButtonLabel"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="primary"
-              onClick={() => {
-                editAutoFollowPattern(autoFollowPatternName);
-                routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(autoFollowPatternName)}`));
-              }}
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
-                defaultMessage="Edit"
-              />
-            </EuiButton>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <AutoFollowPatternDeleteProvider>
+                  {(deleteAutoFollowPattern) => (
+                    <EuiButtonEmpty
+                      color="danger"
+                      onClick={() => deleteAutoFollowPattern(autoFollowPatternName)}
+                    >
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
+                        defaultMessage="Delete"
+                      />
+                    </EuiButtonEmpty>
+                  )}
+                </AutoFollowPatternDeleteProvider>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="primary"
+                  onClick={() => {
+                    editAutoFollowPattern(autoFollowPatternName);
+                    routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(autoFollowPatternName)}`));
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
+                    defaultMessage="Edit"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

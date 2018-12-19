@@ -4,29 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment, cloneElement } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButton,
   EuiConfirmModal,
   EuiOverlayMask,
 } from '@elastic/eui';
 
-export const RemoveClusterButton = injectI18n(
+export const RemoveClusterButtonProvider = injectI18n(
   class extends Component {
     static propTypes = {
       removeClusters: PropTypes.func.isRequired,
       clusterNames: PropTypes.array.isRequired,
-      isSmallButton: PropTypes.bool,
-      children: PropTypes.node,
-    };
-
-    static defaultProps = {
-      children: (
-        <EuiButton color="danger" />
-      ),
+      children: PropTypes.func.isRequired,
     };
 
     state = {
@@ -57,46 +49,10 @@ export const RemoveClusterButton = injectI18n(
       this.closeConfirmModal();
     }
 
-    renderButtonText() {
-      const { clusterNames, isSmallButton } = this.props;
-      const isSingleCluster = clusterNames.length === 1;
-
-      if (isSmallButton) {
-        return (
-          <FormattedMessage
-            id="xpack.remoteClusters.removeButton.shortButtonLabel"
-            defaultMessage="Remove"
-          />
-        );
-      }
-
-      if (isSingleCluster) {
-        return (
-          <FormattedMessage
-            id="xpack.remoteClusters.removeButton.singleButtonLabel"
-            defaultMessage="Remove remote cluster"
-          />
-        );
-      }
-
-      return (
-        <FormattedMessage
-          id="xpack.remoteClusters.removeButton.multipleButtonLabel"
-          defaultMessage="Remove {count} remote clusters"
-          values={{ count: clusterNames.length }}
-        />
-      );
-    }
-
     render() {
       const { intl, clusterNames, children } = this.props;
       const { isModalOpen } = this.state;
       const isSingleCluster = clusterNames.length === 1;
-
-      const button = cloneElement(children, {
-        onClick: this.showConfirmModal,
-      }, this.renderButtonText());
-
       let modal;
 
       if (isModalOpen) {
@@ -150,7 +106,7 @@ export const RemoveClusterButton = injectI18n(
 
       return (
         <Fragment>
-          {button}
+          {children(this.showConfirmModal)}
           {modal}
         </Fragment>
       );

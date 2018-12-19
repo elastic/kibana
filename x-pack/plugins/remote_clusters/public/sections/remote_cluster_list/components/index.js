@@ -5,4 +5,4 @@
  */
 
 export { ConnectionStatus } from './connection_status';
-export { RemoveClusterButton } from './remove_cluster_button';
+export { RemoveClusterButtonProvider } from './remove_cluster_button_provider';

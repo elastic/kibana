@@ -191,7 +191,8 @@ export const RemoteClusterList = injectI18n(
               <p>
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterList.emptyPromptDescription"
-                  defaultMessage="Remote clusters create a uni-directional connection between your local cluster and other clusters."
+                  defaultMessage="Remote clusters create a uni-directional connection from your
+                    local cluster to other clusters."
                 />
               </p>
             </Fragment>
