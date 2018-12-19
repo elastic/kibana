@@ -44,16 +44,12 @@ const buildUiExports = _.once(async () => {
   return collectUiExports(specs);
 });
 
-async function getKibanaIndexNames(client) {
-  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  return kibanaIndices.map(x => x.index);
-}
-
 /**
  * Deletes all indices that start with `.kibana`
  */
 export async function deleteKibanaIndices({ client, stats, log }) {
-  const indexNames = await getKibanaIndexNames(client);
+  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
+  const indexNames = kibanaIndices.map(x => x.index);
   if (!indexNames.length) {
     return;
   }
@@ -165,19 +161,8 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
     });
   }
 
-  const indexNames = await getKibanaIndexNames(client);
-  const latestIndexNumber = indexNames
-    // extract index number
-    .map(i => parseInt(i.replace(/^\.kibana_/, ''), 10))
-    .filter(n => !isNaN(n))
-    .reduce((acc, next) => Math.max(acc, next), -Infinity);
-
-  if (!isFinite(latestIndexNumber)) {
-    throw new Error(`unable to find the .kibana index with the latest version out of ${JSON.stringify(indexNames)}`);
-  }
-
   await client.deleteByQuery({
-    index: `.kibana_${latestIndexNumber}`,
+    index: `.kibana`,
     body: {
       query: {
         bool: {
@@ -194,7 +179,8 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
 
   log.warning(
     `since spaces are enabled, all objects other than the default space were deleted from ` +
-    `.kibana_${latestIndexNumber} rather than deleting the whole index`
+    `.kibana rather than deleting the whole index`
   );
-  stats.deletedIndex(indexNames);
+
+  stats.deletedIndex('.kibana');
 }

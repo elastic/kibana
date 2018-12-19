@@ -33,7 +33,7 @@ export function createDeleteIndexStream(client, stats, log, kibanaUrl) {
           if (index.startsWith('.kibana')) {
             await cleanKibanaIndices({ client, stats, log, kibanaUrl });
           } else {
-            await deleteIndex({ client, stats, log, index: record.value.index });
+            await deleteIndex({ client, stats, log, index });
           }
         } else {
           this.push(record);
