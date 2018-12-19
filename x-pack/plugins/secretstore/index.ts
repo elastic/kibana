@@ -16,9 +16,27 @@ export const secretstore = (kibana: any) => {
     id: 'secretstore',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, 'public'),
-    uiExports: {},
+    uiExports: {
+      savedObjectSchema: {
+        secretType: {
+          hidden: true,
+        },
+      },
+      pluginContextProvider: dependentPlugin => {
+        return {
+          getSecretStoreReader: () => {
+            return new SecretStoreReader(depedentPlugin);
+          },
+        };
+      },
+    },
+
     init(server: any) {
-      server.expose('secretstore', new SecretStore());
+      server.expose('secretstore', new SecretStoreReader());
+      server.addMemoizedFactoryToRequest('getSecretStoreWriter', request => {
+        const client = request.getSavedObjectsClient({ includesHiddenTypes: ['secretType'] });
+        return new SecretStoreWriter(client, request);
+      });
       const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
       warn(existence(server.savedObjects, 'server.savedObjects'));
       server.savedObjects.addScopedSavedObjectsClientWrapperFactory(999, (args: any) => {

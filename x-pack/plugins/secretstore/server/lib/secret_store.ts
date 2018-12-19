@@ -5,34 +5,18 @@
  */
 
 import crypto from 'crypto';
-import Iron from 'iron';
-import hash from 'object-hash';
 import { SavedObjectsClient } from 'src/server/saved_objects';
+import { buildCrypt } from './crypt_keeper';
 
 export class SecretStore {
-  public readonly hide: (deets: any) => any;
-  public readonly unhide: (deets: any) => any;
   public readonly hideAttribute: (deets: any, secretKey: string) => any;
   public readonly unhideAttribute: (deets: any) => any;
   private readonly type: string;
-  private readonly hashCheck: boolean;
 
-  constructor(savedObjectsClient: SavedObjectsClient, type: string, hashCheck?: boolean) {
-    this.hashCheck = hashCheck || true;
+  constructor(savedObjectsClient: SavedObjectsClient, type: string) {
     this.type = type;
-    const secretKey = crypto.randomBytes(32).toString('hex');
-    const weakMap = new WeakMap();
-    weakMap.set(this, {
-      [secretKey]: crypto.randomBytes(256).toString('hex'),
-    });
-
-    this.hide = async (deets: any) => {
-      return await Iron.seal(deets, weakMap.get(this)[secretKey], Iron.defaults);
-    };
-
-    this.unhide = async (deets: any) => {
-      return await Iron.unseal(deets, weakMap.get(this)[secretKey], Iron.defaults);
-    };
+    const key = crypto.randomBytes(128).toString('hex');
+    const crypt = buildCrypt({ key });
 
     this.hideAttribute = async (deets: any, attributeToHide: string) => {
       // extract attribute to hide from object
@@ -40,13 +24,12 @@ export class SecretStore {
       delete deets[attributeToHide];
 
       // actually create the saved object to know the id
-      const savedObject = await savedObjectsClient.create(this.type, deets);
-
-      // generate an object hash of the saved object without the secret details
-      toEncrypt.original_hash = hash(savedObject);
+      const savedObject = await savedObjectsClient.create(this.type, deets, {
+        id: crypto.randomBytes(32).toString('base64'),
+      });
 
       // now encrypt
-      const hidden = await this.hide(toEncrypt);
+      const hidden = crypt.encrypt(toEncrypt, savedObject);
 
       // lastly put the encrypted details into the saved object
       return await savedObjectsClient.update(
@@ -67,20 +50,20 @@ export class SecretStore {
       const toDecrypt = savedObject.attributes[encKey];
       delete savedObject.attributes[encKey];
 
-      // this is to be used as a tamper-proof checksum if enabled
-      const objectHash = hash(savedObject);
-
       // decrypt the details
-      const unhidden = await this.unhide(toDecrypt);
+      try {
+        const unhidden = crypt.decrypt(toDecrypt, savedObject);
 
-      // return the details only if the saved object was not modified
-      if (objectHash === unhidden.original_hash || !this.hashCheck) {
-        delete unhidden.original_hash;
-        savedObject.attributes = {
-          ...savedObject.attributes,
-          ...unhidden,
-        };
-        return savedObject;
+        // return the details only if the saved object was not modified
+        if (unhidden) {
+          savedObject.attributes = {
+            ...savedObject.attributes,
+            ...unhidden,
+          };
+          return savedObject;
+        }
+      } catch (e) {
+        throw Error(`SecretStore Decrypt Failed: ${e.message}`);
       }
 
       return undefined;
