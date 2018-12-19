@@ -44,15 +44,15 @@ class LocalReporter {
   }
 }
 
-function addMessageToMap(targetMap, key, value) {
+function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
 
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    throw createFailError(`There is more than one default message for the same id "${key}":
-"${existingValue.message}" and "${value.message}"`);
+    reporter.saveError(createFailError(`There is more than one default message for the same id "${key}":
+"${existingValue.message}" and "${value.message}"`));
+  } else {
+    targetMap.set(key, value);
   }
-
-  targetMap.set(key, value);
 }
 
 function normalizePath(inputPath) {
@@ -89,7 +89,7 @@ function filterEntries(entries) {
   );
 }
 
-export function validateMessageNamespace(id, filePath) {
+export function validateMessageNamespace(id, filePath, reporter) {
   const normalizedPath = normalizePath(filePath);
 
   const [expectedNamespace] = Object.entries(paths).find(([, pluginPath]) =>
@@ -97,8 +97,10 @@ export function validateMessageNamespace(id, filePath) {
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    throw createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
-See .i18nrc.json for the list of supported namespaces.`);
+    reporter.saveError(
+      createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+See .i18nrc.json for the list of supported namespaces.`)
+    );
   }
 }
 

@@ -64,4 +64,10 @@ Error: There is more than one default message for the same id \\"plugin_3.duplic
 ]
 `;
 
-exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See .i18nrc.json for the list of supported namespaces."`;
+exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `
+Array [
+  Array [
+    [Error: Expected "wrong_plugin_namespace.message-id" id to have "plugin_2" namespace. See .i18nrc.json for the list of supported namespaces.],
+  ],
+]
+`;

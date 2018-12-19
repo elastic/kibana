@@ -69,11 +69,14 @@ describe('dev/i18n/extract_default_translations', () => {
   });
 
   test('throws on wrong message namespace', () => {
+    const saveError = jest.fn();
     const id = 'wrong_plugin_namespace.message-id';
     const filePath = path.resolve(
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath)).toThrowErrorMatchingSnapshot();
+
+    expect(() => validateMessageNamespace(id, filePath, { saveError })).not.toThrow();
+    expect(saveError.mock.calls).toMatchSnapshot();
   });
 });
