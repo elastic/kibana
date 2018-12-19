@@ -7,17 +7,12 @@
 import gql from 'graphql-tag';
 
 export const uncommonProcessesSchema = gql`
-  type Hosts {
-    id: String!
-    name: String!
-  }
-
   type UncommonProcessItem {
     _id: String!
     name: String!
     title: String
     instances: Int!
-    hosts: [Hosts!]!
+    hosts: [HostEcsFields!]!
   }
 
   type UncommonProcessesEdges {

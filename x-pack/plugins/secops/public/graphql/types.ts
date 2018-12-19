@@ -138,9 +138,13 @@ export interface GeoEcsFields {
 }
 
 export interface HostEcsFields {
+  id?: string | null;
+
   hostname?: string | null;
 
   ip?: string | null;
+
+  name?: string | null;
 }
 
 export interface SourceEcsFields {
@@ -228,7 +232,7 @@ export interface UncommonProcessItem {
 
   instances: number;
 
-  hosts?: (string | null)[] | null;
+  hosts: HostEcsFields[];
 }
 
 export interface SayMyName {
@@ -615,7 +619,15 @@ export namespace GetUncommonProcessesQuery {
 
     instances: number;
 
-    hosts?: (string | null)[] | null;
+    hosts: Hosts[];
+  };
+
+  export type Hosts = {
+    __typename?: 'HostEcsFields';
+
+    id?: string | null;
+
+    name?: string | null;
   };
 
   export type Cursor = {

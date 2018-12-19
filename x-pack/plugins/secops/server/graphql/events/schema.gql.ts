@@ -26,8 +26,10 @@ export const eventsSchema = gql`
   }
 
   type HostEcsFields {
+    id: String
     hostname: String
     ip: String
+    name: String
   }
 
   type SourceEcsFields {

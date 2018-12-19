@@ -11,6 +11,7 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { buildQuery, processFieldsMap } from './query.dsl';
 import {
+  HostHits,
   UncommonProcessBucket,
   UncommonProcessData,
   UncommonProcessesAdapter,
@@ -65,16 +66,12 @@ export const getHits = (
     hosts: getHosts(bucket.hosts.buckets),
   }));
 
-export const getHosts = (buckets: Array<{ key: string; name: string }>) => {
-  // console.log('hosts are:', buckets);
-  return buckets.map(bucket => ({ id: bucket.key, name: bucket.key }));
-};
-/*
-  buckets.map((bucket: { id: string; name: string }) => ({
+export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
+  buckets.map(bucket => ({
     id: bucket.key,
-    name: 'some name',
+    name: bucket.host.hits.hits[0]._source.host.name,
   }));
-*/
+
 export const formatUncommonProcessesData = (
   fields: ReadonlyArray<string>,
   hit: UncommonProcessHit,

@@ -10,7 +10,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql/types';
+import {
+  HostEcsFields,
+  UncommonProcessesEdges,
+  UncommonProcessItem,
+} from '../../../../graphql/types';
 import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
@@ -97,6 +101,8 @@ export const UncommonProcessTable = connect(
   }
 )(UncommonProcessTableComponent);
 
+const extractHostNames = (hosts: HostEcsFields[]) => hosts.map(host => host.name).join(', ');
+
 const getUncommonColumns = () => [
   {
     name: 'Process Name',
@@ -135,7 +141,7 @@ const getUncommonColumns = () => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultTo('--', uncommonProcess.hosts)}</>
+      <>{uncommonProcess.hosts != null ? extractHostNames(uncommonProcess.hosts) : '--'}</>
     ),
   },
 ];

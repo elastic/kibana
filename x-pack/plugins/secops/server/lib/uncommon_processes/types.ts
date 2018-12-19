@@ -42,9 +42,6 @@ export interface UncommonProcessHit {
       name: string;
       title: string;
     };
-    host: {
-      name: string;
-    };
   };
   cursor: string;
   sort: StringOrNumber[];
@@ -53,7 +50,7 @@ export interface UncommonProcessHit {
 export interface UncommonProcessBucket {
   key: string;
   hosts: {
-    buckets: Array<{ key: string; name: string }>;
+    buckets: Array<{ key: string; host: HostHits }>;
   };
   process: {
     hits: {
@@ -74,5 +71,27 @@ export interface UncommonProcessData extends SearchHit {
       after_key: string;
       buckets: UncommonProcessBucket[];
     };
+  };
+}
+
+export interface HostHits {
+  hits: {
+    total: number;
+    max_source: number;
+    hits: [
+      // This type is an array/tuple of size exactly one
+      {
+        _index: string;
+        _type: string;
+        _id: string;
+        _score: number;
+        _source: {
+          host: {
+            name: string;
+            id: string;
+          };
+        };
+      }
+    ];
   };
 }

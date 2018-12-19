@@ -15,7 +15,8 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const hostFieldsMap: Readonly<Record<string, string>> = {
-  hosts: 'host.name',
+  'hosts.id': 'host.id',
+  'hosts.name': 'host.name',
 };
 
 export const buildQuery = (options: UncommonProcessesRequestOptions) => {
@@ -24,7 +25,6 @@ export const buildQuery = (options: UncommonProcessesRequestOptions) => {
   const { fields, filterQuery } = options;
   const processFields = reduceFields(fields, processFieldsMap);
   const hostFields = reduceFields(fields, hostFieldsMap);
-
   const filter = [
     ...createQueryFilterClauses(filterQuery as FilterQuery),
     {
