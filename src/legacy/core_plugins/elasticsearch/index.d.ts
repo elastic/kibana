@@ -371,7 +371,7 @@ export interface CallClusterWithRequest {
   <T = any>(
     request: Request,
     endpoint: string,
-    clientParams: GenericParams,
+    clientParams: any,
     options?: CallClusterOptions
   ): Promise<T>;
 }
