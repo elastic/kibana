@@ -17,16 +17,34 @@
  * under the License.
  */
 
-import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
-import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { I18nProvider } from '@kbn/i18n/react';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Embeddable } from 'ui/embeddable';
+import { DisabledLabVisualization } from './disabled_lab_visualization';
 
-export function visualizeEmbeddableFactoryProvider(Private) {
-  const VisualizeEmbeddableFactoryProvider = (
-    savedVisualizations,
-    config) => {
-    return new VisualizeEmbeddableFactory(savedVisualizations, config);
-  };
-  return Private(VisualizeEmbeddableFactoryProvider);
+export class DisabledLabEmbeddable extends Embeddable {
+  private domNode?: HTMLElement;
+
+  constructor(title: string) {
+    super({ title });
+  }
+
+  public render(domNode: HTMLElement) {
+    if (this.metadata.title) {
+      this.domNode = domNode;
+      ReactDOM.render(
+        <I18nProvider>
+          <DisabledLabVisualization title={this.metadata.title} />
+        </I18nProvider>,
+        domNode
+      );
+    }
+  }
+
+  public destroy() {
+    if (this.domNode) {
+      ReactDOM.unmountComponentAtNode(this.domNode);
+    }
+  }
 }
-
-EmbeddableFactoriesRegistryProvider.register(visualizeEmbeddableFactoryProvider);
