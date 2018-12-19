@@ -10,6 +10,7 @@ import chrome from 'ui/chrome';
 
 import { SocketKind } from '../model';
 import { loadStatusSuccess } from './actions';
+import { installLanguageServerSuccess } from './actions/language_server';
 
 export function bindSocket(store: Store) {
   const basePath = chrome.getBasePath();
@@ -37,5 +38,9 @@ export function bindSocket(store: Store) {
   socket.on(SocketKind.DELETE_PROGRESS, (data: any) => {
     // const { repoUri, progress } = data;
     // TODO(qianliang): distribute delete progress update actions to store.
+  });
+
+  socket.on(SocketKind.INSTALL_PROGRESS, (data: any) => {
+    store.dispatch(installLanguageServerSuccess(data.langServerName));
   });
 }

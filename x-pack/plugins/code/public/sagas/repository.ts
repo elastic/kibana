@@ -27,6 +27,7 @@ import {
   initRepoCommand,
   loadUserConfig,
 } from '../actions';
+import { loadLanguageServers } from '../actions/language_server';
 import { history } from '../utils/url';
 import { adminRoutePattern } from './patterns';
 
@@ -152,6 +153,7 @@ function* handleAdminRouteChange() {
   yield put(fetchRepos());
   yield put(fetchRepoConfigs());
   yield put(loadUserConfig());
+  yield put(loadLanguageServers());
 }
 
 export function* watchAdminRouteChange() {
