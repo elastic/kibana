@@ -7,41 +7,8 @@
 // @ts-ignore Missing typings for series charts
 import { EuiHistogramSeries, EuiSeriesChart, EuiSeriesChartUtils } from '@elastic/eui';
 import React from 'react';
-import { HistogramDataPoint, HistogramSeries } from '../../../common/graphql/types';
-
-const formatHistogramData = (histogram: HistogramSeries[]) => {
-  const histogramSeriesData: { upSeriesData: any[]; downSeriesData: any[] } = {
-    upSeriesData: [],
-    downSeriesData: [],
-  };
-  // TODO: there's a lot of nesting here, refactor this function
-  histogram.forEach(({ data }) => {
-    if (data) {
-      data.forEach(dataPoint => {
-        if (dataPoint) {
-          const { x, x0, downCount } = dataPoint;
-          const findPointInSeries = (hdp: HistogramDataPoint) => hdp.x === x && hdp.x0 === x0;
-          const upEntry = histogramSeriesData.upSeriesData.find(findPointInSeries);
-          const downEntry = histogramSeriesData.downSeriesData.find(findPointInSeries);
-          if (downCount) {
-            if (downEntry) {
-              downEntry.y += 1;
-            } else {
-              histogramSeriesData.downSeriesData.push({ x, x0, y: 1 });
-            }
-          } else {
-            if (upEntry) {
-              upEntry.y += 1;
-            } else {
-              histogramSeriesData.upSeriesData.push({ x, x0, y: 1 });
-            }
-          }
-        }
-      });
-    }
-  });
-  return histogramSeriesData;
-};
+import { HistogramSeries } from '../../../common/graphql/types';
+import { formatHistogramData } from '../../lib/adapters/monitors/format_histogram_data';
 
 interface SnapshotHistogramProps {
   histogram: HistogramSeries[];
