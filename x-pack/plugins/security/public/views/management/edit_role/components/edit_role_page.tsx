@@ -96,7 +96,7 @@ class EditRolePageUI extends Component<Props, State> {
               <Fragment>
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
-                  <p id="reservedRoleDescription" tabIndex={1}>
+                  <p id="reservedRoleDescription" tabIndex={0}>
                     <FormattedMessage
                       id="xpack.security.management.editRole.modifyingReversedRolesDescription"
                       defaultMessage="Reserved roles are built-in and cannot be removed or modified."

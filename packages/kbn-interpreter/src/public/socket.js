@@ -55,6 +55,9 @@ export async function createSocket(basePath) {
 
     socket.on('connect', () => {
       resolve();
+      socket.off('connectionFailed', errorHandler);
+      socket.off('connect_error', errorHandler);
+      socket.off('connect_timeout', errorHandler);
     });
 
     function errorHandler(err) {

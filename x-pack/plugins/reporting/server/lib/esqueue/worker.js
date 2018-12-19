@@ -184,6 +184,7 @@ export class Worker extends events.EventEmitter {
       docOutput.content = output.content;
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
+      docOutput.size = output.size;
     } else {
       docOutput.content = output || defaultOutput;
       docOutput.content_type = unknownMime;
@@ -349,17 +350,20 @@ export class Worker extends events.EventEmitter {
         excludes: [ 'output.content' ]
       },
       query: {
-        constant_score: {
+        bool: {
           filter: {
             bool: {
-              filter: { term: { jobtype: this.jobtype } },
+              minimum_should_match: 1,
+              must: { term: { jobtype: this.jobtype } },
               should: [
                 { term: { status: 'pending' } },
-                { bool: {
-                  filter: [
-                    { term: { status: 'processing' } },
-                    { range: { process_expiration: { lte: nowTime } } }
-                  ] }
+                {
+                  bool: {
+                    must: [
+                      { term: { status: 'processing' } },
+                      { range: { process_expiration: { lte: nowTime } } }
+                    ]
+                  }
                 }
               ]
             }

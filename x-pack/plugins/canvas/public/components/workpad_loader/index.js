@@ -46,7 +46,9 @@ export const WorkpadLoader = compose(
           notify.error(err, { title: `Couldn't upload workpad` });
           // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
           // https://github.com/elastic/kibana/issues/20277
-          if (err.response.status === 403) props.setCanUserWrite(false);
+          if (err.response.status === 403) {
+            props.setCanUserWrite(false);
+          }
         }
         return;
       }
@@ -87,7 +89,9 @@ export const WorkpadLoader = compose(
         notify.error(err, { title: `Couldn't clone workpad` });
         // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
         // https://github.com/elastic/kibana/issues/20277
-        if (err.response.status === 403) props.setCanUserWrite(false);
+        if (err.response.status === 403) {
+          props.setCanUserWrite(false);
+        }
       }
     },
 
@@ -110,13 +114,17 @@ export const WorkpadLoader = compose(
 
         const [passes, errors] = results.reduce(
           ([passes, errors], result) => {
-            if (result.id === loadedWorkpad && !result.err) redirectHome = true;
+            if (result.id === loadedWorkpad && !result.err) {
+              redirectHome = true;
+            }
 
             if (result.err) {
               errors.push(result.id);
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
-              if (result.err.response.status === 403) props.setCanUserWrite(false);
+              if (result.err.response.status === 403) {
+                props.setCanUserWrite(false);
+              }
             } else {
               passes.push(result.id);
             }
@@ -133,11 +141,15 @@ export const WorkpadLoader = compose(
           workpads: remainingWorkpads,
         };
 
-        if (errors.length > 0) notify.error("Couldn't delete all workpads");
+        if (errors.length > 0) {
+          notify.error("Couldn't delete all workpads");
+        }
 
         setWorkpads(workpadState);
 
-        if (redirectHome) props.router.navigateTo('home');
+        if (redirectHome) {
+          props.router.navigateTo('home');
+        }
 
         return errors.map(({ id }) => id);
       });

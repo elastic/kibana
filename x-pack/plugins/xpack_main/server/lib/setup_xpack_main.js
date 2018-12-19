@@ -23,7 +23,6 @@ export function setupXPackMain(server) {
 
   server.expose('info', info);
   server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
-
   server.expose('registerFeature', registerFeature);
   server.expose('getFeatures', getFeatures);
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));

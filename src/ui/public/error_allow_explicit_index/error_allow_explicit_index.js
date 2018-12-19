@@ -22,11 +22,13 @@ import { get } from 'lodash';
 import uiRoutes from '../routes';
 import { KbnUrlProvider } from '../url';
 
-import './error_allow_explicit_index.less';
 import template from './error_allow_explicit_index.html';
 
 uiRoutes
-  .when('/error/multi.allow_explicit_index', { template });
+  .when('/error/multi.allow_explicit_index', {
+    template,
+    k7Breadcrumbs: () => [{ text: 'Error' }],
+  });
 
 export function ErrorAllowExplicitIndexProvider(Private, Promise) {
   const kbnUrl = Private(KbnUrlProvider);

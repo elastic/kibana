@@ -27,6 +27,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AdvancedSettings } from './advanced_settings';
 import { i18n } from '@kbn/i18n';
+import { getBreadcrumbs } from './breadcrumbs';
 
 const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
 
@@ -54,7 +55,8 @@ function destroyAdvancedSettings() {
 
 uiRoutes
   .when('/management/kibana/settings/:setting?', {
-    template: indexTemplate
+    template: indexTemplate,
+    k7Breadcrumbs: getBreadcrumbs
   });
 
 uiModules.get('apps/management')
@@ -83,11 +85,15 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings'
 });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'advanced_settings',
-    title: 'Advanced Settings',
-    description: 'Directly edit settings that control behavior in Kibana.',
+    title: i18n('kbn.management.settings.advancedSettingsLabel', {
+      defaultMessage: 'Advanced Settings',
+    }),
+    description: i18n('kbn.management.settings.advancedSettingsDescription', {
+      defaultMessage: 'Directly edit settings that control behavior in Kibana.',
+    }),
     icon: 'advancedSettingsApp',
     path: '/app/kibana#/management/kibana/settings',
     showOnHomePage: false,

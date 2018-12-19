@@ -7,12 +7,17 @@
 /**
  * Controller for Node Detail
  */
-import { find, partial } from 'lodash';
+import React from 'react';
+import { partial } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
+import { Node } from '../../../components/elasticsearch/node/node';
+import { I18nProvider } from '@kbn/i18n/react';
+import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
+import { MonitoringViewBaseController } from '../../base_controller';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -23,47 +28,63 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope, i18n) {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controllerAs: 'monitoringElasticsearchNodeApp',
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope, i18n) {
+      const $route = $injector.get('$route');
+      const kbnUrl = $injector.get('kbnUrl');
+      const nodeName = $route.current.params.node;
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
+      super({
+        title: i18n('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+          defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
+          values: {
+            nodeName,
+          }
+        }),
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringElasticsearchNodeApp',
+        $scope,
+        $injector
+      });
 
-    const title = $injector.get('title');
-    const routeTitle = i18n('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
-      defaultMessage: 'Elasticsearch - Nodes - {nodeSummaryName} - Overview',
-      values: {
-        nodeSummaryName: $scope.pageData.nodeSummary.name
-      }
-    });
+      this.nodeName = nodeName;
 
-    title($scope.cluster, routeTitle);
+      const features = $injector.get('features');
+      const callPageData = partial(getPageData, $injector);
+      // show/hide system indices in shard allocation view
+      $scope.showSystemIndices = features.isEnabled('showSystemIndices', false);
+      $scope.toggleShowSystemIndices = (isChecked) => {
+        $scope.showSystemIndices = isChecked;
+        // preserve setting in localStorage
+        features.update('showSystemIndices', isChecked);
+        // update the page
+        callPageData().then(data => this.data = data);
+      };
 
-    const features = $injector.get('features');
-    const callPageData = partial(getPageData, $injector);
-    // show/hide system indices in shard allocation view
-    $scope.showSystemIndices = features.isEnabled('showSystemIndices', false);
-    $scope.toggleShowSystemIndices = (isChecked) => {
-      $scope.showSystemIndices = isChecked;
-      // preserve setting in localStorage
-      features.update('showSystemIndices', isChecked);
-      // update the page
-      callPageData().then((pageData) => $scope.pageData = pageData);
-    };
+      const transformer = nodesByIndices();
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.shards) {
+          return;
+        }
 
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => callPageData(),
-      handleResponse: (response) => {
-        $scope.pageData = response;
-      }
-    });
+        const shards = data.shards;
+        $scope.totalCount = shards.length;
+        $scope.showing = transformer(shards, data.nodes);
+        $scope.labels = labels.node;
 
-    $executor.start($scope);
-
-    $scope.$on('$destroy', $executor.destroy);
+        this.renderReact(
+          <I18nProvider>
+            <Node
+              scope={$scope}
+              kbnUrl={kbnUrl}
+              onBrush={this.onBrush}
+              {...data}
+            />
+          </I18nProvider>
+        );
+      });
+    }
   }
 });

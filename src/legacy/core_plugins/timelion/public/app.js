@@ -26,6 +26,7 @@ import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -58,6 +59,11 @@ require('ui/routes')
   .when('/:id?', {
     template: require('plugins/timelion/index.html'),
     reloadOnSearch: false,
+    k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+      $route.current.params.id
+        ? getSavedSheetBreadcrumbs
+        : getCreateBreadcrumbs
+    ),
     resolve: {
       savedSheet: function (redirectWhenMissing, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
@@ -74,6 +80,9 @@ require('ui/routes')
             'search': '/'
           }));
       }
+    },
+    controller($scope, config) {
+      config.bindToScope($scope, 'k7design');
     }
   });
 
@@ -137,8 +146,9 @@ app.controller('timelion', function (
   function getTopNavMenu() {
 
     const newSheetAction = {
-      key: i18n('timelion.topNavMenu.newSheetButtonLabel', {
-        defaultMessage: 'new',
+      key: 'new',
+      label: i18n('timelion.topNavMenu.newSheetButtonLabel', {
+        defaultMessage: 'New',
       }),
       description: i18n('timelion.topNavMenu.newSheetButtonAriaLabel', {
         defaultMessage: 'New Sheet',
@@ -148,8 +158,9 @@ app.controller('timelion', function (
     };
 
     const addSheetAction = {
-      key: i18n('timelion.topNavMenu.addChartButtonLabel', {
-        defaultMessage: 'add',
+      key: 'add',
+      label: i18n('timelion.topNavMenu.addChartButtonLabel', {
+        defaultMessage: 'Add',
       }),
       description: i18n('timelion.topNavMenu.addChartButtonAriaLabel', {
         defaultMessage: 'Add a chart',
@@ -159,8 +170,9 @@ app.controller('timelion', function (
     };
 
     const saveSheetAction = {
-      key: i18n('timelion.topNavMenu.saveSheetButtonLabel', {
-        defaultMessage: 'save',
+      key: 'save',
+      label: i18n('timelion.topNavMenu.saveSheetButtonLabel', {
+        defaultMessage: 'Save',
       }),
       description: i18n('timelion.topNavMenu.saveSheetButtonAriaLabel', {
         defaultMessage: 'Save Sheet',
@@ -170,8 +182,9 @@ app.controller('timelion', function (
     };
 
     const deleteSheetAction = {
-      key: i18n('timelion.topNavMenu.deleteSheetButtonLabel', {
-        defaultMessage: 'delete',
+      key: 'delete',
+      label: i18n('timelion.topNavMenu.deleteSheetButtonLabel', {
+        defaultMessage: 'Delete',
       }),
       description: i18n('timelion.topNavMenu.deleteSheetButtonAriaLabel', {
         defaultMessage: 'Delete current sheet',
@@ -216,8 +229,9 @@ app.controller('timelion', function (
     };
 
     const openSheetAction = {
-      key: i18n('timelion.topNavMenu.openSheetButtonLabel', {
-        defaultMessage: 'open',
+      key: 'open',
+      label: i18n('timelion.topNavMenu.openSheetButtonLabel', {
+        defaultMessage: 'Open',
       }),
       description: i18n('timelion.topNavMenu.openSheetButtonAriaLabel', {
         defaultMessage: 'Open Sheet',
@@ -227,8 +241,9 @@ app.controller('timelion', function (
     };
 
     const optionsAction = {
-      key: i18n('timelion.topNavMenu.optionsButtonLabel', {
-        defaultMessage: 'options',
+      key: 'options',
+      label: i18n('timelion.topNavMenu.optionsButtonLabel', {
+        defaultMessage: 'Options',
       }),
       description: i18n('timelion.topNavMenu.optionsButtonAriaLabel', {
         defaultMessage: 'Options',
@@ -238,8 +253,9 @@ app.controller('timelion', function (
     };
 
     const helpAction = {
-      key: i18n('timelion.topNavMenu.helpButtonLabel', {
-        defaultMessage: 'help',
+      key: 'help',
+      label: i18n('timelion.topNavMenu.helpButtonLabel', {
+        defaultMessage: 'Help',
       }),
       description: i18n('timelion.topNavMenu.helpButtonAriaLabel', {
         defaultMessage: 'Help',

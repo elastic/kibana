@@ -30,11 +30,14 @@ import { castEsToKbnFieldTypeName } from '../../../../../../../utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 
+import { getViewBreadcrumbs } from './breadcrumbs';
+
 const location = 'SavedObject view';
 
 uiRoutes
   .when('/management/kibana/objects/:service/:id', {
-    template: objectViewHTML
+    template: objectViewHTML,
+    k7Breadcrumbs: getViewBreadcrumbs
   });
 
 uiModules.get('apps/management')

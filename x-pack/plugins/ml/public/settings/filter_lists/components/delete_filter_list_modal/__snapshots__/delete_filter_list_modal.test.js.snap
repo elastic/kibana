@@ -7,7 +7,7 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
     fill={false}
     iconSide="left"
     iconType="trash"
-    isDisabled={true}
+    isDisabled={false}
     key="delete_filter_list"
     onClick={[Function]}
     type="button"
@@ -41,7 +41,7 @@ exports[`DeleteFilterListModal renders as disabled delete button when no lists s
     fill={false}
     iconSide="left"
     iconType="trash"
-    isDisabled={true}
+    isDisabled={false}
     key="delete_filter_list"
     onClick={[Function]}
     type="button"

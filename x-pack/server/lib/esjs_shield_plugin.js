@@ -27,7 +27,7 @@
     shield.authenticate = ca({
       params: {},
       url: {
-        fmt: '/_xpack/security/_authenticate'
+        fmt: '/_security/_authenticate'
       }
     });
 
@@ -46,7 +46,7 @@
       },
       urls: [
         {
-          fmt: '/_xpack/security/user/<%=username%>/_password',
+          fmt: '/_security/user/<%=username%>/_password',
           req: {
             username: {
               type: 'string',
@@ -55,7 +55,7 @@
           }
         },
         {
-          fmt: '/_xpack/security/user/_password'
+          fmt: '/_security/user/_password'
         }
       ],
       needBody: true,
@@ -77,7 +77,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/realm/<%=realms%>/_clear_cache',
+        fmt: '/_security/realm/<%=realms%>/_clear_cache',
         req: {
           realms: {
             type: 'string',
@@ -97,7 +97,7 @@
     shield.clearCachedRoles = ca({
       params: {},
       url: {
-        fmt: '/_xpack/security/role/<%=name%>/_clear_cache',
+        fmt: '/_security/role/<%=name%>/_clear_cache',
         req: {
           name: {
             type: 'string',
@@ -122,7 +122,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/role/<%=name%>',
+        fmt: '/_security/role/<%=name%>',
         req: {
           name: {
             type: 'string',
@@ -147,7 +147,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/user/<%=username%>',
+        fmt: '/_security/user/<%=username%>',
         req: {
           username: {
             type: 'string',
@@ -168,7 +168,7 @@
       params: {},
       urls: [
         {
-          fmt: '/_xpack/security/role/<%=name%>',
+          fmt: '/_security/role/<%=name%>',
           req: {
             name: {
               type: 'string',
@@ -177,7 +177,7 @@
           }
         },
         {
-          fmt: '/_xpack/security/role'
+          fmt: '/_security/role'
         }
       ]
     });
@@ -192,7 +192,7 @@
       params: {},
       urls: [
         {
-          fmt: '/_xpack/security/user/<%=username%>',
+          fmt: '/_security/user/<%=username%>',
           req: {
             username: {
               type: 'list',
@@ -201,7 +201,7 @@
           }
         },
         {
-          fmt: '/_xpack/security/user'
+          fmt: '/_security/user'
         }
       ]
     });
@@ -220,7 +220,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/role/<%=name%>',
+        fmt: '/_security/role/<%=name%>',
         req: {
           name: {
             type: 'string',
@@ -246,7 +246,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/user/<%=username%>',
+        fmt: '/_security/user/<%=username%>',
         req: {
           username: {
             type: 'string',
@@ -266,7 +266,7 @@
       params: {},
       urls: [
         {
-          fmt: '/_xpack/security/user/_privileges'
+          fmt: '/_security/user/_privileges'
         }
       ]
     });
@@ -288,7 +288,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/prepare'
+        fmt: '/_security/saml/prepare'
       }
     });
 
@@ -307,7 +307,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/authenticate'
+        fmt: '/_security/saml/authenticate'
       }
     });
 
@@ -322,7 +322,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/logout'
+        fmt: '/_security/saml/logout'
       }
     });
 
@@ -337,7 +337,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/logout'
+        fmt: '/_security/saml/logout'
       }
     });
 
@@ -355,30 +355,50 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/invalidate'
+        fmt: '/_security/saml/invalidate'
       }
     });
 
     /**
-     * Refreshes SAML access token.
+     * Refreshes an access token.
      *
      * @param {string} grant_type Currently only "refresh_token" grant type is supported.
      * @param {string} refresh_token One-time refresh token that will be exchanged to the new access/refresh token pair.
      *
      * @returns {{access_token: string, type: string, expires_in: number, refresh_token: string}}
      */
-    shield.samlRefreshAccessToken = ca({
+    shield.getAccessToken = ca({
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/oauth2/token'
+        fmt: '/_security/oauth2/token'
+      }
+    });
+
+    /**
+     * Invalidates an access token.
+     *
+     * @param {string} token The access token to invalidate
+     *
+     * @returns {{created: boolean}}
+     */
+    shield.deleteAccessToken = ca({
+      method: 'DELETE',
+      needBody: true,
+      params: {
+        token: {
+          type: 'string'
+        }
+      },
+      url: {
+        fmt: '/_security/oauth2/token'
       }
     });
 
     shield.getPrivilege = ca({
       method: 'GET',
       urls: [{
-        fmt: '/_xpack/security/privilege/<%=privilege%>',
+        fmt: '/_security/privilege/<%=privilege%>',
         req: {
           privilege: {
             type: 'string',
@@ -386,14 +406,14 @@
           }
         }
       }, {
-        fmt: '/_xpack/security/privilege'
+        fmt: '/_security/privilege'
       }]
     });
 
     shield.deletePrivilege = ca({
       method: 'DELETE',
       urls: [{
-        fmt: '/_xpack/security/privilege/<%=application%>/<%=privilege%>',
+        fmt: '/_security/privilege/<%=application%>/<%=privilege%>',
         req: {
           application: {
             type: 'string',
@@ -411,7 +431,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/privilege'
+        fmt: '/_security/privilege'
       }
     });
 
@@ -419,7 +439,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/user/_has_privileges'
+        fmt: '/_security/user/_has_privileges'
       }
     });
   };

@@ -115,48 +115,46 @@ describe('features', () => {
       },
     });
     expect(result[application]).toEqual({
-      feature_foo_quz: {
+      'feature_foo.quz': {
         application,
-        name: 'feature_foo_quz',
+        name: 'feature_foo.quz',
         actions: ['action-1', 'action-2'],
         metadata: {},
       },
-      feature_foo_qux: {
+      'feature_foo.qux': {
         application,
-        name: 'feature_foo_qux',
+        name: 'feature_foo.qux',
         actions: ['action-3', 'action-4'],
         metadata: {},
       },
-      feature_bar_quz: {
+      'feature_bar.quz': {
         application,
-        name: 'feature_bar_quz',
+        name: 'feature_bar.quz',
         actions: ['action-1', 'action-2'],
         metadata: {},
       },
-      feature_bar_qux: {
+      'feature_bar.qux': {
         application,
-        name: 'feature_bar_qux',
+        name: 'feature_bar.qux',
         actions: ['action-3', 'action-4'],
         metadata: {},
       },
     });
   });
 
-  test(`throws error if feature privileges would conflict`, () => {
+  test(`feature privileges don't conflict`, () => {
     const application = 'foo-application';
-    expect(() => {
-      serializePrivileges(application, {
-        global: {},
-        space: {},
-        features: {
-          foo_bar: {
-            baz: ['action-1', 'action-2'],
-          },
-          foo: {
-            bar_baz: ['action-1', 'action-2'],
-          },
+    serializePrivileges(application, {
+      global: {},
+      space: {},
+      features: {
+        foo_bar: {
+          baz: ['action-1', 'action-2'],
         },
-      });
-    }).toThrowErrorMatchingSnapshot();
+        foo: {
+          bar_baz: ['action-1', 'action-2'],
+        },
+      },
+    });
   });
 });

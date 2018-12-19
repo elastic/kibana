@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceResolvers } from '../../../common/graphql/types';
-import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
+import { InfraSourceResolvers } from '../../graphql/types';
 import { InfraMetricsDomain } from '../../lib/domains/metrics_domain';
-import { InfraContext } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
+import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type InfraSourceMetricsResolver = InfraResolverOf<
-  InfraSourceResolvers.MetricsResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+type InfraSourceMetricsResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.MetricsResolver>,
+  QuerySourceResolver
 >;
 
 interface ResolverDeps {

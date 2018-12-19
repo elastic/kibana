@@ -61,7 +61,7 @@ export class Cluster {
 
   getRequestTimeout = () => getClonedProperty(this._config, 'requestTimeout');
 
-  getUrl = () => getClonedProperty(this._config, 'url');
+  getHosts = () => getClonedProperty(this._config, 'hosts');
 
   getSsl = () => getClonedProperty(this._config, 'ssl');
 
@@ -88,7 +88,7 @@ export class Cluster {
 
   _getClientConfig = () => {
     return getClonedProperties(this._config, [
-      'url',
+      'hosts',
       'ssl',
       'username',
       'password',
@@ -98,6 +98,9 @@ export class Cluster {
       'keepAlive',
       'pingTimeout',
       'requestTimeout',
+      'sniffOnStart',
+      'sniffInterval',
+      'sniffOnConnectionFault',
       'log'
     ]);
   }

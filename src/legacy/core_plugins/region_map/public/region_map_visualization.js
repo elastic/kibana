@@ -173,7 +173,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
             text: i18n('regionMap.visualization.unableToShowMismatchesWarningText', {
               defaultMessage: 'Ensure that each of these term matches a shape on that shape\'s join field: {mismatches}',
               values: {
-                mismatches: event.mismatches.join(', '),
+                mismatches: event.mismatches ? event.mismatches.join(', ') : '',
               },
             }),
           });

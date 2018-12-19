@@ -23,6 +23,8 @@ import {
 import { AddItemPopover } from '../components/add_item_popover';
 
 export function EditFilterListToolbar({
+  canCreateFilter,
+  canDeleteFilter,
   onSearchChange,
   addItems,
   deleteSelectedItems,
@@ -34,6 +36,7 @@ export function EditFilterListToolbar({
         <EuiFlexItem grow={false}>
           <AddItemPopover
             addItems={addItems}
+            canCreateFilter={canCreateFilter}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -41,7 +44,7 @@ export function EditFilterListToolbar({
         <EuiFlexItem grow={false}>
           <EuiButton
             color="danger"
-            disabled={(selectedItemCount === 0)}
+            disabled={(selectedItemCount === 0 || canDeleteFilter === false)}
             onClick={deleteSelectedItems}
           >
             Delete item
@@ -58,6 +61,8 @@ export function EditFilterListToolbar({
   );
 }
 EditFilterListToolbar.propTypes = {
+  canCreateFilter: PropTypes.bool.isRequired,
+  canDeleteFilter: PropTypes.bool.isRequired,
   onSearchChange: PropTypes.func.isRequired,
   addItems: PropTypes.func.isRequired,
   deleteSelectedItems: PropTypes.func.isRequired,

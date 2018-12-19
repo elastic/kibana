@@ -8,15 +8,17 @@ import { actionsFactory } from './actions';
 import { authorizationModeFactory } from './mode';
 import { privilegesFactory } from './privileges';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
-export function createAuthorizationService(server, xpackInfoFeature, savedObjectTypes, xpackMainPlugin) {
+export function createAuthorizationService(server, xpackInfoFeature, savedObjectTypes, xpackMainPlugin, spaces) {
   const shieldClient = getClient(server);
   const config = server.config();
 
   const actions = actionsFactory(config);
   const application = `kibana-${config.get('kibana.index')}`;
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(actions, application, shieldClient);
+  const checkPrivilegesDynamicallyWithRequest = checkPrivilegesDynamicallyWithRequestFactory(checkPrivilegesWithRequest, spaces);
   const mode = authorizationModeFactory(
     application,
     config,
@@ -30,6 +32,7 @@ export function createAuthorizationService(server, xpackInfoFeature, savedObject
     actions,
     application,
     checkPrivilegesWithRequest,
+    checkPrivilegesDynamicallyWithRequest,
     mode,
     privileges,
   };

@@ -12,21 +12,19 @@ export class SecureSavedObjectsClientWrapper {
       actions,
       auditLogger,
       baseClient,
-      checkPrivilegesWithRequest,
+      checkPrivilegesDynamicallyWithRequest,
       errors,
       request,
       savedObjectTypes,
-      spaces,
     } = options;
 
     this.errors = errors;
     this._actions = actions;
     this._auditLogger = auditLogger;
     this._baseClient = baseClient;
-    this._checkPrivileges = checkPrivilegesWithRequest(request);
+    this._checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
     this._request = request;
     this._savedObjectTypes = savedObjectTypes;
-    this._spaces = spaces;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -103,13 +101,7 @@ export class SecureSavedObjectsClientWrapper {
 
   async _checkSavedObjectPrivileges(actions) {
     try {
-      if (this._spaces) {
-        const spaceId = this._spaces.getSpaceId(this._request);
-        return await this._checkPrivileges.atSpace(spaceId, actions);
-      }
-      else {
-        return await this._checkPrivileges.globally(actions);
-      }
+      return await this._checkPrivileges(actions);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);

@@ -29,8 +29,9 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
+// import { VisualizeDataLoader } from './visualize_data_loader';
+import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
-import { VisualizeDataLoader } from './visualize_data_loader';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -39,6 +40,7 @@ import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
+  autoFetch?: boolean;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -57,6 +59,7 @@ export class EmbeddedVisualizeHandler {
    * @ignore
    */
   public readonly data$: Rx.Observable<any>;
+  public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
   private loaded: boolean = false;
   private destroyed: boolean = false;
@@ -78,11 +81,11 @@ export class EmbeddedVisualizeHandler {
   private dataLoaderParams: RequestHandlerParams;
   private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: VisualizeDataLoader;
+  private dataLoader: PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
-  private readonly inspectorAdapters: Adapters = {};
   private actions: any = {};
   private events$: Rx.Observable<any>;
+  private autoFetch: boolean;
 
   constructor(
     private readonly element: HTMLElement,
@@ -91,7 +94,7 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, Private } = params;
+    const { appState, uiState, queryFilter, timeRange, filters, query, autoFetch } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -103,6 +106,8 @@ export class EmbeddedVisualizeHandler {
       aggs: vis.getAggConfig(),
       forceFetch: false,
     };
+
+    this.autoFetch = !(autoFetch === false);
 
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
@@ -124,7 +129,7 @@ export class EmbeddedVisualizeHandler {
     this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
-    this.dataLoader = new VisualizeDataLoader(vis, Private);
+    this.dataLoader = new PipelineDataLoader(vis);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -219,6 +224,32 @@ export class EmbeddedVisualizeHandler {
   }
 
   /**
+   * renders visualization with provided data
+   * @param visData: visualization data
+   */
+  public render = (pipelineResponse: any = null) => {
+    let visData;
+    if (pipelineResponse) {
+      if (!pipelineResponse.value) {
+        throw new Error(pipelineResponse.error);
+      }
+      visData = pipelineResponse.value.visData || pipelineResponse.value;
+    }
+    return visualizationLoader
+      .render(this.element, this.vis, visData, this.uiState, {
+        listenOnChange: false,
+      })
+      .then(() => {
+        if (!this.loaded) {
+          this.loaded = true;
+          if (this.autoFetch) {
+            this.fetchAndRender();
+          }
+        }
+      });
+  };
+
+  /**
    * Opens the inspector for the embedded visualization. This will return an
    * handler to the inspector to close and interact with it.
    * @return An inspector session to interact with the opened inspector.
@@ -265,6 +296,13 @@ export class EmbeddedVisualizeHandler {
   public removeRenderCompleteListener(listener: () => void) {
     this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
   }
+
+  /**
+   * Force the fetch of new data and renders the chart again.
+   */
+  public reload = () => {
+    this.fetchAndRender(true);
+  };
 
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
@@ -334,34 +372,16 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender();
   };
 
-  /**
-   * Force the fetch of new data and renders the chart again.
-   */
-  private reload = () => {
-    this.fetchAndRender(true);
-  };
-
   private fetch = (forceFetch: boolean = false) => {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
+    this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
+
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
       this.dataSubject.next(data);
       return data;
     });
-  };
-
-  private render = (visData: any = null) => {
-    return visualizationLoader
-      .render(this.element, this.vis, visData, this.uiState, {
-        listenOnChange: false,
-      })
-      .then(() => {
-        if (!this.loaded) {
-          this.loaded = true;
-          this.fetchAndRender();
-        }
-      });
   };
 }

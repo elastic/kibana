@@ -60,6 +60,7 @@ export const SuggestionComponent: SFC<Props> = props => {
       onMouseEnter={props.onMouseEnter}
       ref={props.innerRef}
       id={props.ariaId}
+      aria-selected={props.selected}
     >
       <div className={'suggestionItem suggestionItem--' + props.suggestion.type}>
         <div className="suggestionItem__type">

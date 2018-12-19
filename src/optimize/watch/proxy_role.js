@@ -17,24 +17,18 @@
  * under the License.
  */
 
+import { createProxyBundlesRoute } from '../bundles_route';
 import { fromNode } from 'bluebird';
 import { get, once } from 'lodash';
 
 export default (kbnServer, server, config) => {
 
-  server.route({
-    path: '/bundles/{path*}',
-    method: 'GET',
-    handler: {
-      proxy: {
-        host: config.get('optimize.watchHost'),
-        port: config.get('optimize.watchPort'),
-        passThrough: true,
-        xforward: true
-      }
-    },
-    config: { auth: false }
-  });
+  server.route(
+    createProxyBundlesRoute({
+      host: config.get('optimize.watchHost'),
+      port: config.get('optimize.watchPort')
+    })
+  );
 
   return fromNode(cb => {
     const timeout = setTimeout(() => {

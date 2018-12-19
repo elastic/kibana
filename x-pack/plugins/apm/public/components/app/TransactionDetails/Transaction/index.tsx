@@ -6,7 +6,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -15,10 +14,10 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import React from 'react';
-import { Transaction as ITransaction } from '../../../../../typings/Transaction';
+import { Transaction as ITransaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
+import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { TransactionLink } from '../../../shared/TransactionLink';
-import { DiscoverTransactionLink } from './ActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
@@ -95,11 +94,10 @@ export const Transaction: React.SFC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <DiscoverTransactionLink transaction={transaction}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  View transaction in Discover
-                </EuiButtonEmpty>
-              </DiscoverTransactionLink>
+              <TransactionActionMenu
+                transaction={transaction}
+                location={location}
+              />
             </EuiFlexItem>
             <MaybeViewTraceLink
               transaction={transaction}

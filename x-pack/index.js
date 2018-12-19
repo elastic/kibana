@@ -21,6 +21,7 @@ import { apm } from './plugins/apm';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
+import { indexLifecycleManagement } from './plugins/index_lifecycle_management';
 import { consoleExtensions } from './plugins/console_extensions';
 import { spaces } from './plugins/spaces';
 import { notifications } from './plugins/notifications';
@@ -28,6 +29,9 @@ import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { rollup } from './plugins/rollup';
+import { remoteClusters } from './plugins/remote_clusters';
+import { crossClusterReplication } from './plugins/cross_cluster_replication';
+import { upgradeAssistant } from './plugins/upgrade_assistant';
 
 module.exports = function (kibana) {
   return [
@@ -52,8 +56,12 @@ module.exports = function (kibana) {
     indexManagement(kibana),
     consoleExtensions(kibana),
     notifications(kibana),
+    indexLifecycleManagement(kibana),
     kueryAutocomplete(kibana),
     infra(kibana),
     rollup(kibana),
+    remoteClusters(kibana),
+    crossClusterReplication(kibana),
+    upgradeAssistant(kibana),
   ];
 };

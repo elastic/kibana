@@ -130,7 +130,22 @@ export default function ({ getService, getPageObjects }) {
         expect(ticks).to.eql(['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00']);
       });
 
+      it('should modify the time range when a bar is clicked', async function () {
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.clickHistogramBar(0);
+        const actualTimeString = await PageObjects.header.getPrettyDuration();
+        expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
+      });
+
+      it('should modify the time range when the histogram is brushed', async function () {
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.brushHistogram(0, 1);
+        const actualTimeString = await PageObjects.header.getPrettyDuration();
+        expect(actualTimeString).to.be('September 19th 2015, 23:52:17.080 to September 20th 2015, 02:59:51.112');
+      });
+
       it('should show correct initial chart interval of Auto', async function () {
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';

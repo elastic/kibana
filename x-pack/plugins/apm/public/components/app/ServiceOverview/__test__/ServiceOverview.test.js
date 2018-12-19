@@ -8,9 +8,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { ServiceOverview } from '../view';
 import { STATUS } from '../../../../constants';
-import * as apmRestServices from '../../../../services/rest/apm';
-
-jest.mock('../../../../services/rest/apm');
+import * as apmRestServices from '../../../../services/rest/apm/status_check';
+jest.mock('../../../../services/rest/apm/status_check');
 
 describe('Service Overview -> View', () => {
   let mockAgentStatus;
@@ -22,7 +21,6 @@ describe('Service Overview -> View', () => {
       dataFound: true
     };
 
-    // eslint-disable-next-line import/namespace
     apmRestServices.loadAgentStatus = jest.fn(() =>
       Promise.resolve(mockAgentStatus)
     );

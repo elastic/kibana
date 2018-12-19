@@ -7,11 +7,12 @@
 import { createJobFactory } from './create_job';
 import { executeJobFactory } from './execute_job';
 import { metadata } from '../metadata';
+import { CSV_JOB_TYPE as jobType } from '../../../common/constants';
 
 export function register(registry) {
   registry.register({
     ...metadata,
-    jobType: 'csv',
+    jobType,
     jobContentExtension: 'csv',
     createJobFactory,
     executeJobFactory,

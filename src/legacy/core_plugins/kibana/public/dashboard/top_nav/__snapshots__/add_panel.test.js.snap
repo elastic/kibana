@@ -49,7 +49,7 @@ exports[`render 1`] = `
     <EuiSpacer
       size="s"
     />
-    <SavedObjectFinder
+    <InjectIntl(SavedObjectFinderUI)
       callToActionButton={
         <EuiButton
           color="primary"

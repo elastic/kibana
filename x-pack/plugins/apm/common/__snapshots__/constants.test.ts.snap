@@ -1,5 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error v2 ERROR_CULPRIT 1`] = `"handleOopsie"`;
+
+exports[`Error v2 ERROR_EXC_HANDLED 1`] = `false`;
+
+exports[`Error v2 ERROR_EXC_MESSAGE 1`] = `"sonic boom"`;
+
+exports[`Error v2 ERROR_EXC_STACKTRACE 1`] = `undefined`;
+
+exports[`Error v2 ERROR_GROUP_ID 1`] = `"grouping key"`;
+
+exports[`Error v2 ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Error v2 ERROR_LOG_STACKTRACE 1`] = `undefined`;
+
+exports[`Error v2 PARENT_ID 1`] = `"parentId"`;
+
+exports[`Error v2 PROCESSOR_EVENT 1`] = `"error"`;
+
+exports[`Error v2 PROCESSOR_NAME 1`] = `"error"`;
+
+exports[`Error v2 REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Error v2 REQUEST_URL_FULL 1`] = `undefined`;
+
+exports[`Error v2 SERVICE_AGENT_NAME 1`] = `"agent name"`;
+
+exports[`Error v2 SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+
+exports[`Error v2 SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Error v2 SPAN_DURATION 1`] = `undefined`;
+
+exports[`Error v2 SPAN_HEX_ID 1`] = `undefined`;
+
+exports[`Error v2 SPAN_ID 1`] = `undefined`;
+
+exports[`Error v2 SPAN_NAME 1`] = `undefined`;
+
+exports[`Error v2 SPAN_SQL 1`] = `undefined`;
+
+exports[`Error v2 SPAN_START 1`] = `undefined`;
+
+exports[`Error v2 SPAN_TYPE 1`] = `undefined`;
+
+exports[`Error v2 TRACE_ID 1`] = `"trace id"`;
+
+exports[`Error v2 TRANSACTION_DURATION 1`] = `undefined`;
+
+exports[`Error v2 TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Error v2 TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Error v2 TRANSACTION_RESULT 1`] = `undefined`;
+
+exports[`Error v2 TRANSACTION_SAMPLED 1`] = `undefined`;
+
+exports[`Error v2 TRANSACTION_TYPE 1`] = `undefined`;
+
+exports[`Error v2 USER_ID 1`] = `undefined`;
+
 exports[`Span v1 ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Span v1 ERROR_EXC_HANDLED 1`] = `undefined`;

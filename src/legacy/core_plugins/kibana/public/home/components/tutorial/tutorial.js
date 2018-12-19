@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
@@ -37,12 +37,17 @@ import {
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
   ON_PREM: 'onPrem',
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
 };
+
+const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
+const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add data' });
 
 class TutorialUi extends React.Component {
 
@@ -89,6 +94,22 @@ class TutorialUi extends React.Component {
         notFound: true,
       });
     }
+
+    if(this.props.isK7Design) {
+      chrome.breadcrumbs.set([
+        {
+          text: homeTitle,
+          href: '#/home'
+        },
+        {
+          text: addDataTitle,
+          href: '#/home/tutorial_directory'
+        },
+        {
+          text: tutorial ? tutorial.name : this.props.tutorialId
+        }
+      ]);
+    }
   }
 
   getInstructions = () => {
@@ -104,7 +125,12 @@ class TutorialUi extends React.Component {
       case INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD:
         return this.state.tutorial.onPremElasticCloud;
       default:
-        throw new Error(`Unhandled instruction type ${this.state.visibleInstructions}`);
+        throw new Error(this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.unhandledInstructionTypeErrorDescription',
+          defaultMessage: 'Unhandled instruction type {visibleInstructions}'
+        }, {
+          visibleInstructions: this.state.visibleInstructions
+        }));
     }
   };
 
@@ -349,14 +375,27 @@ class TutorialUi extends React.Component {
         </div>
       );
     }
+
+    let breadcrumbs;
+    if (!this.props.isK7Design) {
+      breadcrumbs = (
+        <Fragment>
+          <div>
+            <EuiLink href="#/home">{homeTitle}</EuiLink> /{' '}
+            <EuiLink href="#/home/tutorial_directory">{addDataTitle}</EuiLink> /{' '}
+            {this.state.tutorial ? this.state.tutorial.name : this.props.tutorialId}
+          </div>
+          <EuiSpacer size="s" />
+        </Fragment>
+      );
+    }
+
     return (
       <EuiPage className="homPage">
         <EuiPageBody>
 
-          <div>
-            <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
-          </div>
-          <EuiSpacer size="s" />
+          {breadcrumbs}
+
           {content}
 
         </EuiPageBody>
@@ -372,6 +411,7 @@ TutorialUi.propTypes = {
   replaceTemplateStrings: PropTypes.func.isRequired,
   tutorialId: PropTypes.string.isRequired,
   bulkCreate: PropTypes.func.isRequired,
+  isK7Design: PropTypes.bool.isRequired,
 };
 
 export const Tutorial = injectI18n(TutorialUi);
