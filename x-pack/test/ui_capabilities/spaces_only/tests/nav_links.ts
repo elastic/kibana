@@ -39,7 +39,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
             break;
           case 'space_with_no_features':
             expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.none());
+            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
           default:
             throw new UnreachableError(scenario);
