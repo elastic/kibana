@@ -13,29 +13,25 @@ import {
   updateAutoFollowPattern as updateAutoFollowPatternRequest,
   deleteAutoFollowPattern as deleteAutoFollowPatternRequest,
 } from '../../services/api';
+import { arrify } from '../../../../common/services/utils';
 import routing from '../../services/routing';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
-import { getDetailPanelAutoFollowPatternName } from '../selectors';
+import { getSelectedAutoFollowPatternId } from '../selectors';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 
-export const editAutoFollowPattern = (name) => ({
-  type: t.AUTO_FOLLOW_PATTERN_EDIT,
+export const selectAutoFollowPattern = (name) => ({
+  type: t.AUTO_FOLLOW_PATTERN_SELECT,
   payload: name
 });
 
-export const openAutoFollowPatternDetailPanel = (name) => {
+export const toggleAutoFollowPatternDetailPanel = (isOpen = true) => {
   return {
-    type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
-    payload: name
+    type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL_TOGGLE,
+    payload: isOpen
   };
 };
-
-export const closeAutoFollowPatternDetailPanel = () => ({
-  type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
-  payload: null
-});
 
 export const loadAutoFollowPatterns = (isUpdating = false) =>
   sendApiRequest({
@@ -54,7 +50,7 @@ export const getAutoFollowPattern = (id) =>
     handler: async (dispatch) => (
       getAutoFollowPatternRequest(id)
         .then((response) => {
-          dispatch(editAutoFollowPattern(id));
+          dispatch(selectAutoFollowPattern(id));
           return response;
         })
     )
@@ -135,9 +131,11 @@ export const deleteAutoFollowPattern = (id) => (
       }
 
       // If we've just deleted a pattern we were looking at, we need to close the panel.
-      const detailPanelAutoFollowPatternName = getDetailPanelAutoFollowPatternName(getState());
-      if (detailPanelAutoFollowPatternName && response.itemsDeleted.includes(detailPanelAutoFollowPatternName)) {
-        dispatch(closeAutoFollowPatternDetailPanel());
+      const ids = arrify(id);
+      const autoFollowPatternId = getSelectedAutoFollowPatternId(getState());
+      if (ids.some(_id => autoFollowPatternId === _id)) {
+        dispatch(toggleAutoFollowPatternDetailPanel(false));
+        dispatch(selectAutoFollowPattern(null));
       }
     }
   })

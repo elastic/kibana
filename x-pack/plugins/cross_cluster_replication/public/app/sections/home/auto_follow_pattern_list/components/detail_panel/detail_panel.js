@@ -41,12 +41,9 @@ import routing from '../../../../../services/routing';
 
 export class DetailPanelUi extends Component {
   static propTypes = {
-    isDetailPanelOpen: PropTypes.bool.isRequired,
     apiStatus: PropTypes.string,
     autoFollowPattern: PropTypes.object,
-    autoFollowPatternName: PropTypes.string,
     closeDetailPanel: PropTypes.func.isRequired,
-    editAutoFollowPattern: PropTypes.func.isRequired,
   }
 
   renderAutoFollowPattern() {
@@ -251,15 +248,15 @@ export class DetailPanelUi extends Component {
 
   renderFooter() {
     const {
-      editAutoFollowPattern,
       autoFollowPattern,
-      autoFollowPatternName,
       closeDetailPanel,
     } = this.props;
 
     if (!autoFollowPattern) {
       return null;
     }
+
+    const { name: autoFollowPatternName } = autoFollowPattern;
 
     return (
       <EuiFlyoutFooter>
@@ -300,7 +297,6 @@ export class DetailPanelUi extends Component {
                   fill
                   color="primary"
                   onClick={() => {
-                    editAutoFollowPattern(autoFollowPatternName);
                     routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(autoFollowPatternName)}`));
                   }}
                 >
@@ -318,15 +314,7 @@ export class DetailPanelUi extends Component {
   }
 
   render() {
-    const {
-      isDetailPanelOpen,
-      closeDetailPanel,
-      autoFollowPatternName,
-    } = this.props;
-
-    if (!isDetailPanelOpen) {
-      return null;
-    }
+    const { autoFollowPattern, closeDetailPanel } = this.props;
 
     return (
       <EuiFlyout
@@ -336,14 +324,15 @@ export class DetailPanelUi extends Component {
         size="m"
         maxWidth={400}
       >
-        <EuiFlyoutHeader>
-          <EuiTitle size="m" id="autoFollowPatternDetailsFlyoutTitle">
-            <h2>{autoFollowPatternName}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
+        {autoFollowPattern && (
+          <EuiFlyoutHeader>
+            <EuiTitle size="m" id="autoFollowPatternDetailsFlyoutTitle">
+              <h2>{autoFollowPattern.name}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+        )}
 
         {this.renderContent()}
-
         {this.renderFooter()}
       </EuiFlyout>
     );

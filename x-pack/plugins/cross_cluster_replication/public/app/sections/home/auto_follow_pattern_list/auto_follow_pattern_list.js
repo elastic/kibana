@@ -21,12 +21,13 @@ export const AutoFollowPatternList = injectI18n(
   class extends PureComponent {
     static propTypes = {
       loadAutoFollowPatterns: PropTypes.func,
+      selectAutoFollowPattern: PropTypes.func,
       autoFollowPatterns: PropTypes.array,
       apiStatus: PropTypes.string,
       apiError: PropTypes.object,
       openDetailPanel: PropTypes.func.isRequired,
       closeDetailPanel: PropTypes.func.isRequired,
-      isDetailPanelOpen: PropTypes.bool,
+      isDetailPanelOpened: PropTypes.bool,
     }
 
     componentDidMount() {
@@ -41,24 +42,32 @@ export const AutoFollowPatternList = injectI18n(
     }
 
     componentDidUpdate() {
+      const { history: { location: { search } } } = this.props;
+      let { pattern } = extractQueryParams(search);
+
+      pattern = !!pattern ? pattern : null;
+      this.onAutoFollowPatternChange(pattern);
+    }
+
+    onAutoFollowPatternChange(newId) {
       const {
+        autoFollowPatternId,
+        selectAutoFollowPattern,
         openDetailPanel,
-        closeDetailPanel,
-        isDetailPanelOpen,
-        history: {
-          location: {
-            search,
-          },
-        },
+        closeDetailPanel
       } = this.props;
 
-      const { pattern: patternName } = extractQueryParams(search);
+      if (newId !== autoFollowPatternId) {
+        selectAutoFollowPattern(newId);
+      }
 
-      // Show deeplinked auto follow pattern whenever patterns get loaded or the URL changes.
-      if (patternName != null) {
-        openDetailPanel(patternName);
-      } else if (isDetailPanelOpen) {
+      /**
+       * Single source of truth to open or close the detail panel
+       */
+      if (!newId) {
         closeDetailPanel();
+      } else {
+        openDetailPanel();
       }
     }
 
@@ -102,7 +111,11 @@ export const AutoFollowPatternList = injectI18n(
     }
 
     renderList() {
-      const { autoFollowPatterns, apiStatus } = this.props;
+      const {
+        autoFollowPatterns,
+        apiStatus,
+        isDetailPanelOpened,
+      } = this.props;
 
       if (apiStatus === API_STATUS.LOADING) {
         return (
@@ -118,7 +131,7 @@ export const AutoFollowPatternList = injectI18n(
       return (
         <Fragment>
           <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
-          <DetailPanel />
+          {isDetailPanelOpened && <DetailPanel />}
         </Fragment>
       );
     }

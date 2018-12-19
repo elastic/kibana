@@ -25,7 +25,7 @@ export const AutoFollowPatternTable = injectI18n(
   class extends PureComponent {
     static propTypes = {
       autoFollowPatterns: PropTypes.array,
-      openDetailPanel: PropTypes.func.isRequired,
+      selectAutoFollowPattern: PropTypes.func.isRequired,
     }
 
     state = {
@@ -61,7 +61,7 @@ export const AutoFollowPatternTable = injectI18n(
     };
 
     getTableColumns() {
-      const { intl, editAutoFollowPattern, openDetailPanel } = this.props;
+      const { intl, selectAutoFollowPattern } = this.props;
 
       return [{
         field: 'name',
@@ -73,7 +73,7 @@ export const AutoFollowPatternTable = injectI18n(
         truncateText: false,
         render: (name) => {
           return (
-            <EuiLink onClick={() => openDetailPanel(name)}>
+            <EuiLink onClick={() => selectAutoFollowPattern(name)}>
               {name}
             </EuiLink>
           );
@@ -152,7 +152,7 @@ export const AutoFollowPatternTable = injectI18n(
             }),
             icon: 'pencil',
             onClick: ({ name }) => {
-              editAutoFollowPattern(name);
+              selectAutoFollowPattern(name);
               routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
             },
             type: 'icon',

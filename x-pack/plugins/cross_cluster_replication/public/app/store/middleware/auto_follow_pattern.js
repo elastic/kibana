@@ -15,7 +15,7 @@ export const autoFollowPatternMiddleware = () => next => action => {
   const { pattern: patternName } = extractQueryParams(search);
 
   switch (type) {
-    case t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL:
+    case t.AUTO_FOLLOW_PATTERN_SELECT:
       if (!routing.userHasLeftApp) {
         // Persist state to query params by removing deep link.
         if(!name) {
@@ -23,7 +23,7 @@ export const autoFollowPatternMiddleware = () => next => action => {
             search: '',
           });
         }
-        // Allow the user to share a deep link to this job.
+        // Allow the user to share a deep link to this auto-follow pattern.
         else if (patternName !== name) {
           history.replace({
             search: `?pattern=${encodeURIComponent(name)}`,
