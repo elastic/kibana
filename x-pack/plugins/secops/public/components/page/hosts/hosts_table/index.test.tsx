@@ -28,6 +28,10 @@ describe('Load More Table Component', () => {
       hosts: {
         limit: 2,
       },
+      uncommonProcesses: {
+        limit: 0,
+        upperLimit: 0,
+      },
       inputs: {
         global: {
           timerange: {

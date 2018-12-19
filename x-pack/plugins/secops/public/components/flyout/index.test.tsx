@@ -33,6 +33,10 @@ describe('Flyout', () => {
       hosts: {
         limit: 2,
       },
+      uncommonProcesses: {
+        limit: 0,
+        upperLimit: 0,
+      },
       dragAndDrop: {
         dataProviders: {},
       },

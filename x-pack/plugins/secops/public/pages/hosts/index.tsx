@@ -79,8 +79,8 @@ export const Hosts = pure(() => (
                     loading={loading}
                     data={uncommonProcesses}
                     totalCount={totalCount}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                     nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                     loadMore={loadMore}
                   />
                 )}
