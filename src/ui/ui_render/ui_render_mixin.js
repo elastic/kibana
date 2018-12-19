@@ -72,7 +72,14 @@ export function uiRenderMixin(kbnServer, server, config) {
         `${dllBundlePath}/vendors.style.dll.css`,
         `${regularBundlePath}/commons.style.css`,
         `${regularBundlePath}/${app.getId()}.style.css`,
-      ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
+        ...kbnServer.uiExports.styleSheetPaths
+          .map(path => (
+            path.localPath.endsWith('.scss')
+              ? `${basePath}/built_assets/css/${path.publicPath}`
+              : `${basePath}/${path.publicPath}`
+          ))
+          .reverse()
+      ];
 
       const bootstrap = new AppBootstrap({
         templateData: {

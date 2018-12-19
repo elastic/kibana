@@ -17,16 +17,18 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 import { Build } from './build';
 
-export async function buildAll(styleSheets = []) {
+export async function buildAll(styleSheets, buildDir) {
   const bundles = await Promise.all(styleSheets.map(async styleSheet => {
 
     if (!styleSheet.localPath.endsWith('.scss')) {
       return;
     }
 
-    const bundle = new Build(styleSheet.localPath, styleSheet.cssPath);
+    const bundle = new Build(styleSheet.localPath, resolve(buildDir, styleSheet.publicPath));
     await bundle.build();
 
     return bundle;

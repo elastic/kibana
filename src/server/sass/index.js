@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
 
 export async function sassMixin(kbnServer, server, config) {
   if (process.env.kbnWorkerType === 'optmzr') {
@@ -39,7 +39,7 @@ export async function sassMixin(kbnServer, server, config) {
   let trackedFiles = new Set();
 
   try {
-    scssBundles = await buildAll(kbnServer.uiExports.styleSheetPaths);
+    scssBundles = await buildAll(kbnServer.uiExports.styleSheetPaths, fromRoot('built_assets/css'));
 
     scssBundles.forEach(bundle => {
       bundle.includedFiles.forEach(file => trackedFiles.add(file));
