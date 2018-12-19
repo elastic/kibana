@@ -35,7 +35,7 @@ export interface UncommonProcessHit {
   _id: string;
   _score: number | null;
   total: TotalHit;
-  hosts: string[];
+  hosts: Array<{ id: string; name: string }>;
   _source: {
     '@timestamp': string;
     process: {
@@ -53,7 +53,7 @@ export interface UncommonProcessHit {
 export interface UncommonProcessBucket {
   key: string;
   hosts: {
-    buckets: [];
+    buckets: Array<{ key: string; name: string }>;
   };
   process: {
     hits: {

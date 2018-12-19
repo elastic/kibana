@@ -65,9 +65,16 @@ export const getHits = (
     hosts: getHosts(bucket.hosts.buckets),
   }));
 
-export const getHosts = (buckets: ReadonlyArray<UncommonProcessBucket>): string[] =>
-  buckets.map((bucket: Readonly<UncommonProcessBucket>) => bucket.key);
-
+export const getHosts = (buckets: Array<{ key: string; name: string }>) => {
+  // console.log('hosts are:', buckets);
+  return buckets.map(bucket => ({ id: bucket.key, name: bucket.key }));
+};
+/*
+  buckets.map((bucket: { id: string; name: string }) => ({
+    id: bucket.key,
+    name: 'some name',
+  }));
+*/
 export const formatUncommonProcessesData = (
   fields: ReadonlyArray<string>,
   hit: UncommonProcessHit,
