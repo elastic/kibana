@@ -8,7 +8,9 @@ import { get, map } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 
 export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {}) => {
-  if (!argValue || argValue.show === false) return { show: false };
+  if (!argValue || argValue.show === false) {
+    return { show: false };
+  }
 
   const config = { show: true };
   const axisType = get(columns, `${axis}.type`);
@@ -21,19 +23,30 @@ export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {})
     config.position = acceptedPositions.includes(position) ? position : acceptedPositions[0];
 
     if (axisType === 'number' || axisType === 'date') {
-      if (min) config.min = min;
-      if (max) config.max = max;
+      if (min) {
+        config.min = min;
+      }
+      if (max) {
+        config.max = max;
+      }
     }
 
-    if (tickSize && axisType === 'number') config.tickSize = tickSize;
+    if (tickSize && axisType === 'number') {
+      config.tickSize = tickSize;
+    }
   }
 
-  if (axisType === 'string')
+  if (axisType === 'string') {
     config.ticks = map(ticks[axis].hash, (position, name) => [position, name]);
+  }
 
-  if (axisType === 'date') config.mode = 'time';
+  if (axisType === 'date') {
+    config.mode = 'time';
+  }
 
-  if (typeof font === 'object') config.font = font;
+  if (typeof font === 'object') {
+    config.font = font;
+  }
 
   return config;
 };

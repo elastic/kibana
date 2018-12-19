@@ -17,7 +17,9 @@ export const defaultSpec = {
 };
 
 export const getFontSpec = argFont => {
-  if (!argFont || !argFont.spec) return defaultSpec;
+  if (!argFont || !argFont.spec) {
+    return defaultSpec;
+  }
 
   const { fontSize, lineHeight, fontStyle, fontWeight, fontFamily, color } = argFont.spec;
   const size = fontSize && Number(fontSize.replace('px', ''));

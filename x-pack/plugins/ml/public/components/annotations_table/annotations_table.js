@@ -10,6 +10,7 @@
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
 
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 
@@ -38,8 +39,11 @@ import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { ml } from '../../services/ml_api_service';
+import { mlJobService } from '../../services/job_service';
 import { mlTableService } from '../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
+
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -51,7 +55,10 @@ class AnnotationsTable extends Component {
     super(props);
     this.state = {
       annotations: [],
-      isLoading: false
+      isLoading: false,
+      // Need to do a detailed check here because the angular wrapper could pass on something like `[undefined]`.
+      jobId: (Array.isArray(this.props.jobs) && this.props.jobs.length > 0 && this.props.jobs[0] !== undefined)
+        ? this.props.jobs[0].job_id : undefined,
     };
   }
 
@@ -67,8 +74,8 @@ class AnnotationsTable extends Component {
       // Load annotations for the selected job.
       ml.annotations.getAnnotations({
         jobIds: [job.job_id],
-        earliestMs: dataCounts.earliest_record_timestamp,
-        latestMs: dataCounts.latest_record_timestamp,
+        earliestMs: null,
+        latestMs: null,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
       }).then((resp) => {
         this.setState((prevState, props) => ({
@@ -78,7 +85,7 @@ class AnnotationsTable extends Component {
           jobId: props.jobs[0].job_id
         }));
       }).catch((resp) => {
-        console.log('Error loading list of annoations for jobs list:', resp);
+        console.log('Error loading list of annotations for jobs list:', resp);
         this.setState({
           annotations: [],
           errorMessage: 'Error loading the list of annotations for this job',
@@ -87,6 +94,18 @@ class AnnotationsTable extends Component {
         });
       });
     }
+  }
+
+  getJob(jobId) {
+    // check if the job was supplied via props and matches the supplied jobId
+    if (Array.isArray(this.props.jobs) && this.props.jobs.length > 0) {
+      const job = this.props.jobs[0];
+      if (jobId === undefined || job.job_id === jobId) {
+        return job;
+      }
+    }
+
+    return mlJobService.getJob(jobId);
   }
 
   componentDidMount() {
@@ -105,16 +124,17 @@ class AnnotationsTable extends Component {
     }
   }
 
-  openSingleMetricView(annotation) {
+  openSingleMetricView = (annotation = {}) => {
     // Creates the link to the Single Metric Viewer.
-    // Set the total time range from the start to the end of the annotation,
-    const dataCounts = this.props.jobs[0].data_counts;
+    // Set the total time range from the start to the end of the annotation.
+    const job = this.getJob(annotation.job_id);
+    const dataCounts = job.data_counts;
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(dataCounts.latest_record_timestamp).toISOString();
 
-    const _g = rison.encode({
+    const globalSettings = {
       ml: {
-        jobIds: [this.props.jobs[0].job_id]
+        jobIds: [job.job_id]
       },
       refreshInterval: {
         display: 'Off',
@@ -126,7 +146,7 @@ class AnnotationsTable extends Component {
         to,
         mode: 'absolute'
       }
-    });
+    };
 
     const appState = {
       filters: [],
@@ -138,19 +158,28 @@ class AnnotationsTable extends Component {
       }
     };
 
-    if (annotation !== undefined) {
+    if (annotation.timestamp !== undefined && annotation.end_timestamp !== undefined) {
       appState.mlTimeSeriesExplorer = {
         zoom: {
           from: new Date(annotation.timestamp).toISOString(),
           to: new Date(annotation.end_timestamp).toISOString()
         }
       };
+
+      if (annotation.timestamp < dataCounts.earliest_record_timestamp) {
+        globalSettings.time.from = new Date(annotation.timestamp).toISOString();
+      }
+
+      if (annotation.end_timestamp > dataCounts.latest_record_timestamp) {
+        globalSettings.time.to = new Date(annotation.end_timestamp).toISOString();
+      }
     }
 
+    const _g = rison.encode(globalSettings);
     const _a = rison.encode(appState);
 
     const url = `?_g=${_g}&_a=${_a}`;
-    addItemToRecentlyAccessed('timeseriesexplorer', this.props.jobs[0].job_id, url);
+    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, url);
     window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
   }
 
@@ -212,10 +241,12 @@ class AnnotationsTable extends Component {
           title="No annotations created for this job"
           iconType="iInCircle"
         >
-          <p>
-            To create an annotation,
-            open the <EuiLink onClick={this.openSingleMetricView}>Single Metric Viewer</EuiLink>
-          </p>
+          {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) &&
+            <p>
+              To create an annotation,
+              open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
+            </p>
+          }
         </EuiCallOut>
       );
     }
@@ -268,11 +299,21 @@ class AnnotationsTable extends Component {
       },
     ];
 
+    const jobIds = _.uniq(annotations.map(a => a.job_id));
+    if (jobIds.length > 1) {
+      columns.unshift({
+        field: 'job_id',
+        name: 'job ID',
+        sortable: true,
+      });
+    }
+
     if (isNumberBadgeVisible) {
       columns.unshift({
         field: 'key',
-        name: '',
-        width: '50px',
+        name: 'Label',
+        sortable: true,
+        width: '60px',
         render: (key) => {
           return (
             <EuiBadge color="default">
@@ -284,23 +325,30 @@ class AnnotationsTable extends Component {
     }
 
     if (isSingleMetricViewerLinkVisible) {
-      const openInSingleMetricViewerText = 'Open in Single Metric Viewer';
       columns.push({
         align: RIGHT_ALIGNMENT,
         width: '60px',
         name: 'View',
-        render: (annotation) => (
-          <EuiToolTip
-            position="bottom"
-            content={openInSingleMetricViewerText}
-          >
-            <EuiButtonIcon
-              onClick={() => this.openSingleMetricView(annotation)}
-              iconType="stats"
-              aria-label={openInSingleMetricViewerText}
-            />
-          </EuiToolTip>
-        )
+        render: (annotation) => {
+          const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
+          const openInSingleMetricViewerText = isDrillDownAvailable
+            ? 'Open in Single Metric Viewer'
+            : 'Job configuration not supported in Single Metric Viewer';
+
+          return (
+            <EuiToolTip
+              position="bottom"
+              content={openInSingleMetricViewerText}
+            >
+              <EuiButtonIcon
+                onClick={() => this.openSingleMetricView(annotation)}
+                disabled={!isDrillDownAvailable}
+                iconType="stats"
+                aria-label={openInSingleMetricViewerText}
+              />
+            </EuiToolTip>
+          );
+        }
       });
     }
 
@@ -320,7 +368,11 @@ class AnnotationsTable extends Component {
         pagination={{
           pageSizeOptions: [5, 10, 25]
         }}
-        sorting={true}
+        sorting={{
+          sort: {
+            field: 'timestamp', direction: 'asc'
+          }
+        }}
         rowProps={getRowProps}
       />
     );
