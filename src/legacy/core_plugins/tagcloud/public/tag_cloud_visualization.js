@@ -22,6 +22,7 @@ import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
+import { getFieldFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { Label } from './label';
@@ -40,11 +41,10 @@ export class TagCloudVisualization {
     this._containerNode.appendChild(cloudContainer);
 
     this._vis = vis;
-    this._bucketAgg = null;
     this._truncated = false;
     this._tagCloud = new TagCloud(cloudContainer);
     this._tagCloud.on('select', (event) => {
-      if (!this._bucketAgg) {
+      if (!this._vis.params.bucket) {
         return;
       }
       this._vis.API.events.filter({
@@ -84,16 +84,16 @@ export class TagCloudVisualization {
 
     await this._renderComplete$.pipe(take(1)).toPromise();
 
-    const hasAggDefined = this._vis.aggs[0] && this._vis.aggs[1];
-    if (!hasAggDefined) {
+    if (data.columns.length !== 2) {
       this._feedbackMessage.current.setState({
         shouldShowTruncate: false,
         shouldShowIncomplete: false
       });
       return;
     }
+
     this._label.current.setState({
-      label: `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`,
+      label: `${data.columns[0].title} - ${data.columns[1].title}`,
       shouldShowLabel: this._vis.params.showLabel
     });
     this._feedbackMessage.current.setState({
@@ -107,7 +107,6 @@ export class TagCloudVisualization {
     this._tagCloud.destroy();
     unmountComponentAtNode(this._feedbackNode);
     unmountComponentAtNode(this._labelNode);
-
   }
 
   _updateData(data) {
@@ -116,13 +115,7 @@ export class TagCloudVisualization {
       return;
     }
 
-    const segmentAggs = this._vis.aggs.bySchemaName.segment;
-    if (segmentAggs && segmentAggs.length > 0) {
-      this._bucketAgg = segmentAggs[0];
-    } else {
-      this._bucketAgg = null;
-    }
-
+    const bucketFormatter = this._vis.params.bucket ? getFieldFormat(this._vis.params.bucket) : null;
     const hasTags = data.columns.length === 2;
     const tagColumn = hasTags ? data.columns[0].id : -1;
     const metricColumn = data.columns[hasTags ? 1 : 0].id;
@@ -130,7 +123,7 @@ export class TagCloudVisualization {
       const tag = row[tagColumn] || 'all';
       const metric = row[metricColumn];
       return {
-        displayText: this._bucketAgg ? this._bucketAgg.fieldFormatter()(tag) : tag,
+        displayText: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         rawText: tag,
         value: metric,
         meta: {
