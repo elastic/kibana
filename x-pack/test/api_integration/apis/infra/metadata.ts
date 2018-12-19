@@ -5,8 +5,9 @@
  */
 
 import expect from 'expect.js';
-import { MetadataQuery } from '../../../../plugins/infra/common/graphql/types';
+
 import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
+import { MetadataQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const metadataTests: KbnTestProvider = ({ getService }) => {
@@ -29,7 +30,12 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const metadata = resp.data.source.metadataByNode;
-          expect(metadata.length).to.be(14);
+          if (metadata) {
+            expect(metadata.features.length).to.be(14);
+            expect(metadata.name).to.equal('demo-stack-nginx-01');
+          } else {
+            throw new Error('Metadata should never be empty');
+          }
         });
     });
   });

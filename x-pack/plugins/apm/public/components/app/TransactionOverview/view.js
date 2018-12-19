@@ -90,10 +90,9 @@ class TransactionOverview extends Component {
       <div>
         <HeaderContainer>
           <h1>{serviceName}</h1>
-          {get(license.data, 'features.ml.isAvailable') &&
-            mlEnabled && (
-              <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
-            )}
+          {get(license.data, 'features.ml.isAvailable') && mlEnabled && (
+            <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
+          )}
         </HeaderContainer>
 
         <KueryBar />

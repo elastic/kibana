@@ -18,6 +18,8 @@ describe('EditFilterListHeader', () => {
   const requiredProps = {
     updateNewFilterId,
     updateDescription,
+    canCreateFilter: true,
+    canDeleteFilter: true,
   };
 
   test('renders the header when creating a new filter list with the ID not set', () => {

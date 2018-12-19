@@ -239,15 +239,15 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
           actions: ['action:read'],
           metadata: {},
         },
-        feature_foo_all: {
+        'feature_foo.all': {
           application,
-          name: 'feature_foo_all',
+          name: 'feature_foo.all',
           actions: ['action:foo_all'],
           metadata: {},
         },
-        feature_bar_read: {
+        'feature_bar.read': {
           application,
-          name: 'feature_bar_read',
+          name: 'feature_bar.read',
           actions: ['action:bar_read'],
           metadata: {},
         }
@@ -346,14 +346,14 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
         actions: ['action:bar'],
         metadata: {},
       },
-      feature_foo_all: {
+      'feature_foo.all': {
         application,
-        name: 'feature_foo_all',
+        name: 'feature_foo.all',
         actions: ['action:baz'],
       },
-      feature_bar_read: {
+      'feature_bar.read': {
         application,
-        name: 'feature_bar_read',
+        name: 'feature_bar.read',
         actions: ['action:not-quz'],
       }
     }
@@ -373,15 +373,15 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
           actions: ['action:bar'],
           metadata: {},
         },
-        feature_foo_all: {
+        'feature_foo.all': {
           application,
-          name: 'feature_foo_all',
+          name: 'feature_foo.all',
           actions: ['action:baz'],
           metadata: {},
         },
-        feature_bar_read: {
+        'feature_bar.read': {
           application,
-          name: 'feature_bar_read',
+          name: 'feature_bar.read',
           actions: ['action:quz'],
           metadata: {},
         }
@@ -422,14 +422,14 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
         actions: ['action:not-bar'],
         metadata: {},
       },
-      feature_foo_all: {
+      'feature_foo.all': {
         application,
-        name: 'feature_foo_all',
+        name: 'feature_foo.all',
         actions: ['action:baz'],
       },
-      feature_bar_read: {
+      'feature_bar.read': {
         application,
-        name: 'feature_bar_read',
+        name: 'feature_bar.read',
         actions: ['action:quz'],
       }
     }
@@ -449,15 +449,15 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
           actions: ['action:bar'],
           metadata: {},
         },
-        feature_foo_all: {
+        'feature_foo.all': {
           application,
-          name: 'feature_foo_all',
+          name: 'feature_foo.all',
           actions: ['action:baz'],
           metadata: {},
         },
-        feature_bar_read: {
+        'feature_bar.read': {
           application,
-          name: 'feature_bar_read',
+          name: 'feature_bar.read',
           actions: ['action:quz'],
           metadata: {},
         }
@@ -498,14 +498,14 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
         actions: ['action:bar'],
         metadata: {},
       },
-      feature_foo_all: {
+      'feature_foo.all': {
         application,
-        name: 'feature_foo_all',
+        name: 'feature_foo.all',
         actions: ['action:baz'],
       },
-      feature_bar_read: {
+      'feature_bar.read': {
         application,
-        name: 'feature_bar_read',
+        name: 'feature_bar.read',
         actions: ['action:not-quz'],
       }
     }
@@ -525,15 +525,15 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
           actions: ['action:bar'],
           metadata: {},
         },
-        feature_foo_all: {
+        'feature_foo.all': {
           application,
-          name: 'feature_foo_all',
+          name: 'feature_foo.all',
           actions: ['action:baz'],
           metadata: {},
         },
-        feature_bar_read: {
+        'feature_bar.read': {
           application,
-          name: 'feature_bar_read',
+          name: 'feature_bar.read',
           actions: ['action:quz'],
           metadata: {},
         }
@@ -572,9 +572,9 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
         actions: ['action:bar'],
         metadata: {},
       },
-      feature_foo_all: {
+      'feature_foo.all': {
         application,
-        name: 'feature_foo_all',
+        name: 'feature_foo.all',
         actions: ['action:foo-all'],
         metadata: {},
       }
@@ -601,9 +601,9 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
           actions: ['action:bar'],
           metadata: {},
         },
-        feature_foo_all: {
+        'feature_foo.all': {
           application,
-          name: 'feature_foo_all',
+          name: 'feature_foo.all',
           actions: ['action:foo-all'],
           metadata: {},
         }
@@ -642,9 +642,9 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
         actions: ['action:not-bar'],
         metadata: {},
       },
-      feature_foo_all: {
+      'feature_foo.all': {
         application,
-        name: 'feature_foo_all',
+        name: 'feature_foo.all',
         actions: ['action:foo-all'],
         metadata: {},
       }
@@ -671,9 +671,9 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
           actions: ['action:quz'],
           metadata: {},
         },
-        feature_foo_all: {
+        'feature_foo.all': {
           application,
-          name: 'feature_foo_all',
+          name: 'feature_foo.all',
           actions: ['action:foo-all'],
           metadata: {},
         }
@@ -712,9 +712,9 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
         actions: ['action:not-bar'],
         metadata: {},
       },
-      feature_foo_all: {
+      'feature_foo.all': {
         application,
-        name: 'feature_foo_all',
+        name: 'feature_foo.all',
         actions: ['action:foo-all'],
         metadata: {},
       }
@@ -735,15 +735,15 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
           actions: ['action:bar'],
           metadata: {},
         },
-        feature_foo_all: {
+        'feature_foo.all': {
           application,
-          name: 'feature_foo_all',
+          name: 'feature_foo.all',
           actions: ['action:foo-all'],
           metadata: {},
         },
-        feature_foo_read: {
+        'feature_foo.read': {
           application,
-          name: 'feature_foo_read',
+          name: 'feature_foo.read',
           actions: ['action:foo-read'],
           metadata: {},
         }
@@ -780,9 +780,9 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when order of actio
         actions: ['action:quz', 'action:bar'],
         metadata: {},
       },
-      feature_foo_all: {
+      'feature_foo.all': {
         application,
-        name: 'feature_foo_all',
+        name: 'feature_foo.all',
         actions: ['action:bar-all', 'action:foo-all'],
         metadata: {},
       }

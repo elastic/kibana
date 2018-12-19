@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
-import { loadAgentStatus } from '../../../services/rest/apm';
+import { loadAgentStatus } from '../../../services/rest/apm/status_check';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';

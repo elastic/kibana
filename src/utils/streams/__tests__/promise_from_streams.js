@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Writable, Duplex } from 'stream';
+import { Readable, Writable, Duplex, Transform } from 'stream';
 
 import expect from 'expect.js';
 
@@ -83,26 +83,63 @@ describe('promiseFromStreams', () => {
   describe('last stream is duplex', () => {
     it('waits for writing and resolves to final value', async () => {
       let written = '';
+
+      const duplexReadQueue = [];
+      const duplexItemsToPush = ['foo', 'bar', null];
       const result = await createPromiseFromStreams([
         createListStream(['a', 'b', 'c']),
         new Duplex({
-          read() {
-            this.push('foo');
-            this.push('bar');
-            this.push(null);
+          async read() {
+            const result = await duplexReadQueue.shift();
+            this.push(result);
           },
 
           write(chunk, enc, cb) {
-            setTimeout(() => {
-              written += chunk;
-              cb();
-            }, 50);
+            duplexReadQueue.push(new Promise((resolve) => {
+              setTimeout(() => {
+                written += chunk;
+                cb();
+                resolve(duplexItemsToPush.shift());
+              }, 50);
+            }));
           }
         }).setEncoding('utf8')
       ]);
 
       expect(written).to.eql('abc');
       expect(result).to.be('bar');
+    });
+  });
+
+  describe('error handling', () => {
+    it('read stream gets destroyed when transform stream fails', async () => {
+      let destroyCalled = false;
+      const readStream = new Readable({
+        read() {
+          this.push('a');
+          this.push('b');
+          this.push('c');
+          this.push(null);
+        },
+        destroy() {
+          destroyCalled = true;
+        }
+      });
+      const transformStream = new Transform({
+        transform(chunk, enc, done) {
+          done(new Error('Test error'));
+        }
+      });
+      try {
+        await createPromiseFromStreams([
+          readStream,
+          transformStream,
+        ]);
+        throw new Error('Should fail');
+      } catch (e) {
+        expect(e.message).to.be('Test error');
+        expect(destroyCalled).to.be(true);
+      }
     });
   });
 });

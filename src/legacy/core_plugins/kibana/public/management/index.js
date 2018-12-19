@@ -24,14 +24,17 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management } from 'ui/management';
+import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
 
 uiRoutes
   .when('/management', {
-    template: landingTemplate
+    template: landingTemplate,
+    k7Breadcrumbs: () => [
+      MANAGEMENT_BREADCRUMB
+    ]
   });
 
 uiRoutes
@@ -83,11 +86,15 @@ uiModules
     };
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'management',
-    title: 'Management',
-    description: 'Your center console for managing the Elastic Stack.',
+    title: i18n('kbn.management.managementLabel', {
+      defaultMessage: 'Management',
+    }),
+    description: i18n('kbn.management.managementDescription', {
+      defaultMessage: 'Your center console for managing the Elastic Stack.',
+    }),
     icon: 'managementApp',
     path: '/app/kibana#/management',
     showOnHomePage: false,

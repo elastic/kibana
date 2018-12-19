@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import { leastCommonMultiple } from '../../utils/math';
 import { parseEsInterval } from '../../utils/parse_es_interval';
 

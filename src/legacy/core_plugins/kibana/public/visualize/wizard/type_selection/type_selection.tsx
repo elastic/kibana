@@ -79,7 +79,12 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         <div className="visNewVisDialog__body">
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+              <EuiFlexGroup
+                className="visNewVisDialog__list"
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+              >
                 <EuiFlexItem grow={false} className="visNewVisDialog__searchWrapper">
                   <EuiFieldSearch
                     placeholder="Filter"

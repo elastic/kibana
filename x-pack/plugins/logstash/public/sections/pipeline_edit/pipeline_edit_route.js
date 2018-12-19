@@ -6,6 +6,7 @@
 
 import routes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import template from './pipeline_edit_route.html';
 import 'plugins/logstash/services/pipeline';
 import 'plugins/logstash/services/license';
@@ -14,10 +15,15 @@ import './components/pipeline_edit';
 import './components/upgrade_failure';
 import { updateLogstashSections } from 'plugins/logstash/lib/update_management_sections';
 import { Pipeline } from 'plugins/logstash/models/pipeline';
+import { getPipelineCreateBreadcrumbs, getPipelineEditBreadcrumbs } from '../breadcrumbs';
 
 routes
-  .when('/management/logstash/pipelines/pipeline/:id/edit')
-  .when('/management/logstash/pipelines/new-pipeline')
+  .when('/management/logstash/pipelines/pipeline/:id/edit', {
+    k7Breadcrumbs: getPipelineEditBreadcrumbs
+  })
+  .when('/management/logstash/pipelines/new-pipeline', {
+    k7Breadcrumbs: getPipelineCreateBreadcrumbs
+  })
   .defaults(/management\/logstash\/pipelines\/(new-pipeline|pipeline\/:id\/edit)/, {
     template: template,
     controller: class PipelineEditRouteController {
@@ -50,7 +56,12 @@ routes
             return licenseService.checkValidity()
               .then(() => {
                 if (err.status !== 403) {
-                  toastNotifications.addDanger(`Couldn't load pipeline. Error: '${err.statusText}'.`);
+                  toastNotifications.addDanger(i18n.translate('xpack.logstash.couldNotLoadPipelineErrorNotification', {
+                    defaultMessage: `Couldn't load pipeline. Error: '{errStatusText}'.`,
+                    values: {
+                      errStatusText: err.statusText,
+                    },
+                  }));
                 }
 
                 kbnUrl.redirect('/management/logstash/pipelines');

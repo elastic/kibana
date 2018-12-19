@@ -20,10 +20,11 @@ import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
-import { createAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
+import { createAuthorizationService, disableUICapabilitesFactory, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
+import { createOptionalPlugin } from './server/lib/optional_plugin';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -88,6 +89,21 @@ export const security = (kibana) => new kibana.Plugin({
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
       };
+    },
+    replaceInjectedVars: async function (originalInjectedVars, request, server) {
+      const disableUICapabilites = disableUICapabilitesFactory(server, request);
+      // if we're an anonymous route, we disable all ui capabilities
+      if (request.route.settings.auth === false) {
+        return {
+          ...originalInjectedVars,
+          uiCapabilities: disableUICapabilites.all(originalInjectedVars.uiCapabilities)
+        };
+      }
+
+      return {
+        ...originalInjectedVars,
+        uiCapabilities: await disableUICapabilites.usingPrivileges(originalInjectedVars.uiCapabilities)
+      };
     }
   },
 
@@ -117,8 +133,10 @@ export const security = (kibana) => new kibana.Plugin({
 
     const { savedObjects } = server;
 
+    const spaces = createOptionalPlugin(config, 'xpack.spaces', server.plugins, 'spaces');
+
     // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin);
+    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin, spaces);
     server.expose('authorization', deepFreeze(authorization));
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
@@ -147,17 +165,15 @@ export const security = (kibana) => new kibana.Plugin({
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
-        const { spaces } = server.plugins;
 
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
           baseClient: client,
-          checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
+          checkPrivilegesDynamicallyWithRequest: authorization.checkPrivilegesDynamicallyWithRequest,
           errors: savedObjects.SavedObjectsClient.errors,
           request,
           savedObjectTypes: savedObjects.types,
-          spaces,
         });
       }
 
@@ -193,16 +209,15 @@ export const security = (kibana) => new kibana.Plugin({
     server.ext('onPostAuth', async function (req, h) {
       const path = req.path;
 
-      const { actions, checkPrivilegesWithRequest } = server.plugins.security.authorization;
-      const checkPrivileges = checkPrivilegesWithRequest(req);
+      const { actions, checkPrivilegesDynamicallyWithRequest } = server.plugins.security.authorization;
+      const checkPrivileges = checkPrivilegesDynamicallyWithRequest(req);
 
       // Enforce app restrictions
       if (path.startsWith('/app/')) {
         const appId = path.split('/', 3)[2];
         const appAction = actions.app.get(appId);
 
-        // TODO: Check this at the specific space
-        const checkPrivilegesResponse = await checkPrivileges.globally(appAction);
+        const checkPrivilegesResponse = await checkPrivileges(appAction);
         if (!checkPrivilegesResponse.hasAllRequested) {
           return Boom.notFound();
         }
@@ -218,8 +233,7 @@ export const security = (kibana) => new kibana.Plugin({
           const feature = path.split('/', 3)[2];
           const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
 
-          // TODO: Check this at the specific space
-          const checkPrivilegesResponse = await checkPrivileges.globally(apiActions);
+          const checkPrivilegesResponse = await checkPrivileges(apiActions);
           if (!checkPrivilegesResponse.hasAllRequested) {
             return Boom.notFound();
           }

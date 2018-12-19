@@ -7,12 +7,17 @@
 /**
  * Kibana Overview
  */
-import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from'ui/routes';
+import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ClusterStatus } from '../../../components/kibana/cluster_status';
+import { I18nProvider } from '@kbn/i18n/react';
+import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -44,30 +49,49 @@ uiRoutes.when('/kibana', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope, i18n) {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controllerAs: 'monitoringKibanaOverviewApp',
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope) {
+      super({
+        title: `Kibana`,
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringKibanaOverviewApp',
+        $scope,
+        $injector
+      });
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.clusterStatus) {
+          return;
+        }
 
-    const title = $injector.get('title');
-    const routeTitle = i18n('xpack.monitoring.kibana.overview.routeTitle', {
-      defaultMessage: 'Kibana'
-    });
+        this.renderReact(
+          <I18nProvider>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPageContent>
+                  <ClusterStatus stats={data.clusterStatus} />
+                  <EuiSpacer size="m"/>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_cluster_requests}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_cluster_response_times}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
 
-    title($scope.cluster, routeTitle);
-
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => $scope.pageData = response
-    });
-
-    $executor.start($scope);
-
-    $scope.$on('$destroy', $executor.destroy);
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </I18nProvider>
+        );
+      });
+    }
   }
 });

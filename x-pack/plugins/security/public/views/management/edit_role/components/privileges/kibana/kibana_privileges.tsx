@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../../../../../../../spaces/common/model/space';
@@ -29,11 +28,9 @@ interface Props {
 export class KibanaPrivileges extends Component<Props, {}> {
   public render() {
     return (
-      <I18nProvider>
-        <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
-          {this.getForm()}
-        </CollapsiblePanel>
-      </I18nProvider>
+      <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
+        {this.getForm()}
+      </CollapsiblePanel>
     );
   }
 

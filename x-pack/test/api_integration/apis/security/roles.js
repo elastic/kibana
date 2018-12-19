@@ -42,8 +42,23 @@ export default function ({ getService }) {
               run_as: ['watcher_user'],
             },
             kibana: {
-              global: ['all', 'read'],
-              space: {}
+              global: {
+                minimum: ["read"],
+                feature: {
+                  dashboard: ["read"],
+                  dev_tools: ["all"],
+                }
+              },
+              space: {
+                marketing: {
+                  minimum: ["all"],
+                  feature: {
+                    dashboard: ["read"],
+                    discover: ["all"],
+                    ml: ["all"]
+                  }
+                }
+              }
             }
           })
           .expect(204);
@@ -66,8 +81,13 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['all', 'read'],
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
                 resources: ['*'],
+              },
+              {
+                application: 'kibana-.kibana',
+                privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                resources: ['space:marketing'],
               }
             ],
             run_as: ['watcher_user'],
@@ -140,8 +160,23 @@ export default function ({ getService }) {
               run_as: ['watcher_user'],
             },
             kibana: {
-              global: ['all', 'read'],
-              space: {}
+              global: {
+                minimum: ["read"],
+                feature: {
+                  dashboard: ["read"],
+                  dev_tools: ["all"],
+                }
+              },
+              space: {
+                marketing: {
+                  minimum: ["all"],
+                  feature: {
+                    dashboard: ["read"],
+                    discover: ["all"],
+                    ml: ["all"]
+                  }
+                }
+              }
             }
           })
           .expect(204);
@@ -164,8 +199,13 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['all', 'read'],
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
                 resources: ['*'],
+              },
+              {
+                application: 'kibana-.kibana',
+                privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                resources: ['space:marketing'],
               },
               {
                 application: 'logstash-default',

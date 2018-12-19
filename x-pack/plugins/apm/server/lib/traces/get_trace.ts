@@ -6,8 +6,8 @@
 
 import { SearchParams } from 'elasticsearch';
 import { TRACE_ID } from '../../../common/constants';
-import { Span } from '../../../typings/Span';
-import { Transaction } from '../../../typings/Transaction';
+import { Span } from '../../../typings/es_schemas/Span';
+import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';
 
 export type TraceAPIResponse = Array<Transaction | Span>;

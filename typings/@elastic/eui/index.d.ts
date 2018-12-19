@@ -22,6 +22,5 @@
 declare module '@elastic/eui' {
   export const EuiWrappingPopover: React.SFC<any>;
   export const EuiCopy: React.SFC<any>;
-  export const EuiPopoverTitle: React.SFC<any>;
   export const EuiOutsideClickDetector: React.SFC<any>;
 }

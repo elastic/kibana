@@ -10,7 +10,7 @@ When {kib} first starts up, it executes the following `POST` request against {es
 
 [source,js]
 ----------------------------------
-POST /_xpack/security/privilege
+POST /_security/privilege
 Content-Type: application/json
 Authorization: Basic kibana changeme
 
@@ -80,7 +80,7 @@ The {es} {ref}/security-api-has-privileges.html[has privileges API] determines w
 
 [source,js]
 ----------------------------------
-POST /_xpack/security/user/_has_privileges
+POST /_security/user/_has_privileges
 Content-Type: application/json
 Authorization: Basic foo_read_only_user password
 
@@ -110,7 +110,7 @@ Within the secured instance of the `SavedObjectsClient` the `_has_privileges` ch
 
 [source,js]
 ----------------------------------
-POST /_xpack/security/user/_has_privileges
+POST /_security/user/_has_privileges
 Content-Type: application/json
 Authorization: Basic foo_legacy_user password
 

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throws error when invoked before it's available 1`] = `"Plugin accessed before it's available"`;
+
+exports[`throws error when invoked before it's available 2`] = `"Plugin accessed before it's available"`;
+
+exports[`throws error when invoked before it's available 3`] = `"Plugin accessed before it's available"`;
+
+exports[`throws error when invoked when it's not enabled 1`] = `"Plugin isn't enabled, check isEnabled before using"`;
+
+exports[`throws error when invoked when it's not enabled 2`] = `"Plugin isn't enabled, check isEnabled before using"`;
+
+exports[`throws error when invoked when it's not enabled 3`] = `"Plugin isn't enabled, check isEnabled before using"`;

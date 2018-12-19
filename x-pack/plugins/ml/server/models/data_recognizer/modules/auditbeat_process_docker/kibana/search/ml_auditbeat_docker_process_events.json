@@ -1,0 +1,16 @@
+{
+  "title": "ML Auditbeat Docker: Process Events",
+  "description": "Auditbeat process events in Docker containers",
+  "hits": 0,
+  "columns": [
+    "_source"
+  ],
+  "sort": [
+    "@timestamp",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"INDEX_PATTERN_ID\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"index\":\"INDEX_PATTERN_ID\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"exists\",\"key\":\"docker.container.id\",\"value\":\"exists\"},\"exists\":{\"field\":\"docker.container.id\"},\"$state\":{\"store\":\"appState\"}},{\"meta\":{\"negate\":false,\"index\":\"INDEX_PATTERN_ID\",\"type\":\"phrase\",\"key\":\"event.type\",\"value\":\"syscall\",\"params\":{\"query\":\"syscall\",\"type\":\"phrase\"},\"disabled\":false,\"alias\":null},\"query\":{\"match\":{\"event.type\":{\"query\":\"syscall\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}]}"
+  }
+}

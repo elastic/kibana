@@ -32,15 +32,6 @@ module.directive('mlCreateWatch', function () {
       $scope.STATUS = mlCreateWatchService.STATUS;
 
       $scope.ui = {
-        thresholdOptions: [
-          { display: 'critical', val: 75 },
-          { display: 'major', val: 50 },
-          { display: 'minor', val: 25 },
-          { display: 'warning', val: 0 }
-        ],
-        setThreshold: (t) => {
-          $scope.config.threshold = t;
-        },
         emailEnabled: false,
         embedded: $scope.embedded,
         watchAlreadyExists: false

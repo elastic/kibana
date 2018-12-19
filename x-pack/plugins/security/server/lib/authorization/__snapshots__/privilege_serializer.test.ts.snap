@@ -1,11 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#deserializePrivilegeAssignedAtSpace throws Error if not prefixed with space_ 1`] = `"Unable to deserialize all, should have started with space_ or feature_"`;
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature_.privilege-1 1`] = `"Feature privilege 'feature_.privilege-1' didn't match pattern"`;
 
-exports[`#deserializePrivilegeAssignedAtSpace throws Error if prefixed with space_ but not a reserved privilege 1`] = `"Unrecognized privilege assigned at space"`;
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature_foo. 1`] = `"Feature privilege 'feature_foo.' didn't match pattern"`;
 
-exports[`#deserializePrivilegeAssignedGlobally throws Error if not prefixed with feature_ and isn't a reserved privilege 1`] = `"Unrecognized privilege assigned globally"`;
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature_foo_privilege-1 1`] = `"Feature privilege 'feature_foo_privilege-1' didn't match pattern"`;
 
-exports[`#serializeGlobalPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized global reserved privilege"`;
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature-foo.privilege-1 1`] = `"Feature privilege 'feature-foo.privilege-1' didn't match pattern"`;
 
-exports[`#serializeSpaceReservedPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized space reserved privilege"`;
+exports[`#deserializeFeaturePrivilege throws error when deserializing foo_feature_foo.privilege-1 1`] = `"Feature privilege 'foo_feature_foo.privilege-1' didn't match pattern"`;
+
+exports[`#deserializeGlobalMinimumPrivilege throws Error if isn't a minimum privilege 1`] = `"Unrecognized global minimum privilege"`;
+
+exports[`#deserializeSpaceMinimumPrivilege throws Error if prefixed with space_ but not a reserved privilege 1`] = `"Unrecognized space minimum privilege"`;
+
+exports[`#deserializeSpaceMinimumPrivilege throws Error if provided 'all' 1`] = `"Unrecognized space minimum privilege"`;
+
+exports[`#serializeGlobalMinimumPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized global minimum privilege"`;
+
+exports[`#serializeSpaceMinimumPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized space minimum privilege"`;

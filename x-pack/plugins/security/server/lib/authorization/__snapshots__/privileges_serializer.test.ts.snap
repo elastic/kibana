@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`features throws error if feature privileges would conflict 1`] = `"Detected conflicting feature privilege name: feature_foo_bar_baz"`;
+exports[`global throws Error if unrecognized global privilege is specified 1`] = `"Unrecognized global minimum privilege"`;
 
-exports[`global throws Error if unrecognized global privilege is specified 1`] = `"Unrecognized global reserved privilege"`;
-
-exports[`space throws Error if unrecognized space privilege is specified 1`] = `"Unrecognized space reserved privilege"`;
+exports[`space throws Error if unrecognized space privilege is specified 1`] = `"Unrecognized space minimum privilege"`;
