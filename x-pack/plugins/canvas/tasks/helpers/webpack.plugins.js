@@ -6,6 +6,9 @@
 
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const {
+  createServerCodeTransformer,
+} = require('@kbn/interpreter/tasks/build/server_code_transformer');
 
 const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
@@ -76,6 +79,7 @@ export function getWebpackConfig({ devtool, watch } = {}) {
           from: `${sourceDir}/functions/server/`,
           to: `${buildDir}/functions/server/`,
           ignore: '**/__tests__/**',
+          transform: createServerCodeTransformer(!!devtool),
         },
       ]),
       new CopyWebpackPlugin([
@@ -83,6 +87,7 @@ export function getWebpackConfig({ devtool, watch } = {}) {
           from: `${sourceDir}/functions/common/`,
           to: `${buildDir}/functions/common/`,
           ignore: '**/__tests__/**',
+          transform: createServerCodeTransformer(!!devtool),
         },
       ]),
       new CopyWebpackPlugin([
@@ -90,6 +95,7 @@ export function getWebpackConfig({ devtool, watch } = {}) {
           from: `${sourceDir}/lib/`,
           to: `${buildDir}/lib/`,
           ignore: '**/__tests__/**',
+          transform: createServerCodeTransformer(!!devtool),
         },
       ]),
     ],
