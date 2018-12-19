@@ -9,6 +9,4 @@ import { ApolloClient } from 'apollo-client';
 
 export type GraphQLClient = ApolloClient<NormalizedCacheObject>;
 
-// TODO: re-evaluate this type to more explicitly define what
-// a resource initializer for GQL clients should be.
 export type CreateGraphQLClient = (url: string, xsrfHeader: string) => GraphQLClient;
