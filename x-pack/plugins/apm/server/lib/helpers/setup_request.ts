@@ -5,12 +5,12 @@
  */
 
 /* tslint:disable no-console */
-import { Legacy } from 'kibana';
 import {
   AggregationSearchResponse,
   ESFilter,
   SearchParams
 } from 'elasticsearch';
+import { Legacy } from 'kibana';
 import moment from 'moment';
 
 function decodeEsQuery(esQuery?: string) {
