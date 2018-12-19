@@ -86,7 +86,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     return null;
   }
 
-  const transactionLink = getTransactionLink(transaction);
+  const transactionLink = getTransactionLink(transaction, error);
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -203,8 +203,8 @@ interface Props {
   location: any;
 }
 
-function getTransactionLink(transaction?: Transaction) {
-  if (!transaction) {
+function getTransactionLink(transaction?: Transaction, error: APMError) {
+  if (!transaction || !get(error, 'transaction.sampled') {
     return;
   }
 

@@ -9,7 +9,11 @@ import { get } from 'lodash';
 import { oc } from 'ts-optchain';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../common/constants';
+import {
+  ERROR_GROUP_ID,
+  SERVICE_NAME,
+  TRANSACTION_SAMPLED
+} from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
@@ -19,6 +23,7 @@ export interface ErrorGroupAPIResponse {
   occurrencesCount?: number;
 }
 
+// TODO: rename from "getErrorGroup"  to "getErrorGroupSample" (since a single error is returned, not an errorGroup)
 export async function getErrorGroup({
   serviceName,
   groupId,
@@ -47,19 +52,37 @@ export async function getErrorGroup({
     filter.push(esFilterQuery);
   }
 
+  const filter = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [ERROR_GROUP_ID]: groupId } },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
   const params = {
     index: config.get<string>('apm_oss.errorIndices'),
     body: {
       size: 1,
       query: {
         bool: {
-          filter
+          filter,
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
         }
       },
       sort: [
-        {
-          '@timestamp': 'desc'
-        }
+        { _score: 'desc' }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
+        { '@timestamp': { order: 'desc' } } // sort by timestamp to get the most recent error
       ]
     }
   };
