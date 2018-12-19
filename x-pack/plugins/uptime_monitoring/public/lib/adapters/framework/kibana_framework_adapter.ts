@@ -6,6 +6,7 @@
 
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
+import moment from 'moment';
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome, { Breadcrumb } from 'ui/chrome';
@@ -41,12 +42,13 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
             : basePath + PLUGIN.ROUTER_BASE_NAME;
+          const persistedState = this.initializePersistedState();
           const {
             autorefreshEnabled,
             autorefreshInterval,
             dateRangeStart,
             dateRangeEnd,
-          } = this.initializePersistedState();
+          } = persistedState;
           ReactDOM.render(
             component({
               isUsingK7Design: $scope.k7design,
@@ -93,6 +95,17 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     try {
       if (uptimeConfigurationData) {
         return JSON.parse(uptimeConfigurationData) || {};
+      } else {
+        const initialState: UptimePersistedState = {
+          autorefreshEnabled: false,
+          autorefreshInterval: 5000,
+          dateRangeStart: moment()
+            .subtract(1, 'day')
+            .valueOf(),
+          dateRangeEnd: moment().valueOf(),
+        };
+        this.updatePersistedState(initialState);
+        return initialState;
       }
     } catch (e) {
       return {};

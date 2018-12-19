@@ -143,10 +143,10 @@ export const MonitorCharts = ({
               width={500}
               height={200}
               xType={EuiSeriesChartUtils.SCALE.TIME}
+              stackBy="y"
             >
-              <EuiAreaSeries name="Up Count" data={upSeries} />
-              <EuiAreaSeries name="Down Count" data={downSeries} />
-              <EuiLineSeries name="Pings" data={checksSeries} lineSize={2} />
+              <EuiAreaSeries name="Up Count" data={upSeries} color="green" />
+              <EuiAreaSeries name="Down Count" data={downSeries} color="red" />
             </EuiSeriesChart>
           </EuiPanel>
         </Fragment>

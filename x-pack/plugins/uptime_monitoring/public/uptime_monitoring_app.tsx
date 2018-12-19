@@ -153,27 +153,27 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 <EuiHeaderSectionItem border="none">
                   <div style={{ marginTop: '10px', marginLeft: '8px' }}>
                     <EuiDatePickerRange
-                      endDateControl={
-                        <EuiDatePicker
-                          selected={moment(this.state.dateRangeEnd)}
-                          isInvalid={dateRangeIsInvalid()}
-                          aria-label="End Date"
-                          onChange={(e: Moment | null) => {
-                            if (e) {
-                              this.setState({ dateRangeEnd: e.valueOf() }, this.persistState);
-                            }
-                          }}
-                          showTimeSelect
-                        />
-                      }
                       startDateControl={
                         <EuiDatePicker
                           selected={moment(this.state.dateRangeStart)}
                           isInvalid={dateRangeIsInvalid()}
                           aria-label="Start Date"
                           onChange={(e: Moment | null) => {
-                            if (e) {
+                            if (e && e.valueOf() < this.state.dateRangeEnd) {
                               this.setState({ dateRangeStart: e.valueOf() }, this.persistState);
+                            }
+                          }}
+                          showTimeSelect
+                        />
+                      }
+                      endDateControl={
+                        <EuiDatePicker
+                          selected={moment(this.state.dateRangeEnd)}
+                          isInvalid={dateRangeIsInvalid()}
+                          aria-label="End Date"
+                          onChange={(e: Moment | null) => {
+                            if (e && this.state.dateRangeStart < e.valueOf()) {
+                              this.setState({ dateRangeEnd: e.valueOf() }, this.persistState);
                             }
                           }}
                           showTimeSelect
@@ -288,12 +288,14 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       dateRangeStart,
       dateRangeEnd,
     } = this.state;
-    this.props.persistState({
-      autorefreshEnabled,
-      autorefreshInterval: value,
-      dateRangeStart,
-      dateRangeEnd,
-    });
+    if (dateRangeEnd > dateRangeStart) {
+      this.props.persistState({
+        autorefreshEnabled,
+        autorefreshInterval: value,
+        dateRangeStart,
+        dateRangeEnd,
+      });
+    }
   };
 }
 
