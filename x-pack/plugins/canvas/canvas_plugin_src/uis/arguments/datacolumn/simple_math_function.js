@@ -21,7 +21,9 @@ export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
     { text: 'Unique', value: 'unique' },
   ];
 
-  if (!onlymath) options.unshift({ text: 'Value', value: '' });
+  if (!onlymath) {
+    options.unshift({ text: 'Value', value: '' });
+  }
 
   return (
     <EuiSelect compressed options={options} inputRef={inputRef} value={value} onChange={onChange} />

@@ -24,7 +24,6 @@ export const TagBadge = (props: TagBadgeProps) => {
     onClickAriaLabel,
     tag: { color, disabled, id },
   } = props;
-
   const maxIdRenderSize = props.maxIdRenderSize || TABLE_CONFIG.TRUNCATE_TAG_LENGTH;
   const idToRender = id.length > maxIdRenderSize ? `${id.substring(0, maxIdRenderSize)}...` : id;
   return disabled ? (

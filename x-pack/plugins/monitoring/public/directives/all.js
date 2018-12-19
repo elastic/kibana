@@ -7,15 +7,11 @@
 import './main';
 import './chart';
 import './sparkline';
-import './alerts';
-import './cluster/overview';
 import './cluster/listing';
 import './elasticsearch/cluster_status';
 import './elasticsearch/index_summary';
 import './elasticsearch/node_summary';
 import './elasticsearch/ml_job_listing';
-import './elasticsearch/shard_allocation';
-import './elasticsearch/shard_allocation/directives/clusterView';
 import './logstash/cluster_status';
 import './logstash/listing';
 import './logstash/node_summary';

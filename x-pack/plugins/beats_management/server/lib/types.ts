@@ -6,7 +6,6 @@
 
 import { DatabaseAdapter } from './adapters/database/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
-
 import { CMBeatsDomain } from './beats';
 import { BackendFrameworkLib } from './framework';
 import { CMTagsDomain } from './tags';
@@ -26,4 +25,14 @@ export enum BeatEnrollmentStatus {
   Success = 'Success',
   ExpiredEnrollmentToken = 'Expired enrollment token',
   InvalidEnrollmentToken = 'Invalid enrollment token',
+}
+
+export interface AsyncResponse<DataType = any> {
+  error: {
+    code: number | string;
+    message: string;
+  };
+}
+export interface AsyncResponse<DataType = any> {
+  data: DataType;
 }

@@ -11,7 +11,7 @@ import {
   SPAN_NAME,
   SPAN_TYPE
 } from 'x-pack/plugins/apm/common/constants';
-import { Span } from '../../../../../../../../typings/Span';
+import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 

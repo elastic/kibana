@@ -78,7 +78,7 @@ export function createEsTestCluster(options = {}) {
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
-          `discovery.zen.ping.unicast.hosts=localhost:${port}`,
+          'discovery.type=single-node',
           ...esArgs,
         ],
       });
