@@ -205,7 +205,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         { up: 0, down: 0 }
       );
     });
-    // console.log(JSON.stringify(monitorStatuses, null, 2));
     const { up, down, trouble } = monitorStatuses.reduce(
       (acc, status) => {
         if (status.down === 0 && status.up === windowSize) {
