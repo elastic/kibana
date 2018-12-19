@@ -35,7 +35,6 @@ import { MAX_SEARCH_SIZE } from './constants';
 import {
   ensureMinimumTime,
   getIndices,
-  getRemoteClusters
 } from './lib';
 
 export class CreateIndexPatternWizard extends Component {
@@ -104,16 +103,17 @@ export class CreateIndexPatternWizard extends Component {
       defaultMessage="Failed to load remote clusters"
     />);
 
-    const [allIndices, { remoteClustersExist }] = await ensureMinimumTime([
-      this.catchAndWarn(getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg),
-      this.catchAndWarn(getRemoteClusters(services.$http), [], clustersFailMsg)
-    ]);
+    // query local and remote indices, updating state independently
+    ensureMinimumTime(
+      this.catchAndWarn(
+        getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg)
+    ).then(allIndices => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
 
-    this.setState({
-      allIndices,
-      isInitiallyLoadingIndices: false,
-      remoteClustersExist
-    });
+    ensureMinimumTime(
+      this.catchAndWarn(
+        // if we get an error from remote cluster query, supply fallback value that allows user entry
+        getIndices(services.es, this.indexPatternCreationType, `*:*`, 1), ['a'], clustersFailMsg)
+    ).then(remoteIndices => this.setState({ remoteClustersExist: !!remoteIndices.length }));
   }
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
