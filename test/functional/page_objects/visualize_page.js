@@ -399,7 +399,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
-        await browser.pressKeys('\uE006');
+        await browser.pressKeys(Keys.RETURN);
       });
       await PageObjects.common.sleep(500);
     }
@@ -499,20 +499,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
+      log.debug(`selectField ${fieldValue}`);
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
         .field-select
       `;
-
-      await retry.try(async () => {
-        await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(fieldValue);
-        await browser.pressKeys('\uE006');
-      });
-      await PageObjects.common.sleep(500);
+      await find.clickByCssSelector(selector);
+      await find.setValue(`${selector} input.ui-select-search`, fieldValue);
+      await browser.pressKeys(Keys.RETURN);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -543,9 +539,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setInterval(newValue) {
+      log.debug(`Visualize.setInterval(${newValue})`);
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
-      await browser.pressKeys(Keys.RETURN);
+      // The interval element will only interpret space as "select this" if there
+      // was a long enough gap from the typing above to the space click.  Hence the
+      // need for the sleep.
+      await PageObjects.common.sleep(500);
+      await browser.pressKeys(Keys.SPACE);
     }
 
     async setCustomInterval(newValue) {
