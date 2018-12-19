@@ -116,6 +116,20 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
+    it('Saved search will update when the query is changed in the URL', async () => {
+      const currentQuery = await queryBar.getQueryString();
+      expect(currentQuery).to.equal('');
+      const currentUrl = await browser.getCurrentUrl();
+      const newUrl = currentUrl.replace('query:%27%27', 'query:%27abc12345678910%27');
+      // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
+      // soft refresh.
+      await browser.get(newUrl.toString(), false);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(0);
+    });
+
     it('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
