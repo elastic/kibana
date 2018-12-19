@@ -40,6 +40,9 @@ var ignore = [
   // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
   // is `x-pack` and `b` is not `node_modules`
   /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
+
+  // ignore paths matching `/canvas/canvas_plugin/`
+  /\/canvas\/canvas_plugin\//,
 ];
 
 if (global.__BUILT_WITH_BABEL__) {
