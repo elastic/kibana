@@ -8,7 +8,7 @@
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
 import React from 'react';
-import { Transaction } from '../../../../../typings/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 // @ts-ignore
 import { fromQuery, history, toQuery } from '../../../../utils/url';

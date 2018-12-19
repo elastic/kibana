@@ -7,7 +7,7 @@
 import moment from 'moment';
 import React from 'react';
 
-import { InfraMetricType, InfraPathType } from '../../common/graphql/types';
+import { InfraMetricType, InfraPathType } from '../graphql/types';
 import {
   InfraFormatterType,
   InfraOptions,
@@ -56,7 +56,7 @@ const initialState = {
         rules: [
           {
             value: 0,
-            color: '#D9D9D9',
+            color: '#D3DAE6',
           },
           {
             value: 0.65,

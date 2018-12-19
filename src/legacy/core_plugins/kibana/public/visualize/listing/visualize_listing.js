@@ -23,17 +23,17 @@ import 'ui/pager';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
 
+import { i18n } from '@kbn/i18n';
 import { injectI18nProvider } from '@kbn/i18n/react';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
-app.directive('visualizeListingTable', reactDirective => reactDirective(VisualizeListingTable));
+app.directive('visualizeListingTable', reactDirective => reactDirective(injectI18nProvider(VisualizeListingTable)));
 app.directive('newVisModal', reactDirective => reactDirective(injectI18nProvider(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {

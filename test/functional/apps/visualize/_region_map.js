@@ -70,10 +70,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.sleep(1000);//give angular time to go update UI state
 
         //ensure all fields are there
-        await  PageObjects.visualize.selectFieldById('Two letter abbreviation', 'joinField');
-        await  PageObjects.visualize.selectFieldById('Three letter abbreviation', 'joinField');
-        await  PageObjects.visualize.selectFieldById('Country name', 'joinField');
-        await  PageObjects.visualize.selectFieldById('Two letter abbreviation', 'joinField');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-3 code', 'joinField');
+        await  PageObjects.visualize.selectFieldById('name', 'joinField');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
         await PageObjects.common.sleep(2000);//need some time for the data to load
 
         await PageObjects.visualize.openInspector();

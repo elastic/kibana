@@ -87,7 +87,6 @@ function DetailView({ errorGroup, urlParams, location }) {
     return null;
   }
 
-  const { serviceName } = urlParams;
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -129,7 +128,6 @@ function DetailView({ errorGroup, urlParams, location }) {
   const tabs = getTabs(context, logStackframes);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
   const occurencesCount = errorGroup.data.occurrencesCount;
-  const groupId = errorGroup.data.groupId;
   const agentName = get(errorGroup.data.error, SERVICE_AGENT_NAME);
 
   return (
@@ -143,8 +141,7 @@ function DetailView({ errorGroup, urlParams, location }) {
           Error occurrence
         </HeaderMedium>
         <DiscoverErrorButton
-          serviceName={serviceName}
-          groupId={groupId}
+          error={errorGroup.data.error}
           kuery={urlParams.kuery}
         >
           <EuiButtonEmpty iconType="discoverApp">

@@ -8,7 +8,7 @@ import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraMetricData } from '../../../common/graphql/types';
+import { InfraMetricData } from '../../graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { metricTimeActions } from '../../store';
 import { InfraLoadingPanel } from '../loading';
@@ -18,7 +18,8 @@ interface Props {
   metrics: InfraMetricData[];
   layouts: InfraMetricLayout[];
   loading: boolean;
-  nodeName: string;
+  nodeId: string;
+  label: string;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   intl: InjectedIntl;
 }
@@ -41,15 +42,10 @@ export const Metrics = injectI18n(
           <InfraLoadingPanel
             height="100vh"
             width="auto"
-            text={intl.formatMessage(
-              {
-                id: 'xpack.infra.metrics.loadingNodeDataText',
-                defaultMessage: 'Loading data for {nodeName}',
-              },
-              {
-                nodeName: this.props.nodeName,
-              }
-            )}
+            text={intl.formatMessage({
+              id: 'xpack.infra.metrics.loadingNodeDataText',
+              defaultMessage: 'Loading data',
+            })}
           />
         );
       }

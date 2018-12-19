@@ -20,8 +20,12 @@ export const shape = () => ({
 
     const shapeContent = shapeSvg.firstElementChild;
 
-    if (fill) shapeContent.setAttribute('fill', fill);
-    if (border) shapeContent.setAttribute('stroke', border);
+    if (fill) {
+      shapeContent.setAttribute('fill', fill);
+    }
+    if (border) {
+      shapeContent.setAttribute('stroke', border);
+    }
     const strokeWidth = Math.max(borderWidth, 0);
     shapeContent.setAttribute('stroke-width', strokeWidth);
     shapeContent.setAttribute('stroke-miterlimit', 999);
@@ -64,7 +68,9 @@ export const shape = () => ({
       shapeSvg.setAttribute('viewBox', [minX, minY, shapeWidth, shapeHeight].join(' '));
 
       const oldShape = domNode.firstElementChild;
-      if (oldShape) domNode.removeChild(oldShape);
+      if (oldShape) {
+        domNode.removeChild(oldShape);
+      }
 
       domNode.appendChild(shapeSvg);
     };

@@ -12,11 +12,11 @@ import { uiModules } from 'ui/modules';
 import {
   KuiTableRowCell,
   KuiTableRow,
-  KuiFlexGroup,
-  KuiFlexItem,
   KuiEmptyTablePrompt
 } from '@kbn/ui-framework/components';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
 import { MonitoringTable } from 'plugins/monitoring/components/table';
@@ -69,11 +69,11 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <KuiFlexGroup
+          <EuiFlexGroup
             gutterSize="none"
             alignItems="center"
           >
-            <KuiFlexItem>
+            <EuiFlexItem>
               <Sparkline
                 series={throughputMetric.data}
                 onBrush={onBrush}
@@ -83,21 +83,21 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
                 }}
                 options={{ xaxis: throughputMetric.timeRange }}
               />
-            </KuiFlexItem>
-            <KuiFlexItem
+            </EuiFlexItem>
+            <EuiFlexItem
               className="monTableCell__number"
               data-test-subj="eventsEmittedRate"
             >
               { formatMetric(latestThroughput, '0.[0]a', throughputMetric.metric.units) }
-            </KuiFlexItem>
-          </KuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <KuiFlexGroup
+          <EuiFlexGroup
             gutterSize="none"
             alignItems="center"
           >
-            <KuiFlexItem>
+            <EuiFlexItem>
               <Sparkline
                 series={nodesCountMetric.data}
                 onBrush={onBrush}
@@ -107,14 +107,14 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
                 }}
                 options={{ xaxis: nodesCountMetric.timeRange }}
               />
-            </KuiFlexItem>
-            <KuiFlexItem
+            </EuiFlexItem>
+            <EuiFlexItem
               className="monTableCell__number"
               data-test-subj="nodeCount"
             >
               { formatMetric(latestNodesCount, '0a') }
-            </KuiFlexItem>
-          </KuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </KuiTableRowCell>
       </KuiTableRow>
     );
