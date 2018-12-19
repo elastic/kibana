@@ -51,7 +51,8 @@ function normalize(localPath, type, pluginSpec) {
   // publicPath will always point to the css file
   const localCssPath = localPath.slice(0, -extname.length) + '.css';
 
-  // update localPath to point to the .css file if it exists and the .scss path does not
+  // update localPath to point to the .css file if it exists and
+  // the .scss path does not, which is the case for built plugins
   if (extname === '.scss' && !existsSync(localPath) && existsSync(localCssPath)) {
     localPath = localCssPath;
   }
