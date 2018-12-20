@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import { entries } from 'lodash';
-import queryString from 'query-string';
+import queryString from 'querystring';
 import { Action } from 'redux-actions';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
@@ -61,10 +61,10 @@ function handleCloseReferences() {
   const { pathname, search } = history.location;
   const queryParams = queryString.parse(search);
   if (queryParams.tab) {
-    queryParams.tab = undefined;
+    delete queryParams.tab;
   }
   if (queryParams.refUrl) {
-    queryParams.refUrl = undefined;
+    delete queryParams.refUrl;
   }
   const query = queryString.stringify(queryParams);
   if (query) {

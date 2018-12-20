@@ -6,7 +6,7 @@
 
 import { EuiAccordion, EuiButtonIcon, EuiLoadingKibana, EuiPanel, EuiTitle } from '@elastic/eui';
 import { IPosition } from 'monaco-editor';
-import queryString from 'query-string';
+import queryString from 'querystring';
 import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
 import { GroupedFileReferences, GroupedRepoReferences } from '../../actions';

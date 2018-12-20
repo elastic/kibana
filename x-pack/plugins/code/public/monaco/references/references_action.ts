@@ -5,7 +5,7 @@
  */
 import { editor } from 'monaco-editor';
 import ICodeEditor = editor.ICodeEditor;
-import queryString from 'query-string';
+import queryString from 'querystring';
 import { parseSchema } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import queryString from 'query-string';
+import queryString from 'querystring';
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 

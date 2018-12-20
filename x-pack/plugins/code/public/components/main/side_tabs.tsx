@@ -5,7 +5,7 @@
  */
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import { parse as parseQuery } from 'query-string';
+import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
