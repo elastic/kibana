@@ -7,12 +7,20 @@ exports[`PropertiesTable AgentFeatureTipMessage component should render when doc
   <Styled(EuiIcon)
     type="iInCircle"
   />
-  You can configure your agent to add contextual information about your users.
+  <FormattedMessage
+    defaultMessage="You can configure your agent to add contextual information about your users."
+    id="xpack.apm.propertiesTable.userTab.agentFeatureText"
+    values={Object {}}
+  />
    
   <ExternalLink
     href="mock-url"
   >
-    Learn more in the documentation.
+    <FormattedMessage
+      defaultMessage="Learn more in the documentation."
+      id="xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel"
+      values={Object {}}
+    />
   </ExternalLink>
 </styled.div>
 `;
@@ -20,7 +28,11 @@ exports[`PropertiesTable AgentFeatureTipMessage component should render when doc
 exports[`PropertiesTable PropertiesTable component should render empty when data isn't present 1`] = `
 <styled.div>
   <Styled(styled.div)>
-    No data available
+    <FormattedMessage
+      defaultMessage="No data available"
+      id="xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel"
+      values={Object {}}
+    />
   </Styled(styled.div)>
   <AgentFeatureTipMessage
     agentName="testAgentName"
