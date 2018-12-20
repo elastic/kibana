@@ -47,10 +47,10 @@ describe('store_actions', () => {
       it('should add buffer to dispatch action mapState', async () => {
         const action = mapExtentChanged({
           extent: {
-            max_lat: 10,
-            max_lon: 100,
-            min_lat: 5,
-            min_lon: 95,
+            maxLat: 10,
+            maxLon: 100,
+            minLat: 5,
+            minLon: 95,
           }
         });
         await action(dispatchMock, getStoreMock);
@@ -58,16 +58,16 @@ describe('store_actions', () => {
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
             extent: {
-              max_lat: 10,
-              max_lon: 100,
-              min_lat: 5,
-              min_lon: 95,
+              maxLat: 10,
+              maxLon: 100,
+              minLat: 5,
+              minLon: 95,
             },
             buffer: {
-              max_lat: 12.5,
-              max_lon: 102.5,
-              min_lat: 2.5,
-              min_lon: 92.5,
+              maxLat: 12.5,
+              maxLon: 102.5,
+              minLat: 2.5,
+              minLon: 92.5,
             }
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -82,10 +82,10 @@ describe('store_actions', () => {
           return {
             zoom: initialZoom,
             buffer: {
-              max_lat: 12.5,
-              max_lon: 102.5,
-              min_lat: 2.5,
-              min_lon: 92.5,
+              maxLat: 12.5,
+              maxLon: 102.5,
+              minLat: 2.5,
+              minLon: 92.5,
             }
           };
         };
@@ -95,10 +95,10 @@ describe('store_actions', () => {
         const action = mapExtentChanged({
           zoom: initialZoom,
           extent: {
-            max_lat: 11,
-            max_lon: 101,
-            min_lat: 6,
-            min_lon: 96,
+            maxLat: 11,
+            maxLon: 101,
+            minLat: 6,
+            minLon: 96,
           }
         });
         await action(dispatchMock, getStoreMock);
@@ -107,16 +107,16 @@ describe('store_actions', () => {
           mapState: {
             zoom: 10,
             extent: {
-              max_lat: 11,
-              max_lon: 101,
-              min_lat: 6,
-              min_lon: 96,
+              maxLat: 11,
+              maxLon: 101,
+              minLat: 6,
+              minLon: 96,
             },
             buffer: {
-              max_lat: 12.5,
-              max_lon: 102.5,
-              min_lat: 2.5,
-              min_lon: 92.5,
+              maxLat: 12.5,
+              maxLon: 102.5,
+              minLat: 2.5,
+              minLon: 92.5,
             }
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -127,10 +127,10 @@ describe('store_actions', () => {
         const action = mapExtentChanged({
           zoom: initialZoom,
           extent: {
-            max_lat: 5,
-            max_lon: 90,
-            min_lat: 0,
-            min_lon: 85,
+            maxLat: 5,
+            maxLon: 90,
+            minLat: 0,
+            minLon: 85,
           }
         });
         await action(dispatchMock, getStoreMock);
@@ -139,16 +139,16 @@ describe('store_actions', () => {
           mapState: {
             zoom: 10,
             extent: {
-              max_lat: 5,
-              max_lon: 90,
-              min_lat: 0,
-              min_lon: 85,
+              maxLat: 5,
+              maxLon: 90,
+              minLat: 0,
+              minLon: 85,
             },
             buffer: {
-              max_lat: 7.5,
-              max_lon: 92.5,
-              min_lat: -2.5,
-              min_lon: 82.5,
+              maxLat: 7.5,
+              maxLon: 92.5,
+              minLat: -2.5,
+              minLon: 82.5,
             }
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -159,10 +159,10 @@ describe('store_actions', () => {
         const action = mapExtentChanged({
           zoom: initialZoom + 1,
           extent: {
-            max_lat: 11,
-            max_lon: 101,
-            min_lat: 6,
-            min_lon: 96,
+            maxLat: 11,
+            maxLon: 101,
+            minLat: 6,
+            minLon: 96,
           }
         });
         await action(dispatchMock, getStoreMock);
@@ -171,16 +171,16 @@ describe('store_actions', () => {
           mapState: {
             zoom: 11,
             extent: {
-              max_lat: 11,
-              max_lon: 101,
-              min_lat: 6,
-              min_lon: 96,
+              maxLat: 11,
+              maxLon: 101,
+              minLat: 6,
+              minLon: 96,
             },
             buffer: {
-              max_lat: 13.5,
-              max_lon: 103.5,
-              min_lat: 3.5,
-              min_lon: 93.5,
+              maxLat: 13.5,
+              maxLon: 103.5,
+              minLat: 3.5,
+              minLon: 93.5,
             }
           },
           type: 'MAP_EXTENT_CHANGED',

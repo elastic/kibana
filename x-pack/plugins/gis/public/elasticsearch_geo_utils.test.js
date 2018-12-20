@@ -14,10 +14,10 @@ import {
 
 const geoFieldName = 'location';
 const mapExtent = {
-  max_lat: 39,
-  max_lon: -83,
-  min_lat: 35,
-  min_lon: -89,
+  maxLat: 39,
+  maxLon: -83,
+  minLat: 35,
+  minLon: -89,
 };
 
 describe('hitsToGeoJson', () => {
@@ -149,12 +149,12 @@ describe('createExtentFilter', () => {
       geo_bounding_box: {
         [geoFieldName]: {
           top_left: {
-            lat: mapExtent.max_lat,
-            lon: mapExtent.min_lon
+            lat: mapExtent.maxLat,
+            lon: mapExtent.minLon
           },
           bottom_right: {
-            lat: mapExtent.min_lat,
-            lon: mapExtent.max_lon
+            lat: mapExtent.minLat,
+            lon: mapExtent.maxLon
           }
         }
       }
@@ -169,8 +169,8 @@ describe('createExtentFilter', () => {
           shape: {
             type: 'envelope',
             coordinates: [
-              [mapExtent.min_lon, mapExtent.max_lat],
-              [mapExtent.max_lon, mapExtent.min_lat]
+              [mapExtent.minLon, mapExtent.maxLat],
+              [mapExtent.maxLon, mapExtent.minLat]
             ]
           },
           relation: 'INTERSECTS'
@@ -181,10 +181,10 @@ describe('createExtentFilter', () => {
 
   it('should clamp longitudes to -180 to 180', () => {
     const mapExtent = {
-      max_lat: 39,
-      max_lon: 209,
-      min_lat: 35,
-      min_lon: -191,
+      maxLat: 39,
+      maxLon: 209,
+      minLat: 35,
+      minLon: -191,
     };
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
@@ -193,8 +193,8 @@ describe('createExtentFilter', () => {
           shape: {
             type: 'envelope',
             coordinates: [
-              [-180, mapExtent.max_lat],
-              [180, mapExtent.min_lat]
+              [-180, mapExtent.maxLat],
+              [180, mapExtent.minLat]
             ]
           },
           relation: 'INTERSECTS'
@@ -207,10 +207,10 @@ describe('createExtentFilter', () => {
 describe('convertMapExtentToEnvelope', () => {
   it('should convert bounds to envelope', () => {
     const bounds = {
-      max_lat: 65.98468,
-      max_lon: -162.71869,
-      min_lat: 60.97598,
-      min_lon: -174.59527,
+      maxLat: 65.98468,
+      maxLon: -162.71869,
+      minLat: 60.97598,
+      minLon: -174.59527,
     };
     expect(convertMapExtentToEnvelope(bounds)).toEqual({
       "type": "envelope",
@@ -222,10 +222,10 @@ describe('convertMapExtentToEnvelope', () => {
 
   it('should clamp longitudes to -180 to 180', () => {
     const bounds = {
-      max_lat: 85.05113,
-      max_lon: 209.55801,
-      min_lat: -85.05113,
-      min_lon: -454.84711,
+      maxLat: 85.05113,
+      maxLon: 209.55801,
+      minLat: -85.05113,
+      minLon: -454.84711,
     };
     expect(convertMapExtentToEnvelope(bounds)).toEqual({
       "type": "envelope",
@@ -237,10 +237,10 @@ describe('convertMapExtentToEnvelope', () => {
 
   it('should split bounds that cross dateline(east to west)', () => {
     const bounds = {
-      max_lat: 66.01959,
-      max_lon: 190.11434,
-      min_lat: 61.0176,
-      min_lon: 169.35168,
+      maxLat: 66.01959,
+      maxLon: 190.11434,
+      minLat: 61.0176,
+      minLon: 169.35168,
     };
     expect(convertMapExtentToEnvelope(bounds)).toEqual([
       {
@@ -260,10 +260,10 @@ describe('convertMapExtentToEnvelope', () => {
 
   it('should split bounds that cross dateline(west to east)', () => {
     const bounds = {
-      max_lat: 14.29261,
-      max_lon: -159.0253,
-      min_lat: -18.0925,
-      min_lon: -193.69868,
+      maxLat: 14.29261,
+      maxLon: -159.0253,
+      minLat: -18.0925,
+      minLon: -193.69868,
     };
     expect(convertMapExtentToEnvelope(bounds)).toEqual([
       {
