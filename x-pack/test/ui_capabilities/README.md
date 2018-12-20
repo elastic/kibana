@@ -69,4 +69,18 @@ global visualize read
 # Spaces
 
 ## Spaces
-disabling each feature one by one
+everything enabled
+nothing enabled
+advanced settings disabled
+apm disabled
+canvas disabled
+dashboard disabled
+dev_tools disabled
+discover disabled
+graph disabled
+infrastructure disabled
+logs disabled
+ml disabled
+monitoring disabled
+timelion disabled
+visualize disabled
