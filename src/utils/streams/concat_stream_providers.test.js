@@ -28,18 +28,11 @@ describe('concatStreamProviders() helper', () => {
   test('writes the data from an array of stream providers into a destination stream in order', async () => {
     const results = await createPromiseFromStreams([
       concatStreamProviders([
-        () => createListStream([
-          'foo',
-          'bar'
-        ]),
-        () => createListStream([
-          'baz',
-        ]),
-        () => createListStream([
-          'bug',
-        ]),
+        () => createListStream(['foo', 'bar']),
+        () => createListStream(['baz']),
+        () => createListStream(['bug']),
       ]),
-      createConcatStream('')
+      createConcatStream(''),
     ]);
 
     expect(results).toBe('foobarbazbug');
@@ -47,29 +40,35 @@ describe('concatStreamProviders() helper', () => {
 
   test('emits the errors from a sub-stream to the destination', async () => {
     const dest = concatStreamProviders([
-      () => createListStream([
-        'foo',
-        'bar'
-      ]),
-      () => new Readable({
-        read() {
-          this.emit('error', new Error('foo'));
-        }
-      }),
+      () => createListStream(['foo', 'bar']),
+      () =>
+        new Readable({
+          read() {
+            this.emit('error', new Error('foo'));
+          },
+        }),
     ]);
 
     const errorListener = jest.fn();
     dest.on('error', errorListener);
 
-    try {
-      await createPromiseFromStreams([dest]);
-      throw new Error('Expected createPromiseFromStreams() to reject with error');
-    } catch (error) {
-      expect(error).toHaveProperty('message', 'foo');
-    }
-
-    expect(errorListener).toHaveBeenCalledTimes(1);
-    expect(errorListener.mock.calls[0][0]).toBeInstanceOf(Error);
-    expect(errorListener.mock.calls[0][0]).toHaveProperty('message', 'foo');
+    await expect(createPromiseFromStreams([dest])).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"foo"`
+    );
+    expect(errorListener).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      [Error: foo],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
+}
+`);
   });
 });

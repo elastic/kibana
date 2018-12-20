@@ -81,12 +81,12 @@ describe('concatStream', () => {
           createConcatStream()
         ]);
       } catch (err) {
-        expect.fail('createPromiseFromStreams() should not fail synchronously');
+        throw new Error('createPromiseFromStreams() should not fail synchronously');
       }
 
       try {
         await promise;
-        expect.fail('Promise should have rejected');
+        throw new Error('Promise should have rejected');
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toContain('concat');
