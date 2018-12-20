@@ -103,6 +103,8 @@ export const getPluginPaths = type => {
           // Get the full path of all files in the directory
           readdir(dir).then(files => files.map(file => path.resolve(dir, file)))
         )
-      ).then(flatten);
+      )
+        .then(flatten)
+        .then(files => filterDirectories(files, { exclude: true }));
     });
 };
