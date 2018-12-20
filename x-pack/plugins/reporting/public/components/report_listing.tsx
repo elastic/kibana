@@ -118,11 +118,16 @@ class ReportListingUi extends Component<Props, State> {
       <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
         <EuiTitle>
           <h1>
-            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="reports" />
+            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
           </h1>
         </EuiTitle>
         <EuiText color="subdued">
-          <p>Find reports generated in Kibana applications here</p>
+          <p>
+            <FormattedMessage
+              id="xpack.reporting.listing.reports.subtitle"
+              defaultMessage="Find reports generated in Kibana applications here"
+            />
+          </p>
         </EuiText>
         <EuiSpacer />
         {this.renderTable()}
