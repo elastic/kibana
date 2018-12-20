@@ -7,7 +7,7 @@
 import { IconType } from '@elastic/eui';
 import Joi from 'joi';
 import _ from 'lodash';
-import { uiCapabilitiesRegex } from 'ui/capabilities';
+import { UICapabilities, uiCapabilitiesRegex } from 'ui/capabilities';
 
 export interface FeaturePrivilegeDefinition {
   metadata?: {
@@ -37,12 +37,17 @@ export interface Feature {
   };
 }
 
-const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
+// Each feature gets its own property on the UICapabilities object,
+// but that object has a few built-in properties which should not be overwritten.
+const prohibitedFeatureIds: Array<keyof UICapabilities> = ['management', 'navLinks'];
+
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
+const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 
 const schema = Joi.object({
   id: Joi.string()
     .regex(featurePrivilegePartRegex)
+    .invalid(...prohibitedFeatureIds)
     .required(),
   name: Joi.string().required(),
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),

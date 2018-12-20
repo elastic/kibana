@@ -32,18 +32,25 @@ export const alterColumn = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args.column || (!args.type && !args.name)) return context;
+    if (!args.column || (!args.type && !args.name)) {
+      return context;
+    }
 
     const column = context.columns.find(col => col.name === args.column);
-    if (!column) throw new Error(`Column not found: '${args.column}'`);
+    if (!column) {
+      throw new Error(`Column not found: '${args.column}'`);
+    }
 
     const name = args.name || column.name;
     const type = args.type || column.type;
 
     const columns = context.columns.reduce((all, col) => {
       if (col.name !== args.name) {
-        if (col.name !== column.name) all.push(col);
-        else all.push({ name, type });
+        if (col.name !== column.name) {
+          all.push(col);
+        } else {
+          all.push({ name, type });
+        }
       }
       return all;
     }, []);
@@ -54,7 +61,9 @@ export const alterColumn = () => ({
       handler = (function getHandler() {
         switch (type) {
           case 'string':
-            if (column.type === 'date') return v => new Date(v).toISOString();
+            if (column.type === 'date') {
+              return v => new Date(v).toISOString();
+            }
             return String;
           case 'number':
             return Number;

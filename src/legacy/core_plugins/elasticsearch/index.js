@@ -25,11 +25,10 @@ import { createDataCluster } from './lib/create_data_cluster';
 import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
+import { createProxy } from './lib/create_proxy';
 import filterHeaders from './lib/filter_headers';
 
-import { createProxy } from './lib/create_proxy';
-
-const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
+const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -46,7 +45,10 @@ export default function (kibana) {
 
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        sniffOnStart: Joi.boolean().default(false),
+        sniffInterval: Joi.number().allow(false).default(false),
+        sniffOnConnectionFault: Joi.boolean().default(false),
+        hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single().default('http://localhost:9200'),
         preserveHost: Joi.boolean().default(true),
         username: Joi.string(),
         password: Joi.string(),
@@ -86,9 +88,27 @@ export default function (kibana) {
         };
       };
 
+      const url = () => {
+        return (settings, log) => {
+          const deprecatedUrl = get(settings, 'url');
+          const hosts = get(settings, 'hosts.length');
+          if (!deprecatedUrl) {
+            return;
+          }
+          if (hosts) {
+            log('Deprecated config key "elasticsearch.url" conflicts with "elasticsearch.hosts".  Ignoring "elasticsearch.url"');
+          } else {
+            set(settings, 'hosts', [deprecatedUrl]);
+            log('Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"');
+          }
+          unset(settings, 'url');
+        };
+      };
+
       return [
         rename('ssl.ca', 'ssl.certificateAuthorities'),
         rename('ssl.cert', 'ssl.certificate'),
+        url(),
         sslVerify(),
       ];
     },
@@ -115,8 +135,7 @@ export default function (kibana) {
       createDataCluster(server);
       createAdminCluster(server);
 
-      createProxy(server, 'POST', '/{index}/_search');
-      createProxy(server, 'POST', '/_msearch');
+      createProxy(server);
 
       // Set up the health check service and start it.
       const { start, waitUntilReady } = healthCheck(this, server);

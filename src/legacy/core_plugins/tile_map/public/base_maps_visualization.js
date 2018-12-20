@@ -25,8 +25,8 @@ import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 import { uiModules } from 'ui/modules';
 
-const MINZOOM = 0;
-const MAXZOOM = 22;//increase this to 22. Better for WMS
+const WMS_MINZOOM = 0;
+const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
 
 const emsServiceSettings = new Promise((resolve) => {
   uiModules.get('kibana').run(($injector) => {
@@ -110,8 +110,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       this._kibanaMap = new KibanaMap(this._container, options);
-      this._kibanaMap.setMinZoom(MINZOOM);//use a default
-      this._kibanaMap.setMaxZoom(MAXZOOM);//use a default
+      this._kibanaMap.setMinZoom(WMS_MINZOOM);//use a default
+      this._kibanaMap.setMaxZoom(WMS_MAXZOOM);//use a default
 
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
@@ -127,9 +127,18 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
     }
 
 
-    _baseLayerConfigured() {
-      const mapParams = this._getMapsParams();
-      return mapParams.wms.selectedTmsLayer;
+    _tmsConfigured() {
+      const { wms } = this._getMapsParams();
+      const hasTmsBaseLayer = !!wms.selectedTmsLayer;
+
+      return hasTmsBaseLayer;
+    }
+
+    _wmsConfigured() {
+      const { wms } = this._getMapsParams();
+      const hasWmsBaseLayer = !!wms.enabled;
+
+      return hasWmsBaseLayer;
     }
 
     async _updateBaseLayer() {
@@ -139,7 +148,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       }
 
       const mapParams = this._getMapsParams();
-      if (!this._baseLayerConfigured()) {
+      if (!this._tmsConfigured()) {
         try {
           const tmsServices = await serviceSettings.getTMSServices();
           const firstRoadMapLayer = tmsServices.find((s) => {
@@ -157,33 +166,28 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       }
 
       try {
-
-        if (mapParams.wms.enabled) {
-
-          if (MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
-            this._kibanaMap.setMinZoom(MINZOOM);
-            this._kibanaMap.setMaxZoom(MAXZOOM);
+        if (this._wmsConfigured()) {
+          if (WMS_MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
+            this._kibanaMap.setMinZoom(WMS_MINZOOM);
+            this._kibanaMap.setMaxZoom(WMS_MAXZOOM);
           }
 
           this._kibanaMap.setBaseLayer({
             baseLayerType: 'wms',
             options: {
-              minZoom: MINZOOM,
-              maxZoom: MAXZOOM,
+              minZoom: WMS_MINZOOM,
+              maxZoom: WMS_MAXZOOM,
               url: mapParams.wms.url,
               ...mapParams.wms.options
             }
           });
-        } else if (mapParams.wms.selectedTmsLayer) {
+        } else if (this._tmsConfigured()) {
           const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
           this._setTmsLayer(selectedTmsLayer);
-
         }
       } catch (tmsLoadingError) {
         toastNotifications.addWarning(tmsLoadingError.message);
       }
-
-
     }
 
     async _setTmsLayer(tmsLayer) {
@@ -192,14 +196,14 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      // const url = tmsLayer.url;
       const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer);
+      const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
       delete options.url;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { url, ...options }
+        options: { url, showZoomMessage, ...options }
       });
     }
 
@@ -235,7 +239,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
     _whenBaseLayerIsLoaded() {
 
-      if (!this._baseLayerConfigured()) {
+      if (!this._tmsConfigured()) {
         return true;
       }
 

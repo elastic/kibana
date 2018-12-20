@@ -69,6 +69,7 @@ export class EditDescriptionPopover extends Component {
         onClick={this.onButtonClick}
         iconType="pencil"
         aria-label="Edit description"
+        isDisabled={this.props.canCreateFilter === false}
       />
     );
 
@@ -100,6 +101,7 @@ export class EditDescriptionPopover extends Component {
   }
 }
 EditDescriptionPopover.propTypes = {
+  canCreateFilter: PropTypes.bool.isRequired,
   description: PropTypes.string,
   updateDescription: PropTypes.func.isRequired
 };

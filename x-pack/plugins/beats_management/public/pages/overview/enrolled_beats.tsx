@@ -24,7 +24,7 @@ import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/do
 import { EnrollBeat } from '../../components/enroll_beats';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatsTableType, Table } from '../../components/table';
-import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
+import { beatsListActions } from '../../components/table/action_schema';
 import { AssignmentActionType } from '../../components/table/table';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AppPageProps } from '../../frontend_types';
@@ -167,28 +167,27 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 onSubmit: () => null, // todo
                 value: this.props.urlState.beatsKBar || '',
               }}
-              assignmentOptions={{
-                items: this.filterTags(this.props.containers.tags.state.list),
-                schema: beatsListAssignmentOptions,
-                type: 'assignment',
-                actionHandler: async (action: AssignmentActionType, payload: any) => {
-                  switch (action) {
-                    case AssignmentActionType.Assign:
-                      const status = await this.props.containers.beats.toggleTagAssignment(
-                        payload,
-                        this.getSelectedBeats()
-                      );
-                      this.notifyUpdatedTagAssociation(status, this.getSelectedBeats(), payload);
-                      break;
-                    case AssignmentActionType.Delete:
-                      this.props.containers.beats.deactivate(this.getSelectedBeats());
-                      this.notifyBeatDisenrolled(this.getSelectedBeats());
-                      break;
-                    case AssignmentActionType.Reload:
-                      this.props.containers.tags.reload();
-                      break;
-                  }
-                },
+              actions={beatsListActions}
+              actionData={{
+                tags: this.filterTags(this.props.containers.tags.state.list),
+              }}
+              actionHandler={async (action: AssignmentActionType, payload: any) => {
+                switch (action) {
+                  case AssignmentActionType.Assign:
+                    const status = await this.props.containers.beats.toggleTagAssignment(
+                      payload,
+                      this.getSelectedBeats()
+                    );
+                    this.notifyUpdatedTagAssociation(status, this.getSelectedBeats(), payload);
+                    break;
+                  case AssignmentActionType.Delete:
+                    this.props.containers.beats.deactivate(this.getSelectedBeats());
+                    this.notifyBeatDisenrolled(this.getSelectedBeats());
+                    break;
+                  case AssignmentActionType.Reload:
+                    this.props.containers.tags.reload();
+                    break;
+                }
               }}
               items={sortBy(this.props.containers.beats.state.list, 'id') || []}
               ref={this.tableRef}
@@ -349,7 +348,9 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     // union beat tags
     flatten(this.getSelectedBeats().map(({ full_tags }) => full_tags))
       // map tag list to bool
-      .map(({ configuration_blocks }) => this.configBlocksRequireUniqueness(configuration_blocks))
+      .map(tag => {
+        return this.configBlocksRequireUniqueness(tag ? tag.configuration_blocks : []);
+      })
       // reduce to result
       .reduce((acc, cur) => acc || cur, false);
 }

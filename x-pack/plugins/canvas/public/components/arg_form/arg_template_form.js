@@ -32,10 +32,14 @@ class ArgTemplateFormComponent extends React.Component {
 
   componentWillUpdate(prevProps) {
     //see if error state changed
-    if (this.props.error !== prevProps.error) this.props.handlers.destroy();
+    if (this.props.error !== prevProps.error) {
+      this.props.handlers.destroy();
+    }
   }
   componentDidUpdate() {
-    if (this.props.error) return this.renderErrorTemplate();
+    if (this.props.error) {
+      return this.renderErrorTemplate();
+    }
     this.renderTemplate(this.domNode);
   }
 
@@ -45,7 +49,9 @@ class ArgTemplateFormComponent extends React.Component {
 
   renderTemplate = domNode => {
     const { template, argumentProps, handlers } = this.props;
-    if (template) return template(domNode, argumentProps, handlers);
+    if (template) {
+      return template(domNode, argumentProps, handlers);
+    }
   };
 
   renderErrorTemplate = () => {
@@ -56,9 +62,13 @@ class ArgTemplateFormComponent extends React.Component {
   render() {
     const { template, error } = this.props;
 
-    if (error) return this.renderErrorTemplate();
+    if (error) {
+      return this.renderErrorTemplate();
+    }
 
-    if (!template) return null;
+    if (!template) {
+      return null;
+    }
 
     return (
       <RenderToDom
