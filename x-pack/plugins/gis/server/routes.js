@@ -8,7 +8,7 @@
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import _ from 'lodash';
-import { EMSClientV66 } from '../../../../src/core_plugins/ems_util/common/ems_client';
+import { EMSClientV66 } from '../../../../src/legacy/core_plugins/ems_util/common/ems_client';
 
 const ROOT = `/${GIS_API_PATH}`;
 

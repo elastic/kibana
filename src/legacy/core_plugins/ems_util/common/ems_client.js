@@ -19,7 +19,7 @@
 
 import MarkdownIt from 'markdown-it';
 import _ from 'lodash';
-import { modifyUrl } from '../../../core/public/utils';
+import { modifyUrl } from '../../../../core/public/utils';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
 import fetch from 'node-fetch';
