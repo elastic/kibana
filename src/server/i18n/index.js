@@ -27,16 +27,18 @@ export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
   const translationsDirs = [fromRoot('src/ui/translations')];
+  const scanDirs = [fromRoot('node_modules/@kbn')].concat(config.get('plugins.scanDirs'));
+  const pluginsPaths = config.get('plugins.paths');
 
   const groupedEntries = await Promise.all([
-    ...config.get('plugins.scanDirs').map(async path => {
+    ...scanDirs.map(async path => {
       const entries = await globby(`*/translations/${locale}.json`, {
         cwd: path,
       });
       return entries.map(entry => resolve(path, entry));
     }),
 
-    ...config.get('plugins.paths').map(async path => {
+    ...pluginsPaths.map(async path => {
       const entries = await globby(
         [`translations/${locale}.json`, `plugins/*/translations/${locale}.json`],
         {
