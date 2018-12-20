@@ -198,7 +198,6 @@ describe(filename, () => {
     });
 
     describe('timeouts', () => {
-
       let sandbox;
 
       beforeEach(() => {
@@ -222,6 +221,34 @@ describe(filename, () => {
         const request = fn(config, tlConfig, emptyScriptedFields);
 
         expect(request).to.not.have.property('timeout');
+      });
+    });
+
+    describe('frozen indices', () => {
+      let sandbox;
+
+      beforeEach(() => {
+        sandbox = sinon.createSandbox();
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('sets ignore_throttled=true on the request', () => {
+        config.index = 'beer';
+        tlConfig.settings['search:includeFrozen'] = false;
+        const request = fn(config, tlConfig, emptyScriptedFields);
+
+        expect(request.ignore_throttled).to.equal(true);
+      });
+
+      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+        tlConfig.settings['search:includeFrozen'] = true;
+        config.index = 'beer';
+        const request = fn(config, tlConfig, emptyScriptedFields);
+
+        expect(request.ignore_throttled).to.equal(false);
       });
     });
 

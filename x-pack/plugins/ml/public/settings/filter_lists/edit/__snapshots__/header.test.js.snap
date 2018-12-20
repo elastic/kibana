@@ -104,6 +104,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
       grow={false}
     >
       <EditDescriptionPopover
+        canCreateFilter={true}
         description="A test filter list"
         updateDescription={[MockFunction]}
       />
@@ -226,6 +227,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
       grow={false}
     >
       <EditDescriptionPopover
+        canCreateFilter={true}
         updateDescription={[MockFunction]}
       />
     </EuiFlexItem>
@@ -325,6 +327,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
       grow={false}
     >
       <EditDescriptionPopover
+        canCreateFilter={true}
         updateDescription={[MockFunction]}
       />
     </EuiFlexItem>
@@ -434,6 +437,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
       grow={false}
     >
       <EditDescriptionPopover
+        canCreateFilter={true}
         description="A test filter list"
         updateDescription={[MockFunction]}
       />

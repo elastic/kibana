@@ -22,9 +22,13 @@ export interface TimeRange {
   from: string;
 }
 
+export interface FilterMeta {
+  disabled: boolean;
+}
+
 // TODO: Filter object representation needs to be fleshed out.
 export interface Filter {
-  meta: object;
+  meta: FilterMeta;
   query: object;
 }
 
@@ -39,6 +43,9 @@ export interface Query {
   language: QueryLanguageType;
   query: string;
 }
+export interface EmbeddableCustomization {
+  [key: string]: object | string;
+}
 
 export interface ContainerState {
   // 'view' or 'edit'. Should probably be an enum but I'm undecided where to define it, here or in dashboard code.
@@ -51,7 +58,7 @@ export interface ContainerState {
   query: Query;
 
   // The shape will be up to the embeddable type.
-  embeddableCustomization?: object;
+  embeddableCustomization?: EmbeddableCustomization;
 
   /**
    * Whether or not panel titles are hidden. It is not the embeddable's responsibility to hide the title (the container
@@ -77,9 +84,9 @@ export interface EmbeddableState {
    * Any customization data that should be stored at the panel level. For
    * example, pie slice colors, or custom per panel sort order or columns.
    */
-  customization: object;
+  customization?: object;
   /**
    * A possible filter the embeddable wishes dashboard to apply.
    */
-  stagedFilter: object;
+  stagedFilter?: object;
 }

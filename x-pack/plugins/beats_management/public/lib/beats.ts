@@ -12,7 +12,7 @@ import {
   CMAssignmentReturn,
   CMBeatsAdapter,
 } from './adapters/beats/adapter_types';
-import { FrontendDomainLibs } from './lib';
+import { FrontendDomainLibs } from './types';
 
 export class BeatsLib {
   constructor(
@@ -20,44 +20,58 @@ export class BeatsLib {
     private readonly libs: { tags: FrontendDomainLibs['tags'] }
   ) {}
 
+  /** Get a single beat using it's ID for lookup */
   public async get(id: string): Promise<CMPopulatedBeat | null> {
     const beat = await this.adapter.get(id);
     return beat ? (await this.mergeInTags([beat]))[0] : null;
   }
 
-  public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
+  /** Get a single beat using the token it was enrolled in for lookup */
+  public getBeatWithToken = async (enrollmentToken: string): Promise<CMBeat | null> => {
     const beat = await this.adapter.getBeatWithToken(enrollmentToken);
     return beat;
-  }
+  };
 
-  public async getBeatsWithTag(tagId: string): Promise<CMPopulatedBeat[]> {
+  /** Get an array of beats that have a given tag id assigned to it */
+  public getBeatsWithTag = async (tagId: string): Promise<CMPopulatedBeat[]> => {
     const beats = await this.adapter.getBeatsWithTag(tagId);
     return await this.mergeInTags(beats);
-  }
+  };
 
-  public async getAll(ESQuery?: any): Promise<CMPopulatedBeat[]> {
+  // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
+  /** Get an array of all enrolled beats. */
+  public getAll = async (ESQuery?: string): Promise<CMPopulatedBeat[]> => {
     const beats = await this.adapter.getAll(ESQuery);
     return await this.mergeInTags(beats);
-  }
+  };
 
-  public async update(id: string, beatData: Partial<CMBeat>): Promise<boolean> {
+  /** Update a given beat via it's ID */
+  public update = async (id: string, beatData: Partial<CMBeat>): Promise<boolean> => {
     return await this.adapter.update(id, beatData);
-  }
+  };
 
-  public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]> {
+  /** unassign tags from beats using an array of tags and beats */
+  public removeTagsFromBeats = async (
+    removals: BeatsTagAssignment[]
+  ): Promise<BeatsRemovalReturn[]> => {
     return await this.adapter.removeTagsFromBeats(removals);
-  }
+  };
 
-  public async assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]> {
+  /** assign tags from beats using an array of tags and beats */
+  public assignTagsToBeats = async (
+    assignments: BeatsTagAssignment[]
+  ): Promise<CMAssignmentReturn[]> => {
     return await this.adapter.assignTagsToBeats(assignments);
-  }
+  };
 
-  private async mergeInTags(beats: CMBeat[]): Promise<CMPopulatedBeat[]> {
+  /** method user to join tags to beats, thus fully populating the beats */
+  private mergeInTags = async (beats: CMBeat[]): Promise<CMPopulatedBeat[]> => {
     const tagIds = flatten(beats.map(b => b.tags || []));
     const tags = await this.libs.tags.getTagsWithIds(tagIds);
 
     // TODO the filter should not be needed, if the data gets into a bad state, we should error
-    // and inform the user they need to delte the tag, or else we should auto delete it
+    // and inform the user they need to delete the tag, or else we should auto delete it
+    // https://github.com/elastic/kibana/issues/26021
     const mergedBeats: CMPopulatedBeat[] = beats.map(
       b =>
         ({
@@ -66,5 +80,5 @@ export class BeatsLib {
         } as CMPopulatedBeat)
     );
     return mergedBeats;
-  }
+  };
 }

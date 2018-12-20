@@ -26,6 +26,8 @@ export function normalizeType(type) {
 
   const normalizedType = Object.keys(normalTypes).find(t => normalTypes[t].includes(type));
 
-  if (normalizedType) return normalizedType;
+  if (normalizedType) {
+    return normalizedType;
+  }
   throw new Error(`Canvas does not yet support type: ${type}`);
 }

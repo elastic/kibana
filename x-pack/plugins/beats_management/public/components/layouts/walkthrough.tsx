@@ -22,7 +22,6 @@ interface LayoutProps {
   walkthroughSteps: Array<{
     id: string;
     name: string;
-    disabled: boolean;
   }>;
   activePath: string;
 }

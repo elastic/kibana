@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -363,9 +364,18 @@ export class ImportView extends Component {
 
           <EuiTitle size="s">
             <h3>
-              Import data &nbsp;
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.importView.importDataTitle"
+                defaultMessage="Import data"
+              />
+              &nbsp;
               <ExperimentalBadge
-                tooltipContent="Experimental feature. We'd love to hear your feedback."
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.importView.experimentalFeatureTooltip"
+                    defaultMessage="Experimental feature. We'd love to hear your feedback."
+                  />
+                }
               />
             </h3>
           </EuiTitle>
@@ -399,7 +409,10 @@ export class ImportView extends Component {
               iconSide="right"
               fill
             >
-              Import
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.importView.importButtonLabel"
+                defaultMessage="Import"
+              />
             </EuiButton>
           }
 
@@ -409,7 +422,10 @@ export class ImportView extends Component {
             <EuiButton
               onClick={this.clickReset}
             >
-              Reset
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.importView.resetButtonLabel"
+                defaultMessage="Reset"
+              />
             </EuiButton>
           }
 
@@ -519,7 +535,12 @@ function getDefaultState(state, results) {
 
 function isIndexNameValid(name, indexNames) {
   if (indexNames.find(i => i === name)) {
-    return 'Index name already exists';
+    return (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
+        defaultMessage="Index name already exists"
+      />
+    );
   }
 
   const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
@@ -529,7 +550,12 @@ function isIndexNameValid(name, indexNames) {
     name.match(/^[-_+]/) !== null  || // name can't start with these chars
     name.match(reg) !== null // name can't contain these chars
   ) {
-    return 'Index name contains illegal characters';
+    return (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importView.indexNameContainsIllegalCharactersErrorMessage"
+        defaultMessage="Index name contains illegal characters"
+      />
+    );
   }
   return '';
 }
@@ -541,7 +567,12 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   }
 
   if (indexPatternNames.find(i => i === name)) {
-    return 'Index pattern name already exists';
+    return (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importView.indexPatternNameAlreadyExistsErrorMessage"
+        defaultMessage="Index pattern name already exists"
+      />
+    );
   }
 
   // escape . and + to stop the regex matching more than it should.
@@ -551,7 +582,12 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   newName = newName.replace('*', '.*');
   const reg = new RegExp(`^${newName}$`);
   if (index.match(reg) === null) { // name should match index
-    return 'Index pattern does not match index name';
+    return (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
+        defaultMessage="Index pattern does not match index name"
+      />
+    );
   }
 
   return '';

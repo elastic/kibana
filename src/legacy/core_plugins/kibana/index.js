@@ -39,6 +39,7 @@ import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
 import { injectVars } from './inject_vars';
+import { i18n } from '@kbn/i18n';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -66,30 +67,42 @@ export default function (kibana) {
         id: 'kibana',
         title: 'Kibana',
         listed: false,
-        description: 'the kibana you know and love',
+        description: i18n.translate('kbn.kibanaDescription', {
+          defaultMessage: 'the kibana you know and love'
+        }),
         main: 'plugins/kibana/kibana',
       },
       styleSheetPaths: `${__dirname}/public/index.scss`,
       links: [
         {
           id: 'kibana:discover',
-          title: 'Discover',
+          title: i18n.translate('kbn.discoverTitle', {
+            defaultMessage: 'Discover'
+          }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
-          description: 'interactively explore your data',
+          description: i18n.translate('kbn.discoverDescription', {
+            defaultMessage: 'interactively explore your data'
+          }),
           icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
         }, {
           id: 'kibana:visualize',
-          title: 'Visualize',
+          title: i18n.translate('kbn.visualizeTitle', {
+            defaultMessage: 'Visualize'
+          }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
-          description: 'design data visualizations',
+          description: i18n.translate('kbn.visualizeDescription', {
+            defaultMessage: 'design data visualizations'
+          }),
           icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
         }, {
           id: 'kibana:dashboard',
-          title: 'Dashboard',
+          title: i18n.translate('kbn.dashboardTitle', {
+            defaultMessage: 'Dashboard'
+          }),
           order: -1001,
           url: `${kbnBaseUrl}#/dashboards`,
           // The subUrlBase is the common substring of all urls for this app. If not given, it defaults to the url
@@ -98,23 +111,33 @@ export default function (kibana) {
           // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
-          description: 'compose visualizations for much win',
+          description: i18n.translate('kbn.dashboardDescription', {
+            defaultMessage: 'compose visualizations for much win'
+          }),
           icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
         }, {
           id: 'kibana:dev_tools',
-          title: 'Dev Tools',
+          title: i18n.translate('kbn.devToolsTitle', {
+            defaultMessage: 'Dev Tools'
+          }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
-          description: 'development tools',
+          description: i18n.translate('kbn.devToolsDescription', {
+            defaultMessage: 'development tools'
+          }),
           icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
         }, {
           id: 'kibana:management',
-          title: 'Management',
+          title: i18n.translate('kbn.managementTitle', {
+            defaultMessage: 'Management'
+          }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
-          description: 'define index patterns, change config, and more',
+          description: i18n.translate('kbn.managementDescription', {
+            defaultMessage: 'define index patterns, change config, and more'
+          }),
           icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
           linkToLastSubUrl: false
@@ -133,8 +156,6 @@ export default function (kibana) {
           kbnBaseUrl
         };
       },
-
-      translations: [],
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),

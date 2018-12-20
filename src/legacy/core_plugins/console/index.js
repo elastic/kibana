@@ -18,11 +18,13 @@
  */
 
 import Boom from 'boom';
-import { resolveApi } from './api_server/server';
 import { resolve, join, sep } from 'path';
-import { has, isEmpty } from 'lodash';
-import setHeaders from '../elasticsearch/lib/set_headers';
+import url from 'url';
+import { has, isEmpty, head } from 'lodash';
+
+import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';
+import setHeaders from '../elasticsearch/lib/set_headers';
 
 import {
   ProxyConfigCollection,
@@ -37,7 +39,7 @@ export default function (kibana) {
   const apps = [];
   return new kibana.Plugin({
     id: 'console',
-    require: [ 'elasticsearch' ],
+    require: ['elasticsearch'],
 
     config: function (Joi) {
       return Joi.object({
@@ -89,7 +91,7 @@ export default function (kibana) {
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
       server.route(createProxyRoute({
-        baseUrl: config.get('elasticsearch.url'),
+        baseUrl: head(config.get('elasticsearch.hosts')),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
           const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
@@ -132,7 +134,16 @@ export default function (kibana) {
 
       injectDefaultVars(server) {
         return {
-          elasticsearchUrl: server.config().get('elasticsearch.url')
+          elasticsearchUrl: url.format(
+            Object.assign(
+              url.parse(
+                head(
+                  server.config().get('elasticsearch.hosts')
+                )
+              ),
+              { auth: false }
+            )
+          )
         };
       },
 

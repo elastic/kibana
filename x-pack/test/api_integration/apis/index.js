@@ -16,10 +16,10 @@ export default function ({ loadTestFile }) {
     // loadTestFile(require.resolve('./xpack_main'));
     // loadTestFile(require.resolve('./logstash'));
     // loadTestFile(require.resolve('./kibana'));
-
+    // loadTestFile(require.resolve('./infra'));
     //Only running our secops test for now since we are working in our own branch
     loadTestFile(require.resolve('./secops'));
-
+    // loadTestFile(require.resolve('./management'));
     // loadTestFile(require.resolve('./beats'));
   });
 }

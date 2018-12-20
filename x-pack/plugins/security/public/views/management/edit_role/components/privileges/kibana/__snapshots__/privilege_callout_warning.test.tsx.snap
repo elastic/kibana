@@ -5,7 +5,16 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
   basePrivilege="all"
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -37,6 +46,26 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -61,15 +90,6 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -116,11 +136,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
             className="euiIcon euiIcon--medium euiCallOutHeader__icon"
             focusable="false"
             height="16"
-            style={
-              Object {
-                "fill": undefined,
-              }
-            }
+            style={null}
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"
@@ -130,11 +146,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
               className="euiIcon euiIcon--medium euiCallOutHeader__icon"
               focusable="false"
               height="16"
-              style={
-                Object {
-                  "fill": undefined,
-                }
-              }
+              style={null}
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"

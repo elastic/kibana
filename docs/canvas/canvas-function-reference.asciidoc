@@ -1,0 +1,16 @@
+[[canvas-function-reference]]
+== Canvas function reference
+
+beta[] Behind the scenes, Canvas is driven by a powerful expression language,
+with dozens of functions and other capabilities, including table transforms, 
+type casting, and sub-expressions.
+
+For the purpose of this documentation, 
+the Canvas functions are divided by the environment they run in:
+
+* <<canvas-common-functions>> can run anywhere
+* <<canvas-server-functions>> can only execute on the server
+* <<canvas-client-functions>> must execute in a browser
+
+The Canvas expression language also supports <<canvas-tinymath-functions>>, which
+perform complex math calculations.

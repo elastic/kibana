@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
-import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { checkPermission } from '../../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
+import { getIndexPatternNames } from '../../../../util/index_utils';
 
 import {
   stopDatafeeds,
@@ -15,6 +16,7 @@ import {
   isStoppable,
   isClosable,
 } from '../utils';
+import { i18n } from '@kbn/i18n';
 
 export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showStartDatafeedModal, refreshJobs) {
   const canCreateJob = (checkPermission('canCreateJob') && mlNodesAvailable());
@@ -26,8 +28,12 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
 
   return [
     {
-      name: 'Start datafeed',
-      description: 'Start datafeed',
+      name: i18n.translate('xpack.ml.jobsList.managementActions.startDatafeedLabel', {
+        defaultMessage: 'Start datafeed'
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.startDatafeedDescription', {
+        defaultMessage: 'Start datafeed'
+      }),
       icon: 'play',
       enabled: () => (canStartStopDatafeed),
       available: (item) => (isStartable([item])),
@@ -36,8 +42,12 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu();
       }
     }, {
-      name: 'Stop datafeed',
-      description: 'Stop datafeed',
+      name: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedLabel', {
+        defaultMessage: 'Stop datafeed'
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedDescription', {
+        defaultMessage: 'Stop datafeed'
+      }),
       icon: 'stop',
       enabled: () => (canStartStopDatafeed),
       available: (item) => (isStoppable([item])),
@@ -46,8 +56,12 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu(true);
       }
     }, {
-      name: 'Close job',
-      description: 'Close job',
+      name: i18n.translate('xpack.ml.jobsList.managementActions.closeJobLabel', {
+        defaultMessage: 'Close job'
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.closeJobDescription', {
+        defaultMessage: 'Close job'
+      }),
       icon: 'cross',
       enabled: () => (canCloseJob),
       available: (item) => (isClosable([item])),
@@ -56,17 +70,36 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu(true);
       }
     }, {
-      name: 'Clone job',
-      description: 'Clone job',
+      name: i18n.translate('xpack.ml.jobsList.managementActions.cloneJobLabel', {
+        defaultMessage: 'Clone job'
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.cloneJobDescription', {
+        defaultMessage: 'Clone job'
+      }),
       icon: 'copy',
-      enabled: () => (canCreateJob),
+      enabled: (item) => {
+        // We only allow cloning of a job if the user has the right permissions and can still access
+        // the indexPattern the job was created for. An indexPattern could either have been deleted
+        // since the the job was created or the current user doesn't have the required permissions to
+        // access the indexPattern.
+        const indexPatternNames = getIndexPatternNames();
+        const jobIndicesAvailable = item.datafeedIndices.every((dfiName) => {
+          return indexPatternNames.some(ipName => ipName === dfiName);
+        });
+
+        return canCreateJob && jobIndicesAvailable;
+      },
       onClick: (item) => {
         cloneJob(item.id);
         closeMenu(true);
       }
     }, {
-      name: 'Edit job',
-      description: 'Edit job',
+      name: i18n.translate('xpack.ml.jobsList.managementActions.editJobLabel', {
+        defaultMessage: 'Edit job'
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.editJobDescription', {
+        defaultMessage: 'Edit job'
+      }),
       icon: 'pencil',
       enabled: () => (canUpdateJob && canUpdateDatafeed),
       onClick: (item) => {
@@ -74,8 +107,12 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu();
       }
     }, {
-      name: 'Delete job',
-      description: 'Delete job',
+      name: i18n.translate('xpack.ml.jobsList.managementActions.deleteJobLabel', {
+        defaultMessage: 'Delete job'
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.deleteJobDescription', {
+        defaultMessage: 'Delete job'
+      }),
       icon: 'trash',
       color: 'danger',
       enabled: () => (canDeleteJob),

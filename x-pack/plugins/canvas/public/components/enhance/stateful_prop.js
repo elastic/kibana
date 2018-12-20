@@ -25,8 +25,11 @@ export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
       }
 
       handleChange = ev => {
-        if (ev.target) this.setState({ value: ev.target.value });
-        else this.setState({ value: ev });
+        if (ev.target) {
+          this.setState({ value: ev.target.value });
+        } else {
+          this.setState({ value: ev });
+        }
       };
 
       render() {

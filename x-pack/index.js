@@ -18,9 +18,11 @@ import { dashboardMode } from './plugins/dashboard_mode';
 import { logstash } from './plugins/logstash';
 import { beats } from './plugins/beats_management';
 import { apm } from './plugins/apm';
+import { gis } from './plugins/gis';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
+import { indexLifecycleManagement } from './plugins/index_lifecycle_management';
 import { consoleExtensions } from './plugins/console_extensions';
 import { spaces } from './plugins/spaces';
 import { notifications } from './plugins/notifications';
@@ -29,6 +31,9 @@ import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { rollup } from './plugins/rollup';
 import { secops } from './plugins/secops';
+import { remoteClusters } from './plugins/remote_clusters';
+import { crossClusterReplication } from './plugins/cross_cluster_replication';
+import { upgradeAssistant } from './plugins/upgrade_assistant';
 
 module.exports = function (kibana) {
   return [
@@ -47,15 +52,20 @@ module.exports = function (kibana) {
     logstash(kibana),
     beats(kibana),
     apm(kibana),
+    gis(kibana),
     canvas(kibana),
     licenseManagement(kibana),
     cloud(kibana),
     indexManagement(kibana),
     consoleExtensions(kibana),
     notifications(kibana),
+    indexLifecycleManagement(kibana),
     kueryAutocomplete(kibana),
     infra(kibana),
     rollup(kibana),
     secops(kibana),
+    remoteClusters(kibana),
+    crossClusterReplication(kibana),
+    upgradeAssistant(kibana),
   ];
 };

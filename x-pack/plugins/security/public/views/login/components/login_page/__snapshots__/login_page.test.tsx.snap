@@ -80,7 +80,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
             }
             title={
               <FormattedMessage
-                defaultMessage="Cannot connect to the Elastiscearch cluster"
+                defaultMessage="Cannot connect to the Elasticsearch cluster"
                 id="xpack.security.loginPage.esUnavailableTitle"
                 values={Object {}}
               />

@@ -87,7 +87,7 @@ const CourierRequestHandlerProvider = function () {
 
       const queryHash = calculateObjectHash(reqBody);
       // We only need to reexecute the query, if forceFetch was true or the hash of the request body has changed
-      // since the last request.
+      // since the last request
       const shouldQuery = forceFetch || (searchSource.lastQuery !== queryHash);
 
       if (shouldQuery) {
@@ -111,25 +111,25 @@ const CourierRequestHandlerProvider = function () {
 
         searchSource.rawResponse = response;
 
-        let resp = cloneDeep(response);
-        for (const agg of aggs) {
-          if (has(agg, 'type.postFlightRequest')) {
-            resp = await agg.type.postFlightRequest(
-              resp,
-              aggs,
-              agg,
-              requestSearchSource,
-              inspectorAdapters
-            );
-          }
-        }
-
-        searchSource.finalResponse = resp;
-
         requestSearchSource.getSearchRequestBody().then(req => {
           request.json(req);
         });
       }
+
+      let resp = cloneDeep(searchSource.rawResponse);
+      for (const agg of aggs) {
+        if (has(agg, 'type.postFlightRequest')) {
+          resp = await agg.type.postFlightRequest(
+            resp,
+            aggs,
+            agg,
+            requestSearchSource,
+            inspectorAdapters
+          );
+        }
+      }
+
+      searchSource.finalResponse = resp;
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
       const tabifyParams = {

@@ -5,19 +5,20 @@
  */
 
 import { EuiGlobalToastList } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../common/domain_types';
+import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatDetailTagsTable, Table } from '../../components/table';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 
 interface BeatTagsPageProps {
-  beatId: string;
+  beat: CMPopulatedBeat;
   libs: FrontendLibs;
   refreshBeat(): void;
 }
 
 interface BeatTagsPageState {
-  beat: CMPopulatedBeat | null;
   notifications: any[];
 }
 
@@ -27,19 +28,21 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     super(props);
 
     this.state = {
-      beat: null,
       notifications: [],
     };
   }
 
-  public async componentWillMount() {
-    await this.getBeat();
-  }
-
   public render() {
-    const { beat } = this.state;
+    const { beat } = this.props;
     return (
-      <div>
+      <React.Fragment>
+        <Breadcrumb
+          title={i18n.translate('xpack.beatsManagement.breadcrumb.beatTags', {
+            defaultMessage: 'Beat tags for: {beatId}',
+            values: { beatId: beat.id },
+          })}
+          path={`/beat/${beat.id}/tags`}
+        />
         <Table
           hideTableControls={true}
           items={beat ? beat.full_tags : []}
@@ -52,16 +55,7 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
           dismissToast={() => this.setState({ notifications: [] })}
           toastLifeTimeMs={5000}
         />
-      </div>
+      </React.Fragment>
     );
   }
-
-  private getBeat = async () => {
-    try {
-      const beat = await this.props.libs.beats.get(this.props.beatId);
-      this.setState({ beat });
-    } catch (e) {
-      throw new Error(e);
-    }
-  };
 }

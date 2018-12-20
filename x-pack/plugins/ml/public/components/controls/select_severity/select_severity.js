@@ -22,12 +22,6 @@ import {
 
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
-const OPTIONS = [
-  { val: 0, display: 'warning', color: getSeverityColor(0) },
-  { val: 25, display: 'minor', color: getSeverityColor(25) },
-  { val: 50, display: 'major', color: getSeverityColor(50) },
-  { val: 75, display: 'critical', color: getSeverityColor(75) },
-];
 
 const optionsMap = {
   'warning': 0,
@@ -36,13 +30,20 @@ const optionsMap = {
   'critical': 75,
 };
 
+const SEVERITY_OPTIONS = [
+  { val: 0, display: 'warning', color: getSeverityColor(0) },
+  { val: 25, display: 'minor', color: getSeverityColor(25) },
+  { val: 50, display: 'major', color: getSeverityColor(50) },
+  { val: 75, display: 'critical', color: getSeverityColor(75) },
+];
+
 function optionValueToThreshold(value) {
   // Get corresponding threshold object with required display and val properties from the specified value.
-  let threshold = OPTIONS.find(opt => (opt.val === value));
+  let threshold = SEVERITY_OPTIONS.find(opt => (opt.val === value));
 
   // Default to warning if supplied value doesn't map to one of the options.
   if (threshold === undefined) {
-    threshold = OPTIONS[0];
+    threshold = SEVERITY_OPTIONS[0];
   }
 
   return threshold;
@@ -53,17 +54,26 @@ class SelectSeverity extends Component {
     super(props);
 
     // Restore the threshold from the state, or default to warning.
-    this.mlSelectSeverityService = this.props.mlSelectSeverityService;
-    const thresholdState = this.mlSelectSeverityService.state.get('threshold');
-    const thresholdValue = _.get(thresholdState, 'val', 0);
-    const threshold = optionValueToThreshold(thresholdValue);
-    // set initial selected option equal to threshold value
-    const selectedOption = OPTIONS.find(opt => (opt.val === threshold.val));
-    this.mlSelectSeverityService.state.set('threshold', threshold);
+    if (this.props.mlSelectSeverityService) {
+      this.mlSelectSeverityService = this.props.mlSelectSeverityService;
+    }
 
     this.state = {
-      valueDisplay: selectedOption.display,
+      valueDisplay: SEVERITY_OPTIONS[0].display,
     };
+  }
+
+  componentDidMount() {
+    // set initial state from service if available
+    if (this.mlSelectSeverityService !== undefined) {
+      const thresholdState = this.mlSelectSeverityService.state.get('threshold');
+      const thresholdValue = _.get(thresholdState, 'val', 0);
+      const threshold = optionValueToThreshold(thresholdValue);
+      // set initial selected option equal to threshold value
+      const selectedOption = SEVERITY_OPTIONS.find(opt => (opt.val === threshold.val));
+      this.mlSelectSeverityService.state.set('threshold', threshold);
+      this.setState({ valueDisplay: selectedOption.display, });
+    }
   }
 
   onChange = (valueDisplay) => {
@@ -71,11 +81,16 @@ class SelectSeverity extends Component {
       valueDisplay: valueDisplay,
     });
     const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
-    this.mlSelectSeverityService.state.set('threshold', threshold).changed();
+
+    if (this.mlSelectSeverityService !== undefined) {
+      this.mlSelectSeverityService.state.set('threshold', threshold).changed();
+    } else {
+      this.props.onChangeHandler(threshold);
+    }
   }
 
   getOptions = () =>
-    OPTIONS.map(({ color, display, val }) => ({
+    SEVERITY_OPTIONS.map(({ color, display, val }) => ({
       value: display,
       inputDisplay: (
         <Fragment>
@@ -103,6 +118,7 @@ class SelectSeverity extends Component {
 
     return (
       <EuiSuperSelect
+        className={this.props.classNames}
         hasDividers
         options={options}
         valueOfSelected={valueDisplay}
@@ -113,7 +129,15 @@ class SelectSeverity extends Component {
 }
 
 SelectSeverity.propTypes = {
-  mlSelectSeverityService: PropTypes.object.isRequired,
+  mlSelectSeverityService: PropTypes.object,
+  onChangeHandler: PropTypes.func,
+  classNames: PropTypes.string
+};
+
+SelectSeverity.defaultProps = {
+  mlSelectSeverityService: undefined,
+  onChangeHandler: () => {},
+  classNames: ''
 };
 
 export { SelectSeverity };

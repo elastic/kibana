@@ -64,6 +64,7 @@ import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -73,8 +74,14 @@ const app = uiModules.get('apps/discover', [
 ]);
 
 uiRoutes
-  .defaults(/discover/, {
-    requireDefaultIndex: true
+  .defaults(/^\/discover(\/|$)/, {
+    requireDefaultIndex: true,
+    k7Breadcrumbs: ($route, $injector) =>
+      $injector.invoke(
+        $route.current.params.id
+          ? getSavedSearchBreadcrumbs
+          : getRootBreadcrumbs
+      )
   })
   .when('/discover/:id?', {
     template: indexTemplate,
@@ -184,6 +191,8 @@ function discoverController(
     return interval.val !== 'custom';
   };
 
+  config.bindToScope($scope, 'k7design');
+
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', savedSearch.destroy);
@@ -193,8 +202,9 @@ function discoverController(
   };
 
   $scope.topNavMenu = [{
-    key: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
-      defaultMessage: 'new',
+    key: 'new',
+    label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
+      defaultMessage: 'New',
     }),
     description: i18n('kbn.discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
@@ -202,8 +212,9 @@ function discoverController(
     run: function () { kbnUrl.change('/discover'); },
     testId: 'discoverNewButton',
   }, {
-    key: i18n('kbn.discover.localMenu.saveTitle', {
-      defaultMessage: 'save',
+    key: 'save',
+    label: i18n('kbn.discover.localMenu.saveTitle', {
+      defaultMessage: 'Save',
     }),
     description: i18n('kbn.discover.localMenu.saveSearchDescription', {
       defaultMessage: 'Save Search',
@@ -239,8 +250,9 @@ function discoverController(
       showSaveModal(saveModal);
     }
   }, {
-    key: i18n('kbn.discover.localMenu.openTitle', {
-      defaultMessage: 'open',
+    key: 'open',
+    label: i18n('kbn.discover.localMenu.openTitle', {
+      defaultMessage: 'Open',
     }),
     description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
       defaultMessage: 'Open Saved Search',
@@ -254,8 +266,9 @@ function discoverController(
       });
     }
   }, {
-    key: i18n('kbn.discover.localMenu.shareTitle', {
-      defaultMessage: 'share',
+    key: 'share',
+    label: i18n('kbn.discover.localMenu.shareTitle', {
+      defaultMessage: 'Share',
     }),
     description: i18n('kbn.discover.localMenu.shareSearchDescription', {
       defaultMessage: 'Share Search',
@@ -278,8 +291,9 @@ function discoverController(
       });
     }
   }, {
-    key: i18n('kbn.discover.localMenu.inspectTitle', {
-      defaultMessage: 'inspect',
+    key: 'inspect',
+    label: i18n('kbn.discover.localMenu.inspectTitle', {
+      defaultMessage: 'Inspect',
     }),
     description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
       defaultMessage: 'Open Inspector for search',
@@ -747,7 +761,7 @@ function discoverController(
         Promise
           .resolve(responseHandler(tabifiedData))
           .then(resp => {
-            visualizeHandler.render(resp);
+            visualizeHandler.render({ value: resp });
           });
       }
 

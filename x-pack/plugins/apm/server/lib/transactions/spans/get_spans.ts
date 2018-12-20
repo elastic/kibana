@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import {
   PROCESSOR_EVENT,
   SPAN_START,
