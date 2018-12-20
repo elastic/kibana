@@ -115,7 +115,7 @@ class KueryBarView extends Component {
               <div>
                 <FormattedMessage
                   id="xpack.apm.kueryBar.indexPatternMissingWarningMessage"
-                  defaultMessage="There&#39;s no APM index pattern with the title &#34;{apmIndexPatternTitle}&#34; available.
+                  defaultMessage="There's no APM index pattern with the title &#34;{apmIndexPatternTitle}&#34; available.
                     To use the Query bar, please choose to import the APM index pattern via the {setupInstructionsLink}."
                   values={{
                     apmIndexPatternTitle,

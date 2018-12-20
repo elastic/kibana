@@ -22,9 +22,7 @@ const KEY_CODES = {
 };
 
 export const Typeahead = injectI18n(
-  class extends Component {
-    static displayName = 'Typeahead';
-
+  class Typeahead extends Component {
     static propTypes = {
       initialValue: PropTypes.string,
       isLoading: PropTypes.bool,
@@ -189,7 +187,7 @@ export const Typeahead = injectI18n(
                 {
                   id: 'xpack.apm.kueryBar.searchPlaceholder',
                   defaultMessage:
-                    'Search transactions and errors... (E.g. {queryExample})'
+                    'Search transactions and errors… (E.g. {queryExample})'
                 },
                 {
                   queryExample:
