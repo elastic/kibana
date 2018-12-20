@@ -21,9 +21,9 @@ const mapDispatchToProps = dispatch => ({
   duplicateElement: (pageId, selectedElement) => () => {
     // gradually unifying code with copy/paste
     // todo: more unification w/ copy/paste; group cloning
-    const newElement = cloneSubgraphs([selectedElement])[0];
-    dispatch(insertNodes(newElement, pageId));
-    dispatch(selectElement(newElement.id));
+    const newElements = cloneSubgraphs([selectedElement]);
+    dispatch(insertNodes(newElements, pageId));
+    dispatch(selectElement(newElements[0].id));
   },
   elementLayer: (pageId, selectedElement) => movement =>
     dispatch(

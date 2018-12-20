@@ -122,15 +122,19 @@ export const elementsReducer = handleActions(
         trimElement(element)
       );
     },
-    [actions.insertNodes]: (workpadState, { payload: { pageId, element } }) => {
+    [actions.insertNodes]: (workpadState, { payload: { pageId, elements } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) {
         return workpadState;
       }
-      return push(
-        workpadState,
-        ['pages', pageIndex, getLocation(element.position.type)],
-        trimElement(element)
+      return elements.reduce(
+        (state, element) =>
+          push(
+            state,
+            ['pages', pageIndex, getLocation(element.position.type)],
+            trimElement(element)
+          ),
+        workpadState
       );
     },
     [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {

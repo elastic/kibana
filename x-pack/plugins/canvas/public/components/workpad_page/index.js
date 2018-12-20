@@ -28,7 +28,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    insertNodes: pageId => selectedElement => dispatch(insertNodes(selectedElement, pageId)),
+    insertNodes: pageId => selectedElements => dispatch(insertNodes(selectedElements, pageId)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
     selectElement: selectedElement => dispatch(selectElement(selectedElement)),
   };
@@ -155,7 +155,7 @@ export const WorkpadPage = compose(
           const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
           if (clonedElements) {
             // first clone and persist the new node(s)
-            clonedElements.map(element => insertNodes(page.id)(element));
+            insertNodes(page.id)(clonedElements);
             // then select the cloned node
             if (rootShapes.length) {
               if (selectedElements.length > 1) {

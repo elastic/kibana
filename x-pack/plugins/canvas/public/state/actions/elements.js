@@ -192,19 +192,21 @@ export const fetchAllRenderables = createThunk(
   }
 );
 
-export const insertNodes = createThunk('insertNodes', ({ dispatch, type }, element, pageId) => {
-  const newElement = cloneDeep(element);
-  // move the root element so users can see that it was added
-  newElement.position.top = newElement.position.top + 10;
-  newElement.position.left = newElement.position.left + 10;
+export const insertNodes = createThunk('insertNodes', ({ dispatch, type }, elements, pageId) => {
   const _insertNodes = createAction(type);
-  dispatch(_insertNodes({ pageId, element: newElement }));
+  const newElements = elements.map(cloneDeep);
+  // move the root element so users can see that it was added
+  newElements.forEach(newElement => {
+    newElement.position.top = newElement.position.top + 10;
+    newElement.position.left = newElement.position.left + 10;
+  });
+  dispatch(_insertNodes({ pageId, elements: newElements }));
 
-  // refresh all elements if there's a filter, otherwise just render the new element
-  if (element.filter) {
+  // refresh all elements just once per `insertNodes call` if there's a filter on any, otherwise just render the new element
+  if (elements.some(element => element.filter)) {
     dispatch(fetchAllRenderables());
   } else {
-    dispatch(fetchRenderable(newElement));
+    newElements.forEach(newElement => dispatch(fetchRenderable(newElement)));
   }
 });
 
