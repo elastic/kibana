@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiBasicTable, EuiButton } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { ReindexButton } from './reindex';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
@@ -17,7 +18,8 @@ export interface IndexDeprecationDetails {
   details?: string;
   actions?: Array<{
     label: string;
-    url: string;
+    url?: string;
+    reindex?: boolean;
   }>;
 }
 
@@ -146,12 +148,16 @@ export class IndexDeprecationTableUI extends React.Component<
     return {
       actions: actions.map((action, idx) => ({
         render(index: IndexDeprecationDetails) {
-          const { url, label } = index.actions![idx];
-          return (
-            <EuiButton size="s" href={url} target="_blank">
-              {label}
-            </EuiButton>
-          );
+          const { url, label, reindex } = index.actions![idx];
+          if (reindex) {
+            return <ReindexButton indexName={index.index} />;
+          } else {
+            return (
+              <EuiButton size="s" href={url} target="_blank">
+                {label}
+              </EuiButton>
+            );
+          }
         },
       })),
     };

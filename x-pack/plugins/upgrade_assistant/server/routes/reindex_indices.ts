@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { Server } from 'hapi';
 
+import { createTestHandler } from 'x-pack/plugins/spaces/server/routes/api/__fixtures__';
 import { reindexServiceFactory, ReindexStatus } from '../lib/reindex_indices';
 
 export function registerReindexIndicesRoutes(server: Server) {
@@ -15,8 +16,8 @@ export function registerReindexIndicesRoutes(server: Server) {
 
   // Start reindex for an index
   server.route({
-    path: `${BASE_PATH}/{indexName}/start`,
-    method: 'GET',
+    path: `${BASE_PATH}/{indexName}`,
+    method: 'POST',
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
@@ -44,8 +45,33 @@ export function registerReindexIndicesRoutes(server: Server) {
 
   // Get status
   server.route({
-    path: `${BASE_PATH}/{indexName}/status`,
+    path: `${BASE_PATH}/{indexName}`,
     method: 'GET',
+    async handler(request) {
+      const client = request.getSavedObjectsClient();
+      const { indexName } = request.params;
+      const reindexService = reindexServiceFactory(client, callWithRequest, request);
+
+      let reindexOp = await reindexService.findReindexOperation(indexName);
+
+      // If the reindex has not been completed yet, poll ES for status and attempt to move to next state.
+      // TODO: ignore version conflicts
+      try {
+        if (reindexOp.attributes.status === ReindexStatus.reindexStarted) {
+          reindexOp = await reindexService.processNextStep(reindexOp);
+        }
+      } catch {
+        // noop
+      }
+
+      return { status: reindexOp.attributes.status };
+    },
+  });
+
+  // Complete the process after reindex is done.
+  server.route({
+    path: `${BASE_PATH}/{indexName}`,
+    method: 'PUT',
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
@@ -53,14 +79,14 @@ export function registerReindexIndicesRoutes(server: Server) {
 
       try {
         let reindexOp = await reindexService.findReindexOperation(indexName);
-        // First run an update to check if the reindexing is still in progress.
-        reindexOp = await reindexService.processNextStep(reindexOp);
 
-        // If its completed, finish the rest of the process.
-        if (reindexOp.attributes.status === ReindexStatus.reindexCompleted) {
-          while (reindexOp.attributes.status < ReindexStatus.completed) {
-            reindexOp = await reindexService.processNextStep(reindexOp);
-          }
+        if (reindexOp.attributes.status < ReindexStatus.reindexCompleted) {
+          return Boom.badRequest(`Index has not finished reindexing yet.`);
+        }
+
+        // Finish the rest of the process.
+        while (reindexOp.attributes.status < ReindexStatus.completed) {
+          reindexOp = await reindexService.processNextStep(reindexOp);
         }
 
         return { status: reindexOp.attributes.status };

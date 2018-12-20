@@ -10,6 +10,7 @@ import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_apis';
 import { GroupByOption } from '../../../types';
 
+import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { COLOR_MAP, LEVEL_MAP } from '../constants';
 import { DeprecationCell } from './cell';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
@@ -65,6 +66,10 @@ interface IndexDeprecationProps {
  * Shows a single deprecation and table of affected indices with details for each index.
  */
 const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
+  if (deprecation.message === `Index created before ${CURRENT_MAJOR_VERSION}.0`) {
+    indices = indices.map(i => ({ ...i, actions: [{ label: 'Reindex', reindex: true }] }));
+  }
+
   return (
     <DeprecationCell docUrl={deprecation.url}>
       <IndexDeprecationTable indices={indices} />
