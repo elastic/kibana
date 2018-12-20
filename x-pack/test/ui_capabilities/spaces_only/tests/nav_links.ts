@@ -33,13 +33,80 @@ export default function navLinksTests({ getService }: TestInvoker) {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
         switch (scenario.id) {
-          case 'space_with_all_features':
-            expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.all());
+          case 'everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
-          case 'space_with_no_features':
-            expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.only('management'));
+          case 'nothing_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            break;
+          case 'advanced_settings_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            break;
+          case 'apm_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('apm'));
+            break;
+          case 'canvas_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('canvas'));
+            break;
+          case 'dashboard_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('dashboard'));
+            break;
+          case 'dev_tools_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('devTools'));
+            break;
+          case 'discover_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('discover'));
+            break;
+          case 'graph_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('graph'));
+            break;
+          case 'infrastructure_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('infrastructure'));
+            break;
+          case 'logs_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('logs'));
+            break;
+          case 'ml_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('ml'));
+            break;
+          case 'monitoring_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('monitoring'));
+            break;
+          case 'timelion_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('timelion'));
+            break;
+          case 'visualize_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('timelion'));
             break;
           default:
             throw new UnreachableError(scenario);

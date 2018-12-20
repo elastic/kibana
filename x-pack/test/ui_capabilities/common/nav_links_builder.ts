@@ -9,7 +9,7 @@ class NavLinks {
   public canvas = 'canvas';
   public graph = 'graph';
   public infrastructure = 'infra:home';
-  public logging = 'infra:logs';
+  public logs = 'infra:logs';
   public dashboard = 'kibana:dashboard';
   public devTools = 'kibana:dev_tools';
   public discover = 'kibana:discover';
@@ -36,6 +36,9 @@ const build = (callback: (featureId: FeatureId) => boolean) => {
 export const navLinksBuilder = {
   all() {
     return build(() => true);
+  },
+  except(...feature: FeatureId[]): Record<string, boolean> {
+    return build(featureId => !feature.includes(featureId as FeatureId));
   },
   none() {
     return build(() => false);
