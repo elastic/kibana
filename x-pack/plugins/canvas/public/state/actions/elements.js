@@ -192,28 +192,6 @@ export const fetchAllRenderables = createThunk(
   }
 );
 
-export const duplicateElement = createThunk(
-  'duplicateElement',
-  ({ dispatch, type }, element, pageId) => {
-    const newElement = { ...getDefaultElement(), ...getBareElement(element) };
-    // move the element so users can see that it was added
-    newElement.position.top = newElement.position.top + 10;
-    newElement.position.left = newElement.position.left + 10;
-    const _duplicateElement = createAction(type);
-    dispatch(_duplicateElement({ pageId, element: newElement }));
-
-    // refresh all elements if there's a filter, otherwise just render the new element
-    if (element.filter) {
-      dispatch(fetchAllRenderables());
-    } else {
-      dispatch(fetchRenderable(newElement));
-    }
-
-    // select the new element
-    dispatch(selectElement(newElement.id));
-  }
-);
-
 export const rawDuplicateElement = createThunk(
   'rawDuplicateElement',
   ({ dispatch, type }, element, pageId) => {

@@ -12,7 +12,6 @@ import defaultConfiguration from '../../lib/aeroelastic/config';
 import {
   addElement,
   removeElements,
-  duplicateElement,
   rawDuplicateElement,
   elementLayer,
   setMultiplePositions,
@@ -332,7 +331,6 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
       case removeElements.toString():
       case addElement.toString():
-      case duplicateElement.toString():
       case rawDuplicateElement.toString():
       case elementLayer.toString():
       case setMultiplePositions.toString():
