@@ -7,8 +7,7 @@
 import Boom from 'boom';
 import { Server } from 'hapi';
 
-import { createTestHandler } from 'x-pack/plugins/spaces/server/routes/api/__fixtures__';
-import { reindexServiceFactory, ReindexStatus } from '../lib/reindex_indices';
+import { reindexServiceFactory, ReindexStep } from '../lib/reindex_indices';
 
 export function registerReindexIndicesRoutes(server: Server) {
   const BASE_PATH = '/api/upgrade_assistant/reindex';
@@ -28,11 +27,11 @@ export function registerReindexIndicesRoutes(server: Server) {
         let reindexOp = await reindexService.createReindexOperation(indexName);
 
         // Keep processing until the reindex has started.
-        while (reindexOp.attributes.status < ReindexStatus.reindexStarted) {
+        while (reindexOp.attributes.lastCompletedStep < ReindexStep.reindexStarted) {
           reindexOp = await reindexService.processNextStep(reindexOp);
         }
 
-        return { status: reindexOp.attributes.status };
+        return reindexOp.attributes;
       } catch (e) {
         if (!e.isBoom) {
           return Boom.boomify(e, { statusCode: 500 });
@@ -57,14 +56,14 @@ export function registerReindexIndicesRoutes(server: Server) {
       // If the reindex has not been completed yet, poll ES for status and attempt to move to next state.
       // TODO: ignore version conflicts
       try {
-        if (reindexOp.attributes.status === ReindexStatus.reindexStarted) {
+        if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
           reindexOp = await reindexService.processNextStep(reindexOp);
         }
       } catch {
         // noop
       }
 
-      return { status: reindexOp.attributes.status };
+      return reindexOp.attributes;
     },
   });
 
@@ -80,16 +79,16 @@ export function registerReindexIndicesRoutes(server: Server) {
       try {
         let reindexOp = await reindexService.findReindexOperation(indexName);
 
-        if (reindexOp.attributes.status < ReindexStatus.reindexCompleted) {
+        if (reindexOp.attributes.lastCompletedStep < ReindexStep.reindexCompleted) {
           return Boom.badRequest(`Index has not finished reindexing yet.`);
         }
 
         // Finish the rest of the process.
-        while (reindexOp.attributes.status < ReindexStatus.completed) {
+        while (reindexOp.attributes.lastCompletedStep < ReindexStep.aliasCreated) {
           reindexOp = await reindexService.processNextStep(reindexOp);
         }
 
-        return { status: reindexOp.attributes.status };
+        return reindexOp.attributes;
       } catch (e) {
         return Boom.boomify(e, { statusCode: 500 });
       }

@@ -21,7 +21,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { ReindexStatus } from 'x-pack/plugins/upgrade_assistant/server/lib/reindex_indices';
+import {
+  ReindexOperation,
+  ReindexStatus,
+  ReindexStep,
+} from 'x-pack/plugins/upgrade_assistant/server/lib/reindex_indices';
 import { LoadingState } from '../../../../types';
 
 const POLL_INTERVAL = 1000;
@@ -37,34 +41,49 @@ const APIClient = axios.create({
   },
 });
 
-const ReindexProgress: React.StatelessComponent<{ status?: ReindexStatus }> = ({ status = -1 }) => (
-  <EuiSteps
-    steps={
-      [
-        {
-          title: 'Index set to read-only',
-          status: status >= ReindexStatus.readonly ? 'complete' : 'incomplete',
-        },
-        {
-          title: 'New index created',
-          status: status >= ReindexStatus.newIndexCreated ? 'complete' : 'incomplete',
-        },
-        {
-          title: 'Reindexing started',
-          status: status >= ReindexStatus.reindexStarted ? 'complete' : 'incomplete',
-        },
-        {
-          title: 'Reindex completed',
-          status: status >= ReindexStatus.reindexCompleted ? 'complete' : 'incomplete',
-        },
-        {
-          title: 'Aliases switched over',
-          status: status === ReindexStatus.completed ? 'complete' : 'incomplete',
-        },
-      ] as EuiStepsProps['steps']
+const ReindexProgress: React.StatelessComponent<{
+  step?: ReindexStep;
+  reindexStatus?: ReindexStatus;
+}> = ({ step = -1, reindexStatus }) => {
+  const getStatus = (thisStep: ReindexStep): 'complete' | 'incomplete' | 'danger' => {
+    if (reindexStatus === undefined) {
+      return 'incomplete';
+    } else if (reindexStatus === ReindexStatus.failed && step + 1 === thisStep) {
+      return 'danger';
+    } else {
+      return step >= thisStep ? 'complete' : 'incomplete';
     }
-  />
-);
+  };
+
+  return (
+    <EuiSteps
+      steps={
+        [
+          {
+            title: 'Index set to read-only',
+            status: getStatus(ReindexStep.readonly),
+          },
+          {
+            title: 'New index created',
+            status: getStatus(ReindexStep.newIndexCreated),
+          },
+          {
+            title: 'Reindexing started',
+            status: getStatus(ReindexStep.reindexStarted),
+          },
+          {
+            title: 'Reindex completed',
+            status: getStatus(ReindexStep.reindexCompleted),
+          },
+          {
+            title: 'Aliases switched over',
+            status: getStatus(ReindexStep.aliasCreated),
+          },
+        ] as EuiStepsProps['steps']
+      }
+    />
+  );
+};
 
 interface ReindexFlyoutProps {
   indexName: string;
@@ -73,7 +92,8 @@ interface ReindexFlyoutProps {
 
 interface ReindexFlyoutState {
   loadingState: LoadingState;
-  status?: ReindexStatus;
+  reindexStatus?: ReindexStatus;
+  step?: ReindexStep;
 }
 
 const delay = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
@@ -93,7 +113,10 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
 
   public render() {
     const { indexName, closeFlyout } = this.props;
-    const { status } = this.state;
+    const { loadingState, reindexStatus, step } = this.state;
+
+    const loading =
+      loadingState === LoadingState.Loading || reindexStatus === ReindexStatus.inProgress;
 
     return (
       <EuiPortal>
@@ -116,16 +139,15 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
             <EuiButton
               color="warning"
               onClick={this.startReindex}
-              disabled={Boolean(status && status >= 0)}
+              disabled={loading || reindexStatus === ReindexStatus.completed}
             >
+              {/* TODO: Show different text if last attempt failed? */}
               Begin reindex
             </EuiButton>
             <EuiSpacer />
-            {Boolean(status !== undefined && status < ReindexStatus.completed) && (
-              <EuiProgress size="xs" />
-            )}
+            {loading && <EuiProgress size="xs" />}
             <EuiSpacer />
-            <ReindexProgress status={status} />
+            <ReindexProgress step={step} reindexStatus={reindexStatus} />
           </EuiFlyoutBody>
         </EuiFlyout>
       </EuiPortal>
@@ -136,9 +158,9 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
     const { indexName } = this.props;
 
     // Optimistically assume we get started.
-    this.setState({ status: ReindexStatus.created });
+    this.setState({ reindexStatus: ReindexStatus.inProgress, step: ReindexStep.created });
 
-    const request = APIClient.post(
+    const request = APIClient.post<ReindexOperation>(
       chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
     );
 
@@ -146,21 +168,22 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
     this.checkStatus(true);
 
     const resp = await request;
-    this.updateStatus(resp.data.status);
+    this.updateReindexState(resp.data);
   };
 
-  private checkStatus = async (keepPollingOnFail: boolean): Promise<void> => {
+  private checkStatus = async (poll: boolean): Promise<void> => {
     const { indexName } = this.props;
 
     try {
-      const resp = await APIClient.get(
+      const resp = await APIClient.get<ReindexOperation>(
         chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
       );
-      const { status } = resp.data;
-      this.updateStatus(status);
+      this.updateReindexState(resp.data);
 
       // If still not complete, poll again for status after POLL_INTERVAL
-      if (status < ReindexStatus.reindexCompleted) {
+      if (resp.data.status !== ReindexStatus.inProgress) {
+        return;
+      } else if (resp.data.lastCompletedStep < ReindexStep.reindexCompleted) {
         await delay(POLL_INTERVAL);
         return this.checkStatus(true);
       } else {
@@ -168,8 +191,8 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
         return this.completeReindex();
       }
     } catch (e) {
-      if (e.response && e.response.status !== 404) {
-        if (keepPollingOnFail) {
+      if (e.response && e.response.status === 404) {
+        if (poll) {
           // for 404s, just check again
           await delay(POLL_INTERVAL);
           return this.checkStatus(true);
@@ -183,19 +206,21 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
   private completeReindex = async (): Promise<void> => {
     const { indexName } = this.props;
 
-    const resp = await APIClient.put(
+    const resp = await APIClient.put<ReindexOperation>(
       chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
     );
 
-    this.updateStatus(resp.data.status);
+    // TODO: when complete, or on close?, refresh the depreaction list
+    this.updateReindexState(resp.data);
   };
 
-  private updateStatus = (newStatus: ReindexStatus) => {
+  private updateReindexState = (reindexOp: ReindexOperation) => {
     // Ensure no request races make the checklist go backwards.
-    if (this.state.status && this.state.status >= newStatus) {
+    if (this.state.step && this.state.step > reindexOp.lastCompletedStep) {
       return;
     }
-    this.setState({ status: newStatus });
+
+    this.setState({ step: reindexOp.lastCompletedStep, reindexStatus: reindexOp.status });
   };
 }
 

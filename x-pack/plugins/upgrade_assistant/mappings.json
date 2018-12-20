@@ -10,6 +10,9 @@
       "status": {
         "type": "integer"
       },
+      "lastCompletedStep": {
+        "type": "integer"
+      },
       "locked": {
         "type": "text"
       },
