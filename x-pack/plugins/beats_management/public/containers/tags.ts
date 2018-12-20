@@ -42,4 +42,12 @@ export class TagsContainer extends Container<ContainerState> {
     }
     return success;
   };
+
+  public upsertTag = async (tag: BeatTag) => {
+    const beatTag = await this.libs.tags.upsertTag(tag);
+    if (beatTag !== null) {
+      this.reload(this.query);
+    }
+    return beatTag !== null;
+  };
 }
