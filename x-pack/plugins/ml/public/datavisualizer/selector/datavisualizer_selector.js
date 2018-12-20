@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -22,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { isFullLicense } from '../../license/check_license';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function startTrialDescription() {
   return (
@@ -48,7 +48,7 @@ function startTrialDescription() {
 }
 
 
-export function DatavisualizerSelector() {
+export const DatavisualizerSelector = injectI18n(function (props) {
 
   const startTrialVisible = (isFullLicense() === false);
 
@@ -96,12 +96,10 @@ export function DatavisualizerSelector() {
                   defaultMessage="Import data from a log file. You can upload files up to 100 MB."
                 />
               }
-              betaBadgeLabel={
-                <FormattedMessage
-                  id="xpack.ml.datavisualizer.selector.experimentalBadgeLabel"
-                  defaultMessage="Experimental"
-                />
-              }
+              betaBadgeLabel={props.intl.formatMessage({
+                id: 'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
+                defaultMessage: 'Experimental'
+              })}
               betaBadgeTooltipContent={
                 <FormattedMessage
                   id="xpack.ml.datavisualizer.selector.experimentalBadgeTooltipLabel"
@@ -183,4 +181,4 @@ export function DatavisualizerSelector() {
       </EuiPageBody>
     </EuiPage>
   );
-}
+});
