@@ -119,5 +119,5 @@ Click a shard's Expand button to view the aggregation details. Hover over an
 aggregation row to view the timing breakdown.
 
 For more information about how the Search Profiler works, how timings are calculated, and
-how to interpret various results, see the
-{ref}/_profiling_queries.html[Profile Reference Documentation]
+how to interpret various results, see 
+{ref}/search-profile-queries.html[Profiling queries].

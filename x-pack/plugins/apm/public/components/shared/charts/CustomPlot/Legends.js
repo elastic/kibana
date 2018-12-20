@@ -20,7 +20,9 @@ import {
 const Container = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  padding-top: 15px;
 
   div {
     margin-right: ${px(unit)};
