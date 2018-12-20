@@ -65,6 +65,25 @@ export function initTransactionGroupsApi(server: Server) {
 
   server.route({
     method: 'GET',
+    path: `/api/apm/services/{serviceName}/transaction_groups/charts`,
+    options: {
+      validate: {
+        query: withDefaultValidators()
+      }
+    },
+    handler: req => {
+      const setup = setupRequest(req);
+      const { serviceName } = req.params;
+
+      return getChartsData({
+        serviceName,
+        setup
+      }).catch(defaultErrorHandler);
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: `/api/apm/services/{serviceName}/transaction_groups/{transactionType}/{transactionName}/charts`,
     options: {
       validate: {
