@@ -81,6 +81,7 @@ module.exports = function({ name }) {
     move: {
       gitignore: '.gitignore',
       eslintrc: '.eslintrc',
+      'package_template.json': 'package.json',
     },
     data: answers =>
       Object.assign(
