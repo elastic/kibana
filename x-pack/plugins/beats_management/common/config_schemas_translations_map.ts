@@ -5,18 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cloneDeep } from 'lodash';
-import { supportedConfigs } from './config_schemas';
-import { YamlConfigSchema } from './lib/types';
+import { ConfigBlockSchema } from './domain_types';
 
-interface ConfigSchema {
-  text: string;
-  value: string;
-  config: YamlConfigSchema[];
-}
-
-let translatedConfigs: ConfigSchema[];
-const supportedConfigLabelsMap = new Map<string, string>([
+export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'filebeatInputConfig.paths.ui.label',
     i18n.translate('xpack.beatsManagement.filebeatInputConfig.pathsLabel', {
@@ -195,13 +186,13 @@ const supportedConfigLabelsMap = new Map<string, string>([
   ],
 
   [
-    'supportedConfigs.filebeatInput.text',
+    'supportedConfigs.filebeat.input.text',
     i18n.translate('xpack.beatsManagement.tagConfig.filebeatInputLabel', {
       defaultMessage: 'Filebeat Input',
     }),
   ],
   [
-    'supportedConfigs.filebeatModule.text',
+    'supportedConfigs.filebeat.modules.text',
     i18n.translate('xpack.beatsManagement.tagConfig.filebeatModuleLabel', {
       defaultMessage: 'Filebeat Module',
     }),
@@ -220,28 +211,31 @@ const supportedConfigLabelsMap = new Map<string, string>([
   ],
 ]);
 
-export const getSupportedConfig = () => {
+export let translatedConfigs: ConfigBlockSchema[];
+export const translateConfigSchema = (schemas: ConfigBlockSchema[]) => {
   if (translatedConfigs) {
     return translatedConfigs;
   }
 
-  translatedConfigs = cloneDeep(supportedConfigs);
-  translatedConfigs.forEach(({ text, config }, index) => {
-    if (text) {
-      translatedConfigs[index].text = supportedConfigLabelsMap.get(text) || '';
-    }
+  translatedConfigs = schemas.map(schema => {
+    schema.name = supportedConfigLabelsMap.get(`supportedConfigs.${schema.id}.text`) || schema.name;
 
-    config.forEach(yanlConfig => {
-      if (yanlConfig.ui.label) {
-        yanlConfig.ui.label = supportedConfigLabelsMap.get(yanlConfig.ui.label) || '';
+    schema.configs = schema.configs.map(configBlock => {
+      if (configBlock.ui.label) {
+        configBlock.ui.label =
+          supportedConfigLabelsMap.get(configBlock.ui.labelId || '') || configBlock.ui.label;
       }
-      if (yanlConfig.ui.helpText) {
-        yanlConfig.ui.helpText = supportedConfigLabelsMap.get(yanlConfig.ui.helpText);
+      if (configBlock.ui.helpText) {
+        configBlock.ui.helpText =
+          supportedConfigLabelsMap.get(configBlock.ui.helpTextId || '') || configBlock.ui.helpText;
       }
-      if (yanlConfig.error) {
-        yanlConfig.error = supportedConfigLabelsMap.get(yanlConfig.error) || '';
+      if (configBlock.error) {
+        configBlock.error =
+          supportedConfigLabelsMap.get(configBlock.errorId || '') || configBlock.error;
       }
+      return configBlock;
     });
+    return schema;
   });
 
   return translatedConfigs;

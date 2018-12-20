@@ -7,8 +7,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiCodeEditor,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,17 +16,14 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   EuiHorizontalRule,
-  // @ts-ignore
-  EuiSearchBar,
   EuiSelect,
-  // @ts-ignore
-  EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { configBlockSchemas } from '../../../../common/config_schemas';
+import { translateConfigSchema } from '../../../../common/config_schemas_translations_map';
 import { ConfigurationBlock } from '../../../../common/domain_types';
-import { getSupportedConfig } from '../../../config_schemas_translations_map';
 import { ConfigForm } from './config_form';
 
 interface ComponentProps {
@@ -41,7 +36,7 @@ interface ComponentProps {
 class ConfigViewUi extends React.Component<ComponentProps, any> {
   private form = React.createRef<any>();
   private editMode: boolean;
-  private supportedConfigs = getSupportedConfig();
+  private schema = translateConfigSchema(configBlockSchemas);
   constructor(props: any) {
     super(props);
     this.editMode = props.configBlock !== undefined;
@@ -49,7 +44,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
     this.state = {
       valid: false,
       configBlock: props.configBlock || {
-        type: this.supportedConfigs[0].value,
+        type: this.schema[0].id,
       },
     };
   }
@@ -64,6 +59,8 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
   };
   public render() {
     const { intl } = this.props;
+    const thisConfigSchema = this.schema.find(s => this.state.configBlock.type === s.id);
+
     return (
       <EuiFlyout onClose={this.props.onClose}>
         <EuiFlyoutHeader>
@@ -100,7 +97,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
             }
           >
             <EuiSelect
-              options={this.supportedConfigs}
+              options={this.schema.map(s => ({ value: s.id, text: s.name }))}
               value={this.state.configBlock.type}
               disabled={this.editMode}
               onChange={this.onValueChange('type')}
@@ -129,9 +126,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
               id="xpack.beatsManagement.tagConfig.configurationTypeText"
               defaultMessage="{configType} configuration"
               values={{
-                configType: (this.supportedConfigs.find(
-                  config => this.state.configBlock.type === config.value
-                ) as any).text,
+                configType: thisConfigSchema ? thisConfigSchema.name : 'Unknown',
               }}
             />
           </h3>
@@ -154,16 +149,8 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
             canSubmit={canIt => this.setState({ valid: canIt })}
             ref={this.form}
             values={this.state.configBlock}
-            id={
-              (this.supportedConfigs.find(
-                config => this.state.configBlock.type === config.value
-              ) as any).value
-            }
-            schema={
-              (this.supportedConfigs.find(
-                config => this.state.configBlock.type === config.value
-              ) as any).config
-            }
+            id={thisConfigSchema ? thisConfigSchema.name : 'Undefined'}
+            schema={thisConfigSchema ? thisConfigSchema.configs : []}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

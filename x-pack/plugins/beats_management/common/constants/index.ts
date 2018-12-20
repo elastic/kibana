@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
+export { UNIQUENESS_ENFORCING_TYPES } from './configuration_blocks';
 export { INDEX_NAMES } from './index_names';
-export { UNIQUENESS_ENFORCING_TYPES, ConfigurationBlockTypes } from './configuration_blocks';
-export const BASE_PATH = '/management/beats_management';
+export { PLUGIN } from './plugin';
+export { LICENSES, REQUIRED_LICENSES, REQUIRED_ROLES } from './security';
 export { TABLE_CONFIG } from './table';
-export { REQUIRED_ROLES, LICENSES, REQUIRED_LICENSES } from './security';
+export const BASE_PATH = '/management/beats_management';

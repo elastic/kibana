@@ -5,8 +5,8 @@
  */
 
 import Joi from 'joi';
-import { get, values } from 'lodash';
-import { ConfigurationBlockTypes, REQUIRED_LICENSES } from '../../../common/constants';
+import { get } from 'lodash';
+import { REQUIRED_LICENSES } from '../../../common/constants';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
@@ -24,17 +24,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
       }),
       payload: Joi.object({
         color: Joi.string(),
-        configuration_blocks: Joi.array().items(
-          Joi.object({
-            configs: Joi.array()
-              .items(Joi.object())
-              .required(),
-            description: Joi.string().allow(''),
-            type: Joi.string()
-              .only(values(ConfigurationBlockTypes))
-              .required(),
-          })
-        ),
+        configuration_blocks: Joi.array().items(Joi.object({})),
       }).allow(null),
     },
   },

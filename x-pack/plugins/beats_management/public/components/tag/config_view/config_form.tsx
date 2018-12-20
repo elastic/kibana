@@ -9,8 +9,7 @@ import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
 import yaml from 'js-yaml';
 import { get } from 'lodash';
 import React from 'react';
-import { ConfigurationBlock } from '../../../../common/domain_types';
-import { YamlConfigSchema } from '../../../lib/types';
+import { BeatConfigSchema, ConfigurationBlock } from '../../../../common/domain_types';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,
@@ -58,7 +57,7 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
 interface ComponentProps {
   intl: InjectedIntl;
   values: ConfigurationBlock;
-  schema: YamlConfigSchema[];
+  schema: BeatConfigSchema[];
   id: string;
   onSubmit?: (modal: any) => any;
   canSubmit(canIt: boolean): any;

@@ -18,13 +18,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { flatten, get } from 'lodash';
 import React from 'react';
+import { configBlockSchemas } from 'x-pack/plugins/beats_management/common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
-import { getSupportedConfig } from '../../config_schemas_translations_map';
 
 interface PageProps {
   beat: CMPopulatedBeat;
@@ -64,7 +65,9 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
           ...beat,
           ...configuration,
           displayValue: get(
-            getSupportedConfig().find(config => config.value === configuration.type),
+            translateConfigSchema(configBlockSchemas).find(
+              config => config.id === configuration.type
+            ),
             'text',
             null
           ),

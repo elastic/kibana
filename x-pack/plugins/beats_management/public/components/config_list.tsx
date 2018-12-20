@@ -8,8 +8,9 @@
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { configBlockSchemas } from '../../common/config_schemas';
+import { translateConfigSchema } from '../../common/config_schemas_translations_map';
 import { ConfigurationBlock } from '../../common/domain_types';
-import { getSupportedConfig } from '../config_schemas_translations_map';
 
 interface ComponentProps {
   configs: ConfigurationBlock[];
@@ -28,12 +29,14 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
           defaultMessage: 'Type',
         }),
         truncateText: false,
-        render: (value: string, config: ConfigurationBlock) => {
-          const type = getSupportedConfig().find((sc: any) => sc.value === config.type);
+        render: (type: string, config: ConfigurationBlock) => {
+          const translatedConfig = translateConfigSchema(configBlockSchemas).find(
+            sc => sc.id === type
+          );
 
           return (
             <EuiLink onClick={() => props.onConfigClick('edit', config)}>
-              {type ? type.text : config.type}
+              {translatedConfig ? translatedConfig.name : type}
             </EuiLink>
           );
         },

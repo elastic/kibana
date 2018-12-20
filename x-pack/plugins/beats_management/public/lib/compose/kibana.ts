@@ -11,8 +11,9 @@ import chrome from 'ui/chrome';
 // @ts-ignore not typed yet
 import { management } from 'ui/management';
 import routes from 'ui/routes';
+import { translateConfigSchema } from 'x-pack/plugins/beats_management/common/config_schemas_translations_map';
+import { configBlockSchemas } from '../../../common/config_schemas';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
-import { getSupportedConfig } from '../../config_schemas_translations_map';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
 import { RestElasticsearchAdapter } from '../adapters/elasticsearch/rest';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
@@ -33,7 +34,7 @@ export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
 
-  const tags = new TagsLib(new RestTagsAdapter(api), getSupportedConfig());
+  const tags = new TagsLib(new RestTagsAdapter(api), translateConfigSchema(configBlockSchemas));
   const tokens = new RestTokensAdapter(api);
   const beats = new BeatsLib(new RestBeatsAdapter(api), {
     tags,

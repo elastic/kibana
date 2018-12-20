@@ -8,7 +8,6 @@ import { omit } from 'lodash';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
-import { ReturnedConfigurationBlock } from './../../../common/domain_types';
 
 export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -56,24 +55,18 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       return wrapEsError(err);
     }
 
-    const configurationBlocks = tags.reduce(
-      (blocks: ReturnedConfigurationBlock[], tag: BeatTag) => {
-        blocks = blocks.concat(
-          tag.configuration_blocks.reduce(
-            (acc: ReturnedConfigurationBlock[], block: ConfigurationBlock) => {
-              acc.push({
-                ...omit(block, ['configs']),
-                config: block.configs[0],
-              });
-              return acc;
-            },
-            []
-          )
-        );
-        return blocks;
-      },
-      []
-    );
+    const configurationBlocks = tags.reduce((blocks: ConfigurationBlock[], tag: BeatTag) => {
+      blocks = blocks.concat(
+        tag.configuration_blocks.reduce((acc: ConfigurationBlock[], block: ConfigurationBlock) => {
+          acc.push({
+            ...omit(block, ['configs']),
+            config: block.config,
+          });
+          return acc;
+        }, [])
+      );
+      return blocks;
+    }, []);
 
     return {
       configuration_blocks: configurationBlocks,
