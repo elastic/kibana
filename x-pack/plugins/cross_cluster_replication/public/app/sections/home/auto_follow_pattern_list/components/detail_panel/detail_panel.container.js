@@ -7,13 +7,14 @@
 import { connect } from 'react-redux';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
-import { getSelectedAutoFollowPattern, getApiStatus, } from '../../../../../store/selectors';
+import { getSelectedAutoFollowPattern, getSelectedAutoFollowPatternId, getApiStatus, } from '../../../../../store/selectors';
 import { selectAutoFollowPattern } from '../../../../../store/actions';
 import { SECTIONS } from '../../../../../constants';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
 const mapStateToProps = (state) => ({
+  autoFollowPatternId: getSelectedAutoFollowPatternId(state),
   autoFollowPattern: getSelectedAutoFollowPattern(state),
   apiStatus: getApiStatus(scope)(state),
 });
