@@ -517,7 +517,7 @@ module
               })
               .catch((resp) => {
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.population.openJobErrorMessage', {
+                  i18n('xpack.ml.newJob.simple.population.couldNotOpenJobErrorMessage', {
                     defaultMessage: 'Could not open job: {resp}',
                     values: { resp }
                   })
@@ -584,7 +584,7 @@ module
                 .catch((resp) => {
                   // datafeed failed
                   msgs.error(
-                    i18n('xpack.ml.newJob.simple.population.startDatafeedErrorMessage', {
+                    i18n('xpack.ml.newJob.simple.population.couldNotStartDatafeedErrorMessage', {
                       defaultMessage: 'Could not start datafeed: {resp}',
                       values: { resp }
                     })

@@ -109,7 +109,7 @@
               <div ng-show="jobState !== JOB_STATE.FINISHED">
                 <h4
                   class="euiTitle euiTitle--small"
-                  i18n-id="xpack.ml.newJob.simple.population.jobDetailsLabel"
+                  i18n-id="xpack.ml.newJob.simple.population.jobDetailsTitle"
                   i18n-default-message="Job Details"
                 ></h4>
                 <div class="euiSpacer euiSpacer--s"></div>
@@ -194,7 +194,7 @@
                     class="euiButton euiButton--primary euiButton--small euiButton--fill">
                     <span
                       class="euiButton__content"
-                      i18n-id="xpack.ml.newJob.simple.population.viewResultsLabel"
+                      i18n-id="xpack.ml.newJob.simple.population.viewResultsLinkText"
                       i18n-default-message="View Results"
                     ></span>
                   </a>
@@ -290,16 +290,16 @@
                           </h4>
                         <span>
                           <span
-                            i18n-id="xpack.ml.newJob.simple.population.documentCountChart.considerUsingText"
+                            i18n-id="xpack.ml.newJob.simple.population.documentCountChart.noResultsDescription"
                             i18n-default-message="Consider using the"
-                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.documentCountChart.considerUsingText + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
+                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.documentCountChart.noResultsDescription + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
                           ></span>
                           <a
                             ng-click="setFullTimeRange()"
                             i18n-id="xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
                             i18n-default-message="full {indexPatternTitle} data"
                             i18n-values="{ indexPatternTitle: ui.indexPattern.title }"
-                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.documentCountChart.considerUsingText + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
+                            i18n-description="Part of composite text xpack.ml.newJob.simple.population.documentCountChart.noResultsDescription + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
                           ></a>
                         </span>
                       </div>
