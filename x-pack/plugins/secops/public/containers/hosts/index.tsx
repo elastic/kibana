@@ -42,7 +42,7 @@ export interface HostsComponentReduxProps {
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
 const HostsComponentQuery = pure<HostsProps>(
-  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit = 2, poll }) => (
+  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit, poll }) => (
     <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
       query={hostsQuery}
       fetchPolicy="cache-and-network"
@@ -102,9 +102,6 @@ const HostsComponentQuery = pure<HostsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => {
-  const limit = hostsLimitSelector(state);
-  return { limit };
-};
+const mapStateToProps = (state: State) => hostsLimitSelector(state);
 
 export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);

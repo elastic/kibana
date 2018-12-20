@@ -87,10 +87,7 @@ const HostsTableComponent = pure<HostsTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => {
-  const limit = defaultTo(2, hostsLimitSelector(state));
-  return { limit };
-};
+const mapStateToProps = (state: State) => hostsLimitSelector(state);
 
 export const HostsTable = connect(
   mapStateToProps,

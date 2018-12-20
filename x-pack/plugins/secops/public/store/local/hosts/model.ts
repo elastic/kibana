@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface BasicQuery {
+export interface BasicQuery {
   limit: number;
 }
 export interface InMemoryPaginationQuery extends BasicQuery {

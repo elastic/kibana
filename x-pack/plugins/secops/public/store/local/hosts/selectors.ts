@@ -7,9 +7,9 @@
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
-import { InMemoryPaginationQuery } from './model';
+import { BasicQuery, InMemoryPaginationQuery } from './model';
 
-const hostsQueryLimit = (state: State): number => state.local.hosts.query.hosts.limit;
+const hostsQueryLimit = (state: State): BasicQuery => state.local.hosts.query.hosts;
 
 const uncommonProcessesQueryLimit = (state: State): InMemoryPaginationQuery =>
   state.local.hosts.query.uncommonProcesses;
