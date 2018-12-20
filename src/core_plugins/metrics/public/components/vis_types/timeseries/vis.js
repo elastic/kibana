@@ -218,7 +218,8 @@ TimeseriesVisualization.propTypes = {
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
   visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  getConfig: PropTypes.func
 };
 
 export default TimeseriesVisualization;

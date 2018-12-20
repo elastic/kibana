@@ -97,7 +97,8 @@ GaugeVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  getConfig: PropTypes.func
 };
 
 export default visWithSplits(GaugeVisualization);

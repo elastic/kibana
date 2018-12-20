@@ -107,7 +107,8 @@ TopNVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  getConfig: PropTypes.func
 };
 
 export default TopNVisualization;
