@@ -29,7 +29,7 @@ export function initRoutes(server) {
     handler: async (request) => {
 
       if (!request.query.id) {
-        console.warn('Must supply id parameters to retrieve EMS file');
+        server.log('warning', 'Must supply id parameters to retrieve EMS file');
         return null;
       }
 
