@@ -18,49 +18,38 @@
  */
 
 import _ from 'lodash';
-import AggConfigResult from '../../vis/agg_config_result';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
-
-const getSchema = column => {
-  return _.get(column, 'aggConfig.schema.name') || _.get(column, 'aggConfig.schema');
-};
-
-const getType = column => {
-  return _.get(column, 'aggConfig.type.type') || _.get(column, 'aggConfig.type');
-};
 
 const LegacyResponseHandlerProvider = function () {
 
   return {
     name: 'legacy',
-    handler: function (table) {
+    handler: function (table, dimensions) {
       return new Promise((resolve) => {
         const converted = { tables: [] };
 
         // check if there are buckets after the first metric
-        const metricsAtAllLevels = table.columns.findIndex(column => getType(column) === 'metrics') <
-          _.findLastIndex(table.columns, column => getType(column) === 'buckets');
+        const metricsAtAllLevels = false; // todo
 
-        const splitColumn = table.columns.find(column => getSchema(column) === 'split');
-        const numberOfMetrics = table.columns.filter(column => getType(column) === 'metrics').length;
-        const numberOfBuckets = table.columns.filter(column => getType(column) === 'buckets').length;
+        const split = (dimensions.splitColumn || dimensions.splitRow);
+        const numberOfMetrics = dimensions.metrics.length;
+        const numberOfBuckets = dimensions.buckets.length;
         const metricsPerBucket = numberOfMetrics / numberOfBuckets;
 
-        if (splitColumn) {
-          const splitAgg = splitColumn.aggConfig;
+        if (split) {
+          const splitColumnIndex = split[0].accessor;
+          const splitColumn = table.columns[splitColumnIndex];
           const splitMap = {};
           let splitIndex = 0;
 
-          table.rows.forEach((row, rowIndex) => {
+          table.rows.forEach((row) => {
             const splitValue = row[splitColumn.id];
-            const splitColumnIndex = table.columns.findIndex(column => column === splitColumn);
 
             if (!splitMap.hasOwnProperty(splitValue)) {
               splitMap[splitValue] = splitIndex++;
               const tableGroup = {
                 $parent: converted,
-                aggConfig: splitAgg,
-                title: `${splitValue}: ${splitAgg.makeLabel()}`,
+                title: `${splitValue}`, //: ${splitAgg.makeLabel()}`, // todo: format (we have the dimensions)
                 key: splitValue,
                 tables: []
               };
@@ -70,57 +59,24 @@ const LegacyResponseHandlerProvider = function () {
                   const isSplitColumn = i === splitColumnIndex;
                   const isSplitMetric = metricsAtAllLevels && i > splitColumnIndex && i <= splitColumnIndex + metricsPerBucket;
                   return !isSplitColumn && !isSplitMetric;
-                }).map(column => ({ title: column.name, ...column })),
+                }),
                 rows: []
               });
 
               converted.tables.push(tableGroup);
             }
 
-            let previousSplitAgg = new AggConfigResult(splitAgg, null, splitValue, splitValue);
-            previousSplitAgg.rawData = {
-              table: table,
-              column: splitColumnIndex,
-              row: rowIndex,
-            };
             const tableIndex = splitMap[splitValue];
-            const newRow = _.map(converted.tables[tableIndex].tables[0].columns, column => {
-              const value = row[column.id];
-              const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
-              aggConfigResult.rawData = {
-                table: table,
-                column: table.columns.findIndex(c => c.id === column.id),
-                row: rowIndex,
-              };
-              if (getType(column) === 'buckets') {
-                previousSplitAgg = aggConfigResult;
-              }
-              return aggConfigResult;
-            });
+            const newRow = _.cloneDeep(row);
+            delete newRow[splitColumn.accessor];
 
             converted.tables[tableIndex].tables[0].rows.push(newRow);
           });
         } else {
 
           converted.tables.push({
-            columns: table.columns.map(column => ({ title: column.name, ...column })),
-            rows: table.rows.map((row, rowIndex) => {
-              let previousSplitAgg;
-              return table.columns.map((column, columnIndex) => {
-                const value = row[column.id];
-                const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
-                aggConfigResult.rawData = {
-                  table: table,
-                  column: columnIndex,
-                  row: rowIndex,
-                };
-                if (getType(column) === 'buckets') {
-                  previousSplitAgg = aggConfigResult;
-                }
-                return aggConfigResult;
-              });
-            }),
-            aggConfig: (column) => column.aggConfig
+            columns: table.columns,
+            rows: table.rows
           });
         }
 

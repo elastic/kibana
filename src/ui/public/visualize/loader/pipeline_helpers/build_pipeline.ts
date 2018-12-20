@@ -132,22 +132,14 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_markdown ${expression}${visConfig}`;
   },
   table: (visState, schemas) => {
-    let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)}`;
-    if (schemas.split_row) {
-      pipeline += `splitRow='${schemas.split_row.map(row => row.id).join(',')}' `;
-      pipeline += `splitRowFormat='${schemas.split_row.map(row => row.format).join(',')}' `;
-    }
-    if (schemas.split_column) {
-      pipeline += `splitColumn='${schemas.split_column.map(row => row.id).join(',')}' `;
-      pipeline += `splitColumnFormat='${schemas.split_column.map(row => row.format).join(',')}' `;
-    }
-    if (schemas.bucket) {
-      pipeline += `bucket='${schemas.bucket.map(row => row.id).join(',')}' `;
-      pipeline += `bucketFormat='${schemas.bucket.map(row => row.format).join(',')}' `;
-    }
-    pipeline += `metric='${schemas.metric.map(row => row.id).join(',')}' `;
-    pipeline += `metricFormat='${schemas.metric.map(row => row.format).join(',')}' `;
-    return pipeline;
+    const visConfig = visState.params;
+    visConfig.dimensions = {
+      metrics: schemas.metric,
+      buckets: schemas.bucket,
+      splitRow: schemas.split_row,
+      splitColumn: schemas.split_column,
+    };
+    return `kibana_table ${prepareJson('visConfig', visState.params)}`;
   },
   metric: (visState, schemas) => {
     const visConfig = visState.params;
