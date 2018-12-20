@@ -42,31 +42,31 @@ export function gis(kibana) {
     },
 
     init(server) {
-      const thisPlugin = this;
-      const xpackMainPlugin = server.plugins.xpack_main;
+      const gisEnabled = server.config().get('xpack.gis.enabled');
 
-      watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
-        async license => {
-          if (license) {
-            if (license.gis) {
-              // TODO: Replace with content to 'activate' app on license verify
-              console.info('Valid GIS License');
-            } else {
-              console.warn('No GIS for YOU!');
+      if (gisEnabled) {
+        const thisPlugin = this;
+        const xpackMainPlugin = server.plugins.xpack_main;
+
+        watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
+          async license => {
+            if (license && license.gis) {
+              initRoutes(server);
             }
-            return license;
-          }
-        });
-      xpackMainPlugin.info
-        .feature(thisPlugin.id)
-        .registerLicenseCheckResultsGenerator(checkLicense);
+          });
 
-      initRoutes(server);
-      server.registerSampleDataset(kySaltTrucksSpecProvider);
-      server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
-      server.injectUiAppVars('gis', async () => {
-        return await server.getInjectedUiAppVars('kibana');
-      });
+        xpackMainPlugin.info
+          .feature(thisPlugin.id)
+          .registerLicenseCheckResultsGenerator(checkLicense);
+
+        server.registerSampleDataset(kySaltTrucksSpecProvider);
+        server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
+        server.injectUiAppVars('gis', async () => {
+          return await server.getInjectedUiAppVars('kibana');
+        });
+      } else {
+        server.log(['info', 'maps'], 'Maps app disabled by configuration');
+      }
     }
   });
 }
