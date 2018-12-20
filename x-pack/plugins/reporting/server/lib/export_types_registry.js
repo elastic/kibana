@@ -28,7 +28,6 @@ async function exportTypesRegistryFn(server) {
   files.forEach(file => {
     server.log(['reporting', 'debug', 'exportTypes'], `Found exportType at ${file}`);
 
-    // FIXME no dynamic require
     const { register } = require(file); // eslint-disable-line import/no-dynamic-require
     register(exportTypesRegistry);
   });

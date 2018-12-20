@@ -55,7 +55,6 @@ function prettyPrintJson(json) {
 }
 
 export async function requestFromApi(argv, requestType) {
-  // FIXME: no dynamic require
   const pattern = resolve(__dirname, `./apis/${requestType}/index.js`);
   const { method, path, body } = require(pattern); // eslint-disable-line import/no-dynamic-require
   const { host, auth, basePath } = getRequestParams(argv);
