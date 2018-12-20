@@ -5,7 +5,7 @@
  */
 
 import * as Joi from 'joi';
-import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { CMBeat } from '../../../common/domain_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';

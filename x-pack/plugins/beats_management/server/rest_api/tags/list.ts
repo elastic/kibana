@@ -5,7 +5,7 @@
  */
 
 import * as Joi from 'joi';
-import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
