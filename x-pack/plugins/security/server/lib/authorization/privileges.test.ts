@@ -219,6 +219,7 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:management/foo/anotherFooManagementLink',
         'ui:navLinks/*',
       ],
     },

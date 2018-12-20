@@ -77,6 +77,7 @@ export function privilegesFactory(
             actions.app.all,
             ...actions.savedObject.readOperations(validSavedObjectTypes),
             ...featuresPrivilegesBuilder.getUIReadActions(features),
+            ...featuresPrivilegesBuilder.getManagementReadActions(features),
             actions.ui.allNavLinks,
           ],
         },
