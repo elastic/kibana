@@ -7,23 +7,26 @@
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
-import { loadCharts } from '../../services/rest/apm';
+import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
+import { loadDetailsCharts } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
-import { getCharts } from '../selectors/chartSelectors';
+import { getTransactionCharts } from '../selectors/chartSelectors';
 import { getUrlParams, IUrlParams } from '../urlParams';
 
 const ID = 'transactionDetailsCharts';
-const INITIAL_DATA = {
-  totalHits: 0,
-  dates: [],
-  responseTimes: {
-    avg: [],
-    p95: [],
-    p99: []
+const INITIAL_DATA: TimeSeriesAPIResponse = {
+  apmTimeseries: {
+    totalHits: 0,
+    responseTimes: {
+      avg: [],
+      p95: [],
+      p99: []
+    },
+    tpmBuckets: [],
+    overallAvgDuration: undefined
   },
-  tpmBuckets: [],
-  overallAvgDuration: undefined
+  anomalyTimeseries: undefined
 };
 
 export const getTransactionDetailsCharts = createSelector(
@@ -32,14 +35,14 @@ export const getTransactionDetailsCharts = createSelector(
   (urlParams, detailCharts = {}) => {
     return {
       ...detailCharts,
-      data: getCharts(urlParams, detailCharts.data || INITIAL_DATA)
+      data: getTransactionCharts(urlParams, detailCharts.data || INITIAL_DATA)
     };
   }
 );
 
 interface Props {
   urlParams: IUrlParams;
-  render: RRRRender<TimeSeriesAPIResponse>;
+  render: RRRRender<ITransactionChartData>;
 }
 
 export function TransactionDetailsChartsRequest({ urlParams, render }: Props) {
@@ -59,7 +62,7 @@ export function TransactionDetailsChartsRequest({ urlParams, render }: Props) {
   return (
     <Request
       id={ID}
-      fn={loadCharts}
+      fn={loadDetailsCharts}
       args={[
         { serviceName, start, end, transactionType, transactionName, kuery }
       ]}

@@ -7,6 +7,7 @@
 import moment from 'moment';
 import { badRequest } from 'boom';
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 /**
  * This model deals with a pipeline object from ES and converts it to Kibana downstream
@@ -70,7 +71,9 @@ export class Pipeline {
   // generate Pipeline object from elasticsearch response
   static fromUpstreamJSON(upstreamPipeline) {
     if (!upstreamPipeline._id) {
-      throw badRequest('upstreamPipeline argument must contain an id property');
+      throw badRequest(i18n.translate('xpack.logstash.upstreamPipelineArgumentMustContainAnIdPropertyErrorMessage', {
+        defaultMessage: 'upstreamPipeline argument must contain an id property',
+      }));
     }
     const id = get(upstreamPipeline, '_id');
     const description = get(upstreamPipeline, '_source.description');

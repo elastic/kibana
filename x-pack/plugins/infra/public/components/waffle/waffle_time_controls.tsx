@@ -5,6 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiDatePicker, EuiFormControlLayout } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
 
@@ -29,11 +30,17 @@ export class WaffleTimeControls extends React.Component<WaffleTimeControlsProps>
         iconType="pause"
         onClick={this.stopLiveStreaming}
       >
-        Stop refreshing
+        <FormattedMessage
+          id="xpack.infra.waffleTime.stopRefreshingButtonLabel"
+          defaultMessage="Stop refreshing"
+        />
       </EuiButtonEmpty>
     ) : (
       <EuiButtonEmpty iconSide="left" iconType="play" onClick={this.startLiveStreaming}>
-        Auto-refresh
+        <FormattedMessage
+          id="xpack.infra.waffleTime.autoRefreshButtonLabel"
+          defaultMessage="Auto-refresh"
+        />
       </EuiButtonEmpty>
     );
 

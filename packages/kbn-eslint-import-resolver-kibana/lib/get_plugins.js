@@ -27,7 +27,7 @@ exports.getPlugins = function(config, kibanaPath, projectRoot) {
   const pluginDirs = [
     ...(config.pluginDirs || []).map(resolveToRoot),
     resolve(kibanaPath, 'plugins'),
-    resolve(kibanaPath, 'src/core_plugins'),
+    resolve(kibanaPath, 'src/legacy/core_plugins'),
   ];
 
   const pluginPaths = [

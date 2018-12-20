@@ -7,12 +7,18 @@
 /*
  * Kibana Instance
  */
-import { get, find } from 'lodash';
+import React from 'react';
+import { get } from 'lodash';
 import uiRoutes from'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { MonitoringTimeseriesContainer } from '../../../components/chart';
+import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
+import { I18nProvider } from '@kbn/i18n/react';
+import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -45,33 +51,74 @@ uiRoutes.when('/kibana/instances/:uuid', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope, i18n) {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controllerAs: 'monitoringKibanaInstanceApp',
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope) {
+      super({
+        title: `Kibana - ${get($scope.pageData, 'kibanaSummary.name')}`,
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringKibanaInstanceApp',
+        $scope,
+        $injector
+      });
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.metrics) {
+          return;
+        }
 
-    const title = $injector.get('title');
-    const routeTitle = i18n('xpack.monitoring.kibana.instance.routeTitle', {
-      defaultMessage: 'Kibana - {kibanaSummaryName}',
-      values: {
-        kibanaSummaryName: get($scope.pageData, 'kibanaSummary.name')
-      }
-    });
+        this.setTitle(`Kibana - ${get(data, 'kibanaSummary.name')}`);
 
-    title($scope.cluster, routeTitle);
-
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => $scope.pageData = response
-    });
-
-    $executor.start($scope);
-
-    $scope.$on('$destroy', $executor.destroy);
+        this.renderReact(
+          <I18nProvider>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPageContent>
+                  <DetailStatus stats={data.kibanaSummary} />
+                  <EuiSpacer size="m"/>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_requests}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_response_times}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_memory}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_average_concurrent_connections}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_os_load}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_process_delay}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </I18nProvider>
+        );
+      });
+    }
   }
 });

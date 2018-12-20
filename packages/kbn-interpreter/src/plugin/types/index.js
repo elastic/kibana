@@ -29,6 +29,8 @@ import { render } from './render';
 import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
+import { kibanaTable } from './kibana_table';
+import { kibanaContext } from './kibana_context';
 
 export const typeSpecs = [
   boolean,
@@ -43,4 +45,6 @@ export const typeSpecs = [
   shape,
   string,
   style,
+  kibanaTable,
+  kibanaContext,
 ];

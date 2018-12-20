@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { formatESMsg } from './format_es_msg';
 const has = _.has;
 
@@ -46,11 +47,20 @@ export function formatMsg(err, source) {
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      message += 'An HTTP request has failed to connect. ' +
-             'Please check if the Kibana server is running and that your browser has a working connection, ' +
-             'or contact your system administrator.';
+      message += i18n.translate('common.ui.notify.toaster.unavailableServerErrorMessage', {
+        defaultMessage: 'An HTTP request has failed to connect. ' +
+        'Please check if the Kibana server is running and that your browser has a working connection, ' +
+        'or contact your system administrator.',
+      });
     } else {
-      message += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
+      message += i18n.translate('common.ui.notify.toaster.errorStatusMessage', {
+        defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
+        values: {
+          errStatus: err.status,
+          errStatusText: err.statusText,
+          errMessage: err.data.message
+        }
+      });
     }
   }
 

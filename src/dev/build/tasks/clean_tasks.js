@@ -19,17 +19,17 @@
 
 import minimatch from 'minimatch';
 
-import { deleteAll, scanDelete } from '../lib';
+import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 
 export const CleanTask = {
   global: true,
   description: 'Cleaning artifacts from previous builds',
 
   async run(config, log) {
-    await deleteAll(log, [
+    await deleteAll([
       config.resolveFromRepo('build'),
       config.resolveFromRepo('target'),
-    ]);
+    ], log);
   },
 };
 
@@ -38,11 +38,11 @@ export const CleanPackagesTask = {
     'Cleaning source for packages that are now installed in node_modules',
 
   async run(config, log, build) {
-    await deleteAll(log, [
+    await deleteAll([
       build.resolvePath('packages'),
       build.resolvePath('x-pack'),
       build.resolvePath('yarn.lock'),
-    ]);
+    ], log);
   },
 };
 
@@ -176,14 +176,14 @@ export const CleanExtraBinScriptsTask = {
   async run(config, log, build) {
     for (const platform of config.getNodePlatforms()) {
       if (platform.isWindows()) {
-        await deleteAll(log, [
+        await deleteAll([
           build.resolvePathForPlatform(platform, 'bin', '*'),
           `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`,
-        ]);
+        ], log);
       } else {
-        await deleteAll(log, [
+        await deleteAll([
           build.resolvePathForPlatform(platform, 'bin', '*.bat'),
-        ]);
+        ], log);
       }
     }
   },
@@ -224,12 +224,30 @@ export const CleanExtraBrowsersTask = {
     for (const platform of config.getNodePlatforms()) {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
-        await deleteAll(log, getBrowserPaths({ linux: true, darwin: true }));
+        await deleteAll(getBrowserPaths({ linux: true, darwin: true }), log);
       } else if (platform.isMac()) {
-        await deleteAll(log, getBrowserPaths({ linux: true, windows: true }));
+        await deleteAll(getBrowserPaths({ linux: true, windows: true }), log);
       } else if (platform.isLinux()) {
-        await deleteAll(log, getBrowserPaths({ windows: true, darwin: true }));
+        await deleteAll(getBrowserPaths({ windows: true, darwin: true }), log);
       }
     }
+  },
+};
+
+export const CleanEmptyFoldersTask = {
+  description: 'Cleaning all empty folders recursively',
+
+  async run(config, log, build) {
+    // Delete every single empty folder from
+    // the distributable except the plugins
+    // and data folder.
+    await deleteEmptyFolders(
+      log,
+      build.resolvePath('.'),
+      [
+        build.resolvePath('plugins'),
+        build.resolvePath('data')
+      ]
+    );
   },
 };

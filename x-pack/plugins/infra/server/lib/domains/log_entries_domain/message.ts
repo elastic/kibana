@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraLogMessageSegment } from '../../../../common/graphql/types';
+import { InfraLogMessageSegment } from '../../../graphql/types';
 
 export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
   const compiledRules = rules.map(compileRule);

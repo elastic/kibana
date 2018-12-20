@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import _ from 'lodash';
 import { relativeOptions } from './relative_options';

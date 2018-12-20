@@ -1,75 +1,103 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Node Listing Metric Cell should format N/A as the metric for an offline node 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="monTableCell__number monTableCell__offline"
 >
-  <div
-    class="kuiTableRowCell__liner"
-  >
-    <div
-      class="monTableCell__number monTableCell__offline"
-    >
-      N/A
-    </div>
-  </div>
-</td>
+  N/A
+</div>
 `;
 
 exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="euiStat euiStat--leftAligned"
 >
   <div
-    class="kuiTableRowCell__liner"
+    class="euiText euiText--small euiStat__description"
+  >
+    <p />
+  </div>
+  <p
+    class="euiTitle euiTitle--large euiStat__title"
+  />
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    intl="[object Object]"
   >
     <div
-      class="monTableCell__metricCellMetric"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      206.3 GB
+      <h4
+        class="euiTitle euiTitle--medium"
+      >
+        206.3 GB 
+        <span
+          class="fa fa-long-arrow-down"
+        />
+      </h4>
     </div>
-    <span
-      class="monTableCell__metricCellSlopeArrow fa fa-long-arrow-down"
-    />
     <div
-      class="monTableCell__metricCellMixMax"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <div>
+      <div
+        class="euiText euiText--extraSmall"
+      >
         206.5 GB max
       </div>
-      <div>
+      <div
+        class="euiText euiText--extraSmall"
+      >
         206.3 GB min
       </div>
     </div>
   </div>
-</td>
+  <p />
+</div>
 `;
 
 exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="euiStat euiStat--leftAligned"
 >
   <div
-    class="kuiTableRowCell__liner"
+    class="euiText euiText--small euiStat__description"
+  >
+    <p />
+  </div>
+  <p
+    class="euiTitle euiTitle--large euiStat__title"
+  />
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    intl="[object Object]"
   >
     <div
-      class="monTableCell__metricCellMetric"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      0%
+      <h4
+        class="euiTitle euiTitle--medium"
+      >
+        0% 
+        <span
+          class="fa fa-long-arrow-down"
+        />
+      </h4>
     </div>
-    <span
-      class="monTableCell__metricCellSlopeArrow fa fa-long-arrow-down"
-    />
     <div
-      class="monTableCell__metricCellMixMax"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <div>
+      <div
+        class="euiText euiText--extraSmall"
+      >
         2% max
       </div>
-      <div>
+      <div
+        class="euiText euiText--extraSmall"
+      >
         0% min
       </div>
     </div>
   </div>
-</td>
+  <p />
+</div>
 `;

@@ -6,12 +6,15 @@
 
 import { resolve } from 'path';
 import { initTransactionsApi } from './server/routes/transactions';
+import { initTransactionGroupsApi } from './server/routes/transaction_groups';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
 import { initTracesApi } from './server/routes/traces';
+import { initMetricsApi } from './server/routes/metrics';
 import mappings from './mappings';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
+import { i18n } from '@kbn/i18n';
 
 export function apm(kibana) {
   return new kibana.Plugin({
@@ -23,7 +26,9 @@ export function apm(kibana) {
     uiExports: {
       app: {
         title: 'APM',
-        description: 'APM for the Elastic Stack',
+        description: i18n.translate('xpack.apm.apmForESDescription', {
+          defaultMessage: 'APM for the Elastic Stack'
+        }),
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
         euiIconType: 'apmApp',
@@ -34,7 +39,7 @@ export function apm(kibana) {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPattern: config.get('apm_oss.indexPattern')
+          apmIndexPatternTitle: config.get('apm_oss.indexPattern') // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
@@ -50,7 +55,8 @@ export function apm(kibana) {
       return Joi.object({
         // display menu item
         ui: Joi.object({
-          enabled: Joi.boolean().default(true)
+          enabled: Joi.boolean().default(true),
+          transactionGroupBucketSize: Joi.number().default(100)
         }).default(),
 
         // enable plugin
@@ -64,10 +70,12 @@ export function apm(kibana) {
 
     init(server) {
       initTransactionsApi(server);
+      initTransactionGroupsApi(server);
       initTracesApi(server);
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);
+      initMetricsApi(server);
       makeApmUsageCollector(server);
     }
   });

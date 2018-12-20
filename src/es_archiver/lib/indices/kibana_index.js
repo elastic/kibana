@@ -35,7 +35,7 @@ import { findPluginSpecs } from '../../../plugin_discovery';
 const buildUiExports = _.once(async () => {
   const { spec$ } = await findPluginSpecs({
     plugins: {
-      scanDirs: [path.resolve(__dirname, '../../../core_plugins')],
+      scanDirs: [path.resolve(__dirname, '../../../legacy/core_plugins')],
       paths: [path.resolve(__dirname, '../../../../x-pack')],
     },
   });

@@ -16,12 +16,12 @@ import { setupXPackMain } from './server/lib/setup_xpack_main';
 import {
   xpackInfoRoute,
   telemetryRoute,
+  settingsRoute,
 } from './server/routes/api/v1';
 import {
   CONFIG_TELEMETRY,
   CONFIG_TELEMETRY_DESC,
 } from './common/constants';
-import { settingsRoute } from './server/routes/api/v1/settings';
 import mappings from './mappings.json';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';

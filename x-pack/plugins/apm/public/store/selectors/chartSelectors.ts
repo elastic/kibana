@@ -4,24 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { difference, last, memoize, zipObject } from 'lodash';
+import { difference, memoize, zipObject } from 'lodash';
+import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { AvgAnomalyBucket } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_avg_response_time_anomalies/get_anomaly_aggs/transform';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_all_metrics_chart_data';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
+import { AnomalyTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_anomaly_data/transform';
+import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import {
+  Coordinate,
+  RectCoordinate
+} from 'x-pack/plugins/apm/typings/timeseries';
 import { colors } from '../../style/variables';
-import { asDecimal, asMillis, tpmUnit } from '../../utils/formatters';
+import {
+  asDecimal,
+  asGB,
+  asMillis,
+  asPercent,
+  tpmUnit
+} from '../../utils/formatters';
 import { IUrlParams } from '../urlParams';
-
-interface Coordinate {
-  x: number;
-  y?: number | null;
-}
-
-interface BoundaryCoordinate extends Coordinate {
-  y0: number | null;
-}
 
 export const getEmptySerie = memoize(
   (start = Date.now() - 3600000, end = Date.now()) => {
@@ -42,25 +47,137 @@ export const getEmptySerie = memoize(
   (start: number, end: number) => [start, end].join('_')
 );
 
-export function getCharts(
+interface IEmptySeries {
+  data: Coordinate[];
+}
+
+export interface ITpmBucket {
+  title: string;
+  data: Coordinate[];
+  legendValue: string;
+  type: string;
+  color: string;
+}
+
+export interface ITransactionChartData {
+  noHits: boolean;
+  tpmSeries: ITpmBucket[] | IEmptySeries[];
+  responseTimeSeries: TimeSerie[] | IEmptySeries[];
+}
+
+export function getTransactionCharts(
   urlParams: IUrlParams,
-  charts: TimeSeriesAPIResponse
+  timeseriesResponse: TimeSeriesAPIResponse
 ) {
   const { start, end, transactionType } = urlParams;
-  const noHits = charts.totalHits === 0;
+  const { apmTimeseries, anomalyTimeseries } = timeseriesResponse;
+  const noHits = apmTimeseries.totalHits === 0;
   const tpmSeries = noHits
     ? getEmptySerie(start, end)
-    : getTpmSeries(charts, transactionType);
+    : getTpmSeries(apmTimeseries, transactionType);
 
   const responseTimeSeries = noHits
     ? getEmptySerie(start, end)
-    : getResponseTimeSeries(charts);
+    : getResponseTimeSeries(apmTimeseries, anomalyTimeseries);
 
-  return {
+  const chartsResult: ITransactionChartData = {
     noHits,
     tpmSeries,
     responseTimeSeries
   };
+
+  return chartsResult;
+}
+
+export interface IMemoryChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[] | IEmptySeries[];
+}
+
+export function getMemorySeries(
+  urlParams: IUrlParams,
+  memoryChartResponse: MetricsChartAPIResponse['memory']
+) {
+  const { start, end } = urlParams;
+  const { series, overallValues, totalHits } = memoryChartResponse;
+  const seriesList: IMemoryChartData['series'] =
+    totalHits === 0
+      ? getEmptySerie(start, end)
+      : [
+          {
+            title: 'System total mem.',
+            data: series.totalMemory,
+            type: 'area',
+            color: colors.apmPink,
+            legendValue: asGB(overallValues.totalMemory)
+          },
+          {
+            title: 'System avail. mem.',
+            data: series.freeMemory,
+            type: 'area',
+            color: colors.apmPurple,
+            legendValue: asGB(overallValues.freeMemory)
+          },
+          {
+            title: 'Process RSS',
+            data: series.processMemoryRss,
+            type: 'area',
+            color: colors.apmGreen,
+            legendValue: asGB(overallValues.processMemoryRss)
+          },
+          {
+            title: 'Process mem. size',
+            data: series.processMemorySize,
+            type: 'area',
+            color: colors.apmBlue,
+            legendValue: asGB(overallValues.freeMemory)
+          }
+        ];
+
+  return {
+    ...memoryChartResponse,
+    series: seriesList
+  };
+}
+
+export interface ICPUChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[];
+}
+
+export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
+  const { series, overallValues } = CPUChartResponse;
+
+  const seriesList: TimeSerie[] = [
+    {
+      title: 'Process average',
+      data: series.processCPUAverage,
+      type: 'line',
+      color: colors.apmPink,
+      legendValue: asPercent(overallValues.processCPUAverage || 0)
+    },
+    {
+      title: 'Process max',
+      data: series.processCPUMax,
+      type: 'line',
+      color: colors.apmPurple,
+      legendValue: asPercent(overallValues.processCPUMax || 0)
+    },
+    {
+      title: 'System average',
+      data: series.systemCPUAverage,
+      type: 'line',
+      color: colors.apmGreen,
+      legendValue: asPercent(overallValues.systemCPUAverage || 0)
+    },
+    {
+      title: 'System max',
+      data: series.systemCPUMax,
+      type: 'line',
+      color: colors.apmBlue,
+      legendValue: asPercent(overallValues.systemCPUMax || 0)
+    }
+  ];
+
+  return { ...CPUChartResponse, series: seriesList };
 }
 
 interface TimeSerie {
@@ -68,80 +185,105 @@ interface TimeSerie {
   titleShort?: string;
   hideLegend?: boolean;
   hideTooltipValue?: boolean;
-  data: Coordinate[];
+  data: Array<Coordinate | RectCoordinate>;
   legendValue?: string;
   type: string;
   color: string;
   areaColor?: string;
 }
 
-export function getResponseTimeSeries(chartsData: TimeSeriesAPIResponse) {
-  const { dates, overallAvgDuration } = chartsData;
-  const { avg, p95, p99, avgAnomalies } = chartsData.responseTimes;
+export function getResponseTimeSeries(
+  apmTimeseries: ApmTimeSeriesResponse,
+  anomalyTimeseries?: AnomalyTimeSeriesResponse
+) {
+  const { overallAvgDuration } = apmTimeseries;
+  const { avg, p95, p99 } = apmTimeseries.responseTimes;
 
   const series: TimeSerie[] = [
     {
-      title: 'Avg.',
-      data: getChartValues(dates, avg),
+      title: i18n.translate('xpack.apm.transactions.chart.averageLabel', {
+        defaultMessage: 'Avg.'
+      }),
+      data: avg,
       legendValue: asMillis(overallAvgDuration),
       type: 'line',
       color: colors.apmBlue
     },
     {
-      title: '95th percentile',
+      title: i18n.translate(
+        'xpack.apm.transactions.chart.95thPercentileLabel',
+        {
+          defaultMessage: '95th percentile'
+        }
+      ),
       titleShort: '95th',
-      data: getChartValues(dates, p95),
+      data: p95,
       type: 'line',
       color: colors.apmYellow
     },
     {
-      title: '99th percentile',
+      title: i18n.translate(
+        'xpack.apm.transactions.chart.99thPercentileLabel',
+        {
+          defaultMessage: '99th percentile'
+        }
+      ),
       titleShort: '99th',
-      data: getChartValues(dates, p99),
+      data: p99,
       type: 'line',
       color: colors.apmOrange
     }
   ];
 
-  if (avgAnomalies) {
-    // insert after Avg. serie
-    series.splice(1, 0, {
-      title: 'Anomaly Boundaries',
-      hideLegend: true,
-      hideTooltipValue: true,
-      data: getAnomalyBoundaryValues(
-        dates,
-        avgAnomalies.buckets,
-        avgAnomalies.bucketSizeAsMillis
-      ),
-      type: 'area',
-      color: 'none',
-      areaColor: rgba(colors.apmBlue, 0.1)
-    });
-
-    series.splice(1, 0, {
-      title: 'Anomaly score',
-      hideLegend: true,
-      hideTooltipValue: true,
-      data: getAnomalyScoreValues(
-        dates,
-        avgAnomalies.buckets,
-        avgAnomalies.bucketSizeAsMillis
-      ),
-      type: 'areaMaxHeight',
-      color: 'none',
-      areaColor: rgba(colors.apmRed, 0.1)
-    });
+  if (anomalyTimeseries) {
+    // insert after Avg. series
+    series.splice(
+      1,
+      0,
+      getAnomalyBoundariesSeries(anomalyTimeseries.anomalyBoundaries),
+      getAnomalyScoreSeries(anomalyTimeseries.anomalyScore)
+    );
   }
 
   return series;
 }
 
+export function getAnomalyScoreSeries(data: RectCoordinate[]) {
+  return {
+    title: i18n.translate('xpack.apm.transactions.chart.anomalyScoreLabel', {
+      defaultMessage: 'Anomaly score'
+    }),
+    hideLegend: true,
+    hideTooltipValue: true,
+    data,
+    type: 'areaMaxHeight',
+    color: 'none',
+    areaColor: rgba(colors.apmRed, 0.1)
+  };
+}
+
+function getAnomalyBoundariesSeries(data: Coordinate[]) {
+  return {
+    title: i18n.translate(
+      'xpack.apm.transactions.chart.anomalyBoundariesLabel',
+      {
+        defaultMessage: 'Anomaly Boundaries'
+      }
+    ),
+    hideLegend: true,
+    hideTooltipValue: true,
+    data,
+    type: 'area',
+    color: 'none',
+    areaColor: rgba(colors.apmBlue, 0.1)
+  };
+}
+
 export function getTpmSeries(
-  chartsData: TimeSeriesAPIResponse,
+  apmTimeseries: ApmTimeSeriesResponse,
   transactionType?: string
 ) {
-  const { dates, tpmBuckets } = chartsData;
+  const { tpmBuckets } = apmTimeseries;
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
   const getTpmLegendTitle = (bucketKey: string) => {
@@ -154,10 +296,11 @@ export function getTpmSeries(
   };
 
   return tpmBuckets.map(bucket => {
+    const avg = mean(bucket.dataPoints.map(p => p.y));
     return {
       title: getTpmLegendTitle(bucket.key),
-      data: getChartValues(dates, bucket.values),
-      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(transactionType || '')}`,
+      data: bucket.dataPoints,
+      legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
       type: 'line',
       color: getColor(bucket.key)
     };
@@ -183,86 +326,4 @@ function getColorByKey(keys: string[]) {
   ]);
 
   return (key: string) => assignedColors[key] || unassignedColors[key];
-}
-
-function getChartValues(
-  dates: number[] = [],
-  buckets: Array<number | null> = []
-) {
-  return dates.map((x, i) => ({
-    x,
-    y: buckets[i]
-  }));
-}
-
-export function getAnomalyScoreValues(
-  dates: number[] = [],
-  buckets: AvgAnomalyBucket[] = [],
-  bucketSizeAsMillis: number
-) {
-  const ANOMALY_THRESHOLD = 75;
-  const getX = (currentX: number, i: number) =>
-    currentX + bucketSizeAsMillis * i;
-
-  return dates
-    .map((date, i) => {
-      const { anomalyScore } = buckets[i];
-      return {
-        x: date,
-        anomalyScore
-      };
-    })
-    .filter(p => {
-      const res =
-        p && p.anomalyScore != null && p.anomalyScore > ANOMALY_THRESHOLD;
-      return res;
-    })
-    .reduce<Coordinate[]>((acc, p, i, points) => {
-      const nextPoint = points[i + 1] || {};
-      const endX = getX(p.x, 1);
-      acc.push({ x: p.x, y: 1 });
-      if (nextPoint.x == null || nextPoint.x > endX) {
-        acc.push(
-          {
-            x: endX,
-            y: 1
-          },
-          {
-            x: getX(p.x, 2)
-          }
-        );
-      }
-
-      return acc;
-    }, []);
-}
-
-export function getAnomalyBoundaryValues(
-  dates: number[] = [],
-  buckets: AvgAnomalyBucket[] = [],
-  bucketSizeAsMillis: number
-) {
-  const lastX = last(dates);
-  return dates
-    .map((date, i) => {
-      const bucket = buckets[i];
-      return {
-        x: date,
-        y0: bucket.lower,
-        y: bucket.upper
-      };
-    })
-    .filter(p => p.y != null)
-    .reduce<BoundaryCoordinate[]>((acc, p, i, points) => {
-      const isLast = last(points) === p;
-      acc.push(p);
-
-      if (isLast) {
-        acc.push({
-          ...p,
-          x: Math.min(p.x + bucketSizeAsMillis, lastX) // avoid going beyond the last date
-        });
-      }
-      return acc;
-    }, []);
 }

@@ -1,0 +1,7 @@
+/**
+ * 1. Visually align the actions with the tabs. We can improve this by using flexbox instead, at a later point.
+ */
+.kbnDocTableDetails__actions {
+  float: right;
+  padding-top: $euiSizeS; /* 1 */
+}

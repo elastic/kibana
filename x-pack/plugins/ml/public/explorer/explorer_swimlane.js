@@ -19,6 +19,7 @@ import moment from 'moment';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
+import { formatHumanReadableDateTime } from '../util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
@@ -274,7 +275,7 @@ export class ExplorerSwimlane extends React.Component {
       const displayScore = (bucketScore > 1 ? parseInt(bucketScore) : '< 1');
 
       // Display date using same format as Kibana visualizations.
-      const formattedDate = moment(time * 1000).format('MMMM Do YYYY, HH:mm');
+      const formattedDate = formatHumanReadableDateTime(time * 1000);
       let contents = `${formattedDate}<br/><hr/>`;
       if (swimlaneData.fieldName !== undefined) {
         contents += `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(laneLabel)}<br/><hr/>`;

@@ -6,6 +6,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 
 The Delete Pipeline API enables you to delete a centrally-managed Logstash pipeline.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 [float]
 ==== Request
 

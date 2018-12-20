@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraMetricType, InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
+import { InfraMetricType, InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import {
   InfraFormatterType,
   InfraWaffleData,
@@ -36,6 +38,7 @@ interface Props {
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
   timeRange: InfraTimerangeInput;
+  intl: InjectedIntl;
 }
 
 interface MetricFormatter {
@@ -86,124 +89,157 @@ const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = 
 
 const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
   const values = extractValuesFromMap(map);
+  // if there is only one value then we need to set the bottom range to zero
+  if (values.length === 1) {
+    values.unshift(0);
+  }
   return { min: min(values), max: max(values) };
 };
 
-export class Waffle extends React.Component<Props, {}> {
-  public render() {
-    const { loading, map, reload, timeRange } = this.props;
-    if (loading) {
-      return <InfraLoadingPanel height="100%" width="100%" text="Loading data" />;
-    } else if (!loading && map && map.length === 0) {
+export const Waffle = injectI18n(
+  class extends React.Component<Props, {}> {
+    public static displayName = 'Waffle';
+    public render() {
+      const { loading, map, reload, timeRange, intl } = this.props;
+      if (loading) {
+        return (
+          <InfraLoadingPanel
+            height="100%"
+            width="100%"
+            text={intl.formatMessage({
+              id: 'xpack.infra.waffle.loadingDataText',
+              defaultMessage: 'Loading data',
+            })}
+          />
+        );
+      } else if (!loading && map && map.length === 0) {
+        return (
+          <CenteredEmptyPrompt
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.infra.waffle.noDataTitle"
+                  defaultMessage="There is no data to display."
+                />
+              </h2>
+            }
+            titleSize="m"
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.infra.waffle.noDataDescription"
+                  defaultMessage="Try adjusting your time or filter."
+                />
+              </p>
+            }
+            actions={
+              <EuiButton
+                iconType="refresh"
+                color="primary"
+                fill
+                onClick={() => {
+                  reload();
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.infra.waffle.checkNewDataButtonLabel"
+                  defaultMessage="Check for new data"
+                />
+              </EuiButton>
+            }
+            data-test-subj="noMetricsDataPrompt"
+          />
+        );
+      }
+      const { metric } = this.props.options;
+      const metricFormatter = get(
+        METRIC_FORMATTERS,
+        metric.type,
+        METRIC_FORMATTERS[InfraMetricType.count]
+      );
+      const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromMap(map);
       return (
-        <CenteredEmptyPrompt
-          title={<h2>There is no data to display.</h2>}
-          titleSize="m"
-          body={<p>Try adjusting your time or filter.</p>}
-          actions={
-            <EuiButton
-              iconType="refresh"
-              color="primary"
-              fill
-              onClick={() => {
-                reload();
-              }}
-            >
-              Check for new data
-            </EuiButton>
-          }
-          data-test-subj="noMetricsDataPrompt"
-        />
+        <AutoSizer content>
+          {({ measureRef, content: { width = 0, height = 0 } }) => {
+            const groupsWithLayout = applyWaffleMapLayout(map, width, height);
+            return (
+              <WaffleMapOuterContiner
+                innerRef={(el: any) => measureRef(el)}
+                data-test-subj="waffleMap"
+              >
+                <WaffleMapInnerContainer>
+                  {groupsWithLayout.map(this.renderGroup(bounds, timeRange))}
+                </WaffleMapInnerContainer>
+                <Legend
+                  formatter={this.formatter}
+                  bounds={bounds}
+                  legend={this.props.options.legend}
+                />
+              </WaffleMapOuterContiner>
+            );
+          }}
+        </AutoSizer>
       );
     }
-    const { metric } = this.props.options;
-    const metricFormatter = get(
-      METRIC_FORMATTERS,
-      metric.type,
-      METRIC_FORMATTERS[InfraMetricType.count]
-    );
-    const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromMap(map);
-    return (
-      <AutoSizer content>
-        {({ measureRef, content: { width = 0, height = 0 } }) => {
-          const groupsWithLayout = applyWaffleMapLayout(map, width, height);
-          return (
-            <WaffleMapOuterContiner
-              innerRef={(el: any) => measureRef(el)}
-              data-test-subj="waffleMap"
-            >
-              <WaffleMapInnerContainer>
-                {groupsWithLayout.map(this.renderGroup(bounds, timeRange))}
-              </WaffleMapInnerContainer>
-              <Legend
-                formatter={this.formatter}
-                bounds={bounds}
-                legend={this.props.options.legend}
-              />
-            </WaffleMapOuterContiner>
-          );
-        }}
-      </AutoSizer>
-    );
+
+    // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
+    private formatter = (val: string | number) => {
+      const { metric } = this.props.options;
+      const metricFormatter = get(
+        METRIC_FORMATTERS,
+        metric.type,
+        METRIC_FORMATTERS[InfraMetricType.count]
+      );
+      if (val == null) {
+        return '';
+      }
+      const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+      return formatter(val);
+    };
+
+    private handleDrilldown = (filter: string) => {
+      this.props.onDrilldown({
+        kind: 'kuery',
+        expression: filter,
+      });
+      return;
+    };
+
+    private renderGroup = (bounds: InfraWaffleMapBounds, timeRange: InfraTimerangeInput) => (
+      group: InfraWaffleMapGroup
+    ) => {
+      if (isWaffleMapGroupWithGroups(group)) {
+        return (
+          <GroupOfGroups
+            onDrilldown={this.handleDrilldown}
+            key={group.id}
+            options={this.props.options}
+            group={group}
+            formatter={this.formatter}
+            bounds={bounds}
+            nodeType={this.props.nodeType}
+            timeRange={timeRange}
+          />
+        );
+      }
+      if (isWaffleMapGroupWithNodes(group)) {
+        return (
+          <GroupOfNodes
+            key={group.id}
+            options={this.props.options}
+            group={group}
+            onDrilldown={this.handleDrilldown}
+            formatter={this.formatter}
+            isChild={false}
+            bounds={bounds}
+            nodeType={this.props.nodeType}
+            timeRange={timeRange}
+          />
+        );
+      }
+    };
   }
-
-  // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
-  private formatter = (val: string | number) => {
-    const { metric } = this.props.options;
-    const metricFormatter = get(
-      METRIC_FORMATTERS,
-      metric.type,
-      METRIC_FORMATTERS[InfraMetricType.count]
-    );
-    if (val == null) {
-      return '';
-    }
-    const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
-    return formatter(val);
-  };
-
-  private handleDrilldown = (filter: string) => {
-    this.props.onDrilldown({
-      kind: 'kuery',
-      expression: filter,
-    });
-    return;
-  };
-
-  private renderGroup = (bounds: InfraWaffleMapBounds, timeRange: InfraTimerangeInput) => (
-    group: InfraWaffleMapGroup
-  ) => {
-    if (isWaffleMapGroupWithGroups(group)) {
-      return (
-        <GroupOfGroups
-          onDrilldown={this.handleDrilldown}
-          key={group.id}
-          options={this.props.options}
-          group={group}
-          formatter={this.formatter}
-          bounds={bounds}
-          nodeType={this.props.nodeType}
-          timeRange={timeRange}
-        />
-      );
-    }
-    if (isWaffleMapGroupWithNodes(group)) {
-      return (
-        <GroupOfNodes
-          key={group.id}
-          options={this.props.options}
-          group={group}
-          onDrilldown={this.handleDrilldown}
-          formatter={this.formatter}
-          isChild={false}
-          bounds={bounds}
-          nodeType={this.props.nodeType}
-          timeRange={timeRange}
-        />
-      );
-    }
-  };
-}
+);
 
 const WaffleMapOuterContiner = styled.div`
   flex: 1 0 0%;

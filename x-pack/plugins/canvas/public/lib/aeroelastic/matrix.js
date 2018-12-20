@@ -227,7 +227,9 @@ const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
   } else {
     const recDet = 1 / det;
 
-    for (let index = 0; index < 16; index++) inv[index] *= recDet;
+    for (let index = 0; index < 16; index++) {
+      inv[index] *= recDet;
+    }
 
     return inv;
   }
@@ -309,11 +311,10 @@ const applyTransforms = (transforms, previousTransformMatrix) =>
 
 const clamp = (low, high, value) => Math.min(high, Math.max(low, value));
 
-// todo turn it into returning radians rather than degrees
 const matrixToAngle = transformMatrix => {
   // clamping is needed, otherwise inevitable floating point inaccuracies can cause NaN
-  const z0 = (Math.acos(clamp(-1, 1, transformMatrix[0])) * 180) / Math.PI;
-  const z1 = (Math.asin(clamp(-1, 1, transformMatrix[1])) * 180) / Math.PI;
+  const z0 = Math.acos(clamp(-1, 1, transformMatrix[0]));
+  const z1 = Math.asin(clamp(-1, 1, transformMatrix[1]));
   return z1 > 0 ? z0 : -z0;
 };
 

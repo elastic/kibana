@@ -22,18 +22,18 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const find = getService('find');
+  const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
 
   describe('tile map visualize app', function () {
 
-
     describe('incomplete config', function describeIndexTests() {
 
-
       before(async function () {
-        remote.setWindowSize(1280, 1000);
+        browser.setWindowSize(1280, 1000);
 
         const fromTime = '2015-09-19 06:31:44.000';
         const toTime = '2015-09-23 18:31:44.000';
@@ -45,7 +45,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch();
         log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-
         //do not configure aggs
       });
 
@@ -55,15 +54,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickMapZoomIn();
         await PageObjects.visualize.clickMapZoomIn();
       });
-
-
     });
-
 
 
     describe('complete config', function describeIndexTests() {
       before(async function () {
-        remote.setWindowSize(1280, 1000);
+        browser.setWindowSize(1280, 1000);
 
         const fromTime = '2015-09-19 06:31:44.000';
         const toTime = '2015-09-23 18:31:44.000';
@@ -223,6 +219,68 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
         });
       });
+    });
+
+    describe('zoom warning behavior', function describeIndexTests() {
+
+      const waitForLoading = false;
+      let zoomWarningEnabled;
+      let last = false;
+      const toastDefaultLife = 6000;
+
+      before(async function () {
+        browser.setWindowSize(1280, 1000);
+
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickTileMap');
+        await PageObjects.visualize.clickTileMap();
+        await PageObjects.visualize.clickNewSearch();
+
+        zoomWarningEnabled = await testSubjects.exists('zoomWarningEnabled');
+        log.debug(`Zoom warning enabled: ${zoomWarningEnabled}`);
+
+        const zoomLevel = 9;
+        for (let i = 0; i < zoomLevel; i++) {
+          await PageObjects.visualize.clickMapZoomIn();
+        }
+
+      });
+
+      beforeEach(async function () {
+        await PageObjects.common.sleep(2000);
+        await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+      });
+
+      afterEach(async function () {
+        if (!last) {
+          await PageObjects.common.sleep(toastDefaultLife);
+          await PageObjects.visualize.clickMapZoomOut(waitForLoading);
+        }
+      });
+
+      it('should show warning at zoom 10',
+        async () => {
+          testSubjects.existOrFail('maxZoomWarning');
+        });
+
+      it('should continue providing zoom warning if left alone',
+        async () => {
+          testSubjects.existOrFail('maxZoomWarning');
+        });
+
+      it('should suppress zoom warning if suppress warnings button clicked',
+        async () => {
+          last = true;
+          await find.clickByCssSelector('[data-test-subj="suppressZoomWarnings"]');
+
+          await PageObjects.common.sleep(toastDefaultLife + 2000);
+          await PageObjects.visualize.clickMapZoomOut(waitForLoading);
+          await PageObjects.common.sleep(1000);
+          await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+
+          testSubjects.missingOrFail('maxZoomWarning');
+        });
     });
   });
 }

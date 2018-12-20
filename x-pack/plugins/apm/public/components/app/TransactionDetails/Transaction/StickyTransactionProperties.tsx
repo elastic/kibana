@@ -12,9 +12,8 @@ import {
   TRANSACTION_RESULT,
   USER_ID
 } from '../../../../../common/constants';
-import { Transaction } from '../../../../../typings/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
-// @ts-ignore
 import {
   IStickyProperty,
   StickyProperties

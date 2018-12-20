@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { resolve } from 'path';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -14,11 +15,13 @@ import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
 import { validateConfig } from './server/lib/validate_config';
+import { validateMaxContentLength } from './server/lib/validate_max_content_length';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
 import { PHANTOM, createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
 import { getReportingUsageCollector } from './server/usage';
+import { i18n } from '@kbn/i18n';
 
 const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -46,9 +49,13 @@ export const reporting = (kibana) => {
       },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-          name: 'PDF footer image',
+          name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
+            defaultMessage: 'PDF footer image'
+          }),
           value: null,
-          description: `Custom image to use in the PDF's footer`,
+          description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
+            defaultMessage: `Custom image to use in the PDF's footer`
+          }),
           type: 'image',
           options: {
             maxSize: {
@@ -87,7 +94,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: remove support in 7.0
+            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: make chromium the only valid option in 7.0
             autoDownload: Joi.boolean().when('$dev', {
               is: true,
               then: Joi.default(true),
@@ -142,12 +149,11 @@ export const reporting = (kibana) => {
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
-      validateConfig(config, message => server.log(['reporting', 'warning'], message));
-      logConfiguration(config, message => server.log(['reporting', 'debug'], message));
+      const logWarning = message => server.log(['reporting', 'warning'], message);
 
-      if (config.get('xpack.reporting.capture.browser.type') === PHANTOM) {
-        server.log(['reporting', 'warning'], 'Phantom browser type for reporting will be deprecated starting in 7.0');
-      }
+      validateConfig(config, logWarning);
+      validateMaxContentLength(server, logWarning);
+      logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
 
@@ -172,6 +178,15 @@ export const reporting = (kibana) => {
 
     deprecations: function ({ unused }) {
       return [
+        (settings, log) => {
+          const isPhantom = get(settings, 'capture.browser.type') === PHANTOM;
+          if (isPhantom) {
+            log(
+              'Phantom browser support for Reporting will be removed and Chromium will be the only valid option starting in 7.0.0. ' +
+              'Use the default `chromium` value for `xpack.reporting.capture.browser.type` to dismiss this warning.'
+            );
+          }
+        },
         unused("capture.concurrency"),
         unused("capture.timeout"),
         unused("capture.settleTime"),

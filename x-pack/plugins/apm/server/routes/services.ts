@@ -17,7 +17,6 @@ import { getService } from '../lib/services/get_service';
 import { getServices } from '../lib/services/get_services';
 
 const ROOT = '/api/apm/services';
-const pre = [{ method: setupRequest, assign: 'setup' }];
 const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
@@ -29,28 +28,22 @@ export function initServicesApi(server: Server) {
     method: 'GET',
     path: ROOT,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators()
       }
     },
     handler: async req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
+      const services = await getServices(setup).catch(defaultErrorHandler);
 
-      let serviceBucketList;
-      try {
-        serviceBucketList = await getServices(setup);
-      } catch (error) {
-        return defaultErrorHandler(error);
-      }
-
-      // Store telemetry data derived from serviceBucketList
-      const apmTelemetry = createApmTelementry(
-        serviceBucketList.map(({ agentName }) => agentName as AgentName)
+      // Store telemetry data derived from services
+      const agentNames = services.map(
+        ({ agentName }) => agentName as AgentName
       );
+      const apmTelemetry = createApmTelementry(agentNames);
       storeApmTelemetry(server, apmTelemetry);
 
-      return serviceBucketList;
+      return services;
     }
   });
 
@@ -58,13 +51,12 @@ export function initServicesApi(server: Server) {
     method: 'GET',
     path: `${ROOT}/{serviceName}`,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators()
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       const { serviceName } = req.params;
       return getService(serviceName, setup).catch(defaultErrorHandler);
     }

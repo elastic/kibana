@@ -14,6 +14,7 @@ type SavedObjectClient = any;
 export interface KbnServer {
   info: { protocol: string };
   config: () => ConfigObject;
+  plugins: Record<string, any>;
   savedObjects: {
     getScopedSavedObjectsClient: (
       fakeRequest: { headers: object; getBasePath: () => string }
@@ -37,6 +38,7 @@ export interface Logger {
   debug: (message: string) => void;
   error: (message: string) => void;
   warning: (message: string) => void;
+  clone: (tags: string[]) => Logger;
 }
 
 export interface ViewZoomWidthHeight {

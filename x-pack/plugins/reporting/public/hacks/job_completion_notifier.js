@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import { get } from 'lodash';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
+import { JobStatuses } from '../constants/job_statuses';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
@@ -38,13 +40,19 @@ uiModules.get('kibana')
       const reportObjectTitle = job._source.payload.title;
       const reportObjectType = job._source.payload.type;
 
-      const isJobSuccessful = get(job, '_source.status') === 'completed';
+      const isJobSuccessful = get(job, '_source.status') === JobStatuses.COMPLETED;
 
       if (!isJobSuccessful) {
         const errorDoc = await jobQueueClient.getContent(job._id);
         const text = errorDoc.content;
         return toastNotifications.addDanger({
-          title: `Couldn't create report for ${reportObjectType} '${reportObjectTitle}'`,
+          title: (
+            <FormattedMessage
+              id="xpack.reporting.jobCompletionNotifier.couldNotCreateReportTitle"
+              defaultMessage="Couldn't create report for {reportObjectType} '{reportObjectTitle}'"
+              values={{ reportObjectType, reportObjectTitle }}
+            />
+          ),
           text,
         });
       }
@@ -58,7 +66,19 @@ uiModules.get('kibana')
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
           <p>
-            Pick it up from <a href={reportingSectionUrl}>Management &gt; Kibana &gt; Reporting</a>.
+            <FormattedMessage
+              id="xpack.reporting.jobCompletionNotifier.reportLink.pickItUpFromPathDescription"
+              defaultMessage="Pick it up from {path}."
+              values={{ path: (
+                <a href={reportingSectionUrl}>
+                  <FormattedMessage
+                    id="xpack.reporting.jobCompletionNotifier.reportLink.reportingSectionUrlLinkLabel"
+                    defaultMessage="Management &gt; Kibana &gt; Reporting"
+                  />
+                </a>
+              )
+              }}
+            />
           </p>
         );
       }
@@ -69,7 +89,10 @@ uiModules.get('kibana')
           data-test-subj="downloadCompletedReportButton"
           onClick={() => { downloadReport(job._id); }}
         >
-          Download report
+          <FormattedMessage
+            id="xpack.reporting.jobCompletionNotifier.downloadReportButtonLabel"
+            defaultMessage="Download report"
+          />
         </EuiButton>
       );
 
@@ -77,10 +100,21 @@ uiModules.get('kibana')
 
       if (maxSizeReached) {
         return toastNotifications.addWarning({
-          title: `Created partial report for ${reportObjectType} '${reportObjectTitle}'`,
+          title: (
+            <FormattedMessage
+              id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportTitle"
+              defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
+              values={{ reportObjectType, reportObjectTitle }}
+            />
+          ),
           text: (
             <div>
-              <p>The report reached the max size and contains partial data.</p>
+              <p>
+                <FormattedMessage
+                  id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportDescription"
+                  defaultMessage="The report reached the max size and contains partial data."
+                />
+              </p>
               {seeReportLink}
               {downloadReportButton}
             </div>
@@ -90,7 +124,13 @@ uiModules.get('kibana')
       }
 
       toastNotifications.addSuccess({
-        title: `Created report for ${reportObjectType} '${reportObjectTitle}'`,
+        title: (
+          <FormattedMessage
+            id="xpack.reporting.jobCompletionNotifier.successfullyCreatedReportNotificationTitle"
+            defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
+            values={{ reportObjectType, reportObjectTitle }}
+          />
+        ),
         text: (
           <div>
             {seeReportLink}
@@ -122,7 +162,7 @@ uiModules.get('kibana')
             return;
           }
 
-          if (job._source.status === 'completed' || job._source.status === 'failed') {
+          if (job._source.status === JobStatuses.COMPLETED || job._source.status === JobStatuses.FAILED) {
             await showCompletionNotification(job);
             jobCompletionNotifications.remove(job.id);
             return;
