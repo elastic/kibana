@@ -19,6 +19,7 @@
 
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
+  hidden?: boolean;
 }
 
 export interface SavedObjectsSchemaDefinition {
@@ -29,6 +30,22 @@ export class SavedObjectsSchema {
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
     this.definition = schemaDefinition;
+  }
+
+  public isHiddenType(type: string) {
+    if (this.definition && this.definition.hasOwnProperty(type)) {
+      return !!this.definition[type].hidden;
+    }
+
+    return false;
+  }
+
+  public getAvailableTypes() {
+    if (this.definition) {
+      return Object.entries(this.definition).filter((type, definition) => !definition.hidden);
+    }
+
+    return [];
   }
 
   public isNamespaceAgnostic(type: string) {
