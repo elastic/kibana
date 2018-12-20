@@ -27,7 +27,7 @@ export const AutoFollowPatternList = injectI18n(
       apiError: PropTypes.object,
       openDetailPanel: PropTypes.func.isRequired,
       closeDetailPanel: PropTypes.func.isRequired,
-      isDetailPanelOpened: PropTypes.bool,
+      isDetailPanelOpen: PropTypes.bool,
     }
 
     componentDidMount() {
@@ -114,7 +114,7 @@ export const AutoFollowPatternList = injectI18n(
       const {
         autoFollowPatterns,
         apiStatus,
-        isDetailPanelOpened,
+        isDetailPanelOpen,
       } = this.props;
 
       if (apiStatus === API_STATUS.LOADING) {
@@ -131,7 +131,7 @@ export const AutoFollowPatternList = injectI18n(
       return (
         <Fragment>
           <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
-          {isDetailPanelOpened && <DetailPanel />}
+          {isDetailPanelOpen && <DetailPanel />}
         </Fragment>
       );
     }

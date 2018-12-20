@@ -13,7 +13,7 @@ import {
   getApiStatus,
   getApiError,
   isApiAuthorized,
-  isAutoFollowPatternDetailPanelOpened as isDetailPanelOpened,
+  isAutoFollowPatternDetailPanelOpen as isDetailPanelOpen,
 } from '../../../store/selectors';
 import {
   loadAutoFollowPatterns,
@@ -30,7 +30,7 @@ const mapStateToProps = (state) => ({
   apiStatus: getApiStatus(scope)(state),
   apiError: getApiError(scope)(state),
   isAuthorized: isApiAuthorized(scope)(state),
-  isDetailPanelOpened: isDetailPanelOpened(state),
+  isDetailPanelOpen: isDetailPanelOpen(state),
 });
 
 const mapDispatchToProps = dispatch => ({
