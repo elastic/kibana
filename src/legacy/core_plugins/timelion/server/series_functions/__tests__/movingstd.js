@@ -25,7 +25,7 @@ import invoke from './helpers/invoke_series_fn.js';
 import getSeries from './helpers/get_series';
 import getSeriesList from './helpers/get_series_list';
 
-describe('movingstd', () => {
+describe('movingstd.js', () => {
 
   it('computes the moving standard deviation of a list', async () => {
     const points = [
