@@ -15,8 +15,6 @@ import {
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
-// import { esErrors } from '../../../fixtures'; // Temp for development to test ES error in UI
-
 export const registerAutoFollowPatternRoutes = (server) => {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
@@ -32,8 +30,6 @@ export const registerAutoFollowPatternRoutes = (server) => {
     },
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
-
-      // throw wrapEsError(esErrors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
 
       try {
         const response = await callWithRequest('ccr.autoFollowPatterns');
