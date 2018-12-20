@@ -9,4 +9,3 @@ export { dragAndDropActions } from './drag_and_drop';
 export { hostsActions } from './hosts';
 export { inputsActions } from './inputs';
 export { timelineActions } from './timeline';
-export { uncommonProcessesActions } from './uncommon_processes';

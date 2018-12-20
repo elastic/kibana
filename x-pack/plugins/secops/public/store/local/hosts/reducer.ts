@@ -6,16 +6,55 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { updateLimitOfPagination } from './actions';
+import {
+  updateHostsLimit,
+  updateUncommonProcessesLimit,
+  updateUncommonProcessesUpperLimit,
+} from './actions';
 import { HostsModel } from './model';
 
 export type HostsState = HostsModel;
 
-export const initialHostsState: HostsState = { limit: 2 };
+export const initialHostsState: HostsState = {
+  query: {
+    hosts: {
+      limit: 2,
+    },
+    uncommonProcesses: {
+      limit: 10,
+      upperLimit: 100,
+    },
+  },
+};
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
-  .case(updateLimitOfPagination, (state, { limit }) => ({
+  .case(updateHostsLimit, (state, { limit }) => ({
     ...state,
-    limit,
+    query: {
+      ...state.query,
+      hosts: {
+        limit,
+      },
+    },
+  }))
+  .case(updateUncommonProcessesLimit, (state, { limit }) => ({
+    ...state,
+    query: {
+      ...state.query,
+      uncommonProcesses: {
+        ...state.query.uncommonProcesses,
+        limit,
+      },
+    },
+  }))
+  .case(updateUncommonProcessesUpperLimit, (state, { upperLimit }) => ({
+    ...state,
+    query: {
+      ...state.query,
+      uncommonProcesses: {
+        ...state.query.uncommonProcesses,
+        upperLimit,
+      },
+    },
   }))
   .build();

@@ -11,11 +11,6 @@ import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from '.
 import { hostsReducer, HostsState, initialHostsState } from './hosts';
 import { initialInputsState, inputsReducer, InputsState } from './inputs';
 import { initialTimelineState, timelineReducer, TimelineState } from './timeline';
-import {
-  initialUncommonProcessesState,
-  uncommonProcessesReducer,
-  UncommonProcessesState,
-} from './uncommon_processes';
 
 export interface LocalState {
   app: AppState;
@@ -23,7 +18,6 @@ export interface LocalState {
   timeline: TimelineState;
   hosts: HostsState;
   inputs: InputsState;
-  uncommonProcesses: UncommonProcessesState;
 }
 
 export const initialLocalState: LocalState = {
@@ -32,7 +26,6 @@ export const initialLocalState: LocalState = {
   timeline: initialTimelineState,
   hosts: initialHostsState,
   inputs: initialInputsState,
-  uncommonProcesses: initialUncommonProcessesState,
 };
 
 export const localReducer = combineReducers<LocalState>({
@@ -41,5 +34,4 @@ export const localReducer = combineReducers<LocalState>({
   timeline: timelineReducer,
   hosts: hostsReducer,
   inputs: inputsReducer,
-  uncommonProcesses: uncommonProcessesReducer,
 });

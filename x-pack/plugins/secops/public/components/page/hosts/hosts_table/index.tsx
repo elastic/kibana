@@ -10,7 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { HostItem, HostsEdges } from '../../../../../common/graphql/types';
-import { hostsActions, hostsSelector, State } from '../../../../store';
+import { hostsActions, hostsLimitSelector, State } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 interface OwnProps {
@@ -87,15 +87,12 @@ const HostsTableComponent = pure<HostsTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => {
-  const limit = defaultTo(2, hostsSelector(state));
-  return { limit };
-};
+const mapStateToProps = (state: State) => hostsLimitSelector(state);
 
 export const HostsTable = connect(
   mapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateLimitOfPagination,
+    updateLimitPagination: hostsActions.updateHostsLimit,
   }
 )(HostsTableComponent);
 

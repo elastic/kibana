@@ -6,9 +6,9 @@
 
 export {
   dataProvidersSelector,
-  hostsSelector,
+  hostsLimitSelector,
+  uncommonProcessesLimitSelector,
   timelineByIdSelector,
   globalTimeRangeSelector,
   globalPolicySelector,
-  uncommonProcessesSelector,
 } from './local';

@@ -12,10 +12,9 @@ import { ThemeProvider } from 'styled-components';
 
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
+import { mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
-import { DEFAULT_PAGE_COUNT } from '../../store/local/timeline/model';
 import { DragDropContextWrapper } from '../drag_and_drop/drag_drop_context_wrapper';
-import { defaultWidth } from '../timeline/body';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 import { FlyoutButton } from './button';
 import { FlyoutPane } from './pane';
@@ -24,67 +23,7 @@ const testFlyoutHeight = 980;
 const testWidth = 640;
 
 describe('Flyout', () => {
-  const state: State = {
-    local: {
-      app: {
-        notesById: {},
-        theme: 'dark',
-      },
-      hosts: {
-        limit: 2,
-      },
-      uncommonProcesses: {
-        limit: 0,
-        upperLimit: 0,
-      },
-      dragAndDrop: {
-        dataProviders: {},
-      },
-      inputs: {
-        global: {
-          timerange: {
-            kind: 'absolute',
-            from: 0,
-            to: 1,
-          },
-          query: [],
-          policy: {
-            kind: 'manual',
-            duration: 5000,
-          },
-        },
-      },
-      timeline: {
-        timelineById: {
-          test: {
-            activePage: 0,
-            dataProviders: [],
-            description: '',
-            eventIdToNoteIds: {},
-            historyIds: [],
-            id: 'test',
-            isFavorite: false,
-            isLive: false,
-            itemsPerPage: 25,
-            itemsPerPageOptions: [10, 25, 50],
-            kqlMode: 'filter',
-            kqlQuery: '',
-            title: '',
-            noteIds: [],
-            pageCount: DEFAULT_PAGE_COUNT,
-            pinnedEventIds: {},
-            range: '1 Day',
-            show: false,
-            sort: {
-              columnId: 'timestamp',
-              sortDirection: 'descending',
-            },
-            width: defaultWidth,
-          },
-        },
-      },
-    },
-  };
+  const state: State = mockGlobalState;
 
   let store = createStore(state);
 

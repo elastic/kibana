@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, getOr } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { GetHostsQuery, HostsEdges, PageInfo } from '../../../common/graphql/types';
 
 import { connect } from 'react-redux';
-import { hostsSelector, inputsModel, State } from '../../store';
+import { hostsLimitSelector, inputsModel, State } from '../../store';
 import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
@@ -42,7 +42,7 @@ export interface HostsComponentReduxProps {
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
 const HostsComponentQuery = pure<HostsProps>(
-  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit = 2, poll }) => (
+  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit, poll }) => (
     <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
       query={hostsQuery}
       fetchPolicy="cache-and-network"
@@ -102,9 +102,6 @@ const HostsComponentQuery = pure<HostsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => {
-  const limit = defaultTo(2, hostsSelector(state));
-  return { limit };
-};
+const mapStateToProps = (state: State) => hostsLimitSelector(state);
 
 export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);

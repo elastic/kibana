@@ -10,74 +10,13 @@ import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import { mockGlobalState } from '../../../mock';
 import { createStore, State } from '../../../store';
-import { DEFAULT_PAGE_COUNT } from '../../../store/local/timeline/model';
-import { defaultWidth } from '../body';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { TimelineHeader } from './timeline_header';
 
 describe('Header', () => {
-  const state: State = {
-    local: {
-      app: {
-        notesById: {},
-        theme: 'dark',
-      },
-      inputs: {
-        global: {
-          timerange: {
-            kind: 'absolute',
-            from: 0,
-            to: 1,
-          },
-          query: [],
-          policy: {
-            kind: 'manual',
-            duration: 5000,
-          },
-        },
-      },
-      hosts: {
-        limit: 2,
-      },
-      uncommonProcesses: {
-        limit: 0,
-        upperLimit: 0,
-      },
-      dragAndDrop: {
-        dataProviders: {},
-      },
-      timeline: {
-        timelineById: {
-          test: {
-            activePage: 0,
-            dataProviders: [],
-            description: '',
-            eventIdToNoteIds: {},
-            historyIds: [],
-            id: 'test',
-            isFavorite: false,
-            isLive: false,
-            itemsPerPage: 25,
-            itemsPerPageOptions: [10, 25, 50],
-            kqlMode: 'filter',
-            kqlQuery: '',
-            title: '',
-            noteIds: [],
-            pageCount: DEFAULT_PAGE_COUNT,
-            pinnedEventIds: {},
-            range: '1 Day',
-            show: false,
-            sort: {
-              columnId: 'timestamp',
-              sortDirection: 'descending',
-            },
-            width: defaultWidth,
-          },
-        },
-      },
-    },
-  };
+  const state: State = mockGlobalState;
 
   let store = createStore(state);
 
