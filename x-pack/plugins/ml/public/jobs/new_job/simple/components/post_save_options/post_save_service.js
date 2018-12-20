@@ -10,6 +10,7 @@
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { i18n } from '@kbn/i18n';
 
 const msgs = mlMessageBarService;
 
@@ -43,7 +44,10 @@ class PostSaveService {
               this.status.realtimeJob = this.STATUS.SAVED;
               resolve();
             }).catch((resp) => {
-              msgs.error('Could not start datafeed: ', resp);
+              msgs.error(
+                i18n.translate('xpack.ml.newJob.simple.postSaveOptions.couldNotStartDatafeedErrorMessage', {
+                  defaultMessage: 'Could not start datafeed:'
+                }), resp);
               this.status.realtimeJob = this.STATUS.SAVE_FAILED;
               reject();
             });
