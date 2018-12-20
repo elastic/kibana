@@ -179,7 +179,7 @@ module.directive('mlMetricDistributionChart', function (i18n) {
         .attr('y', 10)
         .attr('class', 'info-text')
         .attr('transform', `translate(${margin.left}, ${margin.top})`)
-        .text(i18n('xpack.ml.metricDistributionChart.displayingPercentilesLabel', {
+        .text(i18n('xpack.ml.fieldDataCard.metricDistributionChart.displayingPercentilesLabel', {
           defaultMessage: 'Displaying {minPercent} - {maxPercent} percentiles',
           values: {
             minPercent,
@@ -251,14 +251,29 @@ module.directive('mlMetricDistributionChart', function (i18n) {
           }
         }
 
-        let contents = `value:${xVal}`;
+        let contents;
         const bar = scope.processedData[processedDataIdx];
         const minValFormatted =  scope.card.fieldFormat.convert(bar.dataMin, 'text');
         if (bar.dataMax > bar.dataMin) {
           const maxValFormatted =  scope.card.fieldFormat.convert(bar.dataMax, 'text');
-          contents = `${bar.percent}% of documents have<br>values between ${minValFormatted} and ${maxValFormatted}`;
+          contents = i18n('xpack.ml.fieldDataCard.metricDistributionChart.documentsBarPercentBetweenValuesDescription', {
+            defaultMessage: '{barPercent}% of documents have{br}values between {minValFormatted} and {maxValFormatted}',
+            values: {
+              barPercent: bar.percent,
+              minValFormatted,
+              maxValFormatted,
+              br: '<br />',
+            },
+          });
         } else {
-          contents = `${bar.percent}% of documents have<br>a value of ${minValFormatted}`;
+          contents = i18n('xpack.ml.fieldDataCard.metricDistributionChart.documentsBarPercentValueDescription', {
+            defaultMessage: '{barPercent}% of documents have{br}a value of {minValFormatted}',
+            values: {
+              barPercent: bar.percent,
+              minValFormatted,
+              br: '<br />',
+            },
+          });
         }
 
         contents = `<div class='eui-textCenter'>${contents}</div>`;
