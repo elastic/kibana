@@ -70,7 +70,7 @@ export function apm(kibana) {
         navLinkId: 'apm',
         privileges: {
           all: {
-            app: ['apm'],
+            app: ['apm', 'kibana'],
             savedObject: {
               all: [],
               read: ['config']

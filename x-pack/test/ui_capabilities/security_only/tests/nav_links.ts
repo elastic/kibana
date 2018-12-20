@@ -8,10 +8,7 @@ import expect from 'expect.js';
 import { SecurityService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
 import { navLinksBuilder } from '../../common/nav_links_builder';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { isCustomRoleSpecification } from '../../common/types';
 import { UserScenarios } from '../scenarios';
 
@@ -63,12 +60,93 @@ export default function navLinksTests({ getService }: TestInvoker) {
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
+          case 'apm_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('apm', 'management')
+            );
+            break;
+          case 'canvas_all':
+          case 'canvas_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('canvas', 'management')
+            );
+            break;
+          case 'dashboard_all':
+          case 'dashboard_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('dashboard', 'management')
+            );
+            break;
+
+          case 'dev_tools_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('devTools', 'management')
+            );
+            break;
           case 'discover_all':
           case 'discover_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.only('discover', 'management')
+            );
+            break;
+          case 'graph_all':
+          case 'graph_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('graph', 'management')
+            );
+            break;
+          case 'infrastructure_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('infrastructure', 'management')
+            );
+            break;
+          case 'logs_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('logging', 'management')
+            );
+            break;
+          case 'ml_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('ml', 'management'));
+            break;
+          case 'monitoring_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('monitoring', 'management')
+            );
+            break;
+          case 'timelion_all':
+          case 'timelion_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('timelion', 'management')
+            );
+            break;
+          case 'visualize_all':
+          case 'visualize_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('visualize', 'management')
             );
             break;
           default:

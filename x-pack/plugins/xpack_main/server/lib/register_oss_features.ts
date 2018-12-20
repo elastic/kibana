@@ -130,7 +130,7 @@ const timelionFeatures: Feature[] = [
     navLinkId: 'timelion',
     privileges: {
       all: {
-        app: ['timelion'],
+        app: ['timelion', 'kibana'],
         savedObject: {
           all: ['timelion'],
           read: ['config', 'index-pattern'],
@@ -138,7 +138,7 @@ const timelionFeatures: Feature[] = [
         ui: [],
       },
       read: {
-        app: ['timelion'],
+        app: ['timelion', 'kibana'],
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'timelion'],

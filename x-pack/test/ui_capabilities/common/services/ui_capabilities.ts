@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import axios, { AxiosInstance } from 'axios';
 import cheerio from 'cheerio';
 import { UICapabilities } from 'ui/capabilities';
 import { format as formatUrl } from 'url';
+import util from 'util';
 import { TestInvoker } from '../../../common/types';
 import { LogService } from '../../../types/services';
 
@@ -66,9 +66,9 @@ export class UICapabilitiesService {
 
     if (response.status !== 200) {
       throw new Error(
-        `Expected status code of 200, received ${response.status} ${response.statusText}: ${
-          response.data
-        }`
+        `Expected status code of 200, received ${response.status} ${
+          response.statusText
+        }: ${util.inspect(response.data)}`
       );
     }
 

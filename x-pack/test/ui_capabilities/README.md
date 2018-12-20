@@ -69,5 +69,4 @@ global visualize read
 # Spaces
 
 ## Spaces
-default space with discover visible
-space_1 with discover hidden
+disabling each feature one by one

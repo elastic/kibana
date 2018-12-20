@@ -75,7 +75,7 @@ export function infra(kibana: any) {
         navLinkId: 'infra:home',
         privileges: {
           all: {
-            app: [APP_ID],
+            app: [APP_ID, 'kibana'],
             savedObject: {
               all: [],
               read: ['config'],
@@ -93,7 +93,7 @@ export function infra(kibana: any) {
         navLinkId: 'infra:logs',
         privileges: {
           all: {
-            app: [APP_ID],
+            app: [APP_ID, 'kibana'],
             savedObject: {
               all: [],
               read: ['config'],

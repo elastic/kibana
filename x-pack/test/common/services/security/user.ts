@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import axios, { AxiosInstance } from 'axios';
+import util from 'util';
 import { LogService } from '../../../types/services';
 
 export class User {
@@ -16,6 +17,7 @@ export class User {
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/user' },
       baseURL: url,
       maxRedirects: 0,
+      validateStatus: () => true, // we do our own validation below and throw better error messages
     });
   }
 
@@ -29,7 +31,9 @@ export class User {
       }
     );
     if (status !== 200) {
-      throw new Error(`Expected status code of 200, received ${status} ${statusText}: ${data}`);
+      throw new Error(
+        `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+      );
     }
     this.log.debug(`created user ${username}`);
   }
@@ -40,7 +44,9 @@ export class User {
       `/api/security/v1/users/${username}`
     );
     if (status !== 204) {
-      throw new Error(`Expected status code of 204, received ${status} ${statusText}: ${data}`);
+      throw new Error(
+        `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
+      );
     }
     this.log.debug(`deleted user ${username}`);
   }
