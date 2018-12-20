@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import {
+  resolve,
+  dirname,
+  relative
+} from 'path';
+
 import {
   stat,
   rename,
@@ -39,37 +44,38 @@ import {
   createFormatArchiveStreams,
 } from '../lib';
 
-async function rebuildFilesInDir({ log, folderPath, archiveName }) {
-  const files = prioritizeMappings(await readDirectory(folderPath));
-  for (const filename of files) {
-    const filePath = resolve(folderPath, filename);
-    const stats = await fromNode(cb => stat(filePath, cb));
-    if (stats.isDirectory()) {
-      // Recursion
-      await rebuildFilesInDir({ log, archiveName, folderPath: filePath });
-    } else {
-      log.info(`${archiveName} Rebuilding ${filename}`);
-      const gzip = isGzip(filePath);
-      const tempFile = filePath + (gzip ? '.rebuilding.gz' : '.rebuilding');
-
-      await createPromiseFromStreams([
-        createReadStream(filePath),
-        ...createParseArchiveStreams({ gzip }),
-        ...createFormatArchiveStreams({ gzip }),
-        createWriteStream(tempFile),
-      ]);
-
-      await fromNode(cb => rename(tempFile, filePath, cb));
-      log.info(`${archiveName} Rebuilt ${filename}`);
-    }
-  }
+async function isDirectory(path) {
+  const stats = await fromNode(cb => stat(path, cb));
+  return stats.isDirectory();
 }
 
-export async function rebuildAllAction({ dataDir, log }) {
-  const archiveNames = await readDirectory(dataDir);
+export async function rebuildAllAction({ dataDir, log, rootDir = dataDir }) {
+  const childNames = prioritizeMappings(await readDirectory(dataDir));
+  for (const childName of childNames) {
+    const childPath = resolve(dataDir, childName);
 
-  for (const name of archiveNames) {
-    const inputDir = resolve(dataDir, name);
-    await rebuildFilesInDir({ log, archiveName: name, folderPath: inputDir });
+    if (await isDirectory(childPath)) {
+      await rebuildAllAction({
+        dataDir: childPath,
+        log,
+        rootDir,
+      });
+      continue;
+    }
+
+    const archiveName = dirname(relative(rootDir, childPath));
+    log.info(`${archiveName} Rebuilding ${childName}`);
+    const gzip = isGzip(childPath);
+    const tempFile = childPath + (gzip ? '.rebuilding.gz' : '.rebuilding');
+
+    await createPromiseFromStreams([
+      createReadStream(childPath),
+      ...createParseArchiveStreams({ gzip }),
+      ...createFormatArchiveStreams({ gzip }),
+      createWriteStream(tempFile),
+    ]);
+
+    await fromNode(cb => rename(tempFile, childPath, cb));
+    log.info(`${archiveName} Rebuilt ${childName}`);
   }
 }
