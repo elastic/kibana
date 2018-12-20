@@ -85,12 +85,16 @@ export default function navLinksTests({ getService }: TestInvoker) {
           case 'dual_privileges_all_at_space_with_no_features':
           case 'dual_privileges_read_at_space_with_no_features':
           case 'global_read_at_space_with_no_features':
+          case 'space_with_no_features_all_at_space_with_no_features':
+          case 'space_with_no_features_read_at_space_with_no_features':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
           case 'space_with_all_features_all_at_space_with_no_features':
           case 'space_with_all_features_read_at_space_with_no_features':
+          case 'space_with_no_features_all_at_space_with_all_features':
+          case 'space_with_no_features_read_at_space_with_all_features':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(
               GetUICapabilitiesFailureReason.RedirectedToRoot

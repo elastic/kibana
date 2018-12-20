@@ -153,6 +153,38 @@ const SpaceWithAllFeaturesRead: User = {
   },
 };
 
+const SpaceWithNoFeaturesAll: User = {
+  username: 'space_with_no_features_all',
+  fullName: 'space_with_no_features_all',
+  password: 'space_with_no_features_all-password',
+  role: {
+    name: 'space_with_no_features_all_role',
+    kibana: {
+      space: {
+        space_with_no_features: {
+          minimum: ['all'],
+        },
+      },
+    },
+  },
+};
+
+const SpaceWithNoFeaturesRead: User = {
+  username: 'space_with_no_features_read',
+  fullName: 'space_with_no_features_read',
+  password: 'space_with_no_features_read-password',
+  role: {
+    name: 'space_with_no_features_read_role',
+    kibana: {
+      space: {
+        space_with_no_features: {
+          minimum: ['read'],
+        },
+      },
+    },
+  },
+};
+
 export const Users: User[] = [
   Superuser,
   LegacyAll,
@@ -163,6 +195,8 @@ export const Users: User[] = [
   GlobalRead,
   SpaceWithAllFeaturesAll,
   SpaceWithAllFeaturesRead,
+  SpaceWithNoFeaturesAll,
+  SpaceWithNoFeaturesRead,
 ];
 
 // these are the spaces that we care about
@@ -361,6 +395,42 @@ const SpaceWithAllFeaturesReadAtSpaceWithNoFeatures: SpaceWithAllFeaturesReadAtS
   space: SpaceWithNoFeatures,
 };
 
+interface SpaceWithNoFeaturesAllAtSpaceWithAllFeatures extends Scenario {
+  id: 'space_with_no_features_all_at_space_with_all_features';
+}
+const SpaceWithNoFeaturesAllAtSpaceWithAllFeatures: SpaceWithNoFeaturesAllAtSpaceWithAllFeatures = {
+  id: 'space_with_no_features_all_at_space_with_all_features',
+  user: SpaceWithNoFeaturesAll,
+  space: SpaceWithAllFeatures,
+};
+
+interface SpaceWithNoFeaturesAllAtSpaceWithNoFeatures extends Scenario {
+  id: 'space_with_no_features_all_at_space_with_no_features';
+}
+const SpaceWithNoFeaturesAllAtSpaceWithNoFeatures: SpaceWithNoFeaturesAllAtSpaceWithNoFeatures = {
+  id: 'space_with_no_features_all_at_space_with_no_features',
+  user: SpaceWithNoFeaturesAll,
+  space: SpaceWithNoFeatures,
+};
+
+interface SpaceWithNoFeaturesReadAtSpaceWithAllFeatures extends Scenario {
+  id: 'space_with_no_features_read_at_space_with_all_features';
+}
+const SpaceWithNoFeaturesReadAtSpaceWithAllFeatures: SpaceWithNoFeaturesReadAtSpaceWithAllFeatures = {
+  id: 'space_with_no_features_read_at_space_with_all_features',
+  user: SpaceWithNoFeaturesRead,
+  space: SpaceWithAllFeatures,
+};
+
+interface SpaceWithNoFeaturesReadAtSpaceWithNoFeatures extends Scenario {
+  id: 'space_with_no_features_read_at_space_with_no_features';
+}
+const SpaceWithNoFeaturesReadAtSpaceWithNoFeatures: SpaceWithNoFeaturesReadAtSpaceWithNoFeatures = {
+  id: 'space_with_no_features_read_at_space_with_no_features',
+  user: SpaceWithNoFeaturesRead,
+  space: SpaceWithNoFeatures,
+};
+
 export type UserAtSpaceScenarios =
   | SuperuserAtSpaceWithAllFeatures
   | SuperuserAtSpaceWithNoFeatures
@@ -379,7 +449,11 @@ export type UserAtSpaceScenarios =
   | SpaceWithAllFeaturesAllAtSpaceWithAllFeatures
   | SpaceWithAllFeaturesAllAtSpaceWithNoFeatures
   | SpaceWithAllFeaturesReadAtSpaceWithAllFeatures
-  | SpaceWithAllFeaturesReadAtSpaceWithNoFeatures;
+  | SpaceWithAllFeaturesReadAtSpaceWithNoFeatures
+  | SpaceWithNoFeaturesAllAtSpaceWithAllFeatures
+  | SpaceWithNoFeaturesAllAtSpaceWithNoFeatures
+  | SpaceWithNoFeaturesReadAtSpaceWithAllFeatures
+  | SpaceWithNoFeaturesReadAtSpaceWithNoFeatures;
 export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
   SuperuserAtSpaceWithAllFeatures,
   SuperuserAtSpaceWithNoFeatures,
@@ -399,4 +473,8 @@ export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
   SpaceWithAllFeaturesAllAtSpaceWithNoFeatures,
   SpaceWithAllFeaturesReadAtSpaceWithAllFeatures,
   SpaceWithAllFeaturesReadAtSpaceWithNoFeatures,
+  SpaceWithNoFeaturesAllAtSpaceWithAllFeatures,
+  SpaceWithNoFeaturesAllAtSpaceWithNoFeatures,
+  SpaceWithNoFeaturesReadAtSpaceWithAllFeatures,
+  SpaceWithNoFeaturesReadAtSpaceWithNoFeatures,
 ];
