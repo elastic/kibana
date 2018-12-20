@@ -111,7 +111,7 @@ export class CreateIndexPatternWizard extends Component {
 
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry
-      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1), ['a'], clustersFailMsg)
+      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1), ['a'], clustersFailMsg
     ).then(remoteIndices => this.setState({ remoteClustersExist: !!remoteIndices.length }));
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
