@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }) {
     const linksText = await Promise.all(appLinks.map(appLink => appLink.getVisibleText()));
     expect(linksText).to.eql([
       ...appNavLinkTexts,
-      ...getAlwaysPresentNavLinks('global discover all user')
+      ...getAlwaysPresentNavLinks('test user')
     ]);
   };
 
@@ -42,9 +42,9 @@ export default function ({ getPageObjects, getService }) {
         });
 
         await security.user.create('global_discover_all_user', {
-          password: 'password',
+          password: 'global_discover_all_user-password',
           roles: ['global_discover_all_role'],
-          full_name: 'global discover all user',
+          full_name: 'test user',
         });
 
         await spaces.create({
@@ -61,7 +61,59 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink in both spaces', async () => {
-        await PageObjects.security.login('global_discover_all_user', 'password', {
+        await PageObjects.security.login('global_discover_all_user', 'global_discover_all_user-password', {
+          expectSpaceSelector: true,
+        });
+        await PageObjects.spaceSelector.clickSpaceCard('default');
+        await PageObjects.spaceSelector.expectHomePage('default');
+        await expectAppNavLinks([
+          'Discover',
+          'Management',
+        ]);
+
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.clickSpaceAvatar('space_1');
+        await PageObjects.spaceSelector.expectHomePage('space_1');
+        await expectAppNavLinks([
+          'Discover',
+          'Management',
+        ]);
+      });
+    });
+
+    describe('global discover read-only privileges', () => {
+      before(async () => {
+        await security.role.create('global_discover_read_role', {
+          kibana: {
+            global: {
+              feature: {
+                discover: ['all']
+              },
+            }
+          }
+        });
+
+        await security.user.create('global_discover_read_user', {
+          password: 'global_discover_read_user-password',
+          roles: ['global_discover_read_role'],
+          full_name: 'test user',
+        });
+
+        await spaces.create({
+          id: 'space_1',
+          name: 'space_1',
+          disabledFeatures: [],
+        });
+      });
+
+      after(async () => {
+        await security.role.delete('global_discover_read_role');
+        await security.user.delete('global_discover_read_user');
+        await spaces.delete('space_1');
+      });
+
+      it('shows discover navlink in both spaces', async () => {
+        await PageObjects.security.login('global_discover_read_user', 'global_discover_read_user-password', {
           expectSpaceSelector: true,
         });
         await PageObjects.spaceSelector.clickSpaceCard('default');

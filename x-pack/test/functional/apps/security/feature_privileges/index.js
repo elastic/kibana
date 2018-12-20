@@ -6,7 +6,7 @@
 
 
 export default function ({ loadTestFile }) {
-  describe('privileges', function () {
+  describe('feature privileges', function () {
     loadTestFile(require.resolve('./discover'));
   });
 }
