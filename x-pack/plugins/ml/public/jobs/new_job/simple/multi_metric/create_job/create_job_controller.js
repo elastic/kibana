@@ -494,10 +494,10 @@ module
               })
               .catch((resp) => {
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.multiMetric.openJobErrorMessage', {
-                    defaultMessage: 'Could not open job: {resp}',
-                    values: { resp }
-                  })
+                  i18n('xpack.ml.newJob.simple.multiMetric.couldNotOpenJobErrorMessage', {
+                    defaultMessage: 'Could not open job:'
+                  }),
+                  resp
                 );
                 msgs.error(
                   i18n('xpack.ml.newJob.simple.multiMetric.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
@@ -514,9 +514,9 @@ module
             // save failed
             msgs.error(
               i18n('xpack.ml.newJob.simple.multiMetric.saveFailedErrorMessage', {
-                defaultMessage: 'Save failed: {response}',
-                values: { response: resp.resp }
-              })
+                defaultMessage: 'Save failed:'
+              }),
+              resp.resp
             );
           });
       } else {
@@ -561,10 +561,10 @@ module
                 .catch((resp) => {
                   // datafeed failed
                   msgs.error(
-                    i18n('xpack.ml.newJob.simple.multiMetric.startDatafeedErrorMessage', {
-                      defaultMessage: 'Could not start datafeed: {resp}',
-                      values: { resp }
-                    })
+                    i18n('xpack.ml.newJob.simple.multiMetric.couldNotStartDatafeedErrorMessage', {
+                      defaultMessage: 'Could not start datafeed:'
+                    }),
+                    resp
                   );
                 });
             }
@@ -572,9 +572,9 @@ module
           .catch((resp) => {
             msgs.error(
               i18n('xpack.ml.newJob.simple.multiMetric.saveDatafeedFailedErrorMessage', {
-                defaultMessage: 'Save datafeed failed: : {resp}',
-                values: { resp }
-              })
+                defaultMessage: 'Save datafeed failed:',
+              }),
+              resp
             );
           });
       }
