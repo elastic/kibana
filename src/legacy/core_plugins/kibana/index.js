@@ -164,6 +164,16 @@ export default function (kibana) {
             dashboard: {
               showWriteControls: true
             },
+            management: {
+              /*
+               * Management settings correspond to management section/link ids, and should not be changed
+               * without also updating those definitions.
+               */
+              kibana: {
+                settings: true,
+                indices: true,
+              },
+            }
           }
         };
       },

@@ -15,11 +15,7 @@ exports[`renders without crashing 1`] = `
             Object {
               "spaceIdentifier": <strong>
                 /s/
-                <FormattedMessage
-                  defaultMessage="awesome-space"
-                  id="xpack.spaces.management.spaceIdentifier.spaceIdentifierText"
-                  values={Object {}}
-                />
+                
               </strong>,
             }
           }

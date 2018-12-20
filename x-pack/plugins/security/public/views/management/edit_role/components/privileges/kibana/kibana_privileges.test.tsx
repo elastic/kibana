@@ -42,6 +42,7 @@ const buildProps = (customProps = {}) => {
     ],
     uiCapabilities: {
       navLinks: {},
+      management: {},
       spaces: {
         manage: true,
       },

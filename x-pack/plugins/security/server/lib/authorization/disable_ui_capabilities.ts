@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues } from 'lodash';
+import { flatten, isObject, mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
@@ -37,22 +37,45 @@ export function disableUICapabilitesFactory(
 
   const disableAll = (uiCapabilities: UICapabilities) => {
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) =>
-      mapValues(featureUICapabilities, (enabled, uiCapability) => {
-        if (shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
-          return false;
+      mapValues(featureUICapabilities, (value, uiCapability) => {
+        if (typeof value === 'boolean') {
+          if (shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+            return false;
+          }
+          return value;
         }
 
-        return enabled;
+        if (isObject(value)) {
+          return mapValues(value, () => false);
+        }
+
+        throw new Error(`Expected value type of boolean or object, but found ${value}`);
       })
     );
   };
 
   const usingPrivileges = async (uiCapabilities: UICapabilities) => {
+    function getActionsForFeatureCapability(
+      featureId: string,
+      uiCapability: string,
+      value: boolean | Record<string, boolean>
+    ): string[] {
+      if (typeof value === 'boolean') {
+        return [actions.ui.get(featureId, uiCapability)];
+      }
+      if (isObject(value)) {
+        return Object.keys(value).map(item => actions.ui.get(featureId, uiCapability, item));
+      }
+      throw new Error(`Expected value type of boolean or object, but found ${value}`);
+    }
+
     const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
       (acc, [featureId, featureUICapabilities]) => [
         ...acc,
-        ...Object.keys(featureUICapabilities).map(uiCapability =>
-          actions.ui.get(featureId, uiCapability)
+        ...flatten(
+          Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
+            return getActionsForFeatureCapability(featureId, uiCapability, value);
+          })
         ),
       ],
       []
@@ -78,20 +101,48 @@ export function disableUICapabilitesFactory(
       throw err;
     }
 
+    const checkPrivilegesForCapability = (
+      enabled: boolean,
+      featureId: string,
+      ...uiCapabilityParts: string[]
+    ) => {
+      // if the uiCapability has already been disabled, we don't want to re-enable it
+      if (enabled === false) {
+        return false;
+      }
+
+      const action = actions.ui.get(featureId, ...uiCapabilityParts);
+      return checkPrivilegesResponse.privileges[action] === true;
+    };
+
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) => {
-      return mapValues(featureUICapabilities, (enabled, uiCapability) => {
-        if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
-          return enabled;
-        }
+      return mapValues(
+        featureUICapabilities,
+        (value: boolean | Record<string, boolean>, uiCapability) => {
+          if (typeof value === 'boolean') {
+            if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+              return value;
+            }
+            return checkPrivilegesForCapability(value, featureId!, uiCapability!);
+          }
 
-        // if the uiCapability has already been disabled, we don't want to re-enable it
-        if (!enabled) {
-          return false;
-        }
+          if (isObject(value)) {
+            const res = mapValues(value, (enabled, subUiCapability) => {
+              return checkPrivilegesForCapability(
+                enabled,
+                featureId!,
+                uiCapability!,
+                subUiCapability!
+              );
+            });
+            return res;
+          }
 
-        const action = actions.ui.get(featureId!, uiCapability!);
-        return checkPrivilegesResponse.privileges[action] === true;
-      });
+          throw new Error(
+            `Unexpected UI Capability value. Expected boolean or object, but found ${value}`
+          );
+        }
+      );
     });
   };
 
