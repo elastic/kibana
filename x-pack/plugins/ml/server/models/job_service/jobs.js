@@ -89,7 +89,7 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
-    const auditMessages = await getAuditMessagesSummary();
+    const auditMessages = await getAuditMessagesSummary(fullJobsList.length);
     const auditMessagesByJob = auditMessages.reduce((p, c) => {
       p[c.job_id] = c;
       return p;
