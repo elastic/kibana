@@ -19,6 +19,7 @@
 
 import { resolve } from 'path';
 import {
+  stat,
   rename,
   createReadStream,
   createWriteStream
@@ -38,28 +39,37 @@ import {
   createFormatArchiveStreams,
 } from '../lib';
 
-export async function rebuildAllAction({ dataDir, log }) {
-  const archiveNames = await readDirectory(dataDir);
-
-  for (const name of archiveNames) {
-    const inputDir = resolve(dataDir, name);
-    const files = prioritizeMappings(await readDirectory(inputDir));
-    for (const filename of files) {
-      log.info('[%s] Rebuilding %j', name, filename);
-
-      const path = resolve(inputDir, filename);
-      const gzip = isGzip(path);
-      const tempFile = path + (gzip ? '.rebuilding.gz' : '.rebuilding');
+async function rebuildFilesInDir({ log, folderPath, archiveName }) {
+  const files = prioritizeMappings(await readDirectory(folderPath));
+  for (const filename of files) {
+    const filePath = resolve(folderPath, filename);
+    const stats = await fromNode(cb => stat(filePath, cb));
+    if (stats.isDirectory()) {
+      // Recursion
+      await rebuildFilesInDir({ log, archiveName, folderPath: filePath });
+    } else {
+      log.info(`${archiveName} Rebuilding ${filename}`);
+      const gzip = isGzip(filePath);
+      const tempFile = filePath + (gzip ? '.rebuilding.gz' : '.rebuilding');
 
       await createPromiseFromStreams([
-        createReadStream(path),
+        createReadStream(filePath),
         ...createParseArchiveStreams({ gzip }),
         ...createFormatArchiveStreams({ gzip }),
         createWriteStream(tempFile),
       ]);
 
-      await fromNode(cb => rename(tempFile, path, cb));
-      log.info('[%s] Rebuilt %j', name, filename);
+      await fromNode(cb => rename(tempFile, filePath, cb));
+      log.info(`${archiveName} Rebuilt ${filename}`);
     }
+  }
+}
+
+export async function rebuildAllAction({ dataDir, log }) {
+  const archiveNames = await readDirectory(dataDir);
+
+  for (const name of archiveNames) {
+    const inputDir = resolve(dataDir, name);
+    await rebuildFilesInDir({ log, archiveName: name, folderPath: inputDir });
   }
 }
