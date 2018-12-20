@@ -39,7 +39,7 @@ describe('$executor service', () => {
 
   it('should register listener for fetch upon start', () => {
     executor.start(scope);
-    const listeners = timefilter.listeners('fetch');
+    const listeners = timefilter.getListeners('fetch');
     const handlerFunc = listeners.find(listener => {
       return listener.name === 'reFetch';
     });
@@ -48,7 +48,7 @@ describe('$executor service', () => {
 
   it('should register listener for refreshIntervalUpdate upon start', () => {
     executor.start(scope);
-    const listeners = timefilter.listeners('refreshIntervalUpdate');
+    const listeners = timefilter.getListeners('refreshIntervalUpdate');
     const handlerFunc = listeners.find(listener => {
       return listener.name === 'killIfPaused';
     });

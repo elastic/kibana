@@ -168,11 +168,11 @@ dataArray.forEach(function (data, i) {
 
       it('should add an event and its listeners', function () {
         listeners.forEach(function (listener) {
-          expect(vis.listeners(beforeEvent)).to.contain(listener);
+          expect(vis.getListeners(beforeEvent)).to.contain(listener);
         });
 
         listeners.forEach(function (listener) {
-          expect(vis.listeners(afterEvent)).to.contain(listener);
+          expect(vis.getListeners(afterEvent)).to.contain(listener);
         });
       });
 
@@ -226,11 +226,11 @@ dataArray.forEach(function (data, i) {
       it('should remove a listener', function () {
         const charts = vis.handler.charts;
 
-        expect(vis.listeners(beforeEvent)).to.not.contain(listener1);
-        expect(vis.listeners(beforeEvent)).to.contain(listener2);
+        expect(vis.getListeners(beforeEvent)).to.not.contain(listener1);
+        expect(vis.getListeners(beforeEvent)).to.contain(listener2);
 
-        expect(vis.listeners(afterEvent)).to.not.contain(listener1);
-        expect(vis.listeners(afterEvent)).to.contain(listener2);
+        expect(vis.getListeners(afterEvent)).to.not.contain(listener1);
+        expect(vis.getListeners(afterEvent)).to.contain(listener2);
 
         // Events should still be attached to charts
         charts.forEach(function (chart) {
@@ -244,8 +244,8 @@ dataArray.forEach(function (data, i) {
         vis.off(afterEvent);
 
         // should remove 'brush' event
-        expect(vis.listeners(beforeEvent)).to.contain(listener2);
-        expect(vis.listeners(afterEvent)).to.not.contain(listener2);
+        expect(vis.getListeners(beforeEvent)).to.contain(listener2);
+        expect(vis.getListeners(afterEvent)).to.not.contain(listener2);
 
         // should remove the event from the charts
         charts.forEach(function (chart) {
