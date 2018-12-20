@@ -28,8 +28,6 @@ export default async function (server /*options*/) {
     types: new TypesRegistry()
   };
 
-  server.expose(registries);
-
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
@@ -50,5 +48,7 @@ export default async function (server /*options*/) {
   });
 
   await populateServerRegistries(registries);
+
+  server.expose(registries);
   routes(server);
 }

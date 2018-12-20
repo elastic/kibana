@@ -52,10 +52,11 @@ const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
   setAppReady: basePath => async () => {
     try {
+      // wait for core interpreter to load
+      await getInitializedFunctions();
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions(functionsRegistry);
       await loadBrowserRegistries(types, basePath);
-      await getInitializedFunctions();
 
       // set app state to ready
       dispatch(appReady());

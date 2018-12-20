@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/functions_registry';
 import uniqBy from 'lodash.uniqby';
-import { getBrowserRegistries } from '@kbn/interpreter/public';
 import { getServerFunctions } from '../state/selectors/app';
 
 export async function getFunctionDefinitions(state) {
-  const { browserFunctions } = await getBrowserRegistries();
   const serverFunctions = getServerFunctions(state);
-  return uniqBy(serverFunctions.concat(browserFunctions.toArray()), 'name');
+  return uniqBy(serverFunctions.concat(functionsRegistry.toArray()), 'name');
 }

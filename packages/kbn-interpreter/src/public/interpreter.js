@@ -31,17 +31,15 @@ export async function initializeInterpreter(socket, typesRegistry, functionsRegi
 
   const interpretAst = async (ast, context, handlers) => {
     // Load plugins before attempting to get functions, otherwise this gets racey
-    return functionList
-      .then((serverFunctionList) => {
-        return socketInterpreterProvider({
-          types: typesRegistry.toJS(),
-          handlers: { ...handlers, ...createHandlers(socket) },
-          functions: functionsRegistry.toJS(),
-          referableFunctions: serverFunctionList,
-          socket: socket,
-        });
-      })
-      .then(interpretFn => interpretFn(ast, context));
+    const serverFunctionList = await functionList;
+    const interpretFn = await socketInterpreterProvider({
+      types: typesRegistry.toJS(),
+      handlers: { ...handlers, ...createHandlers(socket) },
+      functions: functionsRegistry.toJS(),
+      referableFunctions: serverFunctionList,
+      socket: socket,
+    });
+    return interpretFn(ast, context);
   };
 
   // Listen for interpreter runs

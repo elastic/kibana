@@ -18,7 +18,7 @@
  */
 
 
-import { initializeInterpreter as initialize } from '@kbn/interpreter/src/public';
+import { initializeInterpreter as initialize } from '@kbn/interpreter/public';
 
 let _resolve;
 const interpreterPromise = new Promise(resolve => { _resolve = resolve; });
@@ -32,11 +32,13 @@ export const initializeInterpreter = async (socket, typesRegistry, functionsRegi
 
 export const getInitializedFunctions = async () => {
   await interpreterPromise;
-  return interpreter.getInitializedFunctions();
+  const result = await interpreter.getInitializedFunctions();
+  return result;
 };
 
 export const interpretAst = async (ast, context, handlers) => {
   await interpreterPromise;
-  return interpreter.interpretAst(ast, context, handlers);
+  const result = await interpreter.interpretAst(ast, context, handlers);
+  return result;
 };
 
