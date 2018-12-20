@@ -24,7 +24,7 @@ import assert from 'chai';
 const expect = assert.expect;
 import invoke from './helpers/invoke_series_fn.js';
 
-describe('precision.js', () => {
+describe('points.js', () => {
 
   let seriesList;
   beforeEach(() => {
