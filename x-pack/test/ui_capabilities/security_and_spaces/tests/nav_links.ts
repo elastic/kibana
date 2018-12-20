@@ -65,36 +65,36 @@ export default function navLinksTests({ getService }: TestInvoker) {
           space.id
         );
         switch (scenario.id) {
-          case 'superuser_at_space_with_all_features':
-          case 'global_all_at_space_with_all_features':
-          case 'legacy_all_at_space_with_all_features':
-          case 'legacy_read_at_space_with_all_features':
-          case 'dual_privileges_all_at_space_with_all_features':
-          case 'dual_privileges_read_at_space_with_all_features':
-          case 'global_read_at_space_with_all_features':
-          case 'space_with_all_features_all_at_space_with_all_features':
-          case 'space_with_all_features_read_at_space_with_all_features':
+          case 'superuser at everything_space':
+          case 'global_all at everything_space':
+          case 'legacy_all at everything_space':
+          case 'legacy_read at everything_space':
+          case 'dual_privileges_all at everything_space':
+          case 'dual_privileges_read at everything_space':
+          case 'global_read at everything_space':
+          case 'everything_space_all at everything_space':
+          case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
-          case 'superuser_at_space_with_no_features':
-          case 'global_all_at_space_with_no_features':
-          case 'legacy_all_at_space_with_no_features':
-          case 'legacy_read_at_space_with_no_features':
-          case 'dual_privileges_all_at_space_with_no_features':
-          case 'dual_privileges_read_at_space_with_no_features':
-          case 'global_read_at_space_with_no_features':
-          case 'space_with_no_features_all_at_space_with_no_features':
-          case 'space_with_no_features_read_at_space_with_no_features':
+          case 'superuser at nothing_space':
+          case 'global_all at nothing_space':
+          case 'legacy_all at nothing_space':
+          case 'legacy_read at nothing_space':
+          case 'dual_privileges_all at nothing_space':
+          case 'dual_privileges_read at nothing_space':
+          case 'global_read at nothing_space':
+          case 'nothing_space_all at nothing_space':
+          case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
-          case 'space_with_all_features_all_at_space_with_no_features':
-          case 'space_with_all_features_read_at_space_with_no_features':
-          case 'space_with_no_features_all_at_space_with_all_features':
-          case 'space_with_no_features_read_at_space_with_all_features':
+          case 'everything_space_all at nothing_space':
+          case 'everything_space_read at nothing_space':
+          case 'nothing_space_all at everything_space':
+          case 'nothing_space_read at everything_space':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(
               GetUICapabilitiesFailureReason.RedirectedToRoot

@@ -121,15 +121,15 @@ const GlobalRead: User = {
   },
 };
 
-const SpaceWithAllFeaturesAll: User = {
-  username: 'space_with_all_features_all',
-  fullName: 'space_with_all_features_all',
-  password: 'space_with_all_features_all-password',
+const EverythingSpaceAll: User = {
+  username: 'everything_space_all',
+  fullName: 'everything_space_all',
+  password: 'everything_space_all-password',
   role: {
-    name: 'space_with_all_features_all_role',
+    name: 'everything_space_all_role',
     kibana: {
       space: {
-        space_with_all_features: {
+        everything_space: {
           minimum: ['all'],
         },
       },
@@ -137,15 +137,15 @@ const SpaceWithAllFeaturesAll: User = {
   },
 };
 
-const SpaceWithAllFeaturesRead: User = {
-  username: 'space_with_all_features_read',
-  fullName: 'space_with_all_features_read',
-  password: 'space_with_all_features_read-password',
+const EverythingSpaceRead: User = {
+  username: 'everything_space_read',
+  fullName: 'everything_space_read',
+  password: 'everything_space_read-password',
   role: {
-    name: 'space_with_all_features_read_role',
+    name: 'everything_space_read_role',
     kibana: {
       space: {
-        space_with_all_features: {
+        everything_space: {
           minimum: ['read'],
         },
       },
@@ -153,15 +153,15 @@ const SpaceWithAllFeaturesRead: User = {
   },
 };
 
-const SpaceWithNoFeaturesAll: User = {
-  username: 'space_with_no_features_all',
-  fullName: 'space_with_no_features_all',
-  password: 'space_with_no_features_all-password',
+const NothingSpaceAll: User = {
+  username: 'nothing_space_all',
+  fullName: 'nothing_space_all',
+  password: 'nothing_space_all-password',
   role: {
-    name: 'space_with_no_features_all_role',
+    name: 'nothing_space_all_role',
     kibana: {
       space: {
-        space_with_no_features: {
+        nothing_space: {
           minimum: ['all'],
         },
       },
@@ -169,15 +169,15 @@ const SpaceWithNoFeaturesAll: User = {
   },
 };
 
-const SpaceWithNoFeaturesRead: User = {
-  username: 'space_with_no_features_read',
-  fullName: 'space_with_no_features_read',
-  password: 'space_with_no_features_read-password',
+const NothingSpaceRead: User = {
+  username: 'nothing_space_read',
+  fullName: 'nothing_space_read',
+  password: 'nothing_space_read-password',
   role: {
-    name: 'space_with_no_features_read_role',
+    name: 'nothing_space_read_role',
     kibana: {
       space: {
-        space_with_no_features: {
+        nothing_space: {
           minimum: ['read'],
         },
       },
@@ -193,22 +193,22 @@ export const Users: User[] = [
   DualPrivilegesRead,
   GlobalAll,
   GlobalRead,
-  SpaceWithAllFeaturesAll,
-  SpaceWithAllFeaturesRead,
-  SpaceWithNoFeaturesAll,
-  SpaceWithNoFeaturesRead,
+  EverythingSpaceAll,
+  EverythingSpaceRead,
+  NothingSpaceAll,
+  NothingSpaceRead,
 ];
 
 // these are the spaces that we care about
-const SpaceWithAllFeatures: Space = {
-  id: 'space_with_all_features',
-  name: 'space_with_all_features',
+const EverythingSpace: Space = {
+  id: 'everything_space',
+  name: 'everything_space',
   disabledFeatures: [],
 };
 
-const SpaceWithNoFeatures: Space = {
-  id: 'space_with_no_features',
-  name: 'space_with_no_features',
+const NothingSpace: Space = {
+  id: 'nothing_space',
+  name: 'nothing_space',
   disabledFeatures: [
     'advancedSettings',
     'apm',
@@ -226,255 +226,255 @@ const SpaceWithNoFeatures: Space = {
   ],
 };
 
-export const Spaces: Space[] = [SpaceWithAllFeatures, SpaceWithNoFeatures];
+export const Spaces: Space[] = [EverythingSpace, NothingSpace];
 
 interface Scenario {
   user: User;
   space: Space;
 }
 
-interface SuperuserAtSpaceWithAllFeatures extends Scenario {
-  id: 'superuser_at_space_with_all_features';
+interface SuperuserAtEverythingSpace extends Scenario {
+  id: 'superuser at everything_space';
 }
-const SuperuserAtSpaceWithAllFeatures: SuperuserAtSpaceWithAllFeatures = {
-  id: 'superuser_at_space_with_all_features',
+const SuperuserAtEverythingSpace: SuperuserAtEverythingSpace = {
+  id: 'superuser at everything_space',
   user: Superuser,
-  space: SpaceWithAllFeatures,
+  space: EverythingSpace,
 };
 
-interface SuperuserAtSpaceWithNoFeatures extends Scenario {
-  id: 'superuser_at_space_with_no_features';
+interface SuperuserAtNothingSpace extends Scenario {
+  id: 'superuser at nothing_space';
 }
-const SuperuserAtSpaceWithNoFeatures: SuperuserAtSpaceWithNoFeatures = {
-  id: 'superuser_at_space_with_no_features',
+const SuperuserAtNothingSpace: SuperuserAtNothingSpace = {
+  id: 'superuser at nothing_space',
   user: Superuser,
-  space: SpaceWithNoFeatures,
+  space: NothingSpace,
 };
 
-interface LegacyAllAtSpaceWithAllFeatures extends Scenario {
-  id: 'legacy_all_at_space_with_all_features';
+interface LegacyAllAtEverythingSpace extends Scenario {
+  id: 'legacy_all at everything_space';
 }
-const LegacyAllAtSpaceWithAllFeatures: LegacyAllAtSpaceWithAllFeatures = {
-  id: 'legacy_all_at_space_with_all_features',
+const LegacyAllAtEverythingSpace: LegacyAllAtEverythingSpace = {
+  id: 'legacy_all at everything_space',
   user: LegacyAll,
-  space: SpaceWithAllFeatures,
+  space: EverythingSpace,
 };
 
-interface LegacyAllAtSpaceWithNoFeatures extends Scenario {
-  id: 'legacy_all_at_space_with_no_features';
+interface LegacyAllAtNothingSpace extends Scenario {
+  id: 'legacy_all at nothing_space';
 }
-const LegacyAllAtSpaceWithNoFeatures: LegacyAllAtSpaceWithNoFeatures = {
-  id: 'legacy_all_at_space_with_no_features',
+const LegacyAllAtNothingSpace: LegacyAllAtNothingSpace = {
+  id: 'legacy_all at nothing_space',
   user: LegacyAll,
-  space: SpaceWithNoFeatures,
+  space: NothingSpace,
 };
 
-interface LegacyReadAtSpaceWithAllFeatures extends Scenario {
-  id: 'legacy_read_at_space_with_all_features';
+interface LegacyReadAtEverythingSpace extends Scenario {
+  id: 'legacy_read at everything_space';
 }
-const LegacyReadAtSpaceWithAllFeatures: LegacyReadAtSpaceWithAllFeatures = {
-  id: 'legacy_read_at_space_with_all_features',
+const LegacyReadAtEverythingSpace: LegacyReadAtEverythingSpace = {
+  id: 'legacy_read at everything_space',
   user: LegacyRead,
-  space: SpaceWithAllFeatures,
+  space: EverythingSpace,
 };
 
-interface LegacyReadAtSpaceWithNoFeatures extends Scenario {
-  id: 'legacy_read_at_space_with_no_features';
+interface LegacyReadAtNothingSpace extends Scenario {
+  id: 'legacy_read at nothing_space';
 }
-const LegacyReadAtSpaceWithNoFeatures: LegacyReadAtSpaceWithNoFeatures = {
-  id: 'legacy_read_at_space_with_no_features',
+const LegacyReadAtNothingSpace: LegacyReadAtNothingSpace = {
+  id: 'legacy_read at nothing_space',
   user: LegacyRead,
-  space: SpaceWithNoFeatures,
+  space: NothingSpace,
 };
 
-interface DualPrivilegesAllAtSpaceWithAllFeatures extends Scenario {
-  id: 'dual_privileges_all_at_space_with_all_features';
+interface DualPrivilegesAllAtEverythingSpace extends Scenario {
+  id: 'dual_privileges_all at everything_space';
 }
-const DualPrivilegesAllAtSpaceWithAllFeatures: DualPrivilegesAllAtSpaceWithAllFeatures = {
-  id: 'dual_privileges_all_at_space_with_all_features',
+const DualPrivilegesAllAtEverythingSpace: DualPrivilegesAllAtEverythingSpace = {
+  id: 'dual_privileges_all at everything_space',
   user: DualPrivilegesAll,
-  space: SpaceWithAllFeatures,
+  space: EverythingSpace,
 };
 
-interface DualPrivilegesAllAtSpaceWithNoFeatures extends Scenario {
-  id: 'dual_privileges_all_at_space_with_no_features';
+interface DualPrivilegesAllAtNothingSpace extends Scenario {
+  id: 'dual_privileges_all at nothing_space';
 }
-const DualPrivilegesAllAtSpaceWithNoFeatures: DualPrivilegesAllAtSpaceWithNoFeatures = {
-  id: 'dual_privileges_all_at_space_with_no_features',
+const DualPrivilegesAllAtNothingSpace: DualPrivilegesAllAtNothingSpace = {
+  id: 'dual_privileges_all at nothing_space',
   user: DualPrivilegesAll,
-  space: SpaceWithNoFeatures,
+  space: NothingSpace,
 };
 
-interface DualPrivilegesReadAtSpaceWithAllFeatures extends Scenario {
-  id: 'dual_privileges_read_at_space_with_all_features';
+interface DualPrivilegesReadAtEverythingSpace extends Scenario {
+  id: 'dual_privileges_read at everything_space';
 }
-const DualPrivilegesReadAtSpaceWithAllFeatures: DualPrivilegesReadAtSpaceWithAllFeatures = {
-  id: 'dual_privileges_read_at_space_with_all_features',
+const DualPrivilegesReadAtEverythingSpace: DualPrivilegesReadAtEverythingSpace = {
+  id: 'dual_privileges_read at everything_space',
   user: DualPrivilegesRead,
-  space: SpaceWithAllFeatures,
+  space: EverythingSpace,
 };
 
-interface DualPrivilegesReadAtSpaceWithNoFeatures extends Scenario {
-  id: 'dual_privileges_read_at_space_with_no_features';
+interface DualPrivilegesReadAtNothingSpace extends Scenario {
+  id: 'dual_privileges_read at nothing_space';
 }
-const DualPrivilegesReadAtSpaceWithNoFeatures: DualPrivilegesReadAtSpaceWithNoFeatures = {
-  id: 'dual_privileges_read_at_space_with_no_features',
+const DualPrivilegesReadAtNothingSpace: DualPrivilegesReadAtNothingSpace = {
+  id: 'dual_privileges_read at nothing_space',
   user: DualPrivilegesRead,
-  space: SpaceWithNoFeatures,
+  space: NothingSpace,
 };
 
-interface GlobalAllAtSpaceWithAllFeatures extends Scenario {
-  id: 'global_all_at_space_with_all_features';
+interface GlobalAllAtEverythingSpace extends Scenario {
+  id: 'global_all at everything_space';
 }
-const GlobalAllAtSpaceWithAllFeatures: GlobalAllAtSpaceWithAllFeatures = {
-  id: 'global_all_at_space_with_all_features',
+const GlobalAllAtEverythingSpace: GlobalAllAtEverythingSpace = {
+  id: 'global_all at everything_space',
   user: GlobalAll,
-  space: SpaceWithAllFeatures,
+  space: EverythingSpace,
 };
 
-interface GlobalAllAtSpaceWithNoFeatures extends Scenario {
-  id: 'global_all_at_space_with_no_features';
+interface GlobalAllAtNothingSpace extends Scenario {
+  id: 'global_all at nothing_space';
 }
-const GlobalAllAtSpaceWithNoFeatures: GlobalAllAtSpaceWithNoFeatures = {
-  id: 'global_all_at_space_with_no_features',
+const GlobalAllAtNothingSpace: GlobalAllAtNothingSpace = {
+  id: 'global_all at nothing_space',
   user: GlobalAll,
-  space: SpaceWithNoFeatures,
+  space: NothingSpace,
 };
 
-interface GlobalReadAtSpaceWithAllFeatures extends Scenario {
-  id: 'global_read_at_space_with_all_features';
+interface GlobalReadAtEverythingSpace extends Scenario {
+  id: 'global_read at everything_space';
 }
-const GlobalReadAtSpaceWithAllFeatures: GlobalReadAtSpaceWithAllFeatures = {
-  id: 'global_read_at_space_with_all_features',
+const GlobalReadAtEverythingSpace: GlobalReadAtEverythingSpace = {
+  id: 'global_read at everything_space',
   user: GlobalRead,
-  space: SpaceWithAllFeatures,
+  space: EverythingSpace,
 };
 
-interface GlobalReadAtSpaceWithNoFeatures extends Scenario {
-  id: 'global_read_at_space_with_no_features';
+interface GlobalReadAtNothingSpace extends Scenario {
+  id: 'global_read at nothing_space';
 }
-const GlobalReadAtSpaceWithNoFeatures: GlobalReadAtSpaceWithNoFeatures = {
-  id: 'global_read_at_space_with_no_features',
+const GlobalReadAtNothingSpace: GlobalReadAtNothingSpace = {
+  id: 'global_read at nothing_space',
   user: GlobalRead,
-  space: SpaceWithNoFeatures,
+  space: NothingSpace,
 };
 
-interface SpaceWithAllFeaturesAllAtSpaceWithAllFeatures extends Scenario {
-  id: 'space_with_all_features_all_at_space_with_all_features';
+interface EverythingSpaceAllAtEverythingSpace extends Scenario {
+  id: 'everything_space_all at everything_space';
 }
-const SpaceWithAllFeaturesAllAtSpaceWithAllFeatures: SpaceWithAllFeaturesAllAtSpaceWithAllFeatures = {
-  id: 'space_with_all_features_all_at_space_with_all_features',
-  user: SpaceWithAllFeaturesAll,
-  space: SpaceWithAllFeatures,
+const EverythingSpaceAllAtEverythingSpace: EverythingSpaceAllAtEverythingSpace = {
+  id: 'everything_space_all at everything_space',
+  user: EverythingSpaceAll,
+  space: EverythingSpace,
 };
 
-interface SpaceWithAllFeaturesAllAtSpaceWithNoFeatures extends Scenario {
-  id: 'space_with_all_features_all_at_space_with_no_features';
+interface EverythingSpaceAllAtNothingSpace extends Scenario {
+  id: 'everything_space_all at nothing_space';
 }
-const SpaceWithAllFeaturesAllAtSpaceWithNoFeatures: SpaceWithAllFeaturesAllAtSpaceWithNoFeatures = {
-  id: 'space_with_all_features_all_at_space_with_no_features',
-  user: SpaceWithAllFeaturesAll,
-  space: SpaceWithNoFeatures,
+const EverythingSpaceAllAtNothingSpace: EverythingSpaceAllAtNothingSpace = {
+  id: 'everything_space_all at nothing_space',
+  user: EverythingSpaceAll,
+  space: NothingSpace,
 };
 
-interface SpaceWithAllFeaturesReadAtSpaceWithAllFeatures extends Scenario {
-  id: 'space_with_all_features_read_at_space_with_all_features';
+interface EverythingSpaceReadAtEverythingSpace extends Scenario {
+  id: 'everything_space_read at everything_space';
 }
-const SpaceWithAllFeaturesReadAtSpaceWithAllFeatures: SpaceWithAllFeaturesReadAtSpaceWithAllFeatures = {
-  id: 'space_with_all_features_read_at_space_with_all_features',
-  user: SpaceWithAllFeaturesRead,
-  space: SpaceWithAllFeatures,
+const EverythingSpaceReadAtEverythingSpace: EverythingSpaceReadAtEverythingSpace = {
+  id: 'everything_space_read at everything_space',
+  user: EverythingSpaceRead,
+  space: EverythingSpace,
 };
 
-interface SpaceWithAllFeaturesReadAtSpaceWithNoFeatures extends Scenario {
-  id: 'space_with_all_features_read_at_space_with_no_features';
+interface EverythingSpaceReadAtNothingSpace extends Scenario {
+  id: 'everything_space_read at nothing_space';
 }
-const SpaceWithAllFeaturesReadAtSpaceWithNoFeatures: SpaceWithAllFeaturesReadAtSpaceWithNoFeatures = {
-  id: 'space_with_all_features_read_at_space_with_no_features',
-  user: SpaceWithAllFeaturesRead,
-  space: SpaceWithNoFeatures,
+const EverythingSpaceReadAtNothingSpace: EverythingSpaceReadAtNothingSpace = {
+  id: 'everything_space_read at nothing_space',
+  user: EverythingSpaceRead,
+  space: NothingSpace,
 };
 
-interface SpaceWithNoFeaturesAllAtSpaceWithAllFeatures extends Scenario {
-  id: 'space_with_no_features_all_at_space_with_all_features';
+interface NothingSpaceAllAtEverythingSpace extends Scenario {
+  id: 'nothing_space_all at everything_space';
 }
-const SpaceWithNoFeaturesAllAtSpaceWithAllFeatures: SpaceWithNoFeaturesAllAtSpaceWithAllFeatures = {
-  id: 'space_with_no_features_all_at_space_with_all_features',
-  user: SpaceWithNoFeaturesAll,
-  space: SpaceWithAllFeatures,
+const NothingSpaceAllAtEverythingSpace: NothingSpaceAllAtEverythingSpace = {
+  id: 'nothing_space_all at everything_space',
+  user: NothingSpaceAll,
+  space: EverythingSpace,
 };
 
-interface SpaceWithNoFeaturesAllAtSpaceWithNoFeatures extends Scenario {
-  id: 'space_with_no_features_all_at_space_with_no_features';
+interface NothingSpaceAllAtNothingSpace extends Scenario {
+  id: 'nothing_space_all at nothing_space';
 }
-const SpaceWithNoFeaturesAllAtSpaceWithNoFeatures: SpaceWithNoFeaturesAllAtSpaceWithNoFeatures = {
-  id: 'space_with_no_features_all_at_space_with_no_features',
-  user: SpaceWithNoFeaturesAll,
-  space: SpaceWithNoFeatures,
+const NothingSpaceAllAtNothingSpace: NothingSpaceAllAtNothingSpace = {
+  id: 'nothing_space_all at nothing_space',
+  user: NothingSpaceAll,
+  space: NothingSpace,
 };
 
-interface SpaceWithNoFeaturesReadAtSpaceWithAllFeatures extends Scenario {
-  id: 'space_with_no_features_read_at_space_with_all_features';
+interface NothingSpaceReadAtEverythingSpace extends Scenario {
+  id: 'nothing_space_read at everything_space';
 }
-const SpaceWithNoFeaturesReadAtSpaceWithAllFeatures: SpaceWithNoFeaturesReadAtSpaceWithAllFeatures = {
-  id: 'space_with_no_features_read_at_space_with_all_features',
-  user: SpaceWithNoFeaturesRead,
-  space: SpaceWithAllFeatures,
+const NothingSpaceReadAtEverythingSpace: NothingSpaceReadAtEverythingSpace = {
+  id: 'nothing_space_read at everything_space',
+  user: NothingSpaceRead,
+  space: EverythingSpace,
 };
 
-interface SpaceWithNoFeaturesReadAtSpaceWithNoFeatures extends Scenario {
-  id: 'space_with_no_features_read_at_space_with_no_features';
+interface NothingSpaceReadAtNothingSpace extends Scenario {
+  id: 'nothing_space_read at nothing_space';
 }
-const SpaceWithNoFeaturesReadAtSpaceWithNoFeatures: SpaceWithNoFeaturesReadAtSpaceWithNoFeatures = {
-  id: 'space_with_no_features_read_at_space_with_no_features',
-  user: SpaceWithNoFeaturesRead,
-  space: SpaceWithNoFeatures,
+const NothingSpaceReadAtNothingSpace: NothingSpaceReadAtNothingSpace = {
+  id: 'nothing_space_read at nothing_space',
+  user: NothingSpaceRead,
+  space: NothingSpace,
 };
 
 export type UserAtSpaceScenarios =
-  | SuperuserAtSpaceWithAllFeatures
-  | SuperuserAtSpaceWithNoFeatures
-  | LegacyAllAtSpaceWithAllFeatures
-  | LegacyAllAtSpaceWithNoFeatures
-  | LegacyReadAtSpaceWithAllFeatures
-  | LegacyReadAtSpaceWithNoFeatures
-  | DualPrivilegesAllAtSpaceWithAllFeatures
-  | DualPrivilegesAllAtSpaceWithNoFeatures
-  | DualPrivilegesReadAtSpaceWithAllFeatures
-  | DualPrivilegesReadAtSpaceWithNoFeatures
-  | GlobalAllAtSpaceWithAllFeatures
-  | GlobalAllAtSpaceWithNoFeatures
-  | GlobalReadAtSpaceWithAllFeatures
-  | GlobalReadAtSpaceWithNoFeatures
-  | SpaceWithAllFeaturesAllAtSpaceWithAllFeatures
-  | SpaceWithAllFeaturesAllAtSpaceWithNoFeatures
-  | SpaceWithAllFeaturesReadAtSpaceWithAllFeatures
-  | SpaceWithAllFeaturesReadAtSpaceWithNoFeatures
-  | SpaceWithNoFeaturesAllAtSpaceWithAllFeatures
-  | SpaceWithNoFeaturesAllAtSpaceWithNoFeatures
-  | SpaceWithNoFeaturesReadAtSpaceWithAllFeatures
-  | SpaceWithNoFeaturesReadAtSpaceWithNoFeatures;
+  | SuperuserAtEverythingSpace
+  | SuperuserAtNothingSpace
+  | LegacyAllAtEverythingSpace
+  | LegacyAllAtNothingSpace
+  | LegacyReadAtEverythingSpace
+  | LegacyReadAtNothingSpace
+  | DualPrivilegesAllAtEverythingSpace
+  | DualPrivilegesAllAtNothingSpace
+  | DualPrivilegesReadAtEverythingSpace
+  | DualPrivilegesReadAtNothingSpace
+  | GlobalAllAtEverythingSpace
+  | GlobalAllAtNothingSpace
+  | GlobalReadAtEverythingSpace
+  | GlobalReadAtNothingSpace
+  | EverythingSpaceAllAtEverythingSpace
+  | EverythingSpaceAllAtNothingSpace
+  | EverythingSpaceReadAtEverythingSpace
+  | EverythingSpaceReadAtNothingSpace
+  | NothingSpaceAllAtEverythingSpace
+  | NothingSpaceAllAtNothingSpace
+  | NothingSpaceReadAtEverythingSpace
+  | NothingSpaceReadAtNothingSpace;
 export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
-  SuperuserAtSpaceWithAllFeatures,
-  SuperuserAtSpaceWithNoFeatures,
-  LegacyAllAtSpaceWithAllFeatures,
-  LegacyAllAtSpaceWithNoFeatures,
-  LegacyReadAtSpaceWithAllFeatures,
-  LegacyReadAtSpaceWithNoFeatures,
-  DualPrivilegesAllAtSpaceWithAllFeatures,
-  DualPrivilegesAllAtSpaceWithNoFeatures,
-  DualPrivilegesReadAtSpaceWithAllFeatures,
-  DualPrivilegesReadAtSpaceWithNoFeatures,
-  GlobalAllAtSpaceWithAllFeatures,
-  GlobalAllAtSpaceWithNoFeatures,
-  GlobalReadAtSpaceWithAllFeatures,
-  GlobalReadAtSpaceWithNoFeatures,
-  SpaceWithAllFeaturesAllAtSpaceWithAllFeatures,
-  SpaceWithAllFeaturesAllAtSpaceWithNoFeatures,
-  SpaceWithAllFeaturesReadAtSpaceWithAllFeatures,
-  SpaceWithAllFeaturesReadAtSpaceWithNoFeatures,
-  SpaceWithNoFeaturesAllAtSpaceWithAllFeatures,
-  SpaceWithNoFeaturesAllAtSpaceWithNoFeatures,
-  SpaceWithNoFeaturesReadAtSpaceWithAllFeatures,
-  SpaceWithNoFeaturesReadAtSpaceWithNoFeatures,
+  SuperuserAtEverythingSpace,
+  SuperuserAtNothingSpace,
+  LegacyAllAtEverythingSpace,
+  LegacyAllAtNothingSpace,
+  LegacyReadAtEverythingSpace,
+  LegacyReadAtNothingSpace,
+  DualPrivilegesAllAtEverythingSpace,
+  DualPrivilegesAllAtNothingSpace,
+  DualPrivilegesReadAtEverythingSpace,
+  DualPrivilegesReadAtNothingSpace,
+  GlobalAllAtEverythingSpace,
+  GlobalAllAtNothingSpace,
+  GlobalReadAtEverythingSpace,
+  GlobalReadAtNothingSpace,
+  EverythingSpaceAllAtEverythingSpace,
+  EverythingSpaceAllAtNothingSpace,
+  EverythingSpaceReadAtEverythingSpace,
+  EverythingSpaceReadAtNothingSpace,
+  NothingSpaceAllAtEverythingSpace,
+  NothingSpaceAllAtNothingSpace,
+  NothingSpaceReadAtEverythingSpace,
+  NothingSpaceReadAtNothingSpace,
 ];
