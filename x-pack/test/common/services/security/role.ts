@@ -15,7 +15,7 @@ export class Role {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/role' },
       baseURL: url,
-      maxRedirects: 3,
+      maxRedirects: 0,
     });
   }
 

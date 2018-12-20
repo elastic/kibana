@@ -6,6 +6,10 @@ We want to test for all combinations of the following...
 
 ## Users
 superuser
+legacy all
+legacy read
+dual privileges all
+dual privileges read
 global read
 global all
 default space read

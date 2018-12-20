@@ -5,9 +5,18 @@
  */
 
 // TODO: Consolidate the following type definitions
+interface CustomRoleSpecificationElasticsearchIndices {
+  names: string[];
+  privileges: string[];
+}
+
 interface CustomRoleSpecification {
   name: string;
-  kibana: {
+  elasticsearch?: {
+    cluster: string[];
+    indices: CustomRoleSpecificationElasticsearchIndices[];
+  };
+  kibana?: {
     global: {
       minimum?: string[];
       feature?: {
@@ -32,7 +41,10 @@ interface ReservedRoleSpecification {
 export function isCustomRoleSpecification(
   roleSpecification: CustomRoleSpecification | ReservedRoleSpecification
 ): roleSpecification is CustomRoleSpecification {
-  return (roleSpecification as CustomRoleSpecification).kibana !== undefined;
+  const customRoleDefinition = roleSpecification as CustomRoleSpecification;
+  return (
+    customRoleDefinition.kibana !== undefined || customRoleDefinition.elasticsearch !== undefined
+  );
 }
 
 export interface User {

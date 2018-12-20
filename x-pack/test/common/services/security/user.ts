@@ -15,7 +15,7 @@ export class User {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/user' },
       baseURL: url,
-      maxRedirects: 3,
+      maxRedirects: 0,
     });
   }
 

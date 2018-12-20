@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import axios, { AxiosInstance } from 'axios';
 import cheerio from 'cheerio';
 import { UICapabilities } from 'ui/capabilities';
 import { format as formatUrl } from 'url';
-import Wreck from 'wreck';
 import { TestInvoker } from '../../../common/types';
 import { LogService } from '../../../types/services';
 
@@ -16,48 +16,74 @@ export interface BasicCredentials {
   password: string;
 }
 
+export enum GetUICapabilitiesFailureReason {
+  RedirectedToRoot,
+}
+
+interface GetUICapabilitiesResult {
+  success: boolean;
+  value?: UICapabilities;
+  failureReason?: GetUICapabilitiesFailureReason;
+}
+
 export class UICapabilitiesService {
   private readonly log: LogService;
-  private readonly wreck: any;
+  private readonly axios: AxiosInstance;
 
   constructor(url: string, log: LogService) {
     this.log = log;
-    this.wreck = Wreck.defaults({
-      baseUrl: url,
-      redirects: 0,
+    this.axios = axios.create({
+      headers: { 'kbn-xsrf': 'x-pack/ftr/services/ui_capabilities' },
+      baseURL: url,
+      maxRedirects: 0,
+      validateStatus: () => true, // we'll handle our own statusCodes and throw informative errors
     });
   }
 
   public async get(
     credentials: BasicCredentials | null,
     spaceId?: string
-  ): Promise<UICapabilities | null> {
+  ): Promise<GetUICapabilitiesResult> {
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug('requesting /app/kibana to parse the uiCapabilities');
-    const headers = credentials
+    const requestHeaders = credentials
       ? {
           Authorization: `Basic ${Buffer.from(
             `${credentials.username}:${credentials.password}`
           ).toString('base64')}`,
         }
       : {};
-    const { res, payload } = await this.wreck.get(`${spaceUrlPrefix}/app/kibana`, {
-      headers,
+    const response = await this.axios.get(`${spaceUrlPrefix}/app/kibana`, {
+      headers: requestHeaders,
     });
 
-    if (res.statusCode !== 200) {
-      throw new Error(`Expected status code of 200, received ${res.statusCode}: ${payload}`);
+    if (response.status === 302 && response.headers.location === '/') {
+      return {
+        success: false,
+        failureReason: GetUICapabilitiesFailureReason.RedirectedToRoot,
+      };
     }
 
-    const dom = cheerio.load(payload.toString());
+    if (response.status !== 200) {
+      throw new Error(
+        `Expected status code of 200, received ${response.status} ${response.statusText}: ${
+          response.data
+        }`
+      );
+    }
+
+    const dom = cheerio.load(response.data.toString());
     const element = dom('kbn-injected-metadata');
     if (!element) {
-      return null;
+      throw new Error('Unable to find "kbn-injected-metadata" element ');
     }
 
-    const json = element.attr('data');
-    const data = JSON.parse(json);
-    return data.vars.uiCapabilities as UICapabilities;
+    const dataAttrJson = element.attr('data');
+    const dataAttr = JSON.parse(dataAttrJson);
+    return {
+      success: true,
+      value: dataAttr.vars.uiCapabilities as UICapabilities,
+    };
   }
 }
 

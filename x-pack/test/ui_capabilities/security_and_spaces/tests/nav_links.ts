@@ -9,7 +9,10 @@ import { SpacesService } from '../../../common/services';
 import { SecurityService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
 import { navLinksBuilder } from '../../common/nav_links_builder';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import {
+  GetUICapabilitiesFailureReason,
+  UICapabilitiesService,
+} from '../../common/services/ui_capabilities';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, UserAtSpaceScenarios, Users } from '../scenarios';
 
@@ -33,6 +36,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
         });
         if (isCustomRoleSpecification(user.role)) {
           await securityService.role.create(user.role.name, {
+            elasticsearch: user.role.elasticsearch,
             kibana: user.role.kibana,
           });
         }
@@ -63,13 +67,34 @@ export default function navLinksTests({ getService }: TestInvoker) {
         switch (scenario.id) {
           case 'superuser_at_space_with_all_features':
           case 'global_all_at_space_with_all_features':
-            expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.all());
+          case 'legacy_all_at_space_with_all_features':
+          case 'legacy_read_at_space_with_all_features':
+          case 'dual_privileges_all_at_space_with_all_features':
+          case 'dual_privileges_read_at_space_with_all_features':
+          case 'global_read_at_space_with_all_features':
+          case 'space_with_all_features_all_at_space_with_all_features':
+          case 'space_with_all_features_read_at_space_with_all_features':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'superuser_at_space_with_no_features':
           case 'global_all_at_space_with_no_features':
-            expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.only('management'));
+          case 'legacy_all_at_space_with_no_features':
+          case 'legacy_read_at_space_with_no_features':
+          case 'dual_privileges_all_at_space_with_no_features':
+          case 'dual_privileges_read_at_space_with_no_features':
+          case 'global_read_at_space_with_no_features':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            break;
+          case 'space_with_all_features_all_at_space_with_no_features':
+          case 'space_with_all_features_read_at_space_with_no_features':
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(
+              GetUICapabilitiesFailureReason.RedirectedToRoot
+            );
             break;
           default:
             throw new UnreachableError(scenario);

@@ -17,7 +17,7 @@ export class SpacesService {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/spaces/space' },
       baseURL: url,
-      maxRedirects: 3,
+      maxRedirects: 0,
     });
   }
 
