@@ -31,37 +31,41 @@ interface Props {
 class AdminSideBar extends React.PureComponent<Props> {
   public render() {
     const projects = this.props.recentProjects.map(p => (
-      <EuiFlexGroup key={p.name} alignItems="center">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiText>
-                <h4>{p.name}</h4>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                <h6>
-                  <EuiTextColor color="subdued">
-                    Opened {moment(p.timestamp).fromNow()}
-                  </EuiTextColor>
-                </h6>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiIcon type="arrowRight" color="subdued" />
-      </EuiFlexGroup>
+      <div className="code-sidebar__link">
+        <EuiFlexGroup key={p.name} alignItems="center">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiText>
+                  <h4>{p.name}</h4>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <h6>
+                    <EuiTextColor color="subdued">
+                      Opened {moment(p.timestamp).fromNow()}
+                    </EuiTextColor>
+                  </h6>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiIcon type="arrowRight" color="subdued" />
+        </EuiFlexGroup>
+      </div>
     ));
 
     return (
-      <Root>
-        <EuiText>
-          <h3>Your Recent Projects</h3>
-        </EuiText>
+      <div className="code-sidebar">
+        <div className="code-sidebar__heading">
+          <EuiText>
+            <h3>Your Recent Projects</h3>
+          </EuiText>
+        </div>
         <EuiSpacer />
         <div>{projects}</div>
-      </Root>
+      </div>
     );
   }
 }
