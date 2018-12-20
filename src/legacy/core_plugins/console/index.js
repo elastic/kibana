@@ -138,7 +138,7 @@ export default function (kibana) {
       apps: apps,
       hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
 
       injectDefaultVars(server) {
         return {
