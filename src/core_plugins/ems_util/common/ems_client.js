@@ -22,6 +22,7 @@ import _ from 'lodash';
 import { modifyUrl } from '../../../core/public/utils';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
+import fetch from 'node-fetch';
 
 const extendUrl = (url, props) => (
   modifyUrl(url, parsed => _.merge(parsed, props))
