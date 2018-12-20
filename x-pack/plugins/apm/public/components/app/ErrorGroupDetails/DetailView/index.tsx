@@ -11,7 +11,8 @@ import {
   EuiTabs,
   EuiTitle
 } from '@elastic/eui';
-import { capitalize, get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';
@@ -152,7 +153,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       <EuiSpacer />
 
       <EuiTabs>
-        {tabs.map(key => {
+        {tabs.map(({ key, label }) => {
           return (
             <EuiTab
               onClick={() => {
@@ -164,10 +165,10 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
                   })
                 });
               }}
-              isSelected={currentTab === key}
+              isSelected={currentTab.key === key}
               key={key}
             >
-              {capitalize(key.replace('_', ' '))}
+              {label}
             </EuiTab>
           );
         })}
@@ -212,14 +213,15 @@ export function TabContent({
   currentTab
 }: {
   error: APMError;
-  currentTab?: string;
+  currentTab?: { key: string; label: string };
 }) {
   const codeLanguage = error.context.service.name;
   const agentName = error.context.service.agent.name;
   const excStackframes: MaybeStackframes = get(error, ERROR_EXC_STACKTRACE);
   const logStackframes: MaybeStackframes = get(error, ERROR_LOG_STACKTRACE);
+  const currentTabKey = currentTab ? currentTab.key : '';
 
-  switch (currentTab) {
+  switch (currentTabKey) {
     case LOG_STACKTRACE_TAB:
     case undefined:
       return (
@@ -230,11 +232,11 @@ export function TabContent({
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      const propData = error.context[currentTab] as any;
+      const propData = error.context[currentTabKey] as any;
       return (
         <PropertiesTable
           propData={propData}
-          propKey={currentTab}
+          propKey={currentTabKey}
           agentName={agentName}
         />
       );
@@ -242,16 +244,37 @@ export function TabContent({
 }
 
 // Ensure the selected tab exists or use the first
-export function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
-  return tabs.includes(selectedTab!) ? selectedTab : tabs[0];
+export function getCurrentTab(
+  tabs: Array<{ key: string; label: string }> = [],
+  selectedTabKey?: string
+) {
+  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
+
+  return selectedTab ? selectedTab : tabs[0] || {};
 }
 
 export function getTabs(error: APMError) {
   const hasLogStacktrace = get(error, ERROR_LOG_STACKTRACE, []).length > 0;
   const contextKeys = Object.keys(error.context);
+  const logStacktraceTab = {
+    key: LOG_STACKTRACE_TAB,
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
+      defaultMessage: 'Log stacktrace'
+    })
+  };
+  const exceptionStacktraceTab = {
+    key: EXC_STACKTRACE_TAB,
+    label: i18n.translate(
+      'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
+      {
+        defaultMessage: 'Exception stacktrace'
+      }
+    )
+  };
+
   return [
-    ...(hasLogStacktrace ? [LOG_STACKTRACE_TAB] : []),
-    EXC_STACKTRACE_TAB,
+    ...(hasLogStacktrace ? [logStacktraceTab] : []),
+    exceptionStacktraceTab,
     ...getPropertyTabNames(contextKeys)
   ];
 }

@@ -5,6 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -43,21 +44,38 @@ const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export function getPropertyTabNames(selected: string[]): string[] {
+export function getPropertyTabNames(
+  selected: string[]
+): Array<{ key: string; label: string }> {
   return PROPERTY_CONFIG.filter(
     ({ key, required }: { key: string; required: boolean }) =>
       required || selected.includes(key)
-  ).map(({ key }: { key: string }) => key);
+  ).map(({ key, label }: { key: string; label: string }) => ({ key, label }));
 }
 
 function getAgentFeatureText(featureName: string) {
   switch (featureName) {
     case 'user':
-      return 'You can configure your agent to add contextual information about your users.';
+      return (
+        <FormattedMessage
+          id="xpack.apm.propertiesTable.userTab.agentFeatureText"
+          defaultMessage="You can configure your agent to add contextual information about your users."
+        />
+      );
     case 'tags':
-      return 'You can configure your agent to add filterable tags on transactions.';
+      return (
+        <FormattedMessage
+          id="xpack.apm.propertiesTable.tagsTab.agentFeatureText"
+          defaultMessage="You can configure your agent to add filterable tags on transactions."
+        />
+      );
     case 'custom':
-      return 'You can configure your agent to add custom contextual information on transactions.';
+      return (
+        <FormattedMessage
+          id="xpack.apm.propertiesTable.customTab.agentFeatureText"
+          defaultMessage="You can configure your agent to add custom contextual information on transactions."
+        />
+      );
   }
 }
 
@@ -78,7 +96,10 @@ export function AgentFeatureTipMessage({
       <EuiIconWithSpace type="iInCircle" />
       {getAgentFeatureText(featureName)}{' '}
       <ExternalLink href={docsUrl}>
-        Learn more in the documentation.
+        <FormattedMessage
+          id="xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel"
+          defaultMessage="Learn more in the documentation."
+        />
       </ExternalLink>
     </TableInfo>
   );
@@ -113,7 +134,12 @@ export function PropertiesTable({
           depth={1}
         />
       ) : (
-        <TableInfoHeader>No data available</TableInfoHeader>
+        <TableInfoHeader>
+          <FormattedMessage
+            id="xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel"
+            defaultMessage="No data available"
+          />
+        </TableInfoHeader>
       )}
       <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
     </TableContainer>

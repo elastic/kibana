@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -75,7 +76,14 @@ export function FormattedValue({ value }: { value: any }): JSX.Element {
   } else if (_.isBoolean(value) || _.isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
   } else if (!value) {
-    return <EmptyValue>N/A</EmptyValue>;
+    return (
+      <EmptyValue>
+        <FormattedMessage
+          id="xpack.apm.propertiesTable.notAvailableLabel"
+          defaultMessage="N/A"
+        />
+      </EmptyValue>
+    );
   }
 
   return <React.Fragment>{value}</React.Fragment>;
