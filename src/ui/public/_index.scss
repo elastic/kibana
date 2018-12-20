@@ -11,6 +11,13 @@
 @import './doc_viewer/index';
 @import './inspector/index';
 @import './markdown/index';
+@import './accessibility/index';
+@import './chrome/index';
+@import './error_allow_explicit_index/index';
+@import './error_auto_create_index/index';
+@import './error_url_overflow/index';
+@import './field_editor/index';
+@import './notify/index';
 @import './query_bar/index';
 
 // The following are prefixed with "vis"

@@ -56,7 +56,7 @@ export default function () {
         '--optimize.watchPrebuild=true',
         '--status.allowAnonymous=true',
         '--optimize.enabled=true',
-        `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
+        `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
         `--elasticsearch.username=${servers.elasticsearch.username}`,
         `--elasticsearch.password=${servers.elasticsearch.password}`,
       ],

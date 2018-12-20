@@ -68,7 +68,7 @@ exports[`TimeField should render a loading state 1`] = `
       options={
         Array [
           Object {
-            "text": "Loading...",
+            "text": "Loading…",
             "value": "",
           },
         ]

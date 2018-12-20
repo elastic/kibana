@@ -33,7 +33,9 @@ export const routes = [
             notify.error(err, { title: `Couldn't create workpad` });
             // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
             // https://github.com/elastic/kibana/issues/20277
-            if (err.response.status === 403) dispatch(setCanUserWrite(false));
+            if (err.response.status === 403) {
+              dispatch(setCanUserWrite(false));
+            }
             router.redirectTo('home');
           }
         },
@@ -59,7 +61,9 @@ export const routes = [
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
               workpadService.update(params.id, fetchedWorkpad).catch(err => {
-                if (err.response.status === 403) dispatch(setCanUserWrite(false));
+                if (err.response.status === 403) {
+                  dispatch(setCanUserWrite(false));
+                }
               });
             } catch (err) {
               notify.error(err, { title: `Couldn't load workpad with ID` });
@@ -72,12 +76,15 @@ export const routes = [
           const pageNumber = parseInt(params.page, 10);
 
           // no page provided, append current page to url
-          if (isNaN(pageNumber))
+          if (isNaN(pageNumber)) {
             return router.redirectTo('loadWorkpad', { id: workpad.id, page: workpad.page + 1 });
+          }
 
           // set the active page using the number provided in the url
           const pageIndex = pageNumber - 1;
-          if (pageIndex !== workpad.page) dispatch(gotoPage(pageIndex));
+          if (pageIndex !== workpad.page) {
+            dispatch(gotoPage(pageIndex));
+          }
 
           // update the application's breadcrumb
           setBreadcrumb([getBaseBreadcrumb(), getWorkpadBreadcrumb(workpad)]);

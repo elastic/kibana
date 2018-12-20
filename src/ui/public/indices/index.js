@@ -20,3 +20,9 @@
 export {
   INDEX_ILLEGAL_CHARACTERS_VISIBLE,
 } from './constants';
+
+export {
+  indexNameBeginsWithPeriod,
+  findIllegalCharactersInIndexName,
+  indexNameContainsSpaces,
+} from './validate';

@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiText
 } from '@elastic/eui';
-import { formatDate } from '@elastic/eui/lib/services/format';
+import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 
 import { EntityCell } from './entity_cell';
 import {
@@ -105,10 +105,10 @@ function getDetailsItems(anomaly, examples, filter) {
   }
 
   const anomalyTime = source[TIME_FIELD_NAME];
-  let timeDesc = `${formatDate(anomalyTime, 'MMMM Do YYYY, HH:mm:ss')}`;
+  let timeDesc = `${formatHumanReadableDateTimeSeconds(anomalyTime)}`;
   if (source.bucket_span !== undefined) {
     const anomalyEndTime = anomalyTime + (source.bucket_span * 1000);
-    timeDesc += ` to ${formatDate(anomalyEndTime, 'MMMM Do YYYY, HH:mm:ss')}`;
+    timeDesc += ` to ${formatHumanReadableDateTimeSeconds(anomalyEndTime)}`;
   }
   items.push({
     title: 'time',

@@ -17,7 +17,9 @@ export const ESIndexSelect = compose(
         const { setLoading, setIndices, value, onChange } = this.props;
         setLoading(false);
         setIndices(indices.sort());
-        if (!value && indices.length) onChange(indices[0]);
+        if (!value && indices.length) {
+          onChange(indices[0]);
+        }
       });
     },
   })

@@ -38,10 +38,10 @@ export default function ({ getService, getPageObjects }) {
         const panelTitleBeforeMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position1 = await panelTitleBeforeMove.getPosition();
 
-        await browser.moveMouseTo(panelTitleBeforeMove);
-        await browser.pressMouseButton();
-        await browser.moveMouseTo(null, -20, -450);
-        await browser.releaseMouseButton();
+        await browser.dragAndDrop(
+          { element: panelTitleBeforeMove },
+          { element: null, xOffset: -20, yOffset: -450 }
+        );
 
         const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position2 = await panelTitleAfterMove.getPosition();
