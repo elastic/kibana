@@ -118,7 +118,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.only('logging', 'management')
+              navLinksBuilder.only('logs', 'management')
             );
             break;
           case 'ml_all':
