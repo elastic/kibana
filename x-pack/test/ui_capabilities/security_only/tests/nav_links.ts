@@ -51,13 +51,17 @@ export default function navLinksTests({ getService }: TestInvoker) {
         switch (scenario.username) {
           case 'superuser':
           case 'all':
-            expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.all());
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'discover_all':
           case 'discover_read':
-            expect(uiCapabilities).to.have.property('navLinks');
-            expect(uiCapabilities!.navLinks).to.eql(navLinksBuilder.only('discover', 'management'));
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('discover', 'management')
+            );
             break;
           default:
             throw new UnreachableError(scenario);
