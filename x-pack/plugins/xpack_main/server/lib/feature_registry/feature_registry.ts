@@ -7,6 +7,7 @@
 import { IconType } from '@elastic/eui';
 import Joi from 'joi';
 import _ from 'lodash';
+import { uiCapabilitiesRegex } from 'ui/capabilities';
 
 export interface FeaturePrivilegeDefinition {
   metadata?: {
@@ -38,7 +39,6 @@ export interface Feature {
 
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
-export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const schema = Joi.object({
   id: Joi.string()

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { uiCapabilities, UICapabilities } from './ui_capabilities';
+export { uiCapabilities, UICapabilities, uiCapabilitiesRegex } from './ui_capabilities';

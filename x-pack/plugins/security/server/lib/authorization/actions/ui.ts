@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isString } from 'lodash';
-import { UICapabilities } from 'ui/capabilities';
-import { uiCapabilitiesRegex } from 'x-pack/plugins/xpack_main/types';
+import { UICapabilities, uiCapabilitiesRegex } from 'ui/capabilities';
 const prefix = 'ui:';
 
 export class UIActions {
