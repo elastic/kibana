@@ -25,13 +25,14 @@ const routeHandlers = {};
  * Helper to extract all the different server route handler so we can easily call them in our tests.
  *
  * Important: This method registers the handlers in the order that they appear in the file, so
- * if a "server.route()" call is moved or deleted, then the HANDLER_INDEX_TO_ACTION must be updated here.
+ * if a 'server.route()' call is moved or deleted, then the HANDLER_INDEX_TO_ACTION must be updated here.
  */
 const registerHandlers = () => {
   let index = 0;
 
   const HANDLER_INDEX_TO_ACTION = {
     0: 'list',
+    1: 'create',
   };
 
   const server = {
@@ -51,7 +52,7 @@ const registerHandlers = () => {
  * callWithRequestFactory() when the request handler call it
  * multiple times.
  */
-const requestResponseQueue = [];
+let requestResponseQueue = [];
 
 /**
  * Helper to mock the response from the call to Elasticsearch
@@ -62,6 +63,8 @@ const requestResponseQueue = [];
 const setHttpRequestResponse = (error, response) => {
   requestResponseQueue.push ({ error, response });
 };
+
+const resetHttpRequestResponses = () => requestResponseQueue = [];
 
 const getNextResponseFromQueue = () => {
   if (!requestResponseQueue.length) {
@@ -98,6 +101,27 @@ describe('[CCR API Routes] Follower Index', () => {
 
       expect(response.indices.length).toEqual(totalResult);
       expect(Object.keys(autoFollowPattern)).toEqual(DESERIALIZED_KEYS);
+    });
+  });
+
+  describe('create()', () => {
+    beforeEach(() => {
+      resetHttpRequestResponses();
+      routeHandler = routeHandlers.create;
+    });
+
+    it('should return 200 status when follower index is created', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({
+        payload: {
+          name: 'follower_index',
+          remoteCluster: 'remote_cluster',
+          leaderIndex: 'leader_index',
+        },
+      });
+
+      expect(response).toEqual({ acknowledge: true });
     });
   });
 });

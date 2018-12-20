@@ -70,3 +70,8 @@ export const deserializeFollowerIndex = ({ index, shards }) => ({
 
 export const deserializeListFollowerIndices = followerIndices =>
   followerIndices.map(deserializeFollowerIndex);
+
+export const serializeFollowerIndex = ({ remoteCluster, leaderIndex }) => ({
+  remote_cluster: remoteCluster,
+  leader_index: leaderIndex,
+});

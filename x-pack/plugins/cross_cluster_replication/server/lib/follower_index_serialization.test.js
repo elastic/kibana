@@ -8,6 +8,7 @@ import {
   deserializeShard,
   deserializeFollowerIndex,
   deserializeListFollowerIndices,
+  serializeFollowerIndex,
 } from './follower_index_serialization';
 
 describe('[CCR] follower index serialization', () => {
@@ -151,7 +152,6 @@ describe('[CCR] follower index serialization', () => {
 
   describe('deserializeListFollowerIndices()', () => {
     it('deserializes list of Elasticsearch follower index objects', () => {
-
       const serializedFollowerIndexList = [{
         index: 'follower index 1',
         shards: [],
@@ -170,6 +170,22 @@ describe('[CCR] follower index serialization', () => {
 
       expect(deserializeListFollowerIndices(serializedFollowerIndexList))
         .toEqual(deserializedFollowerIndexList);
+    });
+  });
+
+  describe('serializeFollowerIndex()', () => {
+    it('serializes object to Elasticsearch follower index object', () => {
+      const deserializedFollowerIndex = {
+        remoteCluster: 'remote cluster',
+        leaderIndex: 'leader index',
+      };
+
+      const serializedFollowerIndex = {
+        remote_cluster: 'remote cluster',
+        leader_index: 'leader index',
+      };
+
+      expect(serializeFollowerIndex(deserializedFollowerIndex)).toEqual(serializedFollowerIndex);
     });
   });
 });
