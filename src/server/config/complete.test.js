@@ -229,17 +229,22 @@ describe('server/config completeMixin()', function () {
     it('should transform deprecated plugin settings', async () => {
       const { callCompleteMixin } = setup({
         settings: {
-          foo1: 'bar'
+          foo: {
+            foo1: 'bar'
+          }
         },
         configValues: {
-          foo2: 'bar'
+          foo: {
+            foo2: 'bar'
+          }
         },
         plugins: [
           {
             spec: {
               getDeprecationsProvider() {
                 return async ({ rename }) => [rename('foo1', 'foo2')];
-              }
+              },
+              getConfigPrefix: () => 'foo'
             }
           }
         ],

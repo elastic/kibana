@@ -35,9 +35,8 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
       />
     </React.Fragment>
     <div>
-      <Introduction
+      <InjectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
-        isBeta={false}
         title="jest test tutorial"
       />
       <EuiSpacer
@@ -117,10 +116,9 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
       />
     </React.Fragment>
     <div>
-      <Introduction
+      <InjectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
         iconType="logoApache"
-        isBeta={false}
         title="jest test tutorial"
       />
       <EuiSpacer
@@ -210,10 +208,9 @@ exports[`should not render breadcrumbs when K7 1`] = `
     restrictWidth={false}
   >
     <div>
-      <Introduction
+      <InjectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
         iconType="logoApache"
-        isBeta={false}
         title="jest test tutorial"
       />
       <EuiSpacer
@@ -293,10 +290,9 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
       />
     </React.Fragment>
     <div>
-      <Introduction
+      <InjectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
         iconType="logoApache"
-        isBeta={false}
         title="jest test tutorial"
       />
       <EuiSpacer

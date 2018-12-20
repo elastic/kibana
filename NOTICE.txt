@@ -134,10 +134,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ---
-This product bundles geohash.js which is available under a
-"MIT" license.  For details, see src/ui/public/utils/decode_geo_hash.js.
-
----
 This product includes code that is based on flot-charts, which was available
 under a "MIT" license.
 

@@ -17,7 +17,7 @@ import {
   InfraPathInput,
   InfraTimerangeInput,
   SourceQuery,
-} from '../../common/graphql/types';
+} from '../graphql/types';
 
 export interface InfraFrontendLibs {
   framework: InfraFrameworkAdapter;
@@ -100,6 +100,7 @@ export interface InfraField {
 export type InfraWaffleData = InfraWaffleMapGroup[];
 
 export interface InfraWaffleMapNode {
+  pathId: string;
   id: string;
   name: string;
   path: InfraNodePath[];

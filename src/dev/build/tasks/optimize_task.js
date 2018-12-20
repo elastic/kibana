@@ -54,6 +54,6 @@ export const OptimizeBuildTask = {
     });
 
     // clean up temporary node install
-    await deleteAll(log, [tempNodeInstallDir]);
+    await deleteAll([tempNodeInstallDir], log);
   },
 };

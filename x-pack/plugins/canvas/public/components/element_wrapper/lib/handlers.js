@@ -24,7 +24,9 @@ export function createHandlers(element, pageId, dispatch) {
     },
 
     done() {
-      if (isComplete) return; // don't emit if the element is already done
+      if (isComplete) {
+        return;
+      } // don't emit if the element is already done
       isComplete = true;
       completeFn();
     },

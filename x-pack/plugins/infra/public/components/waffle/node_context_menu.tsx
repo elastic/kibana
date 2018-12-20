@@ -8,7 +8,7 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elas
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 
@@ -25,22 +25,42 @@ interface Props {
 
 export const NodeContextMenu = injectI18n(
   ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl }: Props) => {
-    const nodeName = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
-    const nodeLogsUrl = nodeName
+    // Due to the changing nature of the fields between APM and this UI,
+    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
+    // #26620 for the details for these fields.
+    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
+    const APM_FIELDS = {
+      [InfraNodeType.host]: 'context.system.hostname',
+      [InfraNodeType.container]: 'container.id',
+      [InfraNodeType.pod]: 'kubernetes.pod.uid',
+    };
+
+    const nodeLogsUrl = node.id
       ? getNodeLogsUrl({
           nodeType,
-          nodeName,
+          nodeId: node.id,
           time: timeRange.to,
         })
       : undefined;
-    const nodeDetailUrl = nodeName
+    const nodeDetailUrl = node.id
       ? getNodeDetailUrl({
           nodeType,
-          nodeName,
+          nodeId: node.id,
           from: timeRange.from,
           to: timeRange.to,
         })
       : undefined;
+
+    const apmTracesUrl = {
+      name: intl.formatMessage(
+        {
+          id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
+          defaultMessage: 'View {nodeType} APM traces',
+        },
+        { nodeType }
+      ),
+      href: `../app/apm#/services?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
+    };
 
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
@@ -69,6 +89,7 @@ export const NodeContextMenu = injectI18n(
                 },
               ]
             : []),
+          ...[apmTracesUrl],
         ],
       },
     ];
@@ -76,7 +97,7 @@ export const NodeContextMenu = injectI18n(
     return (
       <EuiPopover
         closePopover={closePopover}
-        id={`${node.id}-popover`}
+        id={`${node.pathId}-popover`}
         isOpen={isPopoverOpen}
         button={children}
         panelPaddingSize="none"

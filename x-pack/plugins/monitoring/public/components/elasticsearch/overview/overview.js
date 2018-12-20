@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { ClusterStatus } from '../cluster_status';
 import { ShardActivity } from '../shard_activity';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPageBody } from '@elastic/eui';
+import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 export function ElasticsearchOverview({
   clusterStatus,
@@ -24,10 +24,11 @@ export function ElasticsearchOverview({
   ];
 
   return (
-    <Fragment>
-      <ClusterStatus stats={clusterStatus} />
-      <EuiPage style={{ backgroundColor: 'white' }}>
-        <EuiPageBody>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <ClusterStatus stats={clusterStatus} />
+          <EuiSpacer/>
           <EuiFlexGrid columns={2} gutterSize="none">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index} style={{ width: '50%' }}>
@@ -40,8 +41,8 @@ export function ElasticsearchOverview({
             ))}
           </EuiFlexGrid>
           <ShardActivity data={shardActivity} {...props} />
-        </EuiPageBody>
-      </EuiPage>
-    </Fragment>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
