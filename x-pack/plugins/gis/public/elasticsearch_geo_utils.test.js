@@ -9,6 +9,7 @@ import {
   geoPointToGeometry,
   geoShapeToGeometry,
   createExtentFilter,
+  convertMapExtentToEnvelope,
 } from './elasticsearch_geo_utils';
 
 const geoFieldName = 'location';
@@ -200,5 +201,83 @@ describe('createExtentFilter', () => {
         }
       }
     });
+  });
+});
+
+describe('convertMapExtentToEnvelope', () => {
+  it('should convert bounds to envelope', () => {
+    const bounds = {
+      max_lat: 65.98468,
+      max_lon: -162.71869,
+      min_lat: 60.97598,
+      min_lon: -174.59527,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual({
+      "type": "envelope",
+      "coordinates": [
+        [-174.59527, 65.98468], [-162.71869, 60.97598]
+      ]
+    });
+  });
+
+  it('should clamp longitudes to -180 to 180', () => {
+    const bounds = {
+      max_lat: 85.05113,
+      max_lon: 209.55801,
+      min_lat: -85.05113,
+      min_lon: -454.84711,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual({
+      "type": "envelope",
+      "coordinates": [
+        [-180, 85.05113], [180, -85.05113]
+      ]
+    });
+  });
+
+  it('should split bounds that cross dateline(east to west)', () => {
+    const bounds = {
+      max_lat: 66.01959,
+      max_lon: 190.11434,
+      min_lat: 61.0176,
+      min_lon: 169.35168,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual([
+      {
+        "type": "envelope",
+        "coordinates": [
+          [169.35168, 66.01959], [180, 61.0176]
+        ]
+      },
+      {
+        "type": "envelope",
+        "coordinates": [
+          [-180, 66.01959], [-169.88566, 61.0176]
+        ]
+      },
+    ]);
+  });
+
+  it('should split bounds that cross dateline(west to east)', () => {
+    const bounds = {
+      max_lat: 14.29261,
+      max_lon: -159.0253,
+      min_lat: -18.0925,
+      min_lon: -193.69868,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual([
+      {
+        "type": "envelope",
+        "coordinates": [
+          [166.30132, 14.29261], [180, -18.0925]
+        ]
+      },
+      {
+        "type": "envelope",
+        "coordinates": [
+          [-180, 14.29261], [-159.0253, -18.0925]
+        ]
+      },
+    ]);
   });
 });

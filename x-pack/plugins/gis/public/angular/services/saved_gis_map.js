@@ -16,6 +16,7 @@ import {
 } from '../../selectors/map_selectors';
 import { getIsDarkTheme } from '../../store/ui';
 import { TileStyle } from '../../shared/layers/styles/tile_style';
+import { convertMapExtentToEnvelope } from '../../elasticsearch_geo_utils';
 
 const module = uiModules.get('app/gis');
 
@@ -100,11 +101,7 @@ module.factory('SavedGisMap', function (Private) {
       isDarkMode: getIsDarkTheme(state),
     });
 
-    const mapExtent = getMapExtent(state);
-    this.bounds = {
-      "type": "envelope",
-      "coordinates": [ [mapExtent.min_lon, mapExtent.max_lat], [mapExtent.max_lon, mapExtent.min_lat] ]
-    };
+    this.bounds = convertMapExtentToEnvelope(getMapExtent(state));
   };
 
   return SavedGisMap;

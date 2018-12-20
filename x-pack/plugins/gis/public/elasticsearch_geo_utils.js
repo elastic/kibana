@@ -182,3 +182,63 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
     throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
   }
 }
+
+/*
+ * Convert map bounds to envelope
+ * Bounds that cross the dateline are split into 2 envelopes
+ */
+export function convertMapExtentToEnvelope({ max_lat, max_lon, min_lat, min_lon }) {
+  if (max_lon > 180 && min_lon < -180) {
+    return convertMapExtentToEnvelope({
+      max_lat,
+      max_lon: 180,
+      min_lat,
+      min_lon: -180,
+    });
+  }
+
+  if (max_lon > 180) {
+    // bounds cross datleine east to west, slit into 2 shapes
+    const overlapWestOfDateLine = max_lon - 180;
+    return [
+      convertMapExtentToEnvelope({
+        max_lat,
+        max_lon: 180,
+        min_lat,
+        min_lon,
+      }),
+      convertMapExtentToEnvelope({
+        max_lat,
+        max_lon: -180 + overlapWestOfDateLine,
+        min_lat,
+        min_lon: -180,
+      }),
+    ];
+  }
+
+  if (min_lon < -180) {
+    // bounds cross datleine west to east, slit into 2 shapes
+    const overlapEastOfDateLine = Math.abs(min_lon) - 180;
+    return [
+      convertMapExtentToEnvelope({
+        max_lat,
+        max_lon: 180,
+        min_lat,
+        min_lon: 180 - overlapEastOfDateLine,
+      }),
+      convertMapExtentToEnvelope({
+        max_lat,
+        max_lon: max_lon,
+        min_lat,
+        min_lon: -180,
+      }),
+    ];
+  }
+
+  return {
+    "type": "envelope",
+    "coordinates": [
+      [min_lon, max_lat], [max_lon, min_lat]
+    ]
+  };
+}
