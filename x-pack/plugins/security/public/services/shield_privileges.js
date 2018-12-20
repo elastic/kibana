@@ -23,6 +23,8 @@ module.constant('shieldPrivileges', {
     'monitor_watcher',
     'read_ccr',
     'manage_ccr',
+    'manage_ilm',
+    'read_ilm',
   ],
   indices: [
     'all',
@@ -38,6 +40,7 @@ module.constant('shieldPrivileges', {
     'view_index_metadata',
     'read_cross_cluster',
     'manage_follow_index',
+    'manage_ilm',
   ],
   applications: []
 });
