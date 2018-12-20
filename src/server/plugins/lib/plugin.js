@@ -81,7 +81,12 @@ export class Plugin {
       if (this.externalInit) {
         this.status = kbnServer.status.createForPlugin(this);
         server.expose('status', this.status);
-        await this.externalInit(server, options);
+        await this.externalInit(server, options, kbnServer.uiExports.pluginContextProvider.reduce((acc, provider) => {
+          return {
+            ...acc,
+            ...provider(this),
+          };
+        }, {}));
       }
     };
 
