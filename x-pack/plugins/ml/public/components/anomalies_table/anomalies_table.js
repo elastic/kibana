@@ -25,7 +25,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { formatDate } from '@elastic/eui/lib/services/format';
+import {
+  formatHumanReadableDate,
+  formatHumanReadableDateTime,
+  formatHumanReadableDateTimeSeconds
+} from '../../util/date_utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
@@ -35,7 +39,7 @@ import { AnomalyDetails } from './anomaly_details';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 
-import { mlAnomaliesTableService } from './anomalies_table_service';
+import { mlTableService } from '../../services/table_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { getSeverityColor, isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
@@ -47,11 +51,11 @@ const INFLUENCERS_LIMIT = 5;    // Maximum number of influencers to display befo
 
 function renderTime(date, aggregationInterval) {
   if (aggregationInterval === 'hour') {
-    return formatDate(date, 'MMMM Do YYYY, HH:mm');
+    return formatHumanReadableDateTime(date);
   } else if (aggregationInterval === 'second') {
-    return formatDate(date, 'MMMM Do YYYY, HH:mm:ss');
+    return formatHumanReadableDateTimeSeconds(date);
   } else {
-    return formatDate(date, 'MMMM Do YYYY');
+    return formatHumanReadableDate(date);
   }
 }
 
@@ -314,14 +318,14 @@ class AnomaliesTable extends Component {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
-        mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord);
+        mlTableService.rowMouseleave.changed(this.mouseOverRecord);
 
         // fire mouseenter on the new record.
-        mlAnomaliesTableService.anomalyRecordMouseenter.changed(record);
+        mlTableService.rowMouseenter.changed(record);
       }
     } else {
       // Mouse is now over a row, fire mouseenter on the record.
-      mlAnomaliesTableService.anomalyRecordMouseenter.changed(record);
+      mlTableService.rowMouseenter.changed(record);
     }
 
     this.mouseOverRecord = record;
@@ -329,7 +333,7 @@ class AnomaliesTable extends Component {
 
   onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
-      mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord);
+      mlTableService.rowMouseleave.changed(this.mouseOverRecord);
       this.mouseOverRecord = undefined;
     }
   };

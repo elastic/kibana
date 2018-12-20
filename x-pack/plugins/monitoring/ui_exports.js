@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /**
  * Configuration of dependency objects for the UI, which are needed for the
  * Monitoring UI app and views and data for outside the monitoring
  * app (injectDefaultVars and hacks)
  * @return {Object} data per Kibana plugin uiExport schema
  */
-export const uiExports = {
+export const getUiExports = () => ({
   app: {
-    title: 'Monitoring',
+    title: i18n.translate('xpack.monitoring.monitoringTitle', { defaultMessage: 'Monitoring' }),
     order: 9002,
-    description: 'Monitoring for Elastic Stack',
+    description: i18n.translate('xpack.monitoring.uiExportsDescription', {
+      defaultMessage: 'Monitoring for Elastic Stack',
+    }),
     icon: 'plugins/monitoring/icons/monitoring.svg',
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
@@ -29,4 +33,4 @@ export const uiExports = {
   hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],
   home: [ 'plugins/monitoring/register_feature' ],
   styleSheetPaths: `${__dirname}/public/index.scss`,
-};
+});

@@ -4,7 +4,16 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -36,6 +45,26 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -60,15 +89,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -661,7 +681,16 @@ exports[`UploadLicense should display an error when ES says license is expired 1
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -693,6 +722,26 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -717,15 +766,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -1127,7 +1167,16 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -1159,6 +1208,26 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -1183,15 +1252,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -1593,7 +1653,16 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -1625,6 +1694,26 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -1649,15 +1738,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -2059,7 +2139,16 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -2091,6 +2180,26 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -2115,15 +2224,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],

@@ -19,6 +19,7 @@ class ListingUI extends PureComponent {
       {
         name: 'Name',
         field: 'logstash.name',
+        sortable: true,
         render: (name, node) => (
           <div>
             <div>
@@ -41,25 +42,30 @@ class ListingUI extends PureComponent {
       {
         name: 'CPU Usage',
         field: 'process.cpu.percent',
+        sortable: true,
         render: value => formatPercentageUsage(value, 100)
       },
       {
         name: 'Load Average',
         field: 'os.cpu.load_average.1m',
+        sortable: true,
         render: value => formatNumber(value, '0.00')
       },
       {
         name: 'JVM Heap Used',
         field: 'jvm.mem.heap_used_percent',
+        sortable: true,
         render: value => formatPercentageUsage(value, 100)
       },
       {
         name: 'Events Ingested',
         field: 'events.out',
+        sortable: true,
         render: value => formatNumber(value, '0.[0]a')
       },
       {
         name: 'Config Reloads',
+        sortable: true,
         render: node => (
           <div>
             <div>{ node.reloads.successes } successes</div>
@@ -70,6 +76,7 @@ class ListingUI extends PureComponent {
       {
         name: 'Version',
         field: 'logstash.version',
+        sortable: true,
         render: value => formatNumber(value)
       }
     ];

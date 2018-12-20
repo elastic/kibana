@@ -6,13 +6,16 @@
 
 import { handleActions } from 'redux-actions';
 import { set, del, insert } from 'object-path-immutable';
+import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 
 function setPageIndex(workpadState, index) {
-  if (index < 0 || !workpadState.pages[index]) return workpadState;
+  if (index < 0 || !workpadState.pages[index]) {
+    return workpadState;
+  }
   return set(workpadState, 'page', index);
 }
 
@@ -27,10 +30,15 @@ function addPage(workpadState, payload, srcIndex = workpadState.pages.length - 1
 function clonePage(page) {
   // TODO: would be nice if we could more reliably know which parameters need to get a unique id
   // this makes a pretty big assumption about the shape of the page object
+  const elements = page.elements;
+  const groups = page.groups;
+  const nodes = elements.concat(groups);
+  const newNodes = cloneSubgraphs(nodes);
   return {
     ...page,
     id: getId('page'),
-    elements: page.elements.map(element => ({ ...element, id: getId('element') })),
+    groups: newNodes.filter(n => n.position.type === 'group'),
+    elements: newNodes.filter(n => n.position.type !== 'group'),
   };
 }
 
@@ -52,7 +60,9 @@ export const pagesReducer = handleActions(
       const srcPage = workpadState.pages.find(page => page.id === payload);
 
       // if the page id is invalid, don't change the state
-      if (!srcPage) return workpadState;
+      if (!srcPage) {
+        return workpadState;
+      }
 
       const srcIndex = workpadState.pages.indexOf(srcPage);
       const newPageIndex = srcIndex + 1;
@@ -86,10 +96,14 @@ export const pagesReducer = handleActions(
       const newIndex = pageIndex + position;
 
       // TODO: do something better when given an invalid page id
-      if (pageIndex < 0) return workpadState;
+      if (pageIndex < 0) {
+        return workpadState;
+      }
 
       // don't move pages past the first or last position
-      if (newIndex < 0 || newIndex >= workpadState.pages.length) return workpadState;
+      if (newIndex < 0 || newIndex >= workpadState.pages.length) {
+        return workpadState;
+      }
 
       // remove and re-insert the page
       const page = { ...workpadState.pages[pageIndex] };
@@ -118,7 +132,9 @@ export const pagesReducer = handleActions(
         const newSelectedPage = curIndex >= delIndex ? curIndex - 1 : curIndex;
 
         // if we removed the only page, create a new empty one
-        if (wasOnlyPage) newState = addPage(newState);
+        if (wasOnlyPage) {
+          newState = addPage(newState);
+        }
 
         if (wasOnlyPage || wasSelected) {
           // if we removed the only page or the selected one, select the first one

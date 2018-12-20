@@ -95,6 +95,8 @@ declare module '@elastic/eui' {
     rel?: string;
     target?: string;
     type?: string;
+    hasActiveFilters?: boolean;
+    numFilters?: number;
   };
   export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
 
