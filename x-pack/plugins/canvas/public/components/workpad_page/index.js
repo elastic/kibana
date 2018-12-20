@@ -11,7 +11,7 @@ import { notify } from '../../lib/notify';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
 import { setClipboardData, getClipboardData } from '../../lib/clipboard';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { removeElements, rawDuplicateElement } from '../../state/actions/elements';
+import { removeElements, insertNodes } from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
 import { getNodes, isWriteable } from '../../state/selectors/workpad';
 import { flatten } from '../../lib/aeroelastic/functional';
@@ -28,8 +28,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    rawDuplicateElement: pageId => selectedElement =>
-      dispatch(rawDuplicateElement(selectedElement, pageId)),
+    insertNodes: pageId => selectedElement => dispatch(insertNodes(selectedElement, pageId)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
     selectElement: selectedElement => dispatch(selectElement(selectedElement)),
   };
@@ -82,7 +81,7 @@ export const WorkpadPage = compose(
       setUpdateCount,
       page,
       elements: pageElements,
-      rawDuplicateElement,
+      insertNodes,
       removeElements,
       selectElement,
     }) => {
@@ -156,7 +155,7 @@ export const WorkpadPage = compose(
           const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
           if (clonedElements) {
             // first clone and persist the new node(s)
-            clonedElements.map(element => rawDuplicateElement(page.id)(element));
+            clonedElements.map(element => insertNodes(page.id)(element));
             // then select the cloned node
             if (rootShapes.length) {
               if (selectedElements.length > 1) {

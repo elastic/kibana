@@ -192,24 +192,21 @@ export const fetchAllRenderables = createThunk(
   }
 );
 
-export const rawDuplicateElement = createThunk(
-  'rawDuplicateElement',
-  ({ dispatch, type }, element, pageId) => {
-    const newElement = cloneDeep(element);
-    // move the root element so users can see that it was added
-    newElement.position.top = newElement.position.top + 10;
-    newElement.position.left = newElement.position.left + 10;
-    const _rawDuplicateElement = createAction(type);
-    dispatch(_rawDuplicateElement({ pageId, element: newElement }));
+export const insertNodes = createThunk('insertNodes', ({ dispatch, type }, element, pageId) => {
+  const newElement = cloneDeep(element);
+  // move the root element so users can see that it was added
+  newElement.position.top = newElement.position.top + 10;
+  newElement.position.left = newElement.position.left + 10;
+  const _insertNodes = createAction(type);
+  dispatch(_insertNodes({ pageId, element: newElement }));
 
-    // refresh all elements if there's a filter, otherwise just render the new element
-    if (element.filter) {
-      dispatch(fetchAllRenderables());
-    } else {
-      dispatch(fetchRenderable(newElement));
-    }
+  // refresh all elements if there's a filter, otherwise just render the new element
+  if (element.filter) {
+    dispatch(fetchAllRenderables());
+  } else {
+    dispatch(fetchRenderable(newElement));
   }
-);
+});
 
 export const removeElements = createThunk(
   'removeElements',

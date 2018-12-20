@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { rawDuplicateElement, elementLayer } from '../../state/actions/elements';
+import { insertNodes, elementLayer } from '../../state/actions/elements';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { selectElement } from './../../state/actions/transient';
 
@@ -22,7 +22,7 @@ const mapDispatchToProps = dispatch => ({
     // gradually unifying code with copy/paste
     // todo: more unification w/ copy/paste; group cloning
     const newElement = cloneSubgraphs([selectedElement])[0];
-    dispatch(rawDuplicateElement(newElement, pageId));
+    dispatch(insertNodes(newElement, pageId));
     dispatch(selectElement(newElement.id));
   },
   elementLayer: (pageId, selectedElement) => movement =>
