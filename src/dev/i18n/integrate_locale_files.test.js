@@ -78,18 +78,10 @@ describe('dev/i18n/integrate_locale_files', () => {
       ]);
 
       expect(() =>
-        verifyMessages(
-          localizedMessagesMapWithMissingMessage,
-          mockDefaultMessagesMap,
-          'translations/fr.json'
-        )
+        verifyMessages(localizedMessagesMapWithMissingMessage, mockDefaultMessagesMap)
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
-        verifyMessages(
-          localizedMessagesMapWithUnusedMessage,
-          mockDefaultMessagesMap,
-          'translations/fr.json'
-        )
+        verifyMessages(localizedMessagesMapWithUnusedMessage, mockDefaultMessagesMap)
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
         verifyMessages(localizedMessagesMapWithIdTypo, mockDefaultMessagesMap)
