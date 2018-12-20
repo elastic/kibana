@@ -40,7 +40,6 @@ import { socketRoute } from './server/routes/socket';
 import { userRoute } from './server/routes/user';
 import { workspaceRoute } from './server/routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './server/scheduler';
-import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { enableSecurity } from './server/security';
 import { ServerOptions } from './server/server_options';
 import { SocketService } from './server/socket_service';
@@ -92,7 +91,6 @@ export const code = (kibana: any) =>
       const queueIndex: string = server.config().get('xpack.code.queueIndex');
       const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
       const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-      const dataCluster = server.plugins.elasticsearch.getCluster('data');
       const log = new Log(server);
       const serverOptions = new ServerOptions(options, server.config());
 
@@ -108,14 +106,6 @@ export const code = (kibana: any) =>
       enableSecurity(server);
 
       const socketService = new SocketService(server, log);
-
-      // Initialize search clients
-      // @ts-ignore
-      const repoSearchClient = new RepositorySearchClient(dataCluster.getClient(), log);
-      // @ts-ignore
-      const documentSearchClient = new DocumentSearchClient(dataCluster.getClient(), log);
-      // @ts-ignore
-      const symbolSearchClient = new SymbolSearchClient(dataCluster.getClient(), log);
 
       // @ts-ignore
       const esClient: EsClient = adminCluster.getClient();
@@ -192,12 +182,12 @@ export const code = (kibana: any) =>
         indexWorker,
         repoIndexInitializerFactory
       );
-      repositorySearchRoute(server, repoSearchClient);
-      documentSearchRoute(server, documentSearchClient);
-      symbolSearchRoute(server, symbolSearchClient);
+      repositorySearchRoute(server, log);
+      documentSearchRoute(server, log);
+      symbolSearchRoute(server, log);
       fileRoute(server, serverOptions);
-      workspaceRoute(server, serverOptions, esClient);
-      symbolByQnameRoute(server, symbolSearchClient);
+      workspaceRoute(server, serverOptions);
+      symbolByQnameRoute(server, log);
       socketRoute(server, socketService, log);
       userRoute(server, serverOptions);
       installRoute(server, socketService, lspService, installManager, serverOptions);
