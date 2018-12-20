@@ -65,7 +65,7 @@ const createFilter = (table, columnIndex, rowIndex, cellValue) => {
   const { aggConfig, id: columnId } = table.columns[columnIndex];
   let filter = [];
   const value = rowIndex > -1 ? table.rows[rowIndex][columnId] : cellValue;
-  if (value === null || value === undefined) {
+  if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
   if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
@@ -81,14 +81,16 @@ const VisFiltersProvider = (Private, getAppState) => {
   const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  const filter = (event, { simulate } = {}) => {
-    let data = event.datum.aggConfigResult;
+  const filter = (event) => {
+    const data = event.datum;
     const filters = [];
-    while (data) {
-      if (data.type === 'bucket') {
-        const { key, rawData } = data;
-        const { table, column, row } = rawData;
-        const filter = createFilter(table, column, row, key);
+
+    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw'].forEach(val => {
+      if (!data[val]) return;
+      const { table, column, row, value } = data[val];
+      const columnIndex = table.columns.findIndex(c => c.id === column);
+      const filter = createFilter(table, columnIndex, row, value);
+      if (filter) {
         if (event.negate) {
           if (Array.isArray(filter)) {
             filter.forEach(f => f.meta.negate = !f.meta.negate);
@@ -98,12 +100,10 @@ const VisFiltersProvider = (Private, getAppState) => {
         }
         filters.push(filter);
       }
-      data = data.$parent;
-    }
-    if (!simulate) {
-      const appState = getAppState();
-      filterBarPushFilters(appState)(_.flatten(filters));
-    }
+    });
+
+    const appState = getAppState();
+    filterBarPushFilters(appState)(_.flatten(filters));
     return filters;
   };
 

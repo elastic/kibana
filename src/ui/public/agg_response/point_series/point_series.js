@@ -42,7 +42,7 @@ export function AggResponsePointSeriesProvider(Private) {
       orderedDateAxis(chart);
     }
 
-    chart.series = getSeries(table.rows, chart);
+    chart.series = getSeries(table, chart);
 
     // todo: fix .. width auto we get interval 0ms ?
     if (!chart.ordered.interval) {

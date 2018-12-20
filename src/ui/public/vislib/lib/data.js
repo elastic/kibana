@@ -61,12 +61,8 @@ export function VislibLibDataProvider(Private) {
             newData[key] = data[key].map(seri => {
               return {
                 label: seri.label,
-                aggLabel: seri.aggLabel,
-                aggId: seri.aggId,
                 values: seri.values.map(val => {
                   const newVal = _.clone(val);
-                  newVal.aggConfig = val.aggConfig;
-                  newVal.aggConfigResult = val.aggConfigResult;
                   newVal.extraMetrics = val.extraMetrics;
                   newVal.series = val.series || seri.label;
                   return newVal;

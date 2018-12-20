@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-export function getPoint(x, series, yScale, row, y, z) {
+export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
   const zRow = z && row[z.accessor];
   const xRow = row[x.accessor];
   const yRow = row[y.accessor];
@@ -29,7 +29,32 @@ export function getPoint(x, series, yScale, row, y, z) {
     y: yRow,
     z: zRow,
     extraMetrics: _.compact([zRow]),
-    yScale: yScale
+    yScale: yScale,
+    seriesRaw: {
+      table,
+      column: series[0].accessor,
+      row: rowIndex,
+      value: row[series[0].accessor],
+    },
+    xRaw: {
+      table,
+      column: x.accessor,
+      row: rowIndex,
+      value: xRow,
+    },
+    yRaw: {
+      table,
+      column: y.accessor,
+      row: rowIndex,
+      value: yRow,
+    },
+    zRaw: z && {
+      table,
+      column: z.accessor,
+      row: rowIndex,
+      value: zRow,
+    },
+    parent: series,
   };
 
   if (point.y === 'NaN') {

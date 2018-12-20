@@ -21,22 +21,22 @@ import _ from 'lodash';
 import { getPoint } from './_get_point';
 import { addToSiri } from './_add_to_siri';
 
-export function getSeries(rows, chart) {
+export function getSeries(table, chart) {
   const aspects = chart.aspects;
   const multiY = Array.isArray(aspects.y);
   const yScale = chart.yScale;
-  const partGetPoint = _.partial(getPoint, aspects.x[0], aspects.series, yScale);
+  const partGetPoint = _.partial(getPoint, table, aspects.x[0], aspects.series, yScale);
 
-  let series = _(rows)
-    .transform(function (series, row) {
+  let series = _(table.rows)
+    .transform(function (series, row, rowIndex) {
       if (!multiY) {
-        const point = partGetPoint(row, aspects.y, aspects.z);
+        const point = partGetPoint(row, rowIndex, aspects.y, aspects.z);
         if (point) addToSiri(series, point, point.series, point.series);
         return;
       }
 
       aspects.y.forEach(function (y) {
-        const point = partGetPoint(row, y, aspects.z);
+        const point = partGetPoint(row, rowIndex, y, aspects.z);
         if (!point) return;
 
         // use the point's y-axis as it's series by default,

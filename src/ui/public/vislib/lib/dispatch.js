@@ -75,31 +75,6 @@ export function VislibLibDispatchProvider(Private, config) {
         handler: handler
       };
 
-      if (isSeries) {
-        let percentageMode = false;
-        //only series charts work in percentage mode.
-        const isSeriesChart = handler.charts && handler.charts[0] && handler.charts[0].getSeries;
-        const parentNode = d3.event.target.parentNode;
-        const parentData = parentNode ? parentNode.__data__ : null;
-        if (isSeriesChart && parentData) {
-          const aggId = parentData.aggId;
-          const seriesFromAggId = handler.charts[0].getSeries(aggId);
-          if (seriesFromAggId && seriesFromAggId.getValueAxis) {
-            percentageMode = seriesFromAggId.getValueAxis().axisConfig.isPercentage();
-          }
-        }
-
-        const object = _.find(series, { 'label': label });
-        if (object) {
-          eventData.value = +object.values[i].y;
-
-          if (percentageMode) {
-            // Add the formatted percentage to the point object
-            eventData.percent = (100 * d.y).toFixed(1) + '%';
-          }
-        }
-      }
-
       return eventData;
     }
 
