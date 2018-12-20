@@ -75,7 +75,7 @@ export function socketApi(server) {
       );
     });
 
-    const handler = async ({ ast, context, id }) => {
+    socket.on('run', async ({ ast, context, id }) => {
       try {
         const value = await routeExpression(ast, deserialize(context));
         socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) });
@@ -83,11 +83,11 @@ export function socketApi(server) {
         // TODO: I don't think it is possible to hit this right now? Maybe ever?
         socket.emit(`resp:${id}`, { type: 'msgError', value: err });
       }
-    };
+    });
 
-    socket.on('run', handler);
     socket.on('disconnect', () => {
-      socket.removeListener('run', handler);
+      // remove all listeners on disconnect
+      socket.removeAllListeners();
     });
   });
 }

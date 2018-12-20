@@ -63,13 +63,13 @@ must have a proxy that provides an HTTPS endpoint for {es}.
 
 --
 
-.. Specify the HTTPS protocol in the `elasticsearch.url` setting in the {kib}
+.. Specify the HTTPS protocol in the `elasticsearch.hosts` setting in the {kib}
 configuration file, `kibana.yml`:
 +
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-elasticsearch.url: "https://<your_elasticsearch_host>.com:9200"
+elasticsearch.hosts: ["https://<your_elasticsearch_host>.com:9200"]
 --------------------------------------------------------------------------------
 --
 
@@ -100,13 +100,13 @@ must have a proxy that provides an HTTPS endpoint for {es}.
 
 --
 
-.. Specify the HTTPS URL in the `xpack.monitoring.elasticsearch.url` setting in 
+.. Specify the HTTPS URL in the `xpack.monitoring.elasticsearch.hosts` setting in 
 the {kib} configuration file, `kibana.yml`
 +
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.monitoring.elasticsearch.url: "https://<your_monitoring_cluster>:9200"
+xpack.monitoring.elasticsearch.hosts: ["https://<your_monitoring_cluster>:9200"]
 --------------------------------------------------------------------------------
 --
 

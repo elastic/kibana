@@ -33,12 +33,18 @@ export const caseFn = () => ({
 });
 
 async function doesMatch(context, args) {
-  if (typeof args.if !== 'undefined') return args.if;
-  if (typeof args.when !== 'undefined') return (await args.when()) === context;
+  if (typeof args.if !== 'undefined') {
+    return args.if;
+  }
+  if (typeof args.when !== 'undefined') {
+    return (await args.when()) === context;
+  }
   return true;
 }
 
 async function getResult(context, args) {
-  if (typeof args.then !== 'undefined') return await args.then();
+  if (typeof args.then !== 'undefined') {
+    return await args.then();
+  }
   return context;
 }

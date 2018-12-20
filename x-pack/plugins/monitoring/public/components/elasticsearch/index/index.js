@@ -18,9 +18,9 @@ import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 
 export const Index = ({
+  scope,
   indexSummary,
   metrics,
-  scope,
   kbnUrl,
   ...props
 }) => {
@@ -51,7 +51,7 @@ export const Index = ({
             ))}
           </EuiFlexGrid>
           <EuiSpacer size="m"/>
-          <ShardAllocation scope={scope} kbnUrl={kbnUrl} type="index" />
+          <ShardAllocation scope={scope} {...props} kbnUrl={kbnUrl} type="index" />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

@@ -65,7 +65,10 @@ export const config = (Joi) => {
       index_pattern: Joi.string().default('.monitoring-es-2-*,.monitoring-es-6-*'),
       logQueries: Joi.boolean().default(false),
       requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
-      url: Joi.string().uri({ scheme: ['http', 'https'] }), // if empty, use Kibana's connection config
+      sniffOnStart: Joi.boolean().default(false),
+      sniffInterval: Joi.number().allow(false).default(false),
+      sniffOnConnectionFault: Joi.boolean().default(false),
+      hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single(), // if empty, use Kibana's connection config
       username: Joi.string(),
       password: Joi.string(),
       requestTimeout: Joi.number().default(30000),

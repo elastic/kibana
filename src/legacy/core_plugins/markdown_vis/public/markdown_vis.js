@@ -36,7 +36,7 @@ function MarkdownVisProvider(Private, i18n) {
   // Vis object of this type.
   return VisFactory.createReactVisualization({
     name: 'markdown',
-    title: i18n('markdownVis.markdownTitle', { defaultMessage: 'Markdown' }),
+    title: 'Markdown',
     isAccessible: true,
     icon: 'visText',
     description: i18n('markdownVis.markdownDescription', { defaultMessage: 'Create a document using markdown syntax' }),

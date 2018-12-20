@@ -76,11 +76,16 @@ const calendars = [
     }]
   }];
 
+const props = {
+  canCreateCalendar: true,
+  canDeleteCalendar: true
+};
+
 describe('NewCalendar', () => {
 
   test('Renders new calendar form', () => {
     const wrapper = shallow(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -88,7 +93,7 @@ describe('NewCalendar', () => {
 
   test('Import modal shown on Import Events button click', () => {
     const wrapper = mount(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_import_events"]');
@@ -100,7 +105,7 @@ describe('NewCalendar', () => {
 
   test('New event modal shown on New event button click', () => {
     const wrapper = mount(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_new_event"]');
@@ -112,7 +117,7 @@ describe('NewCalendar', () => {
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', () => {
     const wrapper = mount(
-      <NewCalendar />
+      <NewCalendar {...props}/>
     );
 
     const instance = wrapper.instance();
@@ -122,6 +127,22 @@ describe('NewCalendar', () => {
     });
     wrapper.update();
     expect(instance.isDuplicateId()).toBe(true);
+  });
+
+  test('Save button is disabled if canCreateCalendar is false', () => {
+    const noCreateProps = {
+      ...props,
+      canCreateCalendar: false,
+    };
+
+    const wrapper = mount(
+      <NewCalendar {...noCreateProps} />
+    );
+
+    const buttons = wrapper.find('[data-testid="ml_save_calendar_button"]');
+    const saveButton = buttons.find('EuiButton');
+
+    expect(saveButton.prop('isDisabled')).toBe(true);
   });
 
 });

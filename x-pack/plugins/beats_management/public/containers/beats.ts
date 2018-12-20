@@ -73,7 +73,10 @@ export class BeatsContainer extends Container<ContainerState> {
     }
     const assignments = createBeatTagAssignments(beats, tagId);
     await this.libs.beats.removeTagsFromBeats(assignments);
-    await this.reload(this.query);
+    // ES responds incorrectly when we call too soon
+    setTimeout(async () => {
+      await this.reload(this.query);
+    }, 150);
   };
 
   public assignTagsToBeats = async (beats: CMPopulatedBeat[] | string[], tagId: string) => {
@@ -82,7 +85,10 @@ export class BeatsContainer extends Container<ContainerState> {
     }
     const assignments = createBeatTagAssignments(beats, tagId);
     await this.libs.beats.assignTagsToBeats(assignments);
-    await this.reload(this.query);
+    // ES responds incorrectly when we call too soon
+    setTimeout(async () => {
+      await this.reload(this.query);
+    }, 150);
   };
 }
 
