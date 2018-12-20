@@ -11,6 +11,7 @@ import React from 'react';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { loadIndexPatterns } from 'plugins/ml/util/index_utils';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -28,6 +29,7 @@ uiRoutes
     k7Breadcrumbs: getJobManagementBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
+      indexPatterns: loadIndexPatterns,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
