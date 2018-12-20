@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -12,49 +12,11 @@ import styled from 'styled-components';
 import { RootState } from '../../reducers';
 import { colors } from '../../style/variables';
 
-const Title = styled.div`
-  color: #1a1a1a;
-  font-size: 16px;
-  font-family: SFProText-Semibold;
-  font-weight: 600;
-  margin-bottom: 25px;
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-bottom: 20px;
-`;
-
 const Root = styled.div`
   padding: 24px 16px;
   flex-basis: 256px;
   flex-grow: 0;
   border-right: 1px solid ${colors.borderGrey};
-`;
-
-const RecentProject = styled.div`
-  color: #1a1a1a;
-  font-size: 1rem;
-  font-family: SFProText-Bold;
-  font-weight: bold;
-  margin-bottom: 2px;
-`;
-
-const OpenTime = styled.div`
-  color: #999999;
-  font-size: 12px;
-  font-family: SFProText-Regular;
-  font-weight: normal;
-`;
-
-const IconContainer = styled.div`
-  display: flex;
-  align-items: center;
-  svg {
-    display: block;
-  }
 `;
 
 interface Project {
@@ -69,19 +31,35 @@ interface Props {
 class AdminSideBar extends React.PureComponent<Props> {
   public render() {
     const projects = this.props.recentProjects.map(p => (
-      <Container key={p.name}>
-        <div>
-          <RecentProject>{p.name}</RecentProject>
-          <OpenTime>Opened {moment(p.timestamp).fromNow()}</OpenTime>
-        </div>
-        <IconContainer>
-          <EuiIcon type="arrowRight" />
-        </IconContainer>
-      </Container>
+      <EuiFlexGroup key={p.name} alignItems="center">
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiText>
+                <h4>{p.name}</h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <h6>
+                  <EuiTextColor color="subdued">
+                    Opened {moment(p.timestamp).fromNow()}
+                  </EuiTextColor>
+                </h6>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiIcon type="arrowRight" color="subdued" />
+      </EuiFlexGroup>
     ));
+
     return (
       <Root>
-        <Title>Your Recent Projects</Title>
+        <EuiText>
+          <h3>Your Recent Projects</h3>
+        </EuiText>
+        <EuiSpacer />
         <div>{projects}</div>
       </Root>
     );

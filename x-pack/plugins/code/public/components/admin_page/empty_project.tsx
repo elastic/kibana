@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { ImportProject } from './import_project';
 
 const Root = styled.div``;
-const H1 = styled.h1``;
-const H6 = styled.h6``;
 
 export const EmptyProject = () => (
   <Root>
-    <H1>You don't have any project yet.</H1>
-    <H6>Let's import your first one</H6>
+    <EuiSpacer size="xl" />
+    <EuiText textAlign="center">
+      <h1>You don't have any projects yet.</h1>
+    </EuiText>
+    <EuiText textAlign="center" color="subdued">
+      <p>Let's import your first one.</p>
+    </EuiText>
     <ImportProject />
-    <EuiButton>View the Setup Guide</EuiButton>
+    <EuiSpacer />
+    <EuiFlexGroup justifyContent="center">
+      <EuiButton>View the Setup Guide</EuiButton>
+    </EuiFlexGroup>
   </Root>
 );
