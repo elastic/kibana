@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Feature } from './server/lib/feature_registry';
+export { Feature, uiCapabilitiesRegex } from './server/lib/feature_registry';

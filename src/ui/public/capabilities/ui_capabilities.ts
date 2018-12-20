@@ -27,6 +27,4 @@ export interface UICapabilities {
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
 
-export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
-
 export const uiCapabilities: UICapabilities = deepFreeze(chrome.getInjected('uiCapabilities'));
