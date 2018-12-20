@@ -5,4 +5,3 @@
  */
 
 export { apiMiddleware } from './api';
-export { autoFollowPatternMiddleware } from './auto_follow_pattern';

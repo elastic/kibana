@@ -67,6 +67,7 @@ export const updateFormErrors = (errors, existingErrors) => ({
 export class AutoFollowPatternFormUI extends PureComponent {
   static propTypes = {
     saveAutoFollowPattern: PropTypes.func.isRequired,
+    onCancel: PropTypes.func,
     autoFollowPattern: PropTypes.object,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
@@ -205,6 +206,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
   };
 
   cancelForm = () => {
+    this.props.onCancel && this.props.onCancel();
     routing.navigate('/auto_follow_patterns');
   };
 

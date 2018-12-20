@@ -142,20 +142,25 @@ export const AutoFollowPatternTable = injectI18n(
             },
           },
           {
-            name: intl.formatMessage({
-              id: 'xpack.crossClusterReplication.editIndexPattern.fields.table.actionEditLabel',
-              defaultMessage: 'Edit',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.crossClusterReplication.editIndexPattern.fields.table.actionEditDescription',
-              defaultMessage: 'Edit',
-            }),
-            icon: 'pencil',
-            onClick: ({ name }) => {
-              selectAutoFollowPattern(name);
-              routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
+            render: ({ name }) => {
+              const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
+                defaultMessage: 'Edit auto-follow pattern',
+              });
+
+              return (
+                <EuiToolTip
+                  content={label}
+                  delay="long"
+                >
+                  <EuiButtonIcon
+                    aria-label={label}
+                    iconType="pencil"
+                    color="primary"
+                    href={routing.getAutoFollowPatternPath(name)}
+                  />
+                </EuiToolTip>
+              );
             },
-            type: 'icon',
           },
         ],
         width: '100px',

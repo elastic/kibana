@@ -13,12 +13,10 @@ import {
   getApiStatus,
   getApiError,
   isApiAuthorized,
-  isAutoFollowPatternDetailPanelOpen as isDetailPanelOpen,
 } from '../../../store/selectors';
 import {
   loadAutoFollowPatterns,
   selectAutoFollowPattern,
-  toggleAutoFollowPatternDetailPanel,
 } from '../../../store/actions';
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
@@ -30,14 +28,11 @@ const mapStateToProps = (state) => ({
   apiStatus: getApiStatus(scope)(state),
   apiError: getApiError(scope)(state),
   isAuthorized: isApiAuthorized(scope)(state),
-  isDetailPanelOpen: isDetailPanelOpen(state),
 });
 
 const mapDispatchToProps = dispatch => ({
   loadAutoFollowPatterns: (inBackground) => dispatch(loadAutoFollowPatterns(inBackground)),
   selectAutoFollowPattern: (id) => dispatch(selectAutoFollowPattern(id)),
-  openDetailPanel: () => dispatch(toggleAutoFollowPatternDetailPanel(true)),
-  closeDetailPanel: () => dispatch(toggleAutoFollowPatternDetailPanel(false)),
 });
 
 export const AutoFollowPatternList = connect(

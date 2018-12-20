@@ -26,33 +26,22 @@ export const selectAutoFollowPattern = (name) => ({
   payload: name
 });
 
-export const toggleAutoFollowPatternDetailPanel = (isOpen = true) => {
-  return {
-    type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL_TOGGLE,
-    payload: isOpen
-  };
-};
-
 export const loadAutoFollowPatterns = (isUpdating = false) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_LOAD,
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
-    handler: async () => {
-      return await loadAutoFollowPatternsRequest();
-    },
+    handler: async () => (
+      await loadAutoFollowPatternsRequest()
+    ),
   });
 
 export const getAutoFollowPattern = (id) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_GET,
     scope,
-    handler: async (dispatch) => (
-      getAutoFollowPatternRequest(id)
-        .then((response) => {
-          dispatch(selectAutoFollowPattern(id));
-          return response;
-        })
+    handler: async () => (
+      await getAutoFollowPatternRequest(id)
     )
   });
 
@@ -133,7 +122,7 @@ export const deleteAutoFollowPattern = (id) => (
       // If we've just deleted a pattern we were looking at, we need to close the panel.
       const ids = arrify(id);
       const autoFollowPatternId = getSelectedAutoFollowPatternId(getState());
-      if (ids.some(_id => autoFollowPatternId === _id)) {
+      if (ids.includes(autoFollowPatternId)) {
         dispatch(selectAutoFollowPattern(null));
       }
     }

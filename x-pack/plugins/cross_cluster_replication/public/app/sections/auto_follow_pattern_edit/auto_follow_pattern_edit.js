@@ -37,20 +37,38 @@ export const AutoFollowPatternEdit = injectI18n(
   class extends PureComponent {
     static propTypes = {
       getAutoFollowPattern: PropTypes.func.isRequired,
+      selectAutoFollowPattern: PropTypes.func.isRequired,
       saveAutoFollowPattern: PropTypes.func.isRequired,
       clearApiError: PropTypes.func.isRequired,
       apiError: PropTypes.object,
       apiStatus: PropTypes.string.isRequired,
+      autoFollowPattern: PropTypes.object,
+      autoFollowPatternId: PropTypes.string,
     }
 
-    componentDidMount() {
-      const { autoFollowPattern, match: { params: { id } } } = this.props;
-      if (!autoFollowPattern) {
-        const decodedId = decodeURIComponent(id);
-        this.props.getAutoFollowPattern(decodedId);
+    static getDerivedStateFromProps({ autoFollowPatternId }, { lastAutoFollowPatternId }) {
+      if (lastAutoFollowPatternId !== autoFollowPatternId) {
+        return { lastAutoFollowPatternId: autoFollowPatternId };
       }
+    }
+
+    state = { lastAutoFollowPatternId: undefined }
+
+    componentDidMount() {
+      const { match: { params: { id } } } = this.props;
+      const decodedId = decodeURIComponent(id);
+
+      this.props.selectAutoFollowPattern(decodedId);
 
       chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+      const { autoFollowPattern, getAutoFollowPattern } = this.props;
+      if (!autoFollowPattern && prevState.lastAutoFollowPatternId !== this.state.lastAutoFollowPatternId) {
+        // Fetch the auto-follow pattern on the server
+        getAutoFollowPattern(this.state.lastAutoFollowPatternId);
+      }
     }
 
     componentWillUnmount() {
@@ -136,7 +154,7 @@ export const AutoFollowPatternEdit = injectI18n(
     }
 
     render() {
-      const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
+      const { saveAutoFollowPattern, selectAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
 
       return (
         <EuiPage>
@@ -193,6 +211,7 @@ export const AutoFollowPatternEdit = injectI18n(
                         remoteClusters={remoteClusters}
                         autoFollowPattern={autoFollowPattern}
                         saveAutoFollowPattern={saveAutoFollowPattern}
+                        onCancel={() => selectAutoFollowPattern(null)}
                       />
                     );
                   }}

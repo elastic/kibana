@@ -25,13 +25,32 @@ export const AutoFollowPatternList = injectI18n(
       autoFollowPatterns: PropTypes.array,
       apiStatus: PropTypes.string,
       apiError: PropTypes.object,
-      openDetailPanel: PropTypes.func.isRequired,
-      closeDetailPanel: PropTypes.func.isRequired,
-      isDetailPanelOpen: PropTypes.bool,
     }
+
+    static getDerivedStateFromProps({ autoFollowPatternId }, { lastAutoFollowPatternId }) {
+      if (autoFollowPatternId !== lastAutoFollowPatternId) {
+        return {
+          lastAutoFollowPatternId: autoFollowPatternId, // URL query param takes over store value
+          isDetailPanelOpen: !!autoFollowPatternId,
+        };
+      }
+      return null;
+    }
+
+    state = {
+      lastAutoFollowPatternId: undefined,
+      isDetailPanelOpen: false,
+    };
 
     componentDidMount() {
       this.props.loadAutoFollowPatterns();
+
+      // Check if there is an active auto-follow pattern in the URL query param
+      const { history: { location: { search } } } = this.props;
+      const { pattern } = extractQueryParams(search);
+      if (pattern) {
+        this.props.selectAutoFollowPattern(pattern);
+      }
 
       // Interval to load auto-follow patterns in the background passing "true" to the fetch method
       this.interval = setInterval(() => this.props.loadAutoFollowPatterns(true), REFRESH_RATE_MS);
@@ -41,33 +60,20 @@ export const AutoFollowPatternList = injectI18n(
       clearInterval(this.interval);
     }
 
-    componentDidUpdate() {
-      const { history: { location: { search } } } = this.props;
-      let { pattern } = extractQueryParams(search);
+    componentDidUpdate(_, prevState) {
+      const { history } = this.props;
 
-      pattern = !!pattern ? pattern : null;
-      this.onAutoFollowPatternChange(pattern);
-    }
-
-    onAutoFollowPatternChange(newId) {
-      const {
-        autoFollowPatternId,
-        selectAutoFollowPattern,
-        openDetailPanel,
-        closeDetailPanel,
-      } = this.props;
-
-      if (newId !== autoFollowPatternId) {
-        selectAutoFollowPattern(newId);
-      }
-
-      /**
-       * Single source of truth to open or close the detail panel
-       */
-      if (!newId) {
-        closeDetailPanel();
-      } else {
-        openDetailPanel();
+      if (this.state.lastAutoFollowPatternId !== prevState.lastAutoFollowPatternId) {
+        // Persist state to query params for deep link
+        if(!this.state.lastAutoFollowPatternId) {
+          history.replace({
+            search: '',
+          });
+        } else {
+          history.replace({
+            search: `?pattern=${encodeURIComponent(this.state.lastAutoFollowPatternId)}`,
+          });
+        }
       }
     }
 
@@ -114,8 +120,9 @@ export const AutoFollowPatternList = injectI18n(
       const {
         autoFollowPatterns,
         apiStatus,
-        isDetailPanelOpen,
       } = this.props;
+
+      const { isDetailPanelOpen } = this.state;
 
       if (apiStatus === API_STATUS.LOADING) {
         return (
