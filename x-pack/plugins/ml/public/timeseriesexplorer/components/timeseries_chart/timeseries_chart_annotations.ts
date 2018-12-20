@@ -98,6 +98,8 @@ const ANNOTATION_MIN_WIDTH = 2;
 const ANNOTATION_RECT_BORDER_RADIUS = 2;
 const ANNOTATION_TEXT_VERTICAL_OFFSET = 26;
 const ANNOTATION_TEXT_RECT_VERTICAL_OFFSET = 12;
+const ANNOTATION_TEXT_RECT_WIDTH = 24;
+const ANNOTATION_TEXT_RECT_HEIGHT = 20;
 
 export function renderAnnotations(
   focusChart: d3.Selection<[]>,
@@ -190,6 +192,8 @@ export function renderAnnotations(
     .enter()
     .append('rect')
     .classed('mlAnnotationTextRect', true)
+    .attr('width', ANNOTATION_TEXT_RECT_WIDTH)
+    .attr('height', ANNOTATION_TEXT_RECT_HEIGHT)
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS);
 

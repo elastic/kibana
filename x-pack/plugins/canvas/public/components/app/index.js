@@ -43,7 +43,7 @@ const types = {
   viewUIs: viewRegistry,
   argumentUIs: argTypeRegistry,
   templates: templatesRegistry,
-  tags: tagsRegistry,
+  tagUIs: tagsRegistry,
 };
 
 const mapDispatchToProps = dispatch => ({
