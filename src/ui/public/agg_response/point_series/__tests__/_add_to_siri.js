@@ -21,49 +21,90 @@ import expect from 'expect.js';
 import { addToSiri } from '../_add_to_siri';
 
 describe('addToSiri', function () {
+  const xKeys = {
+    ordered: ['', 'foo', 'bar', 'baz'],
+    indexMap: {
+      '': 0,
+      foo: 1,
+      bar: 2,
+      baz: 3,
+    }
+  };
 
   it('creates a new series the first time it sees an id', function () {
     const series = new Map();
-    const point = {};
+    const point = { x: 'foo' };
     const id = 'id';
-    addToSiri(series, point, id, id, { id: id });
+    addToSiri(xKeys, series, point, id, id, { id: id });
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');
     expect(series.get(id).label).to.be(id);
-    expect(series.get(id).values).to.have.length(1);
-    expect(series.get(id).values[0]).to.be(point);
   });
 
-  it('adds points to existing series if id has been seen', function () {
+  it('instantiates a zero-filled array with ordered x values the first time it sees an id', function () {
+    const series = new Map();
+    const point = { x: 'foo' };
+    const id = 'id';
+    const expected = {
+      x: '',
+      xi: Infinity,
+      y: 0,
+      series: id,
+    };
+    addToSiri(xKeys, series, point, id, id, { id: id });
+
+    expect(series.get(id).values).to.have.length(4);
+    expect(series.get(id).values[0]).to.eql(expected);
+  });
+
+  it('writes the correct value to the zero-filled array the first time it sees an id', function () {
+    const series = new Map();
+    const point = { x: 'foo' };
+    const id = 'id';
+    const zeroFilled = {
+      x: '',
+      xi: Infinity,
+      y: 0,
+      series: id,
+    };
+    addToSiri(xKeys, series, point, id, id, { id: id });
+
+    expect(series.get(id).values).to.have.length(4);
+    expect(series.get(id).values[0]).to.eql(zeroFilled);
+    expect(series.get(id).values[1]).to.be(point);
+  });
+
+  it('updates points in existing series if it has been seen', function () {
     const series = new Map();
     const id = 'id';
 
-    const point = {};
-    addToSiri(series, point, id, id, { id: id });
+    const point0 = { x: '' };
+    addToSiri(xKeys, series, point0, id, id, { id: id });
 
-    const point2 = {};
-    addToSiri(series, point2, id, id, { id: id });
+    const point1 = { x: 'foo' };
+    addToSiri(xKeys, series, point1, id, id, { id: id });
 
-    expect(series.has(id)).to.be(true);
-    expect(series.get(id)).to.be.an('object');
+    const point2 = { x: 'bar' };
+    addToSiri(xKeys, series, point2, id, id, { id: id });
+
+    const point3 = { x: 'baz' };
+    addToSiri(xKeys, series, point3, id, id, { id: id });
+
     expect(series.get(id).label).to.be(id);
-    expect(series.get(id).values).to.have.length(2);
-    expect(series.get(id).values[0]).to.be(point);
-    expect(series.get(id).values[1]).to.be(point2);
+    expect(series.get(id).values[0]).to.be(point0);
+    expect(series.get(id).values[1]).to.be(point1);
+    expect(series.get(id).values[2]).to.be(point2);
+    expect(series.get(id).values[3]).to.be(point3);
   });
 
   it('allows overriding the series label', function () {
     const series = new Map();
     const id = 'id';
     const label = 'label';
-    const point = {};
-    addToSiri(series, point, id, label, { id: id });
+    const point = { x: 'foo' };
+    addToSiri(xKeys, series, point, id, label, { id: id });
 
-    expect(series.has(id)).to.be(true);
-    expect(series.get(id)).to.be.an('object');
     expect(series.get(id).label).to.be(label);
-    expect(series.get(id).values).to.have.length(1);
-    expect(series.get(id).values[0]).to.be(point);
   });
 });
