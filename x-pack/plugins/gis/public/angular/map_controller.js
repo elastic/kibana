@@ -21,7 +21,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
-import { getMapReady, getTimeFilters } from "../selectors/map_selectors";
+import { getMapReady } from "../selectors/map_selectors";
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
@@ -73,12 +73,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       updateTheme();
     }
 
-    const storeTime = getTimeFilters(store.getState());
-    const kbnTime = timefilter.getTime();
-    if (storeTime && (storeTime.to !== kbnTime.to || storeTime.from !== kbnTime.from)) {
-      timefilter.setTime(storeTime);
-    }
-
     // Part of initial syncing of store from saved object
     // Delayed until after map is ready so map extent is known
     if (!isLayersListInitializedFromSavedObject && getMapReady(store.getState())) {
@@ -88,13 +82,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
     }
   }
 
-  timefilter.on('timeUpdate', dispatchTimeUpdate);
-
   $scope.$on('$destroy', () => {
     if (unsubscribe) {
       unsubscribe();
     }
-    timefilter.off('timeUpdate', dispatchTimeUpdate);
     const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     if (node) {
       unmountComponentAtNode(node);
@@ -191,12 +182,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
   }];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
-
-  async function dispatchTimeUpdate() {
-    const timeFilters = timefilter.getTime();
-    const store = await getStore();
-    store.dispatch(setTimeFilters(timeFilters));
-  }
 
   function updateTheme() {
     $scope.$evalAsync(() => {

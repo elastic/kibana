@@ -72,6 +72,10 @@ export class ESSearchSource extends VectorSource {
     return true;
   }
 
+  isRefreshAware() {
+    return true;
+  }
+
   getFieldNames() {
     return [
       this._descriptor.geoField,

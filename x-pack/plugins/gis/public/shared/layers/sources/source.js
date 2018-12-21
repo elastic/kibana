@@ -43,6 +43,10 @@ export class ASource {
     return false;
   }
 
+  isRefreshAware() {
+    return false;
+  }
+
   getFieldNames() {
     return [];
   }

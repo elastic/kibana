@@ -19,6 +19,7 @@ import {
   MAP_DESTROYED,
   REPLACE_LAYERLIST,
   SET_TIME_FILTERS,
+  UPDATE_REFRESHED_AT,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
@@ -76,6 +77,7 @@ const INITIAL_STATE = {
     },
     extent: null,
     timeFilters: null,
+    refreshedAt: null,
   },
   selectedLayerId: null,
   layerList: []
@@ -119,6 +121,14 @@ export function map(state = INITIAL_STATE, action) {
     case SET_TIME_FILTERS:
       const { from, to } = action;
       return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
+    case UPDATE_REFRESHED_AT:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          refreshedAt: (new Date()).toISOString(),
+        }
+      };
     case SET_SELECTED_LAYER:
       const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };

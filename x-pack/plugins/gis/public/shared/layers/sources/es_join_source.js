@@ -157,8 +157,12 @@ export class ESJoinSource extends ASource {
   }
 
   isFilterByMapBounds() {
-    //todo
+    // TODO
     return false;
+  }
+
+  isRefreshAware() {
+    return true;
   }
 
   getJoinDescription(leftSourceName, leftFieldName) {

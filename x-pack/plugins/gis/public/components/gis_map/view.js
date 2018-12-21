@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import { MBMapContainer } from '../map/mb';
 import { LayerControl } from '../layer_control/index';
 import { LayerPanel } from '../layer_panel/index';
@@ -12,40 +12,76 @@ import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Toasts } from '../toasts';
 
+import { timeService } from '../../kibana_services';
 
-export function GisMap(props) {
-  const {
-    layerDetailsVisible,
-    addLayerVisible,
-    noFlyoutVisible
-  } = props;
+export class GisMap extends Component {
 
-  let currentPanel;
-  let currentPanelClassName;
+  componentDidMount() {
+    timeService.on('timeUpdate', this.props.setTimeFiltersToKbnGlobalTime);
+    timeService.on('refreshIntervalUpdate', this.setAutoRefresh);
+    this.setAutoRefresh();
+  }
 
-  if (noFlyoutVisible) {
-    currentPanel = null;
-  } else if (addLayerVisible) {
-    currentPanelClassName = "gisLayerPanel-isVisible";
-    currentPanel = <AddLayerPanel/>;
-  } else if (layerDetailsVisible) {
-    currentPanelClassName = "gisLayerPanel-isVisible";
-    currentPanel = (
-      <LayerPanel/>
+  componentWillUnmount() {
+    timeService.off('timeUpdate', this.props.setTimeFiltersToKbnGlobalTime);
+    timeService.off('refreshIntervalUpdate', this.setAutoRefresh);
+    this.clearAutoRefresh();
+  }
+
+  setAutoRefresh = () => {
+    this.clearAutoRefresh();
+
+    const { value, pause } = timeService.getRefreshInterval();
+    if (!pause && value > 0) {
+      this.refreshTimerId = setInterval(
+        () => {
+          this.props.refreshLayers();
+        },
+        value
+      );
+    }
+  }
+
+  clearAutoRefresh = () => {
+    if (this.refreshTimerId) {
+      clearInterval(this.refreshTimerId);
+    }
+  }
+
+  render() {
+    const {
+      layerDetailsVisible,
+      addLayerVisible,
+      noFlyoutVisible
+    } = this.props;
+
+    let currentPanel;
+    let currentPanelClassName;
+
+    if (noFlyoutVisible) {
+      currentPanel = null;
+    } else if (addLayerVisible) {
+      currentPanelClassName = "gisLayerPanel-isVisible";
+      currentPanel = <AddLayerPanel/>;
+    } else if (layerDetailsVisible) {
+      currentPanelClassName = "gisLayerPanel-isVisible";
+      currentPanel = (
+        <LayerPanel/>
+      );
+    }
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem className="gisMapWrapper">
+          <MBMapContainer/>
+          <LayerControl/>
+        </EuiFlexItem>
+
+        <EuiFlexItem className={`gisLayerPanel ${currentPanelClassName}`} grow={false}>
+          {currentPanel}
+        </EuiFlexItem>
+
+        <Toasts/>
+      </EuiFlexGroup>
     );
   }
-  return (
-    <EuiFlexGroup gutterSize="none" responsive={false}>
-      <EuiFlexItem className="gisMapWrapper">
-        <MBMapContainer/>
-        <LayerControl/>
-      </EuiFlexItem>
-
-      <EuiFlexItem className={`gisLayerPanel ${currentPanelClassName}`} grow={false}>
-        {currentPanel}
-      </EuiFlexItem>
-
-      <Toasts/>
-    </EuiFlexGroup>
-  );
 }
