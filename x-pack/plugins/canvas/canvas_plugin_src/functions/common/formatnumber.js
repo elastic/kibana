@@ -21,7 +21,9 @@ export const formatnumber = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args.format) return String(context);
+    if (!args.format) {
+      return String(context);
+    }
     return numeral(context).format(args.format);
   },
 });

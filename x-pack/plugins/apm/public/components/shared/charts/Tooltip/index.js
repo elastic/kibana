@@ -60,6 +60,7 @@ const LegendContainer = styled.div`
 
 const LegendGray = styled(Legend)`
   color: ${colors.gray3};
+  padding-bottom: 0;
 `;
 
 const Value = styled.div`

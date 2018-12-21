@@ -23,7 +23,9 @@ export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
   const paddingVal = padding ? padding.replace('px', '') : '';
 
   const namedChange = name => ev => {
-    if (name === 'padding') return onChange(name, `${ev.target.value}px`);
+    if (name === 'padding') {
+      return onChange(name, `${ev.target.value}px`);
+    }
 
     onChange(name, ev.target.value);
   };
