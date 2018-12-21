@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
-import { mountWithIntl } from '../../../../../../../test_utils/enzyme_helpers';
+import { shallowWithIntl } from '../../../../../../../test_utils/enzyme_helpers';
 import {
   FormattedKey,
   FormattedValue,
@@ -81,12 +81,12 @@ describe('FormattedValue component', () => {
   });
 
   it('should render null', () => {
-    expect(mountWithIntl(<FormattedValue value={null} />)).toMatchSnapshot();
+    expect(shallowWithIntl(<FormattedValue value={null} />)).toMatchSnapshot();
   });
 
   it('should render undefined', () => {
     expect(
-      mountWithIntl(<FormattedValue value={undefined} />)
+      shallowWithIntl(<FormattedValue value={undefined} />)
     ).toMatchSnapshot();
   });
 });
