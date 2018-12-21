@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
