@@ -33,6 +33,8 @@ import glob from 'glob';
 import { promisify } from 'util';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
+import normalize from 'normalize-path';
+import path from 'path';
 
 import { createFailError } from '../run';
 
@@ -287,4 +289,8 @@ export function extractValuesKeysFromNode(node, messageId) {
   return node.properties.map(
     property => (isStringLiteral(property.key) ? property.key.value : property.key.name)
   );
+}
+
+export function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
 }

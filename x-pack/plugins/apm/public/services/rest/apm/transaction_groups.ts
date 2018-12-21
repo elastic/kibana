@@ -91,3 +91,19 @@ export async function loadOverviewCharts({
     }
   });
 }
+
+export async function loadOverviewChartsForAllTypes({
+  serviceName,
+  start,
+  end,
+  kuery
+}: IUrlParams) {
+  return callApi<TimeSeriesAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/charts`,
+    query: {
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
+    }
+  });
+}
