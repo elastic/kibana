@@ -16,6 +16,7 @@ const Container = styled.div`
   cursor: ${props => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${props => (props.disabled ? 0.4 : 1)};
   user-select: none;
+  padding-bottom: 15px;
 `;
 
 export const Indicator = styled.span`

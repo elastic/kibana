@@ -5,6 +5,7 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import createHistory from 'history/createHashHistory';
 import { get, isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';
@@ -26,21 +27,30 @@ const DEFAULT_KIBANA_TIME_RANGE = {
   }
 };
 
-interface ViewMlJobArgs {
+const viewJobLabel: string = i18n.translate(
+  'xpack.apm.viewMLJob.viewJobLabel',
+  {
+    defaultMessage: 'View Job'
+  }
+);
+
+interface ViewMLJobArgs {
   serviceName: string;
-  transactionType: string;
+  transactionType?: string;
   location: any;
 }
 
-export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
+export const ViewMLJob: React.SFC<ViewMLJobArgs> = ({
   serviceName,
   transactionType,
   location,
-  children = 'View Job'
+  children = viewJobLabel
 }) => {
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
-  const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
+  const jobId = `${serviceName}-${
+    transactionType ? transactionType + '-' : ''
+  }high_mean_response_time`;
   const query = {
     _g: {
       ml: {
@@ -51,11 +61,11 @@ export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
 
   return (
     <UnconnectedKibanaLink
-      location={location}
       pathname={pathname}
       hash={hash}
       query={query}
       children={children}
+      location={location}
     />
   );
 };

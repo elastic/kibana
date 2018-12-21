@@ -42,7 +42,8 @@ const module = uiModules.get('apps/ml');
 module.controller('MlNewJobStepJobType',
   function (
     $scope,
-    Private) {
+    Private,
+    i18n) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
@@ -57,8 +58,18 @@ module.controller('MlNewJobStepJobType',
     $scope.indexWarningTitle = '';
     $scope.isTimeBasedIndex = timeBasedIndexCheck(indexPattern);
     if ($scope.isTimeBasedIndex === false) {
-      $scope.indexWarningTitle = (savedSearch.id === undefined) ? `Index pattern ${indexPattern.title} is not time based` :
-        `${savedSearch.title} uses index pattern ${indexPattern.title} which is not time based`;
+      $scope.indexWarningTitle = (savedSearch.id === undefined) ?
+        i18n('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
+          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
+          values: { indexPatternTitle: indexPattern.title }
+        })
+        : i18n('xpack.ml.newJob.wizard.jobType.indexPatternFromSavedSearchNotTimeBasedMessage', {
+          defaultMessage: '{savedSearchTitle} uses index pattern {indexPatternTitle} which is not time based',
+          values: {
+            savedSearchTitle: savedSearch.title,
+            indexPatternTitle: indexPattern.title
+          }
+        });
     }
 
     $scope.indexPattern = indexPattern;
@@ -66,7 +77,14 @@ module.controller('MlNewJobStepJobType',
     $scope.recognizerResults = { count: 0 };
 
     $scope.pageTitleLabel = (savedSearch.id !== undefined) ?
-      `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
+      i18n('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
+        defaultMessage: 'saved search {savedSearchTitle}',
+        values: { savedSearchTitle: savedSearch.title }
+      })
+      : i18n('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
+        defaultMessage: 'index pattern {indexPatternTitle}',
+        values: { indexPatternTitle: indexPattern.title }
+      });
 
     $scope.getUrl = function (basePath) {
       return (savedSearch.id === undefined) ? `${basePath}?index=${indexPattern.id}` :
