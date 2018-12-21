@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
