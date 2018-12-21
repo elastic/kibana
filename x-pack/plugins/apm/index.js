@@ -11,6 +11,7 @@ import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
 import { initTracesApi } from './server/routes/traces';
+import { initMetricsApi } from './server/routes/metrics';
 import mappings from './mappings';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 import { i18n } from '@kbn/i18n';
@@ -74,6 +75,7 @@ export function apm(kibana) {
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);
+      initMetricsApi(server);
       makeApmUsageCollector(server);
     }
   });
