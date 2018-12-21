@@ -136,7 +136,7 @@ class CodeContent extends React.PureComponent<Props, State> {
     return (
       <ButtonsContainer>
         <Button onClick={this.hideBlame}>
-          <a href={`../api/code/repo/${repoUri}/blob/${revision}/${path}`}>Raw</a>
+          <a href={`../api/code/repo/${repoUri}/blob/${revision}/${path}`}>Raw File</a>
         </Button>
         <Button onClick={this.showBlame}>Blame</Button>
         <Button onClick={this.hideBlame}>History</Button>

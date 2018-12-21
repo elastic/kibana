@@ -21,12 +21,14 @@ exports[`render file item 1`] = `
 >
   <styled.div
     active={false}
+    aria-selected={false}
     id="suggestion-1-1"
     onClick={[Function]}
     onMouseEnter={[Function]}
     role="option"
   >
     <div
+      aria-selected={false}
       className="sc-bdVaJa iExjoJ"
       id="suggestion-1-1"
       onClick={[Function]}
@@ -57,10 +59,10 @@ exports[`render file item 1`] = `
             </Styled(styled.div)>
             <Styled(styled.div)>
               <styled.div
-                className="sc-EHOje jxxXAR"
+                className="sc-EHOje iasAWb"
               >
                 <div
-                  className="sc-EHOje jxxXAR sc-htpNat bUoeMH"
+                  className="sc-EHOje iasAWb sc-htpNat bUoeMH"
                 >
                   This is a file
                 </div>
@@ -95,12 +97,14 @@ exports[`render repository item 1`] = `
 >
   <styled.div
     active={false}
+    aria-selected={false}
     id="suggestion-1-1"
     onClick={[Function]}
     onMouseEnter={[Function]}
     role="option"
   >
     <div
+      aria-selected={false}
       className="sc-bdVaJa iExjoJ"
       id="suggestion-1-1"
       onClick={[Function]}
@@ -130,10 +134,10 @@ exports[`render repository item 1`] = `
             </Styled(styled.div)>
             <Styled(styled.div)>
               <styled.div
-                className="sc-EHOje jxxXAR"
+                className="sc-EHOje iasAWb"
               >
                 <div
-                  className="sc-EHOje jxxXAR sc-htpNat bUoeMH"
+                  className="sc-EHOje iasAWb sc-htpNat bUoeMH"
                 />
               </styled.div>
             </Styled(styled.div)>
@@ -166,12 +170,14 @@ exports[`render symbol item 1`] = `
 >
   <styled.div
     active={false}
+    aria-selected={false}
     id="suggestion-1-1"
     onClick={[Function]}
     onMouseEnter={[Function]}
     role="option"
   >
     <div
+      aria-selected={false}
       className="sc-bdVaJa iExjoJ"
       id="suggestion-1-1"
       onClick={[Function]}
@@ -205,11 +211,7 @@ exports[`render symbol item 1`] = `
                         className="euiIcon euiIcon--medium"
                         focusable="false"
                         height="16"
-                        style={
-                          Object {
-                            "fill": undefined,
-                          }
-                        }
+                        style={null}
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
@@ -218,11 +220,7 @@ exports[`render symbol item 1`] = `
                           className="euiIcon euiIcon--medium"
                           focusable="false"
                           height="16"
-                          style={
-                            Object {
-                              "fill": undefined,
-                            }
-                          }
+                          style={null}
                           viewBox="0 0 16 16"
                           width="16"
                           xmlns="http://www.w3.org/2000/svg"
@@ -258,10 +256,10 @@ exports[`render symbol item 1`] = `
             </Styled(styled.div)>
             <Styled(styled.div)>
               <styled.div
-                className="sc-EHOje jxxXAR"
+                className="sc-EHOje iasAWb"
               >
                 <div
-                  className="sc-EHOje jxxXAR sc-htpNat bUoeMH"
+                  className="sc-EHOje iasAWb sc-htpNat bUoeMH"
                 >
                   elastic/elasticsearch &gt; src/foo/bar.java
                 </div>

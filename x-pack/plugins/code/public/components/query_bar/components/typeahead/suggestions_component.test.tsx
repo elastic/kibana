@@ -8,7 +8,6 @@ import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import sinon from 'sinon';
 
 import props from '../props.json';
 import { SuggestionsComponent } from './suggestions_component';

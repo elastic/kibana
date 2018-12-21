@@ -24,6 +24,7 @@ import {
   IndexWorker,
   UpdateWorker,
 } from './server/queue';
+import { RepositoryServiceFactory } from './server/repository_service_factory';
 import { fileRoute } from './server/routes/file';
 import { installRoute } from './server/routes/install';
 import { lspRoute, symbolByQnameRoute } from './server/routes/lsp';
@@ -149,16 +150,27 @@ export const code = (kibana: any) =>
         cancellationService,
         socketService
       ).bind();
-      const cloneWorker = new CloneWorker(queue, log, esClient, indexWorker, socketService).bind();
+
+      const repoServiceFactory: RepositoryServiceFactory = new RepositoryServiceFactory();
+
+      const cloneWorker = new CloneWorker(
+        queue,
+        log,
+        esClient,
+        indexWorker,
+        repoServiceFactory,
+        socketService
+      ).bind();
       const deleteWorker = new DeleteWorker(
         queue,
         log,
         esClient,
         cancellationService,
         lspService,
+        repoServiceFactory,
         socketService
       ).bind();
-      const updateWorker = new UpdateWorker(queue, log, esClient).bind();
+      const updateWorker = new UpdateWorker(queue, log, esClient, repoServiceFactory).bind();
 
       // Initialize schedulers.
       const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);

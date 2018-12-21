@@ -140,7 +140,7 @@ exports[`render full suggestions component 1`] = `
             >
               <styled.div>
                 <div
-                  className="sc-bZQynM gyPMl"
+                  className="sc-bZQynM gNhebF"
                 >
                   <styled.div>
                     <div
@@ -162,11 +162,7 @@ exports[`render full suggestions component 1`] = `
                               className="euiIcon euiIcon--medium"
                               focusable="false"
                               height="16"
-                              style={
-                                Object {
-                                  "fill": undefined,
-                                }
-                              }
+                              style={null}
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
@@ -175,11 +171,7 @@ exports[`render full suggestions component 1`] = `
                                 className="euiIcon euiIcon--medium"
                                 focusable="false"
                                 height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
+                                style={null}
                                 viewBox="0 0 16 16"
                                 width="16"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +195,7 @@ exports[`render full suggestions component 1`] = `
                   </styled.div>
                   <styled.div>
                     <div
-                      className="sc-dnqmqq creRkv"
+                      className="sc-dnqmqq cXfCkY"
                     >
                       1
                        Result
@@ -232,13 +224,15 @@ exports[`render full suggestions component 1`] = `
               >
                 <styled.div
                   active={true}
+                  aria-selected={true}
                   id="suggestion-0-0"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
-                    className="sc-bdVaJa bhnUSL"
+                    aria-selected={true}
+                    className="sc-bdVaJa cBoxAT"
                     id="suggestion-0-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -271,11 +265,7 @@ exports[`render full suggestions component 1`] = `
                                       className="euiIcon euiIcon--medium"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -284,11 +274,7 @@ exports[`render full suggestions component 1`] = `
                                         className="euiIcon euiIcon--medium"
                                         focusable="false"
                                         height="16"
-                                        style={
-                                          Object {
-                                            "fill": undefined,
-                                          }
-                                        }
+                                        style={null}
                                         viewBox="0 0 16 16"
                                         width="16"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -324,10 +310,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje jxxXAR"
+                              className="sc-EHOje iasAWb"
                             >
                               <div
-                                className="sc-EHOje jxxXAR sc-htpNat bUoeMH"
+                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
                               >
                                 elastic/elasticsearch &gt; src/foo/bar.java
                               </div>
@@ -349,7 +335,7 @@ exports[`render full suggestions component 1`] = `
             >
               <styled.div>
                 <div
-                  className="sc-bZQynM gyPMl"
+                  className="sc-bZQynM gNhebF"
                 >
                   <styled.div>
                     <div
@@ -371,11 +357,7 @@ exports[`render full suggestions component 1`] = `
                               className="euiIcon euiIcon--medium"
                               focusable="false"
                               height="16"
-                              style={
-                                Object {
-                                  "fill": undefined,
-                                }
-                              }
+                              style={null}
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
@@ -384,11 +366,7 @@ exports[`render full suggestions component 1`] = `
                                 className="euiIcon euiIcon--medium"
                                 focusable="false"
                                 height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
+                                style={null}
                                 viewBox="0 0 16 16"
                                 width="16"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -412,7 +390,7 @@ exports[`render full suggestions component 1`] = `
                   </styled.div>
                   <styled.div>
                     <div
-                      className="sc-dnqmqq creRkv"
+                      className="sc-dnqmqq cXfCkY"
                     >
                       1
                        Result
@@ -441,12 +419,14 @@ exports[`render full suggestions component 1`] = `
               >
                 <styled.div
                   active={false}
+                  aria-selected={false}
                   id="suggestion-1-0"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
+                    aria-selected={false}
                     className="sc-bdVaJa iExjoJ"
                     id="suggestion-1-0"
                     onClick={[Function]}
@@ -471,10 +451,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje jxxXAR"
+                              className="sc-EHOje iasAWb"
                             >
                               <div
-                                className="sc-EHOje jxxXAR sc-htpNat bUoeMH"
+                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
                               >
                                 This is a file
                               </div>
@@ -496,7 +476,7 @@ exports[`render full suggestions component 1`] = `
             >
               <styled.div>
                 <div
-                  className="sc-bZQynM gyPMl"
+                  className="sc-bZQynM gNhebF"
                 >
                   <styled.div>
                     <div
@@ -518,11 +498,7 @@ exports[`render full suggestions component 1`] = `
                               className="euiIcon euiIcon--medium"
                               focusable="false"
                               height="16"
-                              style={
-                                Object {
-                                  "fill": undefined,
-                                }
-                              }
+                              style={null}
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
@@ -531,11 +507,7 @@ exports[`render full suggestions component 1`] = `
                                 className="euiIcon euiIcon--medium"
                                 focusable="false"
                                 height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
+                                style={null}
                                 viewBox="0 0 16 16"
                                 width="16"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -560,7 +532,7 @@ exports[`render full suggestions component 1`] = `
                   </styled.div>
                   <styled.div>
                     <div
-                      className="sc-dnqmqq creRkv"
+                      className="sc-dnqmqq cXfCkY"
                     >
                       2
                        Result
@@ -590,12 +562,14 @@ exports[`render full suggestions component 1`] = `
               >
                 <styled.div
                   active={false}
+                  aria-selected={false}
                   id="suggestion-2-0"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
+                    aria-selected={false}
                     className="sc-bdVaJa iExjoJ"
                     id="suggestion-2-0"
                     onClick={[Function]}
@@ -620,10 +594,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje jxxXAR"
+                              className="sc-EHOje iasAWb"
                             >
                               <div
-                                className="sc-EHOje jxxXAR sc-htpNat bUoeMH"
+                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
                               />
                             </styled.div>
                           </Styled(styled.div)>
@@ -654,12 +628,14 @@ exports[`render full suggestions component 1`] = `
               >
                 <styled.div
                   active={false}
+                  aria-selected={false}
                   id="suggestion-2-1"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
+                    aria-selected={false}
                     className="sc-bdVaJa iExjoJ"
                     id="suggestion-2-1"
                     onClick={[Function]}
@@ -684,10 +660,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje jxxXAR"
+                              className="sc-EHOje iasAWb"
                             >
                               <div
-                                className="sc-EHOje jxxXAR sc-htpNat bUoeMH"
+                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
                               />
                             </styled.div>
                           </Styled(styled.div)>
@@ -717,11 +693,11 @@ exports[`render full suggestions component 1`] = `
             </div>
             <styled.div>
               <div
-                className="sc-gZMcBi iNXLyj"
+                className="sc-gZMcBi fTFWAX"
               >
                 <styled.div>
                   <div
-                    className="sc-gqjmRU cxjLAE"
+                    className="sc-gqjmRU laCIgx"
                   >
                     Press ⮐ Return for Full Text Search
                   </div>
