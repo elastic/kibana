@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
 
         await browser.dragAndDrop(
           { element: panelTitleBeforeMove },
-          { element: null, xOffset: -20, yOffset: -450 }
+          { xOffset: -20, yOffset: -450 }
         );
 
         const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
