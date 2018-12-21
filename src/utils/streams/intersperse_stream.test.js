@@ -17,41 +17,38 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import sinon from 'sinon';
-
 import {
   createPromiseFromStreams,
   createListStream,
   createIntersperseStream,
   createConcatStream
-} from '../';
+} from './';
 
 describe('intersperseStream', () => {
-  it('places the intersperse value between each provided value', async () => {
+  test('places the intersperse value between each provided value', async () => {
     expect(
       await createPromiseFromStreams([
         createListStream(['to', 'be', 'or', 'not', 'to', 'be']),
         createIntersperseStream(' '),
         createConcatStream()
       ])
-    ).to.be('to be or not to be');
+    ).toBe('to be or not to be');
   });
 
-  it('emits values as soon as possible, does not needlessly buffer', async () => {
+  test('emits values as soon as possible, does not needlessly buffer', async () => {
     const str = createIntersperseStream('y');
-    const stub = sinon.stub();
-    str.on('data', stub);
+    const onData = jest.fn();
+    str.on('data', onData);
 
     str.write('a');
-    sinon.assert.calledOnce(stub);
-    expect(stub.firstCall.args).to.eql(['a']);
-    stub.resetHistory();
+    expect(onData).toHaveBeenCalledTimes(1);
+    expect(onData.mock.calls[0]).toEqual(['a']);
+    onData.mockClear();
 
     str.write('b');
-    sinon.assert.calledTwice(stub);
-    expect(stub.firstCall.args).to.eql(['y']);
-    sinon.assert.calledTwice(stub);
-    expect(stub.secondCall.args).to.eql(['b']);
+    expect(onData).toHaveBeenCalledTimes(2);
+    expect(onData.mock.calls[0]).toEqual(['y']);
+    expect(onData).toHaveBeenCalledTimes(2);
+    expect(onData.mock.calls[1]).toEqual(['b']);
   });
 });
