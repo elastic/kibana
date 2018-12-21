@@ -34,44 +34,43 @@ const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
   const lineNumber: number = get(stackframe, 'line.number');
+  const messageWithLineNumber = (
+    <FormattedMessage
+      id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage"
+      defaultMessage="{fileName} in {functionName} at {lineNumber}"
+      values={{
+        fileName: <FileDetail>{stackframe.filename}</FileDetail>,
+        functionName: <FileDetail>{stackframe.function}</FileDetail>,
+        lineNumber: (
+          <FileDetail>
+            <FormattedMessage
+              id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
+              defaultMessage="line {stackframeLineNumber}"
+              values={{
+                stackframeLineNumber: stackframe.line.number
+              }}
+              description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage
+                  + xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
+            />
+          </FileDetail>
+        )
+      }}
+    />
+  );
+  const messageWithoutLineNumber = (
+    <FormattedMessage
+      id="xpack.apm.stacktraceTab.exceptionLocationMessage"
+      defaultMessage="{fileName} in {functionName}"
+      values={{
+        fileName: <FileDetail>{stackframe.filename}</FileDetail>,
+        functionName: <FileDetail>{stackframe.function}</FileDetail>
+      }}
+    />
+  );
+
   return (
     <FileDetails>
-      <FormattedMessage
-        id="xpack.apm.stacktraceTab.exceptionLocationMessage"
-        defaultMessage="{fileName} in {functionName} {atLineNumber}"
-        values={{
-          fileName: <FileDetail>{stackframe.filename}</FileDetail>,
-          functionName: <FileDetail>{stackframe.function}</FileDetail>,
-          atLineNumber:
-            lineNumber > 0 ? (
-              <FormattedMessage
-                id="xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText"
-                defaultMessage="at {lineNumber}"
-                description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationMessage
-                  + xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText
-                  + xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                values={{
-                  lineNumber: (
-                    <FileDetail>
-                      <FormattedMessage
-                        id="xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                        defaultMessage="line {stackframeLineNumber}"
-                        values={{
-                          stackframeLineNumber: stackframe.line.number
-                        }}
-                        description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationMessage
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                      />
-                    </FileDetail>
-                  )
-                }}
-              />
-            ) : (
-              ''
-            )
-        }}
-      />
+      {lineNumber > 0 ? messageWithLineNumber : messageWithoutLineNumber}
     </FileDetails>
   );
 };

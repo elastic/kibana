@@ -277,40 +277,28 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                 className="c2"
               >
                 <FormattedMessage
-                  defaultMessage="{fileName} in {functionName} {atLineNumber}"
-                  id="xpack.apm.stacktraceTab.exceptionLocationMessage"
+                  defaultMessage="{fileName} in {functionName} at {lineNumber}"
+                  id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage"
                   values={
                     Object {
-                      "atLineNumber": <FormattedMessage
-                        defaultMessage="at {lineNumber}"
-                        description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationMessage
-                  + xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText
-                  + xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                        id="xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText"
-                        values={
-                          Object {
-                            "lineNumber": <styled.span>
-                              <FormattedMessage
-                                defaultMessage="line {stackframeLineNumber}"
-                                description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationMessage
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                                id="xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                                values={
-                                  Object {
-                                    "stackframeLineNumber": 307,
-                                  }
-                                }
-                              />
-                            </styled.span>,
-                          }
-                        }
-                      />,
                       "fileName": <styled.span>
                         server/routes.js
                       </styled.span>,
                       "functionName": <styled.span>
                         &lt;anonymous&gt;
+                      </styled.span>,
+                      "lineNumber": <styled.span>
+                        <FormattedMessage
+                          defaultMessage="line {stackframeLineNumber}"
+                          description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage
+                  + xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
+                          id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
+                          values={
+                            Object {
+                              "stackframeLineNumber": 307,
+                            }
+                          }
+                        />
                       </styled.span>,
                     }
                   }
@@ -330,54 +318,26 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                       &lt;anonymous&gt;
                     </span>
                   </styled.span>
-                   
-                  <FormattedMessage
-                    defaultMessage="at {lineNumber}"
-                    description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationMessage
-                  + xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText
-                  + xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                    id="xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText"
-                    values={
-                      Object {
-                        "lineNumber": <styled.span>
-                          <FormattedMessage
-                            defaultMessage="line {stackframeLineNumber}"
-                            description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationMessage
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                            id="xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                            values={
-                              Object {
-                                "stackframeLineNumber": 307,
-                              }
-                            }
-                          />
-                        </styled.span>,
-                      }
-                    }
-                  >
-                    at 
-                    <styled.span>
-                      <span
-                        className="c3"
-                      >
-                        <FormattedMessage
-                          defaultMessage="line {stackframeLineNumber}"
-                          description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationMessage
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.atLineNumberText
-                          + xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                          id="xpack.apm.stacktraceTab.exceptionLocationMessage.lineNumberText"
-                          values={
-                            Object {
-                              "stackframeLineNumber": 307,
-                            }
+                   at 
+                  <styled.span>
+                    <span
+                      className="c3"
+                    >
+                      <FormattedMessage
+                        defaultMessage="line {stackframeLineNumber}"
+                        description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage
+                  + xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
+                        id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
+                        values={
+                          Object {
+                            "stackframeLineNumber": 307,
                           }
-                        >
-                          line 307
-                        </FormattedMessage>
-                      </span>
-                    </styled.span>
-                  </FormattedMessage>
+                        }
+                      >
+                        line 307
+                      </FormattedMessage>
+                    </span>
+                  </styled.span>
                 </FormattedMessage>
               </div>
             </styled.div>
