@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { GisMap } from './view';
-import { getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
+import { getFlyoutDisplay, FLYOUT_STATE, setRefresh } from '../../store/ui';
 import { setTimeFiltersToKbnGlobalTime, refreshLayers } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
@@ -22,6 +22,7 @@ function mapDispatchToProps(dispatch) {
   return {
     setTimeFiltersToKbnGlobalTime: () => dispatch(setTimeFiltersToKbnGlobalTime()),
     refreshLayers: () => dispatch(refreshLayers()),
+    setRefresh: (({ isPaused, interval }) => dispatch(setRefresh({ isPaused, interval }))),
   };
 }
 

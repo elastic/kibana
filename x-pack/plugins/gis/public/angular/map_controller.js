@@ -14,7 +14,7 @@ import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
 import { setSelectedLayer, setTimeFilters, mapExtentChanged, replaceLayerList } from '../actions/store_actions';
-import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
+import { getIsDarkTheme, updateFlyout, FLYOUT_STATE, setRefresh } from '../store/ui';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -57,6 +57,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
         zoom: mapState.zoom,
         center: mapState.center,
       }));
+    }
+
+    // sync store with savedMap uiState
+    if (savedMap.uiStateJSON) {
+      const uiState = JSON.parse(savedMap.uiStateJSON);
+      if (uiState.refresh) {
+        store.dispatch(setRefresh(uiState.refresh));
+      }
     }
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);

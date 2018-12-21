@@ -14,7 +14,7 @@ import {
   getLayerListRaw,
   getMapExtent,
 } from '../../selectors/map_selectors';
-import { getIsDarkTheme } from '../../store/ui';
+import { getIsDarkTheme, getRefresh } from '../../store/ui';
 import { TileStyle } from '../../shared/layers/styles/tile_style';
 import { convertMapExtentToEnvelope } from '../../elasticsearch_geo_utils';
 
@@ -99,6 +99,7 @@ module.factory('SavedGisMap', function (Private) {
 
     this.uiStateJSON = JSON.stringify({
       isDarkMode: getIsDarkTheme(state),
+      refresh: getRefresh(state),
     });
 
     this.bounds = convertMapExtentToEnvelope(getMapExtent(state));

@@ -7,11 +7,13 @@ import _ from 'lodash';
 import { PROMOTE_TEMPORARY_LAYERS, LAYER_DATA_LOAD_ERROR }
   from '../actions/store_actions';
 import { RESET_LAYER_LOAD } from '../actions/ui_actions';
+import { timeService } from '../kibana_services';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
 export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
 export const UPDATE_IS_DARK_THEME = 'UPDATE_IS_DARK_THEME';
+export const SET_REFRESH = 'SET_REFRESH';
 export const FLYOUT_STATE = {
   NONE: 'NONE',
   LAYER_PANEL: 'LAYER_PANEL',
@@ -26,6 +28,7 @@ export const LAYER_LOAD_STATE = {
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isDarkTheme: false,
+  refresh: null,
   layerLoad: {
     status: LAYER_LOAD_STATE.inactive,
     time: Date()
@@ -52,6 +55,9 @@ function ui(state = INITIAL_STATE, action) {
       return { ...state, isSetViewOpen: false };
     case OPEN_SET_VIEW:
       return { ...state, isSetViewOpen: true };
+    case SET_REFRESH:
+      const { isPaused, interval } = action;
+      return { ...state, refresh: { isPaused, interval } };
     default:
       return state;
   }
@@ -80,11 +86,30 @@ export function updateIsDarkTheme(isDarkTheme) {
     isDarkTheme
   };
 }
+export function setRefresh({ isPaused, interval }) {
+  return async (dispatch) => {
+    dispatch({
+      type: SET_REFRESH,
+      isPaused,
+      interval,
+    });
+
+    // Update Kibana global refresh
+    const kbnRefresh = timeService.getRefreshInterval();
+    if (isPaused !== kbnRefresh.pause || interval !== kbnRefresh.value) {
+      timeService.setRefreshInterval({
+        pause: isPaused,
+        value: interval,
+      });
+    }
+  };
+}
 
 // Selectors
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
 export const getIsDarkTheme = ({ ui }) => _.get(ui, 'isDarkTheme', INITIAL_STATE.isDarkTheme);
+export const getRefresh = ({ ui }) => ui.refresh;
 export const getIsSetViewOpen = ({ ui }) => _.get(ui, 'isSetViewOpen', false);
 
 export default ui;

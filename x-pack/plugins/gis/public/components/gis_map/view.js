@@ -40,6 +40,12 @@ export class GisMap extends Component {
         value
       );
     }
+
+    // Store refresh in UI state so it is saved with the map
+    this.props.setRefresh({
+      isPaused: pause,
+      interval: value,
+    });
   }
 
   clearAutoRefresh = () => {
