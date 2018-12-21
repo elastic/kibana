@@ -20,24 +20,21 @@
       ></span>
     </div>
     <div>
-      <div class="stat min heading">
-        <span
-          i18n-id="xpack.ml.fieldDataCard.cardNumber.minLabel"
-          i18n-default-message="min"
-        ></span>
-      </div>
-      <div class="stat median heading">
-        <span
-          i18n-id="xpack.ml.fieldDataCard.cardNumber.medianLabel"
-          i18n-default-message="median"
-        ></span>
-      </div>
-      <div class="stat max heading">
-        <span
-          i18n-id="xpack.ml.fieldDataCard.cardNumber.maxLabel"
-          i18n-default-message="max"
-        ></span>
-      </div>
+      <div
+        class="stat min heading"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.minLabel"
+        i18n-default-message="min"
+      ></div>
+      <div
+        class="stat median heading"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.medianLabel"
+        i18n-default-message="median"
+      ></div>
+      <div
+        class="stat max heading"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.maxLabel"
+        i18n-default-message="max"
+      ></div>
     </div>
     <div>
       <div class="stat min">{{ card.stats.min | formatField:card.fieldFormat }}</div>
@@ -51,18 +48,16 @@
       ng-model="detailsMode"
       ng-change="detailsModeChanged(detailsMode)"
       aria-label="{{:: 'xpack.ml.fieldDataCard.cardNumber.details.selectMetricDetailsDisplayAriaLabel' | i18n: { defaultMessage: 'Select metric details display' } }}">
-      <option value="distribution">
-        <span
-          i18n-id="xpack.ml.fieldDataCard.cardNumber.details.distributionOfValuesLabel"
-          i18n-default-message="distribution of values"
-        ></span>
-      </option>
-      <option value="top">
-        <span
-          i18n-id="xpack.ml.fieldDataCard.cardNumber.details.topValuesLabel"
-          i18n-default-message="top values"
-        ></span>
-      </option>
+      <option
+        value="distribution"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.details.distributionOfValuesLabel"
+        i18n-default-message="distribution of values"
+      ></option>
+      <option
+        value="top"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.details.topValuesLabel"
+        i18n-default-message="top values"
+      ></option>
     </select>
   </div>
   <div class="details-container" ng-switch on="detailsMode">

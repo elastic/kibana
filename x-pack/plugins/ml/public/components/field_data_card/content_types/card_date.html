@@ -10,23 +10,21 @@
       ></span>
       ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
     </div>
-    <div class="stat">
-      <span
-        i18n-id="xpack.ml.fieldDataCard.cardDate.earliestLabel"
-        i18n-default-message="earliest {earliestCardStats}"
-        i18n-values="{
-          earliestCardStats: (card.stats.earliest | moment),
-        }"
-      ></span>
-    </div>
-    <div class="stat">
-      <span
-        i18n-id="xpack.ml.fieldDataCard.cardDate.latestLabel"
-        i18n-default-message="latest {latestCardStats}"
-        i18n-values="{
-          latestCardStats: (card.stats.latest | moment),
-        }"
-      ></span>
-    </div>
+    <div
+      class="stat"
+      i18n-id="xpack.ml.fieldDataCard.cardDate.earliestLabel"
+      i18n-default-message="earliest {earliestCardStats}"
+      i18n-values="{
+        earliestCardStats: (card.stats.earliest | moment),
+      }"
+    ></div>
+    <div
+      class="stat"
+      i18n-id="xpack.ml.fieldDataCard.cardDate.latestLabel"
+      i18n-default-message="latest {latestCardStats}"
+      i18n-values="{
+        latestCardStats: (card.stats.latest | moment),
+      }"
+    ></div>
   </div>
 </div>
