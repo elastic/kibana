@@ -30,6 +30,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload('gis/kibana');
     });
 
+    loadTestFile(require.resolve('./saved_object_management'));
     loadTestFile(require.resolve('./sample_data'));
     loadTestFile(require.resolve('./load_saved_object'));
     loadTestFile(require.resolve('./es_search_source'));
