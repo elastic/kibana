@@ -154,7 +154,7 @@ export const AutoFollowPatternEdit = injectI18n(
     }
 
     render() {
-      const { saveAutoFollowPattern, selectAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
+      const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
 
       return (
         <EuiPage>
@@ -211,7 +211,6 @@ export const AutoFollowPatternEdit = injectI18n(
                         remoteClusters={remoteClusters}
                         autoFollowPattern={autoFollowPattern}
                         saveAutoFollowPattern={saveAutoFollowPattern}
-                        onCancel={() => selectAutoFollowPattern(null)}
                       />
                     );
                   }}
