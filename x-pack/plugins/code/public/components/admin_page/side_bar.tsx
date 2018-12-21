@@ -8,16 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTextColor } 
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { RootState } from '../../reducers';
-import { colors } from '../../style/variables';
-
-const Root = styled.div`
-  padding: 24px 16px;
-  flex-basis: 256px;
-  flex-grow: 0;
-  border-right: 1px solid ${colors.borderGrey};
-`;
 
 interface Project {
   name: string;
