@@ -6,7 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { HostItem } from '../../../common/graphql/types';
+import { HostItem } from '../../graphql/types';
 import { ItemsPerRow } from './index';
 
 export const mockData = {

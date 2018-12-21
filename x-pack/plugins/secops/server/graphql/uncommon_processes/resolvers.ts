@@ -5,19 +5,17 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { SourceResolvers } from '../../../common/graphql/types';
-import { AppResolvedResult, AppResolverOf } from '../../lib/framework';
-import { Context } from '../../lib/types';
+import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { UncommonProcesses } from '../../lib/uncommon_processes';
 import { UncommonProcessesRequestOptions } from '../../lib/uncommon_processes/types';
 import { getFields } from '../../utils/build_query/fields';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type QueryUncommonProcessesResolver = AppResolverOf<
-  SourceResolvers.UncommonProcessesResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+type QueryUncommonProcessesResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.UncommonProcessesResolver>,
+  QuerySourceResolver
 >;
 
 export interface UncommonProcessesResolversDeps {

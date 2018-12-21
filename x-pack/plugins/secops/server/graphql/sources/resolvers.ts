@@ -4,31 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { QueryResolvers, SourceResolvers } from '../../../common/graphql/types';
-import { AppResolvedResult, AppResolverWithFields } from '../../lib/framework';
+import { QueryResolvers, SourceResolvers } from '../../graphql/types';
+import {
+  AppResolverOf,
+  AppResolverWithFields,
+  ChildResolverOf,
+  ResultOf,
+} from '../../lib/framework';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
-import { Context } from '../../lib/types';
 
 export type QuerySourceResolver = AppResolverWithFields<
   QueryResolvers.SourceResolver,
-  null,
-  Context,
   'id' | 'configuration'
 >;
 
 export type QueryAllSourcesResolver = AppResolverWithFields<
   QueryResolvers.AllSourcesResolver,
-  null,
-  Context,
   'id' | 'configuration'
 >;
 
-export type SourceStatusResolver = AppResolverWithFields<
-  SourceResolvers.StatusResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context,
-  never
+export type SourceStatusResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.StatusResolver<ResultOf<QuerySourceResolver>>>,
+  QuerySourceResolver
 >;
 
 export interface SourcesResolversDeps {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexField, IndexType } from '../../../common/graphql/types';
+import { IndexField, IndexType } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 
 export interface FieldsAdapter {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsData } from '../../../common/graphql/types';
+import { HostsData } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 export * from './elasticsearch_adapter';
 import { HostsAdapter, HostsRequestOptions } from './types';

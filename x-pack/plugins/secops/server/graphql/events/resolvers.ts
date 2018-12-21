@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SourceResolvers } from '../../../common/graphql/types';
+import { SourceResolvers } from '../../graphql/types';
 import { Events } from '../../lib/events';
 import { EventsRequestOptions } from '../../lib/events/types';
-import { AppResolvedResult, AppResolverOf } from '../../lib/framework';
-import { Context } from '../../lib/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { getFields } from '../../utils/build_query/fields';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type QueryEventsResolver = AppResolverOf<
-  SourceResolvers.GetEventsResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+type QueryEventsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.GetEventsResolver>,
+  QuerySourceResolver
 >;
 
 interface EventsResolversDeps {

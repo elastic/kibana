@@ -8,7 +8,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { SourceQuery } from '../../../common/graphql/types';
+import { SourceQuery } from '../../graphql/types';
 import { sourceQuery } from './index.gql_query';
 
 interface WithSourceArgs {

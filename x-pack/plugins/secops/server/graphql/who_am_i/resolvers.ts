@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SourceResolvers } from '../../../common/graphql/types';
-import { AppResolvedResult, AppResolverOf } from '../../lib/framework';
-import { Context } from '../../lib/types';
+import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-export type QueryWhoAmIResolver = AppResolverOf<
-  SourceResolvers.WhoAmIResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+export type QueryWhoAmIResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.WhoAmIResolver>,
+  QuerySourceResolver
 >;
 
 export const createWhoAmIResolvers = (): {

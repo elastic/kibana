@@ -9,7 +9,6 @@ import React from 'react';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
-import { KpiItem } from '../../../common/graphql/types';
 import { EmptyPage } from '../../components/empty_page';
 import {
   EventsTable,
@@ -17,6 +16,7 @@ import {
   TypesBar,
   UncommonProcessTable,
 } from '../../components/page/hosts';
+import { KpiItem } from '../../graphql/types';
 
 import { manageQuery } from '../../components/page/manage_query';
 import { EventsQuery } from '../../containers/events';

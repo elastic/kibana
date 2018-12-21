@@ -9,7 +9,7 @@ import {
   PaginationInput,
   SourceConfiguration,
   TimerangeInput,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { ESQuery, SearchHit } from '../types';
 

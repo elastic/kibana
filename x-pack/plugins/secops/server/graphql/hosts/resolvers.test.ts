@@ -6,7 +6,7 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { omit } from 'lodash/fp';
 
-import { Source } from '.../../../common/graphql/types';
+import { Source } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { Hosts } from '../../lib/hosts';
 import { HostsAdapter } from '../../lib/hosts/types';
@@ -63,7 +63,7 @@ const context = { req };
 describe('Test Source Resolvers', () => {
   test('Make sure that getHosts have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
-      null,
+      {},
       { id: 'default' },
       context,
       {} as GraphQLResolveInfo

@@ -37,7 +37,7 @@ export interface Configuration {
   sources: SourceConfigurations;
 }
 
-export interface Context {
+export interface SecOpsContext {
   req: FrameworkRequest;
 }
 

@@ -5,7 +5,7 @@
  */
 
 import { get, getOr, head } from 'lodash/fp';
-import { HostsData, HostsEdges } from '../../../common/graphql/types';
+import { HostsData, HostsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';

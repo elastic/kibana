@@ -8,7 +8,7 @@ import { EuiBasicTable, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { EventItem } from '../../../common/graphql/types';
+import { EventItem } from '../../graphql/types';
 import { LoadingPanel } from '../loading';
 
 interface BasicTableProps {

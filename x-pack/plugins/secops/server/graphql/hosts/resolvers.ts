@@ -5,19 +5,17 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { SourceResolvers } from '../../../common/graphql/types';
-import { AppResolvedResult, AppResolverOf } from '../../lib/framework';
+import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { Hosts } from '../../lib/hosts';
 import { HostsRequestOptions } from '../../lib/hosts/types';
-import { Context } from '../../lib/types';
 import { getFields } from '../../utils/build_query/fields';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type QueryHostsResolver = AppResolverOf<
-  SourceResolvers.HostsResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+type QueryHostsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.HostsResolver>,
+  QuerySourceResolver
 >;
 
 export interface HostsResolversDeps {

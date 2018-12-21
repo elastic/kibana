@@ -4,35 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexType, SourceStatusResolvers } from '../../../common/graphql/types';
-import { AppResolvedResult, AppResolverOf } from '../../lib/framework';
+import { IndexType, SourceStatusResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { IndexFields } from '../../lib/index_fields';
 import { SourceStatus } from '../../lib/source_status';
-import { Context } from '../../lib/types';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-export type SourceStatusAuditbeatAliasExistsResolver = AppResolverOf<
-  SourceStatusResolvers.AuditbeatAliasExistsResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+export type SourceStatusAuditbeatAliasExistsResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.AuditbeatAliasExistsResolver>,
+  QuerySourceResolver
 >;
 
-export type SourceStatusAuditbeatIndicesExistResolver = AppResolverOf<
-  SourceStatusResolvers.AuditbeatIndicesExistResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+export type SourceStatusAuditbeatIndicesExistResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.AuditbeatIndicesExistResolver>,
+  QuerySourceResolver
 >;
 
-export type SourceStatusAuditbeatIndicesResolver = AppResolverOf<
-  SourceStatusResolvers.AuditbeatIndicesResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+export type SourceStatusAuditbeatIndicesResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.AuditbeatIndicesResolver>,
+  QuerySourceResolver
 >;
 
-export type SourceStatusIndexFieldsResolver = AppResolverOf<
-  SourceStatusResolvers.IndexFieldsResolver,
-  AppResolvedResult<QuerySourceResolver>,
-  Context
+export type SourceStatusIndexFieldsResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.IndexFieldsResolver>,
+  QuerySourceResolver
 >;
 
 export const createSourceStatusResolvers = (libs: {

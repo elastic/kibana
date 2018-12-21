@@ -9,7 +9,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { GetHostsQuery, HostsEdges, PageInfo } from '../../../common/graphql/types';
+import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
 
 import { connect } from 'react-redux';
 import { hostsLimitSelector, inputsModel, State } from '../../store';
