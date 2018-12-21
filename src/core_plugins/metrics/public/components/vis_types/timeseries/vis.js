@@ -51,7 +51,9 @@ class TimeseriesVisualization extends Component {
           icon: annotation.icon,
           series: data.map(s => {
             return [s[0], s[1].map(doc => {
-              return replaceVars(annotation.template, null, doc);
+              const vars = replaceVars(annotation.template, null, doc);
+
+              return vars instanceof Error ? annotation.template : vars;
             })];
           })
         };
