@@ -8,7 +8,6 @@
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import _ from 'lodash';
-import { EMSClientV66 } from '../../../../src/legacy/core_plugins/ems_util/common/ems_client';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -17,7 +16,7 @@ export function initRoutes(server) {
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
 
-  const emsClient = new EMSClientV66({
+  const emsClient = new server.plugins.tile_map.ems_client.EMSClientV66({
     kbnVersion: serverConfig.get('pkg.version'),
     manifestServiceUrl: mapConfig.manifestServiceUrl,
     landingPageUrl: mapConfig.emsLandingPageUrl
@@ -51,6 +50,8 @@ export function initRoutes(server) {
     path: `${ROOT}/meta`,
     handler: async () => {
 
+      // console.log('data/ems');
+      // console.log(server.plugins.tile_map.ems_client);
       let ems;
       try {
         ems = await getEMSResources();
