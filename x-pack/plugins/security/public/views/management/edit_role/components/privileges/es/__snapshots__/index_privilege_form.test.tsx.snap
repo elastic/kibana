@@ -138,6 +138,10 @@ exports[`it renders without crashing 1`] = `
                       "isGroupLabelOption": false,
                       "label": "manage_follow_index",
                     },
+                    Object {
+                      "isGroupLabelOption": false,
+                      "label": "manage_ilm",
+                    },
                   ]
                 }
                 selectedOptions={Array []}
