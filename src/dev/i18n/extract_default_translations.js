@@ -146,11 +146,11 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config)
   );
 }
 
-export async function getDefaultMessagesMap(paths) {
+export async function getDefaultMessagesMap(inputPaths, config) {
   const defaultMessagesMap = new Map();
 
-  for (const inputPath of filterPaths(paths)) {
-    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap);
+  for (const inputPath of filterPaths(inputPaths, config.paths)) {
+    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap, config);
   }
 
   return defaultMessagesMap;

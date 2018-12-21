@@ -27,7 +27,7 @@ import {
   makeDirAsync,
   normalizePath,
 } from './utils';
-import { paths } from '../../../.i18nrc.json';
+import { paths, exclude } from '../../../.i18nrc.json';
 import { getDefaultMessagesMap } from './extract_default_translations';
 import { createFailError } from '../run';
 import { serializeToJson } from './serializers/json';
@@ -91,7 +91,7 @@ async function writeMessages(localizedMessagesByNamespace, fileName, formats, lo
 }
 
 export async function integrateLocaleFiles(filePath, log) {
-  const defaultMessagesMap = await getDefaultMessagesMap(['.']);
+  const defaultMessagesMap = await getDefaultMessagesMap(['.'], { paths, exclude });
   const localizedMessages = JSON.parse((await readFileAsync(filePath)).toString());
 
   if (!localizedMessages.formats) {
