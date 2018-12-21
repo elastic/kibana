@@ -13,7 +13,6 @@ import {
   euiFontSizeXs,
   euiSize,
   euiSizeS,
-  euiSizeXl,
 } from '@elastic/eui/dist/eui_theme_light.json';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
@@ -68,7 +67,7 @@ const ViewMore = styled.div`
 
 const PressReturn = styled.div`
   border-top: ${euiBorderWidthThin} solid ${euiBorderColor};
-  height: ${euiSizeXl};
+  padding: ${euiSizeS};
   text-align: center;
   font-weight: bold;
 `;
@@ -76,6 +75,7 @@ const PressReturn = styled.div`
 const PressReturnText = styled.div`
   background: ${euiColorLightShade};
   margin: ${euiSizeS};
+  padding: ${euiSizeS};
 `;
 
 export class SuggestionsComponent extends Component<Props> {

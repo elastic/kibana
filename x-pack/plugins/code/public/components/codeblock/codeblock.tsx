@@ -119,7 +119,7 @@ export class CodeBlock extends React.PureComponent<Props> {
   public render() {
     const linesCount = this.props.code.split('\n').length;
     return (
-      <EuiPanel>
+      <EuiPanel style={{ marginBottom: '2rem' }} paddingSize="s">
         {this.props.file && <EuiText>{this.props.file}</EuiText>}
         <div ref={r => (this.el = r)} style={{ height: linesCount * 18 }} />
       </EuiPanel>

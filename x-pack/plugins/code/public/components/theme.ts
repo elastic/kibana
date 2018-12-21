@@ -10,6 +10,7 @@ declare module '@elastic/eui/dist/eui_theme_light.json' {
   const euiColorDarkShade: string;
   const euiCodeFontFamily: string;
   const euiColorFullShade: string;
+  const euiColorHighlight: string;
   const euiColorLightShade: string;
   const euiFontSizeXs: string;
   const euiFontSizeS: string;
@@ -17,4 +18,5 @@ declare module '@elastic/eui/dist/eui_theme_light.json' {
   const euiSizeS: string;
   const euiSizeXl: string;
   const euiSizeXs: string;
+  const euiTextColor: string;
 }
