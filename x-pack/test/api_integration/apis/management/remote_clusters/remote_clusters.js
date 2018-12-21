@@ -109,7 +109,7 @@ export default function ({ getService }) {
     });
 
     describe('List', () => {
-      it('should return an array of remote clusters', async () => {
+      it.skip('should return an array of remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
         const { body } = await supertest
