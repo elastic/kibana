@@ -7,11 +7,7 @@ exports[`PropertiesTable AgentFeatureTipMessage component should render when doc
   <Styled(EuiIcon)
     type="iInCircle"
   />
-  <FormattedMessage
-    defaultMessage="You can configure your agent to add contextual information about your users."
-    id="xpack.apm.propertiesTable.userTab.agentFeatureText"
-    values={Object {}}
-  />
+  You can configure your agent to add contextual information about your users.
    
   <ExternalLink
     href="mock-url"
@@ -34,7 +30,7 @@ exports[`PropertiesTable PropertiesTable component should render empty when data
       values={Object {}}
     />
   </Styled(styled.div)>
-  <AgentFeatureTipMessage
+  <InjectIntl(AgentFeatureTipMessage)
     agentName="testAgentName"
     featureName="testPropKey"
   />
@@ -54,7 +50,7 @@ exports[`PropertiesTable PropertiesTable component should render with data 1`] =
     keySorter={[Function]}
     parentKey="testPropKey"
   />
-  <AgentFeatureTipMessage
+  <InjectIntl(AgentFeatureTipMessage)
     agentName="testAgentName"
     featureName="testPropKey"
   />
@@ -69,7 +65,7 @@ exports[`PropertiesTable PropertiesTable component should still render NestedKey
     keySorter={[Function]}
     parentKey="testPropKey"
   />
-  <AgentFeatureTipMessage
+  <InjectIntl(AgentFeatureTipMessage)
     agentName="testAgentName"
     featureName="testPropKey"
   />

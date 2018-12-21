@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -56,57 +56,59 @@ export function getPropertyTabNames(selected: string[]): Tab[] {
   ).map(({ key, label }: Tab) => ({ key, label }));
 }
 
-function getAgentFeatureText(featureName: string) {
+function getAgentFeatureText(featureName: string, intl: InjectedIntl) {
   switch (featureName) {
     case 'user':
-      return (
-        <FormattedMessage
-          id="xpack.apm.propertiesTable.userTab.agentFeatureText"
-          defaultMessage="You can configure your agent to add contextual information about your users."
-        />
-      );
+      return intl.formatMessage({
+        id: 'xpack.apm.propertiesTable.userTab.agentFeatureText',
+        defaultMessage:
+          'You can configure your agent to add contextual information about your users.'
+      });
     case 'tags':
-      return (
-        <FormattedMessage
-          id="xpack.apm.propertiesTable.tagsTab.agentFeatureText"
-          defaultMessage="You can configure your agent to add filterable tags on transactions."
-        />
-      );
+      return intl.formatMessage({
+        id: 'xpack.apm.propertiesTable.tagsTab.agentFeatureText',
+        defaultMessage:
+          'You can configure your agent to add filterable tags on transactions.'
+      });
     case 'custom':
-      return (
-        <FormattedMessage
-          id="xpack.apm.propertiesTable.customTab.agentFeatureText"
-          defaultMessage="You can configure your agent to add custom contextual information on transactions."
-        />
-      );
+      return intl.formatMessage({
+        id: 'xpack.apm.propertiesTable.customTab.agentFeatureText',
+        defaultMessage:
+          'You can configure your agent to add custom contextual information on transactions.'
+      });
   }
 }
 
-export function AgentFeatureTipMessage({
-  featureName,
-  agentName
-}: {
-  featureName: string;
-  agentName?: string;
-}) {
-  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
-  if (!docsUrl) {
-    return null;
-  }
+export const AgentFeatureTipMessage = injectI18n(
+  // tslint:disable-next-line:no-shadowed-variable
+  function AgentFeatureTipMessage({
+    featureName,
+    agentName,
+    intl
+  }: {
+    featureName: string;
+    agentName?: string;
+    intl: InjectedIntl;
+  }) {
+    const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
+    if (!docsUrl) {
+      return null;
+    }
 
-  return (
-    <TableInfo>
-      <EuiIconWithSpace type="iInCircle" />
-      {getAgentFeatureText(featureName)}{' '}
-      <ExternalLink href={docsUrl}>
-        <FormattedMessage
-          id="xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel"
-          defaultMessage="Learn more in the documentation."
-        />
-      </ExternalLink>
-    </TableInfo>
-  );
-}
+    return (
+      <TableInfo>
+        <EuiIconWithSpace type="iInCircle" />
+        {getAgentFeatureText(featureName, intl)}{' '}
+        <ExternalLink href={docsUrl}>
+          <FormattedMessage
+            id="xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel"
+            defaultMessage="Learn more in the documentation."
+          />
+        </ExternalLink>
+      </TableInfo>
+    );
+  }
+);
 
 export const sortKeysByConfig: KeySorter = (object, currentKey) => {
   const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
