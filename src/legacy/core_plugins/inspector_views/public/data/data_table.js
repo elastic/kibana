@@ -38,6 +38,7 @@ class DataTableFormat extends Component {
   static renderCell(col, value, isFormatted) {
     return (
       <EuiFlexGroup
+        responsive={false}
         gutterSize="s"
         alignItems="center"
       >
@@ -46,6 +47,7 @@ class DataTableFormat extends Component {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
+            responsive={false}
             gutterSize="none"
             alignItems="center"
           >
@@ -128,6 +130,7 @@ class DataTableFormat extends Component {
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiInMemoryTable
+          responsive={false}
           className="insDataTableFormat__table"
           data-test-subj="inspectorTable"
           columns={columns}
