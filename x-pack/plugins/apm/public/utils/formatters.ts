@@ -5,10 +5,18 @@
  */
 
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 
 const SECONDS_CUT_OFF = 10 * 1000000; // 10 seconds (in microseconds)
 const MILLISECONDS_CUT_OFF = 10 * 1000; // 10 milliseconds (in microseconds)
+const SPACE = ' ';
+const notAvailableLabel: string = i18n.translate(
+  'xpack.apm.formatters.notAvailableLabel',
+  {
+    defaultMessage: 'N/A'
+  }
+);
 
 /*
  * value: time in microseconds
@@ -23,45 +31,57 @@ interface FormatterOptions {
 
 export function asSeconds(
   value: FormatterValue,
-  { withUnit = true, defaultValue = 'N/A' }: FormatterOptions = {}
+  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
   }
+  const secondsLabel =
+    SPACE +
+    i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
+      defaultMessage: 's'
+    });
   const formatted = asDecimal(value / 1000000);
-  return `${formatted}${withUnit ? ' s' : ''}`;
+  return `${formatted}${withUnit ? secondsLabel : ''}`;
 }
 
 export function asMillis(
   value: FormatterValue,
-  { withUnit = true, defaultValue = 'N/A' }: FormatterOptions = {}
+  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
   }
 
+  const millisLabel =
+    SPACE +
+    i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
+      defaultMessage: 'ms'
+    });
   const formatted = asInteger(value / 1000);
-  return `${formatted}${withUnit ? ' ms' : ''}`;
+  return `${formatted}${withUnit ? millisLabel : ''}`;
 }
 
 export function asMicros(
   value: FormatterValue,
-  { withUnit = true, defaultValue = 'N/A' }: FormatterOptions = {}
+  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
   }
 
+  const microsLabel =
+    SPACE +
+    i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
+      defaultMessage: 'μs'
+    });
   const formatted = asInteger(value);
-  return `${formatted}${withUnit ? ' μs' : ''}`;
+  return `${formatted}${withUnit ? microsLabel : ''}`;
 }
 
 type TimeFormatter = (
   max: number
-) => (
-  value: FormatterValue,
-  { withUnit, defaultValue }: FormatterOptions
-) => string;
+) => (value: FormatterValue, options: FormatterOptions) => string;
 
 export const getTimeFormatter: TimeFormatter = memoize((max: number) => {
   const unit = timeUnit(max);
@@ -87,7 +107,7 @@ export function timeUnit(max: number) {
 
 export function asTime(
   value: FormatterValue,
-  { withUnit = true, defaultValue = 'N/A' }: FormatterOptions = {}
+  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
@@ -105,7 +125,13 @@ export function asInteger(value: number) {
 }
 
 export function tpmUnit(type: string) {
-  return type === 'request' ? 'rpm' : 'tpm';
+  return type === 'request'
+    ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
+        defaultMessage: 'rpm'
+      })
+    : i18n.translate('xpack.apm.formatters.transactionsPerMinLabel', {
+        defaultMessage: 'tpm'
+      });
 }
 
 export function asPercent(
