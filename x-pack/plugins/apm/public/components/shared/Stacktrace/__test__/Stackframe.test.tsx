@@ -7,11 +7,8 @@
 import { ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
-import {
-  mountWithIntl,
-  shallowWithIntl
-} from '../../../../../../../test_utils/enzyme_helpers';
 import { Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 
