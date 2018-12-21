@@ -18,7 +18,7 @@ export function BucketSpanEstimator({ buttonDisabled, buttonText, estimatorRunni
     <div className="bucket-span-estimator">
       <EuiToolTip
         content={<FormattedMessage
-          id="xpack.ml.newJob.simple.bucketSpanEstimator.buttonTooltip"
+          id="xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonTooltip"
           defaultMessage="Experimental feature for estimating bucket span."
         />}
         position="bottom"

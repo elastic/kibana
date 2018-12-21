@@ -40,7 +40,7 @@ export function populateValidationMessages(validationResults, checks) {
     checks.jobId.valid = false;
   } else if (validationResults.contains('job_id_invalid')) {
     checks.jobId.valid = false;
-    const msg = i18n.translate('xpack.ml.newJob.simple.validateJob.JobNameInvalidErrorMessage', {
+    const msg = i18n.translate('xpack.ml.newJob.simple.validateJob.jobNameAllowedCharactersDescription', {
       defaultMessage: 'Job name can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
         'must start and end with an alphanumeric character'
     });
@@ -49,7 +49,7 @@ export function populateValidationMessages(validationResults, checks) {
 
   if (validationResults.contains('job_group_id_invalid')) {
     checks.groupIds.valid = false;
-    const msg = i18n.translate('xpack.ml.newJob.simple.validateJob.JobGroupNameInvalidErrorMessage', {
+    const msg = i18n.translate('xpack.ml.newJob.simple.validateJob.jobGroupAllowedCharactersDescription', {
       defaultMessage: 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
         'must start and end with an alphanumeric character'
     });
@@ -77,7 +77,7 @@ export function populateValidationMessages(validationResults, checks) {
 
   if (validationResults.contains('detectors_duplicates')) {
     checks.duplicateDetectors.valid = false;
-    const msg = i18n.translate('xpack.ml.newJob.simple.validateJob.duplicatesDetectorsErrorMessage', {
+    const msg = i18n.translate('xpack.ml.newJob.simple.validateJob.duplicatedDetectorsErrorMessage', {
       defaultMessage: 'Duplicate detectors were found.',
     });
     checks.duplicateDetectors.message = msg;

@@ -30,7 +30,7 @@ export class EnableModelPlotCheckbox extends Component {
   }
 
   warningTitle = (<FormattedMessage
-    id="xpack.ml.newJob.simple.enableModelPlot.warningTitle"
+    id="xpack.ml.newJob.simple.enableModelPlot.proceedWithCautionWarningTitle"
     defaultMessage="Proceed with caution!"
   />);
 
