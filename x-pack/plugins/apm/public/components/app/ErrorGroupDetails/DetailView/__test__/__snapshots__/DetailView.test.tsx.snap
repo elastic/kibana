@@ -37,7 +37,7 @@ exports[`DetailView should render Discover button 1`] = `
     iconType="discoverApp"
     type="button"
   >
-    View 10 occurences in Discover
+    View 10 occurrences in Discover
   </EuiButtonEmpty>
 </DiscoverErrorButton>
 `;

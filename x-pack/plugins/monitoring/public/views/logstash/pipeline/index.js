@@ -98,6 +98,9 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         getPageData,
         reactNodeId: 'monitoringLogstashPipelineApp',
         $scope,
+        options: {
+          enableTimeFilter: false,
+        },
         $injector
       });
 
