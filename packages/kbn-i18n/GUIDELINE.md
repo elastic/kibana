@@ -393,29 +393,29 @@ For example, there is a component that is wrapped by `injectI18n`, like in the `
 
 ```js
 // ...
-class AddFilterUi extends Component {
+export const AddFilter = injectI18n(
+  class AddFilterUi extends Component {
   // ...
-  render() {
-    const { filter } = this.state;
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={10}>
-          <EuiFieldText
-            fullWidth
-            value={filter}
-            onChange={e => this.setState({ filter: e.target.value.trim() })}
-            placeholder={this.props.intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.source.placeholder',
-              defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
-            })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    render() {
+      const { filter } = this.state;
+      return (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={10}>
+            <EuiFieldText
+              fullWidth
+              value={filter}
+              onChange={e => this.setState({ filter: e.target.value.trim() })}
+              placeholder={this.props.intl.formatMessage({
+                id: 'kbn.management.indexPattern.edit.source.placeholder',
+                defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
   }
-}
-
-export const AddFilter = injectI18n(AddFilterUi);
+);
 ```
 
 To test the `AddFilter` component it is needed to render its `WrappedComponent` property using `shallowWithIntl` function to pass `intl` object into the `props`.
