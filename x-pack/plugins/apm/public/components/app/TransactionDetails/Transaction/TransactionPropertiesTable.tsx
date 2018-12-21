@@ -15,7 +15,8 @@ import { px, units } from '../../../../style/variables';
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
-  PropertiesTable
+  PropertiesTable,
+  Tab
 } from '../../../shared/PropertiesTable';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
@@ -25,10 +26,7 @@ const TableContainer = styled.div`
 `;
 
 // Ensure the selected tab exists or use the first
-function getCurrentTab(
-  tabs: Array<{ key: string; label: string }> = [],
-  selectedTabKey?: string
-) {
+function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
   const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
 
   return selectedTab ? selectedTab : first(tabs) || {};

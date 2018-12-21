@@ -46,7 +46,8 @@ import { KibanaLink, legacyEncodeURIComponent } from '../../../../utils/url';
 import { DiscoverErrorButton } from '../../../shared/DiscoverButtons/DiscoverErrorButton';
 import {
   getPropertyTabNames,
-  PropertiesTable
+  PropertiesTable,
+  Tab
 } from '../../../shared/PropertiesTable';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { StickyProperties } from '../../../shared/StickyProperties';
@@ -70,8 +71,21 @@ const PaddedContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
 `;
 
-const EXC_STACKTRACE_TAB = 'exception_stacktrace';
-const LOG_STACKTRACE_TAB = 'log_stacktrace';
+const logStacktraceTab = {
+  key: 'exception_stacktrace',
+  label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
+    defaultMessage: 'Log stacktrace'
+  })
+};
+const exceptionStacktraceTab = {
+  key: 'log_stacktrace',
+  label: i18n.translate(
+    'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
+    {
+      defaultMessage: 'Exception stacktrace'
+    }
+  )
+};
 
 interface Props {
   errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
@@ -213,30 +227,28 @@ export function TabContent({
   currentTab
 }: {
   error: APMError;
-  currentTab?: { key: string; label: string };
+  currentTab: Tab;
 }) {
   const codeLanguage = error.context.service.name;
   const agentName = error.context.service.agent.name;
   const excStackframes: MaybeStackframes = get(error, ERROR_EXC_STACKTRACE);
   const logStackframes: MaybeStackframes = get(error, ERROR_LOG_STACKTRACE);
-  const currentTabKey = currentTab ? currentTab.key : '';
 
-  switch (currentTabKey) {
-    case LOG_STACKTRACE_TAB:
-    case undefined:
+  switch (currentTab.key) {
+    case logStacktraceTab.key:
       return (
         <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
       );
-    case EXC_STACKTRACE_TAB:
+    case exceptionStacktraceTab.key:
       return (
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      const propData = error.context[currentTabKey] as any;
+      const propData = error.context[currentTab.key] as any;
       return (
         <PropertiesTable
           propData={propData}
-          propKey={currentTabKey}
+          propKey={currentTab.key}
           agentName={agentName}
         />
       );
@@ -244,33 +256,15 @@ export function TabContent({
 }
 
 // Ensure the selected tab exists or use the first
-export function getCurrentTab(
-  tabs: Array<{ key: string; label: string }> = [],
-  selectedTabKey?: string
-) {
+export function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
+  const firstTab = tabs[0] || {};
   const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
-
-  return selectedTab ? selectedTab : tabs[0] || {};
+  return selectedTab ? selectedTab : firstTab;
 }
 
 export function getTabs(error: APMError) {
   const hasLogStacktrace = get(error, ERROR_LOG_STACKTRACE, []).length > 0;
   const contextKeys = Object.keys(error.context);
-  const logStacktraceTab = {
-    key: LOG_STACKTRACE_TAB,
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
-      defaultMessage: 'Log stacktrace'
-    })
-  };
-  const exceptionStacktraceTab = {
-    key: EXC_STACKTRACE_TAB,
-    label: i18n.translate(
-      'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
-      {
-        defaultMessage: 'Exception stacktrace'
-      }
-    )
-  };
 
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),

@@ -44,13 +44,16 @@ const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export function getPropertyTabNames(
-  selected: string[]
-): Array<{ key: string; label: string }> {
+export interface Tab {
+  key: string;
+  label: string;
+}
+
+export function getPropertyTabNames(selected: string[]): Tab[] {
   return PROPERTY_CONFIG.filter(
     ({ key, required }: { key: string; required: boolean }) =>
       required || selected.includes(key)
-  ).map(({ key, label }: { key: string; label: string }) => ({ key, label }));
+  ).map(({ key, label }: Tab) => ({ key, label }));
 }
 
 function getAgentFeatureText(featureName: string) {
