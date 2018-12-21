@@ -18,9 +18,7 @@
  */
 
 import _ from 'lodash';
-import { buildExistsFilter } from '../../filter_manager/lib/exists';
-import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
-import { buildQueryFromFilters } from '../../courier';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -151,7 +149,7 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     });
 
     resultAgg.filters.filters[key] = {
-      bool: buildQueryFromFilters(filters, _.noop, indexPattern)
+      bool: buildQueryFromFilters(filters, indexPattern)
     };
   };
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');

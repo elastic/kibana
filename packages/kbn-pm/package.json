@@ -59,7 +59,7 @@
     "spawn-sync": "^1.0.15",
     "string-replace-loader": "^2.1.1",
     "strip-ansi": "^4.0.0",
-    "strong-log-transformer": "^2.0.0",
+    "strong-log-transformer": "^2.1.0",
     "tempy": "^0.2.1",
     "ts-loader": "^5.2.2",
     "typescript": "^3.0.3",

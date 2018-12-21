@@ -41,16 +41,24 @@ export const compare = () => ({
       case 'ne':
         return a !== b;
       case 'lt':
-        if (typesMatch) return a < b;
+        if (typesMatch) {
+          return a < b;
+        }
         return false;
       case 'lte':
-        if (typesMatch) return a <= b;
+        if (typesMatch) {
+          return a <= b;
+        }
         return false;
       case 'gt':
-        if (typesMatch) return a > b;
+        if (typesMatch) {
+          return a > b;
+        }
         return false;
       case 'gte':
-        if (typesMatch) return a >= b;
+        if (typesMatch) {
+          return a >= b;
+        }
         return false;
       default:
         throw new Error('Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.');

@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.5.4>>
 * <<release-notes-6.5.3>>
 * <<release-notes-6.5.2>>
 * <<release-notes-6.5.1>>
@@ -81,6 +82,49 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.5.4]]
+== {kib} 6.5.4
+
+[float]
+[[breaking-changes-6.5.4]]
+=== Breaking changes
+
+See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+when migrating your application from one version of {kib} to another.
+
+[float]
+[[bug-6.5.4]]
+=== Bug fixes
+
+Canvas::
+* Fixes offset mouse capture after scrolling {pull}27096[#27096]
+* Fixes query bug in esdocs {pull}27157[#27157]
+* Sets time to start/end of day when selecting date in the timepicker {pull}27186[#27186]
+* Upgrades TinyMath so that columns with dots work correctly {pull}26659[#26659]
+* Updates the TinyMath reference links {pull}27085[#27085]
+
+Kibana App::
+* Fixes vertical scroll on long legends {pull}23806[#23806]
+* Fixes a problem that caused {kib} to set the {es} timeout to 0,
+instead of excluding it. As a result, visualizations 
+returned partial data or errors. {pull}27217[#27217]
+
+Machine Learning::
+* Fixes population chart marker positions and swimlane race 
+condition {pull}26716[#26716]
+
+Management::
+* Fixes rollup indices request failures so that they don't block the Create 
+Index Pattern button {pull}26988[#26988]
+
+Security::
+* Initializes authorization mode for reporting jobs {pull}26762[#26762]
+
+Visualization::
+* Fixes the check for the `show partial buckets` option {pull}25520[#25520]
+* Fixes tooltips for the stacked line chart {pull}26881[#26881]
+
 
 [[release-notes-6.5.3]]
 == {kib} 6.5.3

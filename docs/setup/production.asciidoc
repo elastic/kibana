@@ -82,10 +82,10 @@ http.port: 9200
 transport.host: <external ip>
 transport.tcp.port: 9300 - 9400
 --------
-. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.url` should be set to
-`localhost:9200`.
+. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.hosts` setting should be set to
+`["localhost:9200"]`.
 +
 --------
 # The Elasticsearch instance to use for all your queries.
-elasticsearch.url: "http://localhost:9200"
+elasticsearch.hosts: ["http://localhost:9200"]
 --------

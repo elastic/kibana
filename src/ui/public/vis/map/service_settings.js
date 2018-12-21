@@ -40,6 +40,8 @@ uiModules.get('kibana')
 
       constructor() {
 
+        this._showZoomMessage = true;
+
         this._emsClient = new EMSClientV66({
           kbnVersion: kbnVersion,
           manifestServiceUrl: mapConfig.manifestServiceUrl,
@@ -49,6 +51,13 @@ uiModules.get('kibana')
 
       }
 
+      shouldShowZoomMessage({ origin }) {
+        return origin === ORIGIN.EMS && this._showZoomMessage;
+      }
+
+      disableZoomMessage() {
+        this._showZoomMessage = false;
+      }
 
       __debugStubManifestCalls(manifestRetrieval) {
         const oldGetManifest = this._emsClient._getManifest;
@@ -121,8 +130,6 @@ uiModules.get('kibana')
           });
           allServices = allServices.concat(strippedServiceFromManifest);
         }
-
-
 
         return allServices;
       }

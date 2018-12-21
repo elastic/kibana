@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
 

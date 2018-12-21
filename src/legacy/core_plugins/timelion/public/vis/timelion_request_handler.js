@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {

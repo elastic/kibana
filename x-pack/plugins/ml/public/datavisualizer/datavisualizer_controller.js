@@ -18,7 +18,7 @@ import 'plugins/ml/components/form_filter_input';
 
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { decorateQuery, luceneStringToDsl } from 'ui/courier';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import { notify, toastNotifications } from 'ui/notify';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
@@ -56,7 +56,8 @@ module
     $timeout,
     $window,
     Private,
-    AppState) {
+    AppState,
+    config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -258,7 +259,7 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery);
+      decorateQuery(searchQuery, config);
       return searchQuery;
     }
 

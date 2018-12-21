@@ -18,6 +18,3 @@
  */
 
 export { SearchSourceProvider } from './search_source';
-export { migrateFilter } from './migrate_filter';
-export { decorateQuery } from './decorate_query';
-export { buildQueryFromFilters, luceneStringToDsl, BuildESQueryProvider } from './build_query';

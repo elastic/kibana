@@ -19,7 +19,7 @@
 
 module.exports = {
   peg: {
-    files: ['src/ui/public/kuery/ast/*.peg'],
+    files: ['src/utils/kuery/ast/*.peg'],
     tasks: ['peg']
   }
 };

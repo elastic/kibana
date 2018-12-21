@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
