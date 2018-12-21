@@ -21,27 +21,32 @@ export default function navLinksTests({ getService }: TestInvoker) {
           password: scenario.password,
         });
         switch (scenario.username) {
+          // these users have a read/write view of Discover
+          case 'no_kibana_privileges': // we're stuck with this one until post 7.0
           case 'superuser':
           case 'all':
           case 'legacy_all':
           case 'legacy_read':
           case 'dual_privileges_all':
-          case 'no_kibana_privileges': // we're stuck with this one until post 7.0
           case 'discover_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('discover');
             expect(uiCapabilities.value!.discover).to.eql({
+              show: true,
               showWriteControls: true,
             });
             break;
+          // these users have a read-only view of Discover
           case 'dual_privileges_read':
           case 'discover_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('discover');
             expect(uiCapabilities.value!.discover).to.eql({
+              show: true,
               showWriteControls: false,
             });
             break;
+          // these users can't do anything with Discover
           case 'apm_all':
           case 'canvas_all':
           case 'canvas_read':
@@ -62,6 +67,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('discover');
             expect(uiCapabilities.value!.discover).to.eql({
+              show: false,
               showWriteControls: false,
             });
             break;

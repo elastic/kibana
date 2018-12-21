@@ -35,6 +35,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('discover');
             expect(uiCapabilities.value!.discover).to.eql({
+              show: true,
               showWriteControls: true,
             });
             break;
@@ -43,6 +44,7 @@ export default function navLinksTests({ getService }: TestInvoker) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('discover');
             expect(uiCapabilities.value!.discover).to.eql({
+              show: false,
               showWriteControls: false,
             });
             break;

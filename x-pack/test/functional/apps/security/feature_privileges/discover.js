@@ -120,5 +120,44 @@ export default function ({ getPageObjects, getService }) {
         await testSubjects.missingOrFail('discoverSaveButton');
       });
     });
+
+    describe('no discover privileges', () => {
+      before(async () => {
+        await security.role.create('no_discover_privileges_role', {
+          elasticsearch: {
+            indices: [
+              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
+            ],
+          },
+          kibana: {
+            global: {
+              feature: {
+                dashboard: ['all']
+              }
+            }
+          }
+        });
+
+        await security.user.create('no_discover_privileges_user', {
+          password: 'no_discover_privileges_user-password',
+          roles: ['no_discover_privileges_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login('no_discover_privileges_user', 'no_discover_privileges_user-password', {
+          expectSpaceSelector: false,
+        });
+      });
+
+      after(async () => {
+        await security.role.delete('no_discover_privileges_role');
+        await security.user.delete('no_discover_privileges_user');
+      });
+
+      it(`redirects to the home page`, async () => {
+        await PageObjects.common.navigateToUrl('discover');
+        await testSubjects.existOrFail('homeApp');
+      });
+    });
   });
 }

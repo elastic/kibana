@@ -137,6 +137,11 @@ uiRoutes
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));
+      },
+      redirect: function (uiCapabilities, kbnUrl) {
+        if (!uiCapabilities.discover.show) {
+          kbnUrl.redirectPath('/');
+        }
       }
     }
   });
