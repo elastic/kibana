@@ -38,7 +38,7 @@ export abstract class Type<V> {
    */
   protected readonly internalSchema: AnySchema;
 
-  constructor(schema: AnySchema, options: TypeOptions<V> = {}) {
+  protected constructor(schema: AnySchema, options: TypeOptions<V> = {}) {
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
@@ -62,7 +62,7 @@ export abstract class Type<V> {
     // only the last error handler is counted.
     const schemaFlags = (schema.describe().flags as Record<string, any>) || {};
     if (schemaFlags.error === undefined) {
-      schema = schema.error!(([error]) => this.onError(error));
+      schema = schema.error(([error]) => this.onError(error));
     }
 
     this.internalSchema = schema;
@@ -101,12 +101,7 @@ export abstract class Type<V> {
       return error;
     }
 
-    const { context = {}, type, path: rawPath, message } = error;
-
-    // Before v11.0.0 Joi reported paths as `.`-delimited strings, but more
-    // recent version use arrays instead. Once we upgrade Joi, we should just
-    // remove this split logic and use `path` provided by Joi directly.
-    const path = rawPath ? rawPath.split('.') : [];
+    const { context = {}, type, path, message } = error;
 
     const errorHandleResult = this.handleError(type, context, path);
     if (errorHandleResult instanceof SchemaTypeError) {

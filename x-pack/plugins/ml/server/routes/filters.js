@@ -53,11 +53,10 @@ export function filtersRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/filters',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getAllFilters(callWithRequest)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -67,11 +66,10 @@ export function filtersRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/filters/_stats',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getAllFilterStats(callWithRequest)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -81,12 +79,11 @@ export function filtersRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/filters/{filterId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const filterId = request.params.filterId;
       return getFilter(callWithRequest, filterId)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -96,12 +93,11 @@ export function filtersRoutes(server, commonRouteConfig) {
   server.route({
     method: 'PUT',
     path: '/api/ml/filters',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const body = request.payload;
       return newFilter(callWithRequest, body)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -111,7 +107,7 @@ export function filtersRoutes(server, commonRouteConfig) {
   server.route({
     method: 'PUT',
     path: '/api/ml/filters/{filterId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const filterId = request.params.filterId;
       const payload = request.payload;
@@ -121,8 +117,7 @@ export function filtersRoutes(server, commonRouteConfig) {
         payload.description,
         payload.addItems,
         payload.removeItems)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -132,12 +127,11 @@ export function filtersRoutes(server, commonRouteConfig) {
   server.route({
     method: 'DELETE',
     path: '/api/ml/filters/{filterId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const filterId = request.params.filterId;
       return deleteFilter(callWithRequest, filterId)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

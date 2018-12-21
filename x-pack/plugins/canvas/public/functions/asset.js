@@ -14,7 +14,7 @@ export const asset = () => ({
     types: ['null'],
   },
   type: 'string',
-  help: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
+  help: 'Use Canvas workpad asset objects to provide argument values. Usually images',
   args: {
     id: {
       aliases: ['_'],
@@ -26,7 +26,9 @@ export const asset = () => ({
   fn: (context, args) => {
     const assetId = args.id;
     const asset = getAssetById(getState(), assetId);
-    if (asset !== undefined) return asset.value;
+    if (asset !== undefined) {
+      return asset.value;
+    }
 
     throw new Error('Could not get the asset by ID: ' + assetId);
   },

@@ -1,0 +1,47 @@
+.tgcVis {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.tgcVisFeedback {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+
+.tgcVisFeedback__message {
+  display: none;
+  text-align: center;
+  padding: $euiSizeS;
+  font-weight: $euiFontWeightBold;
+  $color: $euiColorWarning;
+  $backgroundColor: tintOrShade($color, 90%, 70%);
+  background-color: transparentize($backgroundColor, .5);
+  color: makeHighContrastColor($color, $backgroundColor);
+}
+
+.tgcVisLabel {
+  position: absolute;
+  bottom: 2px; // Bringing it up 2px removes the vertical scrollbar
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-weight: $euiFontWeightBold;
+}
+
+.tgcFontSizeSlider {
+  margin: $euiSize;
+
+  .noUi-connect {
+    background: $euiColorLightShade;
+  }
+}
+
+.tgcFontSizeSlider__input {
+  width: $euiSizeXXL * 2;
+}

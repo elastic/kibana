@@ -7,12 +7,12 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { get } from 'lodash';
-import { fromExpression, toExpression } from '../../../common/lib/ast';
+import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { DropdownFilter } from './component';
 
 export const dropdownFilter = () => ({
   name: 'dropdown_filter',
-  displayName: 'Dropdown Filter',
+  displayName: 'Dropdown filter',
   help: 'A dropdown from which you can select values for an "exactly" filter',
   reuseDomNode: true,
   height: 50,

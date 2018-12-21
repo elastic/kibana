@@ -19,5 +19,9 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
 import 'uiExports/fieldFormats';
 
+// load application code
+import './lib/load_expression_types';
+import './lib/load_transitions';
+
 // load the application
 chrome.setRootController('canvas', CanvasRootController);

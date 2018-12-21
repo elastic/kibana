@@ -26,7 +26,7 @@ const wrap = Component =>
 
 export const containerStyle = () => ({
   name: 'containerStyle',
-  displayName: 'Container Style',
+  displayName: 'Container style',
   help: 'Tweak the appearance of the element container',
   default: '{containerStyle}',
   simpleTemplate: templateFromReactComponent(wrap(SimpleTemplate)),

@@ -30,8 +30,8 @@ export function registerStatusApi(kbnServer, server, config) {
     config: {
       tags: ['api']
     },
-    async handler(request, reply) {
-      const status = {
+    async handler() {
+      return {
         name: config.get('server.name'),
         uuid: config.get('server.uuid'),
         version: {
@@ -43,8 +43,6 @@ export function registerStatusApi(kbnServer, server, config) {
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
       };
-
-      return reply(status);
     }
   }));
 }

@@ -19,7 +19,13 @@
 
 import { extractHandlebarsMessages } from './handlebars';
 
+const report = jest.fn();
+
 describe('dev/i18n/extractors/handlebars', () => {
+  beforeEach(() => {
+    report.mockClear();
+  });
+
   test('extracts handlebars default messages', () => {
     const source = Buffer.from(`\
 window.onload = function () {
@@ -30,7 +36,7 @@ window.onload = function () {
       var err = document.createElement('h1');
       err.style['color'] = 'white';
       err.innerText = '{{i18n 'ui.id-1' \
-'{"defaultMessage": "Message text", "context": "Message context"}'}}';
+'{"defaultMessage": "Message text", "description": "Message description"}'}}';
 
       document.body.innerHTML = err.outerHTML;
     }
@@ -49,7 +55,8 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on wrong properties argument type', () => {
@@ -59,26 +66,29 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on empty id', () => {
     const source = Buffer.from(`\
 window.onload = function () {
-  err.innerText = '{{i18n '' '{"defaultMessage": "Message text", "context": "Message context"}'}}';
+  err.innerText = '{{i18n '' '{"defaultMessage": "Message text", "description": "Message description"}'}}';
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing defaultMessage property', () => {
     const source = Buffer.from(`\
 window.onload = function () {
-  err.innerText = '{{i18n 'message-id' '{"context": "Message context"}'}}';
+  err.innerText = '{{i18n 'message-id' '{"description": "Message description"}'}}';
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });

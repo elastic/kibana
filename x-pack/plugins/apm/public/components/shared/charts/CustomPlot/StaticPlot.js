@@ -9,11 +9,13 @@ import {
   YAxis,
   HorizontalGridLines,
   LineSeries,
-  AreaSeries
+  AreaSeries,
+  VerticalRectSeries
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
 import { last } from 'lodash';
+import { rgba } from 'polished';
 
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';
@@ -50,19 +52,20 @@ class StaticPlot extends PureComponent {
             data={serie.data}
             color={serie.color}
             stroke={serie.color}
-            fill={serie.areaColor}
+            fill={serie.areaColor || rgba(serie.color, 0.3)}
           />
         );
       case 'areaMaxHeight':
         const yMax = last(plotValues.yTickValues);
         const data = serie.data.map(p => ({
+          x0: p.x0,
           x: p.x,
           y0: 0,
-          y: p.y ? yMax : null
+          y: yMax
         }));
 
         return (
-          <AreaSeries
+          <VerticalRectSeries
             getNull={d => d.y !== null}
             key={serie.title}
             xType="time"
@@ -87,10 +90,17 @@ class StaticPlot extends PureComponent {
       <SharedPlot plotValues={plotValues}>
         <HorizontalGridLines tickValues={yTickValues} />
         <XAxis tickSize={0} tickTotal={X_TICK_TOTAL} tickFormat={tickFormatX} />
-        <YAxis tickSize={0} tickValues={yTickValues} tickFormat={tickFormatY} />
+        <YAxis
+          tickSize={0}
+          tickValues={yTickValues}
+          tickFormat={tickFormatY}
+          style={{
+            line: { stroke: 'none', fill: 'none' }
+          }}
+        />
 
         {noHits ? (
-          <StatusText text="No data within this time range." />
+          <StatusText marginLeft={30} text="No data within this time range." />
         ) : (
           this.getVisSeries(series, plotValues)
         )}

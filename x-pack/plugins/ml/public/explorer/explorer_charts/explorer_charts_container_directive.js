@@ -11,8 +11,6 @@
  * anomalies in the raw data in the Machine Learning Explorer dashboard.
  */
 
-import './styles/explorer_charts_container.less';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 

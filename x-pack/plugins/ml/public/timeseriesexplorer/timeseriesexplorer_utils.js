@@ -15,7 +15,7 @@
 import _ from 'lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
-import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
+import { isTimeSeriesViewJob } from '../../common/util/job_utils';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.

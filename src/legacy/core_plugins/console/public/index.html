@@ -1,0 +1,63 @@
+<kbn-dev-tools-app data-test-subj="console" top-nav-config="topNavController">
+  <div class="conApp">
+    <div class="conApp__editor">
+      <ul class="conApp__autoComplete" id="autocomplete"></ul>
+      <div class="conApp__editorActions" id="ConAppEditorActions">
+        <kbn-tooltip text="{{:: 'console.sendRequestButtonTooltip' | i18n: { defaultMessage: 'click to send request' } }}">
+          <button
+            class="conApp__editorActionButton conApp__editorActionButton--success"
+            ng-click="sendSelected()"
+            data-test-subj="send-request-button">
+            <i class="fa fa-play"></i>
+          </button>
+        </kbn-tooltip>
+        <span dropdown>
+          <button
+            id="consoleRequestOptions"
+            class="conApp__editorActionButton"
+            dropdown-toggle
+            ng-click="getDocumentation()"
+            aria-label="{{:: 'console.requestOptionsButtonAriaLabel' | i18n: { defaultMessage: 'Request options' } }}"
+          >
+            <span class="kuiIcon fa-wrench"></span>
+          </button>
+
+          <ul
+            class="dropdown-menu"
+            role="menu"
+            aria-labelledby="consoleRequestOptions"
+          >
+            <li role="menuitem">
+              <button
+                id="ConCopyAsCurl"
+                i18n-id="console.requestOptions.copyAsUrlButtonLabel"
+                i18n-default-message="Copy as cURL"></button>
+            </li>
+            <li role="menuitem" ng-if="documentation">
+              <button
+                ng-click="openDocumentation(documentation)"
+                i18n-id="console.requestOptions.openDocumentationButtonLabel"
+                i18n-default-message="Open documentation"></button>
+            </li>
+            <li role="menuitem">
+              <button
+                ng-click="autoIndent($event)"
+                i18n-id="console.requestOptions.autoIndentButtonLabel"
+                i18n-default-message="Auto indent"></button>
+            </li>
+          </ul>
+        </span>
+      </div>
+
+      <div class="conApp__editorContent" id="ConAppEditor" data-test-subj="request-editor">GET _search
+  {
+    "query": { "match_all": {} }
+  }</div>
+
+    </div>
+    <div class="conApp__resizer" id="ConAppResizer">&#xFE19;</div>
+    <div class="conApp__output" data-test-subj="response-editor">
+      <div class="conApp__outputContent" id="ConAppOutput">{}</div>
+    </div>
+  </div>
+</kbn-dev-tools-app>

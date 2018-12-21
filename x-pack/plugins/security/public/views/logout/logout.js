@@ -5,7 +5,6 @@
  */
 
 import chrome from 'ui/chrome';
-import 'plugins/security/views/logout/logout.less';
 
 chrome
   .setVisible(false)

@@ -29,18 +29,18 @@ export function registerUpdateRoute(server) {
   server.route({
     path: '/api/index_management/settings/{indexName}',
     method: 'PUT',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexName } = request.params;
       try {
         const response = await updateSettings(callWithRequest, indexName, request.payload);
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          throw wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

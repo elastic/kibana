@@ -1,0 +1,20 @@
+<div ng-controller="KbnTableVisController" class="table-vis">
+  <div ng-if="!hasSomeRows && hasSomeRows !== null" class="kbnDocTable__error">
+    <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
+    <h4
+      i18n-id="tableVis.vis.noResultsFoundTitle"
+      i18n-default-message="No results found"
+    ></h4>
+  </div>
+
+  <div ng-if="tableGroups" class="table-vis-container" data-test-subj="tableVis">
+    <kbn-agg-table-group
+      group="tableGroups"
+      export-title="visState.title"
+      per-page="visState.params.perPage"
+      sort="sort"
+      show-total="visState.params.showTotal"
+      total-func="visState.params.totalFunc">
+    </kbn-agg-table-group>
+  </div>
+</div>

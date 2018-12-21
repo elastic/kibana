@@ -23,7 +23,7 @@ export const PageConfig = ({
         <h4>Page</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Background">
+      <EuiFormRow label="Background color">
         <ColorPickerMini onChange={setBackground} value={background} />
       </EuiFormRow>
       {/* No need to show the transition for the first page because transitions occur when
@@ -31,9 +31,9 @@ export const PageConfig = ({
         page, we use the second page's transition) */}
       {pageIndex > 0 ? (
         <div>
-          <EuiFormRow label="Transition">
+          <EuiFormRow label="Transition" compressed>
             <EuiSelect
-              defaultValue={transition ? transition.name : ''}
+              value={transition ? transition.name : ''}
               options={transitions}
               onChange={e => setTransition(e.target.value)}
             />

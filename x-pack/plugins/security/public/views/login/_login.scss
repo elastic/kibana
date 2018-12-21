@@ -1,0 +1,74 @@
+
+.loginWelcome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $euiZLevel9 + 1000;
+  background: inherit;
+  background-image: linear-gradient(0deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
+  opacity: 0;
+  overflow: auto;
+  animation: loginWelcome_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
+}
+
+.loginWelcome::before {
+  // SASSTODO: webpack pipeline isn't setup to handle image urls in SASS yet
+  // content: url(../../assets/bg_top_branded.svg);
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.loginWelcome::after {
+  // SASSTODO: webpack pipeline isn't setup to handle image urls in SASS yet
+  // content: url(../../assets/bg_bottom_branded.svg);
+  position: fixed;
+  bottom: -2px; // Hides an odd space at the bottom of the svg
+  left: 0;
+  z-index: 1;
+}
+
+.loginWelcome__header {
+  position: relative;
+  padding: $euiSizeXL;
+  z-index: 10;
+}
+
+.loginWelcome__logo {
+  margin-bottom: $euiSizeXL;
+  @include kibanaCircleLogo;
+  @include euiBottomShadowMedium;
+}
+
+.loginWelcome__footerAction {
+  margin-right: $euiSizeS;
+}
+
+.loginWelcome__content {
+  position: relative;
+  margin: auto;
+  max-width: 460px;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  z-index: 10;
+
+  &.loginWelcome__contentDisabledForm {
+    max-width: 700px;
+  }
+}
+
+
+
+@keyframes loginWelcome_FadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(200px), scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0), scale(1);
+  }
+}

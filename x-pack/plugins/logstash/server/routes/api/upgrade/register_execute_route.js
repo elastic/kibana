@@ -42,13 +42,13 @@ export function registerExecuteRoute(server) {
   server.route({
     path: '/api/logstash/upgrade',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         await executeUpgrade(callWithRequest);
-        reply({ is_upgraded: true });
+        return { is_upgraded: true };
       } catch(err) {
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

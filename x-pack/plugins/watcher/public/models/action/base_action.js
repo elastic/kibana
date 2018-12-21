@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export class BaseAction {
   constructor(props = {}) {
@@ -34,7 +35,12 @@ export class BaseAction {
   }
 
   get simulateMessage() {
-    return `Action ${this.id} simulated successfully`;
+    return i18n.translate('xpack.watcher.models.baseAction.simulateMessage', {
+      defaultMessage: 'Action {id} simulated successfully',
+      values: {
+        id: this.id
+      }
+    });
   }
 
   get simulatePrompt() {
@@ -45,9 +51,15 @@ export class BaseAction {
     return this.constructor.template;
   }
 
-  static typeName = 'Action';
+  static typeName = i18n.translate('xpack.watcher.models.baseAction.typeName', {
+    defaultMessage: 'Action',
+  });
   static iconClass = 'fa-cog';
   static template = '';
-  static selectMessage = 'Perform an action.';
-  static simulatePrompt = 'Simulate this action now';
+  static selectMessage = i18n.translate('xpack.watcher.models.baseAction.selectMessageText', {
+    defaultMessage: 'Perform an action.',
+  });
+  static simulatePrompt = i18n.translate('xpack.watcher.models.baseAction.simulateButtonLabel', {
+    defaultMessage: 'Simulate this action now',
+  });
 }

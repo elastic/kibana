@@ -37,7 +37,7 @@ export function esNodeRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const showSystemIndices = req.payload.showSystemIndices;
@@ -91,13 +91,13 @@ export function esNodeRoute(server) {
           };
         }
 
-        reply({
+        return {
           nodeSummary,
           metrics,
           ...shardAllocation
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

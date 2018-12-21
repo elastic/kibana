@@ -2,8 +2,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      // Allows for importing from `kibana` package for the exported types.
+      "kibana": ["./kibana"],
       "ui/*": [
         "src/ui/public/*"
+      ],
+      "test_utils/*": [
+        "src/test_utils/public/*"
       ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
@@ -44,7 +49,10 @@
     "importHelpers": true
   },
   "include": [
-    "src/**/*"
+    "kibana.d.ts",
+    "src/**/*",
+    "typings/**/*",
+    "test_utils/**/*"
   ],
   "exclude": [
     "src/**/__fixtures__/**/*",

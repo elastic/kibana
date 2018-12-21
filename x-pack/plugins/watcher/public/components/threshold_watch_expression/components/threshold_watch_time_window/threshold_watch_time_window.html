@@ -16,42 +16,42 @@
       xpack-aria-describes="durationSelectWindowSize"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'required')"
-    >
-      Window duration size is required.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.timeWindow.durationSizeIsRequiredValidationMessage"
+      i18n-default-message="Window duration size is required."
+    ></div>
     <div
       id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowSize', 'min'])}}"
       aria-describes="durationSelectWindowSize"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'min')"
-    >
-      Window duration size can not be a negative number.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.timeWindow.durationSizeMustBePositiveNumberValidationMessage"
+      i18n-default-message="Window duration size can not be a negative number."
+    ></div>
     <div
       id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowSize', 'number'])}}"
       xpack-aria-describes="durationSelectWindowSize"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'number')"
-    >
-      Window duration size must be a valid number.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.timeWindow.durationSizeMustBeValidNumberValidationMessage"
+      i18n-default-message="Window duration size must be a valid number."
+    ></div>
     <div
       id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowUnit', 'required'])}}"
       xpack-aria-describes="durationSelectWindowUnit"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowUnit', 'required')"
-    >
-      Window duration unit is required.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.timeWindow.durationUnitIsRequiredValidationMessage"
+      i18n-default-message="Window duration unit is required."
+    ></div>
     <div
       id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowSize', 'minimumDuration'])}}"
       xpack-aria-describes="durationSelectWindowSize durationSelectWindowUnit"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'minimumDuration', false)"
-    >
-      Window duration is too short.
-      The minimum allowed is {{thresholdWatchTimeWindow.timeWindowMinimumSize}}{{thresholdWatchTimeWindow.timeWindowMinimumUnit}}.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.timeWindow.durationIsTooShortValidationMessage"
+      i18n-default-message="Window duration is too short. The minimum allowed is {minimumSize}{minimumUnit}."
+      i18n-values="{ minimumSize: thresholdWatchTimeWindow.timeWindowMinimumSize, minimumUnit: thresholdWatchTimeWindow.timeWindowMinimumUnit }"
+    ></div>
     <duration-select
       duration-id="window"
       minimum-unit="thresholdWatchTimeWindow.timeWindowMinimumUnit"

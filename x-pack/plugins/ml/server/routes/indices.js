@@ -14,7 +14,7 @@ export function indicesRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/indices/field_caps',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const index = request.payload.index;
       let fields = '*';
@@ -23,8 +23,7 @@ export function indicesRoutes(server, commonRouteConfig) {
       }
 
       return callWithRequest('fieldCaps', { index, fields })
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

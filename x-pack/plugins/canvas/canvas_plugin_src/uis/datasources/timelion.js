@@ -28,8 +28,12 @@ const TimelionDatasource = ({ args, updateArgs }) => {
   };
 
   const getArgName = () => {
-    if (getSimpleArg('_', args)[0]) return '_';
-    if (getSimpleArg('q', args)[0]) return 'q';
+    if (getSimpleArg('_', args)[0]) {
+      return '_';
+    }
+    if (getSimpleArg('q', args)[0]) {
+      return 'q';
+    }
     return 'query';
   };
 
@@ -99,7 +103,7 @@ TimelionDatasource.propTypes = {
 export const timelion = () => ({
   name: 'timelion',
   displayName: 'Timelion',
-  help: 'Use timelion syntax to retrieve a timeseries',
+  help: 'Use Timelion syntax to retrieve a timeseries',
   image: 'timelionApp',
   template: templateFromReactComponent(TimelionDatasource),
 });

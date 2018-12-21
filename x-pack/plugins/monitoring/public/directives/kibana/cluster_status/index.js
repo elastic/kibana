@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { ClusterStatus } from 'plugins/monitoring/components/kibana/cluster_status';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringClusterStatusKibana', () => {
@@ -18,7 +19,7 @@ uiModule.directive('monitoringClusterStatusKibana', () => {
     },
     link(scope, $el) {
       scope.$watch('status', status => {
-        render(<ClusterStatus stats={status} />, $el[0]);
+        render(<I18nProvider><ClusterStatus stats={status} /></I18nProvider>, $el[0]);
       });
     },
   };

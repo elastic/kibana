@@ -13,7 +13,6 @@ import {
 import React from 'react';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
-import './space_card.less';
 
 interface Props {
   space: Space;

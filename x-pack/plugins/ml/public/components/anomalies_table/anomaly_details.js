@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiText
 } from '@elastic/eui';
-import { formatDate } from '@elastic/eui/lib/services/format';
+import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 
 import { EntityCell } from './entity_cell';
 import {
@@ -105,10 +105,10 @@ function getDetailsItems(anomaly, examples, filter) {
   }
 
   const anomalyTime = source[TIME_FIELD_NAME];
-  let timeDesc = `${formatDate(anomalyTime, 'MMMM Do YYYY, HH:mm:ss')}`;
+  let timeDesc = `${formatHumanReadableDateTimeSeconds(anomalyTime)}`;
   if (source.bucket_span !== undefined) {
     const anomalyEndTime = anomalyTime + (source.bucket_span * 1000);
-    timeDesc += ` to ${formatDate(anomalyEndTime, 'MMMM Do YYYY, HH:mm:ss')}`;
+    timeDesc += ` to ${formatHumanReadableDateTimeSeconds(anomalyEndTime)}`;
   }
   items.push({
     title: 'time',
@@ -219,7 +219,7 @@ export class AnomalyDetails extends Component {
     return (
       <React.Fragment>
         <EuiText size="xs">
-          <h5>Description</h5>
+          <h4>Description</h4>
           {anomalyDescription}
         </EuiText>
         {(mvDescription !== undefined) &&
@@ -236,11 +236,11 @@ export class AnomalyDetails extends Component {
     const isInterimResult = _.get(this.props.anomaly, 'source.is_interim', false);
     return (
       <React.Fragment>
-        <EuiText>
+        <EuiText size="xs">
           {this.props.isAggregatedData === true ? (
-            <h5>Details on highest severity anomaly</h5>
+            <h4>Details on highest severity anomaly</h4>
           ) : (
-            <h5>Anomaly details</h5>
+            <h4>Anomaly details</h4>
           )}
           {isInterimResult === true &&
             <React.Fragment>
@@ -287,8 +287,8 @@ export class AnomalyDetails extends Component {
       return (
         <React.Fragment>
           <EuiSpacer size="m" />
-          <EuiText>
-            <h5>Influencers</h5>
+          <EuiText size="xs">
+            <h4>Influencers</h4>
           </EuiText>
           <EuiDescriptionList
             type="column"

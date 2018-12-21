@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 async function parseResponse(request) {
   const response = await request;
   if (!response._scroll_id) {
-    throw new Error('Expected _scroll_id in the following Elasticsearch response: ' + JSON.stringify(response));
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage', {
+      defaultMessage: 'Expected {scrollId} in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response), scrollId: '_scroll_id' }
+    }));
   }
 
   if (!response.hits) {
-    throw new Error('Expected hits in the following Elasticsearch response: ' + JSON.stringify(response));
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedHitsErrorMessage', {
+      defaultMessage: 'Expected {hits} in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response), hits: 'hits' }
+    }));
   }
 
   return {
@@ -61,5 +69,3 @@ export function createHitIterator(logger) {
     }
   };
 }
-
-

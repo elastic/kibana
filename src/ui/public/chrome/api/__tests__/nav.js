@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 
 import { initChromeNavApi } from '../nav';
-import StubBrowserStorage from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { KibanaParsedUrl } from '../../../url/kibana_parsed_url';
 
 const basePath = '/someBasePath';

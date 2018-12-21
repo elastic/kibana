@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 import { Space } from '../../../common/model/space';
 import { SpaceCard } from './space_card';
-import './space_cards.less';
 
 interface Props {
   spaces: Space[];

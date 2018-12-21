@@ -10,7 +10,7 @@ import { ExtendedTemplate } from './extended_template';
 
 export const axisConfig = () => ({
   name: 'axisConfig',
-  displayName: 'Axis Config',
+  displayName: 'Axis config',
   help: 'Visualization axis configuration',
   simpleTemplate: templateFromReactComponent(SimpleTemplate),
   template: templateFromReactComponent(ExtendedTemplate),

@@ -29,7 +29,7 @@ export function apmOverviewRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -44,12 +44,12 @@ export function apmOverviewRoute(server) {
           getMetrics(req, apmIndexPattern, metricSet),
         ]);
 
-        reply({
+        return {
           stats,
           metrics
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        return handleError(err, req);
       }
     }
   });

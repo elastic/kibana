@@ -53,7 +53,7 @@ FontArgInput.displayName = 'FontArgInput';
 
 export const font = () => ({
   name: 'font',
-  displayName: 'Text Settings',
+  displayName: 'Text settings',
   help: 'Set the font, size and color',
   template: templateFromReactComponent(FontArgInput),
   default: `{font size=14 family="${openSans.value}" color="#000000" align=left}`,

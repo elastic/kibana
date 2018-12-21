@@ -743,7 +743,19 @@
         "index_pattern": {
           "total": 0
         },
+        "graph_workspace": {
+          "total": 0
+        },
+        "timelion_sheet": {
+          "total": 0
+        },
         "indices": 1,
+        "os": {
+          "distros": [],
+          "distroReleases": [],
+          "platforms": [],
+          "platformReleases": []
+        },
         "search": {
           "total": 0
         },
@@ -755,10 +767,17 @@
         ],
         "visualization": {
           "total": 0
-        }
+        },
+        "plugins": {}
       },
       "logstash": {
         "count": 1,
+        "os": {
+          "distros": [],
+          "distroReleases": [],
+          "platforms": [],
+          "platformReleases": []
+        },
         "versions": [
           {
             "count": 1,
@@ -769,7 +788,10 @@
       "xpack": {
         "graph": {
           "available": true,
-          "enabled": true
+          "enabled": true,
+          "graph_workspace": {
+            "total": 0
+          }
         },
         "logstash": {
           "available": true,

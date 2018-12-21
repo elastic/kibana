@@ -15,4 +15,10 @@ describe('ML - mlChartTooltipService', () => {
     expect(mlChartTooltipService.hide).to.be.a('function');
   });
 
+  it('should fail silently when target is not defined', () => {
+    mlChartTooltipService.element = {};
+    expect(() => {
+      mlChartTooltipService.show('', undefined);
+    }).to.not.throwError('Call to show() should fail silently.');
+  });
 });

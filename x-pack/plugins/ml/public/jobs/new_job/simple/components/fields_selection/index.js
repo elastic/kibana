@@ -7,4 +7,3 @@
 
 
 import './fields_selection_directive';
-import './styles/main.less';

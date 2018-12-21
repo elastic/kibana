@@ -26,7 +26,7 @@ export const TranspileScssTask = {
   description: 'Transpiling SCSS to CSS',
 
   async run(config, log, build) {
-    const scanDirs = [ build.resolvePath('src/core_plugins') ];
+    const scanDirs = [ build.resolvePath('src/legacy/core_plugins') ];
     const paths = [ build.resolvePath('node_modules/x-pack') ];
 
     const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });

@@ -11,7 +11,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     elasticsearch: {
       indices: [
         {
-          names: ['.kibana'],
+          names: ['.kibana*'],
           privileges: ['manage', 'read', 'index', 'delete'],
         },
       ],
@@ -22,7 +22,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     elasticsearch: {
       indices: [
         {
-          names: ['.kibana'],
+          names: ['.kibana*'],
           privileges: ['read', 'view_index_metadata'],
         },
       ],
@@ -33,7 +33,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     elasticsearch: {
       indices: [
         {
-          names: ['.kibana'],
+          names: ['.kibana*'],
           privileges: ['manage', 'read', 'index', 'delete'],
         },
       ],
@@ -47,7 +47,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     elasticsearch: {
       indices: [
         {
-          names: ['.kibana'],
+          names: ['.kibana*'],
           privileges: ['read', 'view_index_metadata'],
         },
       ],

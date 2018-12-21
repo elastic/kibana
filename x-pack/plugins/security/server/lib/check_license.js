@@ -13,7 +13,6 @@
  * security in roles.
  * @property {boolean} allowRoleFieldLevelSecurity Indicates whether we allow users to define field level security
  * in roles
- * @property {string} [loginMessage] Message to show at the login page.
  * @property {string} [linksMessage] Message to show when security links are clicked throughout the kibana app.
  */
 

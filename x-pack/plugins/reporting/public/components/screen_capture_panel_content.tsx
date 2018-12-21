@@ -5,6 +5,7 @@
  */
 
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { ReportingPanelContent } from './reporting_panel_content';
 
@@ -45,17 +46,30 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   }
 
   private renderOptions = () => {
-    return (
-      <Fragment>
-        <EuiSwitch
-          label="Optimize for printing"
-          checked={this.state.usePrintLayout}
-          onChange={this.handlePrintLayoutChange}
-          data-test-subj="usePrintLayout"
-        />
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
+    if (this.props.reportType === 'png') {
+      return (
+        <Fragment>
+          <EuiSpacer size="s" />
+        </Fragment>
+      );
+    } else {
+      return (
+        <Fragment>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                defaultMessage="Optimize for printing"
+              />
+            }
+            checked={this.state.usePrintLayout}
+            onChange={this.handlePrintLayoutChange}
+            data-test-subj="usePrintLayout"
+          />
+          <EuiSpacer size="s" />
+        </Fragment>
+      );
+    }
   };
 
   private handlePrintLayoutChange = (evt: any) => {
@@ -69,13 +83,23 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
 
     const el = document.querySelector('[data-shared-items-container]');
     const bounds = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-    return {
-      id: 'preserve_layout',
-      dimensions: {
-        height: bounds.height,
-        width: bounds.width,
-      },
-    };
+
+    if (this.props.reportType === 'png') {
+      return {
+        dimensions: {
+          height: bounds.height,
+          width: bounds.width,
+        },
+      };
+    } else {
+      return {
+        id: 'preserve_layout',
+        dimensions: {
+          height: bounds.height,
+          width: bounds.width,
+        },
+      };
+    }
   };
 
   private getJobParams = () => {

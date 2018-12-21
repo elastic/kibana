@@ -9,8 +9,6 @@
  * the Machine Learning Explorer dashboard.
  */
 
-import './styles/explorer_chart.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -21,6 +19,7 @@ import moment from 'moment';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
+import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import {
   getSeverityWithLow,
@@ -138,6 +137,7 @@ export class ExplorerChartSingleMetric extends React.Component {
             return lineChartYScale.tickFormat()(d);
           }
         })
+        // Don't use an arrow function since we need access to `this`.
         .each(function () {
           maxYAxisLabelWidth = Math.max(this.getBBox().width + yAxis.tickPadding(), maxYAxisLabelWidth);
         })
@@ -191,11 +191,10 @@ export class ExplorerChartSingleMetric extends React.Component {
       timeBuckets.setInterval('auto');
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
-      const emphasisStart = Math.max(config.selectedEarliest, config.plotEarliest);
-      const emphasisEnd = Math.min(config.selectedLatest, config.plotLatest);
+      const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
       // +1 ms to account for the ms that was substracted for query aggregations.
-      const interval = emphasisEnd - emphasisStart + 1;
-      const tickValues = getTickValues(emphasisStart, interval, config.plotEarliest, config.plotLatest);
+      const interval = config.selectedLatest - config.selectedEarliest + 1;
+      const tickValues = getTickValues(tickValuesStart, interval, config.plotEarliest, config.plotLatest);
 
       const xAxis = d3.svg.axis().scale(lineChartXScale)
         .orient('bottom')
@@ -235,7 +234,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .call(yAxis);
 
       if (tooManyBuckets === false) {
-        removeLabelOverlap(gAxis, emphasisStart, interval, vizWidth);
+        removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
       }
     }
 
@@ -277,6 +276,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Create any new dots that are needed i.e. if number of chart points has increased.
       dots.enter().append('circle')
         .attr('r', LINE_CHART_ANOMALY_RADIUS)
+        // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
@@ -284,9 +284,9 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       // Update all dots to new positions.
       const threshold = mlSelectSeverityService.state.get('threshold');
-      dots.attr('cx', function (d) { return lineChartXScale(d.date); })
-        .attr('cy', function (d) { return lineChartYScale(d.value); })
-        .attr('class', function (d) {
+      dots.attr('cx', d => lineChartXScale(d.date))
+        .attr('cy', d => lineChartYScale(d.value))
+        .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
             markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
@@ -301,11 +301,12 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Remove multi-bucket markers that are no longer needed
       multiBucketMarkers.exit().remove();
 
-      // Update markers to new positions.
+      // Append the multi-bucket markers and position on chart.
       multiBucketMarkers.enter().append('path')
         .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
         .attr('transform', d => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`)
-        .attr('class', d => `metric-value anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
+        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
+        // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
@@ -334,7 +335,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     function showLineChartTooltip(marker, circle) {
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
-      const formattedDate = moment(marker.date).format('MMMM Do YYYY, HH:mm');
+      const formattedDate = formatHumanReadableDateTime(marker.date);
       let contents = formattedDate + '<br/><hr/>';
 
       if (_.has(marker, 'anomalyScore')) {

@@ -1,0 +1,28 @@
+.tvbMarkdownEditor {
+  display: flex;
+  background-color: $euiColorEmptyShade;
+  height: 500px;
+}
+
+.tvbMarkdownEditor__editor,
+.tvbMarkdownEditor__variables {
+  width: 50%;
+  flex: 1 0 auto;
+}
+
+.tvbMarkdownEditor__editor {
+  border-right: 2px solid $euiColorLightestShade;
+}
+
+.tvbMarkdownEditor__variables {
+  padding: $euiSizeS;
+  overflow: auto;
+}
+
+.tvbMarkdownEditor__noVariables {
+  display: block;
+  padding-bottom: $euiSizeXXL;
+  padding-top: $euiSizeXXL - $euiSizeL;
+  text-align: center;
+  border-bottom: $euiBorderThin;
+}

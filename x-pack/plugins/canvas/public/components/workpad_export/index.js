@@ -6,9 +6,9 @@
 
 /* eslint import/no-unresolved: 1 */
 // TODO: remove eslint rule when updating to use the linked kibana resolve package
-import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
+import { jobCompletionNotifications } from '../../../../reporting/public/lib/job_completion_notifications';
 import { getWorkpad, getPages } from '../../state/selectors/workpad';
 import { getReportingBrowserType } from '../../state/selectors/app';
 import { notify } from '../../lib/notify';
@@ -24,7 +24,9 @@ const mapStateToProps = state => ({
 
 const getAbsoluteUrl = path => {
   const { location } = getWindow();
-  if (!location) return path; // fallback for mocked window object
+  if (!location) {
+    return path;
+  } // fallback for mocked window object
 
   const { protocol, hostname, port } = location;
   return `${protocol}//${hostname}:${port}${path}`;
@@ -34,13 +36,16 @@ export const WorkpadExport = compose(
   connect(mapStateToProps),
   withProps(({ workpad, pageCount }) => ({
     getExportUrl: type => {
-      if (type === 'pdf') return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+      if (type === 'pdf') {
+        return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+      }
 
       throw new Error(`Unknown export type: ${type}`);
     },
     onCopy: type => {
-      if (type === 'pdf')
+      if (type === 'pdf') {
         return notify.info('The PDF generation URL was copied to your clipboard.');
+      }
 
       throw new Error(`Unknown export type: ${type}`);
     },

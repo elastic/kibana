@@ -40,7 +40,7 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX request that can not be authenticated to the IdP.', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
       callWithInternalUser
         .withArgs('shield.samlPrepare')
@@ -61,7 +61,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).to.be('https://idp-host/path/login?SAMLRequest=some%20request%20');
       expect(authenticationResult.state).to.eql({
         requestId: 'some-request-id',
-        nextURL: `/test-base-path/some-path`
+        nextURL: `/s/foo/some-path`
       });
     });
 
@@ -206,7 +206,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.state).to.be(undefined);
     });
 
-    it('fails if `authorization` header has unsupported schema even if state contains a valid token.', async () => {
+    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
 
       const authenticationResult = await provider.authenticate(request, {
@@ -216,8 +216,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       sinon.assert.notCalled(callWithRequest);
       expect(request.headers.authorization).to.be('Basic some:credentials');
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.error).to.eql(Boom.badRequest('Unsupported authentication schema: Basic'));
+      expect(authenticationResult.notHandled()).to.be(true);
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
@@ -236,7 +235,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(request.headers).to.not.have.property('authorization');
       expect(authenticationResult.failed()).to.be(true);
       expect(authenticationResult.error).to.be(failureReason);
-      sinon.assert.neverCalledWith(callWithRequest, 'shield.samlRefreshAccessToken');
+      sinon.assert.neverCalledWith(callWithRequest, 'shield.getAccessToken');
     });
 
     it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
@@ -259,7 +258,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'valid-refresh-token' } }
         )
         .returns(Promise.resolve({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' }));
@@ -291,7 +290,7 @@ describe('SAMLAuthenticationProvider', () => {
       const refreshFailureReason = new Error('Something is wrong with refresh token.');
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
         )
         .returns(Promise.reject(refreshFailureReason));
@@ -318,7 +317,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'token has already been refreshed' } }));
@@ -334,7 +333,7 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('initiates SAML handshake for non-AJAX requests if refresh token is used more than once.', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
       callWithInternalUser
         .withArgs('shield.samlPrepare')
@@ -352,7 +351,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'token has already been refreshed' } }));
@@ -372,7 +371,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).to.be('https://idp-host/path/login?SAMLRequest=some%20request%20');
       expect(authenticationResult.state).to.eql({
         requestId: 'some-request-id',
-        nextURL: `/test-base-path/some-path`
+        nextURL: `/s/foo/some-path`
       });
     });
 
@@ -388,7 +387,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'refresh token is expired' } }));
@@ -404,7 +403,7 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('initiates SAML handshake for non-AJAX requests if refresh token is expired.', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
       callWithInternalUser
         .withArgs('shield.samlPrepare')
@@ -422,7 +421,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs(
-          'shield.samlRefreshAccessToken',
+          'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
         )
         .returns(Promise.reject({ body: { error_description: 'refresh token is expired' } }));
@@ -442,7 +441,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).to.be('https://idp-host/path/login?SAMLRequest=some%20request%20');
       expect(authenticationResult.state).to.eql({
         requestId: 'some-request-id',
-        nextURL: `/test-base-path/some-path`
+        nextURL: `/s/foo/some-path`
       });
     });
 
@@ -564,7 +563,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.error).to.be(failureReason);
     });
 
-    it('does not redirect if `redirect` field in SAML logout response is null.', async () => {
+    it('redirects to /logged_out if `redirect` field in SAML logout response is null.', async () => {
       const request = requestFixture();
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
@@ -582,10 +581,11 @@ describe('SAMLAuthenticationProvider', () => {
         { body: { token: accessToken, refresh_token: refreshToken } }
       );
 
-      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/logged_out');
     });
 
-    it('does not redirect if `redirect` field in SAML logout response is not defined.', async () => {
+    it('redirects to /logged_out if `redirect` field in SAML logout response is not defined.', async () => {
       const request = requestFixture();
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
@@ -603,7 +603,8 @@ describe('SAMLAuthenticationProvider', () => {
         { body: { token: accessToken, refresh_token: refreshToken } }
       );
 
-      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/logged_out');
     });
 
     it('relies on SAML logout if query string is not empty, but does not include SAMLRequest.', async () => {
@@ -624,7 +625,8 @@ describe('SAMLAuthenticationProvider', () => {
         { body: { token: accessToken, refresh_token: refreshToken } }
       );
 
-      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/logged_out');
     });
 
     it('relies SAML invalidate call even if access token is presented.', async () => {
@@ -651,10 +653,11 @@ describe('SAMLAuthenticationProvider', () => {
         }
       );
 
-      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/logged_out');
     });
 
-    it('does not redirect if `redirect` field in SAML invalidate response is null.', async () => {
+    it('redirects to /logged_out if `redirect` field in SAML invalidate response is null.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
       callWithInternalUser
@@ -675,10 +678,11 @@ describe('SAMLAuthenticationProvider', () => {
         }
       );
 
-      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/logged_out');
     });
 
-    it('does not redirect if `redirect` field in SAML invalidate response is not defined.', async () => {
+    it('redirects to /logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
       callWithInternalUser
@@ -699,7 +703,8 @@ describe('SAMLAuthenticationProvider', () => {
         }
       );
 
-      expect(authenticationResult.succeeded()).to.be(true);
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/logged_out');
     });
 
     it('redirects user to the IdP if SLO is supported by IdP in case of SP initiated logout.', async () => {

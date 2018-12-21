@@ -7,25 +7,28 @@
 import $ from 'jquery';
 import { times } from 'lodash';
 import { elasticOutline } from '../lib/elastic_outline';
-import { isValid } from '../../common/lib/url';
+import { isValidUrl } from '../../common/lib/url';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Image Repeat',
+  displayName: 'Image repeat',
   help: 'Repeat an image a given number of times',
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const settings = {
       count: 10,
       ...config,
-      image: isValid(config.image) ? config.image : elasticOutline,
+      image: isValidUrl(config.image) ? config.image : elasticOutline,
     };
 
     const container = $('<div class="repeatImage" style="pointer-events: none;">');
 
     function setSize(img) {
-      if (img.naturalHeight > img.naturalWidth) img.height = settings.size;
-      else img.width = settings.size;
+      if (img.naturalHeight > img.naturalWidth) {
+        img.height = settings.size;
+      } else {
+        img.width = settings.size;
+      }
     }
 
     function finish() {
@@ -36,11 +39,15 @@ export const repeatImage = () => ({
     const img = new Image();
     img.onload = function() {
       setSize(img);
-      if (settings.max && settings.count > settings.max) settings.count = settings.max;
+      if (settings.max && settings.count > settings.max) {
+        settings.count = settings.max;
+      }
       times(settings.count, () => container.append(img.cloneNode(true)));
 
-      if (isValid(settings.emptyImage)) {
-        if (settings.max == null) throw new Error('max must be set if using an emptyImage');
+      if (isValidUrl(settings.emptyImage)) {
+        if (settings.max == null) {
+          throw new Error('max must be set if using an emptyImage');
+        }
 
         const emptyImage = new Image();
         emptyImage.onload = function() {

@@ -1,0 +1,257 @@
+{
+  "id": "logstash-*",
+  "title": "logstash-*",
+  "fields": [
+    {
+      "name": "bytes",
+      "type": "number",
+      "count": 10,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "ssl",
+      "type": "boolean",
+      "count": 20,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "@timestamp",
+      "type": "date",
+      "count": 30,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "time",
+      "type": "date",
+      "count": 30,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "@tags",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "utc_time",
+      "type": "date",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "phpmemory",
+      "type": "number",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "ip",
+      "type": "ip",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "request_body",
+      "type": "attachment",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "point",
+      "type": "geo_point",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "area",
+      "type": "geo_shape",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "hashed",
+      "type": "murmur3",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": false,
+      "readFromDocValues": false
+    },
+    {
+      "name": "geo.coordinates",
+      "type": "geo_point",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "extension",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "machine.os",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "machine.os.raw",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "geo.src",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "_id",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "_type",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "_source",
+      "type": "_source",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "non-filterable",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": false,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "non-sortable",
+      "type": "string",
+      "count": 0,
+      "scripted": false,
+      "searchable": false,
+      "aggregatable": false,
+      "readFromDocValues": false
+    },
+    {
+      "name": "custom_user_field",
+      "type": "conflict",
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "script string",
+      "type": "string",
+      "count": 0,
+      "scripted": true,
+      "script": "'i am a string'",
+      "lang": "expression",
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "script number",
+      "type": "number",
+      "count": 0,
+      "scripted": true,
+      "script": "1234",
+      "lang": "expression",
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "script date",
+      "type": "date",
+      "count": 0,
+      "scripted": true,
+      "script": "1234",
+      "lang": "painless",
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    },
+    {
+      "name": "script murmur3",
+      "type": "murmur3",
+      "count": 0,
+      "scripted": true,
+      "script": "1234",
+      "lang": "expression",
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": false
+    }
+  ]
+}

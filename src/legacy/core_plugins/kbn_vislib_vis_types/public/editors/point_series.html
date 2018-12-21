@@ -1,0 +1,71 @@
+<div>
+  <!-- Global settings -->
+  <div class="kuiSideBarSection">
+    <div class="kuiSideBarSectionTitle">
+      <div
+        class="kuiSideBarSectionTitle__text"
+        i18n-id="kbnVislibVisTypes.editors.pointSeries.settingsTitle"
+        i18n-default-message="Settings"
+      ></div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="legendPosition"
+        i18n-id="kbnVislibVisTypes.editors.pointSeries.legendPositionLabel"
+        i18n-default-message="Legend Position"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <select
+          id="legendPosition"
+          class="kuiSelect kuiSideBarSelect"
+          ng-model="editorState.params.legendPosition"
+          ng-options="position for position in ['top', 'left', 'right', 'bottom']"
+        ></select>
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="showCursor"
+        i18n-id="kbnVislibVisTypes.editors.pointSeries.showTooltipLabel"
+        i18n-default-message="Show Tooltip"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="showCursor" type="checkbox" ng-model="editorState.params.addTooltip">
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow" ng-show="vis.hasSchemaAgg('segment', 'date_histogram')">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="currentTimeMarker"
+        i18n-id="kbnVislibVisTypes.editors.pointSeries.currentTimeMarkerLabel"
+        i18n-default-message="Current Time Marker"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="currentTimeMarker" type="checkbox"
+               ng-model="editorState.params.addTimeMarker"
+               ng-checked="editorState.params.addTimeMarker"
+        >
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow" ng-show="!vis.hasSchemaAgg('segment', 'date_histogram')">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="orderBuckets"
+        i18n-id="kbnVislibVisTypes.editors.pointSeries.orderBucketsBySumLabel"
+        i18n-default-message="Order Buckets by Sum"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="orderBuckets" type="checkbox" ng-model="editorState.params.orderBucketsBySum">
+      </div>
+    </div>
+
+    <vislib-grid></vislib-grid>
+  </div>
+
+</div>

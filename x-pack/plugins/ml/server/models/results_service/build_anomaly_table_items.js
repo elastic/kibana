@@ -6,7 +6,7 @@
 
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import {
   getEntityFieldName,
@@ -17,13 +17,15 @@ import {
 
 
 // Builds the items for display in the anomalies table from the supplied list of anomaly records.
-export function buildAnomalyTableItems(anomalyRecords, aggregationInterval) {
+// Provide the timezone to use for aggregating anomalies (by day or hour) as set in the
+// Kibana dateFormat:tz setting.
+export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, dateFormatTz) {
 
   // Aggregate the anomaly records if necessary, and create skeleton display records with
   // time, detector (description) and source record properties set.
   let displayRecords = [];
   if (aggregationInterval !== 'second') {
-    displayRecords = aggregateAnomalies(anomalyRecords, aggregationInterval);
+    displayRecords = aggregateAnomalies(anomalyRecords, aggregationInterval, dateFormatTz);
   } else {
     // Show all anomaly records.
     displayRecords = anomalyRecords.map((record) => {
@@ -115,7 +117,7 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval) {
   });
 }
 
-function aggregateAnomalies(anomalyRecords, interval) {
+function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   // Aggregate the anomaly records by time, jobId, detectorIndex, and entity (by/over/partition).
   // anomalyRecords assumed to be supplied in ascending time order.
   if (anomalyRecords.length === 0) {
@@ -125,7 +127,9 @@ function aggregateAnomalies(anomalyRecords, interval) {
   const aggregatedData = {};
   anomalyRecords.forEach((record) => {
     // Use moment.js to get start of interval.
-    const roundedTime = moment(record.timestamp).startOf(interval).valueOf();
+    const roundedTime = (dateFormatTz !== undefined) ?
+      moment(record.timestamp).tz(dateFormatTz).startOf(interval).valueOf() :
+      moment(record.timestamp).startOf(interval).valueOf();
     if (aggregatedData[roundedTime] === undefined) {
       aggregatedData[roundedTime] = {};
     }

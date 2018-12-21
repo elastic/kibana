@@ -5,9 +5,12 @@
  */
 
 import { management } from 'ui/management';
+import { i18n } from '@kbn/i18n';
 
 management.getSection('logstash').register('pipelines', {
-  display: 'Pipelines',
+  display: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
+    defaultMessage: 'Pipelines',
+  }),
   order: 10,
   url: '#/management/logstash/pipelines/'
 });
@@ -17,13 +20,17 @@ management.getSection('logstash/pipelines').register('pipeline', {
 });
 
 management.getSection('logstash/pipelines/pipeline').register('edit', {
-  display: 'Edit pipeline',
+  display: i18n.translate('xpack.logstash.managementSection.editPipelineTitle', {
+    defaultMessage: 'Edit pipeline',
+  }),
   order: 1,
   visible: false
 });
 
 management.getSection('logstash/pipelines/pipeline').register('new', {
-  display: 'Create pipeline',
+  display: i18n.translate('xpack.logstash.managementSection.createPipelineTitle', {
+    defaultMessage: 'Create pipeline',
+  }),
   order: 1,
   visible: false
 });

@@ -13,7 +13,9 @@
     uis-open-close="indexSelect.onDropdownToggled(isOpen)"
     multiple
   >
-    <ui-select-match placeholder="Start typing...">
+    <ui-select-match
+      placeholder="{{ 'xpack.watcher.indexSelect.startTypingPlaceholder' | i18n: { defaultMessage: 'Start typing…' } }}"
+    >
       {{$item.indexName}}
     </ui-select-match>
     <ui-select-choices
@@ -34,9 +36,11 @@
       </div>
     </ui-select-choices>
     <ui-select-no-choice>
-      <p class="indexSelectNoChoice">
-        Building list... please wait
-      </p>
+      <p
+        class="indexSelectNoChoice"
+        i18n-id="xpack.watcher.indexSelect.buildingListTextMessage"
+        i18n-default-message="Building list… please wait"
+      ></p>
     </ui-select-no-choice>
   </ui-select>
 </div>

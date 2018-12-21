@@ -1,0 +1,64 @@
+<div class="kuiSideBarSection">
+  <div class="kuiSideBarSectionTitle">
+    <div
+      class="kuiSideBarSectionTitle__text"
+      i18n-id="kbnVislibVisTypes.editors.heatmap.basicSettingsTitle"
+      i18n-default-message="Basic Settings"
+    ></div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="addTooltip"
+      i18n-id="kbnVislibVisTypes.editors.heatmap.showTooltipsLabel"
+      i18n-default-message="Show Tooltips"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="addTooltip" type="checkbox" ng-model="editorState.params.addTooltip">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="enableHover"
+      i18n-id="kbnVislibVisTypes.editors.heatmap.highlightLabel"
+      i18n-default-message="Highlight"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="enableHover" type="checkbox" ng-model="editorState.params.enableHover">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-show="editorState.params.addLegend">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="legendPosition"
+      i18n-id="kbnVislibVisTypes.editors.heatmap.legendPositionLabel"
+      i18n-default-message="Legend Position"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="legendPosition"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="editorState.params.legendPosition"
+        ng-options="position.value as position.text for position in vis.type.editorConfig.collections.legendPositions"
+      ></select>
+    </div>
+  </div>
+</div>
+
+<div class="kuiSideBarSection">
+
+  <div class="kuiSideBarSectionTitle">
+    <div
+      class="kuiSideBarSectionTitle__text"
+      i18n-id="kbnVislibVisTypes.editors.heatmap.heatmapSettingsTitle"
+      i18n-default-message="Heatmap Settings"
+    ></div>
+  </div>
+
+  <heatmap-options></heatmap-options>
+
+</div>

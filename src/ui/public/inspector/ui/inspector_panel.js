@@ -28,8 +28,6 @@ import {
 
 import { InspectorViewChooser } from './inspector_view_chooser';
 
-import './inspector.less';
-
 function hasAdaptersChanged(oldAdapters, newAdapters) {
   return Object.keys(oldAdapters).length !== Object.keys(newAdapters).length
     || Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key]);
@@ -40,7 +38,6 @@ class InspectorPanel extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isHelpPopoverOpen: false,
       selectedView: props.views[0],
       views: props.views,
       // Clone adapters array so we can validate that this prop never change

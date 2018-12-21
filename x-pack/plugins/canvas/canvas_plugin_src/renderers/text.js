@@ -9,7 +9,7 @@ import React from 'react';
 
 export const text = () => ({
   name: 'text',
-  displayName: 'Plain Text',
+  displayName: 'Plain text',
   help: 'Render output as plain text',
   reuseDomNode: true,
   render(domNode, { text }, handlers) {

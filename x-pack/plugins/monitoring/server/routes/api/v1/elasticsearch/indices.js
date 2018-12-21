@@ -33,7 +33,7 @@ export function esIndicesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const { clusterUuid } = req.params;
       const { show_system_indices: showSystemIndices } = req.query;
@@ -45,12 +45,12 @@ export function esIndicesRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeIndices: true });
         const indices = await getIndices(req, esIndexPattern, showSystemIndices, shardStats);
 
-        reply({
+        return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           indices
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

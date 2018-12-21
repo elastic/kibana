@@ -29,7 +29,7 @@ export function beatsOverviewRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
 
       const config = server.config();
       const ccs = req.payload.ccs;
@@ -47,13 +47,13 @@ export function beatsOverviewRoute(server) {
           getMetrics(req, beatsIndexPattern, metricSet),
         ]);
 
-        reply({
+        return {
           ...latest,
           stats,
           metrics
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
 
     }

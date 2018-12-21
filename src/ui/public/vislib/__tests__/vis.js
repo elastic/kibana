@@ -105,11 +105,11 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove all DOM elements from el', function () {
-        expect($(secondVis.el).find('.vis-wrapper').length).to.be(0);
+        expect($(secondVis.el).find('.visWrapper').length).to.be(0);
       });
 
       it('should not remove visualizations that have not been destroyed', function () {
-        expect($(vis.el).find('.vis-wrapper').length).to.be(1);
+        expect($(vis.el).find('.visWrapper').length).to.be(1);
       });
     });
 

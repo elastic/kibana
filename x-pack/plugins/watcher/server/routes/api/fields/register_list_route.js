@@ -29,7 +29,7 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/watcher/fields',
     method: 'POST',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexes } = request.payload;
 
@@ -41,16 +41,16 @@ export function registerListRoute(server) {
 
           const fields = Fields.fromUpstreamJson(json);
 
-          reply(fields.downstreamJson);
+          return fields.downstreamJson;
         })
         .catch(err => {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

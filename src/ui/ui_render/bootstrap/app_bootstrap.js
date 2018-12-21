@@ -24,10 +24,9 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 
 export class AppBootstrap {
-  constructor({ templateData, translations }) {
+  constructor({ templateData }) {
     this.templateData = templateData;
     this._rawTemplate = undefined;
-    i18n.init(translations);
   }
 
   async getJsFile() {

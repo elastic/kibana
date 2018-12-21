@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import React, { ChangeEvent, Component } from 'react';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';

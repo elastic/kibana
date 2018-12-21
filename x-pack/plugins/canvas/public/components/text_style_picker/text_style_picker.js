@@ -100,7 +100,7 @@ export const TextStylePicker = ({
         <EuiFlexItem grow={false}>
           <EuiSelect
             compressed
-            defaultValue={size}
+            value={size}
             onChange={e => doChange('size', Number(e.target.value))}
             options={fontSizes.map(size => ({ text: String(size), value: size }))}
           />
@@ -156,4 +156,5 @@ TextStylePicker.propTypes = {
 
 TextStylePicker.defaultProps = {
   align: 'left',
+  size: 14,
 };

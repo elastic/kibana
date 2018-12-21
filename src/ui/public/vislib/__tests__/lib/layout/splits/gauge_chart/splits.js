@@ -180,7 +180,7 @@ describe('Vislib Gauge Split Function Test Suite', function () {
       });
 
       it('should add the correct class name', function () {
-        expect(!!$('.chart-wrapper-row').length).to.be(true);
+        expect(!!$('.visWrapper__splitCharts--row').length).to.be(true);
       });
     });
 
@@ -188,11 +188,11 @@ describe('Vislib Gauge Split Function Test Suite', function () {
       let visEl;
 
       beforeEach(ngMock.inject(function () {
-        visEl = el.append('div').attr('class', 'vis-wrapper');
-        visEl.append('div').attr('class', 'x-axis-chart-title');
-        visEl.append('div').attr('class', 'y-axis-chart-title');
-        visEl.select('.x-axis-chart-title').call(chartTitleSplit);
-        visEl.select('.y-axis-chart-title').call(chartTitleSplit);
+        visEl = el.append('div').attr('class', 'visWrapper');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--x');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--y');
+        visEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
+        visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
 
       }));
 
@@ -201,8 +201,8 @@ describe('Vislib Gauge Split Function Test Suite', function () {
       });
 
       it('should append the correct number of divs', function () {
-        expect($('.x-axis-chart-title .chart-title').length).to.be(2);
-        expect($('.y-axis-chart-title .chart-title').length).to.be(2);
+        expect($('.visAxis__splitTitles--x .chart-title').length).to.be(2);
+        expect($('.visAxis__splitTitles--y .chart-title').length).to.be(2);
       });
 
 

@@ -13,14 +13,14 @@ function reportingFeaturePreRoutingFn(server) {
 
   // License checking and enable/disable logic
   return function reportingFeaturePreRouting(getReportingFeatureId) {
-    return function licensePreRouting(request, reply) {
+    return function licensePreRouting(request) {
       const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
       const reportingFeatureId = getReportingFeatureId(request);
       const reportingFeature = licenseCheckResults[reportingFeatureId];
       if (!reportingFeature.showLinks || !reportingFeature.enableLinks) {
-        reply(Boom.forbidden(reportingFeature.message));
+        throw Boom.forbidden(reportingFeature.message);
       } else {
-        reply(reportingFeature);
+        return reportingFeature;
       }
     };
   };

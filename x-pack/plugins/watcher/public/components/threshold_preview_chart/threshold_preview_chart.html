@@ -2,9 +2,9 @@
   <p
     class="thresholdPreviewChartNoData"
     ng-if="!thresholdPreviewChart.isDataExists"
-  >
-    Your index and condition did not return any data
-  </p>
+    i18n-id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
+    i18n-default-message="Your index and condition did not return any data"
+  ></p>
   <flot-chart
     ng-if="thresholdPreviewChart.isDataExists"
     data="thresholdPreviewChart.data"

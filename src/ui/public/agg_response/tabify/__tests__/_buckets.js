@@ -53,6 +53,87 @@ describe('Buckets wrapper', function () {
     const keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
+
+    it('should accept filters agg queries with strings', () => {
+      const aggResp = {
+        buckets: {
+          'response:200': {},
+          'response:404': {},
+        }
+      };
+
+      const aggParams = {
+        filters: [
+          {
+            label: '',
+            input: { query: 'response:200' },
+          },
+          {
+            label: '',
+            input: { query: 'response:404' },
+          },
+        ],
+      };
+
+      const buckets = new TabifyBuckets(aggResp, aggParams);
+      expect(buckets).to.have.length(2);
+      buckets._keys.forEach((key) => {
+        expect(key).to.be.a('string');
+      });
+    });
+
+    it('should accept filters agg queries with query_string queries', () => {
+      const aggResp = {
+        buckets: {
+          'response:200': {},
+          'response:404': {},
+        }
+      };
+
+      const aggParams = {
+        filters: [
+          {
+            label: '',
+            input: { query: { query_string: { query: 'response:200' } } },
+          },
+          {
+            label: '',
+            input: { query: { query_string: { query: 'response:404' } } },
+          },
+        ],
+      };
+
+      const buckets = new TabifyBuckets(aggResp, aggParams);
+      expect(buckets).to.have.length(2);
+      buckets._keys.forEach((key) => {
+        expect(key).to.be.a('string');
+      });
+    });
+
+    it('should accept filters agg queries with query dsl queries', () => {
+      const aggResp = {
+        buckets: {
+          '{match_all: {}}': {},
+        }
+      };
+
+      const aggParams = {
+        filters: [
+          {
+            label: '',
+            input: { query: { match_all: {} } },
+          },
+        ],
+      };
+
+      const buckets = new TabifyBuckets(aggResp, aggParams);
+      expect(buckets).to.have.length(1);
+      buckets._keys.forEach((key) => {
+        expect(key).to.be.a('string');
+      });
+    });
+
+
   });
 
   describe('with array style buckets', function () {

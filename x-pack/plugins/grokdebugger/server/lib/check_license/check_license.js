@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export function checkLicense(xpackLicenseInfo) {
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable the Watcher UI
@@ -11,7 +13,12 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       enableLink: false,
       enableAPIRoute: false,
-      message: 'You cannot use the Grok Debugger because license information is not available at this time.'
+      message: i18n.translate('xpack.grokDebugger.unavailableLicenseInformationMessage', {
+        defaultMessage: 'You cannot use the {grokLogParsingTool} Debugger because license information is not available at this time.',
+        values: {
+          grokLogParsingTool: 'Grok'
+        }
+      }),
     };
   }
 
@@ -23,7 +30,13 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       enableLink: false,
       enableAPIRoute: false,
-      message: `You cannot use the Grok Debugger because your ${licenseType} license has expired.`
+      message: i18n.translate('xpack.grokDebugger.licenseHasExpiredMessage', {
+        defaultMessage: 'You cannot use the {grokLogParsingTool} Debugger because your {licenseType} license has expired.',
+        values: {
+          licenseType,
+          grokLogParsingTool: 'Grok'
+        },
+      }),
     };
   }
 

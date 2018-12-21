@@ -49,6 +49,12 @@ describe('leastCommonInterval', () => {
       leastCommonInterval('60 s', '1m');
     }).toThrowError();
     expect(() => {
+      leastCommonInterval('1m', '2m');
+    }).toThrowError();
+    expect(() => {
+      leastCommonInterval('1h', '2h');
+    }).toThrowError();
+    expect(() => {
       leastCommonInterval('1d', '7d');
     }).toThrowError();
     expect(() => {

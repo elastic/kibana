@@ -24,6 +24,7 @@ import {
 
 import { docExistsSuite } from './doc_exists';
 import { docMissingSuite } from './doc_missing';
+import { docMissingAndIndexReadOnlySuite } from './doc_missing_and_index_read_only';
 import { indexMissingSuite } from './index_missing';
 
 describe('uiSettings/routes', function () {
@@ -49,6 +50,7 @@ describe('uiSettings/routes', function () {
   before(startServers);
   describe('index missing', indexMissingSuite);
   describe('doc missing', docMissingSuite);
+  describe('doc missing and index readonly', docMissingAndIndexReadOnlySuite);
   describe('doc exists', docExistsSuite);
   after(stopServers);
 });

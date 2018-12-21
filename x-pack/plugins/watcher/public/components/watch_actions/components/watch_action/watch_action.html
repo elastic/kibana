@@ -23,9 +23,10 @@
       </span>
       <span
         class="watchActionErrorMessage"
-        ng-if="watchAction.isCollapsed && !watchAction.isValid">
-        There are errors in this action that need to be addressed before you can save.
-      </span>
+        ng-if="watchAction.isCollapsed && !watchAction.isValid"
+        i18n-id="xpack.watcher.watchActions.errorInActionValidationMessage"
+        i18n-default-message="There are errors in this action that need to be addressed before you can save."
+      ></span>
     </span>
   </button>
   <div
@@ -47,9 +48,10 @@
         <button
           class="kuiButton kuiButton--danger kuiButton--iconText watchActionDeleteButton"
           ng-click="watchAction.onDelete(watchAction.action)"
-        >
-          Remove {{watchAction.action.typeName}} Action
-        </button>
+          i18n-id="xpack.watcher.watchActions.removeActionButtonLabel"
+          i18n-default-message="Remove {actionTypeName} Action"
+          i18n-values="{ actionTypeName: watchAction.action.typeName }"
+        ></button>
       </div>
   </div>
 </div>

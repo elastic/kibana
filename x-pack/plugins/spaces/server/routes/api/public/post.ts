@@ -13,7 +13,8 @@ export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'POST',
     path: '/api/spaces/space',
-    async handler(request: any, reply: any) {
+    async handler(request: any) {
+      server.log(['spaces', 'debug'], `Inside POST /api/spaces/space`);
       const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
@@ -22,12 +23,14 @@ export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
       const space = request.payload;
 
       try {
-        return reply(await spacesClient.create(space));
+        server.log(['spaces', 'debug'], `Attempting to create space`);
+        return await spacesClient.create(space);
       } catch (error) {
         if (SavedObjectsClient.errors.isConflictError(error)) {
-          return reply(Boom.conflict(`A space with the identifier ${space.id} already exists.`));
+          return Boom.conflict(`A space with the identifier ${space.id} already exists.`);
         }
-        return reply(wrapError(error));
+        server.log(['spaces', 'debug'], `Error creating space: ${error}`);
+        return wrapError(error);
       }
     },
     config: {

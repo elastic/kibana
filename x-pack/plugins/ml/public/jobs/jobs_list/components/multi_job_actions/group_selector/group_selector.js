@@ -5,6 +5,7 @@
  */
 
 
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import PropTypes from 'prop-types';
 import React, {
   Component,
@@ -24,7 +25,6 @@ import {
 
 import { cloneDeep } from 'lodash';
 
-import './styles/main.less';
 import { ml } from '../../../../../services/ml_api_service';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
@@ -66,6 +66,7 @@ export class GroupSelector extends Component {
     };
 
     this.refreshJobs = this.props.refreshJobs;
+    this.canUpdateJob = checkPermission('canUpdateJob');
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -204,6 +205,7 @@ export class GroupSelector extends Component {
           iconType="indexEdit"
           aria-label="Edit job groups"
           onClick={() => this.togglePopover()}
+          disabled={this.canUpdateJob === false}
         />
       </EuiToolTip>
     );

@@ -2,6 +2,108 @@
 
 exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
 <UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isManualUpgrade={true}
   isNewPipeline={true}
   onClose={[MockFunction]}
@@ -75,6 +177,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                   >
                     <EuiTitle
                       size="m"
+                      textTransform="none"
                     >
                       <UpgradeFailureTitle
                         className="euiTitle euiTitle--medium"
@@ -107,11 +210,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -120,11 +219,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                       className="euiIcon euiIcon--xLarge"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -153,6 +248,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                               >
                                 <EuiTitle
                                   size="m"
+                                  textTransform="none"
                                 >
                                   <h2
                                     className="euiTitle euiTitle--medium"
@@ -175,9 +271,10 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                     </EuiSpacer>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p
                           style={
@@ -279,7 +376,13 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                 <span
                                   className="euiButtonEmpty__text"
                                 >
-                                  Go back
+                                  <FormattedMessage
+                                    defaultMessage="Go back"
+                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                    values={Object {}}
+                                  >
+                                    Go back
+                                  </FormattedMessage>
                                 </span>
                               </span>
                             </button>
@@ -301,6 +404,108 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
 
 exports[`UpgradeFailure component passes expected text for not manual upgrade 1`] = `
 <UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isManualUpgrade={false}
   isNewPipeline={true}
   onClose={[MockFunction]}
@@ -374,6 +579,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                   >
                     <EuiTitle
                       size="m"
+                      textTransform="none"
                     >
                       <UpgradeFailureTitle
                         className="euiTitle euiTitle--medium"
@@ -406,11 +612,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -419,11 +621,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                       className="euiIcon euiIcon--xLarge"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -452,6 +650,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                               >
                                 <EuiTitle
                                   size="m"
+                                  textTransform="none"
                                 >
                                   <h2
                                     className="euiTitle euiTitle--medium"
@@ -474,9 +673,10 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                     </EuiSpacer>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p
                           style={
@@ -578,7 +778,13 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                 <span
                                   className="euiButtonEmpty__text"
                                 >
-                                  Go back
+                                  <FormattedMessage
+                                    defaultMessage="Go back"
+                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                    values={Object {}}
+                                  >
+                                    Go back
+                                  </FormattedMessage>
                                 </span>
                               </span>
                             </button>
@@ -600,6 +806,108 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
 
 exports[`UpgradeFailure component passes expected text for not new pipeline 1`] = `
 <UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isManualUpgrade={true}
   isNewPipeline={false}
   onClose={[MockFunction]}
@@ -673,6 +981,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                   >
                     <EuiTitle
                       size="m"
+                      textTransform="none"
                     >
                       <UpgradeFailureTitle
                         className="euiTitle euiTitle--medium"
@@ -705,11 +1014,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -718,11 +1023,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                       className="euiIcon euiIcon--xLarge"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -751,6 +1052,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                               >
                                 <EuiTitle
                                   size="m"
+                                  textTransform="none"
                                 >
                                   <h2
                                     className="euiTitle euiTitle--medium"
@@ -773,9 +1075,10 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                     </EuiSpacer>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p
                           style={
@@ -877,7 +1180,13 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                 <span
                                   className="euiButtonEmpty__text"
                                 >
-                                  Go back
+                                  <FormattedMessage
+                                    defaultMessage="Go back"
+                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                    values={Object {}}
+                                  >
+                                    Go back
+                                  </FormattedMessage>
                                 </span>
                               </span>
                             </button>

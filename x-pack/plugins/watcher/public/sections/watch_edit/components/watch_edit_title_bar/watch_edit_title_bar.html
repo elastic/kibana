@@ -1,6 +1,10 @@
 <div class="kuiBar">
   <div class="kuiBarSection">
-    <h2 class="euiTitle euiTitle--medium">New watch</h2>
+    <h2
+      class="euiTitle euiTitle--medium"
+      i18n-id="xpack.watcher.sections.watchEdit.titleBar.newWatchTitle"
+      i18n-default-message="New watch"
+      ></h2>
   </div>
   <div class="kuiBarSection">
     <div class="kuiButtonGroup">
@@ -9,25 +13,25 @@
         ng-disabled="!watchEditTitleBar.isWatchValid"
         ng-click="watchEditTitleBar.onWatchSave()"
         data-test-subj="btnSaveWatch"
-      >
-        Save
-      </button>
+        i18n-id="xpack.watcher.sections.watchEdit.titleBar.saveButtonLabel"
+        i18n-default-message="Save"
+      ></button>
       <button
         class="kuiButton kuiButton--basic"
         ng-click="watchEditTitleBar.onClose()"
         data-test-subj="btnCancel"
-      >
-        Cancel
-      </button>
+        i18n-id="xpack.watcher.sections.watchEdit.titleBar.cancelButtonLabel"
+        i18n-default-message="Cancel"
+      ></button>
       <button
         ng-if="!watchEditTitleBar.watch.isNew"
         class="kuiButton kuiButton--danger kuiButton--iconText"
         ng-click="watchEditTitleBar.onWatchDelete()"
-        tooltip="Delete Watch"
+        tooltip="{{ 'xpack.watcher.sections.watchEdit.titleBar.deleteButtonTooltip' | i18n: { defaultMessage: 'Delete Watch' } }}"
         data-test-subj="btnDeleteWatch"
-      >
-        Delete
-      </button>
+        i18n-id="xpack.watcher.sections.watchEdit.titleBar.deleteButtonLabel"
+        i18n-default-message="Delete"
+      ></button>
     </div>
   </div>
 </div>

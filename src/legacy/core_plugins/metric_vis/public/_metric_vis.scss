@@ -1,0 +1,32 @@
+.mtrVis {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.mtrVis__value {
+  @include euiTextTruncate;
+  font-weight: $euiFontWeightBold;
+}
+
+.mtrVis__container {
+  text-align: center;
+  padding: $euiSize;
+}
+
+.mtrVis__container--light {
+  color: $euiColorEmptyShade;
+}
+
+.mtrVis__container-isFilterable {
+  cursor: pointer;
+  transition: transform $euiAnimSpeedNormal $euiAnimSlightResistance;
+  transform: translate(0, 0);
+
+  &:hover, &:focus {
+    box-shadow: none;
+    transform: translate(0, -2px);
+  }
+}

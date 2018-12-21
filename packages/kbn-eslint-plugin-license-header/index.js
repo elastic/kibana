@@ -20,6 +20,6 @@
 module.exports = {
   rules: {
     'require-license-header': require('./rules/require_license_header'),
-    'remove-outdated-license-header': require('./rules/remove_outdated_license_header'),
+    'disallow-license-headers': require('./rules/disallow_license_headers'),
   },
 };

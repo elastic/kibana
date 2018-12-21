@@ -15,7 +15,7 @@ function telemetryStart($injector) {
   if (telemetryEnabled) {
     const Private = $injector.get('Private');
     // no telemetry for non-logged in users
-    if (Private(PathProvider).isLoginOrLogout()) { return; }
+    if (Private(PathProvider).isUnauthenticated()) { return; }
 
     const $http = $injector.get('$http');
     const sender = new Telemetry($injector, () => fetchTelemetry($http));

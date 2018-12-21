@@ -35,13 +35,13 @@ export function jobs(server) {
   server.route({
     path: `${mainEntry}/list`,
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const page = parseInt(request.query.page) || 0;
       const size = Math.min(100, parseInt(request.query.size) || 10);
       const jobIds = request.query.ids ? request.query.ids.split(',') : null;
 
       const results = jobsQuery.list(request.pre.management.jobTypes, request.pre.user, page, size, jobIds);
-      reply(results);
+      return results;
     },
     config: getRouteConfig(),
   });
@@ -50,9 +50,9 @@ export function jobs(server) {
   server.route({
     path: `${mainEntry}/count`,
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
-      reply(results);
+      return results;
     },
     config: getRouteConfig(),
   });
@@ -61,21 +61,51 @@ export function jobs(server) {
   server.route({
     path: `${mainEntry}/output/{docId}`,
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const { docId } = request.params;
 
-      jobsQuery.get(request.pre.user, docId, { includeContent: true })
+      return jobsQuery.get(request.pre.user, docId, { includeContent: true })
         .then((doc) => {
           if (!doc) {
-            return reply(boom.notFound());
+            return boom.notFound();
           }
 
           const { jobtype: jobType } = doc._source;
           if (!request.pre.management.jobTypes.includes(jobType)) {
-            return reply(boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`));
+            return boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
           }
 
-          reply(doc._source.output);
+          return doc._source.output;
+        });
+    },
+    config: getRouteConfig(),
+  });
+
+  // return some info about the job
+  server.route({
+    path: `${mainEntry}/info/{docId}`,
+    method: 'GET',
+    handler: (request) => {
+      const { docId } = request.params;
+
+      return jobsQuery.get(request.pre.user, docId)
+        .then((doc) => {
+          if (!doc) {
+            return boom.notFound();
+          }
+
+          const { jobtype: jobType } = doc._source;
+          if (!request.pre.management.jobTypes.includes(jobType)) {
+            return boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+          }
+
+          const { payload } = doc._source;
+          payload.headers = 'not shown';
+
+          return {
+            ...doc._source,
+            payload
+          };
         });
     },
     config: getRouteConfig(),
@@ -90,13 +120,25 @@ export function jobs(server) {
   server.route({
     path: `${mainEntry}/download/{docId}`,
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const { docId } = request.params;
 
-      const response = await jobResponseHandler(request.pre.management.jobTypes, request.pre.user, reply, { docId });
-      if (!response.isBoom) {
-        response.header('accept-ranges', 'none');
+      let response = await jobResponseHandler(request.pre.management.jobTypes, request.pre.user, h, { docId });
+      const { statusCode } = response;
+
+      if (statusCode !== 200) {
+        const logLevel = statusCode === 500 ? 'error' : 'debug';
+        server.log(
+          [logLevel, "reporting", "download"],
+          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(response.source)}]`
+        );
       }
+
+      if (!response.isBoom) {
+        response = response.header('accept-ranges', 'none');
+      }
+
+      return response;
     },
     config: {
       ...getRouteConfig(),

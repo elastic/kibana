@@ -12,13 +12,14 @@ import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { getCreateMultiMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
@@ -30,9 +31,10 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
@@ -46,6 +48,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/jobs/new_job/simple/multi_metric', {
     template,
+    k7Breadcrumbs: getCreateMultiMetricJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
@@ -63,7 +66,7 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlCreateMultiMetricJob', function (
     $scope,
-    $route,
+    $timeout,
     Private,
     AppState) {
 
@@ -107,12 +110,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
@@ -128,6 +132,7 @@ module
       formValid: false,
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
+      cardinalityValidator: { status: 0, message: '' },
       aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
       fields: [],
       splitFields: [],
@@ -196,10 +201,12 @@ module
       query,
       filters,
       combinedQuery,
+      usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
       description: '',
       jobGroups: [],
       useDedicatedIndex: false,
+      enableModelPlot: false,
       isSparseData: false,
       modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT
     };
@@ -495,6 +502,8 @@ module
                     $scope.formConfig.end,
                     'explorer');
 
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -508,6 +517,9 @@ module
           });
       }
     };
+
+    // expose this function so it can be used in the enable model plot checkbox directive
+    $scope.getJobFromConfig = mlMultiMetricJobService.getJobFromConfig;
 
     addJobValidationMethods($scope, mlMultiMetricJobService);
 
@@ -547,6 +559,7 @@ module
                   }
                 } else {
                   $scope.jobState = JOB_STATE.FINISHED;
+                  focusOnResultsLink('job_finished_view_results_link', $timeout);
                 }
                 jobCheck();
               });
@@ -626,12 +639,13 @@ module
       moveToAdvancedJobCreation(job);
     };
 
+    let lastEstimatedModelMemoryLimit = null;
     $scope.setModelMemoryLimit = function () {
       const formConfig = $scope.formConfig;
       ml.calculateModelMemoryLimit({
         indexPattern: formConfig.indexPattern.title,
         splitFieldName: formConfig.splitField.name,
-        query: formConfig.query,
+        query: formConfig.combinedQuery,
         fieldNames: Object.keys(formConfig.fields),
         influencerNames: formConfig.influencerFields.map(f => f.name),
         timeFieldName: formConfig.timeField,
@@ -639,10 +653,32 @@ module
         latestMs: formConfig.end
       })
         .then((resp) => {
-          formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          // To avoid overwriting a possible custom set model memory limit,
+          // it only gets set to the estimation if the current limit is either
+          // the default value or the value of the previous estimation.
+          // That's our best guess if the value hasn't been customized.
+          // It doesn't get it if the user intentionally for whatever reason (re)set
+          // the value to either the default or pervious estimate.
+          // Because the string based limit could contain e.g. MB/Mb/mb
+          // all strings get lower cased for comparison.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
+          if (
+            currentModelMemoryLimit === defaultModelMemoryLimit ||
+            currentModelMemoryLimit === lastEstimatedModelMemoryLimit
+          ) {
+            formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          }
+          lastEstimatedModelMemoryLimit = resp.modelMemoryLimit.toLowerCase();
         })
         .catch(() => {
-          formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          // To avoid overwriting a possible custom set model memory limit,
+          // the limit is reset to the default only if the current limit matches
+          // the previous estimated limit.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          if (currentModelMemoryLimit === lastEstimatedModelMemoryLimit) {
+            formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          }
         });
     };
 

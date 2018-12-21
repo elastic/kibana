@@ -18,13 +18,15 @@
  */
 
 import _ from 'lodash';
-// Takes a hit, merges it with any stored/scripted fields, and with the metaFields
-// returns a flattened version
+
 export function getComputedFields() {
   const self = this;
   const scriptFields = {};
   let docvalueFields = [];
 
+  // Date value returned in "_source" could be in any number of formats
+  // Use a docvalue for each date field to ensure standardized formats when working with date fields
+  // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
   docvalueFields = _.reject(self.fields.byType.date, 'scripted')
     .map((dateField) => {
       return {

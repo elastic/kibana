@@ -21,7 +21,8 @@ export const axisConfig = () => ({
     },
     position: {
       types: ['string'],
-      help: 'Position of the axis labels. Eg, top, bottom, left, and right.',
+      help: 'Position of the axis labels - top, bottom, left, and right',
+      options: ['top', 'bottom', 'left', 'right'],
       default: '',
     },
     min: {
@@ -41,7 +42,9 @@ export const axisConfig = () => ({
   },
   fn: (context, args) => {
     const positions = ['top', 'bottom', 'left', 'right', ''];
-    if (!positions.includes(args.position)) throw new Error(`Invalid position ${args.position}`);
+    if (!positions.includes(args.position)) {
+      throw new Error(`Invalid position ${args.position}`);
+    }
 
     const min = typeof args.min === 'string' ? moment.utc(args.min).valueOf() : args.min;
     const max = typeof args.max === 'string' ? moment.utc(args.max).valueOf() : args.max;

@@ -3,11 +3,39 @@
   ng-change="watchHistoryRangeFilter.onRangeChange(watchHistoryRangeFilter.range)"
   class="kuiSelect"
 >
-  <option value="now-1h">Last 1 hour</option>
-  <option value="now-24h">Last 24 hours</option>
-  <option value="now-7d">Last 7 days</option>
-  <option value="now-30d">Last 30 days</option>
-  <option value="now-6M">Last 6 months</option>
-  <option value="now-1y">Last 1 year</option>
-  <option value="all">All</option>
+  <option
+    value="now-1h"
+    i18n-id="xpack.watcher.sections.watchDetail.watchHistoryRangeFilter.last1HourLabel"
+    i18n-default-message="Last 1 hour"
+  ></option>
+  <option
+    value="now-24h"
+    i18n-id="xpack.watcher.sections.watchDetail.watchHistoryRangeFilter.last24HoursLabel"
+    i18n-default-message="Last 24 hours"
+  ></option>
+  <option
+    value="now-7d"
+    i18n-id="xpack.watcher.sections.watchDetail.watchHistoryRangeFilter.last7DaysLabel"
+    i18n-default-message="Last 7 days"
+  ></option>
+  <option
+    value="now-30d"
+    i18n-id="xpack.watcher.sections.watchDetail.watchHistoryRangeFilter.last30DaysLabel"
+    i18n-default-message="Last 30 days"
+  ></option>
+  <option
+    value="now-6M"
+    i18n-id="xpack.watcher.sections.watchDetail.watchHistoryRangeFilter.last6MonthsLabel"
+    i18n-default-message="Last 6 months"
+  ></option>
+  <option
+    value="now-1y"
+    i18n-id="xpack.watcher.sections.watchDetail.watchHistoryRangeFilter.last1YearLabel"
+    i18n-default-message="Last 1 year"
+  ></option>
+  <option
+    value="all"
+    i18n-id="xpack.watcher.sections.watchDetail.watchHistoryRangeFilter.allLabel"
+    i18n-default-message="All"
+  ></option>
 </select>

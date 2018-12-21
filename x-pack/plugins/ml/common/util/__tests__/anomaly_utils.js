@@ -284,19 +284,19 @@ describe('ML - anomaly utils', () => {
 
   describe('getMultiBucketImpactLabel', () => {
 
-    it('returns high for 4 <= score <= 5', () => {
-      expect(getMultiBucketImpactLabel(4)).to.be('high');
+    it('returns high for 3 <= score <= 5', () => {
+      expect(getMultiBucketImpactLabel(3)).to.be('high');
       expect(getMultiBucketImpactLabel(5)).to.be('high');
     });
 
-    it('returns medium for 3 <= score < 4', () => {
-      expect(getMultiBucketImpactLabel(3)).to.be('medium');
-      expect(getMultiBucketImpactLabel(3.99)).to.be('medium');
+    it('returns medium for 2 <= score < 3', () => {
+      expect(getMultiBucketImpactLabel(2)).to.be('medium');
+      expect(getMultiBucketImpactLabel(2.99)).to.be('medium');
     });
 
-    it('returns low for 1 <= score < 3', () => {
+    it('returns low for 1 <= score < 2', () => {
       expect(getMultiBucketImpactLabel(1)).to.be('low');
-      expect(getMultiBucketImpactLabel(2.99)).to.be('low');
+      expect(getMultiBucketImpactLabel(1.99)).to.be('low');
     });
 
     it('returns none for -5 <= score < 1', () => {

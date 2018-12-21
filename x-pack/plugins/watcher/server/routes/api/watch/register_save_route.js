@@ -25,22 +25,20 @@ export function registerSaveRoute(server) {
   server.route({
     path: '/api/watcher/watch/{id}',
     method: 'PUT',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       const watch = Watch.fromDownstreamJson(request.payload);
 
       return saveWatch(callWithRequest, watch.upstreamJson)
-        .then(reply)
         .catch(err => {
-
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

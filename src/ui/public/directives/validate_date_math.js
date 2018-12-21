@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import { uiModules } from '../modules';
 
 uiModules.get('kibana').directive('validateDateMath', function () {

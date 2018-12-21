@@ -6,12 +6,24 @@
 
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function AddRoleAlert() {
   return (
     <p>
-      <strong>Grant additional privileges. </strong>
-      In Kibana Management, assign the <EuiCode>monitoring_user</EuiCode> role to your Kibana user.
+      <strong>
+        <FormattedMessage
+          id="xpack.logstash.addRoleAlert.grantAdditionalPrivilegesTitle"
+          defaultMessage="Grant additional privileges."
+        />
+      </strong>
+      <FormattedMessage
+        id="xpack.logstash.addRoleAlert.grantAdditionalPrivilegesDescription"
+        defaultMessage="In Kibana Management, assign the {role} role to your Kibana user."
+        values={{
+          role: <EuiCode>monitoring_user</EuiCode>,
+        }}
+      />
     </p>
   );
 }

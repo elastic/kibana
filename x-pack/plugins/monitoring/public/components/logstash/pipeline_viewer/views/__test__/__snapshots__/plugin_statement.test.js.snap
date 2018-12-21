@@ -29,6 +29,7 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
+          aria-label="mutate"
           className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
@@ -122,6 +123,7 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
         grow={false}
       >
         <EuiButtonEmpty
+          aria-label="mutate"
           className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
@@ -215,6 +217,7 @@ exports[`PluginStatement component does not render explicit id field if no id is
         grow={false}
       >
         <EuiButtonEmpty
+          aria-label="stdin"
           className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
@@ -283,6 +286,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
         grow={false}
       >
         <EuiButtonEmpty
+          aria-label="stdin"
           className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
@@ -364,6 +368,7 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
+          aria-label="mutate"
           className="monPipelineViewer__plugin"
           color="primary"
           flush="left"

@@ -132,7 +132,9 @@ export default function ({ getService }) {
           'roles',
           'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
 
         expect(apiResponse.body.username).to.be('a@b.c');
@@ -171,7 +173,9 @@ export default function ({ getService }) {
           'roles',
           'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
 
         expect(apiResponse.body.username).to.be('a@b.c');
@@ -271,7 +275,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic AbCdEf')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(400);
+          .expect(401);
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });

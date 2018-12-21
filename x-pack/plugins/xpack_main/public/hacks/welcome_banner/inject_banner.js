@@ -31,7 +31,7 @@ async function asyncInjectBanner($injector) {
   }
 
   // and no banner for non-logged in users
-  if (Private(PathProvider).isLoginOrLogout()) {
+  if (Private(PathProvider).isUnauthenticated()) {
     return;
   }
 

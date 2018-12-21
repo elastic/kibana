@@ -25,6 +25,8 @@ describe('get_beat_summary', () => {
       bytesWritten: null,
       configReloads: null,
       uptime: null,
+      handlesHardLimit: null,
+      handlesSoftLimit: null
     });
   });
 
@@ -46,6 +48,12 @@ describe('get_beat_summary', () => {
                     info: {
                       uptime: {
                         ms: 32 * 1000 * 1000 * 1000,
+                      }
+                    },
+                    handles: {
+                      limit: {
+                        hard: 14000,
+                        soft: 14000
                       }
                     }
                   },
@@ -119,6 +127,8 @@ describe('get_beat_summary', () => {
       bytesWritten: 16000000,
       configReloads: 17,
       uptime: 32000000000,
+      handlesHardLimit: 14000,
+      handlesSoftLimit: 14000
     });
   });
 
@@ -140,6 +150,12 @@ describe('get_beat_summary', () => {
                     info: {
                       uptime: {
                         ms: 32 * 1000 * 1000
+                      }
+                    },
+                    handles: {
+                      limit: {
+                        hard: 14000,
+                        soft: 14000
                       }
                     }
                   },
@@ -213,6 +229,8 @@ describe('get_beat_summary', () => {
       bytesWritten: null,
       configReloads: 18,
       uptime: 32000000,
+      handlesHardLimit: 14000,
+      handlesSoftLimit: 14000
     });
   });
 });

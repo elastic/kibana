@@ -21,11 +21,13 @@ describe('StatementList', () => {
           id: 'mutateIf',
           parentId: null,
           depth: 0,
+          statement: { },
         },
         {
           id: 'mutate',
           parentId: 'mutateIf',
           depth: 1,
+          statement: { },
         },
       ],
       onShowVertexDetails,

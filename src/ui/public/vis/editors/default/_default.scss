@@ -101,11 +101,12 @@
   }
 
   .visualize {
-    @include flex-parent();
+    display: flex;
+    flex-direction: column;
     flex: 1 1 100%;
   }
 
-  .visualize-chart {
+  .visChart {
     position: relative;
   }
 }

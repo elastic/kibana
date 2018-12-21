@@ -27,7 +27,7 @@ describe('dev/i18n/serializers/json', () => {
         'plugin2.message.id-2',
         {
           message: 'Message text 2',
-          context: 'Message context',
+          description: 'Message description',
         },
       ],
     ]);

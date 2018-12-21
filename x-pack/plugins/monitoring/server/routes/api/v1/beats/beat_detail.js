@@ -30,7 +30,7 @@ export function beatsDetailRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
 
       const clusterUuid = req.params.clusterUuid;
       const beatUuid = req.params.beatUuid;
@@ -51,12 +51,12 @@ export function beatsDetailRoute(server) {
           getMetrics(req, beatsIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
         ]);
 
-        reply({
+        return {
           summary,
           metrics,
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
 
     }

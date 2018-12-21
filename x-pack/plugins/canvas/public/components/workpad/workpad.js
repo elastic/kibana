@@ -7,8 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
+import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
+import { setDocTitle } from '../../lib/doc_title';
 
 export const Workpad = props => {
   const {
@@ -37,17 +39,31 @@ export const Workpad = props => {
   const keyHandler = action => {
     // handle keypress events for editor and presentation events
     // this exists in both contexts
-    if (action === 'REFRESH') return fetchAllRenderables();
+    if (action === 'REFRESH') {
+      return fetchAllRenderables();
+    }
 
     // editor events
-    if (action === 'UNDO') return undoHistory();
-    if (action === 'REDO') return redoHistory();
-    if (action === 'GRID') return setGrid(!grid);
+    if (action === 'UNDO') {
+      return undoHistory();
+    }
+    if (action === 'REDO') {
+      return redoHistory();
+    }
+    if (action === 'GRID') {
+      return setGrid(!grid);
+    }
 
     // presentation events
-    if (action === 'PREV') return previousPage();
-    if (action === 'NEXT') return nextPage();
+    if (action === 'PREV') {
+      return previousPage();
+    }
+    if (action === 'NEXT') {
+      return nextPage();
+    }
   };
+
+  setDocTitle(workpad.name);
 
   return (
     <div className="canvasWorkpad__buffer" style={bufferStyle}>
@@ -72,7 +88,8 @@ export const Workpad = props => {
               : {};
 
             // NOTE: the data-shared-* attributes here are used for reporting
-            return (
+            return Style.it(
+              workpad.css,
               <div
                 className={`canvasWorkpad ${isFullscreen ? 'fullscreen' : ''}`}
                 style={fsStyle}
@@ -125,5 +142,5 @@ Workpad.propTypes = {
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   fetchAllRenderables: PropTypes.func.isRequired,
-  style: PropTypes.object,
+  css: PropTypes.object,
 };

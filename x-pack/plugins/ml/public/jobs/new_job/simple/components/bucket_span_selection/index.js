@@ -7,4 +7,3 @@
 
 
 import './bucket_span_selection_directive';
-import './styles/main.less';

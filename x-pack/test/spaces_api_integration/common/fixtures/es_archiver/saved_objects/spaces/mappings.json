@@ -55,6 +55,9 @@
               }
             }
           },
+          "namespace": {
+            "type": "keyword"
+          },
           "dashboard": {
             "properties": {
               "description": {

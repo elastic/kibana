@@ -8,6 +8,8 @@ import { get, map, pick } from 'lodash';
 import { badRequest } from 'boom';
 import { Action } from '../action';
 import { WatchStatus } from '../watch_status';
+import { i18n } from '@kbn/i18n';
+import { WatchErrors } from '../watch_errors';
 
 export class BaseWatch {
   // This constructor should not be used directly.
@@ -21,6 +23,7 @@ export class BaseWatch {
     this.isSystemWatch = false;
 
     this.watchStatus = props.watchStatus;
+    this.watchErrors = props.watchErrors;
     this.actions = props.actions;
   }
 
@@ -56,6 +59,7 @@ export class BaseWatch {
       type: this.type,
       isSystemWatch: this.isSystemWatch,
       watchStatus: this.watchStatus ? this.watchStatus.downstreamJson : undefined,
+      watchErrors: this.watchErrors ? this.watchErrors.downstreamJson : undefined,
       actions: map(this.actions, (action) => action.downstreamJson)
     };
 
@@ -86,15 +90,36 @@ export class BaseWatch {
   }
 
   // from Elasticsearch
-  static getPropsFromUpstreamJson(json) {
+  static getPropsFromUpstreamJson(json, options) {
     if (!json.id) {
-      throw badRequest('json argument must contain an id property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.baseWatch.idPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
+        }),
+      );
     }
     if (!json.watchJson) {
-      throw badRequest('json argument must contain a watchJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.baseWatch.watchJsonPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {watchJson} property',
+          values: {
+            watchJson: 'watchJson'
+          }
+        }),
+      );
     }
     if (!json.watchStatusJson) {
-      throw badRequest('json argument must contain a watchStatusJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.baseWatch.watchStatusJsonPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {watchStatusJson} property',
+          values: {
+            watchStatusJson: 'watchStatusJson'
+          }
+        }),
+      );
     }
 
     const id = json.id;
@@ -113,12 +138,15 @@ export class BaseWatch {
 
     const actionsJson = get(watchJson, 'actions', {});
     const actions = map(actionsJson, (actionJson, actionId) => {
-      return Action.fromUpstreamJson({ id: actionId, actionJson });
+      return Action.fromUpstreamJson({ id: actionId, actionJson }, options);
     });
+
+    const watchErrors = WatchErrors.fromUpstreamJson(this.getWatchErrors(actions));
 
     const watchStatus = WatchStatus.fromUpstreamJson({
       id,
-      watchStatusJson
+      watchStatusJson,
+      watchErrors,
     });
 
     return {
@@ -126,7 +154,31 @@ export class BaseWatch {
       name,
       watchJson,
       watchStatus,
+      watchErrors,
       actions
     };
+  }
+
+  /**
+   * Retrieve all the errors in the watch
+   *
+   * @param {array} actions - Watch actions
+   */
+  static getWatchErrors(actions) {
+    const watchErrors = {};
+
+    // Check for errors in Actions
+    const actionsErrors = actions.reduce((acc, action) => {
+      if (action.errors) {
+        acc[action.id] = action.errors;
+      }
+      return acc;
+    }, {});
+
+    if (Object.keys(actionsErrors).length) {
+      watchErrors.actions = actionsErrors;
+    }
+
+    return watchErrors;
   }
 }

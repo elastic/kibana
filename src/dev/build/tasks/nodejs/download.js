@@ -52,11 +52,7 @@ export async function download(options) {
   try {
     log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
 
-    const request = wreck.request('GET', url);
-    const response = await Promise.race([
-      new Promise(resolve => request.once('response', resolve)),
-      new Promise((resolve, reject) => request.once('error', reject)),
-    ]);
+    const response = await wreck.request('GET', url);
 
     if (response.statusCode !== 200) {
       throw new Error(

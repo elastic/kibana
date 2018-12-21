@@ -21,16 +21,17 @@ import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 
-import { Messages, PlainMessages } from '../messages';
+import { Translation } from '../translation';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
+import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
 // Add all locale data to `IntlMessageFormat`.
 import './locales.js';
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
-const messages: Messages = {};
+const translationsForLocale: Record<string, Translation> = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
@@ -44,8 +45,9 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
  * Returns message by the given message id.
  * @param id - path to the message
  */
-function getMessageById(id: string): string {
-  return getMessages()[id];
+function getMessageById(id: string): string | undefined {
+  const translation = getTranslation();
+  return translation.messages ? translation.messages[id] : undefined;
 }
 
 /**
@@ -58,33 +60,38 @@ function normalizeLocale(locale: string) {
 
 /**
  * Provides a way to register translations with the engine
- * @param newMessages
+ * @param newTranslation
  * @param [locale = messages.locale]
  */
-export function addMessages(newMessages: PlainMessages = {}, locale = newMessages.locale) {
+export function addTranslation(newTranslation: Translation, locale = newTranslation.locale) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
 
-  if (newMessages.locale && newMessages.locale !== locale) {
+  if (newTranslation.locale && newTranslation.locale !== locale) {
     throw new Error(
-      '[I18n] A `locale` in the messages object is different from the one provided as a second argument.'
+      '[I18n] A `locale` in the translation object is different from the one provided as a second argument.'
     );
   }
 
   const normalizedLocale = normalizeLocale(locale);
+  const existingTranslation = translationsForLocale[normalizedLocale] || { messages: {} };
 
-  messages[normalizedLocale] = {
-    ...messages[normalizedLocale],
-    ...newMessages,
+  translationsForLocale[normalizedLocale] = {
+    formats: newTranslation.formats || existingTranslation.formats,
+    locale: newTranslation.locale || existingTranslation.locale,
+    messages: {
+      ...existingTranslation.messages,
+      ...newTranslation.messages,
+    },
   };
 }
 
 /**
  * Returns messages for the current language
  */
-export function getMessages(): PlainMessages {
-  return messages[currentLocale] || {};
+export function getTranslation(): Translation {
+  return translationsForLocale[currentLocale] || { messages: {} };
 }
 
 /**
@@ -154,13 +161,13 @@ export function getFormats() {
  * Returns array of locales having translations
  */
 export function getRegisteredLocales() {
-  return Object.keys(messages);
+  return Object.keys(translationsForLocale);
 }
 
 interface TranslateArguments {
   values?: { [key: string]: string | number | Date };
   defaultMessage?: string;
-  context?: string;
+  description?: string;
 }
 
 /**
@@ -177,25 +184,28 @@ export function translate(
     defaultMessage: '',
   }
 ) {
+  const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
+
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }
 
-  const message = getMessageById(id);
+  const message = shouldUsePseudoLocale ? defaultMessage : getMessageById(id);
 
   if (!message && !defaultMessage) {
     throw new Error(`[I18n] Cannot format message: "${id}". Default message must be provided.`);
   }
 
-  if (!hasValues(values)) {
-    return message || defaultMessage;
-  }
-
   if (message) {
     try {
-      const msg = getMessageFormat(message, getLocale(), getFormats());
+      // We should call `format` even for messages without any value references
+      // to let it handle escaped curly braces `\\{` that are the part of the text itself
+      // and not value reference boundaries.
+      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
 
-      return msg.format(values);
+      return shouldUsePseudoLocale
+        ? translateUsingPseudoLocale(formattedMessage)
+        : formattedMessage;
     } catch (e) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
@@ -214,20 +224,20 @@ export function translate(
 
 /**
  * Initializes the engine
- * @param newMessages
+ * @param newTranslation
  */
-export function init(newMessages?: PlainMessages) {
-  if (!newMessages) {
+export function init(newTranslation?: Translation) {
+  if (!newTranslation) {
     return;
   }
 
-  addMessages(newMessages);
+  addTranslation(newTranslation);
 
-  if (newMessages.locale) {
-    setLocale(newMessages.locale);
+  if (newTranslation.locale) {
+    setLocale(newTranslation.locale);
   }
 
-  if (newMessages.formats) {
-    setFormats(newMessages.formats);
+  if (newTranslation.formats) {
+    setFormats(newTranslation.formats);
   }
 }

@@ -24,11 +24,7 @@ import { join, relative, resolve } from 'path';
 import { getProjectPaths } from '../config';
 import { isDirectory, isFile } from '../utils/fs';
 import { log } from '../utils/log';
-import {
-  createProductionPackageJson,
-  readPackageJson,
-  writePackageJson,
-} from '../utils/package_json';
+import { readPackageJson, writePackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import {
   buildProjectGraph,
@@ -39,10 +35,10 @@ import {
 
 export async function buildProductionProjects({
   kibanaRoot,
-  buildRoot,
+  buildRoots,
 }: {
   kibanaRoot: string;
-  buildRoot: string;
+  buildRoots: string[];
 }) {
   const projects = await getProductionProjects(kibanaRoot);
   const projectGraph = buildProjectGraph(projects);
@@ -55,7 +51,9 @@ export async function buildProductionProjects({
     for (const project of batch) {
       await deleteTarget(project);
       await buildProject(project);
-      await copyToBuild(project, kibanaRoot, buildRoot);
+      for (const buildRoot of buildRoots) {
+        await copyToBuild(project, kibanaRoot, buildRoot);
+      }
     }
   }
 }
@@ -128,6 +126,5 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
     ? await readPackageJson(buildProjectPath)
     : project.json;
 
-  const preparedPackageJson = createProductionPackageJson(packageJson);
-  await writePackageJson(buildProjectPath, preparedPackageJson);
+  await writePackageJson(buildProjectPath, packageJson);
 }

@@ -30,7 +30,7 @@ export function registerVisualizeRoute(server) {
   server.route({
     path: '/api/watcher/watch/visualize',
     method: 'POST',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const watch = Watch.fromDownstreamJson(request.payload.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.payload.options);
@@ -40,17 +40,19 @@ export function registerVisualizeRoute(server) {
         .then(hits => {
           const visualizeData = watch.formatVisualizeData(hits);
 
-          reply({ visualizeData });
+          return {
+            visualizeData
+          };
         })
         .catch(err => {
 
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

@@ -1,0 +1,26 @@
+[role="xpack"]
+[[xpack-infra]]
+= Infrastructure
+
+[partintro]
+--
+beta[]
+ 
+Use the interactive Infrastructure UI to monitor your infrastructure and
+identify problems in real time. You can explore metrics and logs for common
+servers, containers, and services. 
+
+[role="screenshot"]
+image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
+
+
+[float]
+== Add data sources
+Kibana provides step-by-step instructions to help you add your data sources.
+The {infra-guide}[Infrastructure Monitoring Guide] is good source for more detailed
+instructions and information.
+
+--
+
+include::monitor.asciidoc[]
+include::infra-ui.asciidoc[]

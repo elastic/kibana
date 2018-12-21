@@ -19,4 +19,5 @@
 
 exports.installArchive = require('./archive').installArchive;
 exports.installSnapshot = require('./snapshot').installSnapshot;
+exports.downloadSnapshot = require('./snapshot').downloadSnapshot;
 exports.installSource = require('./source').installSource;

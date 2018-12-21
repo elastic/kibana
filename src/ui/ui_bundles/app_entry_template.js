@@ -33,10 +33,14 @@ import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
 
+import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
+const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
+i18n.init(injectedMetadata.legacyMetadata.translations);
+
 new CoreSystem({
-  injectedMetadata: JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data')),
+  injectedMetadata,
   rootDomElement: document.body,
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}

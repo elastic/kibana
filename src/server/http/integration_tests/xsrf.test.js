@@ -27,7 +27,7 @@ const xsrfHeader = 'kbn-xsrf';
 const versionHeader = 'kbn-version';
 const testPath = '/xsrf/test/route';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
-const actualVersion = require(src('../package.json')).version;
+const actualVersion = require(src('../package.json')).version; // eslint-disable-line import/no-dynamic-require
 
 describe('xsrf request filter', () => {
   let root;
@@ -44,8 +44,8 @@ describe('xsrf request filter', () => {
     kbnServer.server.route({
       path: testPath,
       method: 'GET',
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: async function () {
+        return 'ok';
       }
     });
 
@@ -58,8 +58,8 @@ describe('xsrf request filter', () => {
           parse: false
         }
       },
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: async function () {
+        return 'ok';
       }
     });
 
@@ -72,8 +72,8 @@ describe('xsrf request filter', () => {
           parse: false
         }
       },
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: async function () {
+        return 'ok';
       }
     });
   }, 30000);

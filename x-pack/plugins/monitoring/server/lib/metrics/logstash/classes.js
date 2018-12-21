@@ -8,6 +8,14 @@ import _ from 'lodash';
 import { ClusterMetric, Metric } from '../classes';
 import { LARGE_FLOAT } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+
+const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.msTimeUnitLabel', {
+  defaultMessage: 'ms'
+});
+const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.perSecondUnitLabel', {
+  defaultMessage: '/s'
+});
 
 export class LogstashClusterMetric extends ClusterMetric {
   constructor(opts) {
@@ -32,7 +40,7 @@ export class LogstashEventsLatencyClusterMetric extends LogstashClusterMetric {
       ...opts,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: 'ms'
+      units: msTimeUnitLabel
     });
 
     this.aggs = {
@@ -106,7 +114,7 @@ export class LogstashEventsRateClusterMetric extends LogstashClusterMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: '/s'
+      units: perSecondUnitLabel
     });
 
     this.aggs = {
@@ -163,7 +171,7 @@ export class LogstashEventsLatencyMetric extends LogstashMetric {
       ...opts,
       format: LARGE_FLOAT,
       metricAgg: 'sum',
-      units: 'ms'
+      units: msTimeUnitLabel
     });
 
     this.aggs = {
@@ -213,7 +221,7 @@ export class LogstashEventsRateMetric extends LogstashMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: '/s'
+      units: perSecondUnitLabel
     });
   }
 }

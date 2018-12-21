@@ -17,12 +17,12 @@ export function setCollectionIntervalRoute(server) {
     config: {
       validate: {}
     },
-    async handler(req, reply) {
+    async handler(req) {
       try {
         const response = await setCollectionInterval(req);
-        reply(response);
+        return response;
       } catch (err) {
-        reply(handleSettingsError(err));
+        throw handleSettingsError(err);
       }
     }
   });

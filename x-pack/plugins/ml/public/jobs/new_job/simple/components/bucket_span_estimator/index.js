@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './bucket_span_estimator_directive.js';

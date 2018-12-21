@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { format as formatUrl } from 'url';
+
 import { EsArchiver } from '../../../src/es_archiver';
 import * as KibanaServer from './kibana_server';
 
@@ -35,6 +37,7 @@ export function EsArchiverProvider({ getService, hasService }) {
     client,
     dataDir,
     log,
+    kibanaUrl: formatUrl(config.get('servers.kibana'))
   });
 
   if (hasService('kibanaServer')) {

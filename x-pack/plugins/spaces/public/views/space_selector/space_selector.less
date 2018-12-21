@@ -1,46 +1,7 @@
-@import "~ui/styles/variables";
-
-#spaceSelectorRootWrap, #spaceSelectorRoot {
-  background-color: @globalColorLightestGray;
+.spcSpaceSelector::before {
+  content: url(../../../assets/bg_top_branded.svg);
 }
 
-#spaceSelectorRootWrap {
-  flex-grow: 1;
-}
-.spaceSelector__page {
-  padding: 0;
-}
-
-.spaceSelector__pageContent {
-  background-color: transparent;
-  box-shadow: none;
-  border: none;
-  text-align: center;
-}
-
-.spaceSelector__heading {
-  padding: 40px 16px;
-  background-image: linear-gradient(-194deg, #027AA5 0%, #24A1AB 75%, #3BBBAF 100%, #3EBEB0 100%);
-  justify-content: center;
-  text-align: center;
-}
-
-.spaceSelector__logoCircle {
-  margin: 0 auto;
-  width: 80px;
-  height: 80px;
-  line-height: 80px;
-  text-align: center;
-  background-color: @globalColorWhite;
-  border-radius: 50%;
-  box-shadow:
-    0 6px 12px -1px fadeout(darken(@globalColorBlue, 10%), 80%),
-    0 4px 4px -1px fadeout(darken(@globalColorBlue, 10%), 80%),
-    0 2px 2px 0 fadeout(darken(@globalColorBlue, 10%), 80%);
-}
-
-
-.spaceSelector__searchHolder {
-  width: 400px; // make sure it's as wide as our default form element width
-  max-width: 100%;
+.spcSpaceSelector::after {
+  content: url(../../../assets/bg_bottom_branded.svg);
 }

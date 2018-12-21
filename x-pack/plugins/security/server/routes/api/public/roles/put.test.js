@@ -7,17 +7,25 @@
 import Hapi from 'hapi';
 import Boom from 'boom';
 import { initPutRolesApi } from './put';
+import { defaultValidationErrorHandler } from '../../../../../../../../src/core/server/http/http_tools';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 
 const application = 'kibana-.kibana';
 
 const createMockServer = () => {
-  const mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  const mockServer = new Hapi.Server({
+    debug: false,
+    port: 8080,
+    routes: {
+      validate: {
+        failAction: defaultValidationErrorHandler
+      }
+    }
+  });
   return mockServer;
 };
 
-const defaultPreCheckLicenseImpl = (request, reply) => reply();
+const defaultPreCheckLicenseImpl = () => null;
 
 const privilegeMap = {
   global: {
@@ -62,7 +70,8 @@ const putRoleTest = (
       headers,
       payload,
     };
-    const { result, statusCode } = await mockServer.inject(request);
+    const response = await mockServer.inject(request);
+    const { result, statusCode } = response;
 
     expect(result).toEqual(asserts.result);
     expect(statusCode).toBe(asserts.statusCode);
@@ -97,6 +106,7 @@ describe('PUT role', () => {
         statusCode: 404,
         result: {
           error: 'Not Found',
+          message: 'Not Found',
           statusCode: 404,
         },
       },
@@ -178,7 +188,7 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          message: `child \"kibana\" fails because [child \"space\" fails because [\"&#x2a;\" is not allowed]]`,
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"*\" is not allowed]]`,
           statusCode: 400,
           validation: {
             keys: ['kibana.space.&#x2a;'],
@@ -201,7 +211,7 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          message: `child \"kibana\" fails because [child \"space\" fails because [\"foo-&#x2a;\" is not allowed]]`,
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"foo-*\" is not allowed]]`,
           statusCode: 400,
           validation: {
             keys: ['kibana.space.foo-&#x2a;'],
@@ -214,8 +224,7 @@ describe('PUT role', () => {
     putRoleTest(`returns result of routePreCheckLicense`, {
       name: 'foo-role',
       payload: {},
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {

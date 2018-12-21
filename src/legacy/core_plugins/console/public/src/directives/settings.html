@@ -1,0 +1,123 @@
+<h2
+  class="kuiLocalDropdownTitle"
+  i18n-id="console.settingsPage.pageTitle"
+  i18n-default-message="Settings"
+></h2>
+
+<form class="form" name="settingsForm" ng-submit="settingsForm.$valid && settings.apply()">
+  <fieldset
+    class="kuiVerticalRhythm"
+    role="group"
+  >
+    <div class="kuiLocalDropdownHeader">
+      <legend
+        id="consoleFontSize"
+        class="kuiLocalDropdownHeader__label"
+        i18n-id="console.settingsPage.fontSizeLabel"
+        i18n-default-message="Font Size"
+      ></legend>
+    </div>
+
+    <input
+      input-focus
+      ng-model="settings.vals.fontSize"
+      name="fontSize"
+      type="number"
+      required
+      class="kuiLocalDropdownInput kuiVerticalRhythmSmall"
+      aria-labelledby="consoleFontSize"
+      data-test-subj="setting-font-size-input"
+    >
+
+    <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
+      <input
+        class="kuiCheckBox"
+        type="checkbox"
+        ng-model="settings.vals.wrapMode"
+        aria-describedby="consoleFontSize"
+      >
+      <span
+        class="kuiCheckBoxLabel__text"
+        i18n-id="console.settingsPage.wrapLongLinesLabelText"
+        i18n-default-message="Wrap long lines"
+      ></span>
+    </label>
+  </fieldset>
+
+  <fieldset
+    class="kuiVerticalRhythm"
+    role="group"
+  >
+    <div class="kuiLocalDropdownHeader">
+      <legend
+        id="consoleAutocomplete"
+        class="kuiLocalDropdownHeader__label"
+        i18n-id="console.settingsPage.autocompleteLabel"
+        i18n-default-message="Autocomplete"
+      ></legend>
+    </div>
+
+    <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
+      <input
+        class="kuiCheckBox"
+        name="autocompleteFields"
+        type="checkbox"
+        ng-model="settings.vals.autocomplete.fields"
+        aria-describedby="consoleAutocomplete"
+      >
+      <span
+        class="kuiCheckBoxLabel__text"
+        i18n-id="console.settingsPage.fieldsLabelText"
+        i18n-default-message="Fields"
+      ></span>
+    </label>
+
+    <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
+      <input
+        class="kuiCheckBox"
+        name="autocompleteIndices"
+        type="checkbox"
+        ng-model="settings.vals.autocomplete.indices"
+        aria-describedby="consoleAutocomplete"
+      >
+      <span
+        class="kuiCheckBoxLabel__text"
+        i18n-id="console.settingsPage.indicesAndAliasesLabelText"
+        i18n-default-message="Indices &amp; Aliases"
+      ></span>
+    </label>
+
+    <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
+      <input
+        class="kuiCheckBox"
+        name="autocompleteTemplates"
+        type="checkbox"
+        ng-model="settings.vals.autocomplete.templates"
+        aria-describedby="consoleAutocomplete"
+      >
+      <span
+        class="kuiCheckBoxLabel__text"
+        i18n-id="console.settingsPage.templatesLabelText"
+        i18n-default-message="Templates"
+      ></span>
+    </label>
+  </fieldset>
+
+  <div class="kuiVerticalRhythm">
+    <button
+      ng-click="kbnTopNav.close()"
+      class="kuiButton kuiButton--hollow"
+      i18n-id="console.settingsPage.cancelButtonLabel"
+      i18n-default-message="Cancel"
+    ></button>
+
+    <button
+      type="submit"
+      ng-disabled="settingsForm.$invalid"
+      class="kuiButton kuiButton--primary"
+      data-test-subj="settings-save-button"
+      i18n-id="console.settingsPage.saveButtonLabel"
+      i18n-default-message="Save"
+    ></button>
+  </div>
+</form>

@@ -17,14 +17,13 @@
  * under the License.
  */
 
+import BaseOptimizer from '../base_optimizer';
+import { createBundlesRoute } from '../bundles_route';
+import { DllCompiler } from '../dynamic_dll_plugin';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 
-import BaseOptimizer from '../base_optimizer';
-
-import { createBundlesRoute } from '../bundles_route';
-
-const STATUS = {
+export const STATUS = {
   RUNNING: 'optimizer running',
   SUCCESS: 'optimizer completed successfully',
   FAILURE: 'optimizer failed with stats',
@@ -34,8 +33,8 @@ const STATUS = {
 export default class WatchOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
-    this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
+    this.watchCache = opts.watchCache;
     this.status$ = new Rx.ReplaySubject(1);
   }
 
@@ -43,13 +42,14 @@ export default class WatchOptimizer extends BaseOptimizer {
     this.initializing = true;
     this.initialBuildComplete = false;
 
+    // try reset the watch optimizer cache
+    await this.watchCache.tryReset();
+
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
     await this.uiBundles.resetBundleDir();
-    await this.initCompiler();
+    await super.init();
 
-    this.compiler.plugin('watch-run', this.compilerRunStartHandler);
-    this.compiler.plugin('done', this.compilerDoneHandler);
     this.compiler.watch({ aggregateTimeout: 200 }, this.compilerWatchErrorHandler);
 
     if (this.prebuild) {
@@ -59,18 +59,64 @@ export default class WatchOptimizer extends BaseOptimizer {
     this.initializing = false;
   }
 
+  /**
+   *
+   * Extends the base_optimizer registerCompilerHooks function
+   * calling extended function also adding a new register function
+   *
+   * It gets called by super.init()
+  */
+  registerCompilerHooks() {
+    super.registerCompilerHooks();
+    this.registerCompilerWatchRunHook();
+  }
+
+  registerCompilerWatchRunHook() {
+    this.compiler.hooks.watchRun.tap('watch_optimizer-watchRun', () => {
+      this.status$.next({
+        type: STATUS.RUNNING
+      });
+    });
+  }
+
+  registerCompilerDoneHook() {
+    super.registerCompilerDoneHook();
+
+    this.compiler.hooks.done.tap('watch_optimizer-done', stats => {
+      if (stats.compilation.needAdditionalPass) {
+        return;
+      }
+
+      this.initialBuildComplete = true;
+      const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
+
+      if (this.isFailure(stats)) {
+        this.status$.next({
+          type: STATUS.FAILURE,
+          seconds,
+          error: this.failedStatsToError(stats)
+        });
+      } else {
+        this.status$.next({
+          type: STATUS.SUCCESS,
+          seconds,
+        });
+      }
+    });
+  }
+
   bindToServer(server, basePath) {
     // pause all requests received while the compiler is running
     // and continue once an outcome is reached (aborting the request
     // with an error if it was a failure).
-    server.ext('onRequest', (request, reply) => {
-      this.onceBuildOutcome()
-        .then(() => reply.continue())
-        .catch(reply);
+    server.ext('onRequest', async (request, h) => {
+      await this.onceBuildOutcome();
+      return h.continue;
     });
 
     server.route(createBundlesRoute({
-      bundlesPath: this.compiler.outputPath,
+      regularBundlesPath: this.compiler.outputPath,
+      dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
       basePublicPath: basePath
     }));
   }
@@ -97,14 +143,6 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerRunStartHandler = (watchingCompiler, cb) => {
-    this.status$.next({
-      type: STATUS.RUNNING
-    });
-
-    cb();
-  }
-
   compilerWatchErrorHandler = (error) => {
     if (error) {
       this.status$.next({
@@ -112,25 +150,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         error
       });
     }
-  }
-
-  compilerDoneHandler = (stats) => {
-    this.initialBuildComplete = true;
-    const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
-
-    if (stats.hasErrors() || stats.hasWarnings()) {
-      this.status$.next({
-        type: STATUS.FAILURE,
-        seconds,
-        error: this.failedStatsToError(stats)
-      });
-    } else {
-      this.status$.next({
-        type: STATUS.SUCCESS,
-        seconds,
-      });
-    }
-  }
+  };
 
   onStatusChangeHandler = ({ type, seconds, error }) => {
     switch (type) {

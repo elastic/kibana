@@ -15,7 +15,7 @@ import 'plugins/watcher/components/xpack_aria_describes';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchTimeWindow', function ($injector) {
+app.directive('thresholdWatchTimeWindow', function ($injector, i18n) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -55,7 +55,9 @@ app.directive('thresholdWatchTimeWindow', function ($injector) {
       }
 
       get itemDescription() {
-        return 'For the last';
+        return i18n('xpack.watcher.thresholdWatchExpression.timeWindow.itemDescription', {
+          defaultMessage: 'For the last',
+        });
       }
 
       get itemValue() {

@@ -14,15 +14,14 @@ export function notificationRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/notification_settings',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const params = {
         includeDefaults: true,
         filterPath: '**.xpack.notification'
       };
       return callWithRequest('cluster.getSettings', params)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

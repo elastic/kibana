@@ -27,7 +27,7 @@ export function beatsListingRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
 
       const config = server.config();
       const ccs = req.payload.ccs;
@@ -41,13 +41,13 @@ export function beatsListingRoute(server) {
           getBeats(req, beatsIndexPattern, clusterUuid),
         ]);
 
-        reply({
+        return {
           stats,
           listing
-        });
+        };
 
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
 
     }

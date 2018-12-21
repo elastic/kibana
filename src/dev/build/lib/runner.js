@@ -82,7 +82,7 @@ export function createRunner({ config, log, buildOssDist, buildDefaultDist }) {
    */
   return async function run(task) {
     if (task.global) {
-      await execTask(chalk`{dim [  global  ]} ${task.description}`, task.run);
+      await execTask(chalk`{dim [  global  ]} ${task.description}`, task.run, builds);
     } else {
       for (const build of builds) {
         await execTask(`${build.getLogTag()} ${task.description}`, task.run, build);

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import reducer, { updateTimePicker } from '../urlParams';
+import { urlParamsReducer, updateTimePicker } from '../urlParams';
 import { LOCATION_UPDATE } from '../location';
 
 describe('urlParams', () => {
   it('should handle LOCATION_UPDATE for transactions section', () => {
-    const state = reducer(
+    const state = urlParamsReducer(
       {},
       {
         type: LOCATION_UPDATE,
@@ -34,7 +34,7 @@ describe('urlParams', () => {
   });
 
   it('should handle LOCATION_UPDATE for error section', () => {
-    const state = reducer(
+    const state = urlParamsReducer(
       {},
       {
         type: LOCATION_UPDATE,
@@ -56,7 +56,7 @@ describe('urlParams', () => {
   });
 
   it('should handle TIMEPICKER_UPDATE', () => {
-    const state = reducer(
+    const state = urlParamsReducer(
       {},
       updateTimePicker({
         min: 'minTime',

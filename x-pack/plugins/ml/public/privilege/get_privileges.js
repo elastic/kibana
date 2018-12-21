@@ -26,6 +26,7 @@ export function getPrivileges() {
     canGetFilters: false,
     canCreateFilter: false,
     canDeleteFilter: false,
+    canFindFileStructure: false,
   };
 
   return new Promise((resolve, reject) => {
@@ -57,6 +58,7 @@ export function getPrivileges() {
         'cluster:admin/xpack/ml/filters/get',
         'cluster:admin/xpack/ml/filters/update',
         'cluster:admin/xpack/ml/filters/delete',
+        'cluster:monitor/xpack/ml/findfilestructure',
       ]
     };
 
@@ -144,6 +146,10 @@ export function getPrivileges() {
 
           if (resp.cluster['cluster:admin/xpack/ml/filters/delete']) {
             privileges.canDeleteFilter = true;
+          }
+
+          if (resp.cluster['cluster:monitor/xpack/ml/findfilestructure']) {
+            privileges.canFindFileStructure = true;
           }
 
         }

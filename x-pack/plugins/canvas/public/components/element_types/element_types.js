@@ -39,10 +39,18 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
       </EuiFlexItem>
     );
 
-    if (!search) return card;
-    if (includes(lowerCase(name), search)) return card;
-    if (includes(lowerCase(displayName), search)) return card;
-    if (includes(lowerCase(help), search)) return card;
+    if (!search) {
+      return card;
+    }
+    if (includes(lowerCase(name), search)) {
+      return card;
+    }
+    if (includes(lowerCase(displayName), search)) {
+      return card;
+    }
+    if (includes(lowerCase(help), search)) {
+      return card;
+    }
     return null;
   });
 
@@ -52,6 +60,7 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
+              className="canvasElements__filter"
               placeholder="Filter elements"
               onChange={e => setSearch(e.target.value)}
               value={search}

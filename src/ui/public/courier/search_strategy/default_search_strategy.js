@@ -33,24 +33,23 @@ function getAllFetchParams(searchRequests, Promise) {
 }
 
 async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
-  const searcRequestsWithFetchParams = [];
+  const searchRequestsWithFetchParams = [];
   const failedSearchRequests = [];
 
   // Gather the fetch param responses from all the successful requests.
   fetchParams.forEach((result, index) => {
     if (result.resolved) {
-      searcRequestsWithFetchParams.push(result.resolved);
+      searchRequestsWithFetchParams.push(result.resolved);
     } else {
       const searchRequest = searchRequests[index];
 
-      // TODO: All strategies will need to implement this.
       searchRequest.handleFailure(result.rejected);
       failedSearchRequests.push(searchRequest);
     }
   });
 
   return {
-    serializedFetchParams: await serializeFetchParams(searcRequestsWithFetchParams),
+    serializedFetchParams: await serializeFetchParams(searchRequestsWithFetchParams),
     failedSearchRequests,
   };
 }
@@ -58,7 +57,7 @@ async function serializeAllFetchParams(fetchParams, searchRequests, serializeFet
 export const defaultSearchStrategy = {
   id: 'default',
 
-  search: async ({ searchRequests, es, Promise, serializeFetchParams, maxConcurrentShardRequests = 0 }) => {
+  search: async ({ searchRequests, es, Promise, serializeFetchParams, includeFrozen = false, maxConcurrentShardRequests = 0 }) => {
     // Flatten the searchSource within each searchRequest to get the fetch params,
     // e.g. body, filters, index pattern, query.
     const allFetchParams = await getAllFetchParams(searchRequests, Promise);
@@ -70,6 +69,9 @@ export const defaultSearchStrategy = {
     } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
 
     const msearchParams = {
+      rest_total_hits_as_int: true,
+      // If we want to include frozen indexes we need to specify ignore_throttled: false
+      ignore_throttled: !includeFrozen,
       body: serializedFetchParams,
     };
 

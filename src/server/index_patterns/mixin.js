@@ -32,8 +32,8 @@ export function indexPatternsMixin(kbnServer, server) {
     */
     getIndexPatternsService: {
       assign: 'indexPatterns',
-      method(request, reply) {
-        reply(request.getIndexPatternsService());
+      method(request) {
+        return request.getIndexPatternsService();
       }
     }
   };

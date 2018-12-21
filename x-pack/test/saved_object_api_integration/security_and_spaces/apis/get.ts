@@ -17,10 +17,11 @@ export default function({ getService }: TestInvoker) {
   const {
     createExpectDoesntExistNotFound,
     createExpectLegacyForbidden,
-    createExpectSpaceAwareRbacForbidden,
     createExpectSpaceAwareResults,
     createExpectNotSpaceAwareResults,
-    createExpectNotSpaceAwareRbacForbidden,
+    expectSpaceAwareRbacForbidden,
+    expectNotSpaceAwareRbacForbidden,
+    expectDoesntExistRbacForbidden,
     getTest,
   } = getTestSuiteFactory(esArchiver, supertest);
 
@@ -255,15 +256,15 @@ export default function({ getService }: TestInvoker) {
         tests: {
           spaceAware: {
             statusCode: 403,
-            response: createExpectSpaceAwareRbacForbidden(),
+            response: expectSpaceAwareRbacForbidden,
           },
           notSpaceAware: {
             statusCode: 403,
-            response: createExpectNotSpaceAwareRbacForbidden(),
+            response: expectNotSpaceAwareRbacForbidden,
           },
           doesntExist: {
             statusCode: 403,
-            response: createExpectSpaceAwareRbacForbidden(),
+            response: expectDoesntExistRbacForbidden,
           },
         },
       });

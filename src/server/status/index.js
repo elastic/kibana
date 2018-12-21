@@ -21,6 +21,8 @@ import ServerStatus from './server_status';
 import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
 import { getOpsStatsCollector } from './collectors';
+import Oppsy from 'oppsy';
+import { cloneDeep } from 'lodash';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -29,15 +31,23 @@ export function statusMixin(kbnServer, server, config) {
   const { collectorSet } = server.usage;
   collectorSet.register(statsCollector);
 
-  const { ['even-better']: evenBetter } = server.plugins;
+  const metrics = new Metrics(config, server);
 
-  if (evenBetter) {
-    const metrics = new Metrics(config, server);
+  const oppsy = new Oppsy(server);
+  oppsy.on('ops', event => {
+    // Oppsy has a bad race condition that will modify this data before
+    // we ship it off to the buffer. Let's create our copy first.
+    event = cloneDeep(event);
+    // Oppsy used to provide this, but doesn't anymore. Grab it ourselves.
+    server.listener.getConnections((_, count) => {
+      event.concurrent_connections = count;
 
-    evenBetter.monitor.on('ops', event => {
-      metrics.capture(event).then(data => { kbnServer.metrics = data; }); // captures (performs transforms on) the latest event data and stashes the metrics for status/stats API payload
+      // captures (performs transforms on) the latest event data and stashes
+      // the metrics for status/stats API payload
+      metrics.capture(event).then(data => { kbnServer.metrics = data; });
     });
-  }
+  });
+  oppsy.start(config.get('ops.interval'));
 
   // init routes
   registerStatusPage(kbnServer, server, config);

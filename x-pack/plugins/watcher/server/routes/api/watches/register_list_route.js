@@ -34,7 +34,7 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/watcher/watches',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return fetchWatches(callWithRequest)
@@ -44,26 +44,32 @@ export function registerListRoute(server) {
             const watchJson = get(hit, '_source');
             const watchStatusJson = get(hit, '_source.status');
 
-            return Watch.fromUpstreamJson({
-              id,
-              watchJson,
-              watchStatusJson
-            });
+            return Watch.fromUpstreamJson(
+              {
+                id,
+                watchJson,
+                watchStatusJson,
+              },
+              {
+                throwExceptions: {
+                  Action: false,
+                },
+              }
+            );
           });
 
-          reply({
+          return {
             watches: watches.map(watch => watch.downstreamJson)
-          });
+          };
         })
         .catch(err => {
-
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

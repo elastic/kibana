@@ -64,12 +64,10 @@ test(`calls server.expose with exposed services`, () => {
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
-    mockActions,
-    mockCheckPrivilegesWithRequest,
+    application,
     mockConfig,
     expect.any(Function),
-    mockServer.plugins,
-    mockServer.savedObjects,
+    mockShieldClient,
     mockXpackInfoFeature,
   );
 });

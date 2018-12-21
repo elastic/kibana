@@ -7,7 +7,7 @@
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
+import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
 
@@ -21,11 +21,13 @@ uiRoutes.when('/elasticsearch/ml_jobs', {
     pageData: getPageData
   },
   controllerAs: 'mlJobs',
-  controller: class MlJobsList extends MonitoringViewBaseTableController {
+  controller: class MlJobsList extends MonitoringViewBaseEuiTableController {
 
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       super({
-        title: 'Elasticsearch - Machine Learning Jobs',
+        title: i18n('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
+          defaultMessage: 'Elasticsearch - Machine Learning Jobs'
+        }),
         storageKey: 'elasticsearch.mlJobs',
         getPageData,
         $scope,

@@ -18,9 +18,7 @@
  */
 
 import _ from 'lodash';
-import { buildExistsFilter } from '../../filter_manager/lib/exists';
-import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
-import { buildQueryFromFilters } from '../../courier';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -112,6 +110,8 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const filterAgg = aggConfigs.createAggConfig({
     type: 'filters',
     id: 'other',
+  }, {
+    addToAggConfigs: false,
   });
 
   // nest all the child aggregations of aggWithOtherBucket
@@ -129,8 +129,8 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     if (aggIndex < index) {
       _.each(agg.buckets, (bucket, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
-        const filter = _.cloneDeep(bucket.filter) || currentAgg.createFilter(bucketKey);
-        const newFilters = [...filters, filter];
+        const filter = _.cloneDeep(bucket.filters) || currentAgg.createFilter(bucketKey);
+        const newFilters = _.flatten([...filters, filter]);
         walkBucketTree(newAggIndex, bucket, newAgg.id, newFilters, `${key}-${bucketKey.toString()}`);
       });
       return;

@@ -240,6 +240,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(5);
 
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await queryBar.setQuery('weightLbs:>50');
         await queryBar.submitQuery();
@@ -259,6 +260,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
@@ -273,6 +275,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('Removing filter pills and query unfiters data as expected', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();

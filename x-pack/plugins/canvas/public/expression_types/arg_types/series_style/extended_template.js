@@ -45,7 +45,7 @@ export const ExtendedTemplate = props => {
       {name !== 'defaultStyle' && (
         <EuiFormRow label="Series Identifier" compressed>
           <EuiSelect
-            defaultValue={selectedSeries}
+            value={selectedSeries}
             options={labelOptions}
             onChange={ev => handleChange('label', ev)}
           />
@@ -57,7 +57,7 @@ export const ExtendedTemplate = props => {
             <EuiFlexItem>
               <EuiFormRow label="Line" compressed>
                 <EuiSelect
-                  defaultValue={get(chainArgs, 'lines.0', 0)}
+                  value={get(chainArgs, 'lines.0', 0)}
                   options={values}
                   onChange={ev => handleChange('lines', ev)}
                 />
@@ -68,7 +68,7 @@ export const ExtendedTemplate = props => {
             <EuiFlexItem>
               <EuiFormRow label="Bar" compressed>
                 <EuiSelect
-                  defaultValue={get(chainArgs, 'bars.0', 0)}
+                  value={get(chainArgs, 'bars.0', 0)}
                   options={values}
                   onChange={ev => handleChange('bars', ev)}
                 />
@@ -79,7 +79,7 @@ export const ExtendedTemplate = props => {
             <EuiFlexItem>
               <EuiFormRow label="Point" compressed>
                 <EuiSelect
-                  defaultValue={get(chainArgs, 'points.0', 0)}
+                  value={get(chainArgs, 'points.0', 0)}
                   options={values}
                   onChange={ev => handleChange('points', ev)}
                 />

@@ -12,13 +12,14 @@ import { deleteTestSuiteFactory } from '../../common/suites/delete';
 export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   const {
     deleteTest,
     expectEmptyResult,
     expectReservedSpaceResult,
     expectNotFound,
-  } = deleteTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('delete', () => {
     [

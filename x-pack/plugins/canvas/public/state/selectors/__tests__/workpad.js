@@ -71,6 +71,7 @@ describe('workpad selectors', () => {
               ],
             },
           ],
+          isWriteable: false,
         },
       },
     };
@@ -85,6 +86,7 @@ describe('workpad selectors', () => {
       expect(selector.getElementById({}, 'element-1')).to.be(undefined);
       expect(selector.getResolvedArgs({}, 'element-1')).to.be(undefined);
       expect(selector.getSelectedResolvedArgs({})).to.be(undefined);
+      expect(selector.isWriteable({})).to.be(true);
     });
   });
 
@@ -193,6 +195,12 @@ describe('workpad selectors', () => {
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, ['example3', 'deeper', 'object']);
       expect(arg).to.be(true);
+    });
+  });
+
+  describe('isWriteable', () => {
+    it('returns boolean for if the workpad is writeable', () => {
+      expect(selector.isWriteable(state)).to.equal(false);
     });
   });
 });

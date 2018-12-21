@@ -8,11 +8,13 @@ import { get } from 'lodash';
 import { badImplementation, badRequest } from 'boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ACTION_STATES } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class ActionStatus {
   constructor(props) {
     this.id = props.id;
     this.actionStatusJson = props.actionStatusJson;
+    this.errors = props.errors;
 
     this.lastAcknowledged = getMoment(get(this.actionStatusJson, 'ack.timestamp'));
     this.lastExecution = getMoment(get(this.actionStatusJson, 'last_execution.timestamp'));
@@ -28,6 +30,10 @@ export class ActionStatus {
 
     if (this.lastExecutionSuccessful === false) {
       return ACTION_STATES.ERROR;
+    }
+
+    if (this.errors) {
+      return ACTION_STATES.CONFIG_ERROR;
     }
 
     if (ackState === 'awaits_successful_execution') {
@@ -57,7 +63,14 @@ export class ActionStatus {
     // At this point, we cannot determine the action status so we thrown an error.
     // We should never get to this point in the code. If we do, it means we are
     // missing an action status and the logic to determine it.
-    throw badImplementation(`Could not determine action status; action = ${JSON.stringify(actionStatusJson)}`);
+    throw badImplementation(
+      i18n.translate('xpack.watcher.models.actionStatus.notDetermineActionStatusBadImplementationMessage', {
+        defaultMessage: 'Could not determine action status; action = {actionStatusJson}',
+        values: {
+          actionStatusJson: JSON.stringify(actionStatusJson)
+        }
+      }),
+    );
   }
 
   get isAckable() {
@@ -89,10 +102,24 @@ export class ActionStatus {
   // generate object from elasticsearch response
   static fromUpstreamJson(json) {
     if (!json.id) {
-      throw badRequest('json argument must contain an id property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
+        }),
+      );
     }
     if (!json.actionStatusJson) {
-      throw badRequest('json argument must contain an actionStatusJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionStatusJson} property',
+          values: {
+            actionStatusJson: 'actionStatusJson'
+          }
+        }),
+      );
     }
 
     return new ActionStatus(json);

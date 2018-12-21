@@ -1,0 +1,14 @@
+@import 'node_modules/@elastic/eui/src/components/form/variables';
+@import 'node_modules/@elastic/eui/src/components/form/mixins';
+
+@mixin tvbEditor__repeatingRow {
+  background-color: $euiColorLightestShade;
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeS;
+}
+
+// SASSTODO: These need to be converted to EUI,
+// but they have type errors
+@mixin tvbEditor__input {
+  @include euiFormControlStyle($borderOnly: false, $includeStates: true, $includeSizes: false);
+}

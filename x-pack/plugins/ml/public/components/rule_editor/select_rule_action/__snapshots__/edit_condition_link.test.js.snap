@@ -16,6 +16,7 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       Update rule condition from 
       5
@@ -69,6 +70,7 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
   >
     <EuiText
       grow={true}
+      size="m"
     >
       Update rule condition from 
       5
@@ -122,6 +124,7 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       Update rule condition from 
       5

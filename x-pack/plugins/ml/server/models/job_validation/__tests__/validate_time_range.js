@@ -8,9 +8,10 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import { validateTimeRange } from '../validate_time_range';
+import { isValidTimeField, validateTimeRange } from '../validate_time_range';
 
 import mockTimeField from './mock_time_field';
+import mockTimeFieldNested from './mock_time_field_nested';
 import mockTimeRange from './mock_time_range';
 
 const mockSearchResponse = {
@@ -25,6 +26,58 @@ const callWithRequestFactory = (resp) => {
     });
   };
 };
+
+function getMinimalValidJob() {
+  return {
+    analysis_config: {
+      bucket_span: '15m',
+      detectors: [],
+      influencers: []
+    },
+    data_description: { time_field: '@timestamp' },
+    datafeed_config: {
+      indices: []
+    }
+  };
+}
+
+describe('ML - isValidTimeField', () => {
+  it('called without job config argument triggers Promise rejection', (done) => {
+    isValidTimeField(callWithRequestFactory(mockSearchResponse)).then(
+      () => done(new Error('Promise should not resolve for this test without job argument.')),
+      () => done()
+    );
+  });
+
+  it('time_field `@timestamp`', (done) => {
+    isValidTimeField(callWithRequestFactory(mockSearchResponse), getMinimalValidJob()).then(
+      (valid) => {
+        expect(valid).to.be(true);
+        done();
+      },
+      () => done(new Error('isValidTimeField Promise failed for time_field `@timestamp`.'))
+    );
+  });
+
+  it('time_field `metadata.timestamp`', (done) => {
+    const mockJobConfigNestedDate = getMinimalValidJob();
+    mockJobConfigNestedDate.data_description.time_field = 'metadata.timestamp';
+
+    const mockSearchResponseNestedDate = {
+      fieldCaps: mockTimeFieldNested,
+      search: mockTimeRange
+    };
+
+    isValidTimeField(callWithRequestFactory(mockSearchResponseNestedDate), mockJobConfigNestedDate).then(
+      (valid) => {
+        expect(valid).to.be(true);
+        done();
+      },
+      () => done(new Error('isValidTimeField Promise failed for time_field `metadata.timestamp`.'))
+    );
+  });
+
+});
 
 describe('ML - validateTimeRange', () => {
 
@@ -66,23 +119,11 @@ describe('ML - validateTimeRange', () => {
     );
   });
 
-  const minimumValidJob = {
-    analysis_config: {
-      bucket_span: '15m',
-      detectors: [],
-      influencers: []
-    },
-    data_description: { time_field: '@timestamp' },
-    datafeed_config: {
-      indices: []
-    }
-  };
-
   it('invalid time field', () => {
     const mockSearchResponseInvalid = _.cloneDeep(mockSearchResponse);
     mockSearchResponseInvalid.fieldCaps = undefined;
     const duration = { start: 0, end: 1 };
-    return validateTimeRange(callWithRequestFactory(mockSearchResponseInvalid), minimumValidJob, duration).then(
+    return validateTimeRange(callWithRequestFactory(mockSearchResponseInvalid), getMinimalValidJob(), duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
         expect(ids).to.eql(['time_field_invalid']);
@@ -91,7 +132,7 @@ describe('ML - validateTimeRange', () => {
   });
 
   it('too short time range, 25x bucket span is less than 2h', () => {
-    const jobShortTimeRange = _.cloneDeep(minimumValidJob);
+    const jobShortTimeRange = getMinimalValidJob();
     jobShortTimeRange.analysis_config.bucket_span = '1s';
     const duration = { start: 0, end: 1 };
     return validateTimeRange(callWithRequestFactory(mockSearchResponse), jobShortTimeRange, duration).then(
@@ -104,7 +145,7 @@ describe('ML - validateTimeRange', () => {
 
   it('too short time range, 25x bucket span is more than 2h', () => {
     const duration = { start: 0, end: 1 };
-    return validateTimeRange(callWithRequestFactory(mockSearchResponse), minimumValidJob, duration).then(
+    return validateTimeRange(callWithRequestFactory(mockSearchResponse), getMinimalValidJob(), duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
         expect(ids).to.eql(['time_range_short']);
@@ -114,7 +155,7 @@ describe('ML - validateTimeRange', () => {
 
   it('time range between 2h and 25x bucket span', () => {
     const duration = { start: 0, end: 8000000 };
-    return validateTimeRange(callWithRequestFactory(mockSearchResponse), minimumValidJob, duration).then(
+    return validateTimeRange(callWithRequestFactory(mockSearchResponse), getMinimalValidJob(), duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
         expect(ids).to.eql(['time_range_short']);
@@ -124,7 +165,7 @@ describe('ML - validateTimeRange', () => {
 
   it('valid time range', () => {
     const duration = { start: 0, end: 100000000 };
-    return validateTimeRange(callWithRequestFactory(mockSearchResponse), minimumValidJob, duration).then(
+    return validateTimeRange(callWithRequestFactory(mockSearchResponse), getMinimalValidJob(), duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
         expect(ids).to.eql(['success_time_range']);
@@ -134,7 +175,7 @@ describe('ML - validateTimeRange', () => {
 
   it('invalid time range, start time is before the UNIX epoch', () => {
     const duration = { start: -1, end: 100000000 };
-    return validateTimeRange(callWithRequestFactory(mockSearchResponse), minimumValidJob, duration).then(
+    return validateTimeRange(callWithRequestFactory(mockSearchResponse), getMinimalValidJob(), duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
         expect(ids).to.eql(['time_range_before_epoch']);

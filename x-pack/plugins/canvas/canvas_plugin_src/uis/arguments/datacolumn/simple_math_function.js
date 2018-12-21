@@ -21,16 +21,12 @@ export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
     { text: 'Unique', value: 'unique' },
   ];
 
-  if (!onlymath) options.unshift({ text: 'Value', value: '' });
+  if (!onlymath) {
+    options.unshift({ text: 'Value', value: '' });
+  }
 
   return (
-    <EuiSelect
-      compressed
-      options={options}
-      inputRef={inputRef}
-      defaultValue={value || ''}
-      onChange={onChange}
-    />
+    <EuiSelect compressed options={options} inputRef={inputRef} value={value} onChange={onChange} />
   );
 };
 
@@ -39,4 +35,8 @@ SimpleMathFunction.propTypes = {
   value: PropTypes.string,
   inputRef: PropTypes.func,
   onlymath: PropTypes.bool,
+};
+
+SimpleMathFunction.defaultProps = {
+  value: '',
 };

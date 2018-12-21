@@ -36,7 +36,7 @@ export function kibanaInstanceRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -49,12 +49,12 @@ export function kibanaInstanceRoute(server) {
           getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid }),
         ]);
 
-        reply({
+        return {
           metrics,
           kibanaSummary,
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

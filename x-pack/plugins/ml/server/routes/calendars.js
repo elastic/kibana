@@ -41,11 +41,10 @@ export function calendars(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/calendars',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getAllCalendars(callWithRequest)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -55,12 +54,11 @@ export function calendars(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/calendars/{calendarId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const calendarId = request.params.calendarId;
       return getCalendar(callWithRequest, calendarId)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -70,12 +68,11 @@ export function calendars(server, commonRouteConfig) {
   server.route({
     method: 'PUT',
     path: '/api/ml/calendars',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const body = request.payload;
       return newCalendar(callWithRequest, body)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -85,13 +82,12 @@ export function calendars(server, commonRouteConfig) {
   server.route({
     method: 'PUT',
     path: '/api/ml/calendars/{calendarId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const calendarId = request.params.calendarId;
       const body = request.payload;
       return updateCalendar(callWithRequest, calendarId, body)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -101,12 +97,11 @@ export function calendars(server, commonRouteConfig) {
   server.route({
     method: 'DELETE',
     path: '/api/ml/calendars/{calendarId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const calendarId = request.params.calendarId;
       return deleteCalendar(callWithRequest, calendarId)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

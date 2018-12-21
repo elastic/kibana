@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap as wrapBoom } from 'boom';
+import { boomify } from 'boom';
 
 export function wrapError(error) {
-  return wrapBoom(error, error.status);
+  return boomify(error, { statusCode: error.status });
 }

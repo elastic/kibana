@@ -18,7 +18,7 @@
  */
 
 jest.mock('../chrome', () => ({
-  addBasePath: (path: string) => `http://localhost.com/myBase/${path}`,
+  addBasePath: (path: string) => `http://localhost/myBase/${path}`,
 }));
 
 jest.mock('../metadata', () => ({
@@ -60,7 +60,7 @@ describe('kfetch', () => {
   it('should use supplied pathname and querystring', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path', query: { a: 'b' } });
-    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path?a=b');
+    expect(fetchMock.lastUrl('*')).toBe('http://localhost/myBase/my/path?a=b');
   });
 
   it('should use supplied headers', async () => {
@@ -87,7 +87,7 @@ describe('kfetch', () => {
   it('should prepend url with basepath by default', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path' });
-    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path');
+    expect(fetchMock.lastUrl('*')).toBe('http://localhost/myBase/my/path');
   });
 
   it('should not prepend url with basepath when disabled', async () => {
@@ -142,7 +142,7 @@ describe('kfetch', () => {
 
     it('should contain response properties', () => {
       expect(error.res.status).toBe(404);
-      expect(error.res.url).toBe('http://localhost.com/myBase/my/path');
+      expect(error.res.url).toBe('http://localhost/myBase/my/path');
     });
   });
 

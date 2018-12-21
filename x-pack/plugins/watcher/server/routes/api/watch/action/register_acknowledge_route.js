@@ -19,7 +19,7 @@ export function registerAcknowledgeRoute(server) {
   server.route({
     path: '/api/watcher/watch/{watchId}/action/{actionId}/acknowledge',
     method: 'PUT',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { watchId, actionId } = request.params;
 
@@ -32,20 +32,21 @@ export function registerAcknowledgeRoute(server) {
           };
 
           const watchStatus = WatchStatus.fromUpstreamJson(json);
-          reply({ watchStatus: watchStatus.downstreamJson });
+          return {
+            watchStatus: watchStatus.downstreamJson
+          };
         })
         .catch(err => {
-
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             const statusCodeToMessageMap = {
               404: `Watch with id = ${watchId} not found`
             };
-            return reply(wrapEsError(err, statusCodeToMessageMap));
+            throw wrapEsError(err, statusCodeToMessageMap);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

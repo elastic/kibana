@@ -15,15 +15,15 @@ export function checkAccessRoute(server) {
   server.route({
     method: 'GET',
     path: '/api/monitoring/v1/check_access',
-    handler: async (req, reply) => {
+    handler: async (req) => {
       const response = {};
       try {
         await verifyMonitoringAuth(req);
         response.has_access = true; // response data is ignored
       } catch (err) {
-        return reply(handleError(err, req));
+        throw handleError(err, req);
       }
-      return reply(response);
+      return response;
     }
   });
 }

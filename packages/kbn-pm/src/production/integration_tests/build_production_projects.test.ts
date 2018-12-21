@@ -51,7 +51,7 @@ describe('kbn-pm production', () => {
         });
       }
 
-      await buildProductionProjects({ kibanaRoot: tmpDir, buildRoot });
+      await buildProductionProjects({ kibanaRoot: tmpDir, buildRoots: [buildRoot] });
 
       const files = await globby(['**/*', '!**/node_modules/**'], {
         cwd: buildRoot,

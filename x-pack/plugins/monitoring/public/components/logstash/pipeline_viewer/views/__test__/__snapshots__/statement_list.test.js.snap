@@ -11,6 +11,7 @@ exports[`StatementList renders nested elements as expected 1`] = `
         "depth": 0,
         "id": "mutateIf",
         "parentId": null,
+        "statement": Object {},
       }
     }
     expand={[Function]}
@@ -25,6 +26,7 @@ exports[`StatementList renders nested elements as expected 1`] = `
         "depth": 1,
         "id": "mutate",
         "parentId": "mutateIf",
+        "statement": Object {},
       }
     }
     expand={[Function]}

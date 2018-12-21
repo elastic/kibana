@@ -9,22 +9,32 @@ import PropTypes from 'prop-types';
 import { DomPreview } from '../dom_preview';
 import { PageControls } from './page_controls';
 
-export const PagePreview = ({ page, pageNumber, height, duplicatePage, confirmDelete }) => (
+export const PagePreview = ({
+  isWriteable,
+  page,
+  pageNumber,
+  height,
+  duplicatePage,
+  confirmDelete,
+}) => (
   <div
     className="canvasPageManager__pagePreview"
     style={{ backgroundColor: page.style.background }}
   >
     <DomPreview elementId={page.id} pageNumber={pageNumber} height={height} />
-    <PageControls
-      pageId={page.id}
-      pageNumber={pageNumber}
-      onDuplicate={duplicatePage}
-      onDelete={confirmDelete}
-    />
+    {isWriteable && (
+      <PageControls
+        pageId={page.id}
+        pageNumber={pageNumber}
+        onDuplicate={duplicatePage}
+        onDelete={confirmDelete}
+      />
+    )}
   </div>
 );
 
 PagePreview.propTypes = {
+  isWriteable: PropTypes.bool.isRequired,
   page: PropTypes.shape({
     id: PropTypes.string.isRequired,
     style: PropTypes.shape({

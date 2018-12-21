@@ -22,7 +22,7 @@ import { createBulkGetRoute } from './bulk_get';
 import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/_bulk_get', () => {
-  const savedObjectsClient = { bulkGet: sinon.stub() };
+  const savedObjectsClient = { bulkGet: sinon.stub().returns('') };
   let server;
 
   beforeEach(() => {
@@ -31,8 +31,8 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
-        method(request, reply) {
-          reply(savedObjectsClient);
+        method() {
+          return savedObjectsClient;
         }
       },
     };

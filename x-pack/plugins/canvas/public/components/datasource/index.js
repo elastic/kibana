@@ -9,15 +9,15 @@ import { connect } from 'react-redux';
 import { withState, withHandlers, compose } from 'recompose';
 import { get } from 'lodash';
 import { datasourceRegistry } from '../../expression_types';
+import { getServerFunctions } from '../../state/selectors/app';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
-import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
 const mapStateToProps = state => ({
   element: getSelectedElement(state),
   pageId: getSelectedPage(state),
-  functionDefinitions: getFunctionDefinitions(state),
+  functionDefinitions: getServerFunctions(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -39,12 +39,16 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const datasourceAst = get(element, 'ast.chain', [])
     .map((astDef, i) => {
       // if it's not a function, it's can't be a datasource
-      if (astDef.type !== 'function') return;
+      if (astDef.type !== 'function') {
+        return;
+      }
       const args = astDef.arguments;
 
       // if there's no matching datasource in the registry, we're done
       const datasource = datasourceRegistry.get(astDef.function);
-      if (!datasource) return;
+      if (!datasource) {
+        return;
+      }
 
       const datasourceDef = getDataTableFunctionsByName(datasource.name);
 

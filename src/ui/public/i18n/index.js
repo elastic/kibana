@@ -18,7 +18,6 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { metadata } from 'ui/metadata';
 import {
   I18nProvider,
   i18nFilter,
@@ -28,7 +27,4 @@ import {
 uiModules.get('i18n')
   .provider('i18n', I18nProvider)
   .filter('i18n', i18nFilter)
-  .directive('i18nId', i18nDirective)
-  .config((i18nProvider) => {
-    i18nProvider.init(metadata.translations);
-  });
+  .directive('i18nId', i18nDirective);

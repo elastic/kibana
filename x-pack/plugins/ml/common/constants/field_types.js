@@ -27,7 +27,7 @@ export const ES_FIELD_TYPES = {
   TOKEN_COUNT: 'token_count',
   _ID: '_id',
   _SOURCE: '_source',
-  _TYPE: '_type'
+  _TYPE: '_type',
 };
 
 export const KBN_FIELD_TYPES = {
@@ -52,6 +52,7 @@ export const ML_JOB_FIELD_TYPES = {
   IP: 'ip',
   KEYWORD: 'keyword',
   NUMBER: 'number',
-  TEXT: 'text'
+  TEXT: 'text',
+  UNKNOWN: 'unknown',
 };
 

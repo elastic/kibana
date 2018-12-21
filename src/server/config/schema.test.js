@@ -51,20 +51,20 @@ describe('Config schema', function () {
       it('rejects strings with trailing slashes', function () {
         const { error } = validate({ server: { basePath: '/path/' } });
         expect(error).toHaveProperty('details');
-        expect(error.details[0]).toHaveProperty('path', 'server.basePath');
+        expect(error.details[0]).toHaveProperty('path', ['server', 'basePath']);
       });
 
       it('rejects strings without leading slashes', function () {
         const { error } = validate({ server: { basePath: 'path' } });
         expect(error).toHaveProperty('details');
-        expect(error.details[0]).toHaveProperty('path', 'server.basePath');
+        expect(error.details[0]).toHaveProperty('path', ['server', 'basePath']);
       });
 
       it('rejects things that are not strings', function () {
         for (const value of [1, true, {}, [], /foo/]) {
           const { error } = validate({ server: { basePath: value } });
           expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.basePath');
+          expect(error.details[0]).toHaveProperty('path', ['server', 'basePath']);
         }
       });
     });
@@ -91,13 +91,13 @@ describe('Config schema', function () {
       it('rejects true if basePath not set', function () {
         const { error } = validate({ server: { rewriteBasePath: true } });
         expect(error).toHaveProperty('details');
-        expect(error.details[0]).toHaveProperty('path', 'server.rewriteBasePath');
+        expect(error.details[0]).toHaveProperty('path', ['server', 'rewriteBasePath']);
       });
 
       it('rejects strings', function () {
         const { error } = validate({ server: { rewriteBasePath: 'foo' } });
         expect(error).toHaveProperty('details');
-        expect(error.details[0]).toHaveProperty('path', 'server.rewriteBasePath');
+        expect(error.details[0]).toHaveProperty('path', ['server', 'rewriteBasePath']);
       });
     });
 
@@ -110,7 +110,7 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).toBeInstanceOf(Object);
           expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.ssl.enabled');
+          expect(error.details[0]).toHaveProperty('path', ['server', 'ssl', 'enabled']);
         });
 
         it('can be true', function () {
@@ -146,7 +146,7 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).toBeInstanceOf(Object);
           expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.ssl.certificate');
+          expect(error.details[0]).toHaveProperty('path', ['server', 'ssl', 'certificate']);
         });
       });
 
@@ -165,7 +165,7 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).toBeInstanceOf(Object);
           expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.ssl.key');
+          expect(error.details[0]).toHaveProperty('path', ['server', 'ssl', 'key']);
         });
       });
 
@@ -202,7 +202,7 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).toBeInstanceOf(Object);
           expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.ssl.supportedProtocols.0');
+          expect(error.details[0]).toHaveProperty('path', ['server', 'ssl', 'supportedProtocols', 0]);
         });
 
         it('rejects SSLv3', function () {
@@ -211,7 +211,7 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).toBeInstanceOf(Object);
           expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.ssl.supportedProtocols.0');
+          expect(error.details[0]).toHaveProperty('path', ['server', 'ssl', 'supportedProtocols', 0]);
         });
 
         it('accepts TLSv1, TLSv1.1, TLSv1.2', function () {
@@ -243,7 +243,7 @@ describe('Config schema', function () {
         const { error } = validate(config);
         expect(error).toBeInstanceOf(Object);
         expect(error).toHaveProperty('details');
-        expect(error.details[0]).toHaveProperty('path', 'server.xsrf.whitelist.0');
+        expect(error.details[0]).toHaveProperty('path', ['server', 'xsrf', 'whitelist', 0]);
       });
 
       it('whitelist accepts paths that start with a slash.', () => {

@@ -51,8 +51,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('default request response should include `"timed_out": false`', async function () {
-      const expectedResponseContains = '"timed_out": false,';
+    it('default request response should include `"timed_out" : false`', async function () {
+      const expectedResponseContains = '"timed_out" : false,';
       await PageObjects.console.clickPlay();
       await retry.try(async function () {
         const actualResponse = await PageObjects.console.getResponse();

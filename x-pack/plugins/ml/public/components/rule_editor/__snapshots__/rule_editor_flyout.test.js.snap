@@ -21,6 +21,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"
@@ -91,6 +92,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. 
@@ -109,6 +111,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           Action
@@ -128,6 +131,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           Conditions
@@ -251,6 +255,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"
@@ -335,6 +340,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. 
@@ -353,6 +359,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           Action
@@ -372,6 +379,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           Conditions
@@ -495,6 +503,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"
@@ -565,6 +574,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. 
@@ -583,6 +593,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           Action
@@ -602,6 +613,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           Conditions
@@ -717,6 +729,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"

@@ -31,7 +31,7 @@ describe('config/deprecation warnings mixin', function () {
   let stdio = '';
   let proc = null;
 
-  before(() => new Promise((resolve, reject) => {
+  before(async () => {
     proc = spawn(process.execPath, [
       '-r', SETUP_NODE_ENV,
       RUN_KBN_SERVER_STARTUP
@@ -50,23 +50,35 @@ describe('config/deprecation warnings mixin', function () {
       }
     });
 
-    proc.stdout.on('data', (chunk) => {
-      stdio += chunk.toString('utf8');
-    });
+    // Either time out in 10 seconds, or resolve once the line is in our buffer
+    return Promise.race([
+      new Promise((resolve) => setTimeout(resolve, 10000)),
+      new Promise((resolve, reject) => {
+        proc.stdout.on('data', (chunk) => {
+          stdio += chunk.toString('utf8');
+          if (chunk.toString('utf8').includes('deprecation')) {
+            resolve();
+          }
+        });
 
-    proc.stderr.on('data', (chunk) => {
-      stdio += chunk.toString('utf8');
-    });
+        proc.stderr.on('data', (chunk) => {
+          stdio += chunk.toString('utf8');
+          if (chunk.toString('utf8').includes('deprecation')) {
+            resolve();
+          }
+        });
 
-    proc.on('exit', (code) => {
-      proc = null;
-      if (code > 0) {
-        reject(new Error(`Kibana server exited with ${code} -- stdout:\n\n${stdio}\n`));
-      } else {
-        resolve();
-      }
-    });
-  }));
+        proc.on('exit', (code) => {
+          proc = null;
+          if (code > 0) {
+            reject(new Error(`Kibana server exited with ${code} -- stdout:\n\n${stdio}\n`));
+          } else {
+            resolve();
+          }
+        });
+      })
+    ]);
+  });
 
   after(() => {
     if (proc) {

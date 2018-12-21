@@ -5,6 +5,8 @@
  */
 
 import { resolve } from 'path';
+
+import { SavedObjectsService } from 'src/server/saved_objects';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
@@ -42,6 +44,7 @@ export const spaces = (kibana: any) =>
 
     uiExports: {
       chromeNavControls: ['plugins/spaces/views/nav_control'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/spaces/views/management'],
       apps: [
         {
@@ -122,6 +125,9 @@ export const spaces = (kibana: any) =>
             : null;
           return new SpacesClient(
             spacesAuditLogger,
+            (message: string) => {
+              server.log(['spaces', 'debug'], message);
+            },
             authorization,
             callWithRequestRepository,
             server.config(),
@@ -131,7 +137,10 @@ export const spaces = (kibana: any) =>
         },
       });
 
-      const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
+      const {
+        addScopedSavedObjectsClientWrapperFactory,
+        types,
+      } = server.savedObjects as SavedObjectsService;
       addScopedSavedObjectsClientWrapperFactory(
         Number.MAX_VALUE,
         spacesSavedObjectsClientWrapperFactory(spacesService, types)

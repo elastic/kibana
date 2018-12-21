@@ -6,16 +6,27 @@
 
 import React, { Fragment } from 'react';
 import { EuiTitle, EuiText, EuiTextColor } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const ChangesNeeded = () => {
   return (
     <Fragment>
       <EuiTitle size="l">
-        <h2>You need to make some adjustments</h2>
+        <h2>
+          <FormattedMessage
+            id="xpack.monitoring.noData.blurbs.changesNeededTitle"
+            defaultMessage="You need to make some adjustments"
+          />
+        </h2>
       </EuiTitle>
       <EuiTextColor color="subdued">
         <EuiText>
-          <p>To run monitoring please perform the following steps</p>
+          <p>
+            <FormattedMessage
+              id="xpack.monitoring.noData.blurbs.changesNeededDescription"
+              defaultMessage="To run monitoring please perform the following steps"
+            />
+          </p>
         </EuiText>
       </EuiTextColor>
     </Fragment>

@@ -64,6 +64,8 @@ export default function ({ getService, getPageObjects }) {
     it('should be toggleable via the filter bar', async function () {
       const table = await docTable.getTable();
       await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      // disable filter
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 

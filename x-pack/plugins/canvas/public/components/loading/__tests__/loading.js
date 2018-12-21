@@ -8,7 +8,7 @@ import React from 'react';
 import expect from 'expect.js';
 import { shallow } from 'enzyme';
 import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
-import { Loading } from '../';
+import { Loading } from '../loading';
 
 describe('<Loading />', () => {
   it('uses EuiIcon by default', () => {

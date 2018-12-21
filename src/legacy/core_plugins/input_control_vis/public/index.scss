@@ -1,0 +1,11 @@
+@import 'src/ui/public/styles/styling_constants';
+
+// Prefix all styles with "icv" to avoid conflicts.
+// Examples
+//   icvChart
+//   icvChart__legend
+//   icvChart__legend--small
+//   icvChart__legend-isLoading
+
+@import './components/editor/index';
+@import './components/vis/index';

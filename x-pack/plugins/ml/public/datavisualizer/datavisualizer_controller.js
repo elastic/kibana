@@ -18,15 +18,16 @@ import 'plugins/ml/components/form_filter_input';
 
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { notify } from 'ui/notify';
-import { decorateQuery, luceneStringToDsl } from 'ui/courier';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
+import { notify, toastNotifications } from 'ui/notify';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { getDataVisualizerBreadcrumbs } from './breadcrumbs';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
-import { checkLicenseExpired } from 'plugins/ml/license/check_license';
+import { checkBasicLicense, isFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -36,8 +37,9 @@ import template from './datavisualizer.html';
 uiRoutes
   .when('/jobs/new_job/datavisualizer', {
     template,
+    k7Breadcrumbs: getDataVisualizerBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicenseExpired,
+      CheckLicense: checkBasicLicense,
       privileges: checkGetJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
@@ -53,17 +55,21 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlDataVisualizerViewFields', function (
     $scope,
-    $route,
     $timeout,
     $window,
     Private,
-    AppState) {
+    AppState,
+    config,
+    i18n) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
+
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
-      query } = createSearchItems($route);
+      query } = createSearchItems();
+
     timeBasedIndexCheck(indexPattern, true);
 
     // List of system fields we don't want to display.
@@ -93,21 +99,26 @@ module
     $scope.fieldFilter = '';
     $scope.recognizerResults = { count: 0 };
 
+    $scope.showSidebar = isFullLicense();
+
     // Check for a saved query in the AppState or via a savedSearchId in the URL.
+    // TODO - add in support for lucene queries with filters and Kuery.
     $scope.searchQueryText = '';
-    if (_.has($scope.appState, 'query')) {
-    // Currently only support lucene syntax.
-      if (_.get($scope.appState, 'query.language') === 'lucene') {
-        $scope.searchQueryText = _.get($scope.appState, 'query.query', '');
-      }
+    const queryBarQry = ($scope.appState.query !== undefined) ? ($scope.appState.query) : query;
+    if (queryBarQry.language === 'lucene') {
+      $scope.searchQueryText = _.get(queryBarQry, 'query', '');
     } else {
-    // Use the query built from the savedSearchId supplied in the URL.
-    // If no savedSearchId, the query will default to '*'.
-    // TODO - when filtering is supported, use the filters part too.
-      const queryString = _.get(query, 'query_string.query', '');
-      if (queryString !== '*') {
-        $scope.searchQueryText = queryString;
-      }
+      toastNotifications.addWarning({
+        title: i18n('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningTitle', {
+          defaultMessage: '{language} syntax not supported',
+          values: {
+            language: (queryBarQry.language !== undefined) ? queryBarQry.language : '',
+          }
+        }),
+        text: i18n('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningDescription', {
+          defaultMessage: 'The Data Visualizer currently only supports queries using the lucene query syntax.',
+        }),
+      });
     }
 
     $scope.searchQuery = buildSearchQuery();
@@ -258,7 +269,8 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery);
+      const queryStringOptions = config.get('query:queryString:options');
+      decorateQuery(searchQuery, queryStringOptions);
       return searchQuery;
     }
 
@@ -491,12 +503,28 @@ module
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting stats for metric cards from elasticsearch:', err);
           if (err.statusCode === 500) {
-            notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}. ` +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-            { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.metricInternalServerErrorTitle', {
+                defaultMessage: 'Error loading data for metrics in index {index}. {message}. ' +
+                  'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           } else {
-            notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}`,
-              { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.loadingMetricDataErrorTitle', {
+                defaultMessage: 'Error loading data for metrics in index {index}. {message}',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           }
         });
 
@@ -542,12 +570,28 @@ module
             // TODO - display error in cards saying data could not be loaded.
             console.log('DataVisualizer - error getting non metric field stats from elasticsearch:', err);
             if (err.statusCode === 500) {
-              notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
-            'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-              { lifetime: 30000 });
+              notify.error(
+                i18n('xpack.ml.datavisualizer.fieldsInternalServerErrorTitle', {
+                  defaultMessage: 'Error loading data for fields in index {index}. {message}. ' +
+                    'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                  values: {
+                    index: indexPattern.title,
+                    message: err.message,
+                  }
+                }),
+                { lifetime: 30000 }
+              );
             } else {
-              notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
-                { lifetime: 30000 });
+              notify.error(
+                i18n('xpack.ml.datavisualizer.loadingFieldsDataErrorTitle', {
+                  defaultMessage: 'Error loading data for fields in index {index}. {message}',
+                  values: {
+                    index: indexPattern.title,
+                    message: err.message,
+                  }
+                }),
+                { lifetime: 30000 }
+              );
             }
           });
       } else {
@@ -592,12 +636,28 @@ module
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting overall stats from elasticsearch:', err);
           if (err.statusCode === 500) {
-            notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-            { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.overallFieldsInternalServerErrorTitle', {
+                defaultMessage: 'Error loading data for fields in index {index}. {message}. ' +
+                  'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           } else {
-            notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
-              { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.loadingOverallFieldsDataErrorTitle', {
+                defaultMessage: 'Error loading data for fields in index {index}. {message}',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           }
         });
 

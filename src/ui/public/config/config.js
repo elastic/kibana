@@ -21,6 +21,7 @@ import angular from 'angular';
 import chrome from '../chrome';
 import { isPlainObject } from 'lodash';
 import { uiModules } from '../modules';
+import { subscribeWithScope } from '../utils/subscribe_with_scope';
 
 const module = uiModules.get('kibana/config');
 
@@ -59,20 +60,11 @@ module.service(`config`, function ($rootScope, Promise) {
   //* angular specific methods *
   //////////////////////////////
 
-  const subscription = uiSettings.getUpdate$().subscribe(({ key, newValue, oldValue }) => {
-    const emit = () => {
+  const subscription = subscribeWithScope($rootScope, uiSettings.getUpdate$(), {
+    next: ({ key, newValue, oldValue }) => {
       $rootScope.$broadcast('change:config',        newValue, oldValue, key, this);
       $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);
-    };
-
-    // this is terrible, but necessary to emulate the same API
-    // that the `config` service had before where changes were
-    // emitted to scopes synchronously. All methods that don't
-    // require knowing if we are currently in a digest cycle are
-    // async and would deliver events too late for several usecases
-    //
-    // If you copy this code elsewhere you better have a good reason :)
-    $rootScope.$$phase ? emit() : $rootScope.$apply(emit);
+    }
   });
   $rootScope.$on('$destroy', () => subscription.unsubscribe());
 

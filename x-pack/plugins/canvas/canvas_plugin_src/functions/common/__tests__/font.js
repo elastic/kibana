@@ -160,9 +160,9 @@ describe('font', () => {
         expect(result.spec).to.have.property('textAlign', 'right');
         expect(result.css).to.contain('text-align:right');
 
-        result = fn(null, { align: 'justified' });
-        expect(result.spec).to.have.property('textAlign', 'justified');
-        expect(result.css).to.contain('text-align:justified');
+        result = fn(null, { align: 'justify' });
+        expect(result.spec).to.have.property('textAlign', 'justify');
+        expect(result.css).to.contain('text-align:justify');
       });
 
       it(`defaults to 'left'`, () => {

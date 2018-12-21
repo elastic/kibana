@@ -18,10 +18,13 @@
  */
 
 import { BucketAggType } from './_bucket_agg_type';
+import { i18n } from '@kbn/i18n';
 
 export const filterBucketAgg = new BucketAggType({
   name: 'filter',
-  title: 'Filter',
+  title: i18n.translate('common.ui.aggTypes.buckets.filterTitle', {
+    defaultMessage: 'Filter',
+  }),
   params: [
     {
       name: 'geo_bounding_box'

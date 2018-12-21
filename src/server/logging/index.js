@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { fromNode } from 'bluebird';
-import evenBetter from 'even-better';
+import good from '@elastic/good';
 import loggingConfiguration from './configuration';
 
-export function setupLogging(server, config) {
-  return fromNode((cb) => {
-    server.register({
-      register: evenBetter,
-      options: loggingConfiguration(config)
-    }, cb);
+export async function setupLogging(server, config) {
+  return await server.register({
+    plugin: good,
+    options: loggingConfiguration(config)
   });
 }
 
-export function loggingMixin(kbnServer, server, config) {
-  return setupLogging(server, config);
+export async function loggingMixin(kbnServer, server, config) {
+  return await setupLogging(server, config);
 }

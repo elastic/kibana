@@ -5,10 +5,7 @@
  */
 
 import squel from 'squel';
-import { map, zipObject } from 'lodash';
-import { buildBoolArray } from '../../../../server/lib/build_bool_array';
-import { normalizeType } from '../../../../server/lib/normalize_type';
-import { sanitizeName } from '../../../../server/lib/sanitize_name';
+import { queryEsSQL } from '../../../../server/lib/query_es_sql';
 
 export const esdocs = () => ({
   name: 'esdocs',
@@ -36,7 +33,7 @@ export const esdocs = () => ({
       help: 'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
     },
     fields: {
-      help: 'Comma separated list of fields. Fewer fields will perform better.',
+      help: 'Comma separated list of fields. Fewer fields will perform better',
       types: ['string', 'null'],
     },
     metaFields: {
@@ -73,34 +70,15 @@ export const esdocs = () => ({
 
     if (args.sort) {
       const [sortField, sortOrder] = args.sort.split(',').map(str => str.trim());
-      if (sortField) query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
+      if (sortField) {
+        query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
+      }
     }
 
-    return handlers
-      .elasticsearchClient('transport.request', {
-        path: '/_xpack/sql?format=json',
-        method: 'POST',
-        body: {
-          fetch_size: args.count,
-          query: query.toString(),
-          filter: {
-            bool: {
-              must: [{ match_all: {} }, ...buildBoolArray(context.and)],
-            },
-          },
-        },
-      })
-      .then(res => {
-        const columns = res.columns.map(({ name, type }) => {
-          return { name: sanitizeName(name), type: normalizeType(type) };
-        });
-        const columnNames = map(columns, 'name');
-        const rows = res.rows.map(row => zipObject(columnNames, row));
-        return {
-          type: 'datatable',
-          columns,
-          rows,
-        };
-      });
+    return queryEsSQL(handlers.elasticsearchClient, {
+      count: args.count,
+      query: query.toString(),
+      filter: context.and,
+    });
   },
 });

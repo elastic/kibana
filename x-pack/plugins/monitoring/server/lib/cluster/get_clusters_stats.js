@@ -57,7 +57,8 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
       'hits.hits._source.license.expiry_date',
       'hits.hits._source.license.expiry_date_in_millis',
       'hits.hits._source.cluster_stats',
-      'hits.hits._source.cluster_state'
+      'hits.hits._source.cluster_state',
+      'hits.hits._source.cluster_settings.cluster.metadata.display_name'
     ],
     body: {
       query: createQuery({ type: 'cluster_stats', start, end, metric, clusterUuid }),

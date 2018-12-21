@@ -17,7 +17,7 @@ exports[`NumberFormatEditor should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Documentation"
-            id="common.ui.fieldEditor.number.documentaionLabel"
+            id="common.ui.fieldEditor.number.documentationLabel"
             values={Object {}}
           />
            

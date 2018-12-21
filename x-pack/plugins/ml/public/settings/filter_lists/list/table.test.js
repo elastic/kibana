@@ -25,6 +25,8 @@ describe('Filter Lists Table', () => {
   const requiredProps = {
     setSelectedFilterLists,
     refreshFilterLists,
+    canCreateFilter: true,
+    canDeleteFilter: true
   };
 
   const testFilterLists = [

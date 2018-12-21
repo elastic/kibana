@@ -13,7 +13,9 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'GET',
     path: '/api/spaces/space',
-    async handler(request: any, reply: any) {
+    async handler(request: any) {
+      server.log(['spaces', 'debug'], `Inside GET /api/spaces/space`);
+
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
       );
@@ -21,12 +23,15 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
       let spaces: Space[];
 
       try {
+        server.log(['spaces', 'debug'], `Attempting to retrieve all spaces`);
         spaces = await spacesClient.getAll();
+        server.log(['spaces', 'debug'], `Retrieved ${spaces.length} spaces`);
       } catch (error) {
-        return reply(wrapError(error));
+        server.log(['spaces', 'debug'], `Error retrieving spaces: ${error}`);
+        return wrapError(error);
       }
 
-      return reply(spaces);
+      return spaces;
     },
     config: {
       pre: [routePreCheckLicenseFn],
@@ -36,7 +41,7 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'GET',
     path: '/api/spaces/space/{id}',
-    async handler(request: any, reply: any) {
+    async handler(request: any) {
       const spaceId = request.params.id;
 
       const { SavedObjectsClient } = server.savedObjects;
@@ -45,12 +50,12 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
       );
 
       try {
-        return reply(await spacesClient.get(spaceId));
+        return await spacesClient.get(spaceId);
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return reply(Boom.notFound());
+          return Boom.notFound();
         }
-        return reply(wrapError(error));
+        return wrapError(error);
       }
     },
     config: {

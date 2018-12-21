@@ -37,7 +37,7 @@ class Component extends PureComponent {
         <FormattedMessage
           id="kbn.mgmt.id-2"
           defaultMessage="Message text 2"
-          context="Message context"
+          description="Message description"
         />
         {intl.formatMessage({ id: 'kbn.mgmt.id-3', defaultMessage: 'Message text 3' })}
       </div>
@@ -47,10 +47,10 @@ class Component extends PureComponent {
 `);
 
 const intlFormatMessageSource = `
-  formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', context: 'Message context' });
-  intl.formatMessage({ id: 'kbn.mgmt.id-2', defaultMessage: 'Message text 2', context: 'Message context' });
-  props.intl.formatMessage({ id: 'kbn.mgmt.id-5', defaultMessage: 'Message text 5', context: 'Message context' });
-  this.props.intl.formatMessage({ id: 'kbn.mgmt.id-6', defaultMessage: 'Message text 6', context: 'Message context' });
+  formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', description: 'Message description' });
+  intl.formatMessage({ id: 'kbn.mgmt.id-2', defaultMessage: 'Message text 2', description: 'Message description' });
+  props.intl.formatMessage({ id: 'kbn.mgmt.id-5', defaultMessage: 'Message text 5', description: 'Message description' });
+  this.props.intl.formatMessage({ id: 'kbn.mgmt.id-6', defaultMessage: 'Message text 6', description: 'Message description' });
 `;
 
 const formattedMessageSource = `
@@ -59,13 +59,19 @@ function f() {
     <FormattedMessage
       id="kbn.mgmt.id-1"
       defaultMessage="Message text 1"
-      context="Message context"
+      description="Message description"
     />
   );
 }
 `;
 
+const report = jest.fn();
+
 describe('dev/i18n/extractors/code', () => {
+  beforeEach(() => {
+    report.mockClear();
+  });
+
   test('extracts React, server-side and angular service default messages', () => {
     const actual = Array.from(extractCodeMessages(extractCodeMessagesSource));
     expect(actual.sort()).toMatchSnapshot();
@@ -73,12 +79,14 @@ describe('dev/i18n/extractors/code', () => {
 
   test('throws on empty id', () => {
     const source = Buffer.from(`i18n.translate('', { defaultMessage: 'Default message' });`);
-    expect(() => extractCodeMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractCodeMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing defaultMessage', () => {
     const source = Buffer.from(`intl.formatMessage({ id: 'message-id' });`);
-    expect(() => extractCodeMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractCodeMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });
 

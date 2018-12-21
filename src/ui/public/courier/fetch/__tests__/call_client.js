@@ -49,6 +49,7 @@ describe('callClient', () => {
       _flatten: () => ({}),
       requestIsStopped: () => {},
       getField: () => 'indexPattern',
+      getPreferredSearchStrategyId: () => undefined,
       ...overrideSource
     };
 
@@ -134,32 +135,26 @@ describe('callClient', () => {
         });
       });
 
-      it(`still resolves the promise in spite of the failure`, () => {
-        const searchRequestFail = createSearchRequest('fail', {
+      it(`still bubbles up the failure`, () => {
+        const searchRequestFail1 = createSearchRequest('fail1', {
           source: {
             getField: () => ({ type: 'fail' }),
           },
         });
 
-        searchRequests = [ searchRequestFail ];
+        const searchRequestFail2 = createSearchRequest('fail2', {
+          source: {
+            getField: () => ({ type: 'fail' }),
+          },
+        });
+
+        searchRequests = [ searchRequestFail1, searchRequestFail2 ];
 
         return callClient(searchRequests).then(results => {
-          expect(results).to.eql(undefined);
-        });
-      });
-
-      it(`calls the errorHandler provided to the searchRequest`, () => {
-        const errorHandlerSpy = sinon.spy();
-        const searchRequestFail = createSearchRequest('fail', {
-          source: {
-            getField: () => ({ type: 'fail' }),
-          },
-        }, errorHandlerSpy);
-
-        searchRequests = [ searchRequestFail ];
-
-        return callClient(searchRequests).then(() => {
-          sinon.assert.calledOnce(errorHandlerSpy);
+          expect(results).to.eql([
+            { error: new Error('Search failed') },
+            { error: new Error('Search failed') },
+          ]);
         });
       });
     });
@@ -183,20 +178,6 @@ describe('callClient', () => {
 
       return callClient(searchRequests).then(() => {
         expect(whenAbortedSpy.callCount).to.be(1);
-      });
-    });
-
-    it(`calls searchRequest.handleFailure() with the SearchError that's thrown`, async () => {
-      esShouldError = true;
-      const searchRequest = createSearchRequest(1);
-
-      const handleFailureSpy = sinon.spy();
-      searchRequest.handleFailure = handleFailureSpy;
-      searchRequests = [ searchRequest ];
-
-      return callClient(searchRequests).then(() => {
-        sinon.assert.calledOnce(handleFailureSpy);
-        expect(handleFailureSpy.args[0][0].name).to.be('SearchError');
       });
     });
   });
@@ -348,18 +329,24 @@ describe('callClient', () => {
       searchRequestA = createSearchRequest('a', {
         source: {
           getField: () => ({ type: 'a' }),
+          getSearchStrategyForSearchRequest: () => {},
+          getPreferredSearchStrategyId: () => {},
         },
       });
 
       searchRequestB = createSearchRequest('b', {
         source: {
           getField: () => ({ type: 'b' }),
+          getSearchStrategyForSearchRequest: () => {},
+          getPreferredSearchStrategyId: () => {},
         },
       });
 
       searchRequestA2 = createSearchRequest('a2', {
         source: {
           getField: () => ({ type: 'a' }),
+          getSearchStrategyForSearchRequest: () => {},
+          getPreferredSearchStrategyId: () => {},
         },
       });
     });

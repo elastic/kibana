@@ -1,0 +1,7 @@
+@import 'components/index';
+
+.file-datavisualizer-container {
+  padding: 20px;
+  background-color: $euiColorLightestShade;
+  min-height: calc(100vh - 70px);
+}

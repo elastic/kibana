@@ -3,53 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { GLOBAL_RESOURCE } from '../../../common/constants';
-import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
-
-const hasAnyPrivileges = privileges => {
-  return Object.values(privileges).some(hasPrivilege => hasPrivilege === true);
-};
-
-const hasAnyResourcePrivileges = resourcePrivileges => {
-  return Object.values(resourcePrivileges).some(resource => hasAnyPrivileges(resource));
-};
 
 export function authorizationModeFactory(
-  actions,
-  checkPrivilegesWithRequest,
+  application,
   config,
   log,
-  plugins,
-  savedObjects,
+  shieldClient,
   xpackInfoFeature,
 ) {
   const useRbacForRequestCache = new WeakMap();
 
-  // TODO: This logic will change once we have the ES API to list all privileges
-  // and is not covered by unit tests currently
   const shouldUseRbacForRequest = async (request) => {
     if (!config.get('xpack.security.authorization.legacyFallback.enabled')) {
       return true;
     }
 
-    const adminCluster = plugins.elasticsearch.getCluster('admin');
-    const { callWithInternalUser } = adminCluster;
+    const { callWithRequest } = shieldClient;
 
-    const internalSavedObjectsRepository = savedObjects.getSavedObjectsRepository(
-      callWithInternalUser
-    );
+    const getUserPrivilegesResponse = await callWithRequest(request, 'shield.getUserPrivileges');
 
-    const checkPrivileges = checkPrivilegesWithRequest(request);
-    if (!plugins.spaces) {
-      const { privileges } = await checkPrivileges.globally(actions.login);
-      return hasAnyPrivileges(privileges);
-    }
+    // Superusers have `*` and all other roles will have the explicit application.
+    // We aren't using wildcards at this time, so if the user somehow specifies them
+    // using the ES apis directly (which is documented as unsupported) they won't work here.
+    const result = getUserPrivilegesResponse.applications
+      .some(entry => entry.application === '*' || entry.application === application);
 
-    const { saved_objects: spaceSavedObjects } = await internalSavedObjectsRepository.find({ type: 'space' });
-    const spaceResources = spaceSavedObjects.map(space => spaceApplicationPrivilegesSerializer.resource.serialize(space.id));
-    const allResources = [GLOBAL_RESOURCE, ...spaceResources];
-    const { resourcePrivileges } = await checkPrivileges.atResources(allResources, actions.login);
-    return hasAnyResourcePrivileges(resourcePrivileges);
+    return result;
   };
 
   const isRbacEnabled = () => xpackInfoFeature.getLicenseCheckResults().allowRbac;
@@ -62,7 +41,7 @@ export function authorizationModeFactory(
       }
 
       if (!isRbacEnabled()) {
-        useRbacForRequestCache.set(request, true);
+        useRbacForRequestCache.set(request, false);
         return;
       }
 

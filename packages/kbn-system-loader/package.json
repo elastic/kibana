@@ -3,16 +3,8 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
-  "main": "target/index.js",
-  "typings": "target/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "kbn:bootstrap": "yarn build"
-  },
-  "devDependencies": {
-    "@types/jest": "^23.3.1",
-    "typescript": "^3.0.3"
-  },
+  "main": "src/index.js",
+  "typings": "src/index.d.ts",
   "dependencies": {
     "tslib": "^1.9.3"
   }

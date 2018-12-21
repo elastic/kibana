@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { AddRoleAlert } from './add_role_alert';
 
 describe('AddRoleAlert component', () => {
   it('renders expected component', () => {
-    const wrapper = shallow(<AddRoleAlert />);
+    const wrapper = shallowWithIntl(<AddRoleAlert />);
     expect(wrapper).toMatchSnapshot();
   });
 });

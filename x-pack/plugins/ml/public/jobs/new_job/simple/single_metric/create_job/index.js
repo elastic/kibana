@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import './create_job_controller';
 import './create_job_service';
 import './create_job_chart_directive';

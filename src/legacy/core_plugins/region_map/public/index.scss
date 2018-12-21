@@ -1,0 +1,10 @@
+@import 'src/ui/public/styles/styling_constants';
+
+// Prefix all styles with "rgm" to avoid conflicts.
+// Examples
+//   rgmChart
+//   rgmChart__legend
+//   rgmChart__legend--small
+//   rgmChart__legend-isLoading
+
+@import './region_map';

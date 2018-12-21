@@ -238,6 +238,7 @@
               ml-fields="fields"
               ml-cat-field-name-selected="(job.analysis_config.categorization_field_name?true:false)"
               ml-edit-mode="'NEW'"
+              ml-on-detectors-update="onDetectorsUpdate"
               ></div>
             <div ng-hide="ui.validation.tabs[1].checks.detectors.valid" class="validation-error">
               {{ ( ui.validation.tabs[1].checks.detectors.message || "At least one detector should be configured" ) }}
@@ -274,6 +275,33 @@
             </div>
             <div ng-hide="ui.validation.tabs[1].checks.influencers.valid" class="validation-error">
               {{ ( ui.validation.tabs[1].checks.influencers.message || "At least one influencer should be selected" ) }}
+            </div>
+
+            <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+            <div class="form-group">
+              <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+                <input
+                  type="checkbox"
+                  aria-labelledby="ml_aria_label_new_job_enable_model_plot"
+                  aria-describedby="ml_aria_description_new_job_enable_model_plot"
+                  class='kuiCheckBox'
+                  ng-change="setModelPlotEnabled()"
+                  ng-model="ui.enableModelPlot" />
+                <span class='kuiCheckBoxLabel__text'>
+                  <span id="ml_aria_label_new_job_enable_model_plot">
+                    {{ ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.RUNNING ? 'Validating cardinality...' : 'Enable model plot' }}
+                  </span>
+                  <i ml-info-icon="new_job_enable_model_plot" />
+                </span>
+              </label>
+              <div class='ml-new-job-callout kuiVerticalRhythm'>
+                <ml-enable-model-plot-callout
+                  message='ui.cardinalityValidator.message'
+                  ng-show="ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.WARNING ||
+                    ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.FAILED">
+                </ml-enable-model-plot-callout>
+              </div>
             </div>
           </div>
         </ml-job-tab-1>

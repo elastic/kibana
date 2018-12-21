@@ -11,7 +11,12 @@ import { SpacesDescription } from './spaces_description';
 describe('SpacesDescription', () => {
   it('renders without crashing', () => {
     expect(
-      shallow(<SpacesDescription userProfile={{ hasCapability: () => true }} />)
+      shallow(
+        <SpacesDescription
+          userProfile={{ hasCapability: () => true }}
+          onManageSpacesClick={jest.fn()}
+        />
+      )
     ).toMatchSnapshot();
   });
 });

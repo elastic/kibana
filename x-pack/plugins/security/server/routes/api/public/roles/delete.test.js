@@ -9,12 +9,11 @@ import Boom from 'boom';
 import { initDeleteRolesApi } from './delete';
 
 const createMockServer = () => {
-  const mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  const mockServer = new Hapi.Server({ debug: false, port: 8080 });
   return mockServer;
 };
 
-const defaultPreCheckLicenseImpl = (request, reply) => reply();
+const defaultPreCheckLicenseImpl = () => null;
 
 describe('DELETE role', () => {
   const deleteRoleTest = (
@@ -76,14 +75,14 @@ describe('DELETE role', () => {
         statusCode: 404,
         result: {
           error: 'Not Found',
+          message: 'Not Found',
           statusCode: 404,
         },
       },
     });
 
     deleteRoleTest(`returns result of routePreCheckLicense`, {
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './styles/explorer_chart_label.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -65,7 +63,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
   );
 }
 ExplorerChartLabel.propTypes = {
-  detectorLabel: PropTypes.string.isRequired,
+  detectorLabel: PropTypes.object.isRequired,
   entityFields: PropTypes.arrayOf(ExplorerChartLabelBadge.propTypes.entity),
   infoTooltip: PropTypes.object.isRequired,
   wrapLabel: PropTypes.bool

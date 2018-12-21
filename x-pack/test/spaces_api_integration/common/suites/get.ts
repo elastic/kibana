@@ -42,6 +42,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
   const createExpectNotFoundResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
+      message: 'Not Found',
       statusCode: 404,
     });
   };

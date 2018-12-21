@@ -18,12 +18,18 @@
  */
 
 import { MetricAggType } from './metric_agg_type';
+import { i18n } from '@kbn/i18n';
 
 export const sumMetricAgg = new MetricAggType({
   name: 'sum',
-  title: 'Sum',
+  title: i18n.translate('common.ui.aggTypes.metrics.sumTitle', {
+    defaultMessage: 'Sum'
+  }),
   makeLabel: function (aggConfig) {
-    return 'Sum of ' + aggConfig.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.metrics.sumLabel', {
+      defaultMessage: 'Sum of {field}',
+      values: { field: aggConfig.getFieldDisplayName() }
+    });
   },
   params: [
     {

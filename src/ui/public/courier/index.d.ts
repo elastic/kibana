@@ -18,3 +18,4 @@
  */
 
 export * from './search_source';
+export * from './search_strategy';

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 describe('ConfirmDeleteModal component', () => {
@@ -24,18 +24,18 @@ describe('ConfirmDeleteModal component', () => {
   });
 
   it('confirms delete for single pipeline', () => {
-    const wrapper = shallow(<ConfirmDeleteModal {...props} />);
+    const wrapper = shallowWithIntl(<ConfirmDeleteModal {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('confirms delete for multiple pipelines', () => {
     props.selection = [{ id: 'testId' }, { id: 'testId2' }];
-    const wrapper = shallow(<ConfirmDeleteModal {...props} />);
+    const wrapper = shallowWithIntl(<ConfirmDeleteModal {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('calls cancel delete', () => {
-    const wrapper = mount(<ConfirmDeleteModal {...props} />);
+    const wrapper = mountWithIntl(<ConfirmDeleteModal {...props} />);
     wrapper
       .find('[data-test-subj="confirmModalCancelButton"]')
       .first()
@@ -44,7 +44,7 @@ describe('ConfirmDeleteModal component', () => {
   });
 
   it('calls deleteSelectedPipelines', () => {
-    const wrapper = mount(<ConfirmDeleteModal {...props} />);
+    const wrapper = mountWithIntl(<ConfirmDeleteModal {...props} />);
     wrapper
       .find('[data-test-subj="confirmModalConfirmButton"]')
       .first()
@@ -54,7 +54,7 @@ describe('ConfirmDeleteModal component', () => {
 
   it('does not render a component if modal is hidden', () => {
     props.showConfirmDeleteModal = false;
-    const wrapper = mount(<ConfirmDeleteModal {...props} />);
+    const wrapper = mountWithIntl(<ConfirmDeleteModal {...props} />);
     expect(wrapper.instance()).toBeNull();
   });
 });

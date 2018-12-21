@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import reducer from '../rootReducer';
+import { rootReducer } from '../rootReducer';
 
 describe('root reducer', () => {
   it('should return the initial state', () => {
-    expect(reducer(undefined, {})).toEqual({
+    expect(rootReducer(undefined, {})).toEqual({
       location: { hash: '', pathname: '', search: '' },
       reactReduxRequest: {},
       urlParams: {}

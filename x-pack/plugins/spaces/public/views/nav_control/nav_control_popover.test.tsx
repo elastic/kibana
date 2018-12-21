@@ -8,6 +8,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
+import { SpacesGlobalNavButton } from './components/spaces_global_nav_button';
 import { NavControlPopover } from './nav_control_popover';
 
 const mockChrome = {
@@ -52,6 +53,8 @@ describe('NavControlPopover', () => {
         activeSpace={activeSpace}
         spacesManager={spacesManager}
         userProfile={{ hasCapability: () => true }}
+        anchorPosition={'downRight'}
+        buttonClass={SpacesGlobalNavButton}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -72,6 +75,8 @@ describe('NavControlPopover', () => {
         activeSpace={activeSpace}
         spacesManager={spacesManager}
         userProfile={{ hasCapability: () => true }}
+        anchorPosition={'rightCenter'}
+        buttonClass={SpacesGlobalNavButton}
       />
     );
 

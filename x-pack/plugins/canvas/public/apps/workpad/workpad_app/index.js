@@ -8,8 +8,8 @@ import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
 import { initializeWorkpad } from '../../../state/actions/workpad';
 import { selectElement } from '../../../state/actions/transient';
-import { getEditing, getAppReady } from '../../../state/selectors/app';
-import { getWorkpad } from '../../../state/selectors/workpad';
+import { canUserWrite, getAppReady } from '../../../state/selectors/app';
+import { getWorkpad, isWriteable } from '../../../state/selectors/workpad';
 import { LoadWorkpad } from './load_workpad';
 import { WorkpadApp as Component } from './workpad_app';
 
@@ -17,7 +17,7 @@ const mapStateToProps = state => {
   const appReady = getAppReady(state);
 
   return {
-    editing: getEditing(state),
+    isWriteable: isWriteable(state) && canUserWrite(state),
     appReady: typeof appReady === 'object' ? appReady : { ready: appReady },
     workpad: getWorkpad(state),
   };

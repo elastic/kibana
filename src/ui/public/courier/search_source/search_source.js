@@ -71,9 +71,9 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import { buildEsQuery } from '@kbn/es-query';
 
 import '../../promises';
-
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
@@ -81,8 +81,8 @@ import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_searc
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { BuildESQueryProvider } from './build_query';
+import { getHighlightRequest } from '../../../../legacy/core_plugins/kibana/common/highlight';
+import { KbnError, OutdatedKuerySyntaxError } from '../../errors';
 
 const FIELDS = [
   'type',
@@ -120,7 +120,6 @@ export function SearchSourceProvider(Promise, Private, config) {
   const SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
-  const buildESQuery = Private(BuildESQueryProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getConfig = (...args) => config.get(...args);
 
@@ -130,6 +129,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     constructor(initialFields) {
       this._id = _.uniqueId('data_source');
 
+      this._searchStrategyId = undefined;
       this._fields = parseInitialFields(initialFields);
       this._parent = undefined;
 
@@ -163,6 +163,14 @@ export function SearchSourceProvider(Promise, Private, config) {
     /*****
      * PUBLIC API
      *****/
+
+    setPreferredSearchStrategyId(searchStrategyId) {
+      this._searchStrategyId = searchStrategyId;
+    }
+
+    getPreferredSearchStrategyId() {
+      return this._searchStrategyId;
+    }
 
     setFields(newFields) {
       this._fields = newFields;
@@ -601,7 +609,18 @@ export function SearchSourceProvider(Promise, Private, config) {
             _.set(flatData.body, '_source.includes', remainingFields);
           }
 
-          flatData.body.query = buildESQuery(flatData.index, flatData.query, flatData.filters);
+          try {
+            const esQueryConfigs = {
+              allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
+              queryStringOptions: config.get('query:queryString:options'),
+            };
+            flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
+          } catch (e) {
+            if (e.message === 'OutdatedKuerySyntaxError') {
+              throw new OutdatedKuerySyntaxError();
+            }
+            throw new KbnError(e.message, KbnError);
+          }
 
           if (flatData.highlightAll != null) {
             if (flatData.highlightAll && flatData.body.query) {

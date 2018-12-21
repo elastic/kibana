@@ -39,7 +39,7 @@ node ../scripts/functional_test_runner.js --config test/reporting/configs/[test_
   ```
 
 **Prerequisites**
-The reporting functional tests use [pdf-image](https://www.npmjs.com/package/pdf-image) to convert PDF's pages to png files for image comparisions between generated reports and baseline reports.
+The reporting functional tests use [pdf-image](https://www.npmjs.com/package/pdf-image) to convert PDF's pages to png files for image comparisons between generated reports and baseline reports.
 pdf-image requires the system commands `convert`, `gs`, and `pdfinfo` to function. Those can be set up by running the following.
 
 ```sh
@@ -157,7 +157,7 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 
 **Note:** The current reporting tests add visualizations from what is in `PageObjects.dashboard.getTestVisualizationNames`.  We should probably instead use a saved dashboard we generate this report from. Then you can add any new visualizations, re-save the dashboard, and re-generate the snapshot above.
 
-4. After adding more visualizations to a test dashboard, update tests if neccessary, update snapshots, then **save the new archives**!
+4. After adding more visualizations to a test dashboard, update tests if necessary, update snapshots, then **save the new archives**!
  ```
 node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 save ../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana
 ```

@@ -16,33 +16,33 @@
       xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termSize')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termSize', 'required')"
-    >
-      A value is required.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.requiredValueValidationMessage"
+      i18n-default-message="A value is required."
+    ></div>
     <div
       id="{{thresholdWatchGroupBy.makeId(['termSize', 'number'])}}"
       xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termSize')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termSize', 'number')"
-    >
-      Value must be a valid number.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.valueMustBeValidNumberValidationMessage"
+      i18n-default-message="Value must be a valid number."
+    ></div>
     <div
       id="{{thresholdWatchGroupBy.makeId(['termSize', 'min'])}}"
       xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termSize')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termSize', 'min')"
-    >
-      Value must be greater than 0.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.valueMustBeGraterThanZeroValidationMessage"
+      i18n-default-message="Value must be greater than 0."
+    ></div>
     <div
       id="{{thresholdWatchGroupBy.makeId(['termField', 'required'])}}"
       xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termField')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termField', 'required')"
-    >
-      Please select a field.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.requiredFieldValidationMessage"
+      i18n-default-message="Please select a field."
+    ></div>
     <select
       id="{{thresholdWatchGroupBy.makeId('groupByType')}}"
       class="kuiSelect"
@@ -67,7 +67,11 @@
       ng-options="termField as termField.name group by termField.normalizedType for termField in thresholdWatchGroupBy.termFields"
       ng-if="thresholdWatchGroupBy.groupByType.sizeRequired"
     >
-      <option value="">Select a field...</option>
+      <option
+        value=""
+        i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.selectFieldDropdownPlaceholder"
+        i18n-default-message="Select a field…"
+      ></option>
     </select>
   </form>
 </expression-item>

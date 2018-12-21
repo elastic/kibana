@@ -31,6 +31,7 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
       <h6>Border</h6>
     </EuiTitle>
     <EuiSpacer size="xs" />
+    <EuiSpacer size="xs" />
     <BorderForm
       value={getArgValue('border', '')}
       radius={getArgValue('borderRadius')}

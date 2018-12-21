@@ -22,8 +22,8 @@ import * as i18n from '../core';
 export type I18nServiceType = ReturnType<I18nProvider['$get']>;
 
 export class I18nProvider implements angular.IServiceProvider {
-  public addMessages = i18n.addMessages;
-  public getMessages = i18n.getMessages;
+  public addTranslation = i18n.addTranslation;
+  public getTranslation = i18n.getTranslation;
   public setLocale = i18n.setLocale;
   public getLocale = i18n.getLocale;
   public setDefaultLocale = i18n.setDefaultLocale;
