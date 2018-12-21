@@ -41,6 +41,7 @@ uiModules.get('kibana')
       constructor() {
 
         this._showZoomMessage = true;
+
         this._emsClient = new EMSClientV66({
           kbnVersion: kbnVersion,
           manifestServiceUrl: mapConfig.manifestServiceUrl,
