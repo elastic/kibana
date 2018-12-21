@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AnyObject, CancellationToken, EsClient, Esqueue } from '@code/esqueue';
 import sinon from 'sinon';
+import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 
 import { IndexerFactory } from '../indexer';
 import { Log } from '../log';
