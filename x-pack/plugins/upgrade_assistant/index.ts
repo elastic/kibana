@@ -14,8 +14,14 @@ export function upgradeAssistant(kibana: any) {
     require: ['elasticsearch'],
     uiExports: {
       managementSections: ['plugins/upgrade_assistant'],
-      mappings: require('./mappings.json'),
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+
+      mappings: require('./mappings.json'),
+      savedObjectSchemas: {
+        'upgrade-assistant-reindex-operation': {
+          isNamespaceAgnostic: true,
+        },
+      },
     },
     publicDir: resolve(__dirname, 'public'),
 

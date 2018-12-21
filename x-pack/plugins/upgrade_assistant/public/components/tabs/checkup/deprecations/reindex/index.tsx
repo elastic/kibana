@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios, { AxiosError } from 'axios';
-import React, { Fragment } from 'react';
+import axios from 'axios';
+import React, { Fragment, ReactNode } from 'react';
 import chrome from 'ui/chrome';
 
 import {
@@ -17,7 +17,6 @@ import {
   EuiPortal,
   EuiProgress,
   EuiSteps,
-  EuiStepsProps,
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
@@ -44,43 +43,56 @@ const APIClient = axios.create({
 const ReindexProgress: React.StatelessComponent<{
   step?: ReindexStep;
   reindexStatus?: ReindexStatus;
-}> = ({ step = -1, reindexStatus }) => {
-  const getStatus = (thisStep: ReindexStep): 'complete' | 'incomplete' | 'danger' => {
+  errorMessage: string | null;
+}> = ({ step = -1, reindexStatus, errorMessage }) => {
+  const details = (
+    thisStep: ReindexStep
+  ): { status: 'complete' | 'incomplete' | 'danger'; children: ReactNode } => {
     if (reindexStatus === undefined) {
-      return 'incomplete';
+      return { status: 'incomplete', children: null };
     } else if (reindexStatus === ReindexStatus.failed && step + 1 === thisStep) {
-      return 'danger';
+      return {
+        status: 'danger',
+        children: (
+          <EuiCallOut color="danger" title="There was an error">
+            <EuiText>
+              <p>{errorMessage}</p>
+            </EuiText>
+          </EuiCallOut>
+        ),
+      };
     } else {
-      return step >= thisStep ? 'complete' : 'incomplete';
+      return {
+        status: step >= thisStep ? 'complete' : 'incomplete',
+        children: null,
+      };
     }
   };
 
   return (
     <EuiSteps
-      steps={
-        [
-          {
-            title: 'Index set to read-only',
-            status: getStatus(ReindexStep.readonly),
-          },
-          {
-            title: 'New index created',
-            status: getStatus(ReindexStep.newIndexCreated),
-          },
-          {
-            title: 'Reindexing started',
-            status: getStatus(ReindexStep.reindexStarted),
-          },
-          {
-            title: 'Reindex completed',
-            status: getStatus(ReindexStep.reindexCompleted),
-          },
-          {
-            title: 'Aliases switched over',
-            status: getStatus(ReindexStep.aliasCreated),
-          },
-        ] as EuiStepsProps['steps']
-      }
+      steps={[
+        {
+          title: 'Index set to read-only',
+          ...details(ReindexStep.readonly),
+        },
+        {
+          title: 'New index created',
+          ...details(ReindexStep.newIndexCreated),
+        },
+        {
+          title: 'Reindexing started',
+          ...details(ReindexStep.reindexStarted),
+        },
+        {
+          title: 'Reindex completed',
+          ...details(ReindexStep.reindexCompleted),
+        },
+        {
+          title: 'Aliases switched over',
+          ...details(ReindexStep.aliasCreated),
+        },
+      ]}
     />
   );
 };
@@ -94,6 +106,7 @@ interface ReindexFlyoutState {
   loadingState: LoadingState;
   reindexStatus?: ReindexStatus;
   step?: ReindexStep;
+  errorMessage: string | null;
 }
 
 const delay = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
@@ -103,6 +116,7 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
     super(props);
     this.state = {
       loadingState: LoadingState.Loading,
+      errorMessage: null,
     };
   }
 
@@ -113,14 +127,14 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
 
   public render() {
     const { indexName, closeFlyout } = this.props;
-    const { loadingState, reindexStatus, step } = this.state;
+    const { loadingState, reindexStatus, step, errorMessage } = this.state;
 
     const loading =
       loadingState === LoadingState.Loading || reindexStatus === ReindexStatus.inProgress;
 
     return (
       <EuiPortal>
-        <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="s">
+        <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m">
           <EuiFlyoutHeader hasBorder>
             <h2>Reindex {indexName}</h2>
           </EuiFlyoutHeader>
@@ -141,13 +155,16 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
               onClick={this.startReindex}
               disabled={loading || reindexStatus === ReindexStatus.completed}
             >
-              {/* TODO: Show different text if last attempt failed? */}
-              Begin reindex
+              {reindexStatus === ReindexStatus.failed ? 'Try again' : 'Begin reindex'}
             </EuiButton>
             <EuiSpacer />
             {loading && <EuiProgress size="xs" />}
             <EuiSpacer />
-            <ReindexProgress step={step} reindexStatus={reindexStatus} />
+            <ReindexProgress
+              step={step}
+              reindexStatus={reindexStatus}
+              errorMessage={errorMessage}
+            />
           </EuiFlyoutBody>
         </EuiFlyout>
       </EuiPortal>
@@ -156,6 +173,7 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
 
   private startReindex = async (): Promise<void> => {
     const { indexName } = this.props;
+    const { reindexStatus: originalStatus } = this.state;
 
     // Optimistically assume we get started.
     this.setState({ reindexStatus: ReindexStatus.inProgress, step: ReindexStep.created });
@@ -165,7 +183,9 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
     );
 
     // Kick off status checks immediately
-    this.checkStatus(true);
+    if (originalStatus !== ReindexStatus.failed) {
+      this.checkStatus(true);
+    }
 
     const resp = await request;
     this.updateReindexState(resp.data);
@@ -220,7 +240,11 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
       return;
     }
 
-    this.setState({ step: reindexOp.lastCompletedStep, reindexStatus: reindexOp.status });
+    this.setState({
+      step: reindexOp.lastCompletedStep,
+      reindexStatus: reindexOp.status,
+      errorMessage: reindexOp.errorMessage,
+    });
   };
 }
 

@@ -39,6 +39,7 @@ export interface ReindexOperation extends SavedObjectAttributes {
   lastCompletedStep: ReindexStep;
   locked: string | null;
   reindexTaskId: string | null;
+  errorMessage: string | null;
 }
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
@@ -56,40 +57,14 @@ export const reindexServiceFactory = (
 ): ReindexService => {
   // ------ Utility functions used internally
 
-  /**
-   * Update the status
-   * @param reindexOp
-   * @param status
-   */
-  const updateStatus = (reindexOp: ReindexSavedObject, status: ReindexStatus) => {
-    return client.update<ReindexOperation>(
-      REINDEX_OP_TYPE,
-      reindexOp.id,
-      { ...reindexOp.attributes, status },
-      { version: reindexOp.version }
-    );
-  };
-
-  /**
-   * Update the step for the given ReindexSavedObject, returns an updated object.
-   * @param reindexOp
-   * @param step
-   * @param additionalAttrs
-   */
-  const updateStep = (
+  const updateReindexOp = (
     reindexOp: ReindexSavedObject,
-    step: ReindexStep,
-    additionalAttrs: Partial<ReindexOperation> = {}
+    attrs: Partial<ReindexOperation> = {}
   ) => {
     return client.update<ReindexOperation>(
       REINDEX_OP_TYPE,
       reindexOp.id,
-      {
-        ...reindexOp.attributes,
-        lastCompletedStep: step,
-        locked: moment().format(),
-        ...additionalAttrs,
-      },
+      { ...reindexOp.attributes, locked: moment().format(), ...attrs },
       { version: reindexOp.version }
     );
   };
@@ -161,7 +136,7 @@ export const reindexServiceFactory = (
       throw new Error(`Index could not be set to readonly.`);
     }
 
-    return updateStep(reindexOp, ReindexStep.readonly);
+    return updateReindexOp(reindexOp, { lastCompletedStep: ReindexStep.readonly });
   };
 
   /**
@@ -184,7 +159,7 @@ export const reindexServiceFactory = (
       throw Boom.badImplementation(`Index could not be created: ${newIndexName}`);
     }
 
-    return updateStep(reindexOp, ReindexStep.newIndexCreated);
+    return updateReindexOp(reindexOp, { lastCompletedStep: ReindexStep.newIndexCreated });
   };
 
   /**
@@ -202,7 +177,8 @@ export const reindexServiceFactory = (
       },
     })) as any;
 
-    return updateStep(reindexOp, ReindexStep.reindexStarted, {
+    return updateReindexOp(reindexOp, {
+      lastCompletedStep: ReindexStep.reindexStarted,
       reindexTaskId: startReindex.task,
     });
   };
@@ -221,7 +197,9 @@ export const reindexServiceFactory = (
     });
 
     if (taskResponse.completed) {
-      reindexOp = await updateStep(reindexOp, ReindexStep.reindexCompleted);
+      reindexOp = await updateReindexOp(reindexOp, {
+        lastCompletedStep: ReindexStep.reindexCompleted,
+      });
 
       // Delete the task from ES .tasks index
       const deleteTaskResp = await callWithRequest(request, 'delete', {
@@ -260,7 +238,10 @@ export const reindexServiceFactory = (
       throw Boom.badImplementation(`Index aliases could not be created.`);
     }
 
-    return updateStep(reindexOp, ReindexStep.aliasCreated, { status: ReindexStatus.completed });
+    return updateReindexOp(reindexOp, {
+      lastCompletedStep: ReindexStep.aliasCreated,
+      status: ReindexStatus.completed,
+    });
   };
 
   // ------ The service itself
@@ -293,12 +274,14 @@ export const reindexServiceFactory = (
         lastCompletedStep: ReindexStep.created,
         locked: null,
         reindexTaskId: null,
+        errorMessage: null,
       });
     },
 
     async findReindexOperation(indexName: string) {
       const findResponse = await findReindexOperations(indexName);
 
+      // Bail early if it does not exist or there is more than one.
       if (findResponse.total === 0) {
         throw Boom.notFound(`No reindex operations in-progress for ${indexName}.`);
       } else if (findResponse.total > 1) {
@@ -332,7 +315,11 @@ export const reindexServiceFactory = (
             break;
         }
       } catch (e) {
-        reindexOp = await updateStatus(reindexOp, ReindexStatus.failed);
+        // Trap the exception and add the message to the object so the UI can display it.
+        reindexOp = await updateReindexOp(reindexOp, {
+          status: ReindexStatus.failed,
+          errorMessage: e instanceof Error ? e.message : e.toString(),
+        });
       } finally {
         // Always make sure we return the most recent version of the saved object.
         reindexOp = await releaseLock(reindexOp);

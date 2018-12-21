@@ -18,6 +18,9 @@
       },
       "reindexTaskId": {
         "type": "text"
+      },
+      "errorMessage": {
+        "type": "text"
       }
     }
   }
