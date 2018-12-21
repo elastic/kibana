@@ -5,7 +5,17 @@
  */
 
 // @ts-ignore
-import { EuiButton, EuiModal, EuiSearchBar, EuiSelect } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiModal,
+  EuiSearchBar,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { any } from 'joi';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -15,9 +25,18 @@ import { RootState } from '../../reducers';
 import { ImportProject } from './import_project';
 import { ProjectItem } from './project_item';
 
-const Root = styled.div``;
-const Header = styled.div``;
-const H2 = styled.h2``;
+const NewProjectButton = styled(EuiButton)`
+  margin-top: 1.5rem;
+`;
+
+// TODO
+const sortOptions = [
+  { value: 'alpabetical_asc', text: 'A to Z' },
+  { value: 'alpabetical_desc', text: 'Z to A' },
+  { value: 'updated_asc', text: 'Last Updated ASC' },
+  { value: 'updated_desc', text: 'Last Updated DESC' },
+  { value: 'recently_added', text: 'Recently Added' },
+];
 
 class CodeProjectTab extends React.PureComponent<
   { projects: Repository[]; status: any; isAdmin: boolean },
@@ -45,17 +64,32 @@ class CodeProjectTab extends React.PureComponent<
     ));
 
     return (
-      <Root>
-        <Header>
-          <EuiSelect />
-          <EuiSelect />
-          <EuiSearchBar />
-          <EuiButton>Add New Project</EuiButton>
-        </Header>
-        <H2>{projectsCount}Project(s)</H2>
+      <div>
+        <EuiSpacer />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow label="Sort By">
+              <EuiSelect options={sortOptions} />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label="Apply Filters">
+              <EuiSelect />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow />
+          <EuiFlexItem>
+            <NewProjectButton>Add New Project</NewProjectButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiText>
+          <h3>{projectsCount}Project(s)</h3> 13175545191
+        </EuiText>
+        <EuiSpacer />
         {repoList}
         {modal}
-      </Root>
+      </div>
     );
   }
 }
