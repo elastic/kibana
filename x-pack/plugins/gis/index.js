@@ -61,6 +61,23 @@ export function gis(kibana) {
         .feature(thisPlugin.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
 
+      xpackMainPlugin.registerFeature({
+        id: 'gis',
+        name: 'Maps',
+        icon: 'gisApp',
+        navLinkId: 'gis',
+        privileges: {
+          all: {
+            app: ['gis', 'kibana'],
+            savedObject: {
+              all: [],
+              read: ['config']
+            },
+            ui: [],
+          },
+        }
+      });
+
       initRoutes(server);
       server.registerSampleDataset(kySaltTrucksSpecProvider);
       server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);

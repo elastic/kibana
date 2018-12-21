@@ -8,6 +8,7 @@ class NavLinks {
   public apm = 'apm';
   public canvas = 'canvas';
   public graph = 'graph';
+  public gis = 'gis';
   public infrastructure = 'infra:home';
   public logs = 'infra:logs';
   public dashboard = 'kibana:dashboard';

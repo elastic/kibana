@@ -216,6 +216,7 @@ const NothingSpace: Space = {
     'dashboard',
     'dev_tools',
     'discover',
+    'gis',
     'graph',
     'infrastructure',
     'logs',

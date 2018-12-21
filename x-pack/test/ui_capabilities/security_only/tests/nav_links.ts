@@ -107,6 +107,13 @@ export default function navLinksTests({ getService }: TestInvoker) {
               navLinksBuilder.only('graph', 'management')
             );
             break;
+          case 'gis_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('gis', 'management')
+            );
+            break;
           case 'infrastructure_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
