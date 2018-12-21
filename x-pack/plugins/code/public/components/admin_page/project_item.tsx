@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTextColor } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -13,12 +13,7 @@ import { Repository } from 'x-pack/plugins/code/model';
 import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
 
-const Root = styled.div``;
 const Footer = styled.div``;
-const ProjectURI = styled.div``;
-const Actions = styled.div``;
-const Action = styled.div``;
-const Caption = styled.div``;
 
 class CodeProjectItem extends React.PureComponent<{
   project: Repository;
@@ -46,30 +41,51 @@ class CodeProjectItem extends React.PureComponent<{
       footer = <Footer>LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}</Footer>;
     }
     return (
-      <Root>
-        <EuiIcon type="starEmpty" />
-        <div>
-          <div>
-            {org}/{name}
-          </div>
-          {footer}
-        </div>
-        <ProjectURI>{uri}</ProjectURI>
-        <Actions>
-          <Action>
-            <EuiIcon type="gear" />
-            <Caption>Settings</Caption>
-          </Action>
-          <Action>
-            <EuiIcon type="indexSettings" />
-            <Caption>Index</Caption>
-          </Action>
-          <Action>
-            <EuiIcon type="trash" />
-            <Caption>Delete</Caption>
-          </Action>
-        </Actions>
-      </Root>
+      <EuiPanel>
+        <EuiFlexGroup alignItems="center" justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="starEmpty" color="subdued" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiText>
+              <EuiTextColor color="subdued">{org}</EuiTextColor>
+              /<strong>{name}</strong>
+            </EuiText>
+            <EuiText>
+              <h6>
+                <EuiTextColor color="subdued">{footer}</EuiTextColor>
+              </h6>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiText color="subdued" size="s">
+              <a href={"https://" + uri} target="_blank">{uri}</a>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <div className="code-project-button">
+                  <EuiIcon type="gear" />
+                  <EuiText size="xs" color="subdued">Settings</EuiText>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div className="code-project-button">
+                  <EuiIcon type="indexSettings" />
+                  <EuiText size="xs" color="subdued">Index</EuiText>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div className="code-project-button">
+                  <EuiIcon type="trash" color="danger"/>
+                  <EuiText size="xs" color="subdued">Delete</EuiText>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     );
   }
 }
