@@ -531,10 +531,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getInterval() {
-      const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      const selectedIndex = await select.getProperty('selectedIndex');
       const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`);
+        `select[ng-model="agg.params.interval"] option[selected]`);
       return await intervalElement.getProperty('label');
     }
 
@@ -650,11 +648,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const table = await testSubjects.find('heatmapCustomRangesTable');
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
-      fromCell.clearValue();
-      fromCell.type(`${from}`);
+      await fromCell.clearValue();
+      await fromCell.type(`${from}`);
       const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
-      toCell.clearValue();
-      toCell.type(`${to}`);
+      await toCell.clearValue();
+      await toCell.type(`${to}`);
     }
 
     async clickYAxisOptions(axisId) {
@@ -1190,9 +1188,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
-      // Since slice is an SVG element we can't simply use .click() for it
-      await browser.moveMouseTo(slice);
-      await browser.clickMouseButton();
+      await slice.click();
     }
 
     async getPieSlice(name) {
