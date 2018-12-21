@@ -17,6 +17,11 @@
     "test:browser": "plugin-helpers test:browser",
     "build": "plugin-helpers build"
   },
+  <%_ if (generateTranslations) { _%>
+  "dependencies": {
+    "@kbn/i18n": "link:../../kibana/packages/kbn-i18n"
+  },
+  <%_ } _%>
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "link:../../kibana/packages/kbn-eslint-import-resolver-kibana",
