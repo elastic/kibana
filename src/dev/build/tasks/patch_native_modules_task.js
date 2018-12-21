@@ -18,11 +18,12 @@
  */
 
 import { scanCopy, untar, deleteAll } from '../lib';
-import { writeSync, openSync, existsSync, unlinkSync } from 'fs';
-import binaryInfo from 'nodegit/lib/utils/binary_info';
+import { createWriteStream } from 'fs';
+import binaryInfo from '../../../../x-pack/plugins/code/tasks/nodegit_info';
 import wreck from 'wreck';
 import mkdirp from 'mkdirp';
 import { dirname, join, basename } from 'path';
+import { createPromiseFromStreams } from '../../../utils/streams';
 
 async function download(url, destination, log) {
   const response = await wreck.request('GET', url);
@@ -33,26 +34,11 @@ async function download(url, destination, log) {
     );
   }
   mkdirp.sync(dirname(destination));
-  const fileHandle = openSync(destination, 'w');
-
-  await new Promise((resolve, reject) => {
-    response.on('data', chunk => {
-      writeSync(fileHandle, chunk);
-    });
-
-    response.on('error', (err) => {
-      if (existsSync(destination)) {
-        // remove the unfinished file
-        unlinkSync(destination);
-      }
-      reject(err);
-    });
-    response.on('end', () => {
-      log.debug('Downloaded ', url);
-      resolve();
-    });
-  });
-
+  await createPromiseFromStreams([
+    response,
+    createWriteStream(destination)
+  ]);
+  log.debug('Downloaded ', url);
 }
 
 async function downloadAndExtractTarball(url, dest, log, retry) {
@@ -78,10 +64,10 @@ async function patchNodeGit(config, log, build, platform) {
   const info = binaryInfo(plat, arch);
   const downloadUrl = info.hosted_tarball;
   const packageName = info.package_name;
-  const downloadPath = config.resolveFromRepo('.nodegit_binaries', packageName);
+  const downloadPath =   build.resolvePathForPlatform(platform, '.nodegit_binaries', packageName);
   const extractDir = await downloadAndExtractTarball(downloadUrl, downloadPath, log, 3);
 
-  const destination = build.resolvePathForPlatform(platform, 'node_modules', 'nodegit', 'build', 'Release');
+  const destination = build.resolvePathForPlatform(platform, 'node_modules/nodegit/build/Release');
   log.debug('Replacing nodegit binaries from ', extractDir);
   await deleteAll([destination], log);
   await scanCopy({
@@ -91,14 +77,11 @@ async function patchNodeGit(config, log, build, platform) {
   });
 }
 
-async function cleanNodeGitPatchDir(config, log) {
-  await deleteAll([config.resolveFromRepo('.nodegit_binaries')], log);
-}
+
 
 export const PatchNativeModulesTask = {
   description: 'Patching platform-specific native modules directories',
   async run(config, log, build) {
-    await cleanNodeGitPatchDir(config, log);
     await Promise.all(config.getTargetPlatforms().map(async platform => {
       await patchNodeGit(config, log, build, platform);
     }));
