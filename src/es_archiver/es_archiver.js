@@ -85,6 +85,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
+      kibanaUrl: this.kibanaUrl,
     });
   }
 
