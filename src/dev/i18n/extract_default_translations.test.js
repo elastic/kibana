@@ -23,7 +23,7 @@ import {
   extractMessagesFromPathToMap,
   validateMessageNamespace,
 } from './extract_default_translations';
-import { GlobalReporter } from './utils';
+import { ErrorReporter } from './utils';
 
 const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_translations');
 const pluginsPaths = [
@@ -46,16 +46,16 @@ describe('dev/i18n/extract_default_translations', () => {
     const [pluginPath] = pluginsPaths;
     const resultMap = new Map();
 
-    await extractMessagesFromPathToMap(pluginPath, resultMap, new GlobalReporter());
+    await extractMessagesFromPathToMap(pluginPath, resultMap, new ErrorReporter());
 
     expect([...resultMap].sort()).toMatchSnapshot();
   });
 
   test('throws on id collision', async () => {
     const [, , pluginPath] = pluginsPaths;
-    const reporter = new GlobalReporter();
+    const reporter = new ErrorReporter();
 
-    await expect(extractMessagesFromPathToMap(pluginPath, new Map(), reporter)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(extractMessagesFromPathToMap(pluginPath, new Map(), reporter)).resolves.not.toThrow();
     expect(reporter.errors).toMatchSnapshot();
   });
 
@@ -69,14 +69,14 @@ describe('dev/i18n/extract_default_translations', () => {
   });
 
   test('throws on wrong message namespace', () => {
-    const saveError = jest.fn();
+    const report = jest.fn();
     const id = 'wrong_plugin_namespace.message-id';
     const filePath = path.resolve(
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
 
-    expect(() => validateMessageNamespace(id, filePath, { saveError })).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => validateMessageNamespace(id, filePath, { report })).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });

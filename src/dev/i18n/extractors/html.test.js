@@ -41,11 +41,11 @@ const htmlSourceBuffer = Buffer.from(`
 </div>
 `);
 
-const saveError = jest.fn();
+const report = jest.fn();
 
 describe('dev/i18n/extractors/html', () => {
   beforeEach(() => {
-    saveError.mockClear();
+    report.mockClear();
   });
 
   test('extracts default messages from HTML', () => {
@@ -73,8 +73,8 @@ describe('dev/i18n/extractors/html', () => {
 ></p>
 `);
 
-    expect(() => extractHtmlMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractHtmlMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing i18n-default-message attribute', () => {
@@ -84,8 +84,8 @@ describe('dev/i18n/extractors/html', () => {
 ></p>
 `);
 
-    expect(() => extractHtmlMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractHtmlMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on i18n filter usage in complex angular expression', () => {
@@ -95,8 +95,8 @@ describe('dev/i18n/extractors/html', () => {
 ></div>
 `);
 
-    expect(() => extractHtmlMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractHtmlMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('extracts message from i18n filter in interpolating directive', () => {

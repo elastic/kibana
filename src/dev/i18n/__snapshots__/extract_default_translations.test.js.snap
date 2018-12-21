@@ -54,9 +54,7 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extract_default_translations throws on id collision 1`] = `""`;
-
-exports[`dev/i18n/extract_default_translations throws on id collision 2`] = `
+exports[`dev/i18n/extract_default_translations throws on id collision 1`] = `
 Array [
   "[37m[41m I18N ERROR [49m[39m Error in src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3/test_file.jsx
 Error: There is more than one default message for the same id \\"plugin_3.duplicate_id\\":

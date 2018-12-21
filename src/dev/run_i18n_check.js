@@ -28,7 +28,7 @@ import {
   writeFileAsync,
   serializeToJson,
   serializeToJson5,
-  GlobalReporter,
+  ErrorReporter,
 } from './i18n/';
 
 run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
@@ -42,11 +42,22 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
     );
   }
 
-  const reporter = new GlobalReporter();
+  const reporter = new ErrorReporter();
 
   const list = new Listr(
     filteredPaths.map(filteredPath => ({
-      task: messages => extractMessagesFromPathToMap(filteredPath, messages, reporter),
+      task: async messages => {
+        const initialErrorsNumber = reporter.errors.length;
+
+        // Return result if no new errors were reported for this path.
+        const result = await extractMessagesFromPathToMap(filteredPath, messages, reporter);
+        if (reporter.errors.length === initialErrorsNumber) {
+          return result;
+        }
+
+        // throw an empty error to make listr mark the task as failed without any message
+        throw new Error('');
+      },
       title: filteredPath,
     })),
     {
@@ -68,7 +79,7 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
     );
   } catch (error) {
     if (error.name === 'ListrError' && reporter.errors.length) {
-      reporter.reportErrors();
+      throw createFailError(reporter.errors.join('\n\n'));
     }
 
     throw error;

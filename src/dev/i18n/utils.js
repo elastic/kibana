@@ -33,6 +33,8 @@ import glob from 'glob';
 import { promisify } from 'util';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
+import normalize from 'normalize-path';
+import path from 'path';
 
 import { createFailError } from '../run';
 
@@ -45,6 +47,10 @@ const HTML_KEY_PREFIX = 'html_';
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const globAsync = promisify(glob);
+
+export function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
 
 export function difference(left = [], right = []) {
   return left.filter(value => !right.includes(value));
@@ -289,12 +295,16 @@ export function extractValuesKeysFromNode(node, messageId) {
   );
 }
 
-export class GlobalReporter {
-  constructor() {
-    this.errors = [];
+export class ErrorReporter {
+  errors = [];
+
+  withContext(context) {
+    return { report: error => this.report(error, context) };
   }
 
-  reportErrors() {
-    throw createFailError(this.errors.join('\n\n'));
+  report(error, context) {
+    this.errors.push(
+      `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
+    );
   }
 }

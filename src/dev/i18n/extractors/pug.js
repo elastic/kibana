@@ -62,12 +62,11 @@ export function* extractPugMessages(buffer, reporter) {
         yield extractI18nCallMessages(node);
       }
     } catch (error) {
-      if (isFailError(error)) {
-        reporter.saveError(error);
-        continue;
+      if (!isFailError(error)) {
+        throw error;
       }
 
-      throw error;
+      reporter.report(error);
     }
   }
 }

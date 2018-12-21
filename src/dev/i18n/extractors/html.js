@@ -185,12 +185,11 @@ function* getFilterMessages(htmlContent, reporter) {
 
       yield [messageId, { message, description }];
     } catch (error) {
-      if (isFailError(error)) {
-        reporter.saveError(error);
-        continue;
+      if (!isFailError(error)) {
+        throw error;
       }
 
-      throw error;
+      reporter.report(error);
     }
   }
 }
@@ -212,19 +211,25 @@ function* getDirectiveMessages(htmlContent, reporter) {
     .toArray();
 
   for (const element of elements) {
-    try {
-      const messageId = formatHTMLString(element.id);
-      if (!messageId) {
-        throw createFailError('Empty "i18n-id" value in angular directive is not allowed.');
-      }
+    const messageId = formatHTMLString(element.id);
+    if (!messageId) {
+      reporter.report(
+        createFailError('Empty "i18n-id" value in angular directive is not allowed.')
+      );
+      continue;
+    }
 
-      const message = formatHTMLString(element.defaultMessage);
-      if (!message) {
-        throw createFailError(
+    const message = formatHTMLString(element.defaultMessage);
+    if (!message) {
+      reporter.report(
+        createFailError(
           `Empty defaultMessage in angular directive is not allowed ("${messageId}").`
-        );
-      }
+        )
+      );
+      continue;
+    }
 
+    try {
       if (element.values) {
         const ast = parseExpression(element.values);
         const valuesObjectNode = [...traverseNodes(ast.program.body)].find(node =>
@@ -236,19 +241,16 @@ function* getDirectiveMessages(htmlContent, reporter) {
       } else {
         checkValuesProperty([], message, messageId);
       }
-
-      yield [
-        messageId,
-        { message, description: formatHTMLString(element.description) || undefined },
-      ];
     } catch (error) {
       if (isFailError(error)) {
-        reporter.saveError(error);
+        reporter.report(error);
         continue;
       }
 
       throw error;
     }
+
+    yield [messageId, { message, description: formatHTMLString(element.description) || undefined }];
   }
 }
 

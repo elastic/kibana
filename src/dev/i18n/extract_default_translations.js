@@ -18,8 +18,6 @@
  */
 
 import path from 'path';
-import normalize from 'normalize-path';
-import chalk from 'chalk';
 
 import {
   extractHtmlMessages,
@@ -27,36 +25,21 @@ import {
   extractPugMessages,
   extractHandlebarsMessages,
 } from './extractors';
-import { globAsync, readFileAsync } from './utils';
+import { globAsync, readFileAsync, normalizePath } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
 import { createFailError, isFailError } from '../run';
-
-class LocalReporter {
-  constructor(globalReporter, context) {
-    this.errors = globalReporter.errors;
-    this.context = context;
-  }
-
-  saveError(error) {
-    this.errors.push(
-      `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(this.context.name)}\n${error}`
-    );
-  }
-}
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
 
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    reporter.saveError(createFailError(`There is more than one default message for the same id "${key}":
-"${existingValue.message}" and "${value.message}"`));
+    reporter.report(
+      createFailError(`There is more than one default message for the same id "${key}":
+"${existingValue.message}" and "${value.message}"`)
+    );
   } else {
     targetMap.set(key, value);
   }
-}
-
-function normalizePath(inputPath) {
-  return normalize(path.relative('.', inputPath));
 }
 
 export function filterPaths(inputPaths) {
@@ -97,16 +80,14 @@ export function validateMessageNamespace(id, filePath, reporter) {
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    reporter.saveError(
+    reporter.report(
       createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
 See .i18nrc.json for the list of supported namespaces.`)
     );
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap, globalReporter) {
-  const initialErrorsNumber = globalReporter.errors.length;
-
+export async function extractMessagesFromPathToMap(inputPath, targetMap, reporter) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -149,16 +130,16 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, globalR
       );
 
       for (const { name, content } of files) {
-        const reporter = new LocalReporter(globalReporter, { name });
+        const reporterWithContext = reporter.withContext({ name });
 
         try {
-          for (const [id, value] of extractFunction(content, reporter)) {
-            validateMessageNamespace(id, name, reporter);
-            addMessageToMap(targetMap, id, value, reporter);
+          for (const [id, value] of extractFunction(content, reporterWithContext)) {
+            validateMessageNamespace(id, name, reporterWithContext);
+            addMessageToMap(targetMap, id, value, reporterWithContext);
           }
         } catch (error) {
           if (isFailError(error)) {
-            reporter.saveError(error);
+            reporterWithContext.report(error);
             continue;
           }
 
@@ -167,8 +148,4 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, globalR
       }
     })
   );
-
-  if (globalReporter.errors.length > initialErrorsNumber) {
-    throw new Error();
-  }
 }

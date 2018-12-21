@@ -19,11 +19,11 @@
 
 import { extractHandlebarsMessages } from './handlebars';
 
-const saveError = jest.fn();
+const report = jest.fn();
 
 describe('dev/i18n/extractors/handlebars', () => {
   beforeEach(() => {
-    saveError.mockClear();
+    report.mockClear();
   });
 
   test('extracts handlebars default messages', () => {
@@ -55,8 +55,8 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on wrong properties argument type', () => {
@@ -66,8 +66,8 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on empty id', () => {
@@ -77,8 +77,8 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing defaultMessage property', () => {
@@ -88,7 +88,7 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });

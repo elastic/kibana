@@ -19,11 +19,11 @@
 
 import { extractPugMessages } from './pug';
 
-const saveError = jest.fn();
+const report = jest.fn();
 
 describe('dev/i18n/extractors/pug', () => {
   beforeEach(() => {
-    saveError.mockClear();
+    report.mockClear();
   });
 
   test('extracts messages from pug template with interpolation', () => {
@@ -49,8 +49,8 @@ describe('dev/i18n/extractors/pug', () => {
 h1= i18n('', { defaultMessage: 'Default message', description: 'Message description' })
 `);
 
-    expect(() => extractPugMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractPugMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing default message', () => {
@@ -58,7 +58,7 @@ h1= i18n('', { defaultMessage: 'Default message', description: 'Message descript
 #{i18n('message-id', { description: 'Message description' })}
 `);
 
-    expect(() => extractPugMessages(source, { saveError }).next()).not.toThrow();
-    expect(saveError.mock.calls).toMatchSnapshot();
+    expect(() => extractPugMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });

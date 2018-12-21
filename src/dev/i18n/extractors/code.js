@@ -88,12 +88,11 @@ export function* extractCodeMessages(buffer, reporter) {
         yield extractFormattedMessages(node);
       }
     } catch (error) {
-      if (isFailError(error)) {
-        reporter.saveError(error);
-        continue;
+      if (!isFailError(error)) {
+        throw error;
       }
 
-      throw error;
+      reporter.report(error);
     }
   }
 }

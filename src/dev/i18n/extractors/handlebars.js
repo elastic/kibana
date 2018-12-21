@@ -29,76 +29,88 @@ const TOKENS_REGEX = /[^'\s]+|(?:'([^'\\]|\\[\s\S])*')/g;
  */
 export function* extractHandlebarsMessages(buffer, reporter) {
   for (const expression of buffer.toString().match(HBS_REGEX) || []) {
-    try {
-      const tokens = expression.match(TOKENS_REGEX);
+    const tokens = expression.match(TOKENS_REGEX);
 
-      const [functionName, idString, propertiesString] = tokens;
+    const [functionName, idString, propertiesString] = tokens;
 
-      if (functionName !== 'i18n') {
-        continue;
-      }
+    if (functionName !== 'i18n') {
+      continue;
+    }
 
-      if (tokens.length !== 3) {
-        throw createFailError(`Wrong number of arguments for handlebars i18n call.`);
-      }
+    if (tokens.length !== 3) {
+      reporter.report(createFailError(`Wrong number of arguments for handlebars i18n call.`));
+      continue;
+    }
 
-      if (!idString.startsWith(`'`) || !idString.endsWith(`'`)) {
-        throw createFailError(`Message id should be a string literal.`);
-      }
+    if (!idString.startsWith(`'`) || !idString.endsWith(`'`)) {
+      reporter.report(createFailError(`Message id should be a string literal.`));
+      continue;
+    }
 
-      const messageId = formatJSString(idString.slice(1, -1));
+    const messageId = formatJSString(idString.slice(1, -1));
 
-      if (!messageId) {
-        throw createFailError(`Empty id argument in Handlebars i18n is not allowed.`);
-      }
+    if (!messageId) {
+      reporter.report(createFailError(`Empty id argument in Handlebars i18n is not allowed.`));
+      continue;
+    }
 
-      if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
-        throw createFailError(
+    if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
+      reporter.report(
+        createFailError(
           `Properties string in Handlebars i18n should be a string literal ("${messageId}").`
-        );
-      }
+        )
+      );
+      continue;
+    }
 
-      const properties = JSON.parse(propertiesString.slice(1, -1));
+    const properties = JSON.parse(propertiesString.slice(1, -1));
 
-      if (typeof properties.defaultMessage !== 'string') {
-        throw createFailError(
+    if (typeof properties.defaultMessage !== 'string') {
+      reporter.report(
+        createFailError(
           `defaultMessage value in Handlebars i18n should be a string ("${messageId}").`
-        );
-      }
+        )
+      );
+      continue;
+    }
 
-      if (properties[DESCRIPTION_KEY] != null && typeof properties[DESCRIPTION_KEY] !== 'string') {
-        throw createFailError(
-          `Description value in Handlebars i18n should be a string ("${messageId}").`
-        );
-      }
+    if (properties[DESCRIPTION_KEY] != null && typeof properties[DESCRIPTION_KEY] !== 'string') {
+      reporter.report(
+        createFailError(`Description value in Handlebars i18n should be a string ("${messageId}").`)
+      );
+      continue;
+    }
 
-      const message = formatJSString(properties[DEFAULT_MESSAGE_KEY]);
-      const description = formatJSString(properties[DESCRIPTION_KEY]);
+    const message = formatJSString(properties[DEFAULT_MESSAGE_KEY]);
+    const description = formatJSString(properties[DESCRIPTION_KEY]);
 
-      if (!message) {
-        throw createFailError(
-          `Empty defaultMessage in Handlebars i18n is not allowed ("${messageId}").`
-        );
-      }
+    if (!message) {
+      reporter.report(
+        createFailError(`Empty defaultMessage in Handlebars i18n is not allowed ("${messageId}").`)
+      );
+      continue;
+    }
 
-      const valuesObject = properties.values;
+    const valuesObject = properties.values;
 
-      if (valuesObject != null && typeof valuesObject !== 'object') {
-        throw createFailError(
-          `"values" value should be an object in Handlebars i18n ("${messageId}").`
-        );
-      }
+    if (valuesObject != null && typeof valuesObject !== 'object') {
+      reporter.report(
+        createFailError(`"values" value should be an object in Handlebars i18n ("${messageId}").`)
+      );
+      continue;
+    }
 
+    try {
       checkValuesProperty(Object.keys(valuesObject || {}), message, messageId);
-
-      yield [messageId, { message, description }];
     } catch (error) {
       if (isFailError(error)) {
-        reporter.saveError(error);
+        reporter.report(error);
         continue;
       }
 
       throw error;
     }
+
+    yield [messageId, { message, description }];
   }
 }
