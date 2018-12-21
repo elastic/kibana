@@ -16,7 +16,7 @@ export function crossClusterReplication(kibana) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main', 'remote_clusters', 'index_management'],
     uiExports: {
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/cross_cluster_replication'],
       injectDefaultVars(server) {
         const config = server.config();

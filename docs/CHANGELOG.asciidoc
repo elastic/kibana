@@ -22,7 +22,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.0.0-alpha2]]
 == {kib} 7.0.0-alpha2
 
-coming[7.0.0-alpha2]
 
 [float]
 [[breaking-7.0.0-alpha2]]

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
@@ -26,7 +28,7 @@ export default function (kibana) {
         hidden: true,
         url: '/status',
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     }
   });
 }

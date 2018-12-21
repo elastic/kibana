@@ -12,7 +12,9 @@ import React, {
 } from 'react';
 
 import {
-  EuiSpacer
+  EuiSpacer,
+  EuiCallOut,
+  EuiLoadingSpinner
 } from '@elastic/eui';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -26,17 +28,44 @@ export class DatafeedPreviewPane extends Component {
     super(props);
 
     this.state = {
-      previewJson: ''
+      previewJson: '',
+      loading: true,
+      canPreviewDatafeed: true
     };
   }
 
+  renderContent() {
+    const { previewJson, loading, canPreviewDatafeed } = this.state;
+
+    if (canPreviewDatafeed === false) {
+      return (
+        <EuiCallOut
+          title="You do not have permission to view the datafeed preview"
+          color="warning"
+          iconType="alert"
+        >
+          <p>
+            Please contact your administrator
+          </p>
+        </EuiCallOut>);
+    } else if (loading === true) {
+      return <EuiLoadingSpinner size="xl" />;
+    } else {
+      return <MLJobEditor value={previewJson} readOnly={true} />;
+    }
+  }
+
   componentDidMount() {
-    updateDatafeedPreview(this.props.job)
+    const canPreviewDatafeed = checkPermission('canPreviewDatafeed');
+    this.setState({ canPreviewDatafeed });
+
+    updateDatafeedPreview(this.props.job, canPreviewDatafeed)
       .then((previewJson) => {
-        this.setState({ previewJson });
+        this.setState({ previewJson, loading: false });
       })
       .catch((error) => {
         console.log('Datafeed preview could not be loaded', error);
+        this.setState({ loading: false });
       });
   }
 
@@ -44,7 +73,7 @@ export class DatafeedPreviewPane extends Component {
     return (
       <React.Fragment>
         <EuiSpacer size="s" />
-        <MLJobEditor value={this.state.previewJson} readOnly={true} />
+        {this.renderContent()}
       </React.Fragment>
     );
   }
@@ -53,9 +82,8 @@ DatafeedPreviewPane.propTypes = {
   job: PropTypes.object.isRequired,
 };
 
-function updateDatafeedPreview(job) {
+function updateDatafeedPreview(job, canPreviewDatafeed) {
   return new Promise((resolve, reject) => {
-    const canPreviewDatafeed = checkPermission('canPreviewDatafeed');
     if (canPreviewDatafeed) {
       mlJobService.getDatafeedPreview(job.job_id)
         .then((resp) => {
