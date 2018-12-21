@@ -30,7 +30,7 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
     z: zRow,
     extraMetrics: _.compact([zRow]),
     yScale: yScale,
-    seriesRaw: {
+    seriesRaw: series && {
       table,
       column: series[0].accessor,
       row: rowIndex,

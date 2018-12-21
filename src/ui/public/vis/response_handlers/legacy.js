@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
 const LegacyResponseHandlerProvider = function () {
@@ -28,15 +27,7 @@ const LegacyResponseHandlerProvider = function () {
       return new Promise((resolve) => {
         const converted = { tables: [] };
 
-        // check if there are buckets after the first metric
-        const minMetricIndex = dimensions.metrics.reduce((a, b) => Math.min(a.accessor, b.accessor));
-        const maxBucketIndex = dimensions.metrics.reduce((a, b) => Math.max(a.accessor, b.accessor));
-        const metricsAtAllLevels = minMetricIndex < maxBucketIndex;
-
         const split = (dimensions.splitColumn || dimensions.splitRow);
-        const numberOfMetrics = dimensions.metrics.length;
-        const numberOfBuckets = dimensions.buckets.length;
-        const metricsPerBucket = numberOfMetrics / numberOfBuckets;
 
         if (split) {
           const splitColumnIndex = split[0].accessor;
@@ -53,15 +44,12 @@ const LegacyResponseHandlerProvider = function () {
                 $parent: converted,
                 title: `${splitValue}: ${splitColumn.name}`,
                 key: splitValue,
+                row: dimensions.splitRow,
                 tables: []
               };
               tableGroup.tables.push({
                 $parent: tableGroup,
-                columns: table.columns.filter((column, i) => {
-                  const isSplitColumn = i === splitColumnIndex;
-                  const isSplitMetric = metricsAtAllLevels && i > splitColumnIndex && i <= splitColumnIndex + metricsPerBucket;
-                  return !isSplitColumn && !isSplitMetric;
-                }),
+                columns: table.columns,
                 rows: []
               });
 
@@ -69,10 +57,7 @@ const LegacyResponseHandlerProvider = function () {
             }
 
             const tableIndex = splitMap[splitValue];
-            const newRow = _.cloneDeep(row);
-            delete newRow[splitColumn.accessor];
-
-            converted.tables[tableIndex].tables[0].rows.push(newRow);
+            converted.tables[tableIndex].tables[0].rows.push(row);
           });
         } else {
 

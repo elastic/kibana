@@ -220,6 +220,8 @@ export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) 
       z: schemas.radius,
       width: schemas.width,
       series: schemas.group,
+      splitRow: schemas.split_row,
+      splitColumn: schemas.split_column,
     };
     if (schemas.segment) {
       visConfig.dimensions.x = schemas.segment[0];

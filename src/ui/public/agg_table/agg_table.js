@@ -105,6 +105,8 @@ uiModules
           $scope.formattedColumns = table.columns.map(function (col, i) {
             const isBucket = $scope.dimensions.buckets.find(bucket => bucket.accessor === i);
             const dimension = isBucket ? isBucket : $scope.dimensions.metrics.find(metric => metric.accessor === i);
+            if (!dimension) return;
+
             const formattedColumn = {
               id: col.id,
               title: col.name,
@@ -180,7 +182,7 @@ uiModules
             }
 
             return formattedColumn;
-          });
+          }).filter(column => column);
         });
       }
     };
