@@ -5,14 +5,6 @@
  */
 import expect from 'expect.js';
 
-const getAlwaysPresentNavLinks = (usersFullName) => {
-  return [
-    usersFullName,
-    'Logout',
-    'Collapse',
-  ];
-};
-
 export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
@@ -20,12 +12,10 @@ export default function ({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
 
   const expectAppNavLinks = async (appNavLinkTexts) => {
-    const appLinks = await testSubjects.findAll('appLink');
+    const appSwitcher = await testSubjects.find('appSwitcher');
+    const appLinks = await testSubjects.findAllDescendant('appLink', appSwitcher);
     const linksText = await Promise.all(appLinks.map(appLink => appLink.getVisibleText()));
-    expect(linksText).to.eql([
-      ...appNavLinkTexts,
-      ...getAlwaysPresentNavLinks('test user')
-    ]);
+    expect(linksText).to.eql(appNavLinkTexts);
   };
 
   describe('discover', () => {
