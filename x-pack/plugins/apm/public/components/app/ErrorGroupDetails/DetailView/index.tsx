@@ -72,13 +72,13 @@ const PaddedContainer = styled.div`
 `;
 
 const logStacktraceTab = {
-  key: 'exception_stacktrace',
+  key: 'log_stacktrace',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
     defaultMessage: 'Log stacktrace'
   })
 };
 const exceptionStacktraceTab = {
-  key: 'log_stacktrace',
+  key: 'exception_stacktrace',
   label: i18n.translate(
     'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
     {
