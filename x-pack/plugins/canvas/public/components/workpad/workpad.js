@@ -39,16 +39,28 @@ export const Workpad = props => {
   const keyHandler = action => {
     // handle keypress events for editor and presentation events
     // this exists in both contexts
-    if (action === 'REFRESH') return fetchAllRenderables();
+    if (action === 'REFRESH') {
+      return fetchAllRenderables();
+    }
 
     // editor events
-    if (action === 'UNDO') return undoHistory();
-    if (action === 'REDO') return redoHistory();
-    if (action === 'GRID') return setGrid(!grid);
+    if (action === 'UNDO') {
+      return undoHistory();
+    }
+    if (action === 'REDO') {
+      return redoHistory();
+    }
+    if (action === 'GRID') {
+      return setGrid(!grid);
+    }
 
     // presentation events
-    if (action === 'PREV') return previousPage();
-    if (action === 'NEXT') return nextPage();
+    if (action === 'PREV') {
+      return previousPage();
+    }
+    if (action === 'NEXT') {
+      return nextPage();
+    }
   };
 
   setDocTitle(workpad.name);

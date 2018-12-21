@@ -20,6 +20,18 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extractors/pug throws on empty id 1`] = `"Empty \\"id\\" value in i18n() or i18n.translate() is not allowed."`;
+exports[`dev/i18n/extractors/pug throws on empty id 1`] = `
+Array [
+  Array [
+    [Error: Empty "id" value in i18n() or i18n.translate() is not allowed.],
+  ],
+]
+`;
 
-exports[`dev/i18n/extractors/pug throws on missing default message 1`] = `"Empty defaultMessage in i18n() or i18n.translate() is not allowed (\\"message-id\\")."`;
+exports[`dev/i18n/extractors/pug throws on missing default message 1`] = `
+Array [
+  Array [
+    [Error: Empty defaultMessage in i18n() or i18n.translate() is not allowed ("message-id").],
+  ],
+]
+`;

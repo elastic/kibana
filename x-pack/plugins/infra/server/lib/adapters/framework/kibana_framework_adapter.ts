@@ -5,8 +5,9 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Request, ResponseToolkit, Server } from 'hapi';
+import { Legacy } from 'kibana';
 
+import { GenericParams } from 'elasticsearch';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -25,18 +26,11 @@ import {
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
 
-declare module 'hapi' {
-  interface PluginProperties {
-    elasticsearch: any;
-    kibana: any;
-  }
-}
-
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
-  private server: Server;
+  private server: Legacy.Server;
 
-  constructor(hapiServer: Server) {
+  constructor(hapiServer: Legacy.Server) {
     this.server = hapiServer;
     this.version = hapiServer.plugins.kibana.status.plugin.version;
   }
@@ -56,7 +50,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
     this.server.register<HapiGraphQLPluginOptions>({
       options: {
-        graphqlOptions: (req: Request) => ({
+        graphqlOptions: (req: Legacy.Request) => ({
           context: { req: wrapRequest(req) },
           schema,
         }),
@@ -81,7 +75,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     RouteRequest extends InfraWrappableRequest,
     RouteResponse extends InfraResponse
   >(route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    const wrappedHandler = (request: any, h: ResponseToolkit) =>
+    const wrappedHandler = (request: any, h: Legacy.ResponseToolkit) =>
       route.handler(wrapRequest(request), h);
 
     this.server.route({
@@ -91,26 +85,31 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     });
   }
 
-  public async callWithRequest(req: InfraFrameworkRequest<Request>, ...rest: any[]) {
+  public async callWithRequest(
+    req: InfraFrameworkRequest<Legacy.Request>,
+    endpoint: string,
+    params: GenericParams,
+    ...rest: any[]
+  ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
-    const fields = await callWithRequest(internalRequest, ...rest);
+    const fields = await callWithRequest(internalRequest, endpoint, params, ...rest);
     return fields;
   }
 
   public getIndexPatternsService(
-    request: InfraFrameworkRequest<Request>
+    request: InfraFrameworkRequest<Legacy.Request>
   ): InfraFrameworkIndexPatternsService {
     if (!isServerWithIndexPatternsServiceFactory(this.server)) {
       throw new Error('Failed to access indexPatternsService for the request');
     }
     return this.server.indexPatternsServiceFactory({
-      callCluster: async (method: string, args: [object], ...rest: any[]) => {
+      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
           request,
           method,
-          { ...args, allowNoIndices: true },
+          { ...args, allowNoIndices: true } as GenericParams,
           ...rest
         );
         return fieldCaps;
@@ -119,7 +118,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public async makeTSVBRequest(
-    req: InfraFrameworkRequest<Request>,
+    req: InfraFrameworkRequest<Legacy.Request>,
     model: InfraMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
@@ -159,13 +158,13 @@ export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
   };
 }
 
-interface ServerWithIndexPatternsServiceFactory extends Server {
+interface ServerWithIndexPatternsServiceFactory extends Legacy.Server {
   indexPatternsServiceFactory(options: {
     callCluster: (...args: any[]) => any;
   }): InfraFrameworkIndexPatternsService;
 }
 
 const isServerWithIndexPatternsServiceFactory = (
-  server: Server
+  server: Legacy.Server
 ): server is ServerWithIndexPatternsServiceFactory =>
   typeof (server as any).indexPatternsServiceFactory === 'function';

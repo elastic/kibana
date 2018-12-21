@@ -40,6 +40,7 @@ export async function loadTransactionDistribution({
   transactionName,
   transactionType = 'request',
   transactionId,
+  traceId,
   kuery
 }: Required<IUrlParams>) {
   return callApi<ITransactionDistributionAPIResponse>({
@@ -50,6 +51,7 @@ export async function loadTransactionDistribution({
       start,
       end,
       transactionId,
+      traceId,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
@@ -84,6 +86,22 @@ export async function loadOverviewCharts({
 }: IUrlParams) {
   return callApi<TimeSeriesAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/charts`,
+    query: {
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
+    }
+  });
+}
+
+export async function loadOverviewChartsForAllTypes({
+  serviceName,
+  start,
+  end,
+  kuery
+}: IUrlParams) {
+  return callApi<TimeSeriesAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/charts`,
     query: {
       start,
       end,

@@ -331,8 +331,8 @@ const outputConfig: YamlConfigSchema[] = [
         text: 'Kafka',
       },
       {
-        value: 'console',
-        text: 'Console',
+        value: 'redis',
+        text: 'Redis',
       },
     ],
     error: 'outputConfig.output.error',

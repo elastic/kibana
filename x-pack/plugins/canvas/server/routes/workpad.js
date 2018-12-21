@@ -14,16 +14,25 @@ export function workpad(server) {
   const routePrefix = API_ROUTE_WORKPAD;
 
   function formatResponse(resp) {
-    if (resp.isBoom) return resp; // can't wrap it if it's already a boom error
+    if (resp.isBoom) {
+      return resp;
+    } // can't wrap it if it's already a boom error
 
-    if (resp instanceof esErrors['400']) return boom.badRequest(resp);
+    if (resp instanceof esErrors['400']) {
+      return boom.badRequest(resp);
+    }
 
-    if (resp instanceof esErrors['401']) return boom.unauthorized();
+    if (resp instanceof esErrors['401']) {
+      return boom.unauthorized();
+    }
 
-    if (resp instanceof esErrors['403'])
+    if (resp instanceof esErrors['403']) {
       return boom.forbidden("Sorry, you don't have access to that");
+    }
 
-    if (resp instanceof esErrors['404']) return boom.boomify(resp, { statusCode: 404 });
+    if (resp instanceof esErrors['404']) {
+      return boom.boomify(resp, { statusCode: 404 });
+    }
 
     return resp;
   }
@@ -31,7 +40,9 @@ export function workpad(server) {
   function createWorkpad(req, id) {
     const savedObjectsClient = req.getSavedObjectsClient();
 
-    if (!req.payload) return Promise.resolve(boom.badRequest('A workpad payload is required'));
+    if (!req.payload) {
+      return Promise.resolve(boom.badRequest('A workpad payload is required'));
+    }
 
     const now = new Date().toISOString();
     return savedObjectsClient.create(
