@@ -31,6 +31,7 @@ uiModules
       template: aggTableGroupTemplate,
       scope: {
         group: '=',
+        dimensions: '=',
         perPage: '=?',
         sort: '=?',
         exportTitle: '=?',
@@ -49,9 +50,7 @@ uiModules
               if (!group || !group.tables.length) return;
 
               const firstTable = group.tables[0];
-              const params = firstTable.aggConfig && firstTable.aggConfig.params;
-              // render groups that have Table children as if they were rows, because iteration is cleaner
-              const childLayout = (params && !params.row) ? 'columns' : 'rows';
+              const childLayout = (firstTable.params && !firstTable.params.row) ? 'columns' : 'rows';
 
               $scope[childLayout] = group.tables;
             });

@@ -113,10 +113,6 @@ module.directive('kbnRows', function ($compile, Private) {
         $tr.append($cell);
       }
 
-      function maxRowSize(max, row) {
-        return Math.max(max, row.length);
-      }
-
       $scope.$watchMulti([
         attr.kbnRows,
         attr.kbnRowsMin
@@ -127,23 +123,21 @@ module.directive('kbnRows', function ($compile, Private) {
         $el.empty();
 
         if (!Array.isArray(rows)) rows = [];
-        const width = rows.reduce(maxRowSize, 0);
 
         if (isFinite(min) && rows.length < min) {
           // clone the rows so that we can add elements to it without upsetting the original
           rows = _.clone(rows);
           // crate the empty row which will be pushed into the row list over and over
-          const emptyRow = new Array(width);
-          // fill the empty row with values
-          _.times(width, function (i) { emptyRow[i] = ''; });
+          const emptyRow = {};
           // push as many empty rows into the row array as needed
           _.times(min - rows.length, function () { rows.push(emptyRow); });
         }
 
         rows.forEach(function (row) {
           const $tr = $(document.createElement('tr')).appendTo($el);
-          row.forEach(function (cell) {
-            addCell($tr, cell);
+          $scope.columns.forEach(column => {
+            const value = row[column.id] || '';
+            addCell($tr, value);
           });
         });
       });

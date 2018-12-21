@@ -29,7 +29,9 @@ const LegacyResponseHandlerProvider = function () {
         const converted = { tables: [] };
 
         // check if there are buckets after the first metric
-        const metricsAtAllLevels = false; // todo
+        const minMetricIndex = dimensions.metrics.reduce((a, b) => Math.min(a.accessor, b.accessor));
+        const maxBucketIndex = dimensions.metrics.reduce((a, b) => Math.max(a.accessor, b.accessor));
+        const metricsAtAllLevels = minMetricIndex < maxBucketIndex;
 
         const split = (dimensions.splitColumn || dimensions.splitRow);
         const numberOfMetrics = dimensions.metrics.length;
@@ -49,7 +51,7 @@ const LegacyResponseHandlerProvider = function () {
               splitMap[splitValue] = splitIndex++;
               const tableGroup = {
                 $parent: converted,
-                title: `${splitValue}`, //: ${splitAgg.makeLabel()}`, // todo: format (we have the dimensions)
+                title: `${splitValue}: ${splitColumn.name}`,
                 key: splitValue,
                 tables: []
               };

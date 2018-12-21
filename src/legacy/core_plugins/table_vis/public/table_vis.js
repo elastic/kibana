@@ -26,7 +26,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { legacyTableResponseHandler } from './legacy_response_handler';
 
 // we need to load the css ourselves
 
@@ -104,10 +103,6 @@ function TableVisTypeProvider(Private) {
           aggFilter: ['!filter']
         }
       ])
-    },
-    responseHandler: legacyTableResponseHandler,
-    responseHandlerConfig: {
-      asAggConfigResults: true
     },
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
