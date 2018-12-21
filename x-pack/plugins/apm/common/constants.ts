@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 export const SERVICE_NAME = 'context.service.name';
 export const SERVICE_AGENT_NAME = 'context.service.agent.name';
 export const SERVICE_LANGUAGE_NAME = 'context.service.language.name';
@@ -41,3 +40,12 @@ export const ERROR_LOG_STACKTRACE = 'error.log.stacktrace';
 export const ERROR_EXC_MESSAGE = 'error.exception.message';
 export const ERROR_EXC_STACKTRACE = 'error.exception.stacktrace';
 export const ERROR_EXC_HANDLED = 'error.exception.handled';
+
+// METRICS
+export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
+export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
+export const METRIC_PROCESS_MEMORY_SIZE = 'system.process.memory.size';
+export const METRIC_PROCESS_MEMORY_RSS = 'system.process.memory.rss.bytes';
+
+export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
+export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';

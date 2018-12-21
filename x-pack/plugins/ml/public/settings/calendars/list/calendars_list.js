@@ -75,9 +75,8 @@ export class CalendarsList extends Component {
 
   addRequiredFieldsToList = (calendarsList = []) => {
     for (let i = 0; i < calendarsList.length; i++) {
-      const eventLength = calendarsList[i].events.length;
       calendarsList[i].job_ids_string = calendarsList[i].job_ids.join(', ');
-      calendarsList[i].events_length = `${eventLength} ${eventLength === 1 ? 'event' : 'events'}`;
+      calendarsList[i].events_length = calendarsList[i].events.length;
     }
 
     return calendarsList;

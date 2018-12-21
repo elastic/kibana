@@ -158,16 +158,18 @@ export class PageManager extends React.PureComponent {
                 >
                   {Style.it(
                     workpadCSS,
-                    <PagePreview
-                      isWriteable={isWriteable}
-                      page={page}
-                      height={100}
-                      pageNumber={pageNumber}
-                      movePage={movePage}
-                      selectedPage={selectedPage}
-                      duplicatePage={duplicatePage}
-                      confirmDelete={this.confirmDelete}
-                    />
+                    <div>
+                      <PagePreview
+                        isWriteable={isWriteable}
+                        page={page}
+                        height={100}
+                        pageNumber={pageNumber}
+                        movePage={movePage}
+                        selectedPage={selectedPage}
+                        duplicatePage={duplicatePage}
+                        confirmDelete={this.confirmDelete}
+                      />
+                    </div>
                   )}
                 </Link>
               </EuiFlexItem>
