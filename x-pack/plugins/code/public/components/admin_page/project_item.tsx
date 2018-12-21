@@ -48,8 +48,7 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <EuiText>
-              <EuiTextColor color="subdued">{org}</EuiTextColor>
-              /<strong>{name}</strong>
+              <EuiTextColor color="subdued">{org}</EuiTextColor>/<strong>{name}</strong>
             </EuiText>
             <EuiText>
               <h6>
@@ -59,7 +58,9 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <EuiText color="subdued" size="s">
-              <a href={"https://" + uri} target="_blank">{uri}</a>
+              <a href={'https://' + uri} target="_blank">
+                {uri}
+              </a>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -67,19 +68,25 @@ class CodeProjectItem extends React.PureComponent<{
               <EuiFlexItem grow={false}>
                 <div className="code-project-button">
                   <EuiIcon type="gear" />
-                  <EuiText size="xs" color="subdued">Settings</EuiText>
+                  <EuiText size="xs" color="subdued">
+                    Settings
+                  </EuiText>
                 </div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <div className="code-project-button">
                   <EuiIcon type="indexSettings" />
-                  <EuiText size="xs" color="subdued">Index</EuiText>
+                  <EuiText size="xs" color="subdued">
+                    Index
+                  </EuiText>
                 </div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <div className="code-project-button">
-                  <EuiIcon type="trash" color="danger"/>
-                  <EuiText size="xs" color="subdued">Delete</EuiText>
+                  <EuiIcon type="trash" color="danger" />
+                  <EuiText size="xs" color="subdued">
+                    Delete
+                  </EuiText>
                 </div>
               </EuiFlexItem>
             </EuiFlexGroup>
