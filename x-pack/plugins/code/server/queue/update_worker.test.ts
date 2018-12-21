@@ -5,7 +5,6 @@
  */
 
 import sinon from 'sinon';
-
 import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
