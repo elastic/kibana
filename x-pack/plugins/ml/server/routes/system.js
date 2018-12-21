@@ -26,7 +26,8 @@ export function systemRoutes(server, commonRouteConfig) {
         if (typeof resp.nodes === 'object') {
           Object.keys(resp.nodes).forEach((k) => {
             if (resp.nodes[k].attributes !== undefined) {
-              if (resp.nodes[k].attributes['ml.enabled'] === 'true') {
+              const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
+              if (maxOpenJobs !== null && maxOpenJobs > 0) {
                 count++;
               }
             }
