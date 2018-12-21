@@ -80,6 +80,10 @@ class Routing {
     });
   }
 
+  getAutoFollowPatternPath = (name, section = '/edit') => {
+    return encodeURI(`#${BASE_PATH}/auto_follow_patterns${section}/${encodeURIComponent(name)}`);
+  };
+
   get reactRouter() {
     return this._reactRouter;
   }

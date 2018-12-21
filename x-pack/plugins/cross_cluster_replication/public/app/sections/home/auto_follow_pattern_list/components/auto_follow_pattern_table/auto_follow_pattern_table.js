@@ -25,7 +25,7 @@ export const AutoFollowPatternTable = injectI18n(
   class extends PureComponent {
     static propTypes = {
       autoFollowPatterns: PropTypes.array,
-      openDetailPanel: PropTypes.func.isRequired,
+      selectAutoFollowPattern: PropTypes.func.isRequired,
     }
 
     state = {
@@ -61,7 +61,7 @@ export const AutoFollowPatternTable = injectI18n(
     };
 
     getTableColumns() {
-      const { intl, editAutoFollowPattern, openDetailPanel } = this.props;
+      const { intl, selectAutoFollowPattern } = this.props;
 
       return [{
         field: 'name',
@@ -73,7 +73,7 @@ export const AutoFollowPatternTable = injectI18n(
         truncateText: false,
         render: (name) => {
           return (
-            <EuiLink onClick={() => openDetailPanel(name)}>
+            <EuiLink onClick={() => selectAutoFollowPattern(name)}>
               {name}
             </EuiLink>
           );
@@ -142,20 +142,25 @@ export const AutoFollowPatternTable = injectI18n(
             },
           },
           {
-            name: intl.formatMessage({
-              id: 'xpack.crossClusterReplication.editIndexPattern.fields.table.actionEditLabel',
-              defaultMessage: 'Edit',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.crossClusterReplication.editIndexPattern.fields.table.actionEditDescription',
-              defaultMessage: 'Edit',
-            }),
-            icon: 'pencil',
-            onClick: ({ name }) => {
-              editAutoFollowPattern(name);
-              routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
+            render: ({ name }) => {
+              const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
+                defaultMessage: 'Edit auto-follow pattern',
+              });
+
+              return (
+                <EuiToolTip
+                  content={label}
+                  delay="long"
+                >
+                  <EuiButtonIcon
+                    aria-label={label}
+                    iconType="pencil"
+                    color="primary"
+                    href={routing.getAutoFollowPatternPath(name)}
+                  />
+                </EuiToolTip>
+              );
             },
-            type: 'icon',
           },
         ],
         width: '100px',

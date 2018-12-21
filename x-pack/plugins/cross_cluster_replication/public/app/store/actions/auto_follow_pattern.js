@@ -16,25 +16,18 @@ import {
 import routing from '../../services/routing';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
-import { getDetailPanelAutoFollowPatternName } from '../selectors';
+import { getSelectedAutoFollowPatternId } from '../selectors';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 
-export const editAutoFollowPattern = (name) => ({
-  type: t.AUTO_FOLLOW_PATTERN_EDIT,
-  payload: name
+export const selectDetailAutoFollowPattern = (id) => ({
+  type: t.AUTO_FOLLOW_PATTERN_SELECT_DETAIL,
+  payload: id
 });
 
-export const openAutoFollowPatternDetailPanel = (name) => {
-  return {
-    type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
-    payload: name
-  };
-};
-
-export const closeAutoFollowPatternDetailPanel = () => ({
-  type: t.AUTO_FOLLOW_PATTERN_DETAIL_PANEL,
-  payload: null
+export const selectEditAutoFollowPattern = (id) => ({
+  type: t.AUTO_FOLLOW_PATTERN_SELECT_EDIT,
+  payload: id
 });
 
 export const loadAutoFollowPatterns = (isUpdating = false) =>
@@ -42,21 +35,17 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
     label: t.AUTO_FOLLOW_PATTERN_LOAD,
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
-    handler: async () => {
-      return await loadAutoFollowPatternsRequest();
-    },
+    handler: async () => (
+      await loadAutoFollowPatternsRequest()
+    ),
   });
 
 export const getAutoFollowPattern = (id) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_GET,
     scope,
-    handler: async (dispatch) => (
-      getAutoFollowPatternRequest(id)
-        .then((response) => {
-          dispatch(editAutoFollowPattern(id));
-          return response;
-        })
+    handler: async () => (
+      await getAutoFollowPatternRequest(id)
     )
   });
 
@@ -132,12 +121,12 @@ export const deleteAutoFollowPattern = (id) => (
           });
 
         toastNotifications.addSuccess(successMessage);
-      }
 
-      // If we've just deleted a pattern we were looking at, we need to close the panel.
-      const detailPanelAutoFollowPatternName = getDetailPanelAutoFollowPatternName(getState());
-      if (detailPanelAutoFollowPatternName && response.itemsDeleted.includes(detailPanelAutoFollowPatternName)) {
-        dispatch(closeAutoFollowPatternDetailPanel());
+        // If we've just deleted a pattern we were looking at, we need to close the panel.
+        const autoFollowPatternId = getSelectedAutoFollowPatternId('detail')(getState());
+        if (response.itemsDeleted.includes(autoFollowPatternId)) {
+          dispatch(selectDetailAutoFollowPattern(null));
+        }
       }
     }
   })
