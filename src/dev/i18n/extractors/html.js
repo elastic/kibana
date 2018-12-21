@@ -241,16 +241,18 @@ function* getDirectiveMessages(htmlContent, reporter) {
       } else {
         checkValuesProperty([], message, messageId);
       }
+
+      yield [
+        messageId,
+        { message, description: formatHTMLString(element.description) || undefined },
+      ];
     } catch (error) {
-      if (isFailError(error)) {
-        reporter.report(error);
-        continue;
+      if (!isFailError(error)) {
+        throw error;
       }
 
-      throw error;
+      reporter.report(error);
     }
-
-    yield [messageId, { message, description: formatHTMLString(element.description) || undefined }];
   }
 }
 

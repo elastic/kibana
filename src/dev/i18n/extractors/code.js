@@ -72,10 +72,9 @@ export function* extractCodeMessages(buffer, reporter) {
   } catch (error) {
     if (error instanceof SyntaxError) {
       const errorWithContext = createParserErrorMessage(buffer.toString(), error);
-      throw createFailError(errorWithContext);
+      reporter.report(createFailError(errorWithContext));
+      return;
     }
-
-    throw error;
   }
 
   for (const node of traverseNodes(ast.program.body)) {

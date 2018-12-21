@@ -102,15 +102,14 @@ export function* extractHandlebarsMessages(buffer, reporter) {
 
     try {
       checkValuesProperty(Object.keys(valuesObject || {}), message, messageId);
+
+      yield [messageId, { message, description }];
     } catch (error) {
-      if (isFailError(error)) {
-        reporter.report(error);
-        continue;
+      if (!isFailError(error)) {
+        throw error;
       }
 
-      throw error;
+      reporter.report(error);
     }
-
-    yield [messageId, { message, description }];
   }
 }

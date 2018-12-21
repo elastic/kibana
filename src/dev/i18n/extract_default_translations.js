@@ -137,12 +137,11 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
             addMessageToMap(targetMap, id, value, reporterWithContext);
           }
         } catch (error) {
-          if (isFailError(error)) {
-            reporterWithContext.report(error);
-            continue;
+          if (!isFailError(error)) {
+            throw error;
           }
 
-          throw error;
+          reporterWithContext.report(error);
         }
       }
     })
