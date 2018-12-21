@@ -84,13 +84,8 @@ Array [
   >
     opbeans-node
   </a>,
-  <a
-    href="#/opbeans-node/transactions?_g=myG&kuery=myKuery"
-  >
-    Transactions
-  </a>,
   <span>
-    request
+    Transactions
   </span>,
 ]
 `;
@@ -111,11 +106,6 @@ Array [
     href="#/:serviceName/transactions?_g=myG&kuery=myKuery"
   >
     Transactions
-  </a>,
-  <a
-    href="#/:serviceName/transactions/request?_g=myG&kuery=myKuery"
-  >
-    request
   </a>,
   <span>
     my-transaction-name
