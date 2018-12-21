@@ -34,7 +34,7 @@ describe('StickyProperties', () => {
       {
         label: 'Handled',
         fieldName: 'error.exception.handled',
-        val: 'true'
+        val: true
       },
       {
         label: 'User ID',

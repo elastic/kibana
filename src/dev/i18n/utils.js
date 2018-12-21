@@ -296,3 +296,17 @@ export function extractValuesKeysFromNode(node, messageId) {
     isStringLiteral(property.key) ? property.key.value : property.key.name
   );
 }
+
+export class ErrorReporter {
+  errors = [];
+
+  withContext(context) {
+    return { report: error => this.report(error, context) };
+  }
+
+  report(error, context) {
+    this.errors.push(
+      `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
+    );
+  }
+}
