@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper, shallow } from 'enzyme';
+import { ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
+import {
+  mountWithIntl,
+  shallowWithIntl
+} from '../../../../../../../test_utils/enzyme_helpers';
 import { Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 
@@ -16,7 +20,7 @@ describe('Stackframe', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = stacktracesMock[0];
-      wrapper = mount(<Stackframe stackframe={stackframe} />);
+      wrapper = mountWithIntl(<Stackframe stackframe={stackframe} />);
     });
 
     it('should render correctly', () => {
@@ -35,10 +39,10 @@ describe('Stackframe', () => {
   });
 
   describe('when stackframe does not have source lines', () => {
-    let wrapper: ReactWrapper;
+    let wrapper: ShallowWrapper;
     beforeEach(() => {
       const stackframe = { line: {} } as IStackframe;
-      wrapper = mount(<Stackframe stackframe={stackframe} />);
+      wrapper = shallowWithIntl(<Stackframe stackframe={stackframe} />);
     });
 
     it('should render only FrameHeading', () => {
