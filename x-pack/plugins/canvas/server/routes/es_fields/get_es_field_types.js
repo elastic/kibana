@@ -13,11 +13,15 @@ export function getESFieldTypes(index, fields, elasticsearchClient) {
     fields: fields || '*',
   };
 
-  if (fields && fields.length === 0) return Promise.resolve({});
+  if (fields && fields.length === 0) {
+    return Promise.resolve({});
+  }
 
   return elasticsearchClient('fieldCaps', config).then(resp => {
     return mapValues(resp.fields, types => {
-      if (keys(types).length > 1) return 'conflict';
+      if (keys(types).length > 1) {
+        return 'conflict';
+      }
 
       try {
         return normalizeType(keys(types)[0]);

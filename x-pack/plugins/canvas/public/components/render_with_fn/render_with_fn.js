@@ -44,7 +44,9 @@ export class RenderWithFn extends React.Component {
   componentWillReceiveProps({ renderFn }) {
     const newRenderFunction = renderFn !== this.props.renderFn;
 
-    if (newRenderFunction) this.resetRenderTarget(this.domNode);
+    if (newRenderFunction) {
+      this.resetRenderTarget(this.domNode);
+    }
   }
 
   shouldComponentUpdate(prevProps) {
@@ -60,7 +62,9 @@ export class RenderWithFn extends React.Component {
     }
 
     // Size changes
-    if (!isEqual(size, prevProps.size)) return handlers.resize(size);
+    if (!isEqual(size, prevProps.size)) {
+      return handlers.resize(size);
+    }
   }
 
   componentWillUnmount() {
@@ -70,7 +74,9 @@ export class RenderWithFn extends React.Component {
   callRenderFn = () => {
     const { handlers, config, renderFn, reuseNode, name: functionName } = this.props;
     // TODO: We should wait until handlers.done() is called before replacing the element content?
-    if (!reuseNode || !this.renderTarget) this.resetRenderTarget(this.domNode);
+    if (!reuseNode || !this.renderTarget) {
+      this.resetRenderTarget(this.domNode);
+    }
     // else if (!firstRender) handlers.destroy();
 
     const renderConfig = cloneDeep(config);
@@ -88,12 +94,18 @@ export class RenderWithFn extends React.Component {
   resetRenderTarget = domNode => {
     const { handlers } = this.props;
 
-    if (!domNode) throw new Error('RenderWithFn can not reset undefined target node');
+    if (!domNode) {
+      throw new Error('RenderWithFn can not reset undefined target node');
+    }
 
     // call destroy on existing element
-    if (!this.firstRender) handlers.destroy();
+    if (!this.firstRender) {
+      handlers.destroy();
+    }
 
-    while (domNode.firstChild) domNode.removeChild(domNode.firstChild);
+    while (domNode.firstChild) {
+      domNode.removeChild(domNode.firstChild);
+    }
 
     this.firstRender = true;
     this.renderTarget = this.createRenderTarget();

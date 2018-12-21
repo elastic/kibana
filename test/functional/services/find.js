@@ -109,6 +109,7 @@ export function FindProvider({ getService }) {
     }
 
     async setValue(selector, text) {
+      log.debug(`find.setValue(${selector}, ${text})`);
       return await retry.try(async () => {
         const element = await this.byCssSelector(selector);
         await element.click();
@@ -318,6 +319,12 @@ export function FindProvider({ getService }) {
     }
     async waitForDeletedByCssSelector(selector) {
       await leadfoot.waitForDeletedByCssSelector(selector);
+    }
+    async waitForAttributeToChange(selector, attribute, value) {
+      retry.waitFor(`${attribute} to equal "${value}"`, async () => {
+        const el = await this.byCssSelector(selector);
+        return value === await el.getAttribute(attribute);
+      });
     }
   }
 
