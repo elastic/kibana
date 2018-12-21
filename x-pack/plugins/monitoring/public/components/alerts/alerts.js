@@ -116,7 +116,7 @@ const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl })
         ...sorting,
         sort: {
           ...sorting.sort,
-          field: 'metadata.severity',
+          field: 'status',
           direction: EUI_SORT_DESCENDING,
         }
       }}
