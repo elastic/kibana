@@ -182,8 +182,8 @@ export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageI
     return;
   }
 
-  const valuesKeys = prefixedValuesKeys.map(
-    key => (key.startsWith(HTML_KEY_PREFIX) ? key.slice(HTML_KEY_PREFIX.length) : key)
+  const valuesKeys = prefixedValuesKeys.map(key =>
+    key.startsWith(HTML_KEY_PREFIX) ? key.slice(HTML_KEY_PREFIX.length) : key
   );
 
   let defaultMessageAst;
@@ -292,7 +292,7 @@ export function extractValuesKeysFromNode(node, messageId) {
     throw createFailError(`"values" value should be an object expression ("${messageId}").`);
   }
 
-  return node.properties.map(
-    property => (isStringLiteral(property.key) ? property.key.value : property.key.name)
+  return node.properties.map(property =>
+    isStringLiteral(property.key) ? property.key.value : property.key.name
   );
 }

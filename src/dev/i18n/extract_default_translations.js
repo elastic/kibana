@@ -28,7 +28,6 @@ import {
 } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
-import { paths, exclude } from '../../../.i18nrc.json';
 import { createFailError, isFailError } from '../run';
 
 function addMessageToMap(targetMap, key, value) {
@@ -42,7 +41,7 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-export function filterPaths(inputPaths) {
+export function filterPaths(inputPaths, paths) {
   const availablePaths = Object.values(paths);
   const pathsForExtraction = new Set();
 
@@ -66,16 +65,16 @@ export function filterPaths(inputPaths) {
   return [...pathsForExtraction];
 }
 
-function filterEntries(entries) {
+function filterEntries(entries, exclude) {
   return entries.filter(entry =>
     exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
   );
 }
 
-export function validateMessageNamespace(id, filePath) {
+export function validateMessageNamespace(id, filePath, allowedPaths) {
   const normalizedPath = normalizePath(filePath);
 
-  const [expectedNamespace] = Object.entries(paths).find(([, pluginPath]) =>
+  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
     normalizedPath.startsWith(`${pluginPath}/`)
   );
 
@@ -85,7 +84,7 @@ See .i18nrc.json for the list of supported namespaces.`);
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap) {
+export async function extractMessagesFromPathToMap(inputPath, targetMap, config) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -119,7 +118,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        filterEntries(entries).map(async entry => {
+        filterEntries(entries, config.exclude).map(async entry => {
           return {
             name: entry,
             content: await readFileAsync(entry),
@@ -130,7 +129,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
-            validateMessageNamespace(id, name);
+            validateMessageNamespace(id, name, config.paths);
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
