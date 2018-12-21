@@ -112,9 +112,7 @@ export function initRoutes(server) {
         url: tmsService.getUrlTemplate()
       };
     });
+
     return { fileLayers, tmsServices };
   }
 }
-
-
-

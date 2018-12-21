@@ -79,6 +79,14 @@ exports[`it renders without crashing 1`] = `
             "isGroupLabelOption": false,
             "label": "manage_ccr",
           },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "manage_ilm",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "read_ilm",
+          },
         ]
       }
       selectedOptions={Array []}
