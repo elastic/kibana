@@ -18,7 +18,7 @@ class ListingUI extends PureComponent {
     return [
       {
         name: 'Name',
-        field: 'logstash.name',
+        field: 'name',
         sortable: true,
         render: (name, node) => (
           <div>
@@ -41,25 +41,25 @@ class ListingUI extends PureComponent {
       },
       {
         name: 'CPU Usage',
-        field: 'process.cpu.percent',
+        field: 'cpu_usage',
         sortable: true,
         render: value => formatPercentageUsage(value, 100)
       },
       {
         name: 'Load Average',
-        field: 'os.cpu.load_average.1m',
+        field: 'load_average',
         sortable: true,
         render: value => formatNumber(value, '0.00')
       },
       {
         name: 'JVM Heap Used',
-        field: 'jvm.mem.heap_used_percent',
+        field: 'jvm_heap_used',
         sortable: true,
         render: value => formatPercentageUsage(value, 100)
       },
       {
         name: 'Events Ingested',
-        field: 'events.out',
+        field: 'events_out',
         sortable: true,
         render: value => formatNumber(value, '0.[0]a')
       },
@@ -75,7 +75,7 @@ class ListingUI extends PureComponent {
       },
       {
         name: 'Version',
-        field: 'logstash.version',
+        field: 'version',
         sortable: true,
         render: value => formatNumber(value)
       }
@@ -84,6 +84,15 @@ class ListingUI extends PureComponent {
   render() {
     const { data, stats, sorting, pagination, onTableChange, intl } = this.props;
     const columns = this.getColumns();
+    const flattenedData = data.map(item => ({
+      ...item,
+      name: item.logstash.name,
+      cpu_usage: item.process.cpu.percent,
+      load_average: item.os.cpu.load_average['1m'],
+      jvm_heap_used: item.jvm.mem.heap_used_percent,
+      events_ingested: item.events.out,
+      version: item.logstash.version,
+    }));
 
     return (
       <EuiPage>
@@ -93,7 +102,7 @@ class ListingUI extends PureComponent {
             <EuiSpacer size="m"/>
             <EuiMonitoringTable
               className="logstashNodesTable"
-              rows={data}
+              rows={flattenedData}
               columns={columns}
               sorting={{
                 ...sorting,
