@@ -19,7 +19,7 @@ const kibanaFeatures: Feature[] = [
           all: ['search'],
           read: ['config', 'index-pattern'],
         },
-        ui: [],
+        ui: ['showWriteControls'],
       },
       read: {
         app: ['kibana'],

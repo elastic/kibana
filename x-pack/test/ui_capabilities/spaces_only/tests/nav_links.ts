@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-import { SpacesService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
 import { navLinksBuilder } from '../../common/nav_links_builder';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
@@ -13,22 +12,9 @@ import { SpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: TestInvoker) {
-  const spacesService: SpacesService = getService('spaces');
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('navLinks', () => {
-    before(async () => {
-      for (const space of SpaceScenarios) {
-        await spacesService.create(space);
-      }
-    });
-
-    after(async () => {
-      for (const space of SpaceScenarios) {
-        await spacesService.delete(space.id);
-      }
-    });
-
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);

@@ -4,13 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SpacesService } from '../../../common/services';
 import { TestInvoker } from '../../../common/types';
+import { SpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function uiCapabilitesTests({ loadTestFile }: TestInvoker) {
+export default function uiCapabilitesTests({ loadTestFile, getService }: TestInvoker) {
+  const spacesService: SpacesService = getService('spaces');
+
   describe('ui capabilities', function() {
     this.tags('ciGroup5');
 
+    before(async () => {
+      for (const space of SpaceScenarios) {
+        await spacesService.create(space);
+      }
+    });
+
+    after(async () => {
+      for (const space of SpaceScenarios) {
+        await spacesService.delete(space.id);
+      }
+    });
+
     loadTestFile(require.resolve('./nav_links'));
+    loadTestFile(require.resolve('./discover'));
   });
 }

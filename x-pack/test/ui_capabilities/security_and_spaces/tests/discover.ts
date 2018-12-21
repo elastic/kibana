@@ -6,7 +6,6 @@
 
 import expect from 'expect.js';
 import { TestInvoker } from '../../../common/types';
-import { navLinksBuilder } from '../../common/nav_links_builder';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
@@ -17,7 +16,7 @@ import { UserAtSpaceScenarios } from '../scenarios';
 export default function navLinksTests({ getService }: TestInvoker) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('navLinks', () => {
+  describe('discover', () => {
     UserAtSpaceScenarios.forEach(scenario => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
@@ -32,26 +31,30 @@ export default function navLinksTests({ getService }: TestInvoker) {
           case 'legacy_all at everything_space':
           case 'legacy_read at everything_space':
           case 'dual_privileges_all at everything_space':
-          case 'dual_privileges_read at everything_space':
-          case 'global_read at everything_space':
           case 'everything_space_all at everything_space':
-          case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            expect(uiCapabilities.value).to.have.property('discover');
+            expect(uiCapabilities.value!.discover).to.eql({
+              showWriteControls: true,
+            });
             break;
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
+          case 'global_read at everything_space':
           case 'legacy_all at nothing_space':
           case 'legacy_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
+          case 'dual_privileges_read at everything_space':
           case 'dual_privileges_read at nothing_space':
           case 'global_read at nothing_space':
+          case 'everything_space_read at everything_space':
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            expect(uiCapabilities.value).to.have.property('discover');
+            expect(uiCapabilities.value!.discover).to.eql({
+              showWriteControls: false,
+            });
             break;
           case 'everything_space_all at nothing_space':
           case 'everything_space_read at nothing_space':
