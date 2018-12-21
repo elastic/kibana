@@ -32,22 +32,21 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_3'),
 ];
 
-jest.mock('../../../.i18nrc.json', () => ({
+const config = {
   paths: {
     plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
     plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
     plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
   },
   exclude: [],
-}));
+};
 
 describe('dev/i18n/extract_default_translations', () => {
   test('extracts messages from path to map', async () => {
     const [pluginPath] = pluginsPaths;
     const resultMap = new Map();
 
-    await extractMessagesFromPathToMap(pluginPath, resultMap, new ErrorReporter());
-
+    await extractMessagesFromPathToMap(pluginPath, resultMap, config, new ErrorReporter());
     expect([...resultMap].sort()).toMatchSnapshot();
   });
 
@@ -55,7 +54,9 @@ describe('dev/i18n/extract_default_translations', () => {
     const [, , pluginPath] = pluginsPaths;
     const reporter = new ErrorReporter();
 
-    await expect(extractMessagesFromPathToMap(pluginPath, new Map(), reporter)).resolves.not.toThrow();
+    await expect(
+      extractMessagesFromPathToMap(pluginPath, new Map(), config, reporter)
+    ).resolves.not.toThrow();
     expect(reporter.errors).toMatchSnapshot();
   });
 
@@ -65,7 +66,7 @@ describe('dev/i18n/extract_default_translations', () => {
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath)).not.toThrow();
+    expect(() => validateMessageNamespace(id, filePath, config.paths)).not.toThrow();
   });
 
   test('throws on wrong message namespace', () => {
@@ -76,7 +77,7 @@ describe('dev/i18n/extract_default_translations', () => {
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
 
-    expect(() => validateMessageNamespace(id, filePath, { report })).not.toThrow();
+    expect(() => validateMessageNamespace(id, filePath, config.paths, { report })).not.toThrow();
     expect(report.mock.calls).toMatchSnapshot();
   });
 });

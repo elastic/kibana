@@ -18,5 +18,5 @@
  */
 
 export { filterPaths, extractMessagesFromPathToMap } from './extract_default_translations';
-export { writeFileAsync, ErrorReporter } from './utils';
+export { writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
 export { serializeToJson, serializeToJson5 } from './serializers';
