@@ -36,10 +36,10 @@ describe('Stackframe', () => {
   });
 
   describe('when stackframe does not have source lines', () => {
-    let wrapper: ShallowWrapper;
+    let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = { line: {} } as IStackframe;
-      wrapper = shallowWithIntl(<Stackframe stackframe={stackframe} />);
+      wrapper = mountWithIntl(<Stackframe stackframe={stackframe} />);
     });
 
     it('should render only FrameHeading', () => {
