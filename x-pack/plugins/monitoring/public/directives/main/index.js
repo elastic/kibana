@@ -82,35 +82,27 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
     link(scope, _element, attributes, controller) {
       config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
 
-      function getSetupObj() {
-        return {
-          licenseService: license,
-          breadcrumbsService: breadcrumbs,
-          kbnUrlService: kbnUrl,
-          attributes: {
-            name: attributes.name,
-            product: attributes.product,
-            instance: attributes.instance,
-            resolver: attributes.resolver,
-            page: attributes.page,
-            tabIconClass: attributes.tabIconClass,
-            tabIconLabel: attributes.tabIconLabel,
-            pipelineId: attributes.pipelineId,
-            pipelineHash: attributes.pipelineHash,
-            pipelineVersions: get(scope, 'pageData.versions')
-          },
-          clusterName: get(scope, 'cluster.cluster_name')
-        };
-      }
+      controller.setup({
+        licenseService: license,
+        breadcrumbsService: breadcrumbs,
+        kbnUrlService: kbnUrl,
+        attributes: {
+          name: attributes.name,
+          product: attributes.product,
+          instance: attributes.instance,
+          resolver: attributes.resolver,
+          page: attributes.page,
+          tabIconClass: attributes.tabIconClass,
+          tabIconLabel: attributes.tabIconLabel,
+          pipelineId: attributes.pipelineId,
+          pipelineHash: attributes.pipelineHash,
+          pipelineVersions: get(scope, 'pageData.versions')
+        },
+        clusterName: get(scope, 'cluster.cluster_name')
+      });
 
-      const setupObj = getSetupObj();
-      controller.setup(setupObj);
-      Object.keys(setupObj.attributes).forEach(key => {
-        attributes.$observe(key, () => controller.setup(getSetupObj()));
-      });
-      scope.$watch('pageData.versions', versions => {
-        controller.pipelineVersions = versions;
-      });
+      attributes.$observe('instance', instance => controller.instance = instance);
+      attributes.$observe('resolver', resolver => controller.resolver = resolver);
     }
   };
 });

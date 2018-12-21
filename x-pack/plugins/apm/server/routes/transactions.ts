@@ -12,12 +12,6 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransaction } from '../lib/transactions/get_transaction';
 import { getSpans } from '../lib/transactions/spans/get_spans';
 
-const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
-
 export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
@@ -29,13 +23,16 @@ export function initTransactionsApi(server: Server) {
         })
       }
     },
-    handler: req => {
+    handler: async req => {
       const { transactionId } = req.params;
       const { traceId } = req.query as { traceId: string };
       const setup = setupRequest(req);
-      return getTransaction(transactionId, traceId, setup).catch(
-        defaultErrorHandler
-      );
+      const transaction = await getTransaction(transactionId, traceId, setup);
+      if (transaction) {
+        return transaction;
+      } else {
+        throw Boom.notFound('Cannot find the requested page');
+      }
     }
   });
 
@@ -51,7 +48,7 @@ export function initTransactionsApi(server: Server) {
     handler: req => {
       const { transactionId } = req.params;
       const setup = setupRequest(req);
-      return getSpans(transactionId, setup).catch(defaultErrorHandler);
+      return getSpans(transactionId, setup);
     }
   });
 }
