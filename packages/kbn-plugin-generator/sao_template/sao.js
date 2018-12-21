@@ -72,6 +72,7 @@ module.exports = function({ name }) {
     filters: {
       'public/**/*': 'generateApp',
       'translations/**/*': 'generateTranslations',
+      '.i18nrc.json': 'generateTranslations',
       'public/hack.js': 'generateHack',
       'server/**/*': 'generateApi',
       'public/app.scss': 'generateScss',
@@ -80,6 +81,7 @@ module.exports = function({ name }) {
     move: {
       gitignore: '.gitignore',
       eslintrc: '.eslintrc',
+      'package_template.json': 'package.json',
     },
     data: answers =>
       Object.assign(

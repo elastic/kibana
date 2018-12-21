@@ -17,8 +17,8 @@ export function ConfiguredByNodeWarning() {
       title={
         <FormattedMessage
           id="xpack.remoteClusters.configuredByNodeWarningTitle"
-          defaultMessage="This remote cluster can't be edited or deleted because it's defined in a node's
-            elasticsearch.yml configuration file"
+          defaultMessage="You can't edit or delete this remote cluster because it's defined in a node's
+            elasticsearch.yml configuration file."
         />
       }
       color="primary"
