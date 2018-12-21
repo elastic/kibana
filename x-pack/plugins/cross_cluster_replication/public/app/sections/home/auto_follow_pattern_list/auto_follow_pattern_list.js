@@ -17,6 +17,11 @@ import { AutoFollowPatternTable, DetailPanel } from './components';
 
 const REFRESH_RATE_MS = 30000;
 
+const getQueryParamPattern = ({ location: { search } }) => {
+  const { pattern } = extractQueryParams(search);
+  return pattern ? decodeURIComponent(pattern) : null;
+};
+
 export const AutoFollowPatternList = injectI18n(
   class extends PureComponent {
     static propTypes = {
@@ -30,7 +35,7 @@ export const AutoFollowPatternList = injectI18n(
     static getDerivedStateFromProps({ autoFollowPatternId }, { lastAutoFollowPatternId }) {
       if (autoFollowPatternId !== lastAutoFollowPatternId) {
         return {
-          lastAutoFollowPatternId: autoFollowPatternId, // URL query param takes over store value
+          lastAutoFollowPatternId: autoFollowPatternId,
           isDetailPanelOpen: !!autoFollowPatternId,
         };
       }
@@ -38,43 +43,45 @@ export const AutoFollowPatternList = injectI18n(
     }
 
     state = {
-      lastAutoFollowPatternId: undefined,
+      lastAutoFollowPatternId: null,
       isDetailPanelOpen: false,
     };
 
     componentDidMount() {
-      this.props.loadAutoFollowPatterns();
+      const { loadAutoFollowPatterns, selectAutoFollowPattern, history } = this.props;
 
-      // Check if there is an active auto-follow pattern in the URL query param
-      const { history: { location: { search } } } = this.props;
-      const { pattern } = extractQueryParams(search);
-      if (pattern) {
-        this.props.selectAutoFollowPattern(pattern);
-      }
+      loadAutoFollowPatterns();
+
+      // Select the pattern in the URL query params
+      selectAutoFollowPattern(getQueryParamPattern(history));
 
       // Interval to load auto-follow patterns in the background passing "true" to the fetch method
-      this.interval = setInterval(() => this.props.loadAutoFollowPatterns(true), REFRESH_RATE_MS);
+      this.interval = setInterval(() => loadAutoFollowPatterns(true), REFRESH_RATE_MS);
     }
 
-    componentWillUnmount() {
-      clearInterval(this.interval);
-    }
-
-    componentDidUpdate(_, prevState) {
+    componentDidUpdate(prevProps, prevState) {
       const { history } = this.props;
+      const { lastAutoFollowPatternId } = this.state;
 
-      if (this.state.lastAutoFollowPatternId !== prevState.lastAutoFollowPatternId) {
-        // Persist state to query params for deep link
-        if(!this.state.lastAutoFollowPatternId) {
+      /**
+       * Each time our state is updated (through getDerivedStateFromProps())
+       * we persist the auto-follow pattern id to query params for deep linking
+       */
+      if (lastAutoFollowPatternId !== prevState.lastAutoFollowPatternId) {
+        if(!lastAutoFollowPatternId) {
           history.replace({
             search: '',
           });
         } else {
           history.replace({
-            search: `?pattern=${encodeURIComponent(this.state.lastAutoFollowPatternId)}`,
+            search: `?pattern=${encodeURIComponent(lastAutoFollowPatternId)}`,
           });
         }
       }
+    }
+
+    componentWillUnmount() {
+      clearInterval(this.interval);
     }
 
     renderEmpty() {
@@ -118,6 +125,7 @@ export const AutoFollowPatternList = injectI18n(
 
     renderList() {
       const {
+        selectAutoFollowPattern,
         autoFollowPatterns,
         apiStatus,
       } = this.props;
@@ -138,7 +146,7 @@ export const AutoFollowPatternList = injectI18n(
       return (
         <Fragment>
           <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
-          {isDetailPanelOpen && <DetailPanel />}
+          {isDetailPanelOpen && <DetailPanel closeDetailPanel={() => selectAutoFollowPattern(null)} />}
         </Fragment>
       );
     }

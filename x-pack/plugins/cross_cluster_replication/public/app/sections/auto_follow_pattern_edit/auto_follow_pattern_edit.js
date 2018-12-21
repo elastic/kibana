@@ -55,10 +55,10 @@ export const AutoFollowPatternEdit = injectI18n(
     state = { lastAutoFollowPatternId: undefined }
 
     componentDidMount() {
-      const { match: { params: { id } } } = this.props;
+      const { match: { params: { id } }, selectAutoFollowPattern } = this.props;
       const decodedId = decodeURIComponent(id);
 
-      this.props.selectAutoFollowPattern(decodedId);
+      selectAutoFollowPattern(decodedId);
 
       chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);
     }

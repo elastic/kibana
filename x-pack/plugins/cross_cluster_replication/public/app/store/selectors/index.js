@@ -21,16 +21,15 @@ export const isApiAuthorized = (scope) => createSelector(getApiError(scope), (er
 // Auto-follow pattern
 export const getAutoFollowPatternState = (state) => state.autoFollowPattern;
 export const getAutoFollowPatterns = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => autoFollowPatternsState.byId);
-export const getSelectedAutoFollowPatternId = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => (
-  autoFollowPatternsState.selectedId
+export const getSelectedAutoFollowPatternId = (view = 'detail') => createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => (
+  view === 'detail' ? autoFollowPatternsState.selectedDetailId : autoFollowPatternsState.selectedEditId
 ));
-export const getSelectedAutoFollowPattern = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
-  if(!autoFollowPatternsState.selectedId) {
+export const getSelectedAutoFollowPattern = (view = 'detail') => createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
+  const propId = view === 'detail' ? 'selectedDetailId' : 'selectedEditId';
+
+  if(!autoFollowPatternsState[propId]) {
     return null;
   }
-  return autoFollowPatternsState.byId[autoFollowPatternsState.selectedId];
+  return autoFollowPatternsState.byId[autoFollowPatternsState[propId]];
 });
-export const isAutoFollowPatternDetailPanelOpen = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => (
-  autoFollowPatternsState.isDetailPanelOpen
-));
 export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  objectToArray(autoFollowPatterns));

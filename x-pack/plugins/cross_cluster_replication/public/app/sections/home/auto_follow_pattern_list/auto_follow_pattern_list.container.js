@@ -16,7 +16,7 @@ import {
 } from '../../../store/selectors';
 import {
   loadAutoFollowPatterns,
-  selectAutoFollowPattern,
+  selectDetailAutoFollowPattern,
 } from '../../../store/actions';
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
@@ -24,7 +24,7 @@ const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
 const mapStateToProps = (state) => ({
   autoFollowPatterns: getListAutoFollowPatterns(state),
-  autoFollowPatternId: getSelectedAutoFollowPatternId(state),
+  autoFollowPatternId: getSelectedAutoFollowPatternId('detail')(state),
   apiStatus: getApiStatus(scope)(state),
   apiError: getApiError(scope)(state),
   isAuthorized: isApiAuthorized(scope)(state),
@@ -32,7 +32,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   loadAutoFollowPatterns: (inBackground) => dispatch(loadAutoFollowPatterns(inBackground)),
-  selectAutoFollowPattern: (id) => dispatch(selectAutoFollowPattern(id)),
+  selectAutoFollowPattern: (id) => dispatch(selectDetailAutoFollowPattern(id)),
 });
 
 export const AutoFollowPatternList = connect(

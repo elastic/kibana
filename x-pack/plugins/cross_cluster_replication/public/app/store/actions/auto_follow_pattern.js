@@ -13,7 +13,6 @@ import {
   updateAutoFollowPattern as updateAutoFollowPatternRequest,
   deleteAutoFollowPattern as deleteAutoFollowPatternRequest,
 } from '../../services/api';
-import { arrify } from '../../../../common/services/utils';
 import routing from '../../services/routing';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
@@ -21,9 +20,14 @@ import { getSelectedAutoFollowPatternId } from '../selectors';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 
-export const selectAutoFollowPattern = (name) => ({
-  type: t.AUTO_FOLLOW_PATTERN_SELECT,
-  payload: name
+export const selectDetailAutoFollowPattern = (id) => ({
+  type: t.AUTO_FOLLOW_PATTERN_SELECT_DETAIL,
+  payload: id
+});
+
+export const selectEditAutoFollowPattern = (id) => ({
+  type: t.AUTO_FOLLOW_PATTERN_SELECT_EDIT,
+  payload: id
 });
 
 export const loadAutoFollowPatterns = (isUpdating = false) =>
@@ -117,13 +121,12 @@ export const deleteAutoFollowPattern = (id) => (
           });
 
         toastNotifications.addSuccess(successMessage);
-      }
 
-      // If we've just deleted a pattern we were looking at, we need to close the panel.
-      const ids = arrify(id);
-      const autoFollowPatternId = getSelectedAutoFollowPatternId(getState());
-      if (ids.includes(autoFollowPatternId)) {
-        dispatch(selectAutoFollowPattern(null));
+        // If we've just deleted a pattern we were looking at, we need to close the panel.
+        const autoFollowPatternId = getSelectedAutoFollowPatternId('detail')(getState());
+        if (response.itemsDeleted.includes(autoFollowPatternId)) {
+          dispatch(selectDetailAutoFollowPattern(null));
+        }
       }
     }
   })
