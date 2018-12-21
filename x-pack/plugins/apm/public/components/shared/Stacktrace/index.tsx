@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
@@ -16,42 +17,53 @@ import { Stackframe } from './Stackframe';
 interface Props {
   stackframes?: IStackframe[];
   codeLanguage?: string;
+  intl: InjectedIntl;
 }
 
-export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
-  if (isEmpty(stackframes)) {
-    return <EmptyMessage heading="No stacktrace available." hideSubheading />;
-  }
+export const Stacktrace = injectI18n(
+  ({ stackframes = [], codeLanguage, intl }: Props) => {
+    if (isEmpty(stackframes)) {
+      return (
+        <EmptyMessage
+          heading={intl.formatMessage({
+            id: 'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
+            defaultMessage: 'No stacktrace available.'
+          })}
+          hideSubheading
+        />
+      );
+    }
 
-  const groups = getGroupedStackframes(stackframes);
-  return (
-    <Fragment>
-      {groups.map((group, i) => {
-        // library frame
-        if (group.isLibraryFrame) {
-          const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
-          return (
-            <LibraryStackFrames
-              key={i}
-              initialVisiblity={initialVisiblity}
-              stackframes={group.stackframes}
+    const groups = getGroupedStackframes(stackframes);
+    return (
+      <Fragment>
+        {groups.map((group, i) => {
+          // library frame
+          if (group.isLibraryFrame) {
+            const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
+            return (
+              <LibraryStackFrames
+                key={i}
+                initialVisiblity={initialVisiblity}
+                stackframes={group.stackframes}
+                codeLanguage={codeLanguage}
+              />
+            );
+          }
+
+          // non-library frame
+          return group.stackframes.map((stackframe, idx) => (
+            <Stackframe
+              key={`${i}-${idx}`}
               codeLanguage={codeLanguage}
+              stackframe={stackframe}
             />
-          );
-        }
-
-        // non-library frame
-        return group.stackframes.map((stackframe, idx) => (
-          <Stackframe
-            key={`${i}-${idx}`}
-            codeLanguage={codeLanguage}
-            stackframe={stackframe}
-          />
-        ));
-      })}
-    </Fragment>
-  );
-}
+          ));
+        })}
+      </Fragment>
+    );
+  }
+);
 
 interface StackframesGroup {
   isLibraryFrame: boolean;
