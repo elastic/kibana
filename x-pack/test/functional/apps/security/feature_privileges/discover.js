@@ -14,9 +14,9 @@ const getAlwaysPresentNavLinks = (usersFullName) => {
 };
 
 export default function ({ getPageObjects, getService }) {
+  const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const spaces = getService('spaces');
-  const PageObjects = getPageObjects(['discover', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
   const expectAppNavLinks = async (appNavLinkTexts) => {
@@ -29,9 +29,23 @@ export default function ({ getPageObjects, getService }) {
   };
 
   describe('discover', () => {
+    before(async () => {
+      await esArchiver.load('security/feature_privileges');
+      await esArchiver.loadIfNeeded('logstash_functional');
+    });
+
+    after(async () => {
+      await esArchiver.unload('security/feature_privileges');
+    });
+
     describe('global discover all privileges', () => {
       before(async () => {
         await security.role.create('global_discover_all_role', {
+          elasticsearch: {
+            indices: [
+              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
+            ],
+          },
           kibana: {
             global: {
               feature: {
@@ -47,47 +61,41 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await spaces.create({
-          id: 'space_1',
-          name: 'space_1',
-          disabledFeatures: [],
+        await PageObjects.security.login('global_discover_all_user', 'global_discover_all_user-password', {
+          expectSpaceSelector: false,
         });
       });
 
       after(async () => {
         await security.role.delete('global_discover_all_role');
         await security.user.delete('global_discover_all_user');
-        await spaces.delete('space_1');
       });
 
-      it('shows discover navlink in both spaces', async () => {
-        await PageObjects.security.login('global_discover_all_user', 'global_discover_all_user-password', {
-          expectSpaceSelector: true,
-        });
-        await PageObjects.spaceSelector.clickSpaceCard('default');
-        await PageObjects.spaceSelector.expectHomePage('default');
+      it('shows discover navlink', async () => {
         await expectAppNavLinks([
           'Discover',
           'Management',
         ]);
+      });
 
-        await PageObjects.spaceSelector.openSpacesNav();
-        await PageObjects.spaceSelector.clickSpaceAvatar('space_1');
-        await PageObjects.spaceSelector.expectHomePage('space_1');
-        await expectAppNavLinks([
-          'Discover',
-          'Management',
-        ]);
+      it('shows save button', async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await testSubjects.existOrFail('discoverSaveButton');
       });
     });
 
     describe('global discover read-only privileges', () => {
       before(async () => {
         await security.role.create('global_discover_read_role', {
+          elasticsearch: {
+            indices: [
+              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
+            ],
+          },
           kibana: {
             global: {
               feature: {
-                discover: ['all']
+                discover: ['read']
               },
             }
           }
@@ -99,37 +107,27 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await spaces.create({
-          id: 'space_1',
-          name: 'space_1',
-          disabledFeatures: [],
+        await PageObjects.security.login('global_discover_read_user', 'global_discover_read_user-password', {
+          expectSpaceSelector: false,
         });
       });
 
       after(async () => {
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
-        await spaces.delete('space_1');
       });
 
-      it('shows discover navlink in both spaces', async () => {
-        await PageObjects.security.login('global_discover_read_user', 'global_discover_read_user-password', {
-          expectSpaceSelector: true,
-        });
-        await PageObjects.spaceSelector.clickSpaceCard('default');
-        await PageObjects.spaceSelector.expectHomePage('default');
+      it('shows discover navlink', async () => {
         await expectAppNavLinks([
           'Discover',
           'Management',
         ]);
+      });
 
-        await PageObjects.spaceSelector.openSpacesNav();
-        await PageObjects.spaceSelector.clickSpaceAvatar('space_1');
-        await PageObjects.spaceSelector.expectHomePage('space_1');
-        await expectAppNavLinks([
-          'Discover',
-          'Management',
-        ]);
+      it(`doesn't show save button`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await testSubjects.existOrFail('discoverNewButton');
+        await testSubjects.missingOrFail('discoverSaveButton');
       });
     });
   });
