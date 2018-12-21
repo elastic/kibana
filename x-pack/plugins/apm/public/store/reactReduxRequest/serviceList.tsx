@@ -6,20 +6,21 @@
 
 import React from 'react';
 import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
-import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { ServiceListAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { loadServiceList } from '../../services/rest/apm/services';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
-// @ts-ignore
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceList';
-const INITIAL_DATA: IServiceListItem[] = [];
-const withInitialData = createInitialDataSelector(INITIAL_DATA);
+const INITIAL_DATA: ServiceListAPIResponse = [];
+const withInitialData = createInitialDataSelector<ServiceListAPIResponse>(
+  INITIAL_DATA
+);
 
 export function getServiceList(
   state: IReduxState
-): RRRRenderResponse<IServiceListItem[]> {
+): RRRRenderResponse<ServiceListAPIResponse> {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
@@ -28,7 +29,7 @@ export function ServiceListRequest({
   render
 }: {
   urlParams: IUrlParams;
-  render: RRRRender<IServiceListItem[]>;
+  render: RRRRender<ServiceListAPIResponse>;
 }) {
   const { start, end, kuery } = urlParams;
 
