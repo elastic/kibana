@@ -15,6 +15,7 @@ import {
   fetchRepos,
   fetchReposFailed,
   fetchReposSuccess,
+  hideCallOut,
   importRepo,
   importRepoFailed,
   importRepoSuccess,
@@ -23,6 +24,7 @@ import {
 export enum CallOutType {
   danger = 'danger',
   success = 'success',
+  warning = 'warning',
 }
 
 export interface RepositoryState {
@@ -83,11 +85,22 @@ export const repository = handleActions(
     [String(importRepoFailed)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         if (action.payload) {
-          draft.callOutMessage = action.payload.body.message;
-          draft.showCallOut = true;
-          draft.callOutType = CallOutType.danger;
-          draft.importLoading = false;
+          if (action.payload.res.status === 304) {
+            draft.callOutMessage = 'This Repository has already been imported!';
+            draft.showCallOut = true;
+            draft.callOutType = CallOutType.warning;
+            draft.importLoading = false;
+          } else {
+            draft.callOutMessage = action.payload.body.message;
+            draft.showCallOut = true;
+            draft.callOutType = CallOutType.danger;
+            draft.importLoading = false;
+          }
         }
+      }),
+    [String(hideCallOut)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.showCallOut = false;
       }),
     [String(fetchRepoConfigSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
