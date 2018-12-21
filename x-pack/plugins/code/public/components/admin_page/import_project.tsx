@@ -22,6 +22,11 @@ const ImportButton = styled(EuiButton)`
   margin-top: 1.5rem;
 `;
 
+const ImportWrapper = styled.div`
+  max-width: 800px;
+  margin: auto;
+`;
+
 class CodeImportProject extends React.PureComponent<{
   importRepo: (p: string) => void;
   importLoading: boolean;
@@ -42,7 +47,7 @@ class CodeImportProject extends React.PureComponent<{
 
   public render() {
     return (
-      <div>
+      <ImportWrapper>
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -65,7 +70,7 @@ class CodeImportProject extends React.PureComponent<{
             <ImportButton onClick={this.submitImportProject}>Import</ImportButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </ImportWrapper>
     );
   }
 }
