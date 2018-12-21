@@ -101,7 +101,7 @@ function getPropertyValue({
     );
   }
 
-  return <PropertyValue>{val}</PropertyValue>;
+  return <PropertyValue>{String(val)}</PropertyValue>;
 }
 
 export function StickyProperties({
