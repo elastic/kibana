@@ -68,7 +68,9 @@ function groupMessagesByNamespace(localizedMessagesMap) {
       localizedMessagesByNamespace.set(namespace, []);
     }
 
-    localizedMessagesByNamespace.get(namespace).push([messageId, { message: messageValue }]);
+    localizedMessagesByNamespace
+      .get(namespace)
+      .push([messageId, { message: messageValue.text || messageValue }]);
   }
 
   return localizedMessagesByNamespace;
