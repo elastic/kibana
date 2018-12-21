@@ -136,11 +136,11 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     <Container>
       <HeaderContainer>
         <EuiTitle size="s">
-          <h3>Error occurence</h3>
+          <h3>Error occurrence</h3>
         </EuiTitle>
         <DiscoverErrorButton error={error} kuery={urlParams.kuery}>
           <EuiButtonEmpty iconType="discoverApp">
-            {`View ${occurrencesCount} occurences in Discover`}
+            {`View ${occurrencesCount} occurrences in Discover`}
           </EuiButtonEmpty>
         </DiscoverErrorButton>
       </HeaderContainer>
