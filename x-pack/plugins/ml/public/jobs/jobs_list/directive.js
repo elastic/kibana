@@ -42,7 +42,9 @@ module.directive('jobsPage', function () {
     restrict: 'E',
     link: (scope, element) => {
       ReactDOM.render(
-        <I18nProvider>{React.createElement(JobsPage)}</I18nProvider>,
+        <I18nProvider>
+          {React.createElement(JobsPage, { angularWrapperScope: scope })}
+        </I18nProvider>,
         element[0]
       );
     }
