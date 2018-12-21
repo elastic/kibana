@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { constant } from 'lodash';
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
@@ -57,12 +58,14 @@ module.controller(
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
       if (isVisible && !mounted && !pathProvider.isUnauthenticated()) {
         render(
-          <NavControlPopover
-            spacesManager={spacesManager}
-            activeSpace={activeSpace}
-            anchorPosition={'rightCenter'}
-            buttonClass={SpacesGlobalNavButton}
-          />,
+          <I18nProvider>
+            <NavControlPopover
+              spacesManager={spacesManager}
+              activeSpace={activeSpace}
+              anchorPosition={'rightCenter'}
+              buttonClass={SpacesGlobalNavButton}
+            />
+          </I18nProvider>,
           domNode
         );
         mounted = true;
@@ -109,12 +112,14 @@ chromeHeaderNavControlsRegistry.register(
       spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       ReactDOM.render(
-        <NavControlPopover
-          spacesManager={spacesManager}
-          activeSpace={activeSpace}
-          anchorPosition="downLeft"
-          buttonClass={SpacesHeaderNavButton}
-        />,
+        <I18nProvider>
+          <NavControlPopover
+            spacesManager={spacesManager}
+            activeSpace={activeSpace}
+            anchorPosition="downLeft"
+            buttonClass={SpacesHeaderNavButton}
+          />
+        </I18nProvider>,
         el
       );
     },

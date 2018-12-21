@@ -20,38 +20,42 @@ import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithLogTextview } from '../../containers/logs/with_log_textview';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { WithSource } from '../../containers/with_source';
 
 export const LogsToolbar = injectI18n(({ intl }) => (
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
-        <WithKueryAutocompletion>
-          {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-            <WithLogFilter>
-              {({
-                applyFilterQueryFromKueryExpression,
-                /* filterQuery,*/
-                filterQueryDraft,
-                isFilterQueryDraftValid,
-                setFilterQueryDraftFromKueryExpression,
-              }) => (
-                <AutocompleteField
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  isValid={isFilterQueryDraftValid}
-                  loadSuggestions={loadSuggestions}
-                  onChange={setFilterQueryDraftFromKueryExpression}
-                  onSubmit={applyFilterQueryFromKueryExpression}
-                  placeholder={intl.formatMessage({
-                    id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
-                    defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
-                  })}
-                  suggestions={suggestions}
-                  value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                />
+        <WithSource>
+          {({ derivedIndexPattern }) => (
+            <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
+              {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+                <WithLogFilter indexPattern={derivedIndexPattern}>
+                  {({
+                    applyFilterQueryFromKueryExpression,
+                    filterQueryDraft,
+                    isFilterQueryDraftValid,
+                    setFilterQueryDraftFromKueryExpression,
+                  }) => (
+                    <AutocompleteField
+                      isLoadingSuggestions={isLoadingSuggestions}
+                      isValid={isFilterQueryDraftValid}
+                      loadSuggestions={loadSuggestions}
+                      onChange={setFilterQueryDraftFromKueryExpression}
+                      onSubmit={applyFilterQueryFromKueryExpression}
+                      placeholder={intl.formatMessage({
+                        id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
+                        defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
+                      })}
+                      suggestions={suggestions}
+                      value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                    />
+                  )}
+                </WithLogFilter>
               )}
-            </WithLogFilter>
+            </WithKueryAutocompletion>
           )}
-        </WithKueryAutocompletion>
+        </WithSource>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LogCustomizationMenu>

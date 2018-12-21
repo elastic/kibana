@@ -1,63 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<KibanaPrivileges> renders without crashing 1`] = `
-<I18nProvider>
-  <CollapsiblePanel
-    iconType="logoKibana"
-    title="Kibana"
-  >
-    <InjectIntl(SpaceAwarePrivilegeFormUI)
-      editable={true}
-      kibanaAppPrivileges={
-        Array [
-          "all",
-        ]
+<CollapsiblePanel
+  iconType="logoKibana"
+  title="Kibana"
+>
+  <InjectIntl(SpaceAwarePrivilegeFormUI)
+    editable={true}
+    kibanaAppPrivileges={
+      Array [
+        "all",
+      ]
+    }
+    onChange={[MockFunction]}
+    role={
+      Object {
+        "elasticsearch": Object {
+          "cluster": Array [],
+          "indices": Array [],
+          "run_as": Array [],
+        },
+        "kibana": Object {
+          "global": Array [],
+          "space": Object {},
+        },
+        "name": "",
       }
-      onChange={[MockFunction]}
-      role={
+    }
+    spaces={
+      Array [
         Object {
-          "elasticsearch": Object {
-            "cluster": Array [],
-            "indices": Array [],
-            "run_as": Array [],
-          },
-          "kibana": Object {
-            "global": Array [],
-            "space": Object {},
-          },
-          "name": "",
-        }
-      }
-      spaces={
-        Array [
-          Object {
-            "_reserved": true,
-            "disabledFeatures": Array [],
-            "id": "default",
-            "name": "Default Space",
-          },
-          Object {
-            "disabledFeatures": Array [],
-            "id": "marketing",
-            "name": "Marketing",
-          },
-        ]
-      }
-      uiCapabilities={
+          "_reserved": true,
+          "disabledFeatures": Array [],
+          "id": "default",
+          "name": "Default Space",
+        },
         Object {
-          "navLinks": Object {},
-          "spaces": Object {
-            "manage": true,
-          },
-        }
+          "disabledFeatures": Array [],
+          "id": "marketing",
+          "name": "Marketing",
+        },
+      ]
+    }
+    uiCapabilities={
+      Object {
+        "management": Object {},
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
       }
-      validator={
-        RoleValidator {
-          "inProgressSpacePrivileges": Array [],
-          "shouldValidate": undefined,
-        }
+    }
+    validator={
+      RoleValidator {
+        "inProgressSpacePrivileges": Array [],
+        "shouldValidate": undefined,
       }
-    />
-  </CollapsiblePanel>
-</I18nProvider>
+    }
+  />
+</CollapsiblePanel>
 `;

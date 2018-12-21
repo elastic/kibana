@@ -4,21 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isString } from 'lodash';
+import { UICapabilities } from 'ui/capabilities';
+import { uiCapabilitiesRegex } from 'x-pack/plugins/xpack_main/types';
 const prefix = 'ui:';
 
 export class UIActions {
   public all = `${prefix}*`;
   public allNavLinks = `${prefix}navLinks/*`;
+  public allManagementLinks = `${prefix}management/*`;
 
-  public get(featureId: string, uiCapability: string) {
+  public get(featureId: keyof UICapabilities, ...uiCapabilityParts: string[]) {
     if (!featureId || !isString(featureId)) {
       throw new Error('featureId is required and must be a string');
     }
 
-    if (!uiCapability || !isString(uiCapability)) {
-      throw new Error('uiCapability is required and must be a string');
+    if (!uiCapabilityParts || !Array.isArray(uiCapabilityParts)) {
+      throw new Error('uiCapabilityParts is required and must be an array');
     }
 
-    return `${prefix}${featureId}/${uiCapability}`;
+    if (
+      uiCapabilityParts.length === 0 ||
+      uiCapabilityParts.findIndex(
+        part => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
+      ) >= 0
+    ) {
+      throw new Error(
+        `UI capabilities are required, and must all be strings matching the pattern ${uiCapabilitiesRegex}`
+      );
+    }
+
+    return `${prefix}${featureId}/${uiCapabilityParts.join('/')}`;
   }
 }

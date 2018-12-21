@@ -6,7 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { oc } from 'ts-optchain';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
@@ -14,7 +14,7 @@ import {
 } from '../../../../common/constants';
 import { Setup } from '../../helpers/setup_request';
 
-export type TransactionAPIResponse = Transaction | null;
+export type TransactionAPIResponse = Transaction | undefined;
 
 export async function getTransaction(
   transactionId: string,
@@ -56,5 +56,5 @@ export async function getTransaction(
   }
 
   const resp = await client<Transaction>('search', params);
-  return oc(resp).hits.hits[0]._source() || null;
+  return oc(resp).hits.hits[0]._source();
 }

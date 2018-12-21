@@ -55,7 +55,7 @@ scripts, while still having a nice developer experience.
 ### Internal usage
 
 For packages that are referenced within the Kibana repo itself (for example,
-using the `@kbn/datemath` package from an `x-pack` plugin), we are leveraging
+using the `@kbn/i18n` package from an `x-pack` plugin), we are leveraging
 Yarn's workspaces feature. This allows yarn to optimize node_modules within
 the entire repo to avoid duplicate modules by hoisting common packages as high
 in the dependency tree as possible.
@@ -63,7 +63,7 @@ in the dependency tree as possible.
 To reference a package from within the Kibana repo, simply use the current
 version number from that package's package.json file. Then, running `yarn kbn
 bootstrap` will symlink that package into your dependency tree. That means
-you can make changes to `@kbn/datematch` and immediately have them available
+you can make changes to `@kbn/i18n` and immediately have them available
 in Kibana itself. No `npm publish` needed anymore — Kibana will always rely
 directly on the code that's in the local packages.
 
@@ -75,7 +75,7 @@ relative location to a package instead of a version when adding it to
 `package.json`. For example:
 
 ```
-"@kbn/datemath": "link:packages/kbn-datemath"
+"@kbn/i18n": "link:packages/kbn-i18n"
 ```
 
 Now when you run `yarn` it will set up a symlink to this folder instead of
@@ -84,7 +84,7 @@ use the versions of the package that is bundled with the Kibana version they
 are running inside of.
 
 ```
-"@kbn/datemath": "link:../../kibana/packages/kbn-date-math"
+"@kbn/i18n": "link:../../kibana/packages/kbn-date-math"
 ```
 
 This works because we moved to a strict location of Kibana plugins,
@@ -129,7 +129,7 @@ yarn kbn bootstrap --skip-kibana-extra
 Or just skip few selected packages:
 
 ```
-yarn kbn bootstrap --exclude @kbn/pm --exclude @kbn/datemath
+yarn kbn bootstrap --exclude @kbn/pm --exclude @kbn/i18n
 ```
 
 For more details, run:

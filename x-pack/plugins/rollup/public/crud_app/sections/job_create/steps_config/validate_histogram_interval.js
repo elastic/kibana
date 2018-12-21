@@ -22,6 +22,15 @@ export function validateHistogramInterval(histogram, histogramInterval) {
     )];
   }
 
+  if (Math.round(histogramInterval) !== Number(histogramInterval)) {
+    return [(
+      <FormattedMessage
+        id="xpack.rollupJobs.create.errors.histogramIntervalWholeNumber"
+        defaultMessage="Interval must be a whole number."
+      />
+    )];
+  }
+
   if (!histogramInterval) {
     return [(
       <FormattedMessage

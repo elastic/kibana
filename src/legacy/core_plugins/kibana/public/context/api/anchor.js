@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import { SearchSourceProvider } from 'ui/courier';
 
-export function fetchAnchorProvider(indexPatterns, Private) {
+export function fetchAnchorProvider(indexPatterns, Private, i18n) {
   const SearchSource = Private(SearchSourceProvider);
 
   return async function fetchAnchor(
@@ -54,7 +54,9 @@ export function fetchAnchorProvider(indexPatterns, Private) {
     const response = await searchSource.fetch();
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {
-      throw new Error('Failed to load anchor document.');
+      throw new Error(i18n('kbn.context.failedToLoadAnchorDocumentErrorDescription', {
+        defaultMessage: 'Failed to load anchor document.'
+      }));
     }
 
     return {

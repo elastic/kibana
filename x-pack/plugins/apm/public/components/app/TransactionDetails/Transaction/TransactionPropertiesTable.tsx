@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiSpacer,
-  // @ts-ignore
-  EuiTab,
-  // @ts-ignore
-  EuiTabs
-} from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { Transaction } from '../../../../../typings/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
 import { fromQuery, history, toQuery } from '../../../../utils/url';

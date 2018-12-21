@@ -22,6 +22,7 @@ import { calculateDatafeedFrequencyDefaultSeconds } from 'plugins/ml/../common/u
 import { newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 import { MLJobEditor } from '../../ml_job_editor';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getDefaults(bucketSpan, jobDefaults) {
   const bucketSpanSeconds = (bucketSpan !== undefined) ? parseInterval(bucketSpan).asSeconds() : '';
@@ -91,7 +92,10 @@ export class Datafeed extends Component {
         <EuiSpacer size="m" />
         <EuiForm>
           <EuiFormRow
-            label="Query"
+            label={(<FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.queryLabel"
+              defaultMessage="Query"
+            />)}
             style={{ maxWidth: 'inherit' }}
           >
             <MLJobEditor
@@ -101,7 +105,10 @@ export class Datafeed extends Component {
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Query delay"
+            label={(<FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.queryDelayLabel"
+              defaultMessage="Query delay"
+            />)}
           >
             <EuiFieldText
               value={queryDelay}
@@ -110,7 +117,10 @@ export class Datafeed extends Component {
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Frequency"
+            label={(<FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.frequencyLabel"
+              defaultMessage="Frequency"
+            />)}
           >
             <EuiFieldText
               value={frequency}
@@ -119,7 +129,10 @@ export class Datafeed extends Component {
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Scroll size"
+            label={(<FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.scrollSizeLabel"
+              defaultMessage="Scroll size"
+            />)}
           >
             <EuiFieldNumber
               value={scrollSize}

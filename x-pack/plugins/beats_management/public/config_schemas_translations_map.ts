@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { supportedConfigs } from './config_schemas';
-import { YamlConfigSchema } from './lib/lib';
+import { YamlConfigSchema } from './lib/types';
 
 interface ConfigSchema {
   text: string;
@@ -226,10 +226,9 @@ export const getSupportedConfig = () => {
   }
 
   translatedConfigs = cloneDeep(supportedConfigs);
-
-  translatedConfigs.forEach(({ text, config }) => {
+  translatedConfigs.forEach(({ text, config }, index) => {
     if (text) {
-      text = supportedConfigLabelsMap.get(text) || '';
+      translatedConfigs[index].text = supportedConfigLabelsMap.get(text) || '';
     }
 
     config.forEach(yanlConfig => {

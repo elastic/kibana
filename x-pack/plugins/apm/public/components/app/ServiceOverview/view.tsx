@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React, { Component } from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
-import { loadAgentStatus } from '../../../services/rest/apm';
+import { loadAgentStatus } from '../../../services/rest/apm/status_check';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
@@ -58,7 +57,6 @@ export class ServiceOverview extends Component<Props, State> {
     // is the same either way
     return (
       <div>
-        <EuiSpacer />
         <ServiceListRequest
           urlParams={urlParams}
           render={() => (

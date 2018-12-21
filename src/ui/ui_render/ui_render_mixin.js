@@ -75,17 +75,19 @@ export function uiRenderMixin(kbnServer, server, config) {
       }
 
       const basePath = config.get('server.basePath');
-      const bundlePath = `${basePath}/bundles`;
+      const regularBundlePath = `${basePath}/bundles`;
+      const dllBundlePath = `${basePath}/dlls`;
       const styleSheetPaths = [
-        `${bundlePath}/vendors.style.css`,
-        `${bundlePath}/commons.style.css`,
-        `${bundlePath}/${app.getId()}.style.css`,
+        `${dllBundlePath}/vendors.style.dll.css`,
+        `${regularBundlePath}/commons.style.css`,
+        `${regularBundlePath}/${app.getId()}.style.css`,
       ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
 
       const bootstrap = new AppBootstrap({
         templateData: {
           appId: app.getId(),
-          bundlePath,
+          regularBundlePath,
+          dllBundlePath,
           styleSheetPaths,
         }
       });

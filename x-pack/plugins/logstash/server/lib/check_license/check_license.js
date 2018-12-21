@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export function checkLicense(xpackLicenseInfo) {
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable the Logstash pipeline UI
@@ -12,7 +14,9 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       enableLinks: false,
       isReadOnly: false,
-      message: 'You cannot manage Logstash pipelines because license information is not available at this time.'
+      message: i18n.translate('xpack.logstash.managementSection.notPossibleToManagePipelinesMessage', {
+        defaultMessage: 'You cannot manage Logstash pipelines because license information is not available at this time.',
+      })
     };
   }
 
@@ -30,8 +34,10 @@ export function checkLicense(xpackLicenseInfo) {
 
   // Security is not enabled in ES
   if (!isSecurityEnabled) {
-    const message = 'Security must be enabled in order to use Logstash pipeline management features.'
-      + ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
+    const message = i18n.translate('xpack.logstash.managementSection.enableSecurityDescription', {
+      defaultMessage: 'Security must be enabled in order to use Logstash pipeline management features.' +
+        ' Please set xpack.security.enabled: true in your elasticsearch.yml.',
+    });
     return {
       isAvailable: false,
       enableLinks: false,
@@ -46,7 +52,10 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       enableLinks: false,
       isReadOnly: false,
-      message: `Your ${licenseType} license does not support Logstash pipeline management features. Please upgrade your license.`
+      message: i18n.translate('xpack.logstash.managementSection.licenseDoesNotSupportDescription', {
+        defaultMessage: 'Your {licenseType} license does not support Logstash pipeline management features. Please upgrade your license.',
+        values: { licenseType },
+      }),
     };
   }
 
@@ -56,7 +65,10 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: true,
       enableLinks: true,
       isReadOnly: true,
-      message: `You cannot edit, create, or delete your Logstash pipelines because your ${licenseType} license has expired.`
+      message: i18n.translate('xpack.logstash.managementSection.pipelineCrudOperationsNotAllowedDescription', {
+        defaultMessage: 'You cannot edit, create, or delete your Logstash pipelines because your {licenseType} license has expired.',
+        values: { licenseType },
+      }),
     };
   }
 

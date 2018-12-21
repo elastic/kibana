@@ -5,6 +5,8 @@ experimental[This API is *experimental* and may be changed or removed completely
 
 Retrieves all {kib} spaces, or a specific space.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Get all {kib} spaces
 
 ===== Request

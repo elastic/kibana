@@ -7,32 +7,50 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { sharedSelectors, State, waffleFilterActions, waffleFilterSelectors } from '../../store';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { State, waffleFilterActions, waffleFilterSelectors } from '../../store';
+import { FilterQuery } from '../../store/local/waffle_filter';
+import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
+
+interface WithWaffleFilterProps {
+  indexPattern: StaticIndexPattern;
+}
 
 export const withWaffleFilter = connect(
   (state: State) => ({
     filterQuery: waffleFilterSelectors.selectWaffleFilterQuery(state),
     filterQueryDraft: waffleFilterSelectors.selectWaffleFilterQueryDraft(state),
-    filterQueryAsJson: sharedSelectors.selectWaffleFilterQueryAsJson(state),
+    filterQueryAsJson: waffleFilterSelectors.selectWaffleFilterQueryAsJson(state),
     isFilterQueryDraftValid: waffleFilterSelectors.selectIsWaffleFilterQueryDraftValid(state),
   }),
-  bindPlainActionCreators({
-    applyFilterQuery: waffleFilterActions.applyWaffleFilterQuery,
-    applyFilterQueryFromKueryExpression: (expression: string) =>
-      waffleFilterActions.applyWaffleFilterQuery({
-        kind: 'kuery',
-        expression,
-      }),
-    setFilterQueryDraft: waffleFilterActions.setWaffleFilterQueryDraft,
-    setFilterQueryDraftFromKueryExpression: (expression: string) =>
-      waffleFilterActions.setWaffleFilterQueryDraft({
-        kind: 'kuery',
-        expression,
-      }),
-  })
+  (dispatch, ownProps: WithWaffleFilterProps) =>
+    bindPlainActionCreators({
+      applyFilterQuery: (query: FilterQuery) =>
+        waffleFilterActions.applyWaffleFilterQuery({
+          query,
+          serializedQuery: convertKueryToElasticSearchQuery(
+            query.expression,
+            ownProps.indexPattern
+          ),
+        }),
+      applyFilterQueryFromKueryExpression: (expression: string) =>
+        waffleFilterActions.applyWaffleFilterQuery({
+          query: {
+            kind: 'kuery',
+            expression,
+          },
+          serializedQuery: convertKueryToElasticSearchQuery(expression, ownProps.indexPattern),
+        }),
+      setFilterQueryDraft: waffleFilterActions.setWaffleFilterQueryDraft,
+      setFilterQueryDraftFromKueryExpression: (expression: string) =>
+        waffleFilterActions.setWaffleFilterQueryDraft({
+          kind: 'kuery',
+          expression,
+        }),
+    })
 );
 
 export const WithWaffleFilter = asChildFunctionRenderer(withWaffleFilter);
@@ -43,8 +61,12 @@ export const WithWaffleFilter = asChildFunctionRenderer(withWaffleFilter);
 
 type WaffleFilterUrlState = ReturnType<typeof waffleFilterSelectors.selectWaffleFilterQuery>;
 
-export const WithWaffleFilterUrlState = () => (
-  <WithWaffleFilter>
+type WithWaffleFilterUrlStateProps = WithWaffleFilterProps;
+
+export const WithWaffleFilterUrlState: React.SFC<WithWaffleFilterUrlStateProps> = ({
+  indexPattern,
+}) => (
+  <WithWaffleFilter indexPattern={indexPattern}>
     {({ applyFilterQuery, filterQuery }) => (
       <UrlStateContainer
         urlState={filterQuery}

@@ -5,6 +5,7 @@
  */
 
 import { Dictionary, flatten, mapValues } from 'lodash';
+import { FeaturePrivilegeDefinition } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
 
@@ -52,6 +53,19 @@ export class FeaturesPrivilegesBuilder {
     );
   }
 
+  public getManagementReadActions(features: Feature[]): string[] {
+    return flatten(
+      features.map(feature => {
+        const { privileges } = feature;
+        if (!privileges || !privileges.read || !privileges.read.management) {
+          return [];
+        }
+
+        return this.buildManagementFeaturePrivileges(privileges.read);
+      })
+    );
+  }
+
   private buildFeaturePrivileges(feature: Feature): Dictionary<string[]> {
     return mapValues(feature.privileges, privilegeDefinition => [
       this.actions.login,
@@ -72,6 +86,22 @@ export class FeaturesPrivilegesBuilder {
       ),
       ...privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui)),
       ...(feature.navLinkId ? [this.actions.ui.get('navLinks', feature.navLinkId)] : []),
+      ...this.buildManagementFeaturePrivileges(privilegeDefinition),
     ]);
+  }
+
+  private buildManagementFeaturePrivileges(
+    privilegeDefinition: FeaturePrivilegeDefinition
+  ): string[] {
+    if (!privilegeDefinition.management) {
+      return [];
+    }
+
+    return Object.entries(privilegeDefinition.management).reduce(
+      (acc, [sectionId, items]) => {
+        return [...acc, ...items.map(item => this.actions.ui.get('management', sectionId, item))];
+      },
+      [] as string[]
+    );
   }
 }

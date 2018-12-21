@@ -18,30 +18,40 @@
  */
 
 const { decompress } = require('./decompress');
-const mockFs = require('mock-fs');
 const fs = require('fs');
 const path = require('path');
+const mkdirp = require('mkdirp');
+const del = require('del');
+const os = require('os');
+
+const fixturesFolder = path.resolve(__dirname, '__fixtures__');
+const randomDir = Math.random().toString(36);
+const tmpFolder = path.resolve(os.tmpdir(), randomDir);
+const dataFolder = path.resolve(tmpFolder, 'data');
+const esFolder = path.resolve(tmpFolder, '.es');
+
+const zipSnapshot = path.resolve(dataFolder, 'snapshot.zip');
+const tarGzSnapshot = path.resolve(dataFolder, 'snapshot.tar.gz');
 
 beforeEach(() => {
-  mockFs({
-    '/data': {
-      'snapshot.zip': fs.readFileSync(path.resolve(__dirname, '__fixtures__/snapshot.zip')),
-      'snapshot.tar.gz': fs.readFileSync(path.resolve(__dirname, '__fixtures__/snapshot.tar.gz')),
-    },
-    '/.es': {},
-  });
+  mkdirp.sync(tmpFolder);
+  mkdirp.sync(dataFolder);
+  mkdirp.sync(esFolder);
+
+  fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.zip'), zipSnapshot);
+  fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.tar.gz'), tarGzSnapshot);
 });
 
 afterEach(() => {
-  mockFs.restore();
+  del.sync(tmpFolder, { force: true });
 });
 
 test('zip strips root directory', async () => {
-  await decompress('/data/snapshot.zip', '/.es/foo');
-  expect(fs.readdirSync('/.es/foo/bin')).toContain('elasticsearch.bat');
+  await decompress(zipSnapshot, path.resolve(esFolder, 'foo'));
+  expect(fs.readdirSync(path.resolve(esFolder, 'foo/bin'))).toContain('elasticsearch.bat');
 });
 
 test('tar strips root directory', async () => {
-  await decompress('/data/snapshot.tar.gz', '/.es/foo');
-  expect(fs.readdirSync('/.es/foo/bin')).toContain('elasticsearch');
+  await decompress(tarGzSnapshot, path.resolve(esFolder, 'foo'));
+  expect(fs.readdirSync(path.resolve(esFolder, 'foo/bin'))).toContain('elasticsearch');
 });

@@ -21,7 +21,10 @@ import { deepFreeze } from '../../../core/public/utils/deep_freeze';
 
 export interface UICapabilities {
   navLinks: Record<string, boolean>;
-  [key: string]: Record<string, boolean>;
+  management: {
+    [sectionId: string]: Record<string, boolean>;
+  };
+  [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
 
 export const uiCapabilities: UICapabilities = deepFreeze(chrome.getInjected('uiCapabilities'));

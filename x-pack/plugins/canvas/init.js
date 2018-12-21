@@ -17,7 +17,9 @@ export default async function(server /*options*/) {
     const basePath = config.get('server.basePath');
     const reportingBrowserType = (() => {
       const configKey = 'xpack.reporting.capture.browser.type';
-      if (!config.has(configKey)) return null;
+      if (!config.has(configKey)) {
+        return null;
+      }
       return config.get(configKey);
     })();
     const kibanaVars = await server.getInjectedUiAppVars('kibana');

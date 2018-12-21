@@ -19,7 +19,9 @@ import {
   SpaceSelectorPageProvider,
   AccountSettingProvider,
   InfraHomePageProvider,
+  GisPageProvider,
   StatusPagePageProvider,
+  UpgradeAssistantProvider,
 } from './page_objects';
 
 import {
@@ -49,7 +51,6 @@ import {
   RandomProvider,
   AceEditorProvider,
   GrokDebuggerProvider,
-
 } from './services';
 
 import {
@@ -60,10 +61,15 @@ import {
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
-
-  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
-  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
+  const kibanaCommonConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
+  const kibanaFunctionalConfig = await readConfigFile(
+    require.resolve('../../../test/functional/config.js')
+  );
+  const kibanaAPITestsConfig = await readConfigFile(
+    require.resolve('../../../test/api_integration/config.js')
+  );
 
   return {
     // list paths to the files that contain your plugins tests
@@ -78,7 +84,9 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
+      resolve(__dirname, './apps/gis'),
       resolve(__dirname, './apps/status_page'),
+      resolve(__dirname, './apps/upgrade_assistant'),
     ],
 
     // define the name and providers for services that should be
@@ -131,7 +139,9 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
+      gis: GisPageProvider,
       statusPage: StatusPagePageProvider,
+      upgradeAssistant: UpgradeAssistantProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -139,10 +149,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [
-        'xpack.license.self_generated.type=trial',
-        'xpack.security.enabled=true',
-      ],
+      serverArgs: ['xpack.license.self_generated.type=trial', 'xpack.security.enabled=true'],
     },
 
     kbnTestServer: {
@@ -167,47 +174,50 @@ export default async function ({ readConfigFile }) {
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
       login: {
-        pathname: '/login'
+        pathname: '/login',
       },
       monitoring: {
-        pathname: '/app/monitoring'
+        pathname: '/app/monitoring',
       },
       logstashPipelines: {
         pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines'
+        hash: '/management/logstash/pipelines',
+      },
+      gis: {
+        pathname: '/app/gis',
       },
       graph: {
         pathname: '/app/graph',
       },
       grokDebugger: {
         pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger'
+        hash: '/dev_tools/grokdebugger',
       },
       spaceSelector: {
         pathname: '/',
       },
       infraOps: {
-        pathname: '/app/infra'
+        pathname: '/app/infra',
       },
       canvas: {
         pathname: '/app/canvas',
         hash: '/',
-      }
+      },
     },
 
     // choose where esArchiver should load archives from
     esArchiver: {
-      directory: resolve(__dirname, 'es_archives')
+      directory: resolve(__dirname, 'es_archives'),
     },
 
     // choose where screenshots should be saved
     screenshots: {
-      directory: resolve(__dirname, 'screenshots')
+      directory: resolve(__dirname, 'screenshots'),
     },
 
     junit: {
       reportName: 'X-Pack Functional Tests',
       rootDirectory: resolve(__dirname, '../../'),
-    }
+    },
   };
 }

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
@@ -43,7 +43,7 @@ export const GroupOfNodes: React.SFC<Props> = ({
       <Nodes>
         {group.nodes.map(node => (
           <Node
-            key={node.id}
+            key={node.pathId}
             options={options}
             squareSize={group.squareSize}
             node={node}
