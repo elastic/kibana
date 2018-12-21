@@ -182,6 +182,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
     return callWithRequest(req, 'search', params)
       .then(result => {
+
         const aggregations = get(result, 'aggregations', {});
         const logstashUuids =  get(aggregations, 'logstash_uuids.buckets', []);
         const logstashVersions = get(aggregations, 'logstash_versions.buckets', []);

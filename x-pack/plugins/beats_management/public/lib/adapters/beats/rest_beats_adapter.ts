@@ -24,7 +24,7 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
     return beat;
   }
 
-  public async getAll(ESQuery?: any): Promise<CMBeat[]> {
+  public async getAll(ESQuery?: string): Promise<CMBeat[]> {
     return (await this.REST.get<{ beats: CMBeat[] }>('/api/beats/agents/all', { ESQuery })).beats;
   }
 

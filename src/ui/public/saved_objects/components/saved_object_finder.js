@@ -30,7 +30,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-export class SavedObjectFinder extends React.Component {
+import { injectI18n } from '@kbn/i18n/react';
+
+class SavedObjectFinderUI extends React.Component {
   constructor(props) {
     super(props);
 
@@ -164,7 +166,10 @@ export class SavedObjectFinder extends React.Component {
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            placeholder="Search..."
+            placeholder={this.props.intl.formatMessage({
+              id: 'common.ui.savedObjects.finder.searchPlaceholder',
+              defaultMessage: 'Search…',
+            })}
             fullWidth
             value={this.state.filter}
             onChange={(e) => {
@@ -199,7 +204,10 @@ export class SavedObjectFinder extends React.Component {
     const tableColumns = [
       {
         field: 'title',
-        name: 'Title',
+        name: this.props.intl.formatMessage({
+          id: 'common.ui.savedObjects.finder.titleLabel',
+          defaultMessage: 'Title',
+        }),
         sortable: true,
         render: (title, record) => {
           const {
@@ -247,7 +255,7 @@ export class SavedObjectFinder extends React.Component {
   }
 }
 
-SavedObjectFinder.propTypes = {
+SavedObjectFinderUI.propTypes = {
   callToActionButton: PropTypes.node,
   onChoose: PropTypes.func,
   makeUrl: PropTypes.func,
@@ -255,3 +263,5 @@ SavedObjectFinder.propTypes = {
   savedObjectType: PropTypes.oneOf(['visualization', 'search']).isRequired,
   visTypes: PropTypes.object,
 };
+
+export const SavedObjectFinder = injectI18n(SavedObjectFinderUI);

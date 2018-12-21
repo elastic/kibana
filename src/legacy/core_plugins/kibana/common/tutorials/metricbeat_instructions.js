@@ -92,8 +92,8 @@ export const createMetricbeatInstructions = context => ({
         },
       }),
       commands: [
-        'PS > cd C:\\Program Files\\Metricbeat',
-        'PS C:\\Program Files\\Metricbeat> .\\install-service-metricbeat.ps1',
+        'cd "C:\\Program Files\\Metricbeat"',
+        '.\\install-service-metricbeat.ps1',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.windowsTextPost', {
         defaultMessage: 'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
@@ -146,8 +146,8 @@ export const createMetricbeatInstructions = context => ({
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
-        'PS C:\\Program Files\\Metricbeat> .\\metricbeat.exe setup',
-        'PS C:\\Program Files\\Metricbeat> Start-Service metricbeat',
+        '.\\metricbeat.exe setup',
+        'Start-Service metricbeat',
       ],
     },
   },
@@ -406,7 +406,7 @@ export function metricbeatEnableInstructions(moduleName) {
         values: { path: `C:\\Program Files\\Metricbeat` },
       }),
       commands: [
-        'PS C:\\Program Files\\Metricbeat> metricbeat.exe modules enable ' + moduleName,
+        '.\\metricbeat.exe modules enable ' + moduleName,
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatEnableInstructions.windowsTextPost', {
         defaultMessage: 'Modify the settings in the `modules.d/{moduleName}.yml` file.',

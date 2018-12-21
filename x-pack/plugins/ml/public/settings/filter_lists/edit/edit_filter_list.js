@@ -275,6 +275,7 @@ export class EditFilterList extends Component {
       itemsPerPage,
       activePage,
       saveInProgress } = this.state;
+    const { canCreateFilter, canDeleteFilter } = this.props;
 
     const totalItemCount = (items !== undefined) ? items.length : 0;
 
@@ -286,6 +287,7 @@ export class EditFilterList extends Component {
           horizontalPosition="center"
         >
           <EditFilterListHeader
+            canCreateFilter={canCreateFilter}
             filterId={this.props.filterId}
             newFilterId={newFilterId}
             isNewFilterIdInvalid={isNewFilterIdInvalid}
@@ -296,6 +298,8 @@ export class EditFilterList extends Component {
             usedBy={loadedFilter.used_by}
           />
           <EditFilterListToolbar
+            canCreateFilter={canCreateFilter}
+            canDeleteFilter={canDeleteFilter}
             onSearchChange={this.onSearchChange}
             addItems={this.addItems}
             deleteSelectedItems={this.deleteSelectedItems}
@@ -323,7 +327,10 @@ export class EditFilterList extends Component {
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={this.save}
-                disabled={(saveInProgress === true) || (isNewFilterIdInvalid === true)}
+                disabled={(saveInProgress === true) ||
+                  (isNewFilterIdInvalid === true) ||
+                  (canCreateFilter === false)
+                }
                 fill
               >
                 Save
@@ -336,6 +343,8 @@ export class EditFilterList extends Component {
   }
 }
 EditFilterList.propTypes = {
-  filterId: PropTypes.string
+  filterId: PropTypes.string,
+  canCreateFilter: PropTypes.bool.isRequired,
+  canDeleteFilter: PropTypes.bool.isRequired
 };
 

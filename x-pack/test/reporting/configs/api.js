@@ -30,6 +30,7 @@ export async function getReportingApiConfig({ readConfigFile }) {
       serverArgs: [
         ...apiConfig.get('kbnTestServer.serverArgs'),
         `--optimize.enabled=true`,
+        '--logging.events.log', JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting'])
       ],
     },
   };

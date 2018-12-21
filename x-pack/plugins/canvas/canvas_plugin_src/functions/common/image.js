@@ -36,7 +36,9 @@ export const image = () => ({
     },
   },
   fn: (context, { dataurl, mode }) => {
-    if (!modes.includes(mode)) throw '"mode" must be "contain", "cover", or "stretch"';
+    if (!modes.includes(mode)) {
+      throw '"mode" must be "contain", "cover", or "stretch"';
+    }
 
     const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
 

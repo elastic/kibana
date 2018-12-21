@@ -33,7 +33,7 @@ export interface RequestHandlerParams {
   filters?: Filters;
   forceFetch: boolean;
   queryFilter: QueryFilter;
-  uiState: PersistedState;
+  uiState?: PersistedState;
   partialRows?: boolean;
   inspectorAdapters?: Adapters;
   isHierarchical?: boolean;

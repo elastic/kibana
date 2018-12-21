@@ -19,8 +19,6 @@
 
 export interface State {
   [key: string]: any;
-  translateHashToRison: (
-    stateHashOrRison: string | string[] | undefined
-  ) => string | string[] | undefined;
+  translateHashToRison: (stateHashOrRison: string | string[]) => string | string[];
   getQueryParamName: () => string;
 }

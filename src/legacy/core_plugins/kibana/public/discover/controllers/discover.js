@@ -24,7 +24,7 @@ import chrome from 'ui/chrome';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import * as filterActions from 'ui/doc_table/actions/filter';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
@@ -50,7 +50,7 @@ import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
+import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -64,6 +64,7 @@ import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -73,8 +74,14 @@ const app = uiModules.get('apps/discover', [
 ]);
 
 uiRoutes
-  .defaults(/discover/, {
-    requireDefaultIndex: true
+  .defaults(/^\/discover(\/|$)/, {
+    requireDefaultIndex: true,
+    k7Breadcrumbs: ($route, $injector) =>
+      $injector.invoke(
+        $route.current.params.id
+          ? getSavedSearchBreadcrumbs
+          : getRootBreadcrumbs
+      )
   })
   .when('/discover/:id?', {
     template: indexTemplate,
@@ -158,6 +165,8 @@ function discoverController(
   localStorage,
   i18n,
 ) {
+  const visualizeLoader = Private(VisualizeLoaderProvider);
+  let visualizeHandler;
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
@@ -182,6 +191,8 @@ function discoverController(
     return interval.val !== 'custom';
   };
 
+  config.bindToScope($scope, 'k7design');
+
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', savedSearch.destroy);
@@ -191,8 +202,9 @@ function discoverController(
   };
 
   $scope.topNavMenu = [{
-    key: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
-      defaultMessage: 'new',
+    key: 'new',
+    label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
+      defaultMessage: 'New',
     }),
     description: i18n('kbn.discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
@@ -200,8 +212,9 @@ function discoverController(
     run: function () { kbnUrl.change('/discover'); },
     testId: 'discoverNewButton',
   }, {
-    key: i18n('kbn.discover.localMenu.saveTitle', {
-      defaultMessage: 'save',
+    key: 'save',
+    label: i18n('kbn.discover.localMenu.saveTitle', {
+      defaultMessage: 'Save',
     }),
     description: i18n('kbn.discover.localMenu.saveSearchDescription', {
       defaultMessage: 'Save Search',
@@ -237,8 +250,9 @@ function discoverController(
       showSaveModal(saveModal);
     }
   }, {
-    key: i18n('kbn.discover.localMenu.openTitle', {
-      defaultMessage: 'open',
+    key: 'open',
+    label: i18n('kbn.discover.localMenu.openTitle', {
+      defaultMessage: 'Open',
     }),
     description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
       defaultMessage: 'Open Saved Search',
@@ -252,8 +266,9 @@ function discoverController(
       });
     }
   }, {
-    key: i18n('kbn.discover.localMenu.shareTitle', {
-      defaultMessage: 'share',
+    key: 'share',
+    label: i18n('kbn.discover.localMenu.shareTitle', {
+      defaultMessage: 'Share',
     }),
     description: i18n('kbn.discover.localMenu.shareSearchDescription', {
       defaultMessage: 'Share Search',
@@ -276,8 +291,9 @@ function discoverController(
       });
     }
   }, {
-    key: i18n('kbn.discover.localMenu.inspectTitle', {
-      defaultMessage: 'inspect',
+    key: 'inspect',
+    label: i18n('kbn.discover.localMenu.inspectTitle', {
+      defaultMessage: 'Inspect',
     }),
     description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
       defaultMessage: 'Open Inspector for search',
@@ -745,9 +761,7 @@ function discoverController(
         Promise
           .resolve(responseHandler(tabifiedData))
           .then(resp => {
-            $scope.visData = resp;
-            const visEl = $element.find('#discoverHistogram')[0];
-            visualizationLoader.render(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
+            visualizeHandler.render({ value: resp });
           });
       }
 
@@ -870,7 +884,7 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
-  function setupVisualization() {
+  async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!$scope.opts.timefield) return;
 
@@ -890,35 +904,48 @@ function discoverController(
       }
     ];
 
-    // we have a vis, just modify the aggs
     if ($scope.vis) {
       const visState = $scope.vis.getEnabledState();
       visState.aggs = visStateAggs;
 
       $scope.vis.setState(visState);
-    } else {
-      $scope.vis = new Vis($scope.indexPattern, {
-        title: savedSearch.title,
+      return;
+    }
+
+
+    const visSavedObject = {
+      indexPattern: $scope.indexPattern.id,
+      visState: {
         type: 'histogram',
+        title: savedSearch.title,
         params: {
           addLegend: false,
           addTimeMarker: true
         },
         aggs: visStateAggs
-      });
-
-      $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-        return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
-      });
-
-      $scope.searchSource.setField('aggs', function () {
-        return $scope.vis.getAggConfig().toDsl();
-      });
-    }
-
-    $scope.vis.filters = {
-      timeRange: timefilter.getTime()
+      }
     };
+
+    $scope.vis = new Vis(
+      $scope.searchSource.getField('index'),
+      visSavedObject.visState
+    );
+    visSavedObject.vis = $scope.vis;
+
+    $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
+      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
+    });
+
+    $scope.searchSource.setField('aggs', function () {
+      return $scope.vis.getAggConfig().toDsl();
+    });
+
+    $timeout(async () => {
+      const visEl = $element.find('#discoverHistogram')[0];
+      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
+        autoFetch: false,
+      });
+    });
   }
 
   function resolveIndexPatternLoading() {

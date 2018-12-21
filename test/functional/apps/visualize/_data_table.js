@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
-      await PageObjects.visualize.selectField('_source', 'metrics');
+      await PageObjects.visualize.selectField('agent.raw', 'metrics');
       await PageObjects.visualize.clickGo();
       const data = await PageObjects.visualize.getTableVisData();
       log.debug(data);
@@ -203,6 +203,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('extension.raw');
         await PageObjects.visualize.setSize(2);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         await PageObjects.visualize.toggleOtherBucket();
         await PageObjects.visualize.toggleMissingBucket();
         await PageObjects.visualize.clickGo();
@@ -392,9 +395,9 @@ export default function ({ getService, getPageObjects }) {
         ]);
       });
 
-      it('should allow nesting multiple splits', async () => {
+      it.skip('should allow nesting multiple splits', async () => {
         // This test can be removed as soon as we remove the nested split table
-        // feature (https://github.com/elastic/kibana/issues/24560).
+        // feature (https://github.com/elastic/kibana/issues/24560). (7.0)
         await PageObjects.visualize.clickData();
         await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Table');

@@ -20,14 +20,14 @@
 jest.mock('../lib/url_shortener', () => ({}));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   UrlPanelContent,
 } from './url_panel_content';
 
 test('render', () => {
-  const component = shallow(<UrlPanelContent
+  const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
     objectType="dashboard"
     getUnhashableStates={() => {}}
   />);
@@ -35,7 +35,7 @@ test('render', () => {
 });
 
 test('should enable saved object export option when objectId is provided', () => {
-  const component = shallow(<UrlPanelContent
+  const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
     objectId="id1"
     objectType="dashboard"
     getUnhashableStates={() => {}}

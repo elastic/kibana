@@ -64,8 +64,11 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
           },
           "filters": Array [],
           "toolsRight": Array [
-            <NewFilterButton />,
+            <NewFilterButton
+              canCreateFilter={true}
+            />,
             <DeleteFilterListModal
+              canDeleteFilter={true}
               refreshFilterLists={[MockFunction]}
               selectedFilterLists={
                 Array [
@@ -169,8 +172,11 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
           },
           "filters": Array [],
           "toolsRight": Array [
-            <NewFilterButton />,
+            <NewFilterButton
+              canCreateFilter={true}
+            />,
             <DeleteFilterListModal
+              canDeleteFilter={true}
               refreshFilterLists={[MockFunction]}
             />,
           ],

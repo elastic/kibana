@@ -128,6 +128,21 @@ describe('SavedObjectsClient', () => {
       await savedObjectsClient.get(doc.type, doc.id);
       sinon.assert.calledOnce(kfetchStub);
     });
+
+    test('handles HTTP call when it fails', async () => {
+      kfetchStub.withArgs({
+        method: 'POST',
+        pathname: `/api/saved_objects/_bulk_get`,
+        query: undefined,
+        body: sinon.match.any
+      }).rejects(new Error('Request failed'));
+      try {
+        await savedObjectsClient.get(doc.type, doc.id);
+        throw new Error('should have error');
+      } catch (e) {
+        expect(e.message).to.be('Request failed');
+      }
+    });
   });
 
   describe('#delete', () => {

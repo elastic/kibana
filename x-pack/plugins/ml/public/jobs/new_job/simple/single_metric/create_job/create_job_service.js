@@ -70,7 +70,8 @@ export function SingleMetricJobServiceProvider() {
           .then((resp) => {
 
             const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-            let highestValue = 0;
+            let highestValue;
+            let lowestValue;
 
             _.each(aggregationsByTime, (dataForTime) => {
               const time = dataForTime.key;
@@ -86,8 +87,10 @@ export function SingleMetricJobServiceProvider() {
               if (!isFinite(value) || dataForTime.doc_count === 0) {
                 value = null;
               }
-              if (value > highestValue) {
-                highestValue = value;
+
+              if (value !== null) {
+                highestValue = (highestValue === undefined) ? value : Math.max(value, highestValue);
+                lowestValue = (lowestValue === undefined) ? value : Math.min(value, lowestValue);
               }
 
               obj.results[time] = {
@@ -98,14 +101,36 @@ export function SingleMetricJobServiceProvider() {
             this.chartData.totalResults = resp.hits.total;
             this.chartData.line = processLineChartResults(obj.results);
 
-            this.chartData.highestValue = Math.ceil(highestValue);
-            // Append extra 10px to width of tick label for highest axis value to allow for tick padding.
-            if (this.chartData.fieldFormat !== undefined) {
-              const highValueFormatted = this.chartData.fieldFormat.convert(this.chartData.highestValue, 'text');
-              this.chartData.chartTicksMargin.width = calculateTextWidth(highValueFormatted, false) + 10;
+            // Calculate the width required for the chart ticks margin,
+            // which is the larger of the minimum or maximum value when formatted
+            lowestValue = (lowestValue === undefined) ? 0 : lowestValue;
+            highestValue = (highestValue === undefined) ? 1 : highestValue;
+
+            // For small ranges e.g 0.15 to 0.55 don't floor/ceil values as
+            // the resulting ints would require less width when rendering
+            const valueRange = highestValue - lowestValue;
+            if (valueRange > 1) {
+              lowestValue = Math.floor(lowestValue);
+              this.chartData.highestValue = Math.ceil(highestValue);
             } else {
-              this.chartData.chartTicksMargin.width = calculateTextWidth(this.chartData.highestValue, true) + 10;
+
+              this.chartData.highestValue = highestValue;
             }
+
+            let lowValueWidth = 0;
+            let highValueWidth = 0;
+            if (this.chartData.fieldFormat !== undefined) {
+              const lowValueFormatted = this.chartData.fieldFormat.convert(lowestValue, 'text');
+              const highValueFormatted = this.chartData.fieldFormat.convert(this.chartData.highestValue, 'text');
+              lowValueWidth = calculateTextWidth(lowValueFormatted, false);
+              highValueWidth = calculateTextWidth(highValueFormatted, false);
+            } else {
+              lowValueWidth = calculateTextWidth(lowestValue, true);
+              highValueWidth = calculateTextWidth(this.chartData.highestValue, true);
+            }
+
+            // Append extra 10px to width of tick label for widest axis value to allow for tick padding.
+            this.chartData.chartTicksMargin.width = Math.max(lowValueWidth, highValueWidth) + 10;
 
             resolve(this.chartData);
           })
@@ -430,6 +455,7 @@ function getSearchJsonFromConfig(formConfig) {
   const json = {
     index: formConfig.indexPattern.title,
     size: 0,
+    rest_total_hits_as_int: true,
     body: {
       query: {},
       aggs: {

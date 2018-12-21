@@ -6,6 +6,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 
 The List Pipelines API enables you to list all centrally-managed Logstash pipelines.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 [float]
 ==== Request
 

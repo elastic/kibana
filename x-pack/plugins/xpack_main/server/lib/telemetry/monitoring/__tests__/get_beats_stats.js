@@ -154,6 +154,22 @@ describe('Get Beats Stats', () => {
                 name: 'darwin'
               }
             ]
+          },
+          heartbeat: {
+            endpoints: 4,
+            http: {
+              endpoints: 1,
+              monitors: 1
+            },
+            icmp: {
+              monitors: 0,
+              endpoints: 0
+            },
+            tcp: {
+              monitors: 2,
+              endpoints: 3
+            },
+            monitors: 3
           }
         },
         FlV4ckTxQ0a78hmBkzzc9A: {
