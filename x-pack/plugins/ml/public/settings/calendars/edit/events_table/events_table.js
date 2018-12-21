@@ -19,13 +19,14 @@ import {
 
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
-function DeleteButton({ onClick }) {
+function DeleteButton({ onClick, canDeleteCalendar }) {
   return (
     <Fragment>
       <EuiButtonEmpty
         size="xs"
         color="danger"
         onClick={onClick}
+        isDisabled={canDeleteCalendar === false}
       >
         Delete
       </EuiButtonEmpty>
@@ -34,6 +35,8 @@ function DeleteButton({ onClick }) {
 }
 
 export function EventsTable({
+  canCreateCalendar,
+  canDeleteCalendar,
   eventsList,
   onDeleteClick,
   showSearchBar,
@@ -83,6 +86,7 @@ export function EventsTable({
       render: (event) => (
         <DeleteButton
           data-testid="event_delete"
+          canDeleteCalendar={canDeleteCalendar}
           onClick={() => { onDeleteClick(event.event_id); }}
         />
       )
@@ -92,6 +96,7 @@ export function EventsTable({
   const search = {
     toolsRight: [(
       <EuiButton
+        isDisabled={canCreateCalendar === false}
         key="ml_new_event"
         data-testid="ml_new_event"
         size="s"
@@ -102,6 +107,7 @@ export function EventsTable({
       </EuiButton>),
     (
       <EuiButton
+        isDisabled={canCreateCalendar === false}
         key="ml_import_event"
         data-testid="ml_import_events"
         size="s"
@@ -133,6 +139,8 @@ export function EventsTable({
 }
 
 EventsTable.propTypes = {
+  canCreateCalendar: PropTypes.bool,
+  canDeleteCalendar: PropTypes.bool,
   eventsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   showImportModal: PropTypes.func,
@@ -142,4 +150,6 @@ EventsTable.propTypes = {
 
 EventsTable.defaultProps = {
   showSearchBar: false,
+  canCreateCalendar: true,
+  canDeleteCalendar: true
 };
