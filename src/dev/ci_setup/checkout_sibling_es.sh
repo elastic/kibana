@@ -2,6 +2,8 @@
 
 set -e
 
+source "src/dev/ci_setup/_instrumentation.sh";
+
 function checkout_sibling {
   project=$1
   targetDir=$2
@@ -85,7 +87,9 @@ function checkout_sibling {
   fi
 }
 
+ici_span_start "checkout elasticsearch"
 checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
+ici_span_stop "checkout elasticsearch"
 
 # Set the JAVA_HOME based on the Java property file in the ES repo
 # This assumes the naming convention used on CI (ex: ~/.java/java10)

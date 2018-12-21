@@ -2,6 +2,8 @@
 
 set -e
 
+source "src/dev/ci_setup/_instrumentation.sh";
+
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
@@ -65,6 +67,7 @@ else
     rm -rf "$nodeDir"
   fi
 
+  ici_span_start "download node.js"
   echo " -- downloading node.js from $nodeUrl"
   mkdir -p "$nodeDir"
   if [[ "$OS" == "win" ]]; then
@@ -75,6 +78,7 @@ else
   else
     curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
   fi
+  ici_span_stop "download node.js"
 
 fi
 
@@ -88,7 +92,9 @@ hash -r
 ### downloading yarn
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
+ici_span_start "install yarn"
 npm install -g yarn@^${yarnVersion}
+ici_span_stop "install yarn"
 
 ###
 ### setup yarn offline cache
@@ -106,7 +112,9 @@ hash -r
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
+ici_span_start "yarn kbn bootstrap"
 yarn kbn bootstrap --prefer-offline
+ici_span_stop "yarn kbn bootstrap"
 
 ###
 ### verify no git modifications
