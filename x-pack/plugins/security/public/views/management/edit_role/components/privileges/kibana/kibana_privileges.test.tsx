@@ -57,6 +57,7 @@ const buildProps = (customProps = {}) => {
     intl: null as any,
     uiCapabilities: {
       navLinks: {},
+      management: {},
       spaces: {
         manage: true,
       },

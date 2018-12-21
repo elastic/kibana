@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
+import { uiCapabilities } from 'ui/capabilities';
 import { Pager } from 'ui/pager';
 import { NoVisualizationsPrompt } from './no_visualizations_prompt';
 
@@ -335,6 +336,7 @@ class VisualizeListingTableUi extends Component {
         <KuiListingTable
           pager={this.renderPager()}
           toolBarActions={this.renderToolBarActions()}
+          enableSelection={uiCapabilities.visualize.showWriteControls}
           selectedRowIds={this.state.selectedRowIds}
           rows={this.createRows()}
           header={this.renderHeader()}

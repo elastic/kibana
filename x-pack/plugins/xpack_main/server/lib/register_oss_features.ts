@@ -19,7 +19,7 @@ const kibanaFeatures: Feature[] = [
           all: ['search'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['kibana:discover'],
+        ui: [],
       },
       read: {
         app: ['kibana'],
@@ -43,7 +43,7 @@ const kibanaFeatures: Feature[] = [
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['kibana:visualize'],
+        ui: [],
       },
       read: {
         app: ['kibana'],
@@ -74,7 +74,7 @@ const kibanaFeatures: Feature[] = [
             'canvas-workpad',
           ],
         },
-        ui: ['kibana:dashboard'],
+        ui: [],
       },
       read: {
         app: ['kibana'],
@@ -114,14 +114,34 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'advancedSettings',
     name: 'Advanced Settings',
-    icon: 'managementApp',
-    navLinkId: 'kibana:management:advancedSettings',
+    icon: 'advancedSettingsApp',
     privileges: {
       all: {
+        management: {
+          kibana: ['settings'],
+        },
         app: ['kibana'],
         savedObject: {
           all: ['config'],
           read: [],
+        },
+        ui: [],
+      },
+    },
+  },
+  {
+    id: 'indexPatterns',
+    name: 'Index Pattern Management',
+    icon: 'indexPatternApp',
+    privileges: {
+      all: {
+        management: {
+          kibana: ['indices'],
+        },
+        app: ['kibana'],
+        savedObject: {
+          all: ['index-pattern'],
+          read: ['config'],
         },
         ui: [],
       },

@@ -79,8 +79,12 @@ export const font = () => ({
     },
   },
   fn: (context, args) => {
-    if (!weights.includes(args.weight)) throw new Error(`Invalid font weight: ${args.weight}`);
-    if (!alignments.includes(args.align)) throw new Error(`Invalid text alignment: ${args.align}`);
+    if (!weights.includes(args.weight)) {
+      throw new Error(`Invalid font weight: ${args.weight}`);
+    }
+    if (!alignments.includes(args.align)) {
+      throw new Error(`Invalid text alignment: ${args.align}`);
+    }
 
     // the line height shouldn't ever be lower than the size
     const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
@@ -96,7 +100,9 @@ export const font = () => ({
     };
 
     // conditionally apply styles based on input
-    if (args.color) spec.color = args.color;
+    if (args.color) {
+      spec.color = args.color;
+    }
 
     return {
       type: 'style',
