@@ -114,6 +114,3 @@ export function initRoutes(server) {
     return { fileLayers, tmsServices };
   }
 }
-
-
-
