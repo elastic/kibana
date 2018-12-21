@@ -18,18 +18,18 @@ export class GisMap extends Component {
 
   componentDidMount() {
     timeService.on('timeUpdate', this.props.setTimeFiltersToKbnGlobalTime);
-    timeService.on('refreshIntervalUpdate', this.setAutoRefresh);
-    this.setAutoRefresh();
+    timeService.on('refreshIntervalUpdate', this.setRefreshTimer);
+    this.setRefreshTimer();
   }
 
   componentWillUnmount() {
     timeService.off('timeUpdate', this.props.setTimeFiltersToKbnGlobalTime);
-    timeService.off('refreshIntervalUpdate', this.setAutoRefresh);
-    this.clearAutoRefresh();
+    timeService.off('refreshIntervalUpdate', this.setRefreshTimer);
+    this.clearRefreshTimer();
   }
 
-  setAutoRefresh = () => {
-    this.clearAutoRefresh();
+  setRefreshTimer = () => {
+    this.clearRefreshTimer();
 
     const { value, pause } = timeService.getRefreshInterval();
     if (!pause && value > 0) {
@@ -48,7 +48,7 @@ export class GisMap extends Component {
     });
   }
 
-  clearAutoRefresh = () => {
+  clearRefreshTimer = () => {
     if (this.refreshTimerId) {
       clearInterval(this.refreshTimerId);
     }
