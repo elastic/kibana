@@ -17,19 +17,30 @@
  * under the License.
  */
 
-export function addToSiri(series, point, id, label, agg) {
+function instantiateZeroFilledArray({ xKeys, series }) {
+  // borrowed from `ui/public/vislib/components/zero_injection/zero_filled_array`
+  return xKeys.map(x => ({
+    x,
+    xi: Infinity,
+    y: 0,
+    series,
+  }));
+}
+
+export function addToSiri(xKeys, series, point, id, label, agg) {
   id = id == null ? '' : id + '';
 
-  if (series.has(id)) {
-    series.get(id).values.push(point);
-    return;
+  if (!series.has(id)) {
+    series.set(id, {
+      label: label == null ? id : label,
+      aggLabel: agg.type ? agg.type.makeLabel(agg) : label,
+      aggId: agg.parentId ? agg.parentId : agg.id,
+      count: 0,
+      values: instantiateZeroFilledArray({ xKeys: xKeys.ordered, series: label }),
+    });
   }
 
-  series.set(id, {
-    label: label == null ? id : label,
-    aggLabel: agg.type ? agg.type.makeLabel(agg) : label,
-    aggId: agg.parentId ? agg.parentId : agg.id,
-    count: 0,
-    values: [point]
-  });
+  // update the ordered, zero-filled array with the "real" value
+  series.get(id).values[xKeys.indexMap[point.x]] = point;
+  return;
 }
