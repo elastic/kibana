@@ -3,12 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { BeatTag } from '../../../../common/domain_types';
+import * as t from 'io-ts';
 import { FrameworkUser } from '../framework/adapter_types';
 
+export const RuntimeTagDoc = t.interface(
+  {
+    id: t.string,
+    color: t.string,
+    last_updated: t.string,
+    configuration_block_ids: t.array(t.string),
+  },
+  'StoredBeatTag'
+);
+export interface StoredBeatTag extends t.TypeOf<typeof RuntimeTagDoc> {}
+
 export interface CMTagsAdapter {
-  getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]>;
+  getAll(user: FrameworkUser, ESQuery?: any): Promise<StoredBeatTag[]>;
   delete(user: FrameworkUser, tagIds: string[]): Promise<boolean>;
-  getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]>;
-  upsertTag(user: FrameworkUser, tag: BeatTag): Promise<{}>;
+  getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<StoredBeatTag[]>;
+  upsertTag(user: FrameworkUser, tag: StoredBeatTag): Promise<{}>;
 }

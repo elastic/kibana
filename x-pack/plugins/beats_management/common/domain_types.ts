@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
+import { RuntimeTagDoc } from '../server/lib/adapters/tags/adapter_types';
 import { InterfaceExcept } from '../server/utils/helper_types';
 import { configBlockSchemas } from './config_schemas';
 
@@ -27,7 +28,9 @@ export const createConfigurationBlockInterface = (
     'ConfigBlock'
   );
 const BaseConfigurationBlock = createConfigurationBlockInterface();
-export interface ConfigurationBlock extends t.TypeOf<typeof BaseConfigurationBlock> {}
+export interface ConfigurationBlock extends t.TypeOf<typeof BaseConfigurationBlock> {
+  id?: string;
+}
 
 export interface CMBeat {
   id: string;
@@ -58,6 +61,7 @@ export interface ConfigBlockSchema {
   id: string;
   name: string;
   version: number;
+  allowOtherConfigs?: boolean;
   configs: BeatConfigSchema[];
 }
 
@@ -72,23 +76,13 @@ export interface BeatConfigSchema {
     placeholder?: string;
   };
   options?: Array<{ value: string; text: string }>;
-  validations?: 'isHosts' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
+  validation?: 'isHosts' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
   error: string;
   errorId: string;
   defaultValue?: string;
   required?: boolean;
   parseValidResult?: (value: any) => any;
 }
-
-export const RuntimeTagDoc = t.interface(
-  {
-    id: t.string,
-    color: t.string,
-    last_updated: t.string,
-    configuration_block_ids: t.array(t.string),
-  },
-  'Tag'
-);
 
 export interface BeatTag
   extends InterfaceExcept<

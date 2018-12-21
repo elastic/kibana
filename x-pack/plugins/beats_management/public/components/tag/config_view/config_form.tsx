@@ -124,7 +124,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     helpText={schema.ui.helpText}
                     placeholder={schema.ui.placeholder}
                     label={schema.ui.label}
-                    validations={schema.validations}
+                    validations={schema.validation}
                     validationError={schema.error}
                     required={schema.required || false}
                   />
@@ -144,7 +144,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     placeholder={schema.ui.placeholder}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    validations={schema.validations}
+                    validations={schema.validation}
                     validationError={schema.error}
                     required={schema.required || false}
                   />
@@ -164,7 +164,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     placeholder={schema.ui.placeholder}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    validations={schema.validations}
+                    validations={schema.validation}
                     validationError={schema.error}
                     required={schema.required}
                   />
@@ -192,7 +192,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                         }),
                       },
                     ].concat(schema.options || [])}
-                    validations={schema.validations}
+                    validations={schema.validation}
                     validationError={schema.error}
                     required={schema.required}
                   />
@@ -213,7 +213,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     options={schema.options ? schema.options : []}
-                    validations={schema.validations}
+                    validations={schema.validation}
                     validationError={schema.error}
                     required={schema.required}
                   />

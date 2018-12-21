@@ -6,11 +6,10 @@
 
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { FrameworkUser } from '../framework/adapter_types';
-
-import { BeatTag, CMBeat } from '../../../../common/domain_types';
+import { CMBeat } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
-import { CMTagsAdapter } from './adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
+import { CMTagsAdapter, StoredBeatTag } from './adapter_types';
 
 export class ElasticsearchTagsAdapter implements CMTagsAdapter {
   private database: DatabaseAdapter;
@@ -19,7 +18,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     this.database = database;
   }
 
-  public async getAll(user: FrameworkUser, ESQuery?: any) {
+  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<StoredBeatTag[]> {
     const params = {
       ignore: [404],
       _source: true,
@@ -50,7 +49,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     return tags.map((tag: any) => tag._source.tag);
   }
 
-  public async delete(user: FrameworkUser, tagIds: string[]) {
+  public async delete(user: FrameworkUser, tagIds: string[]): Promise<boolean> {
     const ids = tagIds.map(tag => tag);
 
     const params = {
@@ -106,7 +105,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     return true;
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
+  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<StoredBeatTag[]> {
     if (tagIds.length === 0) {
       return [];
     }
@@ -131,7 +130,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       }));
   }
 
-  public async upsertTag(user: FrameworkUser, tag: BeatTag) {
+  public async upsertTag(user: FrameworkUser, tag: StoredBeatTag): Promise<{}> {
     const body = {
       tag,
       type: 'tag',

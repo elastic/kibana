@@ -1,0 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import { ConfigurationBlock } from '../../../../common/domain_types';
+import { FrameworkUser } from '../framework/adapter_types';
+
+export interface ConfigurationBlockAdapter {
+  getByIds(user: FrameworkUser, ids: string[]): Promise<ConfigurationBlock[]>;
+  delete(user: FrameworkUser, blockIds: string[]): Promise<void>;
+  create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]>;
+}

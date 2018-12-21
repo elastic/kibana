@@ -5,7 +5,7 @@
  */
 
 import { FrameworkUser } from '../framework/adapter_types';
-import { CMTagsAdapter, StoredBeatTag } from './adapter_types';
+import { CMTagsAdapter, StoredBeatTag } from './../tags/adapter_types';
 
 export class MemoryTagsAdapter implements CMTagsAdapter {
   private tagsDB: StoredBeatTag[] = [];
