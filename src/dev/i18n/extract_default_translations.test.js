@@ -64,7 +64,7 @@ describe('dev/i18n/extract_default_translations', () => {
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath, config)).not.toThrow();
+    expect(() => validateMessageNamespace(id, filePath, config.paths)).not.toThrow();
   });
 
   test('throws on wrong message namespace', () => {
@@ -73,6 +73,8 @@ describe('dev/i18n/extract_default_translations', () => {
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath, config)).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      validateMessageNamespace(id, filePath, config.paths)
+    ).toThrowErrorMatchingSnapshot();
   });
 });

@@ -36,37 +36,21 @@ import {
 run(async ({ flags: { path, output, 'output-format': outputFormat, include = [] } }) => {
   const paths = Array.isArray(path) ? path : [path || './'];
   const additionalI18nConfigPaths = Array.isArray(include) ? include : [include];
-
-  const fullConfig = {
-    ...config,
-  };
+  const mergedConfig = { exclude: [], ...config };
 
   for (const configPath of additionalI18nConfigPaths) {
-    const configJson = await readFileAsync(resolve(configPath));
-    const additionalConfig = JSON.parse(configJson);
+    const additionalConfig = JSON.parse(await readFileAsync(resolve(configPath)));
 
-    const additionalConfigPaths = Object.entries(additionalConfig.paths).reduce(
-      (acc, [pluginNamespace, subPath]) => {
-        acc[pluginNamespace] = normalizePath(resolve(configPath, '..', subPath));
-        return acc;
-      },
-      {}
-    );
+    for (const [pathNamespace, pathValue] of Object.entries(additionalConfig.paths)) {
+      mergedConfig.paths[pathNamespace] = normalizePath(resolve(configPath, '..', pathValue));
+    }
 
-    fullConfig.paths = {
-      ...fullConfig.paths,
-      ...additionalConfigPaths,
-    };
-
-    fullConfig.exclude = [
-      ...(fullConfig.exclude || []),
-      ...(additionalConfig.exclude || []).map(excludePath =>
-        normalizePath(resolve(configPath, '..', excludePath))
-      ),
-    ];
+    for (const exclude of additionalConfig.exclude || []) {
+      mergedConfig.exclude.push(normalizePath(resolve(configPath, '..', exclude)));
+    }
   }
 
-  const filteredPaths = filterPaths(paths, fullConfig);
+  const filteredPaths = filterPaths(paths, mergedConfig.paths);
 
   if (filteredPaths.length === 0) {
     throw createFailError(
@@ -77,7 +61,7 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
 
   const list = new Listr(
     filteredPaths.map(filteredPath => ({
-      task: messages => extractMessagesFromPathToMap(filteredPath, messages, fullConfig),
+      task: messages => extractMessagesFromPathToMap(filteredPath, messages, mergedConfig),
       title: filteredPath,
     }))
   );

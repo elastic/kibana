@@ -40,10 +40,8 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-
-
-export function filterPaths(inputPaths, config) {
-  const availablePaths = Object.values(config.paths);
+export function filterPaths(inputPaths, paths) {
+  const availablePaths = Object.values(paths);
   const pathsForExtraction = new Set();
 
   for (const inputPath of inputPaths) {
@@ -66,16 +64,16 @@ export function filterPaths(inputPaths, config) {
   return [...pathsForExtraction];
 }
 
-function filterEntries(entries, config) {
+function filterEntries(entries, exclude) {
   return entries.filter(entry =>
-    config.exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
+    exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
   );
 }
 
-export function validateMessageNamespace(id, filePath, config) {
+export function validateMessageNamespace(id, filePath, allowedPaths) {
   const normalizedPath = normalizePath(filePath);
 
-  const [expectedNamespace] = Object.entries(config.paths).find(([, pluginPath]) =>
+  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
     normalizedPath.startsWith(`${pluginPath}/`)
   );
 
@@ -119,7 +117,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config)
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        filterEntries(entries, config).map(async entry => {
+        filterEntries(entries, config.exclude).map(async entry => {
           return {
             name: entry,
             content: await readFileAsync(entry),
@@ -130,7 +128,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config)
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
-            validateMessageNamespace(id, name, config);
+            validateMessageNamespace(id, name, config.paths);
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
