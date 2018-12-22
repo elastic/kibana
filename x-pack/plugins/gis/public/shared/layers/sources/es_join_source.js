@@ -161,7 +161,7 @@ export class ESJoinSource extends ASource {
     return false;
   }
 
-  isRefreshAware() {
+  isRefreshTimerAware() {
     return true;
   }
 

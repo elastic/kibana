@@ -13,8 +13,9 @@ import {
   getMapCenter,
   getLayerListRaw,
   getMapExtent,
+  getRefreshConfig,
 } from '../../selectors/map_selectors';
-import { getIsDarkTheme, getRefresh } from '../../store/ui';
+import { getIsDarkTheme } from '../../store/ui';
 import { TileStyle } from '../../shared/layers/styles/tile_style';
 import { convertMapExtentToEnvelope } from '../../elasticsearch_geo_utils';
 
@@ -95,11 +96,11 @@ module.factory('SavedGisMap', function (Private) {
       zoom: getMapZoom(state),
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
+      refreshConfig: getRefreshConfig(state),
     });
 
     this.uiStateJSON = JSON.stringify({
       isDarkMode: getIsDarkTheme(state),
-      refresh: getRefresh(state),
     });
 
     this.bounds = convertMapExtentToEnvelope(getMapExtent(state));

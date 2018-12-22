@@ -119,7 +119,9 @@ export const getMapColors = ({ map }) => {
 export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
   map.mapState.timeFilters : timefilter.getTime();
 
-export const getRefreshedAt = ({ map }) => map.mapState.refreshedAt;
+export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
+
+export const getRefreshedAt = ({ map }) => map.mapState.refreshTimerStepKey;
 
 export const getMetadata = ({ config }) => config && config.meta;
 
@@ -129,13 +131,13 @@ export const getDataFilters = createSelector(
   getMapZoom,
   getTimeFilters,
   getRefreshedAt,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshedAt) => {
+  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerStepKey) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
       zoom: mapZoom,
       timeFilters,
-      refreshedAt,
+      refreshTimerStepKey,
     };
   }
 );

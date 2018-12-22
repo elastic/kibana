@@ -72,7 +72,7 @@ export class ESSearchSource extends VectorSource {
     return true;
   }
 
-  isRefreshAware() {
+  isRefreshTimerAware() {
     return true;
   }
 

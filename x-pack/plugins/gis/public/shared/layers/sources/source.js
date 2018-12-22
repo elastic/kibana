@@ -43,7 +43,7 @@ export class ASource {
     return false;
   }
 
-  isRefreshAware() {
+  isRefreshTimerAware() {
     return false;
   }
 

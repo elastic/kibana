@@ -135,7 +135,7 @@ export class ESGeohashGridSource extends VectorSource {
     return true;
   }
 
-  isRefreshAware() {
+  isRefreshTimerAware() {
     return true;
   }
 

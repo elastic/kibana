@@ -35,14 +35,13 @@ export class GisMap extends Component {
     if (!pause && value > 0) {
       this.refreshTimerId = setInterval(
         () => {
-          this.props.refreshLayers();
+          this.props.triggerRefreshTimer();
         },
         value
       );
     }
 
-    // Store refresh in UI state so it is saved with the map
-    this.props.setRefresh({
+    this.props.setRefreshConfig({
       isPaused: pause,
       interval: value,
     });

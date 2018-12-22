@@ -166,7 +166,7 @@ export class VectorLayer extends ALayer {
 
   async _canSkipSourceUpdate(source, sourceDataId, filters) {
     const timeAware = await source.isTimeAware();
-    const refreshAware = await source.isRefreshAware();
+    const refreshAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
 
@@ -194,8 +194,8 @@ export class VectorLayer extends ALayer {
     }
 
     let updateDueToRefresh = false;
-    if (refreshAware && filters.refreshedAt) {
-      updateDueToRefresh = !_.isEqual(meta.refreshedAt, filters.refreshedAt);
+    if (refreshAware && filters.refreshTimerStepKey) {
+      updateDueToRefresh = !_.isEqual(meta.refreshTimerStepKey, filters.refreshTimerStepKey);
     }
 
     let updateDueToFields = false;
