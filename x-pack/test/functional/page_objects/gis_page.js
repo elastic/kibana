@@ -107,24 +107,21 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async setView(lat, lon, zoom) {
       log.debug(`Set view lat: ${lat}, lon: ${lon}, zoom: ${zoom}`);
       await testSubjects.click('toggleSetViewVisibilityButton');
-
-      const latInput = await testSubjects.find('latitudeInput');
-      await latInput.clearValue();
-      await latInput.click();
-      await latInput.type(lat);
-
-      const lonInput = await testSubjects.find('longitudeInput');
-      await lonInput.clearValue();
-      await lonInput.click();
-      await lonInput.type(lon);
-
-      const zoomInput = await testSubjects.find('zoomInput');
-      await zoomInput.clearValue();
-      await zoomInput.click();
-      await zoomInput.type(zoom);
-
+      await testSubjects.setValue('latitudeInput', lat);
+      await testSubjects.setValue('longitudeInput', lon);
+      await testSubjects.setValue('zoomInput', zoom);
       await testSubjects.click('submitViewButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getView() {
+      log.debug('Get view');
+      await testSubjects.click('toggleSetViewVisibilityButton');
+      const lat = await testSubjects.getAttribute('latitudeInput', 'value');
+      const lon = await testSubjects.getAttribute('longitudeInput', 'value');
+      const zoom = await testSubjects.getAttribute('zoomInput', 'value');
+      await testSubjects.click('toggleSetViewVisibilityButton');
+      return { lat, lon, zoom };
     }
 
     async openLayerPanel(layerName) {

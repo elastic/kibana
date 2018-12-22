@@ -8,13 +8,43 @@ import expect from 'expect.js';
 
 export default function ({ getPageObjects }) {
 
-  const PageObjects = getPageObjects(['gis']);
+  const PageObjects = getPageObjects(['gis', 'header']);
 
   describe('gis-map saved object management', () => {
 
     const MAP_NAME_PREFIX = 'saved_object_management_test_';
     const MAP1_NAME = `${MAP_NAME_PREFIX}map1`;
     const MAP2_NAME = `${MAP_NAME_PREFIX}map2`;
+
+    describe('read', () => {
+      before(async () => {
+        await PageObjects.gis.loadSavedMap('refresh example');
+      });
+
+      it('should update global Kibana time to value stored with map', async () => {
+        const kibanaTime = await PageObjects.header.getPrettyDuration();
+        expect(kibanaTime).to.equal('September 20th 2015, 00:00:00.000 to September 23rd 2015, 00:00:00.000');
+      });
+
+      it('should update global Kibana refresh config to value stored with map', async () => {
+        const kibanaRefreshConfig = await PageObjects.header.getRefreshConfig();
+        expect(kibanaRefreshConfig).to.equal('inactive 1 second');
+      });
+
+      it('should set map location to value stored with map', async () => {
+        const { lat, lon, zoom } = await PageObjects.gis.getView();
+        expect(lat).to.equal('39.56438');
+        expect(lon).to.equal('-100.54447');
+        expect(zoom).to.equal('3.52');
+      });
+
+      it('should load map layers stored with map', async () => {
+        const heatmapLayerExists = await PageObjects.gis.doesLayerExist('logs(heatmap)');
+        expect(heatmapLayerExists).to.equal(true);
+        const gridLayerExists = await PageObjects.gis.doesLayerExist('logs(grid)');
+        expect(gridLayerExists).to.equal(true);
+      });
+    });
 
     describe('create', () => {
       it('should allow saving map', async () => {

@@ -189,3 +189,35 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "gis-map:19f4a4d0-0604-11e9-b4c4-ef862674977c",
+    "source": {
+      "type" : "gis-map",
+      "gis-map" : {
+        "title" : "refresh example",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":3.52,\"center\":{\"lon\":-100.54447,\"lat\":39.56438},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-23T00:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"3sks7\",\"label\":\"logs(heatmap)\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_GEOHASH_GRID\",\"id\":\"a0abedd9-6bfc-40a8-a450-6b720189e39a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"heatmap\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"properties\":{\"alphaValue\":0.25},\"previousStyle\":null},\"type\":\"HEATMAP\"},{\"id\":\"llz95\",\"label\":\"logs(grid)\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_GEOHASH_GRID\",\"id\":\"cf65be58-fafb-4f3e-b8d9-42b98d6ffc2a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}},\"alphaValue\":0.25},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isDarkMode\":false}",
+        "bounds" : {
+          "type" : "envelope",
+          "coordinates" : [
+            [
+              -145.37326,
+              55.73977
+            ],
+            [
+              -55.71569,
+              18.52334
+            ]
+          ]
+        }
+      }
+    }
+  }
+}
