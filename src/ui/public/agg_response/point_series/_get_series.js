@@ -26,7 +26,7 @@ export function getSeries(rows, chart) {
   const multiY = Array.isArray(aspects.y);
   const yScale = chart.yScale;
   const partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
-  const orderedXKeys = _.uniq(rows.map(r => r[aspects.x.i].value));
+  const orderedXKeys = aspects.x.i > -1 ? _.uniq(rows.map(r => r[aspects.x.i].value)) : [];
   const orderedXKeysMap = orderedXKeys.reduce((acc, cur, i) => {
     acc[cur] = i;
     return acc;
