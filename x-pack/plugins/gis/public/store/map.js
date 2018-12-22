@@ -19,7 +19,6 @@ import {
   MAP_DESTROYED,
   REPLACE_LAYERLIST,
   SET_TIME_FILTERS,
-  TRIGGER_REFRESH_TIMER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
@@ -29,6 +28,7 @@ import {
   UPDATE_LAYER_ALPHA_VALUE,
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
+  TRIGGER_REFRESH_TIMER,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -79,7 +79,7 @@ const INITIAL_STATE = {
     extent: null,
     timeFilters: null,
     refreshConfig: null,
-    refreshTimerStepKey: null,
+    refreshTimerLastTriggeredAt: null,
   },
   selectedLayerId: null,
   layerList: []
@@ -140,7 +140,7 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         mapState: {
           ...state.mapState,
-          refreshTimerStepKey: (new Date()).toISOString(),
+          refreshTimerLastTriggeredAt: (new Date()).toISOString(),
         }
       };
     case SET_SELECTED_LAYER:

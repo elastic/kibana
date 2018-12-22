@@ -100,12 +100,13 @@ export class HeatmapLayer extends ALayer {
 
     const isSameTime = _.isEqual(dataMeta.timeFilters, dataFilters.timeFilters);
 
-    const updateDueToRefresh = dataFilters.refreshTimerStepKey && !_.isEqual(dataMeta.refreshTimerStepKey, dataFilters.refreshTimerStepKey);
+    const updateDueToRefreshTimer = dataFilters.refreshTimerLastTriggeredAt
+      && !_.isEqual(dataMeta.refreshTimerLastTriggeredAt, dataFilters.refreshTimerLastTriggeredAt);
 
     const updateDueToExtent = this.updateDueToExtent(this._source, dataMeta, dataFilters);
 
 
-    if (isSamePrecision && isSameTime && !updateDueToExtent && !updateDueToRefresh) {
+    if (isSamePrecision && isSameTime && !updateDueToExtent && !updateDueToRefreshTimer) {
       return;
     }
 

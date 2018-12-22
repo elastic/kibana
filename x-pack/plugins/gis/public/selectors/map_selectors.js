@@ -121,7 +121,7 @@ export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
 
 export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
 
-export const getRefreshedAt = ({ map }) => map.mapState.refreshTimerStepKey;
+export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
 
 export const getMetadata = ({ config }) => config && config.meta;
 
@@ -130,14 +130,14 @@ export const getDataFilters = createSelector(
   getMapBuffer,
   getMapZoom,
   getTimeFilters,
-  getRefreshedAt,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerStepKey) => {
+  getRefreshTimerLastTriggeredAt,
+  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
       zoom: mapZoom,
       timeFilters,
-      refreshTimerStepKey,
+      refreshTimerLastTriggeredAt,
     };
   }
 );
