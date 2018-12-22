@@ -19,6 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Timeseries from '../../../visualizations/components/timeseries';
@@ -26,6 +27,7 @@ import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
+import ErrorComponent from '../../error';
 
 function hasSeparateAxis(row) {
   return row.separate_axis;
@@ -70,7 +72,9 @@ class TimeseriesVisualization extends Component {
           icon: annotation.icon,
           series: data.map(s => {
             return [s[0], s[1].map(doc => {
-              return replaceVars(annotation.template, null, doc);
+              const vars = replaceVars(annotation.template, null, doc);
+
+              return vars instanceof Error ? (<ErrorComponent error={vars} />) : vars;
             })];
           })
         };
