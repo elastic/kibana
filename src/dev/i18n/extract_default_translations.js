@@ -26,6 +26,7 @@ import {
   extractHandlebarsMessages,
 } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
+
 import { createFailError, isFailError } from '../run';
 
 function addMessageToMap(targetMap, key, value, reporter) {
@@ -146,4 +147,14 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
       }
     })
   );
+}
+
+export async function getDefaultMessagesMap(inputPaths, config, reporter) {
+  const defaultMessagesMap = new Map();
+
+  for (const inputPath of filterPaths(inputPaths, config.paths)) {
+    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap, config, reporter);
+  }
+
+  return defaultMessagesMap;
 }

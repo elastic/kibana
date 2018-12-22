@@ -17,26 +17,21 @@
  * under the License.
  */
 
-import { serializeToJson5 } from './json5';
+import chalk from 'chalk';
 
-describe('dev/i18n/serializers/json5', () => {
-  test('should serialize default messages to JSON5', () => {
-    const messages = [
-      [
-        'plugin1.message.id-1',
-        {
-          message: 'Message text 1',
-        },
-      ],
-      [
-        'plugin2.message.id-2',
-        {
-          message: 'Message text 2',
-          description: 'Message description',
-        },
-      ],
-    ];
+import { createFailError, run } from './run';
+import { integrateLocaleFiles } from './i18n/integrate_locale_files';
 
-    expect(serializeToJson5(messages).toString()).toMatchSnapshot();
-  });
+run(async ({ flags: { path }, log }) => {
+  if (!path || typeof path === 'boolean') {
+    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --path option isn't provided.`);
+  }
+
+  if (Array.isArray(path)) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} --path should be specified only once`
+    );
+  }
+
+  await integrateLocaleFiles(path, log);
 });
