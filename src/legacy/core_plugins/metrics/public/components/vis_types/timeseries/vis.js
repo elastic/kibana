@@ -20,6 +20,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { toastNotifications } from 'ui/notify';
+import { MarkdownSimple } from 'ui/markdown';
+
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Timeseries from '../../../visualizations/components/timeseries';
@@ -27,7 +30,6 @@ import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-import ErrorComponent from '../../error';
 
 function hasSeparateAxis(row) {
   return row.separate_axis;
@@ -56,12 +58,35 @@ class TimeseriesVisualization extends Component {
     if (!scaledDataFormat || !dateFormat) return val;
     const formatter = createXaxisFormatter(this.getInterval(), scaledDataFormat, dateFormat);
     return formatter(val);
+  };
+
+  componentDidUpdate() {
+    if (this.showToastNotification && this.notificationReason !== this.showToastNotification.reason) {
+      if (this.notification) {
+        toastNotifications.remove(this.notification);
+      }
+
+      this.notificationReason = this.showToastNotification.reason;
+      this.notification = toastNotifications.addDanger({
+        title: this.showToastNotification.title,
+        text: <MarkdownSimple>{this.showToastNotification.reason}</MarkdownSimple>,
+      });
+    }
+
+    if (!this.showToastNotification && this.notification) {
+      toastNotifications.remove(this.notification);
+      this.notificationReason = null;
+      this.notification = null;
+    }
   }
 
   render() {
     const { backgroundColor, model, visData } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     let annotations;
+
+    this.showToastNotification = false;
+
     if (model.annotations && Array.isArray(model.annotations)) {
       annotations = model.annotations.map(annotation => {
         const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
@@ -74,7 +99,13 @@ class TimeseriesVisualization extends Component {
             return [s[0], s[1].map(doc => {
               const vars = replaceVars(annotation.template, null, doc);
 
-              return vars instanceof Error ? (<ErrorComponent error={vars} />) : vars;
+              if (vars instanceof Error) {
+                this.showToastNotification = vars.error.caused_by;
+
+                return annotation.template;
+              }
+
+              return vars;
             })];
           })
         };
