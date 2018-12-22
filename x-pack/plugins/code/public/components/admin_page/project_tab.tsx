@@ -84,7 +84,7 @@ class CodeProjectTab extends React.PureComponent<
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiText>
-          <h3>{projectsCount}Project(s)</h3> 13175545191
+          <h3>{projectsCount}Project(s)</h3>
         </EuiText>
         <EuiSpacer />
         {repoList}
