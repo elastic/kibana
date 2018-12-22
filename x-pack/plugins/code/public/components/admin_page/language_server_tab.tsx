@@ -129,7 +129,12 @@ class AdminLanguageSever extends React.PureComponent<Props> {
       <div>
         <EuiSpacer />
         <EuiText>
-          <h3>{this.props.languageServers.length} Language Server(s)</h3>
+          <h3>{this.props.languageServers.length}
+            { this.props.languageServers.length == 1 ?
+              <span> Language Server</span> :
+              <span> Language Servers</span>
+            }
+          </h3>
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup direction="column" gutterSize="s">

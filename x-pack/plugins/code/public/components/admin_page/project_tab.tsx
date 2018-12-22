@@ -84,7 +84,12 @@ class CodeProjectTab extends React.PureComponent<
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiText>
-          <h3>{projectsCount}Project(s)</h3>
+          <h3>{projectsCount}
+            {projectsCount == 1 ?
+              <span> Project</span> :
+              <span> Projects</span>
+            }
+          </h3>
         </EuiText>
         <EuiSpacer />
         {repoList}
