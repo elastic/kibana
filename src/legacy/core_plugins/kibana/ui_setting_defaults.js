@@ -361,6 +361,14 @@ export function getUiSettingDefaults() {
       }),
       category: ['search'],
     },
+    'search:includeFrozen': {
+      name: 'Search in frozen indices',
+      description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
+        target="_blank" rel="noopener noreferrer">frozen indices</a> in results if enabled. Searching through frozen indices
+        might increase the search time.`,
+      value: false,
+      category: ['search'],
+    },
     'fields:popularLimit': {
       name: i18n.translate('kbn.advancedSettings.fieldsPopularLimitTitle', {
         defaultMessage: 'Popular fields limit',

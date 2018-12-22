@@ -69,4 +69,4 @@ a row, the Search Profiler displays additional information about the query compo
 image::dev-tools/searchprofiler/images/gs6.png["Profile details for the first shard"]
 +
 This panel shows the timing breakdown of low-level Lucene methods.  For more information,
-see the reference docs for {ref}/_profiling_queries.html#_timing_breakdown[Timing Breakdown].
+see the reference docs for timing breakdowns in {ref}/search-profile-queries.html[Profiling queries].

@@ -13,7 +13,9 @@ export const getBaseBreadcrumb = () => ({
 
 export const getWorkpadBreadcrumb = ({ name = 'Workpad', id } = {}) => {
   const output = { text: name };
-  if (id != null) output.href = `#/workpad/${id}`;
+  if (id != null) {
+    output.href = `#/workpad/${id}`;
+  }
   return output;
 };
 

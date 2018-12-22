@@ -37,7 +37,9 @@ export const esPersistMiddleware = ({ getState }) => {
 
   return next => action => {
     // if the action is in the skipped list, do not persist
-    if (skippedActions.indexOf(action.type) >= 0) return next(action);
+    if (skippedActions.indexOf(action.type) >= 0) {
+      return next(action);
+    }
 
     // capture state before and after the action
     const curState = getState();
@@ -45,7 +47,9 @@ export const esPersistMiddleware = ({ getState }) => {
     const newState = getState();
 
     // skips the update request if user doesn't have write permissions
-    if (!canUserWrite(newState)) return;
+    if (!canUserWrite(newState)) {
+      return;
+    }
 
     // if the workpad changed, save it to elasticsearch
     if (workpadChanged(curState, newState) || assetsChanged(curState, newState)) {

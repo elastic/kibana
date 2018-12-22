@@ -17,13 +17,13 @@
  * under the License.
  */
 
-export function getLegendColors(colorRamp) {
+export function getLegendColors(colorRamp, numLegendColors = 4) {
   const colors = [];
   colors[0] = getColor(colorRamp, 0);
-  colors[1] = getColor(colorRamp, Math.floor(colorRamp.length * 1 / 4));
-  colors[2] = getColor(colorRamp, Math.floor(colorRamp.length * 2 / 4));
-  colors[3] = getColor(colorRamp, Math.floor(colorRamp.length * 3 / 4));
-  colors[4] = getColor(colorRamp, colorRamp.length - 1);
+  for (let i = 1; i < numLegendColors - 1; i++) {
+    colors[i] = getColor(colorRamp, Math.floor(colorRamp.length * i / numLegendColors));
+  }
+  colors[numLegendColors - 1] = getColor(colorRamp, colorRamp.length - 1);
   return colors;
 }
 

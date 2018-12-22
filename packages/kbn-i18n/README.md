@@ -259,10 +259,34 @@ import { Header } from './components/header';
 module.directive('headerGlobalNav', (reactDirective) => {
   return reactDirective(injectI18nProvider(Header));
 });
-
 ```
 
 **NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `injectI18nProvider` or `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
+
+### FormattedRelative
+
+`FormattedRelative` expects several attributes (read more [here](https://github.com/yahoo/react-intl/wiki/Components#formattedrelative)), including
+
+- `value` that can be parsed as a date,
+- `formats` that should be one of `'years' | 'months' | 'days' | 'hours' | 'minutes' | 'seconds'` (this options are configured in [`formats.ts`](./src/core/formats.ts))
+-  etc.
+
+If `formats` is not provided then it will be chosen automatically:\
+`x seconds ago` for `x < 60`, `1 minute ago` for `60 <= x < 120`, etc.
+
+```jsx
+<FormattedRelative
+  value={Date.now() - 90000}
+  format="seconds"
+/>
+```
+Initial result: `90 seconds ago`
+```jsx
+<FormattedRelative
+  value={Date.now() - 90000}
+/>
+```
+Initial result: `1 minute ago`
 
 ### Attributes translation in React
 
@@ -274,7 +298,7 @@ React component as a pure function:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-const MyComponentContent = ({ intl }) => (
+export const MyComponent = injectI18n({ intl }) => (
   <input
     type="text"
     placeholder={intl.formatMessage(
@@ -287,13 +311,11 @@ const MyComponentContent = ({ intl }) => (
       { name, unreadCount }
     )}
   />
-);
+));
 
-MyComponentContent.propTypes = {
+MyComponent.WrappedComponent.propTypes = {
   intl: intlShape.isRequired,
 };
-
-export const MyComponent = injectI18n(MyComponentContent);
 ```
 
 React component as a class:
@@ -302,27 +324,27 @@ React component as a class:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-class MyComponentContent extends React.Component {
-  static propTypes = {
-    intl: intlShape.isRequired,
-  };
+export const MyComponent = injectI18n(
+  class MyComponent extends React.Component {
+    static propTypes = {
+      intl: intlShape.isRequired,
+    };
 
-  render() {
-    const { intl } = this.props;
+    render() {
+      const { intl } = this.props;
 
-    return (
-      <input
-        type="text"
-        placeholder={intl.formatMessage({
-          id: 'kbn.management.objects.searchPlaceholder',
-          defaultMessage: 'Search',
-        })}
-      />
-    );
+      return (
+        <input
+          type="text"
+          placeholder={intl.formatMessage({
+            id: 'kbn.management.objects.searchPlaceholder',
+            defaultMessage: 'Search',
+          })}
+        />
+      );
+    }
   }
-}
-
-export const MyComponent = injectI18n(MyComponentContent);
+);
 ```
 
 ## AngularJS

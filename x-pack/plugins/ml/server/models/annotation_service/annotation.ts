@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import _ from 'lodash';
 
-import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { ANNOTATION_DOC_TYPE, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -63,22 +63,22 @@ interface DeleteParams {
 export function annotationProvider(
   callWithRequest: (action: string, params: IndexParams | DeleteParams | GetParams) => Promise<any>
 ) {
-  async function indexAnnotation(annotation: Annotation) {
+  async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       return Promise.reject(new Error('invalid annotation format'));
     }
 
     if (annotation.create_time === undefined) {
       annotation.create_time = new Date().getTime();
-      annotation.create_username = '<user unknown>';
+      annotation.create_username = username;
     }
 
     annotation.modified_time = new Date().getTime();
-    annotation.modified_username = '<user unknown>';
+    annotation.modified_username = username;
 
     const params: IndexParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-      type: 'annotation',
+      type: ANNOTATION_DOC_TYPE,
       body: annotation,
       refresh: 'wait_for',
     };
@@ -102,6 +102,8 @@ export function annotationProvider(
       annotations: {},
     };
 
+    const boolCriteria: object[] = [];
+
     // Build the criteria to use in the bool filter part of the request.
     // Adds criteria for the time range plus any specified job IDs.
     // The nested must_not time range filter queries make sure that we fetch:
@@ -110,8 +112,8 @@ export function annotationProvider(
     // - annotations that start before and end after the given time range
     // - but skip annotation that are completely outside the time range
     //   (the ones that start and end before or after the time range)
-    const boolCriteria: object[] = [
-      {
+    if (earliestMs !== null && latestMs !== null) {
+      boolCriteria.push({
         bool: {
           must_not: [
             {
@@ -160,11 +162,12 @@ export function annotationProvider(
             },
           ],
         },
-      },
-      {
-        exists: { field: 'annotation' },
-      },
-    ];
+      });
+    }
+
+    boolCriteria.push({
+      exists: { field: 'annotation' },
+    });
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
@@ -229,7 +232,7 @@ export function annotationProvider(
   async function deleteAnnotation(id: string) {
     const param: DeleteParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-      type: 'annotation',
+      type: ANNOTATION_DOC_TYPE,
       id,
       refresh: 'wait_for',
     };

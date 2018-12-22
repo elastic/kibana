@@ -101,6 +101,8 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
         clusterName: get(scope, 'cluster.cluster_name')
       });
 
+      attributes.$observe('instance', instance => controller.instance = instance);
+      attributes.$observe('resolver', resolver => controller.resolver = resolver);
     }
   };
 });
