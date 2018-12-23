@@ -123,3 +123,8 @@ export interface TermAggregation {
     }>;
   };
 }
+
+export interface TotalHit {
+  value: number;
+  relation: string;
+}
