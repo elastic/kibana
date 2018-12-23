@@ -72,10 +72,10 @@
     "source": {
       "type" : "gis-map",
       "gis-map" : {
-        "title" : "logstash events",
+        "title" : "document example",
         "description" : "",
-        "mapStateJSON" : "{\"zoom\":4,\"center\":{\"lon\":-100.41,\"lat\":32.82},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-23T00:00:00.000Z\"}}",
-        "layerListJSON" : "[{\"id\":\"0hmz5\",\"label\":\"EMS base layer (road_map)\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"tmsy6\",\"label\":\"logstash events\",\"showAtAllZoomLevels\":false,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_SEARCH\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"alphaValue\":1},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
         "uiStateJSON" : "{\"isDarkMode\":false}",
         "bounds" : {
           "type" : "envelope",
@@ -106,7 +106,7 @@
       "gis-map" : {
         "title" : "join example",
         "description" : "",
-        "mapStateJSON" : "{\"zoom\":3.02,\"center\":{\"lon\":77.33426,\"lat\":-0.04647},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\",\"mode\":\"quick\"}}",
+        "mapStateJSON" : "{\"zoom\":3.02,\"center\":{\"lon\":77.33426,\"lat\":-0.04647},\"timeFilters\":{\"from\":\"now-17m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "layerListJSON" : "[{\"id\":\"0hmz5\",\"label\":\"EMS base layer (road_map)\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"62eca1fc-fe42-11e8-8eb2-f2801f1b9fd1\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"561253e0-f731-11e8-8487-11b9dd924f96\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.shape_name\",\"name\":\"__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name\",\"origin\":\"join\"},\"color\":\"Blues\"}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"alphaValue\":1},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"id\":\"855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"indexPatternId\":\"e20b2a30-f735-11e8-8ce0-9723965e01e3\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}]}}]}]",
         "uiStateJSON" : "{\"isDarkMode\":false}",
         "bounds" : {
@@ -137,7 +137,7 @@
       "type" : "gis-map",
       "gis-map" : {
         "title" : "geohashgrid heatmap example",
-        "mapStateJSON" : "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"}}",
+        "mapStateJSON" : "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"3xlvm\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_GEOHASH_GRID\",\"id\":\"427aa49d-a552-4e7d-a629-67c47db27128\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"heatmap\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"properties\":{\"alphaValue\":1},\"previousStyle\":null},\"type\":\"HEATMAP\"}]",
         "uiStateJSON" : "{\"isDarkMode\":false}",
         "bounds" : {
@@ -169,7 +169,7 @@
       "gis-map" : {
         "title" : "geohashgrid vector grid example",
         "description" : "",
-        "mapStateJSON" : "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"}}",
+        "mapStateJSON" : "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_GEOHASH_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}},\"alphaValue\":1},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
         "uiStateJSON" : "{\"isDarkMode\":false}",
         "bounds" : {
@@ -182,38 +182,6 @@
             [
               -55.49169,
               18.17193
-            ]
-          ]
-        }
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "type": "doc",
-    "id": "gis-map:19f4a4d0-0604-11e9-b4c4-ef862674977c",
-    "source": {
-      "type" : "gis-map",
-      "gis-map" : {
-        "title" : "refresh example",
-        "description" : "",
-        "mapStateJSON" : "{\"zoom\":3.52,\"center\":{\"lon\":-100.54447,\"lat\":39.56438},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-23T00:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
-        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"3sks7\",\"label\":\"logs(heatmap)\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_GEOHASH_GRID\",\"id\":\"a0abedd9-6bfc-40a8-a450-6b720189e39a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"heatmap\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"properties\":{\"alphaValue\":0.25},\"previousStyle\":null},\"type\":\"HEATMAP\"},{\"id\":\"llz95\",\"label\":\"logs(grid)\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_GEOHASH_GRID\",\"id\":\"cf65be58-fafb-4f3e-b8d9-42b98d6ffc2a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}},\"alphaValue\":0.25},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
-        "uiStateJSON" : "{\"isDarkMode\":false}",
-        "bounds" : {
-          "type" : "envelope",
-          "coordinates" : [
-            [
-              -145.37326,
-              55.73977
-            ],
-            [
-              -55.71569,
-              18.52334
             ]
           ]
         }

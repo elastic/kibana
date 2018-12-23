@@ -242,6 +242,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return statsRow[STATS_ROW_VALUE_INDEX];
     }
 
+    async triggerSingleRefresh(refreshInterval) {
+      log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
+      await PageObjects.header.resumeAutoRefresh();
+      log.debug('waiting to give time for refresh timer to fire');
+      await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
+      await PageObjects.header.pauseAutoRefresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
   }
   return new GisPage();
 }
