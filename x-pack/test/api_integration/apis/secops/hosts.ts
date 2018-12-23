@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
-import { GetHostsQuery } from '../../../../plugins/secops/common/graphql/types';
 import { hostsQuery } from '../../../../plugins/secops/public/containers/hosts/index.gql_query';
+import { GetHostsQuery } from '../../../../plugins/secops/public/graphql/types';
 
 import { KbnTestProvider } from './types';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventsData, SourceConfiguration, TimerangeInput } from '../../../common/graphql/types';
+import { EventsData, SourceConfiguration, TimerangeInput } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { ESQuery, SearchHit } from '../types';
 

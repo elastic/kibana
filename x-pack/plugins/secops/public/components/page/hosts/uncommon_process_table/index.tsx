@@ -10,7 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../../common/graphql/types';
+import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql/types';
 import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 

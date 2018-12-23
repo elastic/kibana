@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../utils/logger';
-import { Context } from '../index';
+import { SecOpsContext } from '../index';
 import { mockSourceData } from './source.mock';
 
 /* tslint:disable */
@@ -16,7 +16,7 @@ export const sourcesDataMock =
 /* tslint:enable */
 
 export const getAllSourcesQueryMock = (logger: Logger) => ({
-  allSources: (root: unknown, args: unknown, context: Context) => {
+  allSources: (root: unknown, args: unknown, context: SecOpsContext) => {
     logger.info('Mock allSources');
     const operationName = context.req.payload.operationName.toLowerCase();
     switch (operationName) {

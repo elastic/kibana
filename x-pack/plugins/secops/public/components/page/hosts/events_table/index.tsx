@@ -7,8 +7,8 @@
 import { getOr, noop } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
-import { EventItem } from '../../../../../common/graphql/types';
 import { EventsQuery } from '../../../../containers/events';
+import { EventItem } from '../../../../graphql/types';
 import { BasicTable } from '../../../basic_table';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { Provider } from '../../../timeline/data_providers/provider';

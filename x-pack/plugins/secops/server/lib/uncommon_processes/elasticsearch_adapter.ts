@@ -5,7 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { UncommonProcessesData, UncommonProcessesEdges } from '../../../common/graphql/types';
+import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
@@ -39,7 +39,6 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
       formatUncommonProcessesData(options.fields, hit, processFieldsMap)
     );
     const edges = uncommonProcessesEdges.splice(0, limit);
-
     return {
       edges,
       totalCount,
@@ -77,7 +76,7 @@ export const formatUncommonProcessesData = (
   fields.reduce(
     (flattenedFields, fieldName) => {
       flattenedFields.uncommonProcess._id = hit._id;
-      flattenedFields.uncommonProcess.instances = hit.total;
+      flattenedFields.uncommonProcess.instances = getOr(0, 'total.value', hit);
       flattenedFields.uncommonProcess.hosts = hit.hosts;
       if (hit.cursor) {
         flattenedFields.cursor.value = hit.cursor;

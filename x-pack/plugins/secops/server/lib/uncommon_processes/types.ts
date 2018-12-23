@@ -9,9 +9,9 @@ import {
   SourceConfiguration,
   TimerangeInput,
   UncommonProcessesData,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { ESQuery, SearchHit } from '../types';
+import { ESQuery, SearchHit, TotalHit } from '../types';
 
 export interface UncommonProcessesAdapter {
   getUncommonProcesses(
@@ -34,7 +34,7 @@ export interface UncommonProcessHit {
   _type: string;
   _id: string;
   _score: number | null;
-  total: number;
+  total: TotalHit;
   hosts: string[];
   _source: {
     '@timestamp': string;
@@ -57,7 +57,7 @@ export interface UncommonProcessBucket {
   };
   process: {
     hits: {
-      total: number;
+      total: TotalHit;
       max_score: number | null;
       hits: UncommonProcessHit[];
     };

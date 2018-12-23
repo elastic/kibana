@@ -6,7 +6,7 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { omit } from 'lodash/fp';
 
-import { Source } from '.../../../common/graphql/types';
+import { Source } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
@@ -63,7 +63,7 @@ const context = { req };
 describe('Test Source Resolvers', () => {
   test('Make sure that getUncommonProcesses have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
-      null,
+      {},
       { id: 'default' },
       context,
       {} as GraphQLResolveInfo

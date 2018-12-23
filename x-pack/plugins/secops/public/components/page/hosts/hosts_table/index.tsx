@@ -9,7 +9,7 @@ import { defaultTo } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import { HostItem, HostsEdges } from '../../../../../common/graphql/types';
+import { HostItem, HostsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsLimitSelector, State } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 

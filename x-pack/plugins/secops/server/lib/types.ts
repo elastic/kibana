@@ -37,7 +37,7 @@ export interface Configuration {
   sources: SourceConfigurations;
 }
 
-export interface Context {
+export interface SecOpsContext {
   req: FrameworkRequest;
 }
 
@@ -122,4 +122,9 @@ export interface TermAggregation {
       doc_count: number;
     }>;
   };
+}
+
+export interface TotalHit {
+  value: number;
+  relation: string;
 }

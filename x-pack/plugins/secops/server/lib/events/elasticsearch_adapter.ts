@@ -5,7 +5,7 @@
  */
 
 import { get, has, merge } from 'lodash/fp';
-import { EventItem, EventsData, KpiItem } from '../../../common/graphql/types';
+import { EventItem, EventsData, KpiItem } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { buildQuery, eventFieldsMap } from './query.dsl';

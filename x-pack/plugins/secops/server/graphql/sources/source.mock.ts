@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../utils/logger';
-import { Context } from '../index';
+import { SecOpsContext } from '../index';
 
 /* tslint:disable */
 export const mockSourceData = {
@@ -41,7 +41,7 @@ export const mockSourceData = {
 /* tslint:enable */
 
 export const getSourceQueryMock = (logger: Logger) => ({
-  source: (root: unknown, args: unknown, context: Context) => {
+  source: (root: unknown, args: unknown, context: SecOpsContext) => {
     logger.info('Mock source');
     const operationName = context.req.payload.operationName.toLowerCase();
     switch (operationName) {

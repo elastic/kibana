@@ -16,7 +16,10 @@ describe('elasticsearch_adapter', () => {
       },
       process: {
         hits: {
-          total: 1,
+          total: {
+            value: 1,
+            relation: 'eq',
+          },
           max_score: 5,
           hits: [],
         },
@@ -29,7 +32,10 @@ describe('elasticsearch_adapter', () => {
       },
       process: {
         hits: {
-          total: 1,
+          total: {
+            value: 1,
+            relation: 'eq',
+          },
           max_score: 5,
           hits: [],
         },
@@ -58,7 +64,10 @@ describe('elasticsearch_adapter', () => {
       _type: 'type-123',
       _id: 'id-123',
       _score: 10,
-      total: 100,
+      total: {
+        value: 100,
+        relation: 'eq',
+      },
       hosts: ['host-1', 'host-2'],
       _source: {
         '@timestamp': 'time',

@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { WhoAmIQuery } from '../../../common/graphql/types';
+import { WhoAmIQuery } from '../../graphql/types';
 
 import { whoAmIQuery } from './index.gql_query';
 

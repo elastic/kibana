@@ -7,6 +7,8 @@
 import { GraphQLSchema } from 'graphql';
 import { Request, Server } from 'hapi';
 
+import { GenericParams } from 'elasticsearch';
+import { Legacy } from 'kibana';
 import {
   graphiqlHapi,
   graphqlHapi,
@@ -21,15 +23,6 @@ import {
   WrappableRequest,
 } from './types';
 
-declare module 'hapi' {
-  interface PluginProperties {
-    // tslint:disable-next-line:no-any
-    elasticsearch: any;
-    // tslint:disable-next-line:no-any
-    kibana: any;
-  }
-}
-
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   private server: Server;
@@ -40,11 +33,17 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   // tslint:disable-next-line:no-any
-  public async callWithRequest(req: FrameworkRequest<Request>, ...rest: any[]) {
+  public async callWithRequest(
+    req: FrameworkRequest<Legacy.Request>,
+    endpoint: string,
+    params: GenericParams,
+    // tslint:disable-next-line:no-any
+    ...rest: any[]
+  ) {
     const internalRequest = req[internalFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
-    const fields = await callWithRequest(internalRequest, ...rest);
+    const fields = await callWithRequest(internalRequest, endpoint, params, ...rest);
     return fields;
   }
 
@@ -92,11 +91,11 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     }
     return this.server.indexPatternsServiceFactory({
       // tslint:disable-next-line:no-any
-      callCluster: async (method: string, args: [object], ...rest: any[]) => {
+      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
           request,
           method,
-          { ...args, allowNoIndices: true },
+          { ...args, allowNoIndices: true } as GenericParams,
           ...rest
         );
         return fieldCaps;

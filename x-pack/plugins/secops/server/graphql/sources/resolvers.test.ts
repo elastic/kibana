@@ -58,7 +58,7 @@ const context = { req };
 describe('Test Source Resolvers', () => {
   test('Make sure that getConfiguration have been called', async () => {
     const data = await createSourcesResolvers(mockLibs).Query.source(
-      null,
+      {},
       { id: 'default' },
       context,
       {} as GraphQLResolveInfo

@@ -9,7 +9,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { EventItem, GetEventsQuery, KpiItem } from '../../../common/graphql/types';
+import { EventItem, GetEventsQuery, KpiItem } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { eventsQuery } from './index.gql_query';
 

@@ -6,7 +6,7 @@
 
 import { GraphQLSchema } from 'graphql';
 
-export * from '../../../common/graphql/typed_resolvers';
+export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 

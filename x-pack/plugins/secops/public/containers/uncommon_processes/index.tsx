@@ -9,11 +9,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import {
-  GetUncommonProcessesQuery,
-  PageInfo,
-  UncommonProcessesEdges,
-} from '../../../common/graphql/types';
+import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
