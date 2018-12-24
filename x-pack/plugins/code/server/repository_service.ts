@@ -6,8 +6,9 @@
 
 import del from 'del';
 import fs from 'fs';
+import mkdirp from 'mkdirp';
 import Git from 'nodegit';
-
+import path from 'path';
 import { RepositoryUtils } from '../common/repository_utils';
 import {
   CloneProgress,
@@ -47,6 +48,18 @@ export class RepositoryService {
           // move on with the clone.
           await this.remove(repo.uri);
         }
+      } else {
+        const parentDir = path.dirname(localPath);
+        // on windows, git clone will failed if parent folder is not exists;
+        await new Promise((resolve, reject) =>
+          mkdirp(parentDir, err => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          })
+        );
       }
 
       // Go head with the actual clone.

@@ -201,7 +201,6 @@
     "h2o2": "^8.1.2",
     "handlebars": "^4.0.10",
     "hapi-auth-cookie": "^9.0.0",
-    "highlights": "^3.1.1",
     "history": "4.7.2",
     "history-extra": "^4.0.2",
     "humps": "2.0.1",
