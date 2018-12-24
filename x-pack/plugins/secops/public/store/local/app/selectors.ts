@@ -11,8 +11,14 @@ import { NotesById, Theme } from './model';
 
 const selectTheme = (state: State): Theme => state.local.app.theme;
 
-export const themeSelector = createSelector(selectTheme, theme => theme);
+export const themeSelector = createSelector(
+  selectTheme,
+  theme => theme
+);
 
 const selectNotesById = (state: State): NotesById => state.local.app.notesById;
 
-export const notesByIdSelector = createSelector(selectNotesById, notesById => notesById);
+export const notesByIdSelector = createSelector(
+  selectNotesById,
+  notesById => notesById
+);

@@ -58,7 +58,7 @@ export const StarIcon = pure<{
   timelineId: string;
   updateIsFavorite: UpdateIsFavorite;
 }>(({ isFavorite, timelineId: id, updateIsFavorite }) => (
-  <div onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
+  <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
     {isFavorite ? (
       <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content="Favorite">
         <FilledStar

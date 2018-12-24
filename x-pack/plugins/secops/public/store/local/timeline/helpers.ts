@@ -434,8 +434,8 @@ export const updateTimelineProviderEnabled = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders: timeline.dataProviders.map(
-        provider => (provider.id === providerId ? { ...provider, ...{ enabled } } : provider)
+      dataProviders: timeline.dataProviders.map(provider =>
+        provider.id === providerId ? { ...provider, ...{ enabled } } : provider
       ),
     },
   };
