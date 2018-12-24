@@ -63,7 +63,7 @@ export class Clipboard extends React.PureComponent<Props, State> {
 
     return (
       <>
-        <div data-test-subj="clipboard" onClick={this.onClick}>
+        <div role="button" data-test-subj="clipboard" onClick={this.onClick}>
           {this.props.children}
         </div>
         <EuiGlobalToastList

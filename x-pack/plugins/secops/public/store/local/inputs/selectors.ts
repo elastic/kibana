@@ -18,6 +18,12 @@ export const globalTimeRangeSelector = createSelector(
   timerange => timerange
 );
 
-export const globalPolicySelector = createSelector(selectGlobalPolicy, policy => policy);
+export const globalPolicySelector = createSelector(
+  selectGlobalPolicy,
+  policy => policy
+);
 
-export const globalQuery = createSelector(selectGlobalQuery, query => query);
+export const globalQuery = createSelector(
+  selectGlobalQuery,
+  query => query
+);
