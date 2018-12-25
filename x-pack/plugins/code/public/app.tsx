@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
