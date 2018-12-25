@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 
-import hapi from 'hapi';
+import { Server } from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryConfig } from '../../model';
@@ -17,7 +17,7 @@ import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 
 export function repositoryRoute(
-  server: hapi.Server,
+  server: Server,
   options: ServerOptions,
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
@@ -25,8 +25,10 @@ export function repositoryRoute(
   repoIndexInitializerFactory: RepositoryIndexInitializerFactory
 ) {
   // Clone a git repository
-  server.route({
+
+  server.securedRoute({
     path: '/api/code/repo',
+    requireAdmin: true,
     method: 'POST',
     async handler(req, h) {
       const repoUrl: string = (req.payload as any).url;
@@ -79,8 +81,9 @@ export function repositoryRoute(
   });
 
   // Remove a git repository
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}',
+    requireAdmin: true,
     method: 'DELETE',
     async handler(req, h) {
       const repoUri: string = req.params.uri as string;
