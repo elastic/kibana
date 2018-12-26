@@ -17,12 +17,19 @@
  * under the License.
  */
 
+import  * as emsClient  from './common/ems_client';
+
 export default function (kibana) {
 
   return new kibana.Plugin({
     uiExports: {
       visTypes: ['plugins/tile_map/tile_map_vis'],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: `${__dirname}/public/index.scss`
+    },
+    init(server) {
+      server.expose({
+        ems_client: emsClient
+      });
     }
   });
 }
