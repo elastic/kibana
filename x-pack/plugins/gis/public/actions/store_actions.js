@@ -156,16 +156,16 @@ export function mapExtentChanged(newMapConstants) {
       let doesBufferContainExtent = false;
       if (buffer) {
         const bufferGeometry = turf.bboxPolygon([
-          buffer.min_lon,
-          buffer.min_lat,
-          buffer.max_lon,
-          buffer.max_lat
+          buffer.minLon,
+          buffer.minLat,
+          buffer.maxLon,
+          buffer.maxLat
         ]);
         const extentGeometry = turf.bboxPolygon([
-          extent.min_lon,
-          extent.min_lat,
-          extent.max_lon,
-          extent.max_lat
+          extent.minLon,
+          extent.minLat,
+          extent.maxLon,
+          extent.maxLat
         ]);
 
         doesBufferContainExtent = turfBooleanContains(bufferGeometry, extentGeometry);
@@ -173,13 +173,13 @@ export function mapExtentChanged(newMapConstants) {
 
       if (!doesBufferContainExtent || currentZoom !== newZoom) {
         const scaleFactor = 0.5; // TODO put scale factor in store and fetch with selector
-        const width = extent.max_lon - extent.min_lon;
-        const height = extent.max_lat - extent.min_lat;
+        const width = extent.maxLon - extent.minLon;
+        const height = extent.maxLat - extent.minLat;
         dataFilters.buffer = {
-          min_lon: extent.min_lon - width * scaleFactor,
-          min_lat: extent.min_lat - height * scaleFactor,
-          max_lon: extent.max_lon + width * scaleFactor,
-          max_lat: extent.max_lat + height * scaleFactor
+          minLon: extent.minLon - width * scaleFactor,
+          minLat: extent.minLat - height * scaleFactor,
+          maxLon: extent.maxLon + width * scaleFactor,
+          maxLat: extent.maxLat + height * scaleFactor
         };
       }
     }

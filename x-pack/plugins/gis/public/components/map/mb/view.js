@@ -37,10 +37,10 @@ export class MBMapContainer extends React.Component {
         lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION)
       },
       extent: {
-        min_lon: _.round(mbBounds.getWest(), DECIMAL_DEGREES_PRECISION),
-        min_lat: _.round(mbBounds.getSouth(), DECIMAL_DEGREES_PRECISION),
-        max_lon: _.round(mbBounds.getEast(), DECIMAL_DEGREES_PRECISION),
-        max_lat: _.round(mbBounds.getNorth(), DECIMAL_DEGREES_PRECISION)
+        minLon: _.round(mbBounds.getWest(), DECIMAL_DEGREES_PRECISION),
+        minLat: _.round(mbBounds.getSouth(), DECIMAL_DEGREES_PRECISION),
+        maxLon: _.round(mbBounds.getEast(), DECIMAL_DEGREES_PRECISION),
+        maxLat: _.round(mbBounds.getNorth(), DECIMAL_DEGREES_PRECISION)
       }
     };
   }

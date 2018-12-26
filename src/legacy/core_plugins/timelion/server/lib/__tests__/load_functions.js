@@ -17,12 +17,11 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../load_functions`);
 
 const expect = require('chai').expect;
 
-describe(filename, () => {
+describe('load_functions.js', () => {
   it('exports a function', () => {
     expect(fn).to.be.a('function');
   });

@@ -142,10 +142,10 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   // 1) bounds are all east of 180
   // 2) bounds are all west of -180
   const noWrapMapExtent = {
-    min_lon: mapExtent.min_lon < -180 ? -180 : mapExtent.min_lon,
-    min_lat: mapExtent.min_lat < -90 ? -90 : mapExtent.min_lat,
-    max_lon: mapExtent.max_lon > 180 ? 180 : mapExtent.max_lon,
-    max_lat: mapExtent.max_lat > 90 ? 90 : mapExtent.max_lat,
+    minLon: mapExtent.minLon < -180 ? -180 : mapExtent.minLon,
+    minLat: mapExtent.minLat < -90 ? -90 : mapExtent.minLat,
+    maxLon: mapExtent.maxLon > 180 ? 180 : mapExtent.maxLon,
+    maxLat: mapExtent.maxLat > 90 ? 90 : mapExtent.maxLat,
   };
 
   if (geoFieldType === 'geo_point') {
@@ -153,12 +153,12 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
       geo_bounding_box: {
         [geoFieldName]: {
           top_left: {
-            lat: noWrapMapExtent.max_lat,
-            lon: noWrapMapExtent.min_lon
+            lat: noWrapMapExtent.maxLat,
+            lon: noWrapMapExtent.minLon
           },
           bottom_right: {
-            lat: noWrapMapExtent.min_lat,
-            lon: noWrapMapExtent.max_lon
+            lat: noWrapMapExtent.minLat,
+            lon: noWrapMapExtent.maxLon
           }
         }
       }
@@ -170,8 +170,8 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
           shape: {
             type: 'envelope',
             coordinates: [
-              [noWrapMapExtent.min_lon, noWrapMapExtent.max_lat],
-              [noWrapMapExtent.max_lon, noWrapMapExtent.min_lat]
+              [noWrapMapExtent.minLon, noWrapMapExtent.maxLat],
+              [noWrapMapExtent.maxLon, noWrapMapExtent.minLat]
             ]
           },
           relation: 'INTERSECTS'
@@ -181,4 +181,64 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   } else {
     throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
   }
+}
+
+/*
+ * Convert map bounds to envelope
+ * Bounds that cross the dateline are split into 2 envelopes
+ */
+export function convertMapExtentToEnvelope({ maxLat, maxLon, minLat, minLon }) {
+  if (maxLon > 180 && minLon < -180) {
+    return convertMapExtentToEnvelope({
+      maxLat,
+      maxLon: 180,
+      minLat,
+      minLon: -180,
+    });
+  }
+
+  if (maxLon > 180) {
+    // bounds cross datleine east to west, slit into 2 shapes
+    const overlapWestOfDateLine = maxLon - 180;
+    return [
+      convertMapExtentToEnvelope({
+        maxLat,
+        maxLon: 180,
+        minLat,
+        minLon,
+      }),
+      convertMapExtentToEnvelope({
+        maxLat,
+        maxLon: -180 + overlapWestOfDateLine,
+        minLat,
+        minLon: -180,
+      }),
+    ];
+  }
+
+  if (minLon < -180) {
+    // bounds cross datleine west to east, slit into 2 shapes
+    const overlapEastOfDateLine = Math.abs(minLon) - 180;
+    return [
+      convertMapExtentToEnvelope({
+        maxLat,
+        maxLon: 180,
+        minLat,
+        minLon: 180 - overlapEastOfDateLine,
+      }),
+      convertMapExtentToEnvelope({
+        maxLat,
+        maxLon: maxLon,
+        minLat,
+        minLon: -180,
+      }),
+    ];
+  }
+
+  return {
+    "type": "envelope",
+    "coordinates": [
+      [minLon, maxLat], [maxLon, minLat]
+    ]
+  };
 }

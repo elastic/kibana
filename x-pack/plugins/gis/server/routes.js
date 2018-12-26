@@ -17,13 +17,6 @@ export function initRoutes(server) {
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
 
-  const emsV2 = new EMS_V2({
-    kbnVersion: serverConfig.get('pkg.version'),
-    license: server.plugins.xpack_main.info.license.getUid(),
-    manifestServiceUrl: mapConfig.manifestServiceUrl,
-    emsLandingPageUrl: mapConfig.emsLandingPageUrl
-  });
-
   server.route({
     method: 'GET',
     path: `${ROOT}/data/ems`,
@@ -80,11 +73,15 @@ export function initRoutes(server) {
   });
 
   async function getEMSResources() {
+    const emsV2 = new EMS_V2({
+      kbnVersion: serverConfig.get('pkg.version'),
+      license: server.plugins.xpack_main.info.license.getUid(),
+      manifestServiceUrl: mapConfig.manifestServiceUrl,
+      emsLandingPageUrl: mapConfig.emsLandingPageUrl
+    });
+
     const fileLayers = await emsV2.getFileLayers();
     const tmsServices = await emsV2.getTMSServices();
     return { fileLayers, tmsServices };
   }
 }
-
-
-
