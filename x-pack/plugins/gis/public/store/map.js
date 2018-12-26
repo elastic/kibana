@@ -26,7 +26,9 @@ import {
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_LAYER_ALPHA_VALUE,
-  UPDATE_SOURCE_PROP
+  UPDATE_SOURCE_PROP,
+  SET_REFRESH_CONFIG,
+  TRIGGER_REFRESH_TIMER,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -76,6 +78,8 @@ const INITIAL_STATE = {
     },
     extent: null,
     timeFilters: null,
+    refreshConfig: null,
+    refreshTimerLastTriggeredAt: null,
   },
   selectedLayerId: null,
   layerList: []
@@ -119,6 +123,26 @@ export function map(state = INITIAL_STATE, action) {
     case SET_TIME_FILTERS:
       const { from, to } = action;
       return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
+    case SET_REFRESH_CONFIG:
+      const { isPaused, interval } = action;
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          refreshConfig: {
+            isPaused,
+            interval,
+          }
+        }
+      };
+    case TRIGGER_REFRESH_TIMER:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          refreshTimerLastTriggeredAt: (new Date()).toISOString(),
+        }
+      };
     case SET_SELECTED_LAYER:
       const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };

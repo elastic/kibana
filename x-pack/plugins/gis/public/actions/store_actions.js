@@ -9,6 +9,7 @@ import turfBooleanContains from '@turf/boolean-contains';
 
 import { GIS_API_PATH } from '../../common/constants';
 import { getLayerList, getLayerListRaw, getDataFilters, getSelectedLayer } from '../selectors/map_selectors';
+import { timeService } from '../kibana_services';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -27,6 +28,7 @@ export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_JOINS = 'SET_JOINS';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
+export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
@@ -34,6 +36,7 @@ export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_LAYER_ALPHA_VALUE = 'UPDATE_LAYER_ALPHA_VALUE';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
+export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -332,16 +335,58 @@ export function setMeta(metaJson) {
   };
 }
 
-export function setTimeFilters(timeFilters) {
+export function setTimeFiltersToKbnGlobalTime() {
+  return (dispatch) => {
+    dispatch(setTimeFilters(timeService.getTime()));
+  };
+}
+
+export function setTimeFilters({ from, to }) {
   return async (dispatch, getState) => {
     dispatch({
       type: SET_TIME_FILTERS,
-      ...timeFilters
+      from,
+      to,
+    });
+
+    // Update Kibana global time
+    const kbnTime = timeService.getTime();
+    if ((to && to !== kbnTime.to) || (from && from !== kbnTime.from)) {
+      timeService.setTime({ from, to });
+    }
+
+    const dataFilters = getDataFilters(getState());
+    await syncDataForAllLayers(getState, dispatch, dataFilters);
+  };
+}
+
+export function setRefreshConfig({ isPaused, interval }) {
+  return async (dispatch) => {
+    dispatch({
+      type: SET_REFRESH_CONFIG,
+      isPaused,
+      interval,
+    });
+
+    // Update Kibana global refresh
+    const kbnRefresh = timeService.getRefreshInterval();
+    if (isPaused !== kbnRefresh.pause || interval !== kbnRefresh.value) {
+      timeService.setRefreshInterval({
+        pause: isPaused,
+        value: interval,
+      });
+    }
+  };
+}
+
+export function triggerRefreshTimer() {
+  return async (dispatch, getState) => {
+    dispatch({
+      type: TRIGGER_REFRESH_TIMER,
     });
 
     const dataFilters = getDataFilters(getState());
-    const newDataFilters = { ...dataFilters, timeFilters: { ...timeFilters } };
-    await syncDataForAllLayers(getState, dispatch, newDataFilters);
+    await syncDataForAllLayers(getState, dispatch, dataFilters);
   };
 }
 
