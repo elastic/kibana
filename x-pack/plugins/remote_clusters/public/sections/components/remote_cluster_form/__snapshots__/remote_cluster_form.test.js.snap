@@ -5,16 +5,49 @@ Array [
   <div
     class="euiForm"
   >
-    <div>
-      <div>
-        A unique name for the remote cluster.
-      </div>
-      <div>
-        <div>
-          <div>
+    <div
+      aria-describedby="my-id"
+      aria-labelledby="my-id-title"
+      class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+      role="group"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <h4
+            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            id="my-id-title"
+          >
             Name
+          </h4>
+          <div
+            class="euiText euiText--small euiDescribedFormGroup__description"
+            id="my-id"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              A unique name for the remote cluster.
+            </div>
           </div>
-          <div>
+        </div>
+        <div
+          class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+        >
+          <div
+            class="euiFormRow euiFormRow--fullWidth"
+            id="my-id-row"
+          >
+            <label
+              aria-invalid="false"
+              class="euiFormLabel"
+              for="my-id"
+            >
+              Name
+            </label>
             <div
               class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
@@ -22,32 +55,71 @@ Array [
                 class="euiFormControlLayout__childrenWrapper"
               >
                 <input
+                  aria-describedby="my-id-help"
                   class="euiFieldText euiFieldText--fullWidth"
+                  id="my-id"
                   type="text"
                   value=""
                 />
               </div>
             </div>
-          </div>
-          <div>
-            Name can only contain letters, numbers, underscores, and dashes.
+            <div
+              class="euiFormHelpText euiFormRow__text"
+              id="my-id-help"
+            >
+              Name can only contain letters, numbers, underscores, and dashes.
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div>
-      <div>
-        <p>
-          A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
-        </p>
-      </div>
-      <div>
-        <div>
-          <div>
-            Seed nodes
-          </div>
-          <div>
+    <div
+      aria-describedby="my-id"
+      aria-labelledby="my-id-title"
+      class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+      role="group"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <h4
+            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            id="my-id-title"
+          >
+            Seed nodes for cluster discovery
+          </h4>
+          <div
+            class="euiText euiText--small euiDescribedFormGroup__description"
+            id="my-id"
+          >
             <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <p>
+                A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+        >
+          <div
+            class="euiFormRow euiFormRow--fullWidth"
+            id="my-id-row"
+          >
+            <label
+              aria-invalid="false"
+              class="euiFormLabel"
+              for="my-id"
+            >
+              Seed nodes
+            </label>
+            <div
+              aria-describedby="my-id-help"
               aria-expanded="false"
               aria-haspopup="listbox"
               class="euiComboBox euiComboBox--fullWidth"
@@ -75,6 +147,7 @@ Array [
                     >
                       <input
                         data-test-subj="comboBoxSearchInput"
+                        id="my-id"
                         role="textbox"
                         style="box-sizing:content-box;width:1px"
                         value=""
@@ -87,38 +160,125 @@ Array [
                 </div>
               </div>
             </div>
-          </div>
-          <div>
-            An IP address or host name, followed by the port.
+            <div
+              class="euiFormHelpText euiFormRow__text"
+              id="my-id-help"
+            >
+              An IP address or host name, followed by the port.
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div>
-      <div>
-        <p>
-          By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
-          <strong>
-            Skip if unavailable
-          </strong>
-          . 
-          <a
-            class="euiLink euiLink--primary"
-            href="undefinedguide/en/elasticsearch/reference/undefined/modules-cross-cluster-search.html#_skipping_disconnected_clusters"
-            rel="noopener noreferrer"
-            target="_blank"
+    <div
+      aria-describedby="my-id"
+      aria-labelledby="my-id-title"
+      class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+      role="group"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <h4
+            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            id="my-id-title"
           >
-            Learn more.
-          </a>
-        </p>
-      </div>
-      <div>
-        <div>
-          <div />
-          <div>
-            <div />
+            Make remote cluster optional
+          </h4>
+          <div
+            class="euiText euiText--small euiDescribedFormGroup__description"
+            id="my-id"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <p>
+                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
+                <strong>
+                  Skip if unavailable
+                </strong>
+                . 
+                <a
+                  class="euiLink euiLink--primary"
+                  href="undefinedguide/en/elasticsearch/reference/undefined/modules-cross-cluster-search.html#_skipping_disconnected_clusters"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Learn more.
+                </a>
+              </p>
+            </div>
           </div>
-          <div />
+        </div>
+        <div
+          class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+        >
+          <div
+            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
+            id="my-id-row"
+          >
+            <div
+              class="euiSwitch"
+            >
+              <input
+                class="euiSwitch__input"
+                id="my-id"
+                type="checkbox"
+              />
+              <span
+                class="euiSwitch__body"
+              >
+                <span
+                  class="euiSwitch__thumb"
+                />
+                <span
+                  class="euiSwitch__track"
+                >
+                  <svg
+                    class="euiIcon euiIcon--medium euiSwitch__icon"
+                    focusable="false"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xlink="http://www.w3.org/1999/xlink"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <path
+                        d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                        id="cross-a"
+                      />
+                    </defs>
+                    <use
+                      fill-rule="nonzero"
+                      href="#cross-a"
+                    />
+                  </svg>
+                  <svg
+                    class="euiIcon euiIcon--medium euiSwitch__icon euiSwitch__icon--checked"
+                    focusable="false"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                    />
+                  </svg>
+                </span>
+              </span>
+              <label
+                class="euiSwitch__label"
+                for="my-id"
+              >
+                Skip if unavailable
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>

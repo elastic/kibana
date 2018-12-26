@@ -11,16 +11,10 @@ import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { remoteClustersStore } from '../../../store';
 import { RemoteClusterTable } from './remote_cluster_table';
 
-jest.mock('@elastic/eui', () => {
-  const eui = require.requireActual('@elastic/eui');
-  return {
-    ...eui,
-    // Prevent non-deterministic aria IDs from breaking snapshots on each run.
-    EuiToolTip: ({ children }) => (
-      <div>{children}</div>
-    ),
-  };
-});
+/**
+ * Make sure we have deterministic aria ID
+ */
+jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'my-id');
 
 describe('RemoteClusterTable', () => {
   test(`renders a row for a default remote cluster`, () => {
@@ -41,23 +35,22 @@ describe('RemoteClusterTable', () => {
     expect(component.find('tbody > tr').first()).toMatchSnapshot();
   });
 
-  // TODO: Re-enable this test once EUI supports stubbing its dynamically generated IDs (eui#1381)
-  // test(`renders a row for a remote cluster defined in elasticsearch.yml`, () => {
-  //   const clusters = [{
-  //     name: 'Remote cluster in elasticsearch.yml',
-  //     seeds: ['seed', 'seed2'],
-  //     isConfiguredByNode: true,
-  //   }];
+  test(`renders a row for a remote cluster defined in elasticsearch.yml`, () => {
+    const clusters = [{
+      name: 'Remote cluster in elasticsearch.yml',
+      seeds: ['seed', 'seed2'],
+      isConfiguredByNode: true,
+    }];
 
-  //   const component = renderWithIntl(
-  //     <Provider store={remoteClustersStore}>
-  //       <RemoteClusterTable
-  //         clusters={clusters}
-  //         openDetailPanel={() => {}}
-  //       />
-  //     </Provider>
-  //   );
+    const component = renderWithIntl(
+      <Provider store={remoteClustersStore}>
+        <RemoteClusterTable
+          clusters={clusters}
+          openDetailPanel={() => {}}
+        />
+      </Provider>
+    );
 
-  //   expect(component.find('tbody > tr').first()).toMatchSnapshot();
-  // });
+    expect(component.find('tbody > tr').first()).toMatchSnapshot();
+  });
 });
