@@ -62,4 +62,28 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     needBody: true,
     method: 'DELETE'
   });
+
+  ccr.followerIndices = ca({
+    urls: [
+      {
+        fmt: '/_ccr/stats',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ccr.saveFollowerIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=name%>/_ccr/follow',
+        req: {
+          name: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'PUT'
+  });
 };
