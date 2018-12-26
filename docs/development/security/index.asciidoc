@@ -1,12 +1,22 @@
 [[development-security]]
 == Security
 
+=== Overview
+
+Feature development must consider user access permissions. Its easy for a design to assume access to several APIs which may have independent availability. Feature implementation must account for this although clever use of apis may sidestep apparent restrictions.
+
+=== Implementation
+
 Kibana has generally been able to implement security transparently to core and plugin developers, and this largely remains the case. {kib} on two methods that the <<development-elasticsearch, elasticsearch plugin>>'s `Cluster` provides: `callWithRequest` and `callWithInternalUser`. 
 
 `callWithRequest` executes requests against Elasticsearch using the authentication credentials of the Kibana end-user. So, if you log into Kibana with the user of `foo` when `callWithRequest` is used, {kib} execute the request against Elasticsearch as the user `foo`. Historically, `callWithRequest` has been used extensively to perform actions that are initiated at the request of Kibana end-users.
 
 `callWithInternalUser` executes requests against Elasticsearch using the internal Kibana server user, and has historically been used for performing actions that aren't initiated by Kibana end users; for example, creating the initial `.kibana` index or performing health checks against Elasticsearch.
 
-However, with the changes that role-based access control (RBAC) introduces, this is no longer cut and dry. {kib} now requires all access to the `.kibana` index goes through the `SavedObjectsClient`. This used to be a best practice, as the `SavedObjectsClient` was responsible for translating the documents stored in Elasticsearch to and from Saved Objects, but RBAC is now taking advantage of this abstraction to implement access control and determine when to use `callWithRequest` versus `callWithInternalUser`.
+However, {kib} requires all access to the `.kibana` index go through the `SavedObjectsClient`. Its responsible for translating the documents stored in Elasticsearch to and from Saved Objects and determining when to use `callWithRequest` versus `callWithInternalUser`.
+
+Determining user access is best done by querying the desired resource and handling 403 errors as appropriate. Its also possible to query user access permssions via `has-privileges` but its an X-Pack only feature.
+
+A user with minimal permissions is useful for testing no-access cases - create a new role,  set `Minimum privileges for all spaces` to `all`, and create a user with that role. The user will be able to log into kibana but without access to any indices.
 
 include::rbac.asciidoc[]
