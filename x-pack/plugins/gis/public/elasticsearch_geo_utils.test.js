@@ -9,14 +9,15 @@ import {
   geoPointToGeometry,
   geoShapeToGeometry,
   createExtentFilter,
+  convertMapExtentToEnvelope,
 } from './elasticsearch_geo_utils';
 
 const geoFieldName = 'location';
 const mapExtent = {
-  max_lat: 39,
-  max_lon: -83,
-  min_lat: 35,
-  min_lon: -89,
+  maxLat: 39,
+  maxLon: -83,
+  minLat: 35,
+  minLon: -89,
 };
 
 describe('hitsToGeoJson', () => {
@@ -148,12 +149,12 @@ describe('createExtentFilter', () => {
       geo_bounding_box: {
         [geoFieldName]: {
           top_left: {
-            lat: mapExtent.max_lat,
-            lon: mapExtent.min_lon
+            lat: mapExtent.maxLat,
+            lon: mapExtent.minLon
           },
           bottom_right: {
-            lat: mapExtent.min_lat,
-            lon: mapExtent.max_lon
+            lat: mapExtent.minLat,
+            lon: mapExtent.maxLon
           }
         }
       }
@@ -168,8 +169,8 @@ describe('createExtentFilter', () => {
           shape: {
             type: 'envelope',
             coordinates: [
-              [mapExtent.min_lon, mapExtent.max_lat],
-              [mapExtent.max_lon, mapExtent.min_lat]
+              [mapExtent.minLon, mapExtent.maxLat],
+              [mapExtent.maxLon, mapExtent.minLat]
             ]
           },
           relation: 'INTERSECTS'
@@ -180,10 +181,10 @@ describe('createExtentFilter', () => {
 
   it('should clamp longitudes to -180 to 180', () => {
     const mapExtent = {
-      max_lat: 39,
-      max_lon: 209,
-      min_lat: 35,
-      min_lon: -191,
+      maxLat: 39,
+      maxLon: 209,
+      minLat: 35,
+      minLon: -191,
     };
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
@@ -192,13 +193,91 @@ describe('createExtentFilter', () => {
           shape: {
             type: 'envelope',
             coordinates: [
-              [-180, mapExtent.max_lat],
-              [180, mapExtent.min_lat]
+              [-180, mapExtent.maxLat],
+              [180, mapExtent.minLat]
             ]
           },
           relation: 'INTERSECTS'
         }
       }
     });
+  });
+});
+
+describe('convertMapExtentToEnvelope', () => {
+  it('should convert bounds to envelope', () => {
+    const bounds = {
+      maxLat: 65.98468,
+      maxLon: -162.71869,
+      minLat: 60.97598,
+      minLon: -174.59527,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual({
+      "type": "envelope",
+      "coordinates": [
+        [-174.59527, 65.98468], [-162.71869, 60.97598]
+      ]
+    });
+  });
+
+  it('should clamp longitudes to -180 to 180', () => {
+    const bounds = {
+      maxLat: 85.05113,
+      maxLon: 209.55801,
+      minLat: -85.05113,
+      minLon: -454.84711,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual({
+      "type": "envelope",
+      "coordinates": [
+        [-180, 85.05113], [180, -85.05113]
+      ]
+    });
+  });
+
+  it('should split bounds that cross dateline(east to west)', () => {
+    const bounds = {
+      maxLat: 66.01959,
+      maxLon: 190.11434,
+      minLat: 61.0176,
+      minLon: 169.35168,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual([
+      {
+        "type": "envelope",
+        "coordinates": [
+          [169.35168, 66.01959], [180, 61.0176]
+        ]
+      },
+      {
+        "type": "envelope",
+        "coordinates": [
+          [-180, 66.01959], [-169.88566, 61.0176]
+        ]
+      },
+    ]);
+  });
+
+  it('should split bounds that cross dateline(west to east)', () => {
+    const bounds = {
+      maxLat: 14.29261,
+      maxLon: -159.0253,
+      minLat: -18.0925,
+      minLon: -193.69868,
+    };
+    expect(convertMapExtentToEnvelope(bounds)).toEqual([
+      {
+        "type": "envelope",
+        "coordinates": [
+          [166.30132, 14.29261], [180, -18.0925]
+        ]
+      },
+      {
+        "type": "envelope",
+        "coordinates": [
+          [-180, 14.29261], [-159.0253, -18.0925]
+        ]
+      },
+    ]);
   });
 });

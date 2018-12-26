@@ -17,41 +17,41 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import expect from 'expect.js';
-
 import {
   createReduceStream,
   createPromiseFromStreams,
   createListStream,
-} from '../';
+} from './';
 
 const promiseFromEvent = (name, emitter) =>
   new Promise(resolve => emitter.on(name, () => resolve(name)));
 
 describe('reduceStream', () => {
-  it('calls the reducer for each item provided', async () => {
-    const stub = sinon.stub();
+  test('calls the reducer for each item provided', async () => {
+    const stub = jest.fn();
     await createPromiseFromStreams([
       createListStream([1, 2, 3]),
-      createReduceStream(stub.returnsArg(1), 0)
+      createReduceStream((val, chunk, enc) => {
+        stub(val, chunk, enc);
+        return chunk;
+      }, 0)
     ]);
-    sinon.assert.calledThrice(stub);
-    expect(stub.firstCall.args).to.eql([0, 1, 'utf8']);
-    expect(stub.secondCall.args).to.eql([1, 2, 'utf8']);
-    expect(stub.thirdCall.args).to.eql([2, 3, 'utf8']);
+    expect(stub).toHaveBeenCalledTimes(3);
+    expect(stub.mock.calls[0]).toEqual([0, 1, 'utf8']);
+    expect(stub.mock.calls[1]).toEqual([1, 2, 'utf8']);
+    expect(stub.mock.calls[2]).toEqual([2, 3, 'utf8']);
   });
 
-  it('provides the return value of the last iteration of the reducer', async () => {
+  test('provides the return value of the last iteration of the reducer', async () => {
     const result = await createPromiseFromStreams([
       createListStream('abcdefg'.split('')),
       createReduceStream((acc) => acc + 1, 0)
     ]);
-    expect(result).to.be(7);
+    expect(result).toBe(7);
   });
 
-  it('emits an error if an iteration fails', async () => {
-    const reduce = createReduceStream((acc, i) => expect(i).to.be(1), 0);
+  test('emits an error if an iteration fails', async () => {
+    const reduce = createReduceStream((acc, i) => expect(i).toBe(1), 0);
     const errorEvent = promiseFromEvent('error', reduce);
 
     reduce.write(1);
@@ -60,15 +60,15 @@ describe('reduceStream', () => {
     await errorEvent;
   });
 
-  it('stops calling the reducer if an iteration fails, emits no data', async () => {
-    const reducer = sinon.spy((acc, i) => {
+  test('stops calling the reducer if an iteration fails, emits no data', async () => {
+    const reducer = jest.fn((acc, i) => {
       if (i < 100) return acc + i;
       else throw new Error(i);
     });
     const reduce$ = createReduceStream(reducer, 0);
 
-    const dataStub = sinon.stub();
-    const errorStub = sinon.stub();
+    const dataStub = jest.fn();
+    const errorStub = jest.fn();
     reduce$.on('data', dataStub);
     reduce$.on('error', errorStub);
     const endEvent = promiseFromEvent('end', reduce$);
@@ -81,8 +81,8 @@ describe('reduceStream', () => {
     reduce$.end();
 
     await endEvent;
-    sinon.assert.calledThrice(reducer);
-    sinon.assert.notCalled(dataStub);
-    sinon.assert.calledOnce(errorStub);
+    expect(reducer).toHaveBeenCalledTimes(3);
+    expect(dataStub).toHaveBeenCalledTimes(0);
+    expect(errorStub).toHaveBeenCalledTimes(1);
   });
 });

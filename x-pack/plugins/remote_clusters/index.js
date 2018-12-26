@@ -21,7 +21,7 @@ export function remoteClusters(kibana) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
     uiExports: {
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [
         'plugins/remote_clusters',
       ],

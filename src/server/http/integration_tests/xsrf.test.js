@@ -27,7 +27,7 @@ const xsrfHeader = 'kbn-xsrf';
 const versionHeader = 'kbn-version';
 const testPath = '/xsrf/test/route';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
-const actualVersion = require(src('../package.json')).version;
+const actualVersion = require(src('../package.json')).version; // eslint-disable-line import/no-dynamic-require
 
 describe('xsrf request filter', () => {
   let root;
