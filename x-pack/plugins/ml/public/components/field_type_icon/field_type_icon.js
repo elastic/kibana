@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -20,35 +21,51 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
 
   switch (type) {
     case ML_JOB_FIELD_TYPES.BOOLEAN:
-      ariaLabel = 'boolean type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.booleanTypeAriaLabel', {
+        defaultMessage: 'boolean type'
+      });
       iconClass = 'fa-adjust';
       break;
     case ML_JOB_FIELD_TYPES.DATE:
-      ariaLabel = 'date type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.dateTypeAriaLabel', {
+        defaultMessage: 'date type'
+      });
       iconClass = 'fa-clock-o';
       break;
     case ML_JOB_FIELD_TYPES.NUMBER:
-      ariaLabel = 'number type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.numberTypeAriaLabel', {
+        defaultMessage: 'number type'
+      });
       iconChar = '#';
       break;
     case ML_JOB_FIELD_TYPES.GEO_POINT:
-      ariaLabel = 'geo_point type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.geo_pointTypeAriaLabel', {
+        defaultMessage: 'geo_point type'
+      });
       iconClass = 'fa-globe';
       break;
     case ML_JOB_FIELD_TYPES.KEYWORD:
-      ariaLabel = 'keyword type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.keywordTypeAriaLabel', {
+        defaultMessage: 'keyword type'
+      });
       iconChar = 't';
       break;
     case ML_JOB_FIELD_TYPES.TEXT:
-      ariaLabel = 'text type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.textTypeAriaLabel', {
+        defaultMessage: 'text type'
+      });
       iconClass = 'fa-file-text-o';
       break;
     case ML_JOB_FIELD_TYPES.IP:
-      ariaLabel = 'IP type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.IPTypeAriaLabel', {
+        defaultMessage: 'IP type'
+      });
       iconClass = 'fa-laptop';
       break;
     case ML_JOB_FIELD_TYPES.UNKNOWN:
-      ariaLabel = 'Unknown type';
+      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.UnknownTypeAriaLabel', {
+        defaultMessage: 'Unknown type'
+      });
       iconChar = '?';
       break;
     default:

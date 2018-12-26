@@ -11,10 +11,11 @@ import uiRouter from 'ui/routes';
 import chrome from 'ui/chrome';
 import { isFullLicense } from '../../license/check_license';
 
+import { getAllCrumbNames, getBaseBreadcrumbs } from './get_crumbs';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlNavMenu', function (config) {
+module.directive('mlNavMenu', function (config, i18n) {
   return {
     restrict: 'E',
     transclude: true,
@@ -43,27 +44,9 @@ module.directive('mlNavMenu', function (config) {
       const isK7Design = chrome.getUiSettingsClient().get('k7design', false);
       if (isK7Design === false) {
         // Breadcrumbs
-        const crumbNames = {
-          jobs: { label: 'Job Management', url: '#/jobs' },
-          new_job: { label: 'Create New Job', url: '#/jobs/new_job' },
-          single_metric: { label: 'Single Metric Job', url: '' },
-          multi_metric: { label: 'Multi Metric job', url: '' },
-          population: { label: 'Population job', url: '' },
-          advanced: { label: 'Advanced Job Configuration', url: '' },
-          datavisualizer: { label: 'Data Visualizer', url: '' },
-          filedatavisualizer: { label: 'File Data Visualizer (Experimental)', url: '' },
-          explorer: { label: 'Anomaly Explorer', url: '#/explorer' },
-          timeseriesexplorer: { label: 'Single Metric Viewer', url: '#/timeseriesexplorer' },
-          settings: { label: 'Settings', url: '#/settings' },
-          calendars_list: { label: 'Calendar Management', url: '#/settings/calendars_list' },
-          new_calendar: { label: 'New Calendar', url: '#/settings/calendars_list/new_calendar' },
-          edit_calendar: { label: 'Edit Calendar', url: '#/settings/calendars_list/edit_calendar' },
-          filter_lists: { label: 'Filter Lists', url: '#/settings/filter_lists' },
-          new_filter_list: { label: 'New Filter List', url: '#/settings/filter_lists/new' },
-          edit_filter_list: { label: 'Edit Filter List', url: '#/settings/filter_lists/edit' },
-        };
 
-        const breadcrumbs = [{ label: 'Machine Learning', url: '#/' }];
+        const crumbNames = getAllCrumbNames(i18n);
+        const breadcrumbs = getBaseBreadcrumbs(i18n);
 
         // get crumbs from url
         const crumbs = uiRouter.getBreadcrumbs();

@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiToolTip
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { abbreviateWholeNumber } from 'plugins/ml/formatters/abbreviate_whole_number';
 import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
@@ -28,8 +29,18 @@ import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
 function getTooltipContent(maxScoreLabel, totalScoreLabel) {
   return (
     <React.Fragment>
-      <p>Maximum anomaly score: {maxScoreLabel}</p>
-      <p>Total anomaly score: {totalScoreLabel}</p>
+      <p><FormattedMessage
+        id="xpack.ml.influencersList.tooltip.maxAnomalyScore"
+        defaultMessage="Maximum anomaly score: {maxScoreLabel}"
+        values={{ maxScoreLabel }}
+      />
+      </p>
+      <p><FormattedMessage
+        id="xpack.ml.influencersList.tooltip.totalAnomalyScore"
+        defaultMessage="Total anomaly score: {totalScoreLabel}"
+        values={{ totalScoreLabel }}
+      />
+      </p>
     </React.Fragment>
   );
 }
@@ -124,7 +135,12 @@ export function InfluencersList({ influencers }) {
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xxl" />
           <EuiText>
-            <h4>No influencers found</h4>
+            <h4>
+              <FormattedMessage
+                id="xpack.ml.influencersList.noInfluencersTitle"
+                defaultMessage="No influencers found"
+              />
+            </h4>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
