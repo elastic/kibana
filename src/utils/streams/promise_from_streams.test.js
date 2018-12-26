@@ -19,26 +19,24 @@
 
 import { Readable, Writable, Duplex, Transform } from 'stream';
 
-import expect from 'expect.js';
-
 import {
   createListStream,
   createPromiseFromStreams,
   createReduceStream
-} from '../';
+} from './';
 
 describe('promiseFromStreams', () => {
-  it('pipes together an array of streams', async () => {
+  test('pipes together an array of streams', async () => {
     const str1 = createListStream([1, 2, 3]);
     const str2 = createReduceStream((acc, n) => acc + n, 0);
     const sumPromise = new Promise(resolve => str2.once('data', resolve));
     createPromiseFromStreams([str1, str2]);
     await new Promise(resolve => str2.once('end', resolve));
-    expect(await sumPromise).to.be(6);
+    expect(await sumPromise).toBe(6);
   });
 
   describe('last stream is writable', () => {
-    it('waits for the last stream to finish writing', async () => {
+    test('waits for the last stream to finish writing', async () => {
       let written = '';
 
       await createPromiseFromStreams([
@@ -53,10 +51,10 @@ describe('promiseFromStreams', () => {
         })
       ]);
 
-      expect(written).to.be('a');
+      expect(written).toBe('a');
     });
 
-    it('resolves to undefined', async () => {
+    test('resolves to undefined', async () => {
       const result = await createPromiseFromStreams([
         createListStream(['a']),
         new Writable({
@@ -66,22 +64,22 @@ describe('promiseFromStreams', () => {
         })
       ]);
 
-      expect(result).to.be(undefined);
+      expect(result).toBe(undefined);
     });
   });
 
   describe('last stream is readable', () => {
-    it(`resolves to it's final value`, async () => {
+    test(`resolves to it's final value`, async () => {
       const result = await createPromiseFromStreams([
         createListStream(['a', 'b', 'c'])
       ]);
 
-      expect(result).to.be('c');
+      expect(result).toBe('c');
     });
   });
 
   describe('last stream is duplex', () => {
-    it('waits for writing and resolves to final value', async () => {
+    test('waits for writing and resolves to final value', async () => {
       let written = '';
 
       const duplexReadQueue = [];
@@ -106,13 +104,13 @@ describe('promiseFromStreams', () => {
         }).setEncoding('utf8')
       ]);
 
-      expect(written).to.eql('abc');
-      expect(result).to.be('bar');
+      expect(written).toEqual('abc');
+      expect(result).toBe('bar');
     });
   });
 
   describe('error handling', () => {
-    it('read stream gets destroyed when transform stream fails', async () => {
+    test('read stream gets destroyed when transform stream fails', async () => {
       let destroyCalled = false;
       const readStream = new Readable({
         read() {
@@ -137,8 +135,8 @@ describe('promiseFromStreams', () => {
         ]);
         throw new Error('Should fail');
       } catch (e) {
-        expect(e.message).to.be('Test error');
-        expect(destroyCalled).to.be(true);
+        expect(e.message).toBe('Test error');
+        expect(destroyCalled).toBe(true);
       }
     });
   });
