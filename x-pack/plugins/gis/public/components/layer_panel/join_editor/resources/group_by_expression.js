@@ -7,12 +7,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { EuiExpression } from '@elastic/eui';
+
 export function GroupByExpression({ term }) {
   return (
-    <div className="euiExpressionButton euiText">
-      <span className="euiExpressionButton__description">GROUP BY</span>{' '}
-      <span className="euiExpressionButton__value">{`right.${term}`}</span>
-    </div>
+    <EuiExpression
+      description="GROUP BY"
+      value={`right.${term}`}
+    />
   );
 }
 
