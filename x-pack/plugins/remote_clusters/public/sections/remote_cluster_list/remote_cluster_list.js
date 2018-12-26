@@ -57,7 +57,7 @@ export const RemoteClusterList = injectI18n(
       isRemovingCluster: PropTypes.bool,
     }
 
-    static getDerivedStateFromProps(props) {
+    componentDidUpdate() {
       const {
         openDetailPanel,
         closeDetailPanel,
@@ -67,7 +67,7 @@ export const RemoteClusterList = injectI18n(
             search,
           },
         },
-      } = props;
+      } = this.props;
 
       const { cluster: clusterName } = extractQueryParams(search);
 
@@ -77,11 +77,7 @@ export const RemoteClusterList = injectI18n(
       } else if (isDetailPanelOpen) {
         closeDetailPanel();
       }
-
-      return null;
     }
-
-    state = {};
 
     componentDidMount() {
       this.props.loadClusters();
