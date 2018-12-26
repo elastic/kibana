@@ -8,7 +8,6 @@ import { fork } from 'redux-saga/effects';
 
 import { watchBlame, watchLoadBlame } from './blame';
 import { watchLoadCommit } from './commit';
-import { watchDocumentSearch, watchSearchRouteChange } from './document_search';
 import {
   watchCloseReference,
   watchLoadRepo,
@@ -27,7 +26,7 @@ import {
   watchIndexRepo,
   watchInitRepoCmd,
 } from './repository';
-import { watchRepositorySearch } from './repository_search';
+import { watchDocumentSearch, watchRepositorySearch, watchSearchRouteChange } from './search';
 import { watchRepoCloneSuccess } from './status';
 import { watchLoadStructure } from './structure';
 import { watchLoadUserConfig } from './user';

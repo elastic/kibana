@@ -27,6 +27,8 @@ export const refUrlSelector = (state: RootState) => {
 
 export const fileSelector = (state: RootState) => state.file.file;
 
+export const searchScopeSelector = (state: RootState) => state.search.scope;
+
 export const repoUriSelector = (state: RootState) => {
   const { resource, org, repo } = state.route.match.params;
   return `${resource}/${org}/${repo}`;

@@ -10,34 +10,49 @@ import { Action, handleActions } from 'redux-actions';
 
 import { DocumentSearchResult, RepositoryUri } from '../../model';
 import {
+  changeSearchScope,
   documentSearch as documentSearchQuery,
   documentSearchFailed,
   DocumentSearchPayload,
   documentSearchSuccess,
+  repositorySearch as repositorySearchAction,
+  repositorySearchFailed,
+  RepositorySearchPayload,
+  repositorySearchSuccess,
 } from '../actions';
+import { SearchScope } from '../common/types';
 
-export interface DocumentSearchState {
+export interface SearchState {
+  scope: SearchScope;
   query: string;
   page?: number;
   languages?: Set<string>;
   repositories?: Set<RepositoryUri>;
   isLoading: boolean;
   error?: Error;
-  searchResult?: DocumentSearchResult;
+  documentSearchResults?: DocumentSearchResult;
+  repositorySearchResults?: any;
 }
 
-const initialState: DocumentSearchState = {
-  query: 'queryBuilder',
+const initialState: SearchState = {
+  query: '',
   isLoading: false,
+  scope: SearchScope.default,
 };
 
-export const documentSearch = handleActions<DocumentSearchState, any>(
+export const search = handleActions<SearchState, any>(
   {
-    [String(documentSearchQuery)]: (
-      state: DocumentSearchState,
-      action: Action<DocumentSearchPayload>
-    ) =>
-      produce<DocumentSearchState>(state, draft => {
+    [String(changeSearchScope)]: (state: SearchState, action: Action<any>) =>
+      produce<SearchState>(state, draft => {
+        if (Object.values(SearchScope).includes(action.payload)) {
+          draft.scope = action.payload;
+        } else {
+          draft.scope = SearchScope.default;
+        }
+        draft.isLoading = false;
+      }),
+    [String(documentSearchQuery)]: (state: SearchState, action: Action<DocumentSearchPayload>) =>
+      produce<SearchState>(state, draft => {
         if (action.payload) {
           draft.query = action.payload.query;
           draft.page = parseInt(action.payload.page as string, 10);
@@ -57,11 +72,8 @@ export const documentSearch = handleActions<DocumentSearchState, any>(
           draft.error = undefined;
         }
       }),
-    [String(documentSearchSuccess)]: (
-      state: DocumentSearchState,
-      action: Action<DocumentSearchResult>
-    ) =>
-      produce<DocumentSearchState>(state, draft => {
+    [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>
+      produce<SearchState>(state, draft => {
         const {
           from,
           page,
@@ -88,8 +100,8 @@ export const documentSearch = handleActions<DocumentSearchState, any>(
           };
         });
 
-        draft.searchResult = {
-          ...draft.searchResult,
+        draft.documentSearchResults = {
+          ...draft.documentSearchResults,
           query: state.query,
           total,
           took,
@@ -105,11 +117,36 @@ export const documentSearch = handleActions<DocumentSearchState, any>(
           results,
         };
       }),
-    [String(documentSearchFailed)]: (state: DocumentSearchState, action: Action<Error>) => {
+    [String(documentSearchFailed)]: (state: SearchState, action: Action<Error>) => {
       if (action.payload) {
-        return produce<DocumentSearchState>(state, draft => {
+        return produce<SearchState>(state, draft => {
           draft.isLoading = false;
           draft.error = action.payload!;
+        });
+      } else {
+        return state;
+      }
+    },
+    [String(repositorySearchAction)]: (
+      state: SearchState,
+      action: Action<RepositorySearchPayload>
+    ) =>
+      produce<SearchState>(state, draft => {
+        if (action.payload) {
+          draft.query = action.payload.query;
+          draft.isLoading = true;
+        }
+      }),
+    [String(repositorySearchSuccess)]: (state: SearchState, action: Action<any>) =>
+      produce<SearchState>(state, draft => {
+        draft.repositorySearchResults = action.payload;
+        draft.isLoading = false;
+      }),
+    [String(repositorySearchFailed)]: (state: SearchState, action: Action<any>) => {
+      if (action.payload) {
+        return produce<SearchState>(state, draft => {
+          draft.isLoading = false;
+          draft.error = action.payload.error;
         });
       } else {
         return state;
