@@ -2,9 +2,6 @@
 
 exports[`Service Overview -> View should render when historical data is found 1`] = `
 <div>
-  <EuiSpacer
-    size="l"
-  />
   <ServiceListRequest
     render={[Function]}
   />
@@ -23,9 +20,6 @@ Object {
 
 exports[`Service Overview -> View should render when historical data is not found 1`] = `
 <div>
-  <EuiSpacer
-    size="l"
-  />
   <ServiceListRequest
     render={[Function]}
   />

@@ -51,7 +51,7 @@ function removeSymlinkDependencies(root) {
 
 // parse a ts config file
 function parseTsconfig(pluginSourcePath, configPath) {
-  const ts = require(path.join(pluginSourcePath, 'node_modules', 'typescript'));
+  const ts = require(path.join(pluginSourcePath, 'node_modules', 'typescript')); // eslint-disable-line import/no-dynamic-require
 
   const { error, config } = ts.parseConfigFileTextToJson(
     configPath,
