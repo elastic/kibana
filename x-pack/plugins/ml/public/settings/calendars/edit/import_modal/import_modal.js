@@ -141,12 +141,12 @@ export class ImportModal extends Component {
               direction="column"
               gutterSize="none"
             >
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiModalHeaderTitle >
                   Import events
                 </EuiModalHeaderTitle>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <p>Import events from an ICS file.</p>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -154,7 +154,7 @@ export class ImportModal extends Component {
 
           <EuiModalBody>
             <EuiFlexGroup direction="column">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiFilePicker
                   compressed
                   initialPromptText="Select or drag and drop a file"
