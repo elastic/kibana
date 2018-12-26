@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`[CCR] auto-follow stats serialization should deserialize auto-follow stats 1`] = `
+Object {
+  "autoFollowedClusters": Array [],
+  "numberOfFailedFollowIndices": 0,
+  "numberOfFailedRemoteClusterStateRequests": 0,
+  "numberOfSuccessfulFollowIndices": 0,
+  "recentAutoFollowErrors": Array [],
+}
+`;
