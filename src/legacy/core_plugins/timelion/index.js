@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
@@ -29,7 +31,7 @@ export default function (kibana) {
         euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [
         'plugins/timelion/lib/panel_registry',
         'plugins/timelion/panels/timechart/timechart'

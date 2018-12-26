@@ -41,12 +41,10 @@ import routing from '../../../../../services/routing';
 
 export class DetailPanelUi extends Component {
   static propTypes = {
-    isDetailPanelOpen: PropTypes.bool.isRequired,
     apiStatus: PropTypes.string,
+    autoFollowPatternId: PropTypes.string,
     autoFollowPattern: PropTypes.object,
-    autoFollowPatternName: PropTypes.string,
     closeDetailPanel: PropTypes.func.isRequired,
-    editAutoFollowPattern: PropTypes.func.isRequired,
   }
 
   renderAutoFollowPattern() {
@@ -192,7 +190,7 @@ export class DetailPanelUi extends Component {
       autoFollowPattern,
     } = this.props;
 
-    if(apiStatus === API_STATUS.LOADING) {
+    if (apiStatus === API_STATUS.LOADING) {
       return (
         <EuiFlyoutBody>
           <EuiFlexGroup
@@ -251,15 +249,9 @@ export class DetailPanelUi extends Component {
 
   renderFooter() {
     const {
-      editAutoFollowPattern,
       autoFollowPattern,
-      autoFollowPatternName,
       closeDetailPanel,
     } = this.props;
-
-    if (!autoFollowPattern) {
-      return null;
-    }
 
     return (
       <EuiFlyoutFooter>
@@ -277,56 +269,49 @@ export class DetailPanelUi extends Component {
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <AutoFollowPatternDeleteProvider>
-                  {(deleteAutoFollowPattern) => (
-                    <EuiButtonEmpty
-                      color="danger"
-                      onClick={() => deleteAutoFollowPattern(autoFollowPatternName)}
-                    >
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
-                        defaultMessage="Delete"
-                      />
-                    </EuiButtonEmpty>
-                  )}
-                </AutoFollowPatternDeleteProvider>
-              </EuiFlexItem>
+          {autoFollowPattern && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <AutoFollowPatternDeleteProvider>
+                    {(deleteAutoFollowPattern) => (
+                      <EuiButtonEmpty
+                        color="danger"
+                        onClick={() => deleteAutoFollowPattern(autoFollowPattern.name)}
+                      >
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
+                          defaultMessage="Delete"
+                        />
+                      </EuiButtonEmpty>
+                    )}
+                  </AutoFollowPatternDeleteProvider>
+                </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="primary"
-                  onClick={() => {
-                    editAutoFollowPattern(autoFollowPatternName);
-                    routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(autoFollowPatternName)}`));
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
-                    defaultMessage="Edit"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color="primary"
+                    onClick={() => {
+                      routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(autoFollowPattern.name)}`));
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
+                      defaultMessage="Edit"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     );
   }
 
   render() {
-    const {
-      isDetailPanelOpen,
-      closeDetailPanel,
-      autoFollowPatternName,
-    } = this.props;
-
-    if (!isDetailPanelOpen) {
-      return null;
-    }
+    const { autoFollowPatternId, closeDetailPanel } = this.props;
 
     return (
       <EuiFlyout
@@ -336,14 +321,14 @@ export class DetailPanelUi extends Component {
         size="m"
         maxWidth={400}
       >
+
         <EuiFlyoutHeader>
           <EuiTitle size="m" id="autoFollowPatternDetailsFlyoutTitle">
-            <h2>{autoFollowPatternName}</h2>
+            <h2>{autoFollowPatternId}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
         {this.renderContent()}
-
         {this.renderFooter()}
       </EuiFlyout>
     );

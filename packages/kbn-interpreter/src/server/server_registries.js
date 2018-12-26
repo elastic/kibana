@@ -57,7 +57,7 @@ export const populateServerRegistries = types => {
       global.canvas.register = d => registries[type].register(d);
 
       paths.forEach(path => {
-        require(path);
+        require(path); // eslint-disable-line import/no-dynamic-require
       });
 
       Object.keys(global).forEach(key => {
