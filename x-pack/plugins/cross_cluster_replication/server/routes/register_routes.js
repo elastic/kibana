@@ -5,7 +5,9 @@
  */
 
 import { registerAutoFollowPatternRoutes } from './api/auto_follow_pattern';
+import { registerFollowerIndexRoutes } from './api/follower_index';
 
 export function registerRoutes(server) {
   registerAutoFollowPatternRoutes(server);
+  registerFollowerIndexRoutes(server);
 }
