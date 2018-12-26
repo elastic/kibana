@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiToolTip
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 /*
  * Component for rendering an entity cell in the anomalies table, displaying the value
@@ -25,22 +26,38 @@ export function EntityCell({ entityName, entityValue, filter }) {
       {valueText}
       {filter !== undefined && entityName !== undefined && entityValue !== undefined &&
       <React.Fragment>
-        <EuiToolTip content="Add filter">
+        <EuiToolTip
+          content={<FormattedMessage
+            id="xpack.ml.anomaliesTable.entityCell.addFilterTooltip"
+            defaultMessage="Add filter"
+          />}
+        >
           <EuiButtonIcon
             size="xs"
             className="filter-button"
             onClick={() => filter(entityName, entityValue, '+')}
             iconType="plusInCircle"
-            aria-label="Add filter"
+            aria-label={<FormattedMessage
+              id="xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel"
+              defaultMessage="Add filter"
+            />}
           />
         </EuiToolTip>
-        <EuiToolTip content="Remove filter">
+        <EuiToolTip
+          content={<FormattedMessage
+            id="xpack.ml.anomaliesTable.entityCell.removeFilterTooltip"
+            defaultMessage="Remove filter"
+          />}
+        >
           <EuiButtonIcon
             size="xs"
             className="filter-button"
             onClick={() => filter(entityName, entityValue, '-')}
             iconType="minusInCircle"
-            aria-label="Remove filter"
+            aria-label={<FormattedMessage
+              id="xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel"
+              defaultMessage="Remove filter"
+            />}
           />
         </EuiToolTip>
       </React.Fragment>
