@@ -34,7 +34,7 @@ const markdownIt = new MarkdownIt({
 });
 
 /**
- * x-pack plugins cannot have upstream dependencies on core/*-kibana.
+ * plugins cannot have upstream dependencies on core/*-kibana.
  * Work-around by copy-pasting modifyUrl routine here.
  * @param url
  * @param block

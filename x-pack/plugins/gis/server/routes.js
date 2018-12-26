@@ -50,8 +50,6 @@ export function initRoutes(server) {
     path: `${ROOT}/meta`,
     handler: async () => {
 
-      // console.log('data/ems');
-      // console.log(server.plugins.tile_map.ems_client);
       let ems;
       try {
         ems = await getEMSResources();
