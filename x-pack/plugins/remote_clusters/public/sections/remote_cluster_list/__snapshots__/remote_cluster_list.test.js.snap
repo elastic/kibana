@@ -47,7 +47,7 @@ exports[`RemoteClusterList renders empty state when loading is complete and ther
             class="euiText euiText--medium"
           >
             <p>
-              Remote clusters create a uni-directional connection between your local cluster and other clusters.
+              Remote clusters create a uni-directional connection from your local cluster to other clusters.
             </p>
           </div>
         </span>
