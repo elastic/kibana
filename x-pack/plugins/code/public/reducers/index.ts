@@ -8,21 +8,19 @@ import { combineReducers } from 'redux';
 
 import { blame, BlameState } from './blame';
 import { commit, CommitState } from './commit';
-import { documentSearch, DocumentSearchState } from './document_search';
 import { editor, EditorState } from './editor';
 import { file, FileState } from './file';
 import { languageServer, LanguageServerState } from './language_server';
 import { recentProjects, RecentProjectsState } from './recent_projects';
 import { repository, RepositoryState } from './repository';
-import { repositorySearch, RepositorySearchState } from './repository_search';
 import { route, RouteState } from './route';
+import { search, SearchState } from './search';
 import { status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
 import { userConfig, UserConfigState } from './user';
 export interface RootState {
   repository: RepositoryState;
-  documentSearch: DocumentSearchState;
-  repositorySearch: RepositorySearchState;
+  search: SearchState;
   file: FileState;
   symbol: SymbolState;
   editor: EditorState;
@@ -40,8 +38,7 @@ const reducers = {
   file,
   symbol,
   editor,
-  documentSearch,
-  repositorySearch,
+  search,
   route,
   status,
   userConfig,

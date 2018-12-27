@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiTab } from '@elastic/eui';
+import { EuiFlexGroup, EuiTab, EuiTabs } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Url from 'url';
 
 import { SearchScope } from '../../common/types';
@@ -19,33 +18,40 @@ interface Props {
 }
 
 export class ScopeTab extends React.PureComponent<Props> {
-  public onPageClicked = (page: number) => {
-    const { query } = this.props;
-    const queries = querystring.parse(history.location.search.replace('?', ''));
-    history.push(
-      Url.format({
-        pathname: '/search',
-        query: {
-          ...queries,
-          q: query,
-          p: page + 1,
-        },
-      })
-    );
+  public onTabClicked = (scope: SearchScope) => {
+    return () => {
+      const { query } = this.props;
+      const queries = querystring.parse(history.location.search.replace('?', ''));
+      history.push(
+        Url.format({
+          pathname: '/search',
+          query: {
+            ...queries,
+            q: query,
+            scope,
+          },
+        })
+      );
+    };
   };
 
   public render() {
-    const emptyFunction = () => null;
     return (
       <EuiFlexGroup>
-        <EuiTab isSelected={this.props.scope !== SearchScope.repository} onClick={emptyFunction}>
-          <Link to={`/search?q=${this.props.query}&scope=${SearchScope.symbol}`}>Code</Link>
-        </EuiTab>
-        <EuiTab isSelected={this.props.scope === SearchScope.repository} onClick={emptyFunction}>
-          <Link to={`/search?q=${this.props.query}&scope=${SearchScope.repository}`}>
+        <EuiTabs>
+          <EuiTab
+            isSelected={this.props.scope !== SearchScope.repository}
+            onClick={this.onTabClicked(SearchScope.symbol)}
+          >
+            Code
+          </EuiTab>
+          <EuiTab
+            isSelected={this.props.scope === SearchScope.repository}
+            onClick={this.onTabClicked(SearchScope.repository)}
+          >
             Repository
-          </Link>
-        </EuiTab>
+          </EuiTab>
+        </EuiTabs>
       </EuiFlexGroup>
     );
   }

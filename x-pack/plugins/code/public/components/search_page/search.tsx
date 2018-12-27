@@ -12,7 +12,6 @@ import styled from 'styled-components';
 import Url from 'url';
 
 import { DocumentSearchResult } from '../../../model';
-import { documentSearch } from '../../actions';
 import { SearchScope } from '../../common/types';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
@@ -39,16 +38,18 @@ const CodeResultContainer = styled.div`
   margin-top: 80px;
 `;
 
+const RepositoryResultContainer = CodeResultContainer;
+
 interface Props {
   query: string;
+  scope: SearchScope;
   page?: number;
   languages?: Set<string>;
   repositories?: Set<string>;
   isLoading: boolean;
   error?: Error;
-  searchResult?: DocumentSearchResult;
-  documentSearch: (q: string, p: number) => void;
-  repositorySearch: any;
+  documentSearchResults?: DocumentSearchResult;
+  repositorySearchResults?: any;
 }
 
 interface State {
@@ -119,12 +120,28 @@ class SearchPage extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { query, searchResult, languages, repositories, repositorySearch } = this.props;
+    const {
+      query,
+      scope,
+      documentSearchResults,
+      languages,
+      repositories,
+      repositorySearchResults,
+    } = this.props;
 
-    if (repositorySearch.scope === SearchScope.repository) {
-      const { repositories: repos } = repositorySearch.repositories;
+    if (
+      scope === SearchScope.repository &&
+      repositorySearchResults &&
+      repositorySearchResults.total > 0
+    ) {
+      const { repositories: repos } = repositorySearchResults;
       const resultComps =
-        repos && repos.map((repo: any) => <RepoItem key={repo.uri} uri={repo.uri} />);
+        repos &&
+        repos.map((repo: any) => (
+          <EuiFlexItem key={repo.uri}>
+            <RepoItem uri={repo.uri} />
+          </EuiFlexItem>
+        ));
       const mainComp = (
         <EuiFlexGroup style={{ padding: '0 1rem' }}>
           <EuiFlexItem grow={2}>
@@ -152,20 +169,25 @@ class SearchPage extends React.PureComponent<Props, State> {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <MainContentContainer grow={8}>{resultComps}</MainContentContainer>
+          <MainContentContainer grow={8}>
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ height: '32px' }}>
+                <ScopeTab query={query} scope={scope} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <RepositoryResultContainer>{resultComps}</RepositoryResultContainer>
+          </MainContentContainer>
         </EuiFlexGroup>
       );
       return (
         <SearchContainer>
           <SearchBar query={query} />
-          <ScopeTab query={query} scope={repositorySearch.scope} />
           {mainComp}
         </SearchContainer>
       );
-    }
-
-    if (searchResult) {
-      const { stats, results } = searchResult!;
+    } else if (scope === SearchScope.default && documentSearchResults) {
+      const { stats, results } = documentSearchResults!;
       const { total, from, to, page, totalPage, repoStats, languageStats } = stats!;
 
       const statsComp = (
@@ -189,8 +211,8 @@ class SearchPage extends React.PureComponent<Props, State> {
           <MainContentContainer grow={8}>
             <EuiFlexGroup>
               <EuiFlexItem>{statsComp}</EuiFlexItem>
-              <EuiFlexItem>
-                <ScopeTab query={query} scope={repositorySearch.scope} />
+              <EuiFlexItem style={{ height: '32px' }}>
+                <ScopeTab query={query} scope={scope} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
@@ -220,16 +242,7 @@ class SearchPage extends React.PureComponent<Props, State> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  ...state.documentSearch,
-  repositorySearch: state.repositorySearch,
+  ...state.search,
 });
 
-const mapDispatchToProps = {
-  documentSearch,
-};
-
-export const Search = connect(
-  mapStateToProps,
-  mapDispatchToProps
-  // @ts-ignore
-)(SearchPage);
+export const Search = connect(mapStateToProps)(SearchPage);

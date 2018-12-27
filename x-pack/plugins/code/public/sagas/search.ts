@@ -16,6 +16,10 @@ import {
   documentSearchSuccess,
   Match,
   repositorySearch,
+  repositorySearchFailed,
+  RepositorySearchPayload,
+  repositorySearchQueryChanged,
+  repositorySearchSuccess,
 } from '../actions';
 import { SearchScope } from '../common/types';
 import { searchRoutePattern } from './patterns';
@@ -62,26 +66,52 @@ function* handleDocumentSearch(action: Action<DocumentSearchPayload>) {
   }
 }
 
+function requestRepositorySearch(q: string) {
+  return kfetch({
+    pathname: `../api/code/search/repo`,
+    method: 'get',
+    query: { q },
+  });
+}
+
 export function* watchDocumentSearch() {
   yield takeLatest(String(documentSearch), handleDocumentSearch);
 }
 
+function* handleRepositorySearch(action: Action<RepositorySearchPayload>) {
+  try {
+    const data = yield call(requestRepositorySearch, action.payload!.query);
+    yield put(repositorySearchSuccess(data));
+  } catch (err) {
+    yield put(repositorySearchFailed(err));
+  }
+}
+
+export function* watchRepositorySearch() {
+  yield takeLatest(
+    [String(repositorySearch), String(repositorySearchQueryChanged)],
+    handleRepositorySearch
+  );
+}
+
 function* handleSearchRouteChange(action: Action<Match>) {
   const { location } = action.payload!;
-  const queryParams = queryString.parse(location.search);
+  const rawSearchStr = location.search.length > 0 ? location.search.substring(1) : '';
+  const queryParams = queryString.parse(rawSearchStr);
   const { q, p, langs, repos, scope } = queryParams;
   yield put(changeSearchScope(scope as string));
   if (scope === SearchScope.repository) {
     yield put(repositorySearch({ query: q as string }));
+  } else {
+    yield put(
+      documentSearch({
+        query: q as string,
+        page: p as string,
+        languages: langs as string,
+        repositories: repos as string,
+      })
+    );
   }
-  yield put(
-    documentSearch({
-      query: q as string,
-      page: p as string,
-      languages: langs as string,
-      repositories: repos as string,
-    })
-  );
 }
 
 export function* watchSearchRouteChange() {
