@@ -40,7 +40,14 @@ export function addToSiri(xKeys, series, point, id, label, agg) {
     });
   }
 
-  // update the ordered, zero-filled array with the "real" value
-  series.get(id).values[xKeys.indexMap[point.x]] = point;
+  const seriesValues = series.get(id).values;
+  const xIndex = xKeys.indexMap[point.x];
+  if (seriesValues[xIndex].xi) {
+    // update the ordered, zero-filled array with the "real" value
+    seriesValues[xIndex] = point;
+  } else {
+    // add the point to the list of values at the correct position
+    seriesValues.splice(xIndex, 0, point);
+  }
   return;
 }
