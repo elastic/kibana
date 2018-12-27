@@ -241,11 +241,7 @@ describe('pointSeriesChartDataFromTable', function () {
     // one series for each extension, and then one for each metric inside
     expect(chartData.series).to.have.length(extensions.length * metricCount);
     chartData.series.forEach(function (siri) {
-      // figure out the metric used to create this series
-      const metricAgg = siri.values[0].aggConfigResult.aggConfig;
-      const metric = avg.agg === metricAgg ? avg : max;
-
-      expect(siri.values).to.have.length(rowsPerSegment);
+      expect(siri.values).to.have.length(rowCount);
       siri.values.forEach(function (point) {
         expect(point).to.have.property('x');
         expect(point.x).to.be.a('number');
@@ -254,18 +250,27 @@ describe('pointSeriesChartDataFromTable', function () {
         expect(point.y).to.be.a('number');
 
         expect(point).to.have.property('series');
-        expect(_.contains(extensions, point.series)).to.be.ok();
 
-        expect(point).to.have.property('aggConfigResult');
-        expect(point.aggConfigResult)
-          .to.be.a(AggConfigResult)
-          .and.have.property('aggConfig', metric.agg)
-          .and.have.property('value', point.y)
-          .and.to.have.property('$parent');
+        // only perform these assertions on points that are non zero-filled
+        if (!point.xi) {
+          // figure out the metric used to create this series
+          const firstVal = siri.values.find(val => !val.xi);
+          const metricAgg = firstVal.aggConfigResult.aggConfig;
+          const metric = avg.agg === metricAgg ? avg : max;
 
-        expect(point.aggConfigResult.$parent)
-          .to.be.an(AggConfigResult)
-          .and.have.property('aggConfig', term.agg);
+          expect(point).to.have.property('aggConfigResult');
+          expect(_.contains(extensions, point.series)).to.be.ok();
+
+          expect(point.aggConfigResult)
+            .to.be.a(AggConfigResult)
+            .and.have.property('aggConfig', metric.agg)
+            .and.have.property('value', point.y)
+            .and.to.have.property('$parent');
+
+          expect(point.aggConfigResult.$parent)
+            .to.be.an(AggConfigResult)
+            .and.have.property('aggConfig', term.agg);
+        }
       });
     });
   });

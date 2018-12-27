@@ -26,7 +26,7 @@ export function getSeries(rows, chart) {
   const multiY = Array.isArray(aspects.y);
   const yScale = chart.yScale;
   const partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
-  const orderedXKeys = aspects.x.i > -1 ? _.uniq(rows.map(r => r[aspects.x.i].value)) : [];
+  const orderedXKeys = aspects.x.i > -1 ? _.uniq(rows.map(r => r[aspects.x.i].value)) : ['_all'];
   const orderedXKeysMap = orderedXKeys.reduce((acc, cur, i) => {
     acc[cur] = i;
     return acc;
@@ -81,7 +81,8 @@ export function getSeries(rows, chart) {
 
   if (multiY) {
     series = _.sortBy(series, function (siri) {
-      const firstVal = siri.values[0];
+      // find first non zero-filled value
+      const firstVal = siri.values.find(val => !val.xi);
       let y;
 
       if (firstVal) {
