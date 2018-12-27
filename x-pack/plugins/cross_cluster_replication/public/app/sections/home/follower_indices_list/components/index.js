@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SECTIONS = {
-  AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
-  FOLLOWER_INDEX: 'followerIndex',
-  REMOTE_CLUSTER: 'remoteCluster'
-};
+export { FollowerIndicesTable } from './follower_indices_table';
+export { DetailPanel } from './detail_panel';

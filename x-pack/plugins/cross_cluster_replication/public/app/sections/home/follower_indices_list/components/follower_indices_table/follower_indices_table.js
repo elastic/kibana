@@ -13,19 +13,19 @@ import {
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiLoadingKibana,
+  // EuiLoadingKibana,
   EuiToolTip,
-  EuiOverlayMask,
+  // EuiOverlayMask,
 } from '@elastic/eui';
-import { API_STATUS } from '../../../../../constants';
-import { AutoFollowPatternDeleteProvider } from '../../../../../components';
-import routing from '../../../../../services/routing';
+// import { API_STATUS } from '../../../../../constants';
+import { FollowerIndexDeleteProvider } from '../../../../../components';
+// import routing from '../../../../../services/routing';
 
-export const AutoFollowPatternTable = injectI18n(
+export const FollowerIndicesTable = injectI18n(
   class extends PureComponent {
     static propTypes = {
-      autoFollowPatterns: PropTypes.array,
-      selectAutoFollowPattern: PropTypes.func.isRequired,
+      followerIndices: PropTypes.array,
+      selectFollowerIndex: PropTypes.func.isRequired,
     }
 
     state = {
@@ -40,85 +40,71 @@ export const AutoFollowPatternTable = injectI18n(
       });
     };
 
-    getFilteredPatterns = () => {
-      const { autoFollowPatterns } = this.props;
+    getFilteredIndices = () => {
+      const { followerIndices } = this.props;
       const { queryText } = this.state;
 
       if(queryText) {
-        return autoFollowPatterns.filter(autoFollowPattern => {
-          const { name, remoteCluster, followIndexPatternPrefix, followIndexPatternSuffix } = autoFollowPattern;
+        return followerIndices.filter(followerIndex => {
+          const { name, shards } = followerIndex;
 
           const inName = name.toLowerCase().includes(queryText);
-          const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
-          const inPrefix = followIndexPatternPrefix.toLowerCase().includes(queryText);
-          const inSuffix = followIndexPatternSuffix.toLowerCase().includes(queryText);
+          const inRemoteCluster = shards[0].remoteCluster.toLowerCase().includes(queryText);
+          const inLeaderIndex = shards[0].leaderIndex.toLowerCase().includes(queryText);
 
-          return inName || inRemoteCluster || inPrefix || inSuffix;
+          return inName || inRemoteCluster || inLeaderIndex;
         });
       }
 
-      return autoFollowPatterns.slice(0);
+      return followerIndices.slice(0);
     };
 
     getTableColumns() {
-      const { intl, selectAutoFollowPattern } = this.props;
+      const { intl, selectFollowerIndex } = this.props;
 
       return [{
         field: 'name',
         name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.nameColumnTitle',
+          id: 'xpack.crossClusterReplication.followerIndexList.table.nameColumnTitle',
           defaultMessage: 'Name',
         }),
         sortable: true,
         truncateText: false,
         render: (name) => {
           return (
-            <EuiLink onClick={() => selectAutoFollowPattern(name)}>
+            <EuiLink onClick={() => selectFollowerIndex(name)}>
               {name}
             </EuiLink>
           );
         }
       }, {
-        field: 'remoteCluster',
+        field: 'shards[0].remoteCluster',
         name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
+          id: 'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
           defaultMessage: 'Cluster',
         }),
         truncateText: true,
         sortable: true,
       }, {
-        field: 'leaderIndexPatterns',
+        field: 'shards[0].leaderIndex',
         name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.leaderPatternsColumnTitle',
-          defaultMessage: 'Leader patterns',
+          id: 'xpack.crossClusterReplication.followerIndexList.table.leaderIndexColumnTitle',
+          defaultMessage: 'Leader index',
         }),
-        render: (leaderPatterns) => leaderPatterns.join(', '),
-      }, {
-        field: 'followIndexPatternPrefix',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.prefixColumnTitle',
-          defaultMessage: 'Follower pattern prefix',
-        }),
-        sortable: true,
-      }, {
-        field: 'followIndexPatternSuffix',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.suffixColumnTitle',
-          defaultMessage: 'Follower pattern suffix',
-        }),
+        truncateText: true,
         sortable: true,
       }, {
         name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.actionsColumnTitle',
+          id: 'xpack.crossClusterReplication.followerIndexList.table.actionsColumnTitle',
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             render: ({ name }) => {
               const label = i18n.translate(
-                'xpack.crossClusterReplication.autoFollowPatternList.table.actionDeleteDescription',
+                'xpack.crossClusterReplication.followerIndexList.table.actionDeleteDescription',
                 {
-                  defaultMessage: 'Delete auto-follow pattern',
+                  defaultMessage: 'Delete follower',
                 }
               );
 
@@ -127,24 +113,24 @@ export const AutoFollowPatternTable = injectI18n(
                   content={label}
                   delay="long"
                 >
-                  <AutoFollowPatternDeleteProvider>
-                    {(deleteAutoFollowPattern) => (
+                  <FollowerIndexDeleteProvider>
+                    {(deleteFollowerIndex) => (
                       <EuiButtonIcon
                         aria-label={label}
                         iconType="trash"
                         color="danger"
-                        onClick={() => deleteAutoFollowPattern(name)}
+                        onClick={() => deleteFollowerIndex(name)}
                       />
                     )}
-                  </AutoFollowPatternDeleteProvider>
+                  </FollowerIndexDeleteProvider>
                 </EuiToolTip>
               );
             },
           },
           {
-            render: ({ name }) => {
-              const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
-                defaultMessage: 'Edit auto-follow pattern',
+            render: ({ /*name*/ }) => {
+              const label = i18n.translate('xpack.crossClusterReplication.followerIndexList.table.actionEditDescription', {
+                defaultMessage: 'Edit follower',
               });
 
               return (
@@ -156,7 +142,7 @@ export const AutoFollowPatternTable = injectI18n(
                     aria-label={label}
                     iconType="pencil"
                     color="primary"
-                    href={routing.getAutoFollowPatternPath(name)}
+                    // href={routing.getFollowerIndexPath(name)}
                   />
                 </EuiToolTip>
               );
@@ -168,15 +154,15 @@ export const AutoFollowPatternTable = injectI18n(
     }
 
     renderLoading = () => {
-      const { apiStatusDelete } = this.props;
-
-      if (apiStatusDelete === API_STATUS.DELETING) {
-        return (
-          <EuiOverlayMask>
-            <EuiLoadingKibana size="xl"/>
-          </EuiOverlayMask>
-        );
-      }
+      // const { apiStatusDelete } = this.props;
+      //
+      // if (apiStatusDelete === API_STATUS.DELETING) {
+      //   return (
+      //     <EuiOverlayMask>
+      //       <EuiLoadingKibana size="xl"/>
+      //     </EuiOverlayMask>
+      //   );
+      // }
       return null;
     };
 
@@ -203,23 +189,23 @@ export const AutoFollowPatternTable = injectI18n(
 
       const search = {
         toolsLeft: selectedItems.length ? (
-          <AutoFollowPatternDeleteProvider>
-            {(deleteAutoFollowPattern) => (
+          <FollowerIndexDeleteProvider>
+            {(deleteFollowerIndex) => (
               <EuiButton
                 iconType="trash"
                 color="danger"
-                onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
+                onClick={() => deleteFollowerIndex(selectedItems.map(({ name }) => name))}
               >
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
-                  defaultMessage="Delete auto-follow {total, plural, one {pattern} other {patterns}}"
+                  id="xpack.crossClusterReplication.deleteFollowerIndexButtonLabel"
+                  defaultMessage="Delete follower {total, plural, one {index} other {indices}}"
                   values={{
                     total: selectedItems.length
                   }}
                 />
               </EuiButton>
             )}
-          </AutoFollowPatternDeleteProvider>
+          </FollowerIndexDeleteProvider>
         ) : undefined,
         onChange: this.onSearch,
         box: {
@@ -230,7 +216,7 @@ export const AutoFollowPatternTable = injectI18n(
       return (
         <Fragment>
           <EuiInMemoryTable
-            items={this.getFilteredPatterns()}
+            items={this.getFilteredIndices()}
             itemId="name"
             columns={this.getTableColumns()}
             search={search}
