@@ -20,8 +20,6 @@
 import { capitalize, isArray, isFunction, get } from 'lodash';
 
 import chrome from '../chrome';
-import filterTemplate from '../chrome/config/filter.html';
-import intervalTemplate from '../chrome/config/interval.html';
 import { i18n } from '@kbn/i18n';
 
 export function KbnTopNavControllerProvider($compile) {
@@ -34,10 +32,7 @@ export function KbnTopNavControllerProvider($compile) {
       this.opts = [];
       this.menuItems = [];
       this.currentKey = null;
-      this.templates = {
-        interval: intervalTemplate,
-        filter: filterTemplate,
-      };
+      this.templates = {};
       this.locals = new Map();
 
       this.addItems(opts);
