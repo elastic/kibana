@@ -71,11 +71,15 @@ export const CrossClusterReplicationHome = injectI18n(
       chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
     }
 
+    static getDerivedStateFromProps(props) {
+      const { match: { params: { section } } } = props;
+      return {
+        activeSection: section
+      };
+    }
+
     onSectionChange = (section) => {
       routing.navigate(`/${section}`);
-      this.setState({
-        activeSection: section
-      });
     }
 
     getHeaderSection() {
