@@ -33,3 +33,19 @@ export const getSelectedAutoFollowPattern = (view = 'detail') => createSelector(
   return autoFollowPatternsState.byId[autoFollowPatternsState[propId]];
 });
 export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  objectToArray(autoFollowPatterns));
+
+// Follower index
+export const getFollowerIndexState = (state) => state.followerIndex;
+export const getFollowerIndices = createSelector(getFollowerIndexState, (followerIndexState) => followerIndexState.byId);
+export const getSelectedFollowerIndexId = (view = 'detail') => createSelector(getFollowerIndexState, (followerIndexState) => (
+  view === 'detail' ? followerIndexState.selectedDetailId : followerIndexState.selectedEditId
+));
+export const getSelectedFollowerIndex = (view = 'detail') => createSelector(getFollowerIndexState, (followerIndexState) => {
+  const propId = view === 'detail' ? 'selectedDetailId' : 'selectedEditId';
+
+  if(!followerIndexState[propId]) {
+    return null;
+  }
+  return followerIndexState.byId[followerIndexState[propId]];
+});
+export const getListFollowerIndices = createSelector(getFollowerIndices, (followerIndices) =>  objectToArray(followerIndices));

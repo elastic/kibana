@@ -5,5 +5,5 @@
  */
 
 export * from './auto_follow_pattern';
-
+export * from './follower_index';
 export * from './api';

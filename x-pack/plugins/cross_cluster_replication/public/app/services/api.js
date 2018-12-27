@@ -48,3 +48,11 @@ export const deleteAutoFollowPattern = (id) => {
 
   return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids}`).then(extractData);
 };
+
+export const loadFollowerIndices = () => (
+  httpClient.get(`${apiPrefix}/follower_indices`).then(extractData)
+);
+
+export const getFollowerIndex = (id) => (
+  httpClient.get(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`).then(extractData)
+);

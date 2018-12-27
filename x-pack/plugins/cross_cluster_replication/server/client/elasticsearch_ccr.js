@@ -72,6 +72,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
+  ccr.followerIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/stats',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
   ccr.saveFollowerIndex = ca({
     urls: [
       {
