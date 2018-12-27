@@ -8,15 +8,23 @@ import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getLayerListRaw, getDataFilters, getSelectedLayer } from '../selectors/map_selectors';
+import {
+  getLayerList,
+  getLayerListRaw,
+  getDataFilters,
+  getSelectedLayer,
+  getMapReady,
+  getWaitingForMapReadyLayerListRaw,
+} from '../selectors/map_selectors';
 import { timeService } from '../kibana_services';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
+export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
+export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
-export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
 export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
@@ -25,7 +33,6 @@ export const MAP_DESTROYED = 'MAP_DESTROYED';
 export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
-export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_JOINS = 'SET_JOINS';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
@@ -65,15 +72,36 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
 }
 
 export function replaceLayerList(newLayerList) {
-  return async (dispatch, getState) => {
-    await dispatch({
-      type: REPLACE_LAYERLIST,
-      layerList: newLayerList
+  return (dispatch, getState) => {
+    getLayerListRaw(getState()).forEach(({ id }) => {
+      dispatch(removeLayer(id));
     });
-    const dataFilters = getDataFilters(getState());
-    await syncDataForAllLayers(getState, dispatch, dataFilters);
-  };
 
+    newLayerList.forEach(layerDescriptor => {
+      dispatch(addLayer(layerDescriptor));
+    });
+  };
+}
+
+export function addLayer(layerDescriptor) {
+  return (dispatch, getState) => {
+    dispatch(clearTemporaryLayers());
+
+    const isMapReady = getMapReady(getState());
+    if (!isMapReady) {
+      dispatch({
+        type: ADD_WAITING_FOR_MAP_READY_LAYER,
+        layer: layerDescriptor,
+      });
+      return;
+    }
+
+    dispatch({
+      type: ADD_LAYER,
+      layer: layerDescriptor,
+    });
+    dispatch(syncDataForLayer(layerDescriptor.id));
+  };
 }
 
 export function toggleLayerVisible(layerId) {
@@ -94,17 +122,6 @@ export function updateLayerOrder(newLayerOrder) {
   return {
     type: UPDATE_LAYER_ORDER,
     newLayerOrder
-  };
-}
-
-export function addLayer(layer) {
-  return (dispatch) => {
-    dispatch(clearTemporaryLayers());
-
-    dispatch({
-      type: ADD_LAYER,
-      layer,
-    });
   };
 }
 
@@ -137,8 +154,18 @@ export function clearTemporaryLayers() {
 }
 
 export function mapReady() {
-  return {
-    type: MAP_READY
+  return (dispatch, getState) => {
+    dispatch({
+      type: MAP_READY,
+    });
+
+    getWaitingForMapReadyLayerListRaw(getState()).forEach(layerDescriptor => {
+      dispatch(addLayer(layerDescriptor));
+    });
+
+    dispatch({
+      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+    });
   };
 }
 
@@ -228,16 +255,6 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
     requestToken,
     errorMessage
   });
-}
-
-export function addPreviewLayer(layer, position) {
-
-  const layerDescriptor = layer.toLayerDescriptor();
-
-  return (dispatch) => {
-    dispatch(addLayer(layerDescriptor, position));
-    dispatch(syncDataForLayer(layer.getId()));
-  };
 }
 
 export function updateSourceProp(layerId, propName, value) {
