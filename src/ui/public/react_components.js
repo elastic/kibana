@@ -29,6 +29,7 @@ import {
   EuiColorPicker,
   EuiIconTip,
   EuiCallOut,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 
 import { uiModules } from './modules';
@@ -46,3 +47,15 @@ app.directive('colorPicker', reactDirective => reactDirective(EuiColorPicker));
 app.directive('iconTip', reactDirective => reactDirective(EuiIconTip, ['content', 'type', 'position', 'title', 'color']));
 
 app.directive('callOut', reactDirective => reactDirective(EuiCallOut, ['title', 'color', 'size', 'iconType', 'children']));
+
+app.directive('superDatePicker', reactDirective => reactDirective(EuiSuperDatePicker, [
+  'start',
+  'end',
+  'isPaused',
+  'refreshInterval',
+  'commonlyUsedRanges',
+  'dateFormat',
+  'recentlyUsedRanges',
+  'onTimeChange',
+  'onRefreshChange'
+]));
