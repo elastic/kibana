@@ -47,9 +47,9 @@ export function registerExecuteRoute(server) {
           };
 
           const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
-          ({
+          return {
             watchHistoryItem: watchHistoryItem.downstreamJson
-          });
+          };
         })
         .catch(err => {
 
@@ -59,7 +59,7 @@ export function registerExecuteRoute(server) {
           }
 
           // Case: default
-          wrapUnknownError(err);
+          throw wrapUnknownError(err);
         });
     },
     config: {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { constant } from 'lodash';
@@ -68,7 +69,12 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
 
     props.user.$promise.then(() => {
       // Wait for the user to be propogated before rendering into the DOM.
-      ReactDOM.render(<SecurityNavControl {...props} />, el);
+      ReactDOM.render(
+        <I18nProvider>
+          <SecurityNavControl {...props} />
+        </I18nProvider>,
+        el
+      );
     });
 
     return () => ReactDOM.unmountComponentAtNode(el);

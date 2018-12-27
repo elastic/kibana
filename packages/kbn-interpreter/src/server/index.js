@@ -19,3 +19,4 @@
 
 export { populateServerRegistries, getServerRegistries } from './server_registries';
 export { getPluginPaths } from './get_plugin_paths';
+export { pluginPaths } from './plugin_paths';

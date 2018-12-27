@@ -45,9 +45,15 @@ function getHelp(fnDef) {
 function getFnListItems(fnDef) {
   const { aliases, context, type } = fnDef;
   const items = [];
-  if (aliases.length) items.push({ title: 'Aliases', description: aliases.join(', ') });
-  if (context.types) items.push({ title: 'Accepts', description: context.types.join(', ') });
-  if (type) items.push({ title: 'Returns', description: type });
+  if (aliases.length) {
+    items.push({ title: 'Aliases', description: aliases.join(', ') });
+  }
+  if (context.types) {
+    items.push({ title: 'Accepts', description: context.types.join(', ') });
+  }
+  if (type) {
+    items.push({ title: 'Returns', description: type });
+  }
   return items;
 }
 
@@ -64,7 +70,9 @@ function getArgItems(args) {
 function getArgColumns() {
   return ['argument', 'aliases', 'types', 'default', 'description'].map(field => {
     const column = { field, name: startCase(field), truncateText: field !== 'description' };
-    if (field === 'description') column.width = '50%';
+    if (field === 'description') {
+      column.width = '50%';
+    }
     return column;
   });
 }

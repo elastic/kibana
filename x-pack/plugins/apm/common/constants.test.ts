@@ -5,8 +5,9 @@
  */
 
 import { get } from 'lodash';
-import { Span } from '../typings/Span';
-import { Transaction } from '../typings/Transaction';
+import { APMError } from '../typings/es_schemas/Error';
+import { Span } from '../typings/es_schemas/Span';
+import { Transaction } from '../typings/es_schemas/Transaction';
 import * as constants from './constants';
 
 describe('Transaction v1:', () => {
@@ -19,7 +20,7 @@ describe('Transaction v1:', () => {
       version: 'beat version'
     },
     host: {
-      name: 'string;'
+      name: 'my hostname'
     },
     processor: {
       name: 'transaction',
@@ -77,7 +78,7 @@ describe('Transaction v2', () => {
       name: 'beat name',
       version: 'beat version'
     },
-    host: { name: 'string;' },
+    host: { name: 'my hostname' },
     processor: { name: 'transaction', event: 'transaction' },
     timestamp: { us: 1337 },
     trace: { id: 'trace id' },
@@ -106,6 +107,14 @@ describe('Transaction v2', () => {
       result: 'transaction result',
       sampled: true,
       type: 'transaction type'
+    },
+    kubernetes: {
+      pod: {
+        uid: 'pod1234567890abcdef'
+      }
+    },
+    container: {
+      id: 'container1234567890abcdef'
     }
   };
 
@@ -122,7 +131,7 @@ describe('Span v1', () => {
       version: 'beat version'
     },
     host: {
-      name: 'string;'
+      name: 'my hostname'
     },
     processor: {
       name: 'transaction',
@@ -173,7 +182,7 @@ describe('Span v2', () => {
       version: 'beat version'
     },
     host: {
-      name: 'string;'
+      name: 'my hostname'
     },
     processor: {
       name: 'transaction',
@@ -221,7 +230,69 @@ describe('Span v2', () => {
   matchSnapshot(span);
 });
 
-function matchSnapshot(obj: Span | Transaction) {
+describe('Error v2', () => {
+  const errorDoc: APMError = {
+    agent: {
+      hostname: 'agent hostname',
+      type: 'apm-server',
+      version: '7.0.0'
+    },
+    error: {
+      exception: {
+        module: 'errors',
+        handled: false,
+        message: 'sonic boom',
+        type: 'errorString'
+      },
+      culprit: 'handleOopsie',
+      id: 'error id',
+      grouping_key: 'grouping key'
+    },
+    version: 'v2',
+    '@timestamp': new Date().toString(),
+    beat: {
+      hostname: 'beat hostname',
+      name: 'beat name',
+      version: 'beat version'
+    },
+    host: {
+      name: 'my hostname'
+    },
+    processor: {
+      name: 'error',
+      event: 'error'
+    },
+    timestamp: {
+      us: 1337
+    },
+    trace: {
+      id: 'trace id'
+    },
+    context: {
+      service: {
+        name: 'service name',
+        agent: {
+          name: 'agent name',
+          version: 'v1337'
+        },
+        language: {
+          name: 'nodejs',
+          version: 'v1337'
+        }
+      }
+    },
+    parent: {
+      id: 'parentId'
+    },
+    transaction: {
+      id: 'transaction id'
+    }
+  };
+
+  matchSnapshot(errorDoc);
+});
+
+function matchSnapshot(obj: Span | Transaction | APMError) {
   Object.entries(constants).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {

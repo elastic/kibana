@@ -6,6 +6,7 @@
 
 import {
   EuiBasicTable,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,24 +22,17 @@ import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
-// @ts-ignore
-import {
-  SERVICE_LANGUAGE_NAME,
-  SPAN_HEX_ID,
-  SPAN_ID
-} from '../../../../../../../../common/constants';
+import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
 import { px, unit } from '../../../../../../../style/variables';
-
-// @ts-ignore
-import Stacktrace from '../../../../../../shared/Stacktrace';
 
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { Span } from '../../../../../../../../typings/Span';
-import { DiscoverButton } from '../../../../../../shared/DiscoverButton';
+import { DiscoverSpanButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverSpanButton';
+import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktrace';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
@@ -48,21 +42,6 @@ const StackTraceContainer = styled.div`
 const TagName = styled.div`
   font-weight: bold;
 `;
-
-function getDiscoverQuery(span: Span) {
-  return {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query:
-          span.version === 'v2'
-            ? `${SPAN_HEX_ID}:"${span.span.hex_id}"`
-            : `${SPAN_ID}:"${span.span.id}"`
-      }
-    }
-  };
-}
 
 interface Props {
   span?: Span;
@@ -85,6 +64,10 @@ export function SpanFlyout({
   const dbContext = span.context.db;
   const httpContext = span.context.http;
   const tagContext = span.context.tags;
+  const tags = keys(tagContext).map(key => ({
+    key,
+    value: get(tagContext, key)
+  }));
 
   return (
     <EuiPortal>
@@ -98,9 +81,11 @@ export function SpanFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverButton query={getDiscoverQuery(span)}>
-                {`View span in Discover`}
-              </DiscoverButton>
+              <DiscoverSpanButton span={span}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  {`View span in Discover`}
+                </EuiButtonEmpty>
+              </DiscoverSpanButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -135,15 +120,16 @@ export function SpanFlyout({
                     <EuiBasicTable
                       columns={[
                         {
+                          name: '',
                           field: 'key',
                           render: (key: string) => <TagName>{key}</TagName>
                         },
-                        { field: 'value' }
+                        {
+                          name: '',
+                          field: 'value'
+                        }
                       ]}
-                      items={keys(tagContext).map(key => ({
-                        key,
-                        value: get(tagContext, key)
-                      }))}
+                      items={tags}
                     />
                   </Fragment>
                 )

@@ -28,7 +28,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Instances'
       }),
       value: instances,
-      dataTestSubj: 'instances'
+      'data-test-subj': 'instances'
     },
     {
       label: intl.formatMessage({
@@ -36,7 +36,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Memory'
       }),
       value: formatMetric(memSize, 'byte') + ' / ' + formatMetric(memLimit, 'byte'),
-      dataTestSubj: 'memory'
+      'data-test-subj': 'memory'
     },
     {
       label: intl.formatMessage({
@@ -44,7 +44,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Requests'
       }),
       value: requests,
-      dataTestSubj: 'requests'
+      'data-test-subj': 'requests'
     },
     {
       label: intl.formatMessage({
@@ -52,7 +52,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Connections'
       }),
       value: connections,
-      dataTestSubj: 'connections'
+      'data-test-subj': 'connections'
     },
     {
       label: intl.formatMessage({
@@ -60,7 +60,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Max. Response Time'
       }),
       value: formatMetric(maxResponseTime, '0', 'ms'),
-      dataTestSubj: 'maxResponseTime'
+      'data-test-subj': 'maxResponseTime'
     }
   ];
 

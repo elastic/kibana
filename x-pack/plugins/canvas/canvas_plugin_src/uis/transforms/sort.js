@@ -23,7 +23,9 @@ export const sort = () => ({
     },
   ],
   resolve({ context }) {
-    if (getState(context) === 'ready') return { columns: get(getValue(context), 'columns', []) };
+    if (getState(context) === 'ready') {
+      return { columns: get(getValue(context), 'columns', []) };
+    }
 
     return { columns: [] };
   },

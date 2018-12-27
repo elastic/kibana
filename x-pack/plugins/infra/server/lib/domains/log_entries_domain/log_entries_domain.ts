@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimeKey } from '../../../../common/time';
+import { JsonObject } from '../../../../common/typed_json';
 import {
   InfraLogEntry,
   InfraLogMessageSegment,
   InfraLogSummaryBucket,
-} from '../../../../common/graphql/types';
-import { TimeKey } from '../../../../common/time';
-import { JsonObject } from '../../../../common/typed_json';
+} from '../../../graphql/types';
 import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
 import { InfraSourceConfiguration, InfraSources } from '../../sources';
 import { builtinRules } from './builtin_rules';

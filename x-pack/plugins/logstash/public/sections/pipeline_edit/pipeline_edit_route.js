@@ -15,10 +15,15 @@ import './components/pipeline_edit';
 import './components/upgrade_failure';
 import { updateLogstashSections } from 'plugins/logstash/lib/update_management_sections';
 import { Pipeline } from 'plugins/logstash/models/pipeline';
+import { getPipelineCreateBreadcrumbs, getPipelineEditBreadcrumbs } from '../breadcrumbs';
 
 routes
-  .when('/management/logstash/pipelines/pipeline/:id/edit')
-  .when('/management/logstash/pipelines/new-pipeline')
+  .when('/management/logstash/pipelines/pipeline/:id/edit', {
+    k7Breadcrumbs: getPipelineEditBreadcrumbs
+  })
+  .when('/management/logstash/pipelines/new-pipeline', {
+    k7Breadcrumbs: getPipelineCreateBreadcrumbs
+  })
   .defaults(/management\/logstash\/pipelines\/(new-pipeline|pipeline\/:id\/edit)/, {
     template: template,
     controller: class PipelineEditRouteController {
