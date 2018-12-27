@@ -21,8 +21,6 @@ import { uiModules } from '../modules';
 
 import toggleHtml from './kbn_global_timepicker.html';
 import { timefilter } from 'ui/timefilter';
-import { prettyDuration } from './pretty_duration';
-import { prettyInterval } from './pretty_interval';
 
 uiModules
   .get('kibana')
@@ -47,10 +45,6 @@ uiModules
       $scope.timefilterValues = {
         refreshInterval: refreshInterval,
         time: time,
-        display: {
-          time: prettyDuration(time.from, time.to, getConfig),
-          refreshInterval: prettyInterval(refreshInterval.value),
-        },
         isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
         isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
       };
