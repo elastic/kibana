@@ -28,9 +28,7 @@ import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { injectI18n } from '@kbn/i18n/react';
 
-export const ExplorerSwimlane = injectI18n(class extends React.Component {
-  static displayName = 'ExplorerSwimlane';
-
+export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.Component {
   static propTypes = {
     chartWidth: PropTypes.number.isRequired,
     MlTimeBuckets: PropTypes.func.isRequired,

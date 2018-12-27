@@ -52,18 +52,18 @@ export const ExplorerChartInfoTooltip = injectI18n(function ExplorerChartInfoToo
 
   const toolTipData = [
     {
-      title: intl.formatMessage({ id: 'xpack.ml.explorer.charts.infoTooltip.jobIdLabel', defaultMessage: 'job ID' }),
+      title: intl.formatMessage({ id: 'xpack.ml.explorer.charts.infoTooltip.jobIdTitle', defaultMessage: 'job ID' }),
       description: jobId,
     },
     {
       title: intl.formatMessage({
-        id: 'xpack.ml.explorer.charts.infoTooltip.aggregationIntervalLabel',
+        id: 'xpack.ml.explorer.charts.infoTooltip.aggregationIntervalTitle',
         defaultMessage: 'aggregation interval'
       }),
       description: aggregationInterval,
     },
     {
-      title: intl.formatMessage({ id: 'xpack.ml.explorer.charts.infoTooltip.chartFunctionLabel', defaultMessage: 'chart function' }),
+      title: intl.formatMessage({ id: 'xpack.ml.explorer.charts.infoTooltip.chartFunctionTitle', defaultMessage: 'chart function' }),
       description: chartFunction,
     },
   ];
