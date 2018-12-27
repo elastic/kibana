@@ -34,13 +34,13 @@ const viewJobLabel: string = i18n.translate(
   }
 );
 
-interface ViewMlJobArgs {
+interface ViewMLJobArgs {
   serviceName: string;
-  transactionType: string;
+  transactionType?: string;
   location: any;
 }
 
-export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
+export const ViewMLJob: React.SFC<ViewMLJobArgs> = ({
   serviceName,
   transactionType,
   location,
@@ -48,7 +48,9 @@ export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
 }) => {
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
-  const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
+  const jobId = `${serviceName}-${
+    transactionType ? transactionType + '-' : ''
+  }high_mean_response_time`;
   const query = {
     _g: {
       ml: {
@@ -59,11 +61,11 @@ export const ViewMLJob: React.SFC<ViewMlJobArgs> = ({
 
   return (
     <UnconnectedKibanaLink
-      location={location}
       pathname={pathname}
       hash={hash}
       query={query}
       children={children}
+      location={location}
     />
   );
 };
@@ -150,6 +152,25 @@ export function RelativeLinkComponent({
   );
 }
 
+export function getKibanaHref(kibanaLinkArgs: KibanaLinkArgs): string {
+  const { location, pathname, hash, query = {} } = kibanaLinkArgs;
+  // Preserve current _g and _a
+  const currentQuery = toQuery(location.search);
+  const g = decodeAndMergeG(currentQuery._g, query._g);
+  const nextQuery = {
+    ...query,
+    _g: rison.encode(g),
+    _a: query._a ? rison.encode(query._a) : ''
+  };
+
+  const search = stringifyWithoutEncoding(nextQuery);
+  const href = url.format({
+    pathname: chrome.addBasePath(pathname),
+    hash: `${hash}?${search}`
+  });
+  return href;
+}
+
 // TODO:
 // Both KibanaLink and RelativeLink does similar things, are too magic, and have different APIs.
 // The initial idea with KibanaLink was to automatically preserve the timestamp (_g) when making links. RelativeLink went a bit overboard and preserves all query args
@@ -186,21 +207,12 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   query = {},
   ...props
 }) => {
-  // Preserve current _g and _a
-  const currentQuery = toQuery(location.search);
-  const g = decodeAndMergeG(currentQuery._g, query._g);
-  const nextQuery = {
-    ...query,
-    _g: rison.encode(g),
-    _a: query._a ? rison.encode(query._a) : ''
-  };
-
-  const search = stringifyWithoutEncoding(nextQuery);
-  const href = url.format({
-    pathname: chrome.addBasePath(pathname),
-    hash: `${hash}?${search}`
+  const href = getKibanaHref({
+    location,
+    pathname,
+    hash,
+    query
   });
-
   return <EuiLink {...props} href={href} />;
 };
 

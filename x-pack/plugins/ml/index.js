@@ -9,7 +9,8 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
-import { isAnnotationsFeatureAvailable } from './server/lib/check_annotations';
+import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
+
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { annotationRoutes } from './server/routes/annotations';
 import { jobRoutes } from './server/routes/anomaly_detectors';
@@ -43,7 +44,7 @@ export const ml = (kibana) => {
         euiIconType: 'machineLearningApp',
         main: 'plugins/ml/app',
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       home: ['plugins/ml/register_feature'],
       injectDefaultVars(server) {
@@ -78,13 +79,11 @@ export const ml = (kibana) => {
         ]
       };
 
-      const mlAnnotationsEnabled = await isAnnotationsFeatureAvailable(server);
-
       server.injectUiAppVars('ml', () => {
         const config = server.config();
         return {
           kbnIndex: config.get('kibana.index'),
-          mlAnnotationsEnabled,
+          mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
         };
       });
 

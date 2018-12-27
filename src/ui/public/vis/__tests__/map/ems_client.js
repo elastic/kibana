@@ -23,7 +23,7 @@ import EMS_FILES from './ems_mocks/sample_files_6.6.json';
 import EMS_TILES from './ems_mocks/sample_tiles_6.6.json';
 
 
-import { EMSClientV66 } from '../../../../../core_plugins/ems_util/common/ems_client';
+import { EMSClientV66 } from '../../../../../legacy/core_plugins/tile_map/common/ems_client';
 
 describe('ems_client', () => {
 

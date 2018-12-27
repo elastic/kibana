@@ -398,7 +398,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
-        await browser.pressKeys('\uE006');
+        await browser.pressKeys(browser.getKeys().RETURN);
       });
       await PageObjects.common.sleep(500);
     }
@@ -498,20 +498,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
+      log.debug(`selectField ${fieldValue}`);
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
         .field-select
       `;
-
-      await retry.try(async () => {
-        await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(fieldValue);
-        await browser.pressKeys('\uE006');
-      });
-      await PageObjects.common.sleep(500);
+      await find.clickByCssSelector(selector);
+      await find.setValue(`${selector} input.ui-select-search`, fieldValue);
+      await browser.pressKeys(browser.getKeys().RETURN);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -540,9 +536,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setInterval(newValue) {
+      log.debug(`Visualize.setInterval(${newValue})`);
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
-      await browser.pressKeys(browser.getKeys().RETURN);
+      // The interval element will only interpret space as "select this" if there
+      // was a long enough gap from the typing above to the space click.  Hence the
+      // need for the sleep.
+      await PageObjects.common.sleep(500);
+      await browser.pressKeys(browser.getKeys().SPACE);
     }
 
     async setCustomInterval(newValue) {
@@ -591,7 +592,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickGo() {
-      await testSubjects.click('visualizeEditorRenderButton');
+      await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
       const countOfDataCompleteFlags = 2;
@@ -883,6 +884,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getPieChartLabels() {
+      // Outer retry is because because of stale element references getting thrown on grabbing the data-label.
+      // I suspect it's due to a rendering bug with pie charts not emitting the render-complete flag
+      // when actually done rendering.
       return await retry.try(async () => {
         const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
@@ -997,11 +1001,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.allByCssSelector(zoomSelector);
     }
 
-    async clickMapButton(zoomSelector) {
+    async clickMapButton(zoomSelector, waitForLoading) {
       await retry.try(async () => {
         const zooms = await this.getZoomSelectors(zoomSelector);
         await Promise.all(zooms.map(async zoom => await zoom.click()));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        if (waitForLoading) {
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        }
       });
     }
 
@@ -1029,12 +1035,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return requestObject.aggs.filter_agg.filter.geo_bounding_box['geo.coordinates'];
     }
 
-    async clickMapZoomIn() {
-      await this.clickMapButton('a.leaflet-control-zoom-in');
+    async clickMapZoomIn(waitForLoading = true) {
+      await this.clickMapButton('a.leaflet-control-zoom-in', waitForLoading);
     }
 
-    async clickMapZoomOut() {
-      await this.clickMapButton('a.leaflet-control-zoom-out');
+    async clickMapZoomOut(waitForLoading = true) {
+      await this.clickMapButton('a.leaflet-control-zoom-out', waitForLoading);
     }
 
     async getMapZoomEnabled(zoomSelector) {

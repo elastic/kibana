@@ -78,6 +78,7 @@ export async function FindProvider({ getService }) {
     }
 
     async setValue(selector, text) {
+      log.debug(`find.setValue(${selector}, ${text})`);
       return await retry.try(async () => {
         const element = await this.byCssSelector(selector);
         await element.click();

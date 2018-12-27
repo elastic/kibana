@@ -32,6 +32,7 @@ export enum EmbeddableActionTypeKeys {
   SET_STAGED_FILTER = 'SET_STAGED_FILTER',
   CLEAR_STAGED_FILTERS = 'CLEAR_STAGED_FILTERS',
   EMBEDDABLE_ERROR = 'EMBEDDABLE_ERROR',
+  REQUEST_RELOAD = 'REQUEST_RELOAD',
 }
 
 export interface EmbeddableIsInitializingAction
@@ -58,6 +59,8 @@ export interface SetStagedFilterAction
 
 export interface ClearStagedFiltersAction
   extends KibanaAction<EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS, undefined> {}
+export interface RequestReload
+  extends KibanaAction<EmbeddableActionTypeKeys.REQUEST_RELOAD, undefined> {}
 
 export interface EmbeddableErrorActionPayload {
   error: string | object;
@@ -87,6 +90,8 @@ export const clearStagedFilters = createAction(EmbeddableActionTypeKeys.CLEAR_ST
 export const embeddableError = createAction<EmbeddableErrorActionPayload>(
   EmbeddableActionTypeKeys.EMBEDDABLE_ERROR
 );
+
+export const requestReload = createAction(EmbeddableActionTypeKeys.REQUEST_RELOAD);
 
 /**
  * The main point of communication from the embeddable to the dashboard. Any time state in the embeddable

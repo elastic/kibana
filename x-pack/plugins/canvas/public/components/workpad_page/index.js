@@ -10,23 +10,25 @@ import { compose, withState, withProps } from 'recompose';
 import { notify } from '../../lib/notify';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
 import { setClipboardData, getClipboardData } from '../../lib/clipboard';
-import { removeElements, duplicateElement } from '../../state/actions/elements';
+import { cloneSubgraphs } from '../../lib/clone_subgraphs';
+import { removeElements, rawDuplicateElement } from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
-import { getElements, isWriteable } from '../../state/selectors/workpad';
+import { getNodes, isWriteable } from '../../state/selectors/workpad';
+import { flatten } from '../../lib/aeroelastic/functional';
 import { withEventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
 
 const mapStateToProps = (state, ownProps) => {
   return {
     isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
-    elements: getElements(state, ownProps.page.id),
+    elements: getNodes(state, ownProps.page.id),
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    duplicateElement: pageId => selectedElement =>
-      dispatch(duplicateElement(selectedElement, pageId)),
+    rawDuplicateElement: pageId => (selectedElement, root) =>
+      dispatch(rawDuplicateElement(selectedElement, pageId, root)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
   };
 };
@@ -78,14 +80,35 @@ export const WorkpadPage = compose(
       setUpdateCount,
       page,
       elements: pageElements,
+      rawDuplicateElement,
       removeElements,
-      duplicateElement,
     }) => {
-      const { shapes, selectedLeafShapes = [], cursor } = aeroelastic.getStore(
+      const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(
         page.id
       ).currentScene;
       const elementLookup = new Map(pageElements.map(element => [element.id, element]));
-      const selectedElementIds = selectedLeafShapes;
+      const recurseGroupTree = shapeId => {
+        return [
+          shapeId,
+          ...flatten(
+            shapes
+              .filter(s => s.parent === shapeId && s.type !== 'annotation')
+              .map(s => s.id)
+              .map(recurseGroupTree)
+          ),
+        ];
+      };
+      const selectedPrimaryShapeObjects = selectedPrimaryShapes.map(id =>
+        shapes.find(s => s.id === id)
+      );
+      const selectedPersistentPrimaryShapes = flatten(
+        selectedPrimaryShapeObjects.map(shape =>
+          shape.subtype === 'adHocGroup'
+            ? shapes.filter(s => s.parent === shape.id && s.type !== 'annotation').map(s => s.id)
+            : [shape.id]
+        )
+      );
+      const selectedElementIds = flatten(selectedPersistentPrimaryShapes.map(recurseGroupTree));
       const selectedElements = [];
       const elements = shapes.map(shape => {
         let element = null;
@@ -114,21 +137,25 @@ export const WorkpadPage = compose(
         },
         copyElements: () => {
           if (selectedElements.length) {
-            setClipboardData(selectedElements);
+            setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
             notify.success('Copied element to clipboard');
           }
         },
         cutElements: () => {
           if (selectedElements.length) {
-            setClipboardData(selectedElements);
+            setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
             removeElements(page.id)(selectedElementIds);
             notify.success('Copied element to clipboard');
           }
         },
         pasteElements: () => {
-          const elements = JSON.parse(getClipboardData());
-          if (elements) {
-            elements.map(element => duplicateElement(page.id)(element));
+          const { selectedElements, rootShapes } = JSON.parse(getClipboardData());
+          const indices = rootShapes.map(r => selectedElements.findIndex(s => s.id === r));
+          const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
+          if (clonedElements) {
+            clonedElements.map((element, index) =>
+              rawDuplicateElement(page.id)(element, indices.indexOf(index) >= 0)
+            );
           }
         },
       };
