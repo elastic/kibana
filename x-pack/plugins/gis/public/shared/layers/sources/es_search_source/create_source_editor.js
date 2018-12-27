@@ -7,22 +7,15 @@
 import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
+import { EuiFormRow } from '@elastic/eui';
 
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { MultiFieldSelect } from '../../../components/multi_field_select';
 import { indexPatternService } from '../../../../kibana_services';
-
-import {
-  EuiFormRow,
-  EuiSwitch,
-} from '@elastic/eui';
 
 function filterGeoField(field) {
   return ['geo_point', 'geo_shape'].includes(field.type);
 }
-
-const DEFAULT_LIMIT = 2048;
 
 export class CreateSourceEditor extends Component {
 
@@ -36,11 +29,6 @@ export class CreateSourceEditor extends Component {
       isLoadingIndexPattern: false,
       indexPatternId: '',
       geoField: '',
-      selectedFields: [],
-      limit: DEFAULT_LIMIT,
-      filterByMapBounds: true,
-      showTooltip: true,
-      tooltipProperties: [],
     };
   }
 
@@ -64,7 +52,6 @@ export class CreateSourceEditor extends Component {
       isLoadingIndexPattern: true,
       indexPattern: undefined,
       geoField: undefined,
-      tooltipProperties: [],
     }, this.debouncedLoad.bind(null, indexPatternId));
   }
 
@@ -110,7 +97,6 @@ export class CreateSourceEditor extends Component {
     }, this.previewLayer);
   };
 
-
   onLimitChange = e => {
     const sanitizedValue = parseInt(e.target.value, 10);
     this.setState({
@@ -118,41 +104,15 @@ export class CreateSourceEditor extends Component {
     }, this.previewLayer);
   }
 
-  onFilterByMapBoundsChange = e => {
-    this.setState({
-      filterByMapBounds: e.target.checked,
-    }, this.previewLayer);
-  };
-
-  onShowTooltipChange = e => {
-    this.setState({
-      showTooltip: e.target.checked,
-    }, this.previewLayer);
-  };
-
-  onTooltipPropertiesSelect = (propertyNames) => {
-    this.setState({
-      tooltipProperties: propertyNames
-    }, this.previewLayer);
-  };
-
   previewLayer = () => {
     const {
       indexPatternId,
       geoField,
-      limit,
-      filterByMapBounds,
-      showTooltip,
-      tooltipProperties,
     } = this.state;
     if (indexPatternId && geoField) {
       this.props.onSelect({
         indexPatternId,
         geoField,
-        limit: limit ? limit : DEFAULT_LIMIT,
-        filterByMapBounds,
-        showTooltip,
-        tooltipProperties,
       });
     }
   }
@@ -177,59 +137,9 @@ export class CreateSourceEditor extends Component {
     );
   }
 
-  _renderTooltipConfig() {
-    if (!this.state.indexPattern) {
-      return;
-    }
-
-    let fieldSelectFormRow;
-    if (this.state.showTooltip) {
-      fieldSelectFormRow = (
-        <EuiFormRow
-          label="Fields displayed in tooltip"
-        >
-          <MultiFieldSelect
-            placeholder="Select field(s)"
-            value={this.state.tooltipProperties}
-            onChange={this.onTooltipPropertiesSelect}
-            fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
-          />
-        </EuiFormRow>
-      );
-    }
-
-    return (
-      <Fragment>
-        {/* <EuiFormRow compressed>
-          <EuiSwitch
-            label="Show tooltip on feature mouseover"
-            checked={this.state.showTooltip}
-            onChange={this.onShowTooltipChange}
-          />
-        </EuiFormRow> */}
-
-        {fieldSelectFormRow}
-      </Fragment>
-    );
-  }
-
   render() {
     return (
       <Fragment>
-
-        {/* <EuiFormRow
-          label="Limit"
-          helpText="Maximum documents retrieved from elasticsearch."
-          compressed
-        >
-          <EuiFieldNumber
-            placeholder="10"
-            value={this.state.limit}
-            onChange={this.onLimitChange}
-            aria-label="Limit"
-          />
-        </EuiFormRow> */}
-
 
         <EuiFormRow
           label="Index pattern"
@@ -243,17 +153,6 @@ export class CreateSourceEditor extends Component {
         </EuiFormRow>
 
         {this._renderGeoSelect()}
-
-        {this._renderTooltipConfig()}
-
-
-        <EuiFormRow>
-          <EuiSwitch
-            label="Use map extent to filter data"
-            checked={this.state.filterByMapBounds}
-            onChange={this.onFilterByMapBoundsChange}
-          />
-        </EuiFormRow>
 
       </Fragment>
     );

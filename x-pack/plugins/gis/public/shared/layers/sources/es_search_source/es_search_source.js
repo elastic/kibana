@@ -19,6 +19,9 @@ import { hitsToGeoJson, createExtentFilter } from '../../../../elasticsearch_geo
 import { timefilter } from 'ui/timefilter/timefilter';
 import { ESSourceDetails } from '../../../components/es_source_details';
 import { CreateSourceEditor } from './create_source_editor';
+import { UpdateSourceEditor } from './update_source_editor';
+
+const DEFAULT_LIMIT = 2048;
 
 export class ESSearchSource extends VectorSource {
 
@@ -42,15 +45,25 @@ export class ESSearchSource extends VectorSource {
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
-      limit: descriptor.limit,
-      filterByMapBounds: descriptor.filterByMapBounds,
-      showTooltip: _.get(descriptor, 'showTooltip', false),
+      limit: _.get(descriptor, 'limit', DEFAULT_LIMIT),
+      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', true),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
   }
 
   destroy() {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
+  }
+
+  renderSourceSettingsEditor({ onChange }) {
+    return (
+      <UpdateSourceEditor
+        indexPatternId={this._descriptor.indexPatternId}
+        onChange={onChange}
+        filterByMapBounds={this._descriptor.filterByMapBounds}
+        tooltipProperties={this._descriptor.tooltipProperties}
+      />
+    );
   }
 
   async getNumberFields() {
@@ -156,7 +169,7 @@ export class ESSearchSource extends VectorSource {
   }
 
   canFormatFeatureProperties() {
-    return this._descriptor.showTooltip && this._descriptor.tooltipProperties.length > 0;
+    return this._descriptor.tooltipProperties.length > 0;
   }
 
   async filterAndFormatProperties(properties) {
