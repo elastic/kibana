@@ -33,28 +33,6 @@
   overflow: hidden;
 }
 
-.directoryView {
-  max-height: 60%;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  overflow: auto;
-}
-
-.directoryItem {
-  height: 2rem;
-  line-height: 2rem;
-  margin: 0 0.5rem;
-}
-
-.directoryItem>a {
-  display: block;
-  width: 100px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
 .commitsHeader {
   font-size: 1.5rem;
 }
