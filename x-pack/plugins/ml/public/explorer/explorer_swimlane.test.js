@@ -93,7 +93,7 @@ describe('ExplorerSwimlane', () => {
   test('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
 
-    const wrapper = mountWithIntl(<ExplorerSwimlane.wrappedComponent
+    const wrapper = mountWithIntl(<ExplorerSwimlane.WrappedComponent
       chartWidth={mockChartWidth}
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mockOverallSwimlaneData}
