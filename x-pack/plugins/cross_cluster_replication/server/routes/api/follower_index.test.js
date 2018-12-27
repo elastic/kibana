@@ -32,7 +32,8 @@ const registerHandlers = () => {
 
   const HANDLER_INDEX_TO_ACTION = {
     0: 'list',
-    1: 'create',
+    1: 'get',
+    2: 'create',
   };
 
   const server = {
@@ -101,6 +102,22 @@ describe('[CCR API Routes] Follower Index', () => {
 
       expect(response.indices.length).toEqual(totalResult);
       expect(Object.keys(autoFollowPattern)).toEqual(DESERIALIZED_KEYS);
+    });
+  });
+
+  describe('get()', () => {
+    beforeEach(() => {
+      routeHandler = routeHandlers.get;
+    });
+
+    it('should return a single resource even though ES return an array with 1 item', async () => {
+      const followerIndex = getFollowerIndexMock();
+      const esResponse = { indices: [followerIndex] };
+
+      setHttpRequestResponse(null, esResponse);
+
+      const response = await routeHandler({ params: { id: 1 } });
+      expect(Object.keys(response)).toEqual(DESERIALIZED_KEYS);
     });
   });
 
