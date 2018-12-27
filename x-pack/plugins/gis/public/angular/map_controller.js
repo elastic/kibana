@@ -128,7 +128,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       return { error: err };
     }
 
-
     if (id) {
       toastNotifications.addSuccess({
         title: `Saved '${savedMap.title}'`,
