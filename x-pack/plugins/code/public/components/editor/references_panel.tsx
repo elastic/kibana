@@ -28,7 +28,6 @@ export class ReferencesPanel extends React.Component<Props> {
 
   public render() {
     const body = this.props.isLoading ? <EuiLoadingKibana size="xl" /> : this.renderGroupByRepo();
-
     return (
       <EuiPanel grow={false} className="referencesPanel">
         <EuiButtonIcon
@@ -41,6 +40,7 @@ export class ReferencesPanel extends React.Component<Props> {
         <EuiTitle size="s">
           <h3>{this.props.title}</h3>
         </EuiTitle>
+
         <div className="autoOverflow">{body}</div>
       </EuiPanel>
     );
@@ -57,10 +57,9 @@ export class ReferencesPanel extends React.Component<Props> {
       <EuiAccordion
         id={repo}
         key={repo}
-        // @ts-ignore
-        buttonClassName="euiAccordionForm__button"
+        buttonContentClassName="referenceAccordionButton"
         buttonContent={repo}
-        paddingSize="l"
+        paddingSize="s"
         initialIsOpen={true}
       >
         {files.map(file => this.renderReference(file))}
