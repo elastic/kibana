@@ -80,7 +80,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.selectField('geo.coordinates');
         });
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       /**
@@ -206,7 +205,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.toggleOpenEditor(2);
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
-          await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.visualize.openInspector();
           const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
           await PageObjects.visualize.closeInspector();
@@ -216,7 +214,6 @@ export default function ({ getService, getPageObjects }) {
         after(async () => {
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
-          await PageObjects.header.waitUntilLoadingHasFinished();
         });
       });
     });

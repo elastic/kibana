@@ -12,7 +12,7 @@ import {
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { DiscoverButton } from './DiscoverButton';
 
-function getDiscoverQuery(error: APMError, kuery: string) {
+function getDiscoverQuery(error: APMError, kuery?: string) {
   const serviceName = error.context.service.name;
   const groupId = error.error.grouping_key;
   let query = `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:"${groupId}"`;
@@ -32,9 +32,9 @@ function getDiscoverQuery(error: APMError, kuery: string) {
   };
 }
 
-export const DiscoverErrorButton: React.SFC<{
+const DiscoverErrorButton: React.SFC<{
   readonly error: APMError;
-  readonly kuery: string;
+  readonly kuery?: string;
 }> = ({ error, kuery, children }) => {
   return (
     <DiscoverButton
@@ -43,3 +43,5 @@ export const DiscoverErrorButton: React.SFC<{
     />
   );
 };
+
+export { DiscoverErrorButton };

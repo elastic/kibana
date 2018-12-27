@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 import fieldsRoutes from './server/routes/fields';
 import visDataRoutes from './server/routes/vis';
 
@@ -28,7 +30,7 @@ export default function (kibana) {
       visTypes: [
         'plugins/metrics/kbn_vis_types'
       ],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
 
     config(Joi) {
