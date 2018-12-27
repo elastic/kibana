@@ -64,10 +64,6 @@ export const CrossClusterReplicationHome = injectI18n(
     }]
 
     componentDidMount() {
-      const { match: { params: { section } } } = this.props;
-      this.setState({
-        activeSection: section
-      });
       chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
     }
 
@@ -115,7 +111,7 @@ export const CrossClusterReplicationHome = injectI18n(
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
-                      defaultMessage="Create a follower"
+                      defaultMessage="Create a follower index"
                     />
                   </EuiButton>
                 )}

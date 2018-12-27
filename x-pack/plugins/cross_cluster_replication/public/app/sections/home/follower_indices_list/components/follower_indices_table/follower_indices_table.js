@@ -78,7 +78,7 @@ export const FollowerIndicesTable = injectI18n(
           );
         }
       }, {
-        field: 'shards[0].remoteCluster',
+        field: 'remoteCluster',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
           defaultMessage: 'Cluster',
@@ -86,7 +86,7 @@ export const FollowerIndicesTable = injectI18n(
         truncateText: true,
         sortable: true,
       }, {
-        field: 'shards[0].leaderIndex',
+        field: 'leaderIndex',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexList.table.leaderIndexColumnTitle',
           defaultMessage: 'Leader index',
@@ -104,7 +104,7 @@ export const FollowerIndicesTable = injectI18n(
               const label = i18n.translate(
                 'xpack.crossClusterReplication.followerIndexList.table.actionDeleteDescription',
                 {
-                  defaultMessage: 'Delete follower',
+                  defaultMessage: 'Delete follower index',
                 }
               );
 
@@ -130,7 +130,7 @@ export const FollowerIndicesTable = injectI18n(
           {
             render: ({ /*name*/ }) => {
               const label = i18n.translate('xpack.crossClusterReplication.followerIndexList.table.actionEditDescription', {
-                defaultMessage: 'Edit follower',
+                defaultMessage: 'Edit follower index',
               });
 
               return (

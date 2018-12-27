@@ -52,6 +52,8 @@ export class DetailPanelUi extends Component {
     const {
       followerIndex: {
         name,
+        remoteCluster,
+        leaderIndex,
         shards,
       },
     } = this.props;
@@ -85,7 +87,7 @@ export class DetailPanelUi extends Component {
                 </EuiDescriptionListTitle>
 
                 <EuiDescriptionListDescription>
-                  {shards[0].remoteCluster}
+                  {remoteCluster}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
 
@@ -100,7 +102,7 @@ export class DetailPanelUi extends Component {
                 </EuiDescriptionListTitle>
 
                 <EuiDescriptionListDescription>
-                  {shards[0].leaderIndex}
+                  {leaderIndex}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             </EuiFlexGroup>

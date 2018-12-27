@@ -15,13 +15,19 @@ const initialState = {
 
 const success = action => `${action}_SUCCESS`;
 
+const parseFollowerIndex = (followerIndex) => {
+  // Extract remote cluster and leader index from follower index shard information
+  const { remoteCluster, leaderIndex } = followerIndex.shards[0];
+
+  return { ...followerIndex, remoteCluster, leaderIndex };
+};
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.FOLLOWER_INDEX_LOAD): {
-      return { ...state, byId: arrayToObject(action.payload.indices, 'name') };
+      return { ...state, byId: arrayToObject(action.payload.indices.map(parseFollowerIndex), 'name') };
     }
     case success(t.FOLLOWER_INDEX_GET): {
-      return { ...state, byId: { ...state.byId, [action.payload.name]: action.payload } };
+      return { ...state, byId: { ...state.byId, [action.payload.name]: parseFollowerIndex(action.payload) } };
     }
     case t.FOLLOWER_INDEX_SELECT_DETAIL: {
       return { ...state, selectedDetailId: action.payload };

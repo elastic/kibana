@@ -92,7 +92,7 @@ export const FollowerIndicesList = injectI18n(
             <h1>
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
-                defaultMessage="Create your first follower"
+                defaultMessage="Create your first follower index"
               />
             </h1>
           )}
@@ -115,7 +115,7 @@ export const FollowerIndicesList = injectI18n(
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.addFollowerButtonLabel"
-                defaultMessage="Create a follower"
+                defaultMessage="Create a follower index"
               />
             </EuiButton>
           }
