@@ -51,9 +51,8 @@ export interface Tab {
 
 export function getPropertyTabNames(selected: string[]): Tab[] {
   return PROPERTY_CONFIG.filter(
-    ({ key, required }: { key: string; required: boolean }) =>
-      required || selected.includes(key)
-  ).map(({ key, label }: Tab) => ({ key, label }));
+    ({ key, required }) => required || selected.includes(key)
+  ).map(({ key, label }) => ({ key, label }));
 }
 
 function getAgentFeatureText(featureName: string, intl: InjectedIntl) {
