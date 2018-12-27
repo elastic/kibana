@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Promise from 'bluebird';
 import {
   REPORT_INTERVAL_MS,
   LOCALSTORAGE_KEY,
@@ -21,36 +20,39 @@ export class Telemetry {
     this._$http = $injector.get('$http');
     this._telemetryUrl = $injector.get('telemetryUrl');
     this._telemetryOptedIn = $injector.get('telemetryOptedIn');
-    this._attributes = this._storage.get(LOCALSTORAGE_KEY) || {};
     this._fetchTelemetry = fetchTelemetry;
     this._sending = false;
-  }
 
-  _set(key, value) {
-    this._attributes[key] = value;
-  }
-
-  _get(key) {
-    return this._attributes[key];
+    // try to load the local storage data
+    const attributes = this._storage.get(LOCALSTORAGE_KEY) || {};
+    this._lastReport = attributes.lastReport;
   }
 
   _saveToBrowser() {
-    this._storage.set(LOCALSTORAGE_KEY, this._attributes);
+    // we are the only code that manipulates this key, so it's safe to blindly overwrite the whole object
+    this._storage.set(LOCALSTORAGE_KEY, { lastReport: this._lastReport });
   }
 
-  /*
-   * Check time interval passage
+  /**
+   * Determine if we are due to send a new report.
+   *
+   * @returns {Boolean} true if a new report should be sent. false otherwise.
    */
   _checkReportStatus() {
     // check if opt-in for telemetry is enabled
     if (this._telemetryOptedIn) {
       // If the last report is empty it means we've never sent telemetry and
       // now is the time to send it.
-      if (!this._get('lastReport')) {
+      if (!this._lastReport) {
         return true;
       }
-      // If it's been a day since we last sent telemetry
-      if (Date.now() - parseInt(this._get('lastReport'), 10) > REPORT_INTERVAL_MS) {
+      try {
+        // If it's been a day since we last sent telemetry
+        if (Date.now() - parseInt(this._lastReport, 10) > REPORT_INTERVAL_MS) {
+          return true;
+        }
+      } catch {
+        // failed to parse; we'll overwrite it after we do send
         return true;
       }
     }
@@ -61,7 +63,7 @@ export class Telemetry {
   /**
    * Check report permission and if passes, send the report
    *
-   * This function never throws an exception.
+   * @returns {Promise} Always.
    */
   _sendIfDue() {
     if (this._sending || !this._checkReportStatus()) { return Promise.resolve(false); }
@@ -84,21 +86,26 @@ export class Telemetry {
       })
       // the response object is ignored because we do not check it
       .then(() => {
-        // we sent a report, so we need to record and store the current time stamp
-        this._set('lastReport', Date.now());
+        // we sent a report, so we need to record and store the current timestamp
+        this._lastReport = Date.now();
         this._saveToBrowser();
       })
       // no ajaxErrorHandlers for telemetry
       .catch(() => null)
-      .then(() => this._sending = false);
+      .then(() => {
+        this._sending = false;
+        return true; // sent, but not necessarilly successfully
+      });
   }
 
   /**
    * Public method
+   *
+   * @returns {Number} `window.setInterval` response to allow cancelling the interval.
    */
   start() {
     // continuously check if it's due time for a report
-    window.setInterval(() => this._sendIfDue(), 60000);
+    return window.setInterval(() => this._sendIfDue(), 60000);
   }
 
 } // end class
