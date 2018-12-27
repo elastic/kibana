@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './auto_follow_pattern';
-export * from './follower_index';
-export * from './api';
+export { FollowerIndicesList } from './follower_indices_list.container';

@@ -8,6 +8,7 @@ import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 import {
+  deserializeFollowerIndex,
   deserializeListFollowerIndices,
   serializeFollowerIndex,
 } from '../../lib/follower_index_serialization';
@@ -43,6 +44,35 @@ export const registerFollowerIndexRoutes = (server) => {
       }
     },
   });
+
+
+  /**
+   * Returns a single follower index pattern
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}`,
+    method: 'GET',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+
+      try {
+        const response = await callWithRequest('ccr.followerIndex', { id });
+        const followerIndex = response.indices[0];
+
+        return deserializeFollowerIndex(followerIndex);
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
+
 
   /**
    * Create a follower index
