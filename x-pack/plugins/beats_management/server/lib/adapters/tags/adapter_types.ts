@@ -8,10 +8,10 @@ import { FrameworkUser } from '../framework/adapter_types';
 
 export const RuntimeTagDoc = t.interface(
   {
-    id: t.string,
+    id: t.union([t.undefined, t.string]),
+    name: t.string,
     color: t.string,
     last_updated: t.string,
-    configuration_block_ids: t.array(t.string),
   },
   'StoredBeatTag'
 );

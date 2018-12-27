@@ -3,17 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as t from 'io-ts';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { intersection, uniq, values } from 'lodash';
-import { configBlockSchemas } from '../../common/config_schemas';
+import { validateConfigurationBlocks } from '../../common/config_block_validation';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
-import {
-  BeatTag,
-  ConfigurationBlock,
-  createConfigurationBlockInterface,
-  OutputTypesArray,
-} from '../../common/domain_types';
+import { BeatTag, ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
 import { entries } from '../utils/polyfills';
 import { ConfigurationBlockAdapter } from './adapters/configuration_blocks/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
@@ -68,11 +61,11 @@ export class CMTagsDomain {
     tagId: string,
     config: { color: string; configuration_blocks: ConfigurationBlock[] }
   ) {
-    const { isValid, message } = await this.validateConfigurationBlocks(
-      config.configuration_blocks
-    );
-    if (!isValid) {
-      return { isValid, result: message };
+    try {
+      await this.preventDupeConfigurationBlocks(config.configuration_blocks);
+      validateConfigurationBlocks(config.configuration_blocks);
+    } catch (e) {
+      return { isValid: false, result: e.message };
     }
 
     const existingTag = (await this.tagAdapter.getTagsWithIds(user, [tagId]))[0];
@@ -97,57 +90,7 @@ export class CMTagsDomain {
     };
   }
 
-  private validateConfigurationBlocks(configurationBlocks: ConfigurationBlock[]) {
-    const validationMap = {
-      isHosts: t.array(t.string),
-      isString: t.string,
-      isPeriod: t.string,
-      isPath: t.string,
-      isPaths: t.array(t.string),
-      isYaml: t.string,
-    };
-
-    for (const [index, block] of configurationBlocks.entries()) {
-      const blockSchema = configBlockSchemas.find(s => s.id === block.type);
-      if (!blockSchema) {
-        return {
-          isValid: false,
-          message: `Invalid config type of ${
-            block.type
-          } used in 'configuration_blocks' at index ${index}`,
-        };
-      }
-
-      const interfaceConfig = blockSchema.configs.reduce(
-        (props, config) => {
-          if (config.options) {
-            props[config.id] = t.union(config.options.map(opt => t.literal(opt.value)));
-          } else if (config.validation) {
-            props[config.id] = validationMap[config.validation];
-          }
-
-          return props;
-        },
-        {} as t.Props
-      );
-
-      const runtimeInterface = createConfigurationBlockInterface(
-        t.literal(blockSchema.id),
-        t.interface(interfaceConfig)
-      );
-
-      const validationResults = runtimeInterface.decode(block);
-
-      if (validationResults.isLeft()) {
-        return {
-          isValid: false,
-          message: `configuration_blocks validation error, configuration_blocks at index ${index} is invalid. ${
-            PathReporter.report(validationResults)[0]
-          }`,
-        };
-      }
-    }
-
+  private preventDupeConfigurationBlocks(configurationBlocks: ConfigurationBlock[]) {
     // Get all output types in the array of config blocks
     const outputTypes: string[] = configurationBlocks.reduce((typesCollector: string[], block) => {
       if (block.type !== 'output') {
@@ -160,7 +103,7 @@ export class CMTagsDomain {
 
     // If not a provided output type, fail validation
     if (outputTypes.some((type: string) => !OutputTypesArray.includes(type))) {
-      return { isValid: false, message: 'Invalid output type' };
+      throw new Error('Invalid output type');
     }
     const types = uniq(configurationBlocks.map(block => block.type));
 
@@ -168,7 +111,7 @@ export class CMTagsDomain {
     // we don't need to perform any further validation checks.
     const uniquenessEnforcingTypes = intersection(types, UNIQUENESS_ENFORCING_TYPES);
     if (uniquenessEnforcingTypes.length === 0) {
-      return { isValid: true };
+      return true;
     }
 
     // Count the number of uniqueness-enforcing types in the given configuration blocks
@@ -188,7 +131,7 @@ export class CMTagsDomain {
     // If there is no more than one of any uniqueness-enforcing types in the given
     // configuration blocks, we don't need to perform any further validation checks.
     if (values(typeCountMap).filter(count => count > 1).length === 0) {
-      return { isValid: true };
+      return true;
     }
 
     const message = entries(typeCountMap)
@@ -199,9 +142,6 @@ export class CMTagsDomain {
       )
       .join(' ');
 
-    return {
-      isValid: false,
-      message,
-    };
+    throw new Error(message);
   }
 }

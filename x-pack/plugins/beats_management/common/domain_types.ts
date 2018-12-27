@@ -23,6 +23,7 @@ export const createConfigurationBlockInterface = (
     {
       type: configType,
       description: t.union([t.undefined, t.string]),
+      tag_id: t.string,
       config: beatConfigInterface,
     },
     'ConfigBlock'
@@ -84,11 +85,6 @@ export interface BeatConfigSchema {
   parseValidResult?: (value: any) => any;
 }
 
-export interface BeatTag
-  extends InterfaceExcept<
-    t.TypeOf<typeof RuntimeTagDoc>,
-    'configuration_block_ids' | 'last_updated'
-  > {
+export interface BeatTag extends InterfaceExcept<t.TypeOf<typeof RuntimeTagDoc>, 'last_updated'> {
   last_updated: Date;
-  configuration_blocks: ConfigurationBlock[];
 }
