@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { editor, IPosition, IRange } from 'monaco-editor';
 import React from 'react';
+import styled from 'styled-components';
 import { ResizeChecker } from 'ui/resize_checker';
 import { monaco } from '../../monaco/monaco';
+
+const FileTitle = styled.h5`
+  color: #0079a5;
+  font-size: 13px;
+  font-weight: normal;
+  height: 15px;
+  text-decoration: underline;
+  margin-bottom: 8px;
+`;
 
 interface Props {
   code: string;
@@ -120,7 +130,7 @@ export class CodeBlock extends React.PureComponent<Props> {
     const linesCount = this.props.code.split('\n').length;
     return (
       <EuiPanel style={{ marginBottom: '2rem' }} paddingSize="s">
-        {this.props.file && <EuiText>{this.props.file}</EuiText>}
+        {this.props.file && <FileTitle>{this.props.file}</FileTitle>}
         <div ref={r => (this.el = r)} style={{ height: linesCount * 18 }} />
       </EuiPanel>
     );

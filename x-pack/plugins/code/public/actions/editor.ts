@@ -8,6 +8,11 @@ import { Range } from 'monaco-editor';
 import { createAction } from 'redux-actions';
 import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver';
 
+export interface ReferenceResults {
+  repos: GroupedRepoReferences[];
+  title: string;
+}
+
 export interface GroupedRepoReferences {
   repo: string;
   files: GroupedFileReferences[];
@@ -25,9 +30,7 @@ export interface GroupedFileReferences {
 }
 
 export const findReferences = createAction<TextDocumentPositionParams>('FIND REFERENCES');
-export const findReferencesSuccess = createAction<GroupedRepoReferences[]>(
-  'FIND REFERENCES SUCCESS'
-);
+export const findReferencesSuccess = createAction<ReferenceResults>('FIND REFERENCES SUCCESS');
 export const findReferencesFailed = createAction<Error>('FIND REFERENCES ERROR');
 export const closeReferences = createAction('CLOSE REFERENCES');
 export const hoverResult = createAction<Hover>('HOVER RESULT');

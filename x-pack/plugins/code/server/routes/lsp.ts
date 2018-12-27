@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import hapi from 'hapi';
 // @ts-ignore
-import { entries, groupBy } from 'lodash';
+import { groupBy, last } from 'lodash';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location } from 'vscode-languageserver-types';
@@ -83,20 +83,35 @@ export function lspRoute(
     method: 'POST',
     async handler(req, h: hapi.ResponseToolkit) {
       try {
+        // @ts-ignore
+        const { textDocument, position } = req.payload;
+        const { uri } = textDocument;
         const response: ResponseMessage = await promiseTimeout(
           serverOptions.lspRequestTimeoutMs,
           lspService.sendRequest(
             `textDocument/references`,
-            req.payload,
+            { textDocument: { uri }, position },
             serverOptions.lspRequestTimeoutMs / 2
           )
         );
+        const hover = await lspService.sendRequest('textDocument/hover', {
+          textDocument: { uri },
+          position,
+        });
+        let title: string;
+        if (hover.result && hover.result.contents) {
+          title = Array.isArray(hover.result.contents)
+            ? hover.result.contents[0].value
+            : (hover.result.contents as 'string');
+        } else {
+          title = last(uri.toString().split('/')) + `(${position.line}, ${position.character})`;
+        }
         const gitOperations = new GitOperations(serverOptions.repoPath);
         const files = [];
-        for (const entry of entries(groupBy(response.result as Location[], 'uri'))) {
-          const uri: string = entry[0];
-          const { repoUri, revision, file } = parseLspUrl(uri)!;
-          const locations: Location[] = entry[1];
+        const groupedLocations = groupBy(response.result as Location[], 'uri');
+        for (const url of Object.keys(groupedLocations)) {
+          const { repoUri, revision, file } = parseLspUrl(url)!;
+          const locations: Location[] = groupedLocations[url];
           const lines = locations.map(l => ({
             startLine: l.range.start.line,
             endLine: l.range.end.line,
@@ -134,7 +149,7 @@ export function lspRoute(
             highlights,
           });
         }
-        return groupBy(files, 'repo');
+        return { title, files: groupBy(files, 'repo'), uri, position };
       } catch (error) {
         const log = new Log(server);
         log.error(error);

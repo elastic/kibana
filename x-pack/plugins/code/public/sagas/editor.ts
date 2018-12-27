@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { entries } from 'lodash';
 import queryString from 'querystring';
 import { Action } from 'redux-actions';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
@@ -37,9 +35,9 @@ import { mainRoutePattern } from './patterns';
 function* handleReferences(action: Action<TextDocumentPositionParams>) {
   try {
     const params: TextDocumentPositionParams = action.payload!;
-    const response = yield call(requestFindReferences, params);
-    const results = entries(response).map((v: any) => ({ repo: v[0], files: v[1] }));
-    yield put(findReferencesSuccess(results));
+    const { title, files } = yield call(requestFindReferences, params);
+    const repos = Object.keys(files).map((repo: string) => ({ repo, files: files[repo] }));
+    yield put(findReferencesSuccess({ title, repos }));
   } catch (error) {
     yield put(findReferencesFailed(error));
   }
@@ -134,7 +132,8 @@ export function* watchLoadRepo() {
 
 function* handleMainRouteChange(action: Action<Match>) {
   const { location } = action.payload!;
-  const queryParams = queryString.parse(location.search);
+  const search = location.search.startsWith('?') ? location.search.substring(1) : location.search;
+  const queryParams = queryString.parse(search);
   const { resource, org, repo, path: file, pathType, revision, goto } = action.payload!.params;
   const repoUri = `${resource}/${org}/${repo}`;
   let position;

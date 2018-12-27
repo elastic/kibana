@@ -29,6 +29,7 @@ interface Props extends EditorActions {
   isReferencesOpen: boolean;
   isReferencesLoading: boolean;
   references: any[];
+  referencesTitle: string;
   fileContent?: string;
   fileLanguage?: string;
   hover?: Hover;
@@ -104,24 +105,6 @@ export class EditorComponent extends React.Component<Props> {
     }
   }
 
-  private getTitleFromHover() {
-    const { hover } = this.props;
-    if (hover) {
-      let content;
-      if (Array.isArray(hover.contents)) {
-        content = hover.contents[0];
-      } else {
-        content = hover.contents;
-      }
-      if (typeof content === 'string') {
-        return content;
-      } else if (content && content.value) {
-        return content.value;
-      }
-    }
-    return '';
-  }
-
   private renderReferences() {
     return (
       this.props.isReferencesOpen && (
@@ -129,7 +112,7 @@ export class EditorComponent extends React.Component<Props> {
           onClose={this.props.closeReferences}
           references={this.props.references}
           isLoading={this.props.isReferencesLoading}
-          title={this.getTitleFromHover()}
+          title={this.props.referencesTitle}
           refUrl={this.props.refUrl}
         />
       )
@@ -146,6 +129,7 @@ const mapStateToProps = (state: RootState) => ({
   isReferencesOpen: state.editor.showing,
   isReferencesLoading: state.editor.loading,
   references: state.editor.references,
+  referencesTitle: state.editor.referencesTitle,
   hover: state.editor.hover,
   refUrl: refUrlSelector(state),
   revealPosition: state.editor.revealPosition,

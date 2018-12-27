@@ -24,11 +24,13 @@ export interface EditorState {
   currentHover?: Hover;
   refPayload?: TextDocumentPositionParams;
   revealPosition?: Position;
+  referencesTitle: string;
 }
 const initialState: EditorState = {
   loading: false,
   showing: false,
   references: [],
+  referencesTitle: '',
 };
 
 export const editor = handleActions(
@@ -40,10 +42,13 @@ export const editor = handleActions(
         draft.loading = true;
         draft.references = initialState.references;
         draft.hover = state.currentHover;
+        draft.referencesTitle = initialState.referencesTitle;
       }),
     [String(findReferencesSuccess)]: (state: EditorState, action: any) =>
       produce<EditorState>(state, draft => {
-        draft.references = action.payload;
+        const { title, repos } = action.payload;
+        draft.references = repos;
+        draft.referencesTitle = title;
         draft.loading = false;
       }),
     [String(findReferencesFailed)]: (state: EditorState) =>
