@@ -23,6 +23,7 @@ export function setHttpClient(client) {
 
 const extractData = (response) => response.data;
 
+/* Auto Follow Pattern */
 export const loadAutoFollowPatterns = () => (
   httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(extractData)
 );
@@ -49,6 +50,7 @@ export const deleteAutoFollowPattern = (id) => {
   return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids}`).then(extractData);
 };
 
+/* Follower Index */
 export const loadFollowerIndices = () => (
   httpClient.get(`${apiPrefix}/follower_indices`).then(extractData)
 );
@@ -57,6 +59,15 @@ export const getFollowerIndex = (id) => (
   httpClient.get(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`).then(extractData)
 );
 
+export const createFollowerIndex = (followerIndex) => (
+  httpClient.post(`${apiPrefix}/follower_indices`, followerIndex).then(extractData)
+);
+
+export const updateFollowerIndex = (id, followerIndex) => (
+  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`, followerIndex).then(extractData)
+);
+
+/* Stats */
 export const loadAutoFollowStats = () => (
   httpClient.get(`${apiPrefix}/stats/auto-follow`).then(extractData)
 );
