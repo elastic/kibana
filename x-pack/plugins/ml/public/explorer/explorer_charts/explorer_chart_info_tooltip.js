@@ -40,7 +40,7 @@ function TooltipDefinitionList({ toolTipData }) {
   );
 }
 
-export const ExplorerChartInfoTooltip = injectI18n(function ({
+export const ExplorerChartInfoTooltip = injectI18n(function ExplorerChartInfoTooltip({
   jobId,
   aggregationInterval,
   chartFunction,
