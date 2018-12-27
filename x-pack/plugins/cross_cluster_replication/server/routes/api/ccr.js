@@ -60,19 +60,4 @@ export const registerCcrRoutes = (server) => {
       return autoFollow;
     },
   });
-
-  /**
-   * Returns Follow stats
-   */
-  server.route({
-    path: `${API_BASE_PATH}/stats/follow`,
-    method: 'GET',
-    config: {
-      pre: [ licensePreRouting ]
-    },
-    handler: async (request) => {
-      const { follow } = await getStatsHandler(request);
-      return follow;
-    },
-  });
 };
