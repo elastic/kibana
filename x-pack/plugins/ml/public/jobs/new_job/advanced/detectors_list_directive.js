@@ -98,13 +98,13 @@ module.directive('mlJobDetectorsList', function ($modal, i18n) {
                 callback({
                   success: false,
                   message: i18n('xpack.ml.newJob.advanced.detectorsList.invalidExcludeFrequentParameterErrorMessage', {
-                    defaultMessage: '{excludeFrequent} value must be: "{all}", "{none}", "{by}" or "{over}"',
+                    defaultMessage: '{excludeFrequentParam} value must be: {allValue}, {noneValue}, {byValue} or {overValue}',
                     values: {
-                      excludeFrequent: 'exclude_frequent',
-                      all: 'all',
-                      none: 'none',
-                      by: 'by',
-                      over: 'over'
+                      excludeFrequentParam: 'exclude_frequent',
+                      allValue: '"all"',
+                      noneValue: '"none"',
+                      byValue: '"by"',
+                      overValue: '"over"'
                     }
                   })
                 });
