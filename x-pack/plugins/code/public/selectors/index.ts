@@ -57,3 +57,5 @@ export const treeCommitsSelector = (state: RootState) => {
     return state.file.treeCommits[path];
   }
 };
+
+export const requestedPathsSelector = (state: RootState) => state.file.requestedPaths;

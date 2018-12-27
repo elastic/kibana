@@ -5,7 +5,6 @@
  */
 
 import sinon from 'sinon';
-
 import { IndexerFactory } from '../indexer';
 import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
