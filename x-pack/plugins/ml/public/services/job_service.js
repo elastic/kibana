@@ -632,19 +632,18 @@ class JobService {
         })
         .catch((err) => {
           console.log('jobService error stopping datafeed:', err);
+          const couldNotStopDatafeedErrorMessage = i18n.translate('xpack.ml.jobService.couldNotStopDatafeedErrorMessage', {
+            defaultMessage: 'Could not stop datafeed for {jobId}',
+            values: { jobId },
+          });
+
           if (err.statusCode === 500) {
-            msgs.error(i18n.translate('xpack.ml.jobService.couldNotStopDatafeedErrorMessage', {
-              defaultMessage: 'Could not stop datafeed for {jobId}',
-              values: { jobId },
-            }));
+            msgs.error(couldNotStopDatafeedErrorMessage);
             msgs.error(i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
               defaultMessage: 'Request may have timed out and may still be running in the background.',
             }));
           } else {
-            msgs.error(i18n.translate('xpack.ml.jobService.couldNotStopDatafeedErrorMessage', {
-              defaultMessage: 'Could not stop datafeed for {jobId}',
-              values: { jobId },
-            }), err);
+            msgs.error(couldNotStopDatafeedErrorMessage, err);
           }
           reject(err);
         });
