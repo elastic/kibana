@@ -61,7 +61,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(el => el.getVisibleText()));
+      if (headerElements.length > 0) {
+        return await Promise.all(headerElements.map(el => el.getVisibleText()));
+      } else {
+        return [];
+      }
     }
 
     async openLoadSavedSearchPanel() {
@@ -118,10 +122,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickHistogramBar(i) {
-      await this.waitVisualisationLoaded();
-      const bars = await find.allByCssSelector(`.series.histogram rect`);
-      await bars[i].click();
-      await this.waitVisualisationLoaded();
+      return await retry.try(async () => {
+        await this.waitVisualisationLoaded();
+        const bars = await find.allByCssSelector(`.series.histogram rect`);
+        await bars[i].click();
+        await this.waitVisualisationLoaded();
+      });
     }
 
     async brushHistogram(from, to) {
