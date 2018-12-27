@@ -48,6 +48,7 @@ export function addToSiri(xKeys, series, point, id, label, agg) {
   } else {
     // add the point to the list of values at the correct position
     seriesValues.splice(xIndex, 0, point);
+    // TODO: recalculate values in xKeys.indexMap
   }
   return;
 }
