@@ -17,25 +17,27 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
-import { functions } from './functions';
+const { extname } = require('path');
 
-const basePath = chrome.getBasePath();
+const { transform } = require('babel-core');
 
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
+exports.createServerCodeTransformer = (sourceMaps) => {
+  return (content, path) => {
+    switch (extname(path)) {
+      case '.js':
+        const { code = '' } = transform(content.toString('utf8'), {
+          filename: path,
+          ast: false,
+          code: true,
+          sourceMaps: sourceMaps ? 'inline' : false,
+          babelrc: false,
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        });
+
+        return code;
+
+      default:
+        return content.toString('utf8');
+    }
+  };
 };
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-
-createSocket(basePath).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter();
-});
