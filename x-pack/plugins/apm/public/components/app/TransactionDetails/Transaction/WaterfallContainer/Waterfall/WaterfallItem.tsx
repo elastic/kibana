@@ -8,13 +8,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon } from '@elastic/eui';
+import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
 import {
   colors,
-  fontFamily,
-  fontFamilyCode,
   fontSize,
   fontSizes,
   px,
+  truncate,
   unit,
   units
 } from '../../../../../../style/variables';
@@ -60,30 +60,21 @@ const ItemBar = styled<IBarStyleProps, any>('div')`
   background-color: ${props => props.color};
 `;
 
-const ItemLabel = styled.div`
-  white-space: nowrap;
+const ItemBarInner = styled.span`
   position: absolute;
   right: 0;
-  width: auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  text-align: left;
-  margin: 0;
+  margin-top: 5px;
 `;
 
-const SpanLabel = styled(ItemLabel)`
+const SpanNameLabel = styled.span`
+  color: ${colors.gray2};
   font-weight: normal;
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
-  bottom: ${px(units.half)};
+  white-space: nowrap;
 `;
 
-const TransactionLabel = styled(ItemLabel)`
+const TransactionNameLabel = styled.span`
   font-weight: 600;
-  font-family: ${fontFamily};
-  font-size: ${fontSize};
-  bottom: ${px(units.quarter)};
+  white-space: nowrap;
 `;
 
 interface ITimelineMargins {
@@ -102,16 +93,43 @@ interface IWaterfallItemProps {
   onClick: () => any;
 }
 
-function Prefix({ item }: { item: IWaterfallItem }) {
-  if (item.docType !== 'transaction') {
-    return null;
+function PrefixIcon({ item }: { item: IWaterfallItem }) {
+  if (item.docType === 'span') {
+    const isDbType = item.span.span.type === 'db';
+    if (isDbType) {
+      return <EuiIcon type="database" />;
+    } else {
+      return null;
+    }
   }
 
-  return (
-    <React.Fragment>
-      <EuiIcon type="merge" />{' '}
-    </React.Fragment>
-  );
+  const isRumAgent = item.transaction.context.service.agent.name === 'js-base';
+  if (isRumAgent) {
+    return <EuiIcon type="globe" />;
+  }
+
+  return <EuiIcon type="merge" />;
+}
+
+const StyledDuration = styled.span`
+  font-size: 0.9em;
+  color: ${colors.gray2};
+  margin-left: ${px(units.quarter)};
+`;
+
+function Duration({ item }: { item: IWaterfallItem }) {
+  return <StyledDuration>{asTime(item.duration)}</StyledDuration>;
+}
+
+function HttpStatusCode({ item }: { item: IWaterfallItem }) {
+  // http status code for transactions of type 'request'
+  const httpStatusCode =
+    item.docType === 'transaction' &&
+    item.transaction.transaction.type === 'request'
+      ? item.transaction.transaction.result
+      : undefined;
+
+  return <span>{httpStatusCode}</span>;
 }
 
 export function WaterfallItem({
@@ -128,7 +146,8 @@ export function WaterfallItem({
 
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
-  const Label = item.docType === 'span' ? SpanLabel : TransactionLabel;
+  const NameLabel =
+    item.docType === 'span' ? SpanNameLabel : TransactionNameLabel;
 
   return (
     <Container
@@ -142,11 +161,12 @@ export function WaterfallItem({
         color={color}
         type={item.docType}
       />
-      <Label // using inline styles instead of props to avoid generating a css class for each item
+      <ItemBarInner // using inline styles instead of props to avoid generating a css class for each item
         style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
-        <Prefix item={item} /> {item.name}
-      </Label>
+        <PrefixIcon item={item} /> <HttpStatusCode item={item} />{' '}
+        <NameLabel>{item.name}</NameLabel> <Duration item={item} />
+      </ItemBarInner>
     </Container>
   );
 }
