@@ -349,8 +349,8 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
         datafeedIndices);
       toastNotifications.addDanger(intl.formatMessage({
         id: 'xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage',
-        defaultMessage: `Unable to view examples of documents with mlcategory {categoryId}
-as no mapping could be found for the categorization field {categorizationFieldName}`
+        defaultMessage: 'Unable to view examples of documents with mlcategory {categoryId} ' +
+          'as no mapping could be found for the categorization field {categorizationFieldName}'
       }, {
         categoryId,
         categorizationFieldName,

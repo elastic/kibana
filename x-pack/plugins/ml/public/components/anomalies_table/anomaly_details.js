@@ -204,8 +204,8 @@ function getDetailsItems(anomaly, examples, filter) {
         }
       }) : '';
       const description = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.causeValuesDescription', {
-        defaultMessage: `{causeEntityValue} (actual {actualValue},
-typical {typicalValue}, probability {probabilityValue})`,
+        defaultMessage: '{causeEntityValue} (actual {actualValue}, ' +
+          'typical {typicalValue}, probability {probabilityValue})',
         values: {
           causeEntityValue: cause.entityValue,
           actualValue: formatValue(cause.actual, source.function),
@@ -241,8 +241,8 @@ export class AnomalyDetails extends Component {
     if (anomaly.entityName !== undefined (source.partition_field_name !== undefined) &&
       (source.partition_field_name !== anomaly.entityName)) {
       anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyFoundForAndDetectedInDescription', {
-        defaultMessage: `{anomalySeverity} anomaly in {anomalyDetector} found for {anomalyEntityName} {anomalyEntityValue}
-detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}`,
+        defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector} found for {anomalyEntityName} {anomalyEntityValue} ' +
+          'detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
         values: {
           anomalySeverity: getSeverity(anomaly.severity),
           anomalyDetector: anomaly.detector,
@@ -283,19 +283,13 @@ detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}`,
       });
     }
 
-    if ((source.partition_field_name !== undefined) &&
-        (source.partition_field_name !== anomaly.entityName)) {
-      anomalyDescription += ` detected in ${source.partition_field_name}`;
-      anomalyDescription += ` ${source.partition_field_value}`;
-    }
-
     // Check for a correlatedByFieldValue in the source which will be present for multivariate analyses
     // where the record is anomalous due to relationship with another 'by' field value.
     let mvDescription = undefined;
     if (source.correlated_by_field_value !== undefined) {
       mvDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.multivariateDescription', {
-        defaultMessage: `multivariate correlations found in {sourceByFieldName};
-{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}`,
+        defaultMessage: 'multivariate correlations found in {sourceByFieldName}; ' +
+          '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
         values: {
           sourceByFieldName: source.by_field_name,
           sourceByFieldValue: source.by_field_value,
