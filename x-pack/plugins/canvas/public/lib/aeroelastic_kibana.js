@@ -26,6 +26,7 @@ export const aeroelastic = {
       shapeAdditions: nextScene.shapes,
       primaryUpdate,
       currentScene: nextScene,
+      configuration: nextScene.configuration,
     }))(aero.layout.nextScene, aero.layout.primaryUpdate);
 
     stores.get(page).setUpdater(updateScene);
