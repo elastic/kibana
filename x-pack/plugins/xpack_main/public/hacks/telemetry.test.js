@@ -223,7 +223,7 @@ describe('telemetry class', () => {
       };
       const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
 
-      expect.hasAssertions(true);
+      expect.hasAssertions();
 
       return telemetry._sendIfDue()
         .then(result => {
@@ -264,7 +264,7 @@ describe('telemetry class', () => {
       };
       const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
 
-      expect.hasAssertions(true);
+      expect.hasAssertions();
 
       return telemetry._sendIfDue()
         .then(result => {

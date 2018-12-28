@@ -46,13 +46,10 @@ export class Telemetry {
       if (!this._lastReport) {
         return true;
       }
-      try {
-        // If it's been a day since we last sent telemetry
-        if (Date.now() - parseInt(this._lastReport, 10) > REPORT_INTERVAL_MS) {
-          return true;
-        }
-      } catch (err) {
-        // failed to parse; we'll overwrite it after we do send
+      // returns NaN for any malformed value
+      const lastReport = parseInt(this._lastReport, 10);
+      // If it's been a day since we last sent telemetry
+      if (lastReport === NaN || (Date.now() - lastReport) > REPORT_INTERVAL_MS) {
         return true;
       }
     }
