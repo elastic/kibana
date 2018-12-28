@@ -48,3 +48,7 @@ export const deleteAutoFollowPattern = (id) => {
 
   return httpClient.delete(`${apiPrefix}/auto_follow_patterns/${ids}`).then(extractData);
 };
+
+export const loadAutoFollowStats = () => (
+  httpClient.get(`${apiPrefix}/stats/auto-follow`).then(extractData)
+);
