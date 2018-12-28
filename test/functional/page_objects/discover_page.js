@@ -131,13 +131,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async brushHistogram(from, to) {
-      await this.waitVisualisationLoaded();
-      const bars = await find.allByCssSelector('.series.histogram rect');
-      await browser.dragAndDrop(
-        { element: bars[from], xOffset: 0, yOffset: -5 },
-        { element: bars[to], xOffset: 0, yOffset: -5 }
-      );
-      await this.waitVisualisationLoaded();
+      return await retry.try(async () => {
+        await this.waitVisualisationLoaded();
+        const bars = await find.allByCssSelector('.series.histogram rect');
+        await browser.dragAndDrop(
+          { element: bars[from], xOffset: 0, yOffset: -5 },
+          { element: bars[to], xOffset: 0, yOffset: -5 }
+        );
+        await this.waitVisualisationLoaded();
+      });
     }
 
     async getCurrentQueryName() {
