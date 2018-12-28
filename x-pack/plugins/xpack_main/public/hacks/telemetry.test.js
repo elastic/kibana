@@ -21,7 +21,9 @@ describe('telemetry class', () => {
   // returns a function that behaves like the injector by fetching the requested key from the object directly
   // for example:
   // { '$http': jest.fn() } would be how to mock the '$http' injector value
-  const mockInjectorFromObject = object => key => object[key];
+  const mockInjectorFromObject = object => {
+    return { get: key => object[key] };
+  };
 
   describe('constructor', () => {
 
