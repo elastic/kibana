@@ -41,12 +41,7 @@ export class Telemetry {
   _checkReportStatus() {
     // check if opt-in for telemetry is enabled
     if (this._telemetryOptedIn) {
-      // If the last report is empty it means we've never sent telemetry and
-      // now is the time to send it.
-      if (!this._lastReport) {
-        return true;
-      }
-      // returns NaN for any malformed value
+      // returns NaN for any malformed or unset (null/undefined) value
       const lastReport = parseInt(this._lastReport, 10);
       // If it's been a day since we last sent telemetry
       if (isNaN(lastReport) || (Date.now() - lastReport) > REPORT_INTERVAL_MS) {
