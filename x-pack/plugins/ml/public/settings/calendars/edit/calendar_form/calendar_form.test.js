@@ -11,7 +11,7 @@ jest.mock('ui/chrome', () => ({
 }));
 
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { CalendarForm } from './calendar_form';
 
@@ -43,8 +43,8 @@ const testProps = {
 describe('CalendarForm', () => {
 
   test('Renders calendar form', () => {
-    const wrapper = shallow(
-      <CalendarForm {...testProps}/>
+    const wrapper = shallowWithIntl(
+      <CalendarForm.WrappedComponent {...testProps}/>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -57,8 +57,8 @@ describe('CalendarForm', () => {
       calendarId: 'test-calendar',
       description: 'test description',
     };
-    const wrapper = mount(
-      <CalendarForm {...editProps} />
+    const wrapper = mountWithIntl(
+      <CalendarForm.WrappedComponent {...editProps} />
     );
     const calendarId = wrapper.find('EuiTitle');
 
