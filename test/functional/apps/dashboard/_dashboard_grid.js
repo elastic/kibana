@@ -37,10 +37,9 @@ export default function ({ getService, getPageObjects }) {
         const lastVisTitle = 'Rendering Test: datatable';
         const panelTitleBeforeMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position1 = await panelTitleBeforeMove.getPosition();
-
         await browser.dragAndDrop(
           { element: panelTitleBeforeMove },
-          { xOffset: -20, yOffset: -450 }
+          { element: null, xOffset: -20, yOffset: -450 }
         );
 
         const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);

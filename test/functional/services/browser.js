@@ -119,14 +119,20 @@ export async function BrowserProvider({ getService }) {
       const actions = driver.actions({ bridge: true });
       const _from = from.element._webElement;
 
-      if (to.element instanceof WebElementWrapper) {
+      if (to.element instanceof WebElementWrapper && ((to.xOffset === undefined) || (to.yOffset === undefined))) {
         const _to = to.element._webElement;
         await actions.dragAndDrop(_from, _to).perform();
       } else {
+        let _to = { x: 0, y: 0 };
+        if (to.element instanceof WebElementWrapper) {
+          const position = await to.element.getPosition();
+          _to = { x: position.x, y: position.y };
+        }
+        const _toWithOffset = { x: _to.x + (to.xOffset || 0),  y: _to.y + (to.yOffset || 0) };
         await actions
           .move({ origin: _from })
           .press()
-          .move({ x: to.xOffset, y: to.yOffset, origin: 'pointer' })
+          .move({ x: Math.round(_toWithOffset.x), y: Math.round(_toWithOffset.y), origin: 'pointer' })
           .release()
           .perform();
       }
