@@ -30,6 +30,7 @@ import {
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
   TRIGGER_REFRESH_TIMER,
+  SET_MOUSE_COORDINATES,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -82,6 +83,7 @@ const INITIAL_STATE = {
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
   },
+  mouseCoordinates: null,
   selectedLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
@@ -91,6 +93,17 @@ export function map(state = INITIAL_STATE, action) {
   window._state = state;
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
+    case SET_MOUSE_COORDINATES:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          mouseCoordinates: {
+            lat: action.lat,
+            lon: action.lon
+          }
+        }
+      };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:

@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { MBMapContainer } from './view';
-import { mapExtentChanged, mapReady, mapDestroyed } from '../../../actions/store_actions';
+import { mapExtentChanged, mapReady, mapDestroyed, setMouseCoordinates } from '../../../actions/store_actions';
 import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
 
 function mapStateToProps(state = {}) {
@@ -28,6 +28,9 @@ function mapDispatchToProps(dispatch) {
     },
     onMapDestroyed: () => {
       dispatch(mapDestroyed());
+    },
+    setMouseCoordinates: ({ lat, lon }) => {
+      dispatch(setMouseCoordinates({ lat, lon }));
     }
   };
 }
