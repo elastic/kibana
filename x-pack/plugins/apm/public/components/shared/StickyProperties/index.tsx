@@ -40,6 +40,7 @@ const PropertyLabel = styled.div`
     cursor: help;
   }
 `;
+PropertyLabel.displayName = 'PropertyLabel';
 
 const PropertyValueDimmed = styled.span`
   color: ${colors.gray3};
@@ -49,6 +50,7 @@ const PropertyValue = styled.div`
   display: inline-block;
   line-height: ${px(unit)};
 `;
+PropertyValue.displayName = 'PropertyValue';
 
 const PropertyValueTruncated = styled.span`
   display: inline-block;
@@ -101,7 +103,7 @@ function getPropertyValue({
     );
   }
 
-  return <PropertyValue>{String(val)}</PropertyValue>;
+  return <PropertyValue>{val}</PropertyValue>;
 }
 
 export function StickyProperties({
