@@ -7,47 +7,47 @@
 import _ from 'lodash';
 
 export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
-  const features = hits
-    .map(hit => {
-      const value = _.get(hit, `_source[${geoFieldName}]`);
-      let geometries;
-      if (geoFieldType === 'geo_point') {
-        geometries = geoPointToGeometry(value);
-      } else if (geoFieldType === 'geo_shape') {
-        geometries = geoShapeToGeometry(value);
-      } else {
-        throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
-      }
+  const features = [];
+  hits.forEach(hit => {
+    const value = _.get(hit, `_source[${geoFieldName}]`);
+    let geometries;
+    if (geoFieldType === 'geo_point') {
+      geometries = geoPointToGeometry(value);
+    } else if (geoFieldType === 'geo_shape') {
+      geometries = geoShapeToGeometry(value);
+    } else {
+      throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
+    }
 
-      const properties = {};
-      for (const fieldName in hit._source) {
-        if (hit._source.hasOwnProperty(fieldName)) {
-          if (fieldName !== geoFieldName) {
-            properties[fieldName] = hit._source[fieldName];
-          }
+    const properties = {};
+    for (const fieldName in hit._source) {
+      if (hit._source.hasOwnProperty(fieldName)) {
+        if (fieldName !== geoFieldName) {
+          properties[fieldName] = hit._source[fieldName];
         }
       }
+    }
 
-      // hit.fields contains calculated values from docvalue_fields and script_fields
-      for (const fieldName in hit.fields) {
-        if (hit.fields.hasOwnProperty(fieldName)) {
-          const val = hit.fields[fieldName];
-          properties[fieldName] = Array.isArray(val) && val.length === 1 ? val[0] : val;
-        }
+    // hit.fields contains calculated values from docvalue_fields and script_fields
+    for (const fieldName in hit.fields) {
+      if (hit.fields.hasOwnProperty(fieldName)) {
+        const val = hit.fields[fieldName];
+        properties[fieldName] = Array.isArray(val) && val.length === 1 ? val[0] : val;
       }
+    }
 
-      return geometries.map(geometry => {
-        return {
-          type: 'Feature',
-          geometry: geometry,
-          properties: properties
-        };
+    return geometries.map(geometry => {
+      features.push({
+        type: 'Feature',
+        geometry: geometry,
+        properties: properties
       });
     });
+  });
 
   return {
     type: 'FeatureCollection',
-    features: _.flatten(features)
+    features: features
   };
 }
 
