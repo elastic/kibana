@@ -66,7 +66,7 @@ class CodeProjectTab extends React.PureComponent<
     ));
 
     return (
-      <div className="code-sidebar">
+      <div className="code-sidebar" data-test-subj="codeRepositoryList">
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>

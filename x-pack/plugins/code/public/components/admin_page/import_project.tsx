@@ -63,15 +63,21 @@ class CodeImportProject extends React.PureComponent<
                 value={this.state.value}
                 onChange={this.onChange}
                 aria-label="input project url"
+                data-test-subj="importRepositoryUrlInputBox"
                 isLoading={this.props.importLoading}
-                fullWidth
+                fullWidth={true}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {/* 
   // @ts-ignore */}
-            <ImportButton onClick={this.submitImportProject}>Import</ImportButton>
+            <ImportButton
+              onClick={this.submitImportProject}
+              data-test-subj="importRepositoryButton"
+            >
+              Import
+            </ImportButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </ImportWrapper>
