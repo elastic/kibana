@@ -27,6 +27,7 @@ export const AutoFollowPatternList = injectI18n(
     static propTypes = {
       loadAutoFollowPatterns: PropTypes.func,
       selectAutoFollowPattern: PropTypes.func,
+      loadAutoFollowStats: PropTypes.func,
       autoFollowPatterns: PropTypes.array,
       apiStatus: PropTypes.string,
       apiError: PropTypes.object,
@@ -48,9 +49,10 @@ export const AutoFollowPatternList = injectI18n(
     };
 
     componentDidMount() {
-      const { loadAutoFollowPatterns, selectAutoFollowPattern, history } = this.props;
+      const { loadAutoFollowPatterns, loadAutoFollowStats, selectAutoFollowPattern, history } = this.props;
 
       loadAutoFollowPatterns();
+      loadAutoFollowStats();
 
       // Select the pattern in the URL query params
       selectAutoFollowPattern(getQueryParamPattern(history));

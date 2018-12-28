@@ -63,7 +63,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'DELETE'
   });
 
-  ccr.followerIndices = ca({
+  ccr.stats = ca({
     urls: [
       {
         fmt: '/_ccr/stats',
@@ -72,7 +72,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
-  ccr.followerIndex = ca({
+  ccr.followerIndexStats = ca({
     urls: [
       {
         fmt: '/<%=id%>/_ccr/stats',

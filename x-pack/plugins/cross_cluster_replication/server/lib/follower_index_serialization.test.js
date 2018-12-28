@@ -43,36 +43,7 @@ describe('[CCR] follower index serialization', () => {
         time_since_last_read_millis: 'time since last read millis',
       };
 
-      const deserializedShard = {
-        id: 'shard id',
-        remoteCluster: 'remote cluster',
-        leaderIndex: 'leader index',
-        leaderGlobalCheckpoint: 'leader global checkpoint',
-        leaderMaxSequenceNum: 'leader max seq no',
-        followerGlobalCheckpoint: 'follower global checkpoint',
-        followerMaxSequenceNum: 'follower max seq no',
-        lastRequestedSequenceNum: 'last requested seq no',
-        outstandingReadRequestsCount: 'outstanding read requests',
-        outstandingWriteRequestsCount: 'outstanding write requests',
-        writeBufferOperationsCount: 'write buffer operation count',
-        writeBufferSizeBytes: 'write buffer size in bytes',
-        followerMappingVersion: 'follower mapping version',
-        followerSettingsVersion: 'follower settings version',
-        totalReadTimeMs: 'total read time millis',
-        totalReadRemoteExecTimeMs: 'total read remote exec time millis',
-        successfulReadRequestCount: 'successful read requests',
-        failedReadRequestsCount: 'failed read requests',
-        operationsReadCount: 'operations read',
-        bytesReadCount: 'bytes read',
-        totalWriteTimeMs: 'total write time millis',
-        successfulWriteRequestsCount: 'successful write requests',
-        failedWriteRequestsCount: 'failed write requests',
-        operationsWrittenCount: 'operations written',
-        readExceptions: ['read exception'],
-        timeSinceLastReadMs: 'time since last read millis',
-      };
-
-      expect(deserializeShard(serializedShard)).toEqual(deserializedShard);
+      expect(deserializeShard(serializedShard)).toMatchSnapshot();
     });
   });
 
@@ -87,66 +58,7 @@ describe('[CCR] follower index serialization', () => {
         }],
       };
 
-      const deserializedFollowerIndex = {
-        name: 'follower index name',
-        shards: [{
-          id: 'shard 1',
-          remoteCluster: undefined,
-          leaderIndex: undefined,
-          leaderGlobalCheckpoint: undefined,
-          leaderMaxSequenceNum: undefined,
-          followerGlobalCheckpoint: undefined,
-          followerMaxSequenceNum: undefined,
-          lastRequestedSequenceNum: undefined,
-          outstandingReadRequestsCount: undefined,
-          outstandingWriteRequestsCount: undefined,
-          writeBufferOperationsCount: undefined,
-          writeBufferSizeBytes: undefined,
-          followerMappingVersion: undefined,
-          followerSettingsVersion: undefined,
-          totalReadTimeMs: undefined,
-          totalReadRemoteExecTimeMs: undefined,
-          successfulReadRequestCount: undefined,
-          failedReadRequestsCount: undefined,
-          operationsReadCount: undefined,
-          bytesReadCount: undefined,
-          totalWriteTimeMs: undefined,
-          successfulWriteRequestsCount: undefined,
-          failedWriteRequestsCount: undefined,
-          operationsWrittenCount: undefined,
-          readExceptions: undefined,
-          timeSinceLastReadMs: undefined,
-        }, {
-          id: 'shard 2',
-          remoteCluster: undefined,
-          leaderIndex: undefined,
-          leaderGlobalCheckpoint: undefined,
-          leaderMaxSequenceNum: undefined,
-          followerGlobalCheckpoint: undefined,
-          followerMaxSequenceNum: undefined,
-          lastRequestedSequenceNum: undefined,
-          outstandingReadRequestsCount: undefined,
-          outstandingWriteRequestsCount: undefined,
-          writeBufferOperationsCount: undefined,
-          writeBufferSizeBytes: undefined,
-          followerMappingVersion: undefined,
-          followerSettingsVersion: undefined,
-          totalReadTimeMs: undefined,
-          totalReadRemoteExecTimeMs: undefined,
-          successfulReadRequestCount: undefined,
-          failedReadRequestsCount: undefined,
-          operationsReadCount: undefined,
-          bytesReadCount: undefined,
-          totalWriteTimeMs: undefined,
-          successfulWriteRequestsCount: undefined,
-          failedWriteRequestsCount: undefined,
-          operationsWrittenCount: undefined,
-          readExceptions: undefined,
-          timeSinceLastReadMs: undefined,
-        }],
-      };
-
-      expect(deserializeFollowerIndex(serializedFollowerIndex)).toEqual(deserializedFollowerIndex);
+      expect(deserializeFollowerIndex(serializedFollowerIndex)).toMatchSnapshot();
     });
   });
 

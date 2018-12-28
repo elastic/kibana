@@ -56,3 +56,7 @@ export const loadFollowerIndices = () => (
 export const getFollowerIndex = (id) => (
   httpClient.get(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`).then(extractData)
 );
+
+export const loadAutoFollowStats = () => (
+  httpClient.get(`${apiPrefix}/stats/auto-follow`).then(extractData)
+);

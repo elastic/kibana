@@ -18,20 +18,30 @@ export const isApiAuthorized = (scope) => createSelector(getApiError(scope), (er
   return error.status !== 403;
 });
 
+// Stats
+export const getStatsState = (state) => state.stats;
+export const getAutoFollowStats = createSelector(getStatsState, (statsState) => statsState.autoFollow);
+
 // Auto-follow pattern
 export const getAutoFollowPatternState = (state) => state.autoFollowPattern;
 export const getAutoFollowPatterns = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => autoFollowPatternsState.byId);
 export const getSelectedAutoFollowPatternId = (view = 'detail') => createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => (
   view === 'detail' ? autoFollowPatternsState.selectedDetailId : autoFollowPatternsState.selectedEditId
 ));
-export const getSelectedAutoFollowPattern = (view = 'detail') => createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
-  const propId = view === 'detail' ? 'selectedDetailId' : 'selectedEditId';
+export const getSelectedAutoFollowPattern = (view = 'detail') => createSelector(
+  getAutoFollowPatternState, getAutoFollowStats, (autoFollowPatternsState, autoFollowStatsState) => {
+    const propId = view === 'detail' ? 'selectedDetailId' : 'selectedEditId';
 
-  if(!autoFollowPatternsState[propId]) {
-    return null;
-  }
-  return autoFollowPatternsState.byId[autoFollowPatternsState[propId]];
-});
+    if(!autoFollowPatternsState[propId]) {
+      return null;
+    }
+    const id = autoFollowPatternsState[propId];
+    const autoFollowPattern = autoFollowPatternsState.byId[id];
+
+    // Check if any error and merge them on the auto-follow pattern
+    const errors = autoFollowStatsState && autoFollowStatsState.recentAutoFollowErrors[id] || [];
+    return autoFollowPattern ? { ...autoFollowPattern, errors } : null;
+  });
 export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  objectToArray(autoFollowPatterns));
 
 // Follower index
@@ -49,3 +59,5 @@ export const getSelectedFollowerIndex = (view = 'detail') => createSelector(getF
   return followerIndexState.byId[followerIndexState[propId]];
 });
 export const getListFollowerIndices = createSelector(getFollowerIndices, (followerIndices) =>  objectToArray(followerIndices));
+
+

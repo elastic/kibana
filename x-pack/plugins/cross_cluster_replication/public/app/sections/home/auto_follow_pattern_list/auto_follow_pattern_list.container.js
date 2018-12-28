@@ -17,6 +17,7 @@ import {
 import {
   loadAutoFollowPatterns,
   selectDetailAutoFollowPattern,
+  loadAutoFollowStats,
 } from '../../../store/actions';
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
@@ -33,6 +34,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
   loadAutoFollowPatterns: (inBackground) => dispatch(loadAutoFollowPatterns(inBackground)),
   selectAutoFollowPattern: (id) => dispatch(selectDetailAutoFollowPattern(id)),
+  loadAutoFollowStats: () => dispatch(loadAutoFollowStats())
 });
 
 export const AutoFollowPatternList = connect(

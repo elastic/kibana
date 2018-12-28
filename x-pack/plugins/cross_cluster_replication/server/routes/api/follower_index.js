@@ -32,7 +32,7 @@ export const registerFollowerIndexRoutes = (server) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const response = await callWithRequest('ccr.followerIndices');
+        const response = await callWithRequest('ccr.stats');
         return ({
           indices: deserializeListFollowerIndices(response.follow_stats.indices)
         });
@@ -60,7 +60,7 @@ export const registerFollowerIndexRoutes = (server) => {
       const { id } = request.params;
 
       try {
-        const response = await callWithRequest('ccr.followerIndex', { id });
+        const response = await callWithRequest('ccr.followerIndexStats', { id });
         const followerIndex = response.indices[0];
 
         return deserializeFollowerIndex(followerIndex);

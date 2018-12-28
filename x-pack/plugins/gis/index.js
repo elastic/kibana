@@ -15,7 +15,7 @@ import { watchStatusAndLicenseToInitialize } from
 export function gis(kibana) {
 
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
     id: 'gis',
     configPrefix: 'xpack.gis',
     publicDir: resolve(__dirname, 'public'),
