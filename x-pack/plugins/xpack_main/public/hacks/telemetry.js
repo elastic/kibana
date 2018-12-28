@@ -51,7 +51,7 @@ export class Telemetry {
         if (Date.now() - parseInt(this._lastReport, 10) > REPORT_INTERVAL_MS) {
           return true;
         }
-      } catch {
+      } catch (err) {
         // failed to parse; we'll overwrite it after we do send
         return true;
       }
