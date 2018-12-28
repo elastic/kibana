@@ -126,10 +126,12 @@ export function geoShapeToGeometry(value) {
 
   if (Array.isArray(value)) {
     // value expressed as an array of values
-    const shapes = value.map(itemInValueArray => {
-      return geoShapeToGeometry(itemInValueArray);
-    });
-    return _.flatten(shapes);
+    return value.reduce(
+      (shapes, itemInValueArray) => {
+        return shapes.concat(geoShapeToGeometry(itemInValueArray));
+      },
+      []
+    );
   }
 
   // TODO handle case where value is WKT and convert to geojson
