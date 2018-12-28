@@ -217,6 +217,7 @@ describe('telemetry class', () => {
         '$http': jest.fn().mockResolvedValue({ }), // ignored response
         localStorage: {
           get: jest.fn().mockReturnValueOnce({ lastReport: now - REPORT_INTERVAL_MS - 1 }),
+          set: jest.fn(),
         },
         telemetryOptedIn: true,
         telemetryUrl,
@@ -258,6 +259,7 @@ describe('telemetry class', () => {
         '$http': jest.fn().mockResolvedValue({ }), // ignored response
         localStorage: {
           get: jest.fn().mockReturnValueOnce({ lastReport }),
+          set: jest.fn(),
         },
         telemetryOptedIn: true,
         telemetryUrl,

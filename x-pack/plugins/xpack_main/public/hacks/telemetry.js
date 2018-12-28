@@ -49,7 +49,7 @@ export class Telemetry {
       // returns NaN for any malformed value
       const lastReport = parseInt(this._lastReport, 10);
       // If it's been a day since we last sent telemetry
-      if (lastReport === NaN || (Date.now() - lastReport) > REPORT_INTERVAL_MS) {
+      if (isNaN(lastReport) || (Date.now() - lastReport) > REPORT_INTERVAL_MS) {
         return true;
       }
     }
