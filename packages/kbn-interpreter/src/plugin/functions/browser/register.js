@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
-
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
-};
-
-populateBrowserRegistries(types, chrome.getBasePath());
+import '../common/register';

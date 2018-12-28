@@ -17,13 +17,27 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
+const { extname } = require('path');
 
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
+const { transform } = require('babel-core');
+
+exports.createServerCodeTransformer = (sourceMaps) => {
+  return (content, path) => {
+    switch (extname(path)) {
+      case '.js':
+        const { code = '' } = transform(content.toString('utf8'), {
+          filename: path,
+          ast: false,
+          code: true,
+          sourceMaps: sourceMaps ? 'inline' : false,
+          babelrc: false,
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        });
+
+        return code;
+
+      default:
+        return content.toString('utf8');
+    }
+  };
 };
-
-populateBrowserRegistries(types, chrome.getBasePath());
