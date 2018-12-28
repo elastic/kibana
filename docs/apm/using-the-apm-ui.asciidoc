@@ -2,7 +2,7 @@
 [[apm-ui]]
 == Using the APM UI
 
-The APM UI is designed to be as intuitive as possible, but you might come across certain terms or concepts that don’t feel native to you. Not to worry, that’s why we’ve created this guide to help you get the most out of the solution.
+The APM UI is designed to be as intuitive as possible, but you might come across certain terms or concepts that don’t feel native to you. Not to worry, we've created this guide to help you get the most out of Elastic APM.
 
 * <<services>>
 * <<transactions>>
@@ -15,7 +15,10 @@ The APM UI is designed to be as intuitive as possible, but you might come across
 [[services]]
 === Services
 
-You can add services by setting the `service.name` in the APM agent configuration per service you’re instrumenting. The global time range filter in Kibana defines which services are available. The Services overview gives you a quick insight into the health and general performance of each service.
+The Services overview gives you a quick insight into the health and general performance of each service.
+The <<set-time-filter,global time range filter>> in {kib} defines which services are available.
+
+You can add services by setting the `service.name` configuration in each of the [APM agents] you’re instrumenting.
 
 [role="screenshot"]
 image::apm/images/apm-services-overview.png[Example view of services table the APM UI in Kibana]
@@ -23,10 +26,25 @@ image::apm/images/apm-services-overview.png[Example view of services table the A
 [[transactions]]
 === Transactions
 
-The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more. Please refer to the documentation for each agent for more detail. Each `transaction.type` is displayed separately to make it easy for you to navigate to the transaction.
+Selecting a service on the Services overview page will bring you to the Transaction overview page. 
+A [`transaction`] describes an event captured by an Elastic APM agent instrumenting a service.
+The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
+
+On this page, each `transaction.type` is displayed separately to make it easy for you to navigate to any transaction.
+By default, transactions are sorted by _Impact_. Impact helps show the most used and slowest endpoints in your service.
 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
+
+NOTE: For more details on transactions and , refer to the documentation for each [APM Agent] you're instrumenting.
+
+[NOTE]
+====
+You might see some transactions named "unknown route". This indicates that the agent detected an incoming HTTP request to your application, but didn’t know which route in your service the HTTP request matched.
+
+This could simply be a 404 request, which by definition don’t match any route, or it might be a symptom that the agent either wasn’t installed correctly, or doesn't support your framework. For more details and other troubleshooting, refer to the documentation for each APM Agent you're instrumenting. 
+====
+
 
 [[spans]]
 === Spans

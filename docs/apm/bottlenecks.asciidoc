@@ -2,14 +2,20 @@
 [[apm-bottlenecks]]
 == Visualizing Application Bottlenecks
 
-Elastic APM monitors transactions and errors in your application. A transaction
-can be a request to your server or a batch job or a custom transaction type.
-You can see information about response times, requests per minute, and status
-codes per endpoint. You can also dive into a specific request sample and get a
-complete waterfall view of what your application is spending its time on. For
-example, you might see that the bottlenecks are in database queries, cache
-calls, or external requests. This information enables you to easily compare and
-debug fast responses to slow responses.
+Elastic APM captures different types of information from within instrumented applications, namely:
+[`transactions`], [`spans`], and [`errors`].
+
+[`Spans`] contain information about a specific code path that has been executed.
+They measure from the start to end of an activity,
+and they can have a parent/child relationship with other spans.
+
+[`Transactions`] are a special kind of span that have extra metadata associated with them.
+You can think of transactions as the highest level of work you’re measuring within a service.
+For example, a request to your server, a batch job, or a custom transaction type.
+
+You can see information about response times, requests per minute, and status codes per endpoint.
+You can also dive into a specific request sample and get a complete waterfall view of what your application is spending its time on. For example, you might see that the bottlenecks are in database queries, cache calls, or external requests.
+This information enables you to easily compare and debug everything - from fast responses, to slow responses.
 
 //TBD: What are we wanting them to notice in the following screenshot?
 //For example, the APM UI shows that the following transaction is spending over 400 ms querying the orders database?
@@ -17,10 +23,9 @@ debug fast responses to slow responses.
 [role="screenshot"]
 image::apm/images/apm-transaction.png[Example view of a transaction in the APM UI in Kibana]
 
-For each incoming request and each application error, you can also see
-contextual information such as the request header, user information, system
-values, or custom data that you manually attached to the request.
+For each incoming request and each application error,
+you can also see contextual information such as the request header, user information,
+system values, or custom data that you manually attached to the request.
 
-Having access to application-level insights with just a few clicks can
-drastically decrease the time you spend debugging errors, slow response times,
-and crashes.
+Having access to application-level insights with just a few clicks can drastically decrease the time you spend debugging errors,
+slow response times, and crashes.

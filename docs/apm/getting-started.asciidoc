@@ -3,11 +3,11 @@
 == Getting Started
 
 If you have not already installed and configured Elastic APM, the
-**APM > Getting Started** page in {kib} provides information to help you
+**APM > Setup Instructions** page in {kib} provides information to help you
 complete the setup.
 
 [role="screenshot"]
-image::apm/images/apm-setup.jpg[Installation instructions on the APM page in Kibana]
+image::apm/images/apm-setup.png[Installation instructions on the APM page in Kibana]
 
 After you install the Elastic APM agent library in your application, the
 application automatically appears in the APM UI in {kib}. No further
@@ -16,7 +16,11 @@ configuration is required.
 If you also use Elastic Stack for logging and server-level metrics, you can
 optionally import the APM dashboards that come with the APM Server. You can use
 these APM-specific visualizations to correlate APM data with other data sources.
-To get the dashboards, click the "Load Kibana objects" button at the bottom of the Getting Started guides for APM in Kibana.
+To get the dashboards, click the "Load Kibana objects" button at the bottom of the Setup Instructions page for APM in Kibana.
+
+// Deprecated?
+[role="screenshot"]
+image::apm/images/apm-setup-dashboards.png[Install dashboards for APM in Kibana]
 
 For more setup information, see
 {apm-get-started-ref}/index.html[Getting Started with APM].
