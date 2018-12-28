@@ -98,6 +98,43 @@ describe('hitsToGeoJson', () => {
     const feature = geojson.features[0];
     expect(feature.properties.myScriptedField).toBe(10);
   });
+
+  it('Should create feature per item when geometry value is an array', () => {
+    const hits = [
+      {
+        _source: {
+          [geoFieldName]: [
+            { lat: 20, lon: 100 },
+            { lat: 30, lon: 110 }
+          ],
+          myField: 8,
+        }
+      },
+    ];
+    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(2);
+    expect(geojson.features[0]).toEqual({
+      geometry: {
+        coordinates: [100, 20],
+        type: 'Point',
+      },
+      properties: {
+        myField: 8
+      },
+      type: 'Feature',
+    });
+    expect(geojson.features[1]).toEqual({
+      geometry: {
+        coordinates: [110, 30],
+        type: 'Point',
+      },
+      properties: {
+        myField: 8
+      },
+      type: 'Feature',
+    });
+  });
 });
 
 describe('geoPointToGeometry', () => {
@@ -106,16 +143,18 @@ describe('geoPointToGeometry', () => {
 
   it('Should convert value stored as geo-point string', () => {
     const value = `${lat},${lon}`;
-    const out = geoPointToGeometry(value);
-    expect(out.type).toBe('Point');
-    expect(out.coordinates).toEqual([lon, lat]);
+    const points = geoPointToGeometry(value);
+    expect(points.length).toBe(1);
+    expect(points[0].type).toBe('Point');
+    expect(points[0].coordinates).toEqual([lon, lat]);
   });
 
   it('Should convert value stored as geo-point array', () => {
     const value = [lon, lat];
-    const out = geoPointToGeometry(value);
-    expect(out.type).toBe('Point');
-    expect(out.coordinates).toEqual([lon, lat]);
+    const points = geoPointToGeometry(value);
+    expect(points.length).toBe(1);
+    expect(points[0].type).toBe('Point');
+    expect(points[0].coordinates).toEqual([lon, lat]);
   });
 
   it('Should convert value stored as geo-point object', () => {
@@ -123,9 +162,26 @@ describe('geoPointToGeometry', () => {
       lat,
       lon,
     };
-    const out = geoPointToGeometry(value);
-    expect(out.type).toBe('Point');
-    expect(out.coordinates).toEqual([lon, lat]);
+    const points = geoPointToGeometry(value);
+    expect(points.length).toBe(1);
+    expect(points[0].type).toBe('Point');
+    expect(points[0].coordinates).toEqual([lon, lat]);
+  });
+
+  it('Should convert array of values', () => {
+    const lat2 = 30;
+    const lon2 = -60;
+    const value = [
+      {
+        "lat": lat,
+        "lon": lon
+      },
+      `${lat2},${lon2}`
+    ];
+    const points = geoPointToGeometry(value);
+    expect(points.length).toBe(2);
+    expect(points[0].coordinates).toEqual([lon, lat]);
+    expect(points[1].coordinates).toEqual([lon2, lat2]);
   });
 });
 
@@ -136,9 +192,31 @@ describe('geoShapeToGeometry', () => {
       type: 'linestring',
       coordinates: coordinates
     };
-    const out = geoShapeToGeometry(value);
-    expect(out.type).toBe('LineString');
-    expect(out.coordinates).toEqual(coordinates);
+    const shapes = geoShapeToGeometry(value);
+    expect(shapes.length).toBe(1);
+    expect(shapes[0].type).toBe('LineString');
+    expect(shapes[0].coordinates).toEqual(coordinates);
+  });
+
+  it('Should convert array of values', () => {
+    const linestringCoordinates = [[-77.03653, 38.897676], [-77.009051, 38.889939]];
+    const pointCoordinates = [125.6, 10.1];
+    const value = [
+      {
+        type: 'linestring',
+        coordinates: linestringCoordinates
+      },
+      {
+        type: 'point',
+        coordinates: pointCoordinates
+      }
+    ];
+    const shapes = geoShapeToGeometry(value);
+    expect(shapes.length).toBe(2);
+    expect(shapes[0].type).toBe('LineString');
+    expect(shapes[0].coordinates).toEqual(linestringCoordinates);
+    expect(shapes[1].type).toBe('Point');
+    expect(shapes[1].coordinates).toEqual(pointCoordinates);
   });
 });
 

@@ -8,16 +8,13 @@ import _ from 'lodash';
 
 export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
   const features = hits
-    .filter(hit => {
-      return _.has(hit, `_source[${geoFieldName}]`);
-    })
     .map(hit => {
       const value = _.get(hit, `_source[${geoFieldName}]`);
-      let geometry;
+      let geometries;
       if (geoFieldType === 'geo_point') {
-        geometry = geoPointToGeometry(value);
+        geometries = geoPointToGeometry(value);
       } else if (geoFieldType === 'geo_shape') {
-        geometry = geoShapeToGeometry(value);
+        geometries = geoShapeToGeometry(value);
       } else {
         throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
       }
@@ -39,22 +36,33 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
         }
       }
 
-      return {
-        type: 'Feature',
-        geometry: geometry,
-        properties: properties
-      };
+      return geometries.map(geometry => {
+        return {
+          type: 'Feature',
+          geometry: geometry,
+          properties: properties
+        };
+      });
     });
 
   return {
     type: 'FeatureCollection',
-    features: features
+    features: _.flatten(features)
+  };
+}
+
+function pointGeometryFactory(lat, lon) {
+  return {
+    type: 'Point',
+    coordinates: [lon, lat]
   };
 }
 
 export function geoPointToGeometry(value) {
-  let lat;
-  let lon;
+  if (!value) {
+    return [];
+  }
+
   if (typeof value === 'string') {
     const commaSplit = value.split(',');
     if (commaSplit.length === 1) {
@@ -62,21 +70,34 @@ export function geoPointToGeometry(value) {
       throw new Error(`Unable to convert to geojson, geohash not supported`);
     }
     // Geo-point expressed as a string with the format: "lat,lon".
-    lat = parseFloat(commaSplit[0]);
-    lon = parseFloat(commaSplit[1]);
-  } else if (Array.isArray(value)) {
-    // Geo-point expressed as an array with the format: [ lon, lat]
-    lat = value[1];
-    lon = value[0];
-  } else if (value !== null && typeof value === 'object') {
-    lat = value.lat;
-    lon = value.lon;
+    const lat = parseFloat(commaSplit[0]);
+    const lon = parseFloat(commaSplit[1]);
+    return [pointGeometryFactory(lat, lon)];
   }
 
-  return {
-    type: 'Point',
-    coordinates: [lon, lat]
-  };
+  if (typeof value === 'object' && _.has(value, 'lat') && _.has(value, 'lon')) {
+    // Geo-point expressed as an object with the format: { lon, lat }
+    return [pointGeometryFactory(value.lat, value.lon)];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`Unsupported geo_point value: ${value}`);
+  }
+
+  if (value.length === 2
+      && typeof value[0] === 'number'
+      && typeof value[1] === 'number') {
+    // Geo-point expressed as an array with the format: [lon, lat]
+    const lat = value[1];
+    const lon = value[0];
+    return [pointGeometryFactory(lat, lon)];
+  }
+
+  // Geo-point expressed as an array of values
+  const points = value.map(itemInValueArray => {
+    return geoPointToGeometry(itemInValueArray);
+  });
+  return _.flatten(points);
 }
 
 
@@ -97,6 +118,18 @@ export function makeGeohashGridPolygon(geohashGridFeature) {
 }
 
 export function geoShapeToGeometry(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    // value expressed as an array of values
+    const shapes = value.map(itemInValueArray => {
+      return geoShapeToGeometry(itemInValueArray);
+    });
+    return _.flatten(shapes);
+  }
+
   // TODO handle case where value is WKT and convert to geojson
   if (typeof value === "string") {
     throw new Error(`Unable to convert WKT to geojson, not supported`);
@@ -127,14 +160,13 @@ export function geoShapeToGeometry(value) {
     case 'geometrycollection':
       geoJson.type = 'GeometryCollection';
       break;
+    case 'envelope':
+    case 'circle':
+      // TODO handle envelope and circle geometry types which exist in elasticsearch but not in geojson
+      throw new Error(`Unable to convert ${geoJson.type} geometry to geojson, not supported`);
   }
 
-  // TODO handle envelope and circle geometry types which exist in elasticsearch but not in geojson
-  if (geoJson.type === 'envelope' || geoJson.type === 'circle') {
-    throw new Error(`Unable to convert ${geoJson.type} geometry to geojson, not supported`);
-  }
-
-  return geoJson;
+  return [geoJson];
 }
 
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
