@@ -70,7 +70,7 @@ export class Telemetry {
 
     return this._fetchTelemetry()
       .then(response => {
-        return response.data.map(cluster => {
+        return Promise.all(response.data.map(cluster => {
           const req = {
             method: 'POST',
             url: this._telemetryUrl,
@@ -79,7 +79,7 @@ export class Telemetry {
           // if passing data externally, then suppress kbnXsrfToken
           if (this._telemetryUrl.match(/^https/)) { req.kbnXsrfToken = false; }
           return this._$http(req);
-        });
+        }));
       })
       // the response object is ignored because we do not check it
       .then(() => {
