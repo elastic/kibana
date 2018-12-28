@@ -44,7 +44,12 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
   };
 
   public get sideTab(): Tabs {
-    const tab = parseQuery(this.props.location.search).tab;
+    const { search } = this.props.location;
+    let qs = search;
+    if (search.charAt(0) === '?') {
+      qs = search.substr(1);
+    }
+    const tab = parseQuery(qs).tab;
     return tab === Tabs.structure ? Tabs.structure : Tabs.file;
   }
 

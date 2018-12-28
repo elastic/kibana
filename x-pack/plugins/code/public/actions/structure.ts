@@ -15,3 +15,6 @@ export interface SymbolsPayload {
 export const loadStructure = createAction<string>('LOAD STRUCTURE');
 export const loadStructureSuccess = createAction<SymbolsPayload>('LOAD STRUCTURE SUCCESS');
 export const loadStructureFailed = createAction<Error>('LOAD STRUCTURE FAILED');
+
+export const openSymbolPath = createAction<string>('OPEN SYMBOL PATH');
+export const closeSymbolPath = createAction<string>('CLOSE SYMBOL PATH');
