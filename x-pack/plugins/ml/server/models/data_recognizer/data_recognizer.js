@@ -6,6 +6,7 @@
 
 
 
+import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import Boom from 'boom';
 import { prefixDatafeedId } from '../../../common/util/job_utils';
@@ -142,7 +143,12 @@ export class DataRecognizer {
       dirName = manifestFile.dirName;
     }
     else {
-      throw Boom.notFound(`Module with the id "${id}" not found`);
+      throw Boom.notFound(i18n.translate('xpack.ml.models.dataRecognizer.moduleWithIdNotFoundErrorMessage', {
+        defaultMessage: 'Module with the id "{id}" not found',
+        values: {
+          id,
+        },
+      }));
     }
 
     const jobs = [];
@@ -224,7 +230,12 @@ export class DataRecognizer {
       manifestFile && manifestFile.json &&
       manifestFile.json.defaultIndexPattern === undefined) {
 
-      throw Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
+      throw Boom.badRequest(i18n.translate('xpack.ml.models.dataRecognizer.noIndexPatternConfiguredErrorMessage', {
+        defaultMessage: 'No index pattern configured in "{moduleId}" configuration file and no index pattern passed to the endpoint',
+        values: {
+          moduleId,
+        },
+      }));
     }
     this.indexPatternName = (indexPatternName === undefined) ? manifestFile.json.defaultIndexPattern : indexPatternName;
     this.indexPatternId = this.getIndexPatternId(this.indexPatternName);

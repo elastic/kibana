@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { INDEX_META_DATA_CREATED_BY  } from '../../../common/constants/file_datavisualizer';
 
 export function importDataProvider(callWithRequest) {
@@ -96,7 +97,10 @@ export function importDataProvider(callWithRequest) {
 
       await callWithRequest('indices.create', { index, body });
     } else {
-      throw `${index} already exists.`;
+      throw i18n.translate('xpack.ml.models.fileDataVisualizer.indexAlreadyExistsErrorMessage', {
+        defaultMessage: '{index} already exists.',
+        values: { index },
+      });
     }
   }
 

@@ -13,6 +13,7 @@
  * Bucket spans: 5m, 10m, 30m, 1h, 3h
  */
 
+import { i18n } from '@kbn/i18n';
 import { INTERVALS, LONG_INTERVALS } from './intervals';
 
 export function singleSeriesCheckerFactory(callWithRequest) {
@@ -146,7 +147,13 @@ export function singleSeriesCheckerFactory(callWithRequest) {
                 }
               } else {
                 console.log('SingleSeriesChecker: runTest stopped because fullBuckets is empty', this);
-                reject('runTest stopped because fullBuckets is empty');
+                reject(i18n.translate('xpack.ml.models.bucketSpanEstimator.runTestStoppedErrorMessage', {
+                  defaultMessage: '{runTestCommand} stopped because {fullBucketsParam} is empty',
+                  values: {
+                    runTestCommand: 'runTest',
+                    fullBucketsParam: 'fullBuckets',
+                  },
+                }));
               }
             })
             .catch((resp) => {

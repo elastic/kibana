@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 import _ from 'lodash';
 
@@ -65,7 +66,13 @@ export function annotationProvider(
 ) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
-      return Promise.reject(new Error('invalid annotation format'));
+      return Promise.reject(
+        new Error(
+          i18n.translate('xpack.ml.models.annotationService.invalidAnnotationFormatErrorMessage', {
+            defaultMessage: 'invalid annotation format',
+          })
+        )
+      );
     }
 
     if (annotation.create_time === undefined) {
@@ -215,7 +222,14 @@ export function annotationProvider(
     });
 
     if (isAnnotations(docs) === false) {
-      throw Boom.badRequest(`Annotations didn't pass integrity check.`);
+      throw Boom.badRequest(
+        i18n.translate(
+          'xpack.ml.models.annotationService.annotationsDidNotPassIntegrityCheckErrorMessage',
+          {
+            defaultMessage: `Annotations didn't pass integrity check.`,
+          }
+        )
+      );
     }
 
     docs.forEach((doc: Annotation) => {

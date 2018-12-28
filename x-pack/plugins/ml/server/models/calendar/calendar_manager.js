@@ -6,6 +6,7 @@
 
 
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import Boom from 'boom';
 import { EventManager } from './event_manager';
@@ -26,7 +27,12 @@ export class CalendarManager {
         calendar.events = await this.eventManager.getCalendarEvents(calendarId);
         return calendar;
       } else {
-        throw Boom.notFound(`Calendar with the id "${calendarId}" not found`);
+        throw Boom.notFound(i18n.translate('xpack.ml.models.calendar.calendarWithIdNotFoundErrorMessage', {
+          defaultMessage: 'Calendar with the id "{calendarId}" not found',
+          values: {
+            calendarId,
+          },
+        }));
       }
     } catch (error) {
       throw Boom.badRequest(error);

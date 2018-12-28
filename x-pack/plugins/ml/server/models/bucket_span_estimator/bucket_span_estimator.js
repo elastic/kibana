@@ -6,6 +6,7 @@
 
 
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
 import { INTERVALS } from './intervals';
@@ -116,8 +117,10 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
     run() {
       return new Promise((resolve, reject) => {
         if (this.checkers.length === 0) {
-          console.log('BucketSpanEstimator: run has stopped because no checks where created');
-          reject('BucketSpanEstimator: run has stopped because no checks where created');
+          console.log('BucketSpanEstimator: run has stopped because no checks were created');
+          reject(i18n.translate('xpack.ml.models.bucketSpanEstimator.noChecksWereCreatedErrorMessage', {
+            defaultMessage: 'BucketSpanEstimator: run has stopped because no checks were created',
+          }));
         }
 
         this.polledDataChecker.run()
@@ -138,7 +141,9 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
                 } else {
                 // no results found
                   console.log('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
-                  reject('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
+                  reject(i18n.translate('xpack.ml.models.bucketSpanEstimator.noChecksReturnedValidIntervalErrorMessage', {
+                    defaultMessage: 'BucketSpanEstimator: run has stopped because no checks returned a valid interval',
+                  }));
                 }
               }
             };
@@ -302,27 +307,51 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
 
   return function (formConfig) {
     if (typeof formConfig !== 'object' || formConfig === null) {
-      throw new Error('Invalid formConfig: formConfig needs to be an object.');
+      throw new Error(i18n.translate('xpack.ml.models.bucketSpanEstimator.formConfig.formConfigNeedsToBeObjectErrorMessage', {
+        defaultMessage: 'Invalid {formConfigParam}: {formConfigParam} needs to be an object.',
+        values: { formConfigParam: 'formConfig' },
+      }));
     }
 
     if (typeof formConfig.index !== 'string') {
-      throw new Error('Invalid formConfig: formConfig.index needs to be a string.');
+      throw new Error(i18n.translate('xpack.ml.models.bucketSpanEstimator.formConfig.indexNeedsToBeStringErrorMessage', {
+        defaultMessage: 'Invalid {formConfigParam}: {indexParam} needs to be a string.',
+        values: {
+          formConfigParam: 'formConfig',
+          indexParam: 'formConfig.index',
+        },
+      }));
     }
 
     if (typeof formConfig.duration !== 'object') {
-      throw new Error('Invalid formConfig: formConfig.duration needs to be an object.');
+      throw new Error(i18n.translate('xpack.ml.models.bucketSpanEstimator.formConfig.durationNeedsToBeObjectErrorMessage', {
+        defaultMessage: 'Invalid {formConfigParam}: {durationParam} needs to be an object.',
+        values: {
+          formConfigParam: 'formConfig',
+          durationParam: 'formConfig.duration',
+        },
+      }));
     }
 
     if (typeof formConfig.fields === 'undefined') {
-      throw new Error('Invalid formConfig: Missing fields.');
+      throw new Error(i18n.translate('xpack.ml.models.bucketSpanEstimator.formConfig.missingFieldsErrorMessage', {
+        defaultMessage: 'Invalid {formConfigParam}: Missing fields.',
+        values: { formConfigParam: 'formConfig' },
+      }));
     }
 
     if (typeof formConfig.filters === 'undefined') {
-      throw new Error('Invalid formConfig: Missing filters.');
+      throw new Error(i18n.translate('xpack.ml.models.bucketSpanEstimator.formConfig.missingFiltersErrorMessage', {
+        defaultMessage: 'Invalid {formConfigParam}: Missing filters.',
+        values: { formConfigParam: 'formConfig' },
+      }));
     }
 
     if (typeof formConfig.query === 'undefined') {
-      throw new Error('Invalid formConfig: Missing query.');
+      throw new Error(i18n.translate('xpack.ml.models.bucketSpanEstimator.formConfig.missingQueryErrorMessage', {
+        defaultMessage: 'Invalid {formConfigParam}: Missing query.',
+        values: { formConfigParam: 'formConfig' },
+      }));
     }
 
     return new Promise((resolve, reject) => {
@@ -336,7 +365,10 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
         })
           .then((settings) => {
             if (typeof settings !== 'object' || typeof settings.defaults !== 'object') {
-              reject('Unable to retrieve cluster setting search.max_buckets');
+              reject(i18n.translate('xpack.ml.models.bucketSpanEstimator.unableToRetrieveClusterSettingErrorMessage', {
+                defaultMessage: 'Unable to retrieve cluster setting {maxBucketsParam}',
+                values: { maxBucketsParam: 'search.max_buckets' },
+              }));
             }
 
             const maxBuckets = parseInt(settings.defaults['search.max_buckets']);
@@ -401,7 +433,9 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
               resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']) {
               getBucketSpanEstimation();
             } else {
-              reject('Insufficient permissions to call bucket span estimation.');
+              reject(i18n.translate('xpack.ml.models.bucketSpanEstimator.insufficientPermissionsToCallBucketSpanEstimationErrorMessage', {
+                defaultMessage: 'Insufficient permissions to call bucket span estimation.',
+              }));
             }
           })
           .catch(reject);

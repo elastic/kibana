@@ -5,6 +5,7 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 
 export class FilterManager {
@@ -31,7 +32,10 @@ export class FilterManager {
         filter.used_by = filtersInUse[filter.filter_id];
         return filter;
       } else {
-        throw Boom.notFound(`Filter with the id "${filterId}" not found`);
+        throw Boom.notFound(i18n.translate('xpack.ml.models.filter.filterNotFoundErrorMessage', {
+          defaultMessage: 'Filter with the id "{filterId}" not found',
+          values: { filterId },
+        }));
       }
     } catch (error) {
       throw Boom.badRequest(error);
