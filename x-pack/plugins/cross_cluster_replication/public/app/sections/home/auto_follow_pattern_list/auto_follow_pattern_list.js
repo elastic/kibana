@@ -62,7 +62,7 @@ export const AutoFollowPatternList = injectI18n(
     }
 
     componentDidUpdate(prevProps, prevState) {
-      const { history } = this.props;
+      const { history, loadAutoFollowStats } = this.props;
       const { lastAutoFollowPatternId } = this.state;
 
       /**
@@ -78,6 +78,8 @@ export const AutoFollowPatternList = injectI18n(
           history.replace({
             search: `?pattern=${encodeURIComponent(lastAutoFollowPatternId)}`,
           });
+
+          loadAutoFollowStats();
         }
       }
     }
