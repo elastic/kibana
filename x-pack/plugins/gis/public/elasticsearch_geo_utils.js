@@ -94,10 +94,12 @@ export function geoPointToGeometry(value) {
   }
 
   // Geo-point expressed as an array of values
-  const points = value.map(itemInValueArray => {
-    return geoPointToGeometry(itemInValueArray);
-  });
-  return _.flatten(points);
+  return value.reduce(
+    (points, itemInValueArray) => {
+      return points.concat(geoPointToGeometry(itemInValueArray));
+    },
+    []
+  );
 }
 
 
