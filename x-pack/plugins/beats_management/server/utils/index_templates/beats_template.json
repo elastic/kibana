@@ -24,8 +24,7 @@
               "type": "text"
             },
             "config": {
-              "dynamic": true,
-              "type": "object"
+              "type": "keyword"
             }
           }
         },

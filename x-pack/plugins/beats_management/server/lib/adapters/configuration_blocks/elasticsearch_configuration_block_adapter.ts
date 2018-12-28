@@ -37,7 +37,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     const response = await this.database.search(user, params);
     const configs = get<any>(response, 'hits.hits', []);
 
-    return configs.map((tag: any) => tag._source.tag);
+    return configs.map((tag: any) => ({ ...tag._source.tag, config: JSON.parse(tag._source.tag) }));
   }
 
   public async delete(user: FrameworkUser, ids: string[]): Promise<void> {
@@ -50,7 +50,9 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
   }
 
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
-    const body = flatten(configs.map(config => [{ index: {} }, config]));
+    const body = flatten(
+      configs.map(config => [{ index: {} }, { ...config, config: JSON.stringify(config.config) }])
+    );
 
     const result = await this.database.bulk(user, {
       body,
