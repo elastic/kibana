@@ -256,7 +256,7 @@ describe('telemetry class', () => {
     test('sends telemetry when requested and catches exceptions', () => {
       const lastReport = Date.now() - REPORT_INTERVAL_MS - 1;
       const injector = {
-        '$http': jest.fn().mockResolvedValue({ }), // ignored response
+        '$http': jest.fn().mockRejectedValue(new Error('TEST - expected')), // caught failure
         localStorage: {
           get: jest.fn().mockReturnValueOnce({ lastReport }),
           set: jest.fn(),
