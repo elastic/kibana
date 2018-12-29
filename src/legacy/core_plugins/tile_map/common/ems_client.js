@@ -105,7 +105,6 @@ export class EMSClientV66 {
 
     this._sanitizer = htmlSanitizer ? htmlSanitizer : x => x;
     this._manifestServiceUrl = manifestServiceUrl;
-    this._loadCatalogue = null;
     this._loadFileLayers = null;
     this._loadTMSServices = null;
     this._emsLandingPageUrl = landingPageUrl;
@@ -127,9 +126,23 @@ export class EMSClientV66 {
    * this internal method is overridden by the tests to simulate custom manifest.
    */
   async _getManifest(manifestUrl) {
-    const url = extendUrl(manifestUrl, { query: this._queryParams });
-    const result = await this._fetchWithTimeout(url);
-    return await result.json();
+    let result;
+    try {
+      const url = extendUrl(manifestUrl, { query: this._queryParams });
+      result = await this._fetchWithTimeout(url);
+    } catch (e) {
+      if (!e) {
+        e = new Error('Unknown error');
+      }
+      if (!(e instanceof Error)) {
+        e = new Error(e.data || `status ${e.statusText || e.status}`);
+      }
+      throw new Error(`Unable to retrieve manifest from ${manifestUrl}: ${e.message}`);
+    } finally {
+      return result
+        ? await result.json()
+        : null;
+    }
   }
 
   _fetchWithTimeout(url) {
@@ -167,59 +180,42 @@ export class EMSClientV66 {
 
   _invalidateSettings() {
 
-    this._loadCatalogue = _.once(async () => {
+    this._getManifestWithParams = _.once(
+      async url => this._getManifest(this.extendUrlWithParams(url)));
 
-      try {
-        const url = this.extendUrlWithParams(this._manifestServiceUrl);
-        return await this._getManifest(url);
-      } catch (e) {
-        if (!e) {
-          e = new Error('Unknown error');
-        }
-        if (!(e instanceof Error)) {
-          e = new Error(e.data || `status ${e.statusText || e.status}`);
-        }
-        throw new Error(`Could not retrieve manifest from the tile service: ${e.message}`);
+    this._getCatalogueService = async serviceType => {
+      const catalogueManifest = await this._getManifestWithParams(this._manifestServiceUrl);
+      let service;
+      if(_.has(catalogueManifest, 'services')) {
+        service = catalogueManifest.services
+          .find(s => s.type === serviceType);
       }
-    });
+      return service || {};
+    };
 
+    this._wrapServiceAttribute = async (manifestUrl, attr, WrapperClass) => {
+      const manifest = await this._getManifest(manifestUrl);
+      if (_.has(manifest, attr)) {
+        return manifest[attr].map(config => {
+          return new WrapperClass(config, this);
+        });
+      }
+      return [];
+    };
 
     this._loadFileLayers = _.once(async () => {
-
-      const catalogue = await this._loadCatalogue();
-      const fileService = catalogue.services.find(service => service.type === 'file');
-      if (!fileService) {
-        return [];
-      }
-
-      const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-
-      return manifest.layers.map(layerConfig => {
-        return new FileLayer(layerConfig, this);
-      });
+      const fileService = await this._getCatalogueService('file');
+      return _.isEmpty(fileService)
+        ? []
+        : this._wrapServiceAttribute(fileService.manifest, 'layers', FileLayer);
     });
 
     this._loadTMSServices = _.once(async () => {
-
-      const catalogue = await this._loadCatalogue();
-      const tmsService = catalogue.services.find((service) => service.type === 'tms');
-      if (!tmsService) {
-        return [];
-      }
-      let tmsManifest;
-      try {
-        tmsManifest =
-          await this._getManifest(tmsService.manifest, this._queryParams);
-      } catch(e) {
-        tmsManifest = { services: [] };
-      }
-
-      return tmsManifest.services.map(serviceConfig => {
-        return new TMSService(serviceConfig, this);
-      });
-
+      const tmsService = await this._getCatalogueService('tms');
+      return _.isEmpty(tmsService)
+        ? []
+        : await this._wrapServiceAttribute(tmsService.manifest, 'services', TMSService);
     });
-
   }
 
   getLandingPageUrl() {
