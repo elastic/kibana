@@ -25,6 +25,36 @@ export type SourceStatusAuditbeatIndicesResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type SourceStatusFilebeatAliasExistsResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.FilebeatAliasExistsResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusFilebeatIndicesExistResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.FilebeatIndicesExistResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusFilebeatIndicesResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.FilebeatIndicesResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusPacketbeatAliasExistsResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.PacketbeatAliasExistsResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusPacketbeatIndicesExistResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.PacketbeatIndicesExistResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusPacketbeatIndicesResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.PacketbeatIndicesResolver>,
+  QuerySourceResolver
+>;
+
 export type SourceStatusIndexFieldsResolver = ChildResolverOf<
   AppResolverOf<SourceStatusResolvers.IndexFieldsResolver>,
   QuerySourceResolver
@@ -38,6 +68,12 @@ export const createSourceStatusResolvers = (libs: {
     auditbeatAliasExists: SourceStatusAuditbeatAliasExistsResolver;
     auditbeatIndicesExist: SourceStatusAuditbeatIndicesExistResolver;
     auditbeatIndices: SourceStatusAuditbeatIndicesResolver;
+    filebeatAliasExists: SourceStatusFilebeatAliasExistsResolver;
+    filebeatIndicesExist: SourceStatusFilebeatIndicesExistResolver;
+    filebeatIndices: SourceStatusFilebeatIndicesResolver;
+    packetbeatAliasExists: SourceStatusPacketbeatAliasExistsResolver;
+    packetbeatIndicesExist: SourceStatusPacketbeatIndicesExistResolver;
+    packetbeatIndices: SourceStatusPacketbeatIndicesResolver;
     indexFields: SourceStatusIndexFieldsResolver;
   };
 } => ({
@@ -50,6 +86,24 @@ export const createSourceStatusResolvers = (libs: {
     },
     async auditbeatIndices(source, args, { req }) {
       return await libs.sourceStatus.getIndexNames(req, source.id, 'auditbeatAlias');
+    },
+    async filebeatAliasExists(source, args, { req }) {
+      return await libs.sourceStatus.hasAlias(req, source.id, 'logAlias');
+    },
+    async filebeatIndicesExist(source, args, { req }) {
+      return await libs.sourceStatus.hasIndices(req, source.id, 'logAlias');
+    },
+    async filebeatIndices(source, args, { req }) {
+      return await libs.sourceStatus.getIndexNames(req, source.id, 'logAlias');
+    },
+    async packetbeatAliasExists(source, args, { req }) {
+      return await libs.sourceStatus.hasAlias(req, source.id, 'packetbeatAlias');
+    },
+    async packetbeatIndicesExist(source, args, { req }) {
+      return await libs.sourceStatus.hasIndices(req, source.id, 'packetbeatAlias');
+    },
+    async packetbeatIndices(source, args, { req }) {
+      return await libs.sourceStatus.getIndexNames(req, source.id, 'packetbeatAlias');
     },
     async indexFields(source, args, { req }) {
       return await libs.fields.getFields(req, source.id, args.indexType || IndexType.ANY);

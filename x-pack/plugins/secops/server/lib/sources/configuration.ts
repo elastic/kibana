@@ -60,5 +60,6 @@ const DEFAULT_SOURCE = {
   metricAlias: 'metricbeat-*',
   logAlias: 'filebeat-*',
   auditbeatAlias: 'auditbeat-*',
+  packetbeatAlias: 'packetbeat-*',
   fields: DEFAULT_FIELDS,
 };

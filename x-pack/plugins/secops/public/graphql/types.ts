@@ -68,6 +68,18 @@ export interface SourceStatus {
   auditbeatIndicesExist: boolean;
   /** The list of indices in the auditbeat alias */
   auditbeatIndices: string[];
+  /** Whether the configured filebeat alias exists */
+  filebeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any filebeat indices */
+  filebeatIndicesExist: boolean;
+  /** The list of indices in the filebeat alias */
+  filebeatIndices: string[];
+  /** Whether the configured packetbeat alias exists */
+  packetbeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
+  packetbeatIndicesExist: boolean;
+  /** The list of indices in the packetbeat alias */
+  packetbeatIndices: string[];
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
