@@ -10,11 +10,11 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiPopover
 } from '@elastic/eui';
+import { memoize } from 'lodash';
 import React from 'react';
 import chrome from 'ui/chrome';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
-// @ts-ignore
 import { WatcherFlyout } from './WatcherFlyout';
 
 interface ServiceIntegrationProps {
@@ -35,7 +35,7 @@ export class ServiceIntegrationsView extends React.Component<
 > {
   public state = { isPopoverOpen: false, activeFlyout: null };
 
-  public getPanelItems = _.memoize((mlAvailable: boolean) => {
+  public getPanelItems = memoize((mlAvailable: boolean) => {
     let panelItems: EuiContextMenuPanelItemDescriptor[] = [];
     if (mlAvailable) {
       panelItems = panelItems.concat(this.getMLPanelItems());

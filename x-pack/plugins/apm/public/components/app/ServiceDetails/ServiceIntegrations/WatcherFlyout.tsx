@@ -24,7 +24,8 @@ import {
   EuiText,
   EuiTitle
 } from '@elastic/eui';
-import _ from 'lodash';
+import { memoize } from 'lodash';
+import { padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
@@ -37,7 +38,7 @@ import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
 type ScheduleKey = keyof Schedule;
 
-const getUserTimezone = _.memoize(() => {
+const getUserTimezone = memoize(() => {
   const uiSettings = chrome.getUiSettingsClient();
   return uiSettings.get('dateFormat:tz') === 'Browser'
     ? moment.tz.guess()
@@ -251,8 +252,8 @@ export class WatcherFlyout extends Component<
       .format('hh:mm A (z)'); // Format as 12h w. tz
 
     // Generate UTC hours for Daily Report select field
-    const intervalHours = _.range(24).map(i => {
-      const hour = _.padLeft(i.toString(), 2, '0');
+    const intervalHours = range(24).map(i => {
+      const hour = padLeft(i.toString(), 2, '0');
       return { value: `${hour}:00`, text: `${hour}:00 UTC` };
     });
 
