@@ -38,9 +38,25 @@ const setupHandler = (commit, target) => {
     return;
   }
   const canvasOrigin = canvasPage.getBoundingClientRect();
-  window.onmousemove = ({ clientX, clientY, altKey, metaKey, shiftKey, ctrlKey }) => {
+  window.onmousemove = ({
+    target,
+    buttons,
+    clientX,
+    clientY,
+    altKey,
+    metaKey,
+    shiftKey,
+    ctrlKey,
+  }) => {
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
-    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+    // only commits the cursor position if the target is a nested element of canvasPage
+    // or if left button is being held down (i.e. an element is being dragged)
+    if (buttons === 1 || ancestorElement(target)) {
+      commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+    } else {
+      // clears cursorPosition
+      commit('cursorPosition', {});
+    }
   };
   window.onmouseup = e => {
     e.stopPropagation();
@@ -79,8 +95,8 @@ const handleWheel = (
 
 const handleMouseDown = (commit, e, isEditable) => {
   e.stopPropagation();
-  const { target, clientX, clientY, button, altKey, metaKey, shiftKey, ctrlKey } = e;
-  if (button !== 0 || !isEditable) {
+  const { target, clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey } = e;
+  if (buttons !== 1 || !isEditable) {
     resetHandler();
     return; // left-click and edit mode only
   }
