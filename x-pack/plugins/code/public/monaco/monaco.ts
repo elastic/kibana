@@ -114,43 +114,43 @@ import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution'
   },
 };*/
 
-import * as eui_them_k6 from '@elastic/eui/dist/eui_theme_k6_light.json';
-const euiVars = eui_them_k6 as any;
-function rgb2hex(rgb: string): string {
-  const regex = /rgb\(\s*(\d*),\s*(\d*),\s*(\d*)\)/g;
-  const m = regex.exec(rgb);
-  if (m) {
-    return (
-      '#' +
-      [m[1], m[2], m[3]]
-        .map(s =>
-          parseInt(s, 10)
-            .toString(16)
-            .padStart(2, '0')
-        )
-        .join('')
-    );
-  }
-  return rgb;
-}
+const elasticLight = {
+  keyword: '#DD0A73',
+  comment: '#90A4AE',
+  delimeter: '#017F75',
+  string: '#0079A5',
+  number: '#E5830E',
+  regexp: '#0079A5',
+  types: '#909AA1',
+  annotation: '#D9D9D9',
+  tag: '#DD0A73',
+  symbol: '#A30000',
+  foreground: '#3F3F3F',
+  editorBackground: '#F5F5F5',
+  lineNumbers: '#D9D9D9',
+};
+
 monaco.editor.defineTheme('k6-colors-light', {
   base: 'vs',
   inherit: true,
   rules: [
-    { token: 'keyword', foreground: rgb2hex(euiVars.euiCodeBlockKeywordColor), fontStyle: 'bold' },
-    { token: 'comment', foreground: rgb2hex(euiVars.euiCodeBlockCommentColor) },
-    { token: 'string', foreground: rgb2hex(euiVars.euiCodeBlockStringColor) },
-    { token: 'number', foreground: rgb2hex(euiVars.euiCodeBlockNumberColor) },
-    { token: 'regexp', foreground: rgb2hex(euiVars.euiCodeBlockRegexpColor) },
-    { token: 'type', foreground: rgb2hex(euiVars.euiCodeBlockTypeColor) },
-    { token: 'annotation', foreground: rgb2hex(euiVars.euiCodeBlockMetaColor) },
-    { token: 'tag', foreground: rgb2hex(euiVars.euiCodeBlockTagColor) },
-    { token: 'symbol', foreground: rgb2hex(euiVars.euiCodeBlockSymbolColor) },
+    { token: 'keyword', foreground: elasticLight.keyword, fontStyle: 'bold' },
+    { token: 'comment', foreground: elasticLight.comment },
+    { token: 'delimiter', foreground: elasticLight.delimeter },
+    { token: 'string', foreground: elasticLight.string },
+    { token: 'number', foreground: elasticLight.number },
+    { token: 'regexp', foreground: elasticLight.regexp },
+    { token: 'type', foreground: elasticLight.types },
+    { token: 'annotation', foreground: elasticLight.annotation },
+    { token: 'tag', foreground: elasticLight.tag },
+    { token: 'symbol', foreground: elasticLight.symbol },
+    // We provide an empty string fallback
+    { token: '', foreground: elasticLight.foreground },
   ],
   colors: {
-    'editor.foreground': rgb2hex(euiVars.euiCodeBlockColor),
-    'editor.background': rgb2hex(euiVars.euiCodeBlockBackgroundColor),
-    'editorLineNumber.foreground': rgb2hex(euiVars.euiColorMediumShade),
+    'editor.foreground': elasticLight.foreground,
+    'editor.background': elasticLight.editorBackground,
+    'editorLineNumber.foreground': elasticLight.lineNumbers,
   },
 });
 monaco.editor.setTheme('k6-colors-light');
