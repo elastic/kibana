@@ -1034,7 +1034,6 @@ Array [
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  padding-bottom: 15px;
 }
 
 .c2 {
@@ -1226,7 +1225,6 @@ Array [
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  padding-bottom: 15px;
 }
 
 .c6 {
@@ -2471,7 +2469,6 @@ Array [
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  padding-bottom: 15px;
 }
 
 .c2 {
