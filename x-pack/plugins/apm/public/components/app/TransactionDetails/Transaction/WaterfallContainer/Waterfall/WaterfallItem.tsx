@@ -98,19 +98,23 @@ interface IWaterfallItemProps {
 
 function PrefixIcon({ item }: { item: IWaterfallItem }) {
   if (item.docType === 'span') {
+    // icon for database spans
     const isDbType = item.span.span.type === 'db';
     if (isDbType) {
       return <EuiIcon type="database" />;
-    } else {
-      return null;
     }
+
+    // omit icon for other spans
+    return null;
   }
 
+  // icon for RUM agent transactions
   const isRumAgent = item.transaction.context.service.agent.name === 'js-base';
   if (isRumAgent) {
     return <EuiIcon type="globe" />;
   }
 
+  // icon for other transactions
   return <EuiIcon type="merge" />;
 }
 
