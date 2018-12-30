@@ -58,6 +58,7 @@ class DataTableFormat extends Component {
                   iconType="plusInCircle"
                   color="text"
                   aria-label="Filter for value"
+                  data-test-subj="filterForInspectorCellValue"
                   className="insDataTableFormat__filter"
                   onClick={() => col.filter(value)}
                 />
@@ -73,6 +74,7 @@ class DataTableFormat extends Component {
                     iconType="minusInCircle"
                     color="text"
                     aria-label="Filter out value"
+                    data-test-subj="filterOutInspectorCellValue"
                     className="insDataTableFormat__filter"
                     onClick={() => col.filterOut(value)}
                   />

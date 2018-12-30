@@ -24,7 +24,9 @@ export class Link extends React.PureComponent {
   };
 
   navigateTo = (name, params) => ev => {
-    if (this.props.onClick) this.props.onClick(ev);
+    if (this.props.onClick) {
+      this.props.onClick(ev);
+    }
 
     if (
       !ev.defaultPrevented && // onClick prevented default

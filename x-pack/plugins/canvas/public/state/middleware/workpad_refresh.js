@@ -14,7 +14,9 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
   let refreshInterval = 0;
 
   function updateWorkpad() {
-    if (refreshInterval === 0) return;
+    if (refreshInterval === 0) {
+      return;
+    }
 
     // check the request in flight status
     const inFlightActive = getInFlight(getState());
@@ -38,7 +40,9 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
     next(action);
 
     // when in-flight requests are finished, update the workpad after a given delay
-    if (action.type === inFlightComplete.toString() && refreshInterval > 0) startDelayedUpdate(); // create new update request
+    if (action.type === inFlightComplete.toString() && refreshInterval > 0) {
+      startDelayedUpdate();
+    } // create new update request
 
     // This middleware creates or destroys an interval that will cause workpad elements to update
     if (action.type === setRefreshInterval.toString()) {
@@ -49,7 +53,9 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
       clearTimeout(refreshTimeout);
 
       // if interval is larger than 0, start the delayed update
-      if (refreshInterval > 0) startDelayedUpdate();
+      if (refreshInterval > 0) {
+        startDelayedUpdate();
+      }
     }
   };
 };

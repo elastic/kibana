@@ -21,9 +21,7 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 
-import { formatDate } from '@elastic/eui/lib/services/format';
-
-const TIME_FORMAT = 'MMMM Do YYYY, HH:mm:ss';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 function getColumns(viewForecast) {
   return [
@@ -31,21 +29,21 @@ function getColumns(viewForecast) {
       field: 'forecast_create_timestamp',
       name: 'Created',
       dataType: 'date',
-      render: (date) => formatDate(date, TIME_FORMAT),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
       field: 'forecast_start_timestamp',
       name: 'From',
       dataType: 'date',
-      render: (date) => formatDate(date, TIME_FORMAT),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
       field: 'forecast_end_timestamp',
       name: 'To',
       dataType: 'date',
-      render: (date) => formatDate(date, TIME_FORMAT),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
@@ -95,4 +93,3 @@ ForecastsList.propType = {
   forecasts: PropTypes.array,
   viewForecast: PropTypes.func.isRequired
 };
-

@@ -38,7 +38,7 @@ export function VegaRequestHandlerProvider(es, serviceSettings, config) {
         allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
         queryStringOptions: config.get('query:queryString:options'),
       };
-      const filtersDsl = buildEsQuery(undefined, [query], filters, esQueryConfigs);
+      const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
       const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
       return vp.parseAsync();
     }
