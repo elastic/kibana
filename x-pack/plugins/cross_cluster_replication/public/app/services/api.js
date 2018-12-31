@@ -74,10 +74,6 @@ export const createFollowerIndex = (followerIndex) => (
   httpClient.post(`${apiPrefix}/follower_indices`, followerIndex).then(extractData)
 );
 
-export const updateFollowerIndex = (id, followerIndex) => (
-  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`, followerIndex).then(extractData)
-);
-
 /* Stats */
 export const loadAutoFollowStats = () => (
   httpClient.get(`${apiPrefixIndexManagement}/stats/auto-follow`).then(extractData)

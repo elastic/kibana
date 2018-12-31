@@ -11,7 +11,6 @@ import {
   loadFollowerIndices as loadFollowerIndicesRequest,
   getFollowerIndex as getFollowerIndexRequest,
   createFollowerIndex as createFollowerIndexRequest,
-  updateFollowerIndex as updateFollowerIndexRequest,
 } from '../../services/api';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
@@ -42,27 +41,19 @@ export const getFollowerIndex = (id) =>
     )
   });
 
-export const saveFollowerIndex = (name, followerIndex, isUpdating = false) => (
+export const saveFollowerIndex = (name, followerIndex) => (
   sendApiRequest({
-    label: isUpdating ? t.FOLLOWER_INDEX_UPDATE : t.FOLLOWER_INDEX_CREATE,
+    label: t.FOLLOWER_INDEX_CREATE,
     status: API_STATUS.SAVING,
     scope,
-    handler: async () => {
-      if (isUpdating) {
-        return await updateFollowerIndexRequest(name, followerIndex);
-      }
-      return await createFollowerIndexRequest({ name, ...followerIndex });
-    },
+    handler: async () => (
+      await createFollowerIndexRequest({ name, ...followerIndex })
+    ),
     onSuccess() {
-      const successMessage = isUpdating
-        ? i18n.translate('xpack.crossClusterReplication.followerIndex.updateAction.successNotificationTitle', {
-          defaultMessage: `Follower index '{name}' updated successfully`,
-          values: { name },
-        })
-        : i18n.translate('xpack.crossClusterReplication.followerIndex.addAction.successNotificationTitle', {
-          defaultMessage: `Added follower index '{name}'`,
-          values: { name },
-        });
+      const successMessage = i18n.translate('xpack.crossClusterReplication.followerIndex.addAction.successNotificationTitle', {
+        defaultMessage: `Added follower index '{name}'`,
+        values: { name },
+      });
 
       toastNotifications.addSuccess(successMessage);
       routing.navigate(`/follower_indices`, undefined, {
