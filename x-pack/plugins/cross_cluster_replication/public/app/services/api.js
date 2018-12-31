@@ -5,18 +5,29 @@
  */
 
 import chrome from 'ui/chrome';
-import { API_BASE_PATH, API_REMOTE_CLUSTERS_BASE_PATH } from '../../../common/constants';
+import {
+  API_BASE_PATH,
+  API_REMOTE_CLUSTERS_BASE_PATH,
+  API_INDEX_MANAGEMENT_BASE_PATH,
+} from '../../../common/constants';
 import { arrify } from '../../../common/services/utils';
 
 const apiPrefix = chrome.addBasePath(API_BASE_PATH);
 const apiPrefixRemoteClusters = chrome.addBasePath(API_REMOTE_CLUSTERS_BASE_PATH);
+const apiPrefixIndexManagement = chrome.addBasePath(API_INDEX_MANAGEMENT_BASE_PATH);
 
 // This is an Angular service, which is why we use this provider pattern
 // to access it within our React app.
 let httpClient;
 
-export function setHttpClient(client) {
+// The deffered AngularJS api allows us to create deferred promise
+// to be resolved later. This allows us to cancel in flight Http Requests
+// https://docs.angularjs.org/api/ng/service/$q#the-deferred-api
+let $q;
+
+export function setHttpClient(client, $deffered) {
   httpClient = client;
+  $q = $deffered;
 }
 
 // ---
@@ -69,5 +80,20 @@ export const updateFollowerIndex = (id, followerIndex) => (
 
 /* Stats */
 export const loadAutoFollowStats = () => (
-  httpClient.get(`${apiPrefix}/stats/auto-follow`).then(extractData)
+  httpClient.get(`${apiPrefixIndexManagement}/stats/auto-follow`).then(extractData)
 );
+
+/* Indices */
+let canceler = null;
+export const loadIndices = () => {
+  if (canceler) {
+    // If there is a previous request in flight we cancel it by resolving the canceler
+    canceler.resolve();
+  }
+  canceler = $q.defer();
+  return httpClient.get(`${apiPrefixIndexManagement}/indices`, { timeout: canceler.promise })
+    .then((response) => {
+      canceler = null;
+      return extractData(response);
+    });
+};

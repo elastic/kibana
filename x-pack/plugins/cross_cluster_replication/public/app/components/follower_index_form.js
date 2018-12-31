@@ -7,6 +7,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { debounce } from 'lodash';
 
 import {
   EuiButton,
@@ -33,6 +34,7 @@ import routing from '../services/routing';
 import { API_STATUS } from '../constants';
 import { SectionError } from './section_error';
 import { validateFollowerIndex } from '../services/follower_index_validators';
+import { loadIndices } from '../services/api';
 
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
@@ -98,6 +100,8 @@ export const FollowerIndexForm = injectI18n(
         areErrorsVisible: false,
         isNew,
       };
+
+      this.validateIndexName = debounce(this.validateIndexName, 500);
     }
 
     onFieldsChange = (fields) => {
@@ -136,6 +140,33 @@ export const FollowerIndexForm = injectI18n(
       routing.navigate('/follower_indices');
     };
 
+    onIndexNameChange = (name) => {
+      this.onFieldsChange({ name });
+      this.validateIndexName(name);
+    }
+
+    validateIndexName = async (name) => {
+      if (!name || !name.trim) {
+        return;
+      }
+
+      const { intl } = this.props;
+
+      try {
+        const indices = await loadIndices();
+        const doesExist = indices.some(index => index.name === name);
+        if (doesExist) {
+          const message = intl.formatMessage({
+            id: 'xpack.crossClusterReplication.followerIndexForm.indexAlreadyExistError',
+            defaultMessage: 'An index with the same name already exists.'
+          });
+          this.setState(updateFormErrors({ name: { message, alwaysVisible: true } }));
+        }
+      } catch (err) {
+        // Silently fail...
+      }
+    }
+
     /**
      * Secctions Renders
      */
@@ -169,7 +200,8 @@ export const FollowerIndexForm = injectI18n(
        * Follower index name
        */
       const renderFollowerIndexName = () => {
-        const isInvalid = areErrorsVisible && !!fieldsErrors.name;
+        const hasError = !!fieldsErrors.name;
+        const isInvalid = hasError &&  (fieldsErrors.name.alwaysVisible || areErrorsVisible);
 
         return (
           <EuiDescribedFormGroup
@@ -212,7 +244,7 @@ export const FollowerIndexForm = injectI18n(
               <EuiFieldText
                 isInvalid={isInvalid}
                 value={name}
-                onChange={e => this.onFieldsChange({ name: e.target.value })}
+                onChange={e => this.onIndexNameChange(e.target.value)}
                 fullWidth
                 disabled={!isNew}
               />
