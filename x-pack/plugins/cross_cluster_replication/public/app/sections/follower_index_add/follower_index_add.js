@@ -49,7 +49,7 @@ export const FollowerIndexAdd = injectI18n(
     renderEmptyClusters() {
       const { intl, match: { url: currentUrl } } = this.props;
       const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutTitle',
+        id: 'xpack.crossClusterReplication.followerIndexCreateForm.emptyRemoteClustersCallOutTitle',
         defaultMessage: 'No remote cluster found'
       });
 
@@ -62,7 +62,7 @@ export const FollowerIndexAdd = injectI18n(
           >
             <p>
               <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutDescription"
+                id="xpack.crossClusterReplication.followerIndexCreateForm.emptyRemoteClustersCallOutDescription"
                 defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add
                   a remote cluster."
               />
@@ -74,7 +74,7 @@ export const FollowerIndexAdd = injectI18n(
               color="warning"
             >
               <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternCreateForm.addRemoteClusterButtonLabel"
+                id="xpack.crossClusterReplication.followerIndexCreateForm.addRemoteClusterButtonLabel"
                 defaultMessage="Add remote cluster"
               />
             </EuiButton>
@@ -86,7 +86,7 @@ export const FollowerIndexAdd = injectI18n(
     renderNoConnectedCluster() {
       const { intl } = this.props;
       const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.noRemoteClustersConnectedCallOutTitle',
+        id: 'xpack.crossClusterReplication.followerIndexCreateForm.noRemoteClustersConnectedCallOutTitle',
         defaultMessage: 'Remote cluster connection error'
       });
 
@@ -99,7 +99,7 @@ export const FollowerIndexAdd = injectI18n(
           >
             <p>
               <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternCreateForm.noRemoteClustersConnectedCallOutDescription"
+                id="xpack.crossClusterReplication.followerIndexCreateForm.noRemoteClustersConnectedCallOutDescription"
                 defaultMessage="None of your clusters are connected. Verify your clusters settings
                   and make sure at least one cluster is connected before creating an auto-follow pattern." //eslint-disable-line max-len
               />
@@ -109,7 +109,7 @@ export const FollowerIndexAdd = injectI18n(
               color="warning"
             >
               <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternCreateForm.viewRemoteClusterButtonLabel"
+                id="xpack.crossClusterReplication.followerIndexCreateForm.viewRemoteClusterButtonLabel"
                 defaultMessage="View remote clusters"
               />
             </EuiButton>
@@ -131,7 +131,7 @@ export const FollowerIndexAdd = injectI18n(
               <FollowerIndexPageTitle
                 title={(
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
+                    id="xpack.crossClusterReplication.followerIndex.addTitle"
                     defaultMessage="Add follower index"
                   />
                 )}
@@ -143,7 +143,7 @@ export const FollowerIndexAdd = injectI18n(
                     return (
                       <SectionLoading>
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClusters"
+                          id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
                           defaultMessage="Loading remote clusters..."
                         />
                       </SectionLoading>
@@ -152,7 +152,7 @@ export const FollowerIndexAdd = injectI18n(
 
                   if (error) {
                     const title = intl.formatMessage({
-                      id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersErrorTitle',
+                      id: 'xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersErrorTitle',
                       defaultMessage: 'Error loading remote clusters',
                     });
                     return <SectionError title={title} error={error} />;
