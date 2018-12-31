@@ -205,7 +205,7 @@ export const FollowerIndexForm = injectI18n(
                   values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
                 />
               )}
-              error={fieldsErrors.name}
+              error={fieldsErrors.name && fieldsErrors.name.message}
               isInvalid={isInvalid}
               fullWidth
             >
