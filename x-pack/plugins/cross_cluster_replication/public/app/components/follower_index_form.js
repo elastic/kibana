@@ -77,6 +77,7 @@ export const FollowerIndexForm = injectI18n(
   class extends PureComponent {
     static propTypes = {
       saveFollowerIndex: PropTypes.func.isRequired,
+      clearApiError: PropTypes.func.isRequired,
       followerIndex: PropTypes.object,
       apiError: PropTypes.object,
       apiStatus: PropTypes.string.isRequired,
@@ -108,6 +109,10 @@ export const FollowerIndexForm = injectI18n(
       const errors = validateFollowerIndex(fields);
       this.setState(updateFields(fields));
       this.setState(updateFormErrors(errors));
+
+      if (this.props.apiError) {
+        this.props.clearApiError();
+      }
     };
 
     onClusterChange = (remoteCluster) => {
@@ -178,13 +183,14 @@ export const FollowerIndexForm = injectI18n(
           id: 'xpack.crossClusterReplication.followerIndexForm.savingErrorTitle',
           defaultMessage: 'Error creating follower index',
         });
+        const { leaderIndex } = this.state.followerIndex;
         const error = apiError.status === 404
           ? {
             data: {
               message: intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexForm.leaderIndexNotFoundError',
                 defaultMessage: `The leader index '{leaderIndex}' you want to replicate from does not exist.`,
-              }, { leaderIndex: this.state.followerIndex.leaderIndex })
+              }, { leaderIndex })
             }
           }
           : apiError;

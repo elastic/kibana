@@ -119,7 +119,7 @@ export const FollowerIndexAdd = injectI18n(
     }
 
     render() {
-      const { saveFollowerIndex, apiStatus, apiError, intl } = this.props;
+      const { saveFollowerIndex, clearApiError, apiStatus, apiError, intl } = this.props;
 
       return (
         <EuiPage>
@@ -172,6 +172,7 @@ export const FollowerIndexAdd = injectI18n(
                       apiError={apiError}
                       remoteClusters={remoteClusters}
                       saveFollowerIndex={saveFollowerIndex}
+                      clearApiError={clearApiError}
                     />
                   );
                 }}
