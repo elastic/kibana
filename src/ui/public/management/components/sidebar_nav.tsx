@@ -52,10 +52,38 @@ export const sideNavItems = (sections: Section[], selectedId: string) =>
       ...sectionToNav(selectedId)(section),
     }));
 
-export const SidebarNav = ({
-  sections,
-  selectedId,
-}: {
+interface SidebarNavProps {
   sections: Section[];
   selectedId: string;
-}) => <EuiSideNav items={sideNavItems(sections, selectedId)} style={{ width: 192 }} />;
+}
+
+interface SidebarNavState {
+  isSideNavOpenOnMobile: boolean;
+}
+
+export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState> {
+  constructor(props: SidebarNavProps) {
+    super(props);
+    this.state = {
+      isSideNavOpenOnMobile: false,
+    };
+  }
+
+  public render() {
+    return (
+      <EuiSideNav
+        mobileTitle="Management Nav"
+        isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+        toggleOpenOnMobile={this.toggleOpenOnMobile}
+        items={sideNavItems(this.props.sections, this.props.selectedId)}
+        style={{ width: 192 }}
+      />
+    );
+  }
+
+  private toggleOpenOnMobile = () => {
+    this.setState({
+      isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
+    });
+  };
+}
