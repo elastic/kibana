@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-// import routing from '../../../services/routing';
+import routing from '../../../services/routing';
 import { extractQueryParams } from '../../../services/query_params';
 import { API_STATUS } from '../../../constants';
 import { SectionLoading, SectionError } from '../../../components';
@@ -109,7 +109,7 @@ export const FollowerIndicesList = injectI18n(
           }
           actions={
             <EuiButton
-              //{...routing.getRouterLinkProps('/follower_indices/add')}
+              {...routing.getRouterLinkProps('/follower_indices/add')}
               fill
               iconType="plusInCircle"
             >

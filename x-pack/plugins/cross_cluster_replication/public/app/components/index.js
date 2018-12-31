@@ -14,3 +14,4 @@ export { AutoFollowPatternPageTitle } from './auto_follow_pattern_page_title';
 export { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_preview';
 export { FollowerIndexDeleteProvider } from './follower_index_delete_provider';
 export { FollowerIndexForm } from './follower_index_form';
+export { FollowerIndexPageTitle } from './follower_index_page_title';

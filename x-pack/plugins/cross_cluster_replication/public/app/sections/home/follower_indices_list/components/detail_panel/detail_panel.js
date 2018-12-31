@@ -10,7 +10,6 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCodeEditor,
   EuiDescriptionList,
@@ -95,8 +94,8 @@ export class DetailPanelUi extends Component {
                 <EuiDescriptionListTitle>
                   <EuiTitle size="xs">
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderPatternsLabel"
-                      defaultMessage="Leader patterns"
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderIndexLabel"
+                      defaultMessage="Leader index"
                     />
                   </EuiTitle>
                 </EuiDescriptionListTitle>
@@ -239,38 +238,20 @@ export class DetailPanelUi extends Component {
 
           {followerIndex && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <FollowerIndexDeleteProvider>
-                    {(deleteFollowerIndex) => (
-                      <EuiButtonEmpty
-                        color="danger"
-                        onClick={() => deleteFollowerIndex(followerIndex.name)}
-                      >
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.deleteButtonLabel"
-                          defaultMessage="Delete"
-                        />
-                      </EuiButtonEmpty>
-                    )}
-                  </FollowerIndexDeleteProvider>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="primary"
-                    onClick={() => {
-                      // routing.navigate(encodeURI(`/follower_indices/edit/${encodeURIComponent(followerIndex.name)}`));
-                    }}
+              <FollowerIndexDeleteProvider>
+                {(deleteFollowerIndex) => (
+                  <EuiButtonEmpty
+                    color="danger"
+                    onClick={() => deleteFollowerIndex(followerIndex.name)}
                   >
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexDetailPanel.editButtonLabel"
-                      defaultMessage="Edit"
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.deleteButtonLabel"
+                      defaultMessage="Delete"
                     />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                  </EuiButtonEmpty>
+                )}
+              </FollowerIndexDeleteProvider>
+
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

@@ -23,7 +23,7 @@ import routing from '../../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
 import {
   FollowerIndexForm,
-  AutoFollowPatternPageTitle,
+  FollowerIndexPageTitle,
   RemoteClustersProvider,
   SectionLoading,
   SectionError,
@@ -32,7 +32,7 @@ import {
 export const FollowerIndexAdd = injectI18n(
   class extends PureComponent {
     static propTypes = {
-      saveAutoFollowPattern: PropTypes.func.isRequired,
+      saveFollowerIndex: PropTypes.func.isRequired,
       clearApiError: PropTypes.func.isRequired,
       apiError: PropTypes.object,
       apiStatus: PropTypes.string.isRequired,
@@ -119,7 +119,7 @@ export const FollowerIndexAdd = injectI18n(
     }
 
     render() {
-      const { saveAutoFollowPattern, apiStatus, apiError, intl } = this.props;
+      const { saveFollowerIndex, apiStatus, apiError, intl } = this.props;
 
       return (
         <EuiPage>
@@ -128,11 +128,11 @@ export const FollowerIndexAdd = injectI18n(
               horizontalPosition="center"
               className="ccrPageContent"
             >
-              <AutoFollowPatternPageTitle
+              <FollowerIndexPageTitle
                 title={(
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
-                    defaultMessage="Add auto-follow pattern"
+                    defaultMessage="Add follower index"
                   />
                 )}
               />
@@ -171,7 +171,7 @@ export const FollowerIndexAdd = injectI18n(
                       apiStatus={apiStatus}
                       apiError={apiError}
                       remoteClusters={remoteClusters}
-                      saveAutoFollowPattern={saveAutoFollowPattern}
+                      saveFollowerIndex={saveFollowerIndex}
                     />
                   );
                 }}

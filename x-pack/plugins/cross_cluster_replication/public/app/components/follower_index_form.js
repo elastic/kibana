@@ -12,13 +12,11 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiComboBox,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormHelpText,
   EuiFormRow,
   EuiLoadingKibana,
   EuiLoadingSpinner,
@@ -29,15 +27,13 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import routing from '../services/routing';
 import { API_STATUS } from '../constants';
-import { SectionError } from './';
+import { SectionError } from './section_error';
 import { validateFollowerIndex } from '../services/follower_index_validators';
 
-const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const getFirstConnectedCluster = (clusters) => {
@@ -52,14 +48,25 @@ const getFirstConnectedCluster = (clusters) => {
 const getEmptyFollowerIndex = (remoteClusters) => ({
   name: '',
   remoteCluster: getFirstConnectedCluster(remoteClusters).name,
-  leaderIndexPatterns: [],
-  followIndexPatternPrefix: '',
-  followIndexPatternSuffix: '',
+  leaderIndex: '',
 });
 
-export const updateFormErrors = (errors, existingErrors) => ({
+/**
+ * State transitions: fields update
+ */
+export const updateFields = (fields) => ({ followerIndex }) => ({
+  followerIndex: {
+    ...followerIndex,
+    ...fields,
+  },
+});
+
+/**
+ * State transitions: errors update
+ */
+export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
   fieldsErrors: {
-    ...existingErrors,
+    ...fieldsErrors,
     ...errors,
   }
 });
@@ -94,15 +101,9 @@ export const FollowerIndexForm = injectI18n(
     }
 
     onFieldsChange = (fields) => {
-      this.setState(({ followerIndex }) => ({
-        followerIndex: {
-          ...followerIndex,
-          ...fields,
-        },
-      }));
-
       const errors = validateFollowerIndex(fields);
-      this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
+      this.setState(updateFields(fields));
+      this.setState(updateFormErrors(errors));
     };
 
     onClusterChange = (remoteCluster) => {
@@ -110,13 +111,7 @@ export const FollowerIndexForm = injectI18n(
     };
 
     getFields = () => {
-      const { followerIndex: stateFields } = this.state;
-      const { followIndexPatternPrefix, followIndexPatternSuffix, ...rest } = stateFields;
-
-      return {
-        ...rest,
-        followIndexPattern: `${followIndexPatternPrefix}{{leader_index}}${followIndexPatternSuffix}`
-      };
+      return this.state.followerIndex;
     };
 
     isFormValid() {
@@ -126,14 +121,14 @@ export const FollowerIndexForm = injectI18n(
     sendForm = () => {
       const isFormValid = this.isFormValid();
 
+      this.setState({ areErrorsVisible: !isFormValid });
+
       if (!isFormValid) {
-        this.setState({ areErrorsVisible: true });
         return;
       }
 
-      this.setState({ areErrorsVisible: false });
-
       const { name, ...followerIndex } = this.getFields();
+
       this.props.saveFollowerIndex(name, followerIndex);
     };
 
@@ -150,7 +145,7 @@ export const FollowerIndexForm = injectI18n(
       if (apiError) {
         const title = intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexForm.savingErrorTitle',
-          defaultMessage: 'Error creating auto-follow pattern',
+          defaultMessage: 'Error creating follower index',
         });
         return <SectionError title={title} error={apiError} />;
       }
@@ -159,14 +154,11 @@ export const FollowerIndexForm = injectI18n(
     }
 
     renderForm = () => {
-      const { intl } = this.props;
       const {
         followerIndex: {
           name,
           remoteCluster,
-          leaderIndexPatterns,
-          followIndexPatternPrefix,
-          followIndexPatternSuffix,
+          leaderIndex,
         },
         isNew,
         areErrorsVisible,
@@ -174,7 +166,7 @@ export const FollowerIndexForm = injectI18n(
       } = this.state;
 
       /**
-       * Auto-follow pattern Name
+       * Follower index name
        */
       const renderFollowerIndexName = () => {
         const isInvalid = areErrorsVisible && !!fieldsErrors.name;
@@ -194,7 +186,7 @@ export const FollowerIndexForm = injectI18n(
             description={(
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription"
-                defaultMessage="A unique name for the auto-follow pattern."
+                defaultMessage="A name for the follower index."
               />
             )}
             fullWidth
@@ -204,6 +196,13 @@ export const FollowerIndexForm = injectI18n(
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexForm.followerIndexName.fieldNameLabel"
                   defaultMessage="Name"
+                />
+              )}
+              helpText={(
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+                  defaultMessage="Spaces and the characters {characterList} are not allowed."
+                  values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
                 />
               )}
               error={fieldsErrors.name}
@@ -248,7 +247,7 @@ export const FollowerIndexForm = injectI18n(
             description={(
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.sectionRemoteClusterDescription"
-                defaultMessage="The remote cluster to replicate leader indices from."
+                defaultMessage="The remote cluster to replicate your leader index from."
               />
             )}
             fullWidth
@@ -284,12 +283,11 @@ export const FollowerIndexForm = injectI18n(
       };
 
       /**
-       * Leader index pattern(s)
+       * Leader index
        */
-      const renderLeaderIndexPatterns = () => {
-        const hasError = !!fieldsErrors.leaderIndexPatterns;
-        const isInvalid = hasError && (fieldsErrors.leaderIndexPatterns.alwaysVisible || areErrorsVisible);
-        const formattedLeaderIndexPatterns = leaderIndexPatterns.map(pattern => ({ label: pattern }));
+      const renderLeaderIndex = () => {
+        const hasError = !!fieldsErrors.leaderIndex;
+        const isInvalid = hasError && areErrorsVisible;
 
         return (
           <EuiDescribedFormGroup
@@ -297,8 +295,8 @@ export const FollowerIndexForm = injectI18n(
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexPatternsTitle"
-                    defaultMessage="Leader indices"
+                    id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle"
+                    defaultMessage="Leader index"
                   />
                 </h4>
               </EuiTitle>
@@ -307,25 +305,8 @@ export const FollowerIndexForm = injectI18n(
               <Fragment>
                 <p>
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexPatternsDescription1"
-                    defaultMessage="One or more index patterns that identify the indices you want to
-                      replicate from the remote cluster. As new indices matching these patterns are
-                      created, they are replicated to follower indices on the local cluster."
-                  />
-                </p>
-
-                <p>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexPatternsDescription2"
-                    defaultMessage="{note} indices that already exist are not replicated."
-                    values={{ note: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexPatternsDescription2.noteLabel"
-                          defaultMessage="Note:"
-                        />
-                      </strong>
-                    ) }}
+                    id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription1"
+                    defaultMessage="The leader index you want to replicate from the remote cluster."
                   />
                 </p>
               </Fragment>
@@ -335,120 +316,28 @@ export const FollowerIndexForm = injectI18n(
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.fieldLeaderIndexPatternsLabel"
-                  defaultMessage="Index patterns"
+                  id="xpack.crossClusterReplication.followerIndexForm.fieldLeaderIndexLabel"
+                  defaultMessage="Leader index"
                 />
               )}
               helpText={(
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.fieldLeaderIndexPatternsHelpLabel"
+                  id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
                   defaultMessage="Spaces and the characters {characterList} are not allowed."
-                  values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
+                  values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
                 />
               )}
               isInvalid={isInvalid}
-              error={fieldsErrors.leaderIndexPatterns && fieldsErrors.leaderIndexPatterns.message}
+              error={fieldsErrors.leaderIndex && fieldsErrors.leaderIndex.message}
               fullWidth
             >
-              <EuiComboBox
-                noSuggestions
-                placeholder={intl.formatMessage({
-                  id: 'xpack.crossClusterReplication.followerIndexForm.fieldLeaderIndexPatternsPlaceholder',
-                  defaultMessage: 'Type and then hit ENTER',
-                })}
-                selectedOptions={formattedLeaderIndexPatterns}
-                onCreateOption={this.onCreateLeaderIndexPattern}
-                onChange={this.onLeaderIndexPatternChange}
-                onSearchChange={this.onLeaderIndexPatternInputChange}
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={leaderIndex}
+                onChange={e => this.onFieldsChange({ leaderIndex: e.target.value })}
                 fullWidth
               />
             </EuiFormRow>
-          </EuiDescribedFormGroup>
-        );
-      };
-
-      /**
-       * Auto-follow pattern
-       */
-      const renderFollowerIndex = () => {
-        const isPrefixInvalid = areErrorsVisible && !!fieldsErrors.followIndexPatternPrefix;
-        const isSuffixInvalid = areErrorsVisible && !!fieldsErrors.followIndexPatternSuffix;
-
-        return (
-          <EuiDescribedFormGroup
-            title={(
-              <EuiTitle size="s">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexTitle"
-                    defaultMessage="Follower indices (optional)"
-                  />
-                </h4>
-              </EuiTitle>
-            )}
-            description={(
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexDescription"
-                defaultMessage="A custom prefix or suffix to apply to the names of the follower
-                  indices so you can more easily identify replicated indices. By default, a follower
-                  index has the same name as the leader index."
-              />
-            )}
-            fullWidth
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFormRow
-                  className="ccrFollowerIndicesFormRow"
-                  label={(
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexForm.followerIndex.fieldPrefixLabel"
-                      defaultMessage="Prefix"
-                    />
-                  )}
-                  error={fieldsErrors.followIndexPatternPrefix}
-                  isInvalid={isPrefixInvalid}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    isInvalid={isPrefixInvalid}
-                    value={followIndexPatternPrefix}
-                    onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
-                    fullWidth
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiFormRow
-                  className="ccrFollowerIndicesFormRow"
-                  label={(
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexForm.followerIndex.fieldSuffixLabel"
-                      defaultMessage="Suffix"
-                    />
-                  )}
-                  error={fieldsErrors.followIndexPatternSuffix}
-                  isInvalid={isSuffixInvalid}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    isInvalid={isSuffixInvalid}
-                    value={followIndexPatternSuffix}
-                    onChange={e => this.onFieldsChange({ followIndexPatternSuffix: e.target.value })}
-                    fullWidth
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiFormHelpText className={isPrefixInvalid || isSuffixInvalid ? null : 'ccrFollowerIndicesHelpText'}>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexForm.fieldFollowerIndicesHelpLabel"
-                defaultMessage="Spaces and the characters {characterList} are not allowed."
-                values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
-              />
-            </EuiFormHelpText>
           </EuiDescribedFormGroup>
         );
       };
@@ -546,8 +435,7 @@ export const FollowerIndexForm = injectI18n(
           <EuiForm>
             {renderFollowerIndexName()}
             {renderRemoteClusterField()}
-            {renderLeaderIndexPatterns()}
-            {renderFollowerIndex()}
+            {renderLeaderIndex()}
           </EuiForm>
           {renderFormErrorWarning()}
           <EuiSpacer size="l" />

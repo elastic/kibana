@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 // import { API_STATUS } from '../../../../../constants';
 import { FollowerIndexDeleteProvider } from '../../../../../components';
-// import routing from '../../../../../services/routing';
 
 export const FollowerIndicesTable = injectI18n(
   class extends PureComponent {
@@ -126,29 +125,7 @@ export const FollowerIndicesTable = injectI18n(
                 </EuiToolTip>
               );
             },
-          },
-          {
-            render: ({ /*name*/ }) => {
-              const label = i18n.translate('xpack.crossClusterReplication.followerIndexList.table.actionEditDescription', {
-                defaultMessage: 'Edit follower index',
-              });
-
-              return (
-                <EuiToolTip
-                  content={label}
-                  delay="long"
-                >
-                  <EuiButtonIcon
-                    aria-label={label}
-                    iconType="pencil"
-                    color="primary"
-                    // href={routing.getFollowerIndexPath(name)}
-                  />
-                </EuiToolTip>
-              );
-            },
-          },
-        ],
+          }],
         width: '100px',
       }];
     }

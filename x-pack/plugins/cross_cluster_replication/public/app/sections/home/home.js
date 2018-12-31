@@ -105,7 +105,7 @@ export const CrossClusterReplicationHome = injectI18n(
               <EuiFlexItem grow={false}>
                 {isFollowerIndexApiAuthorized && (
                   <EuiButton
-                    //{...routing.getRouterLinkProps('/follower_indices/add')}
+                    {...routing.getRouterLinkProps('/follower_indices/add')}
                     fill
                     iconType="plusInCircle"
                   >
