@@ -21,49 +21,49 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
 
   switch (type) {
     case ML_JOB_FIELD_TYPES.BOOLEAN:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.booleanTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.booleanTypeAriaLabel', {
         defaultMessage: 'boolean type'
       });
       iconClass = 'fa-adjust';
       break;
     case ML_JOB_FIELD_TYPES.DATE:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.dateTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.dateTypeAriaLabel', {
         defaultMessage: 'date type'
       });
       iconClass = 'fa-clock-o';
       break;
     case ML_JOB_FIELD_TYPES.NUMBER:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.numberTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.numberTypeAriaLabel', {
         defaultMessage: 'number type'
       });
       iconChar = '#';
       break;
     case ML_JOB_FIELD_TYPES.GEO_POINT:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.geo_pointTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.geo_pointTypeAriaLabel', {
         defaultMessage: 'geo_point type'
       });
       iconClass = 'fa-globe';
       break;
     case ML_JOB_FIELD_TYPES.KEYWORD:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.keywordTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.keywordTypeAriaLabel', {
         defaultMessage: 'keyword type'
       });
       iconChar = 't';
       break;
     case ML_JOB_FIELD_TYPES.TEXT:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.textTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.textTypeAriaLabel', {
         defaultMessage: 'text type'
       });
       iconClass = 'fa-file-text-o';
       break;
     case ML_JOB_FIELD_TYPES.IP:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.IPTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.IPTypeAriaLabel', {
         defaultMessage: 'IP type'
       });
       iconClass = 'fa-laptop';
       break;
     case ML_JOB_FIELD_TYPES.UNKNOWN:
-      ariaLabel = i18n.translate('i18nxpack.ml.FieldTypeIcon.UnknownTypeAriaLabel', {
+      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.UnknownTypeAriaLabel', {
         defaultMessage: 'Unknown type'
       });
       iconChar = '?';

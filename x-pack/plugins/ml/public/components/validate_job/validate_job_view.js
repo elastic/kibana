@@ -234,7 +234,7 @@ class ValidateJob extends Component {
           isLoading={this.state.ui.isLoading}
         >
           <FormattedMessage
-            id="i18nxpack.ml.validateJobButtonLabel"
+            id="xpack.ml.validateJobButtonLabel"
             defaultMessage="Validate Job"
           />
         </EuiButton>
@@ -243,7 +243,7 @@ class ValidateJob extends Component {
           <Modal
             close={this.closeModal}
             title={<FormattedMessage
-              id="i18nxpack.ml.validateJob.Modal.title"
+              id="xpack.ml.validateJob.Modal.title"
               defaultMessage="Validate Job {title}"
               values={{
                 title: this.state.title
@@ -255,20 +255,20 @@ class ValidateJob extends Component {
             )}
             <EuiText>
               <FormattedMessage
-                id="i18nxpack.ml.validateJob.Modal.details"
+                id="xpack.ml.validateJob.Modal.details"
                 defaultMessage="Job validation performs certain checks against job configurations and underlying source data
                   and provides specific advice on how to adjust settings that are more likely to produce insightful results."
               />
             </EuiText>
             <EuiText>
               <FormattedMessage
-                id="i18nxpack.ml.validateJob.Modal.jobTips"
+                id="xpack.ml.validateJob.Modal.jobTips"
                 defaultMessage="For more information, see {urlLink}."
                 values={{
                   urlLink: (
                     <EuiLink href={jobTipsUrl} target="_blank">
                       <FormattedMessage
-                        id="i18nxpack.ml.validateJob.Modal.jobTipsLinkText"
+                        id="xpack.ml.validateJob.Modal.jobTipsLinkText"
                         defaultMessage="Machine Learning Job Tips"
                       />
                     </EuiLink>
