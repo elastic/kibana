@@ -40,6 +40,32 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     return configs.map((tag: any) => ({ ...tag._source.tag, config: JSON.parse(tag._source.tag) }));
   }
 
+  public async getForTags(user: FrameworkUser, tagIds: string[]): Promise<ConfigurationBlock[]> {
+    if (tagIds.length === 0) {
+      return [];
+    }
+
+    const params = {
+      ignore: [404],
+      size: 10000,
+      index: INDEX_NAMES.BEATS,
+      type: '_doc',
+      body: {
+        query: {
+          terms: { 'configuration_block.tag': tagIds },
+        },
+      },
+    };
+
+    const response = await this.database.search(user, params);
+    const configs = get<any>(response, 'hits.hits', []);
+
+    return configs.map((tag: any) => ({
+      ...tag._source.tag,
+      config: JSON.parse(tag._source.tag.config || '{}'),
+    }));
+  }
+
   public async delete(user: FrameworkUser, ids: string[]): Promise<void> {
     await this.database.bulk(user, {
       body: ids.map(id => ({ delete: { _id: `configuration_block:${id}` } })),

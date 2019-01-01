@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import { RuntimeTagDoc } from '../server/lib/adapters/tags/adapter_types';
-import { InterfaceExcept } from '../server/utils/helper_types';
 import { configBlockSchemas } from './config_schemas';
+
+const DateType = new t.Type<Date, string>(
+  'DateFromString',
+  (m): m is Date => m instanceof Date,
+  (m, c) =>
+    t.string.validate(m, c).chain(s => {
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
+    }),
+  a => a.toISOString()
+);
 
 export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
 
@@ -23,8 +32,9 @@ export const createConfigurationBlockInterface = (
     {
       type: configType,
       description: t.union([t.undefined, t.string]),
-      tag_id: t.string,
+      tag: t.string,
       config: beatConfigInterface,
+      last_updated: DateType,
     },
     'ConfigBlock'
   );
@@ -54,10 +64,6 @@ export interface CMBeat {
   name?: string;
 }
 
-export interface CMPopulatedBeat extends CMBeat {
-  full_tags: BeatTag[];
-}
-
 export interface ConfigBlockSchema {
   id: string;
   name: string;
@@ -85,6 +91,12 @@ export interface BeatConfigSchema {
   parseValidResult?: (value: any) => any;
 }
 
-export interface BeatTag extends InterfaceExcept<t.TypeOf<typeof RuntimeTagDoc>, 'last_updated'> {
-  last_updated: Date;
-}
+export const RuntimeBeatTag = t.interface(
+  {
+    id: t.union([t.undefined, t.string]),
+    name: t.string,
+    color: t.string,
+  },
+  'StoredBeatTag'
+);
+export interface BeatTag extends t.TypeOf<typeof RuntimeBeatTag> {}

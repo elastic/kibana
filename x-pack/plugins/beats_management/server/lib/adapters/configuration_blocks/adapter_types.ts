@@ -8,6 +8,7 @@ import { FrameworkUser } from '../framework/adapter_types';
 
 export interface ConfigurationBlockAdapter {
   getByIds(user: FrameworkUser, ids: string[]): Promise<ConfigurationBlock[]>;
+  getForTags(user: FrameworkUser, tagIds: string[]): Promise<ConfigurationBlock[]>;
   delete(user: FrameworkUser, blockIds: string[]): Promise<void>;
   create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]>;
 }

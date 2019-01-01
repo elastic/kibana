@@ -1,5 +1,5 @@
 {
-  "index_patterns": [".management-beats"],
+  "index_patterns": [".management-beats-1"],
   "version": 66000,
   "settings": {
     "index": {
@@ -20,11 +20,17 @@
             "type": {
               "type": "keyword"
             },
+            "tag": {
+              "type": "keyword"
+            },
             "description": {
               "type": "text"
             },
             "config": {
               "type": "keyword"
+            },
+            "last_updated": {
+              "type": "date"
             }
           }
         },
@@ -44,12 +50,6 @@
               "type": "keyword"
             },
             "color": {
-              "type": "keyword"
-            },
-            "last_updated": {
-              "type": "date"
-            },
-            "configuration_block_ids": {
               "type": "keyword"
             }
           }

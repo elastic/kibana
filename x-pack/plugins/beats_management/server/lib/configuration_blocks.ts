@@ -6,50 +6,35 @@
 import { intersection, uniq, values } from 'lodash';
 import { validateConfigurationBlocks } from '../../common/config_block_validation';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
-import { BeatTag, ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
+import { ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
 import { entries } from '../utils/polyfills';
+import { ConfigurationBlockAdapter } from './adapters/configuration_blocks/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
-import { CMTagsAdapter } from './adapters/tags/adapter_types';
 
-export class CMTagsDomain {
-  constructor(private readonly tagAdapter: CMTagsAdapter) {}
+export class ConfigurationBlocksLib {
+  constructor(private readonly adapter: ConfigurationBlockAdapter) {}
 
-  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]> {
-    const tags = await this.tagAdapter.getAll(user, ESQuery);
+  public async getForTags(user: FrameworkUser, tagIds: string[]): Promise<ConfigurationBlock[]> {
+    const blocks = await this.adapter.getForTags(user, tagIds);
 
     // const pConfigBlocks = tags.map(async tag => {
     //   return await this.configBlocksAdapter.getByIds(user, tag.configuration_block_ids);
     // });
     // const configBlocks = await Promise.all(pConfigBlocks);
 
-    return tags.map(({ last_updated, ...tag }) => {
+    return blocks.map(({ last_updated, ...block }) => {
       return {
-        ...tag,
+        ...block,
         last_updated: new Date(last_updated),
       };
     });
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]> {
-    const tags = await this.tagAdapter.getTagsWithIds(user, tagIds);
-
-    // const pConfigBlocks = tags.map(async tag => {
-    //   return await this.configBlocksAdapter.getByIds(user, tag.configuration_block_ids);
-    // });
-    // const configBlocks = await Promise.all(pConfigBlocks);
-
-    return tags;
+  public async delete(user: FrameworkUser, ids: string[]) {
+    return await this.adapter.delete(user, ids);
   }
 
-  public async delete(user: FrameworkUser, tagIds: string[]) {
-    return await this.tagAdapter.delete(user, tagIds);
-  }
-
-  public async saveTag(
-    user: FrameworkUser,
-    tagId: string,
-    config: { color: string; configuration_blocks: ConfigurationBlock[] }
-  ) {
+  public async saveTag(user: FrameworkUser, tagId: string, config: ConfigurationBlock) {
     try {
       await this.preventDupeConfigurationBlocks(config.configuration_blocks);
       validateConfigurationBlocks(config.configuration_blocks);

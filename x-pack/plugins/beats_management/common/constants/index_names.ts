@@ -5,5 +5,5 @@
  */
 
 export const INDEX_NAMES = {
-  BEATS: '.management-beats',
+  BEATS: '.management-beats-1',
 };
