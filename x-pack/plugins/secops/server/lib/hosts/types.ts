@@ -11,7 +11,7 @@ import {
   TimerangeInput,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { ESQuery, SearchHit } from '../types';
+import { ESQuery, Hit, Hits, SearchHit } from '../types';
 
 export interface HostsAdapter {
   getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;
@@ -27,34 +27,27 @@ export interface HostsRequestOptions {
 
 type StringOrNumber = string | number;
 
-export interface HostHit {
-  _index: string;
-  _type: string;
-  _id: string;
-  _score: number | null;
+export interface HostHit extends Hit {
   _source: {
-    '@timestamp': string;
+    '@timestamp'?: string;
     host: {
+      id?: string;
       name: string;
-      os: {
+      os?: {
         name: string;
         version: string;
       };
     };
   };
-  cursor: string;
-  sort: StringOrNumber[];
+  cursor?: string;
+  sort?: StringOrNumber[];
 }
 
+export type HostHits = Hits<number, HostHit>;
+
 export interface HostBucket {
-  key: { host_name: string };
-  host: {
-    hits: {
-      total: number;
-      max_score: number | null;
-      hits: HostHit[];
-    };
-  };
+  key?: { host_name: string };
+  host: HostHits;
 }
 
 export interface HostData extends SearchHit {

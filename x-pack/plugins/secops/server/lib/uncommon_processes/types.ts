@@ -11,7 +11,8 @@ import {
   UncommonProcessesData,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { ESQuery, SearchHit, TotalHit } from '../types';
+import { HostHits } from '../hosts/types';
+import { ESQuery, Hit, Hits, SearchHit, TotalHit } from '../types';
 
 export interface UncommonProcessesAdapter {
   getUncommonProcesses(
@@ -29,11 +30,7 @@ export interface UncommonProcessesRequestOptions {
 }
 
 type StringOrNumber = string | number;
-export interface UncommonProcessHit {
-  _index: string;
-  _type: string;
-  _id: string;
-  _score: number | null;
+export interface UncommonProcessHit extends Hit {
   total: TotalHit;
   hosts: Array<{ id: string; name: string }>;
   _source: {
@@ -47,18 +44,14 @@ export interface UncommonProcessHit {
   sort: StringOrNumber[];
 }
 
+export type ProcessHits = Hits<TotalHit, UncommonProcessHit>;
+
 export interface UncommonProcessBucket {
   key: string;
   hosts: {
     buckets: Array<{ key: string; host: HostHits }>;
   };
-  process: {
-    hits: {
-      total: TotalHit;
-      max_score: number | null;
-      hits: UncommonProcessHit[];
-    };
-  };
+  process: ProcessHits;
 }
 
 export interface UncommonProcessData extends SearchHit {
@@ -71,27 +64,5 @@ export interface UncommonProcessData extends SearchHit {
       after_key: string;
       buckets: UncommonProcessBucket[];
     };
-  };
-}
-
-export interface HostHits {
-  hits: {
-    total: number;
-    max_source: number;
-    hits: [
-      // This type is an array/tuple of size exactly one
-      {
-        _index: string;
-        _type: string;
-        _id: string;
-        _score: number;
-        _source: {
-          host: {
-            name: string;
-            id: string;
-          };
-        };
-      }
-    ];
   };
 }

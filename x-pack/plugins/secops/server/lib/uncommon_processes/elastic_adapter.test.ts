@@ -18,7 +18,7 @@ describe('elasticsearch_adapter', () => {
             host: {
               hits: {
                 total: 0,
-                max_source: 0,
+                max_score: 0,
                 hits: [
                   {
                     _index: 'hit-1',
@@ -58,7 +58,7 @@ describe('elasticsearch_adapter', () => {
             host: {
               hits: {
                 total: 0,
-                max_source: 0,
+                max_score: 0,
                 hits: [
                   {
                     _index: 'hit-1',
@@ -81,7 +81,7 @@ describe('elasticsearch_adapter', () => {
             host: {
               hits: {
                 total: 0,
-                max_source: 0,
+                max_score: 0,
                 hits: [
                   {
                     _index: 'hit-2',
