@@ -17,12 +17,27 @@
  * under the License.
  */
 
-// bluebird < v3.3.5 does not work with MutationObserver polyfill
-// when MutationObserver exists, bluebird avoids using node's builtin async schedulers
-const bluebird = require('bluebird');
-bluebird.Promise.setScheduler(function (fn) { global.setImmediate.call(global, fn); });
+const { extname } = require('path');
 
-const MutationObserver = require('mutation-observer');
-Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
+const { transform } = require('babel-core');
 
-require('whatwg-fetch');
+exports.createServerCodeTransformer = (sourceMaps) => {
+  return (content, path) => {
+    switch (extname(path)) {
+      case '.js':
+        const { code = '' } = transform(content.toString('utf8'), {
+          filename: path,
+          ast: false,
+          code: true,
+          sourceMaps: sourceMaps ? 'inline' : false,
+          babelrc: false,
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        });
+
+        return code;
+
+      default:
+        return content.toString('utf8');
+    }
+  };
+};
