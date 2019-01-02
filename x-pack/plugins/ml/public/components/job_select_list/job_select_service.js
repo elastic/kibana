@@ -15,8 +15,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 
 let jobSelectService = undefined;
 
-export function JobSelectServiceProvider($rootScope, globalState) {
-
+export function JobSelectServiceProvider($rootScope, globalState, i18n) {
   function checkGlobalState() {
     if (globalState.ml === undefined) {
       globalState.ml = {};
@@ -42,7 +41,9 @@ export function JobSelectServiceProvider($rootScope, globalState) {
 
       // if there are no valid ids, warn and then select the first job
       if (validIds.length === 0) {
-        const warningText = `No jobs selected, auto selecting first job`;
+        const warningText = i18n('xpack.ml.jobSelectList.noJobsSelectedToast', {
+          defaultMessage: 'No jobs selected, auto selecting first job',
+        });
         toastNotifications.addWarning(warningText);
 
         if (mlJobService.jobs.length) {
@@ -89,8 +90,14 @@ export function JobSelectServiceProvider($rootScope, globalState) {
 
   function warnAboutInvalidJobIds(invalidIds) {
     if (invalidIds.length > 0) {
-      const warningText = (invalidIds.length === 1) ? `Requested job ${invalidIds} does not exist` :
-        `Requested jobs ${invalidIds} do not exist`;
+      const warningText = i18n('xpack.ml.jobSelectList.invalidJobIdToast', {
+        defaultMessage: 'Requested {invalidIdsLength, plural, one {job} other {jobs}} {invalidIds} does not exist',
+        values: {
+          invalidIds: invalidIds,
+          invalidIdsLength: invalidIds.length,
+        }
+      });
+
       toastNotifications.addWarning(warningText);
     }
   }
@@ -102,7 +109,9 @@ export function JobSelectServiceProvider($rootScope, globalState) {
       return sum + ((job.groups === undefined) ? 1 : job.groups.length);
     }, 0);
     if (jobs.length === count) {
-      txt = 'All jobs';
+      txt = i18n('xpack.ml.jobSelectList.menu.description.allJobs', {
+        defaultMessage: 'All jobs',
+      });
     } else {
       // not all jobs have been selected
       // add up how many jobs belong to groups and how many don't
@@ -134,16 +143,31 @@ export function JobSelectServiceProvider($rootScope, globalState) {
 
       // show the whole groups first
       if (wholeGroups.length) {
-        txt = wholeGroups[0];
+        const wholeGroupsTxt = wholeGroups[0];
+        txt = wholeGroupsTxt;
         if (wholeGroups.length > 1 || groupLessJobs > 0) {
           const total = (wholeGroups.length - 1) + groupLessJobs;
-          txt += ` and ${total} other${(total > 1 ? 's' : '')}`;
+          txt = i18n('xpack.ml.jobSelectList.menu.description.wholeGroupsWithOthers', {
+            defaultMessage: '{wholeGroups} and {remainingGroups} {remainingGroups, plural, one {other} other {others}}',
+            values: {
+              wholeGroups: wholeGroupsTxt,
+              remainingGroups: total
+            }
+          });
         }
       } else {
         // otherwise just list the job ids
-        txt = splitJobId(jobs[0]).job;
+        const jobsListText = splitJobId(jobs[0]).job;
+        txt = jobsListText;
         if (jobs.length > 1) {
-          txt += ` and ${jobs.length - 1} other${(jobs.length > 2 ? 's' : '')}`;
+          txt = i18n('xpack.ml.jobSelectList.menu.description.jobsListWithOthers', {
+            defaultMessage: '{jobsList} and {remainingJobs} { jobsLength, plural, one {other} two {other} other {others} }',
+            values: {
+              jobsList: jobsListText,
+              jobsLength: jobs.length,
+              remainingJobs: jobs.length - 1,
+            }
+          });
         }
       }
     }

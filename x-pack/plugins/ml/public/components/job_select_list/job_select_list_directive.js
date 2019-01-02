@@ -25,7 +25,7 @@ import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobSelectList', function (Private) {
+module.directive('mlJobSelectList', function (Private, i18n) {
   return {
     restrict: 'AE',
     replace: true,
@@ -206,9 +206,20 @@ module.directive('mlJobSelectList', function (Private) {
           timeRange.toMoment = moment(timeRange.to);
           timeRange.fromMoment = moment(timeRange.from);
 
-          const fromString = timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
-          const toString =  timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-          timeRange.label = `${fromString} to ${toString}`;
+          const fromStringMomentFormat = i18n('xpack.ml.jobSelectList.groups.timeRange.fromStringMomentFormat', {
+            defaultMessage: 'MMM Do YYYY, HH:mm',
+          });
+          const fromString = timeRange.fromMoment.format(fromStringMomentFormat);
+
+          const toStringMomentFormat = i18n('xpack.ml.jobSelectList.groups.timeRange.toStringMomentFormat', {
+            defaultMessage: 'MMM Do YYYY, HH:mm',
+          });
+          const toString =  timeRange.toMoment.format(toStringMomentFormat);
+
+          timeRange.label = i18n('xpack.ml.jobSelectList.groups.timeRangeLabel', {
+            defaultMessage: '{fromString} to {toString}',
+            values: { fromString, toString }
+          });
 
           group.timeRange = timeRange;
           return group;
@@ -354,9 +365,20 @@ module.directive('mlJobSelectList', function (Private) {
             job.timeRange.toMoment = moment(job.timeRange.to);
             job.timeRange.fromMoment = moment(job.timeRange.from);
 
-            const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
-            const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-            job.timeRange.label = `${fromString} to ${toString}`;
+            const fromStringMomentFormat = i18n('xpack.ml.jobSelectList.jobs.timeRange.fromStringMomentFormat', {
+              defaultMessage: 'MMM Do YYYY, HH:mm',
+            });
+            const fromString = job.timeRange.fromMoment.format(fromStringMomentFormat);
+
+            const toStringMomentFormat = i18n('xpack.ml.jobSelectList.jobs.timeRange.toStringMomentFormat', {
+              defaultMessage: 'MMM Do YYYY, HH:mm',
+            });
+            const toString = job.timeRange.toMoment.format(toStringMomentFormat);
+
+            job.timeRange.label = i18n('xpack.ml.jobSelectList.jobs.timeRangeLabel', {
+              defaultMessage: '{fromString} to {toString}',
+              values: { fromString, toString }
+            });
           }
         });
 
