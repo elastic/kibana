@@ -87,7 +87,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const [isWelcomeShowing, logoutLinkExists] = await Promise.all([
+      const [canCloseFlyout, isWelcomeShowing, logoutLinkExists] = await Promise.all([
+        testSubjects.exists('euiFlyoutCloseButton'),
         PageObjects.home.isWelcomeShowing(),
         find.existsByLinkText('Logout'),
       ]);
@@ -95,6 +96,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       if (!logoutLinkExists) {
         log.debug('Logout not found');
         return;
+      }
+
+      // This can happen if a previous test left the flyout open, and then we can't
+      // click the logout button since it's hidden.
+      if (canCloseFlyout) {
+        log.debug('flyout showing when attempting logout');
+        await testSubjects.click('euiFlyoutCloseButton');
       }
 
       // This sometimes happens when hitting the home screen on a brand new / empty
