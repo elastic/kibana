@@ -27,5 +27,5 @@ declare module 'ui/management' {
     component: string | React.SFC<any>,
     allowOverride: boolean
   ): void;
-  export const management: any;
+  export const management: any; // TODO - properly provide types
 }

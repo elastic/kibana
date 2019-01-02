@@ -56,6 +56,12 @@ export class ManagementSection {
     return this.items.inOrder.filter(item => item.visible);
   }
 
+  /**
+   * Registers a callback that will be executed when management sections are updated
+   * Globally bound to solve for sidebar nav needs
+   *
+   * @param {function} fn
+   */
   addListener(fn) {
     listeners.push(fn);
   }
@@ -76,7 +82,7 @@ export class ManagementSection {
     }
 
     this.items.push(item);
-    listeners.forEach(fn => fn(this.items));
+    listeners.forEach(fn => fn());
 
     return item;
   }
