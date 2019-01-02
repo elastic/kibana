@@ -9,13 +9,7 @@ import styled from 'styled-components';
 
 import { EuiIcon, EuiText } from '@elastic/eui';
 import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
-import {
-  colors,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../../../../style/variables';
+import { colors, px, unit, units } from '../../../../../../style/variables';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span';
