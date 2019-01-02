@@ -1342,10 +1342,10 @@
   resolved "https://registry.yarnpkg.com/@types/expect.js/-/expect.js-0.3.29.tgz#28dd359155b84b8ecb094afc3f4b74c3222dca3b"
   integrity sha1-KN01kVW4S47LCUr8P0t0wyItyjs=
 
-"@types/fetch-mock@7.2.0":
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/@types/fetch-mock/-/fetch-mock-7.2.0.tgz#5f0310e03177d452eeebe9b07975c1fed2a41dba"
-  integrity sha512-p73N4iZbQSEToxVY86R9CHVI4THKM+I9UsFxN10c2EuguSygzDdXXNkicRL/45oIF80u2XE6XDKuCo2NNikDqA==
+"@types/fetch-mock@7.2.1":
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/@types/fetch-mock/-/fetch-mock-7.2.1.tgz#5630999aa75532e00af42a54cbe05e1651f4a080"
+  integrity sha512-zuLhLEK4gOPxhkiUhqbG4p0lKY2ePEE//5NHTTn/vjYl0XWpfk2x0Fw7EWKtCjlggEsuc1GvpasD46X9PSZFaA==
 
 "@types/form-data@^2.2.1":
   version "2.2.1"
@@ -8721,10 +8721,10 @@ fecha@^2.3.3:
   resolved "https://registry.yarnpkg.com/fecha/-/fecha-2.3.3.tgz#948e74157df1a32fd1b12c3a3c3cdcb6ec9d96cd"
   integrity sha512-lUGBnIamTAwk4znq5BcqsDaxSmZ9nDVJaij6NvRt/Tg4R69gERA+otPKbS86ROw9nxVMw2/mp1fnaiWqbs6Sdg==
 
-fetch-mock@7.2.8, fetch-mock@^7.2.8:
-  version "7.2.8"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.2.8.tgz#b83b84c144b37eb6bcecc8e6334b784951452ec6"
-  integrity sha512-1l9oDwU3XjaJqYGXHRqqlP6DEwGdf2eiFcrBwHRgbjuA+kR/u2A+aXn8/AdpzqDQYEdSZk+LgZcIsacgMKJT/g==
+fetch-mock@7.3.0:
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.3.0.tgz#4bf41190c19477c4c86ce1739972035bb02b3add"
+  integrity sha512-KxBeS8vsADFbWPVomuwxYqOJ2obZo6CidgkypjDPeu6zl+tAJvh2GfLDmJ8u//xgBGM9iOGwOxafeqAclilH2A==
   dependencies:
     babel-polyfill "^6.26.0"
     glob-to-regexp "^0.4.0"
