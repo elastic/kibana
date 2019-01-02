@@ -96,7 +96,6 @@ export class DetailPanel extends Component {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
-        \
       </Fragment>
     ) : (
       <EuiFlyoutBody>

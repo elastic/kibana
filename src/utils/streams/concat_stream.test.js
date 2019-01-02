@@ -17,26 +17,24 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream
-} from '../';
+} from './';
 
 describe('concatStream', () => {
-  it('accepts an initial value', async () => {
+  test('accepts an initial value', async () => {
     const output = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
       createConcatStream([0])
     ]);
 
-    expect(output).to.eql([0, 1, 2, 3]);
+    expect(output).toEqual([0, 1, 2, 3]);
   });
 
   describe(`combines using the previous value's concat method`, () => {
-    it('works with strings', async () => {
+    test('works with strings', async () => {
       const output = await createPromiseFromStreams([
         createListStream([
           'a',
@@ -45,10 +43,10 @@ describe('concatStream', () => {
         ]),
         createConcatStream()
       ]);
-      expect(output).to.eql('abc');
+      expect(output).toEqual('abc');
     });
 
-    it('works with arrays', async () => {
+    test('works with arrays', async () => {
       const output = await createPromiseFromStreams([
         createListStream([
           [1],
@@ -57,10 +55,10 @@ describe('concatStream', () => {
         ]),
         createConcatStream()
       ]);
-      expect(output).to.eql([1, 2, 3, 4, 10]);
+      expect(output).toEqual([1, 2, 3, 4, 10]);
     });
 
-    it('works with a mixture, starting with array', async () => {
+    test('works with a mixture, starting with array', async () => {
       const output = await createPromiseFromStreams([
         createListStream([
           [],
@@ -72,10 +70,10 @@ describe('concatStream', () => {
         ]),
         createConcatStream()
       ]);
-      expect(output).to.eql([1, 2, 3, 4, 5, 6, 7]);
+      expect(output).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
 
-    it('fails when the value does not have a concat method', async () => {
+    test('fails when the value does not have a concat method', async () => {
       let promise;
       try {
         promise = createPromiseFromStreams([
@@ -83,15 +81,15 @@ describe('concatStream', () => {
           createConcatStream()
         ]);
       } catch (err) {
-        expect.fail('createPromiseFromStreams() should not fail synchronously');
+        throw new Error('createPromiseFromStreams() should not fail synchronously');
       }
 
       try {
         await promise;
-        expect.fail('Promise should have rejected');
+        throw new Error('Promise should have rejected');
       } catch (err) {
-        expect(err).to.be.an(Error);
-        expect(err.message).to.contain('concat');
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toContain('concat');
       }
     });
   });
