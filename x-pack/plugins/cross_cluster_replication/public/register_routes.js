@@ -26,7 +26,7 @@ if (chrome.getInjected('ccrUiEnabled')) {
     controller: class CrossClusterReplicationController {
       constructor($scope, $route, $http) {
         /**
-         * React-router's <Redirect> does not play wall with the angular router. It will cause this controller
+         * React-router's <Redirect> does not play well with the angular router. It will cause this controller
          * to re-execute without the $destroy handler being called. This means that the app will be mounted twice
          * creating a memory leak when leaving (only 1 app will be unmounted).
          * To avoid this, we unmount the React app each time we enter the controller.
