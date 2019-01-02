@@ -22,6 +22,7 @@ export function secops(kibana: any) {
       app: {
         description: 'Explore your security operations',
         main: 'plugins/secops/app',
+        icon: 'plugins/secops/images/security_app.svg', // TODO: Use real SVG for logo (this is a fake url)
         euiIconType: 'securityApp',
         title: 'Sec Ops',
         listed: false,
@@ -31,6 +32,7 @@ export function secops(kibana: any) {
       links: [
         {
           description: 'Explore your security operations',
+          icon: 'plugins/secops/images/security_app.svg', // TODO: Use real SVG for logo (this is a fake url)
           euiIconType: 'securityApp',
           id: 'secops',
           order: 9000,
