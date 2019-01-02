@@ -93,6 +93,10 @@ const getSelectedLayerId = ({ map }) => {
 
 export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
+export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapReadyLayerList
+  ? map.waitingForMapReadyLayerList
+  : [];
+
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
