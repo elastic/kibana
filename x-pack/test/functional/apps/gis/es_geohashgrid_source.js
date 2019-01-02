@@ -12,6 +12,14 @@ export default function ({ getPageObjects }) {
 
   describe('layer geohashgrid aggregation source', () => {
 
+    async function getRequestTimestamp() {
+      await PageObjects.gis.openInspectorRequestsView();
+      const requestStats = await PageObjects.gis.getInspectorTableData();
+      const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      await PageObjects.gis.closeInspector();
+      return requestTimestamp;
+    }
+
     describe('heatmap', () => {
       before(async () => {
         await PageObjects.gis.loadSavedMap('geohashgrid heatmap example');
@@ -24,6 +32,14 @@ export default function ({ getPageObjects }) {
       const LAYER_ID = '3xlvm';
       const EXPECTED_NUMBER_FEATURES = 6;
       const HEATMAP_PROP_NAME = '__kbn_heatmap_weight__';
+
+      it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
+        const beforeRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp.length).to.be(24);
+        await PageObjects.gis.triggerSingleRefresh(1000);
+        const afterRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+      });
 
       it('should decorate feature properties with scaled doc_count property', async () => {
         const mapboxStyle = await PageObjects.gis.getMapboxStyle();
@@ -71,6 +87,14 @@ export default function ({ getPageObjects }) {
       const LAYER_ID = 'g1xkv';
       const EXPECTED_NUMBER_FEATURES = 6;
       const MAX_OF_BYTES_PROP_NAME = 'max_of_bytes';
+
+      it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
+        const beforeRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp.length).to.be(24);
+        await PageObjects.gis.triggerSingleRefresh(1000);
+        const afterRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+      });
 
       it('should decorate feature properties with metrics properterties', async () => {
         const mapboxStyle = await PageObjects.gis.getMapboxStyle();

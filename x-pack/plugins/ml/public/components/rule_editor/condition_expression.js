@@ -17,7 +17,6 @@ import React, {
 import {
   EuiButtonIcon,
   EuiExpression,
-  EuiExpressionButton,
   EuiPopoverTitle,
   EuiFlexItem,
   EuiFlexGroup,
@@ -100,7 +99,7 @@ export class ConditionExpression extends Component {
     return (
       <div style={POPOVER_STYLE}>
         <EuiPopoverTitle>When</EuiPopoverTitle>
-        <EuiExpression style={{ width: 200 }}>
+        <div className="euiExpression" style={{ width: 200 }}>
           <EuiSelect
             value={this.props.appliesTo}
             onChange={this.changeAppliesTo}
@@ -110,7 +109,7 @@ export class ConditionExpression extends Component {
               { value: APPLIES_TO.DIFF_FROM_TYPICAL, text: appliesToText(APPLIES_TO.DIFF_FROM_TYPICAL) }
             ]}
           />
-        </EuiExpression>
+        </div>
       </div>
     );
   }
@@ -119,7 +118,7 @@ export class ConditionExpression extends Component {
     return (
       <div style={POPOVER_STYLE}>
         <EuiPopoverTitle>Is</EuiPopoverTitle>
-        <EuiExpression>
+        <div className="euiExpression">
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 250 }}>
               <EuiSelect
@@ -141,7 +140,7 @@ export class ConditionExpression extends Component {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     );
   }
@@ -161,9 +160,9 @@ export class ConditionExpression extends Component {
           <EuiPopover
             id="appliesToPopover"
             button={(
-              <EuiExpressionButton
+              <EuiExpression
                 description="when"
-                buttonValue={appliesToText(appliesTo)}
+                value={appliesToText(appliesTo)}
                 isActive={this.state.isAppliesToOpen}
                 onClick={this.openAppliesTo}
               />
@@ -183,9 +182,9 @@ export class ConditionExpression extends Component {
           <EuiPopover
             id="operatorValuePopover"
             button={(
-              <EuiExpressionButton
+              <EuiExpression
                 description={`is ${operatorToText(operator)}`}
-                buttonValue={`${value}`}
+                value={`${value}`}
                 isActive={this.state.isOperatorValueOpen}
                 onClick={this.openOperatorValue}
               />

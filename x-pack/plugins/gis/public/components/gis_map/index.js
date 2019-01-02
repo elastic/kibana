@@ -7,6 +7,11 @@
 import { connect } from 'react-redux';
 import { GisMap } from './view';
 import { getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
+import {
+  setTimeFiltersToKbnGlobalTime,
+  triggerRefreshTimer,
+  setRefreshConfig
+} from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   const flyoutDisplay = getFlyoutDisplay(state);
@@ -17,5 +22,13 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedGisMap = connect(mapStateToProps)(GisMap);
+function mapDispatchToProps(dispatch) {
+  return {
+    setTimeFiltersToKbnGlobalTime: () => dispatch(setTimeFiltersToKbnGlobalTime()),
+    triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
+    setRefreshConfig: (({ isPaused, interval }) => dispatch(setRefreshConfig({ isPaused, interval }))),
+  };
+}
+
+const connectedGisMap = connect(mapStateToProps, mapDispatchToProps)(GisMap);
 export { connectedGisMap as GisMap };
