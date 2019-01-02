@@ -172,18 +172,9 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
                 >
-                  <defs>
-                    <path
-                      d="M8.93 4.244l5.061 4.599c.231.21.605.21.836 0 .23-.21.23-.55 0-.76l-5.075-4.61c-.694-.631-1.811-.63-2.504 0l-5.075 4.61c-.23.21-.23.55 0 .76.23.21.605.21.836 0l5.062-4.6A.498.498 0 0 0 8 4.5v8a.5.5 0 1 0 1 0v-8a.498.498 0 0 0-.07-.256z"
-                      id="sort_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    transform="rotate(-180 8.5 8)"
-                    xlinkHref="#sort_down-a"
+                  <path
+                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
                   />
                 </svg>
               </span>
@@ -478,18 +469,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
                 >
-                  <defs>
-                    <path
-                      d="M8.93 4.244l5.061 4.599c.231.21.605.21.836 0 .23-.21.23-.55 0-.76l-5.075-4.61c-.694-.631-1.811-.63-2.504 0l-5.075 4.61c-.23.21-.23.55 0 .76.23.21.605.21.836 0l5.062-4.6A.498.498 0 0 0 8 4.5v8a.5.5 0 1 0 1 0v-8a.498.498 0 0 0-.07-.256z"
-                      id="sort_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    transform="rotate(-180 8.5 8)"
-                    xlinkHref="#sort_down-a"
+                  <path
+                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
                   />
                 </svg>
               </span>
