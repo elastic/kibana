@@ -87,15 +87,6 @@ export function registerStatsApi(kbnServer, server, config) {
                     ...usage[usageKey]
                   };
                 }
-                else if (usageKey === 'reporting') {
-                  accum = {
-                    ...accum,
-                    xpack: {
-                      ...accum.xpack,
-                      reporting: usage[usageKey]
-                    },
-                  };
-                }
                 else {
                   accum = {
                     ...accum,
