@@ -83,7 +83,7 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
   }
 
   private renderMobileTitle() {
-    return <FormattedMessage id="management.nav.menu" defaultMessage="Management menu" />;
+    return <FormattedMessage id="common.ui.management.nav.menu" defaultMessage="Management menu" />;
   }
 
   private toggleOpenOnMobile = () => {
