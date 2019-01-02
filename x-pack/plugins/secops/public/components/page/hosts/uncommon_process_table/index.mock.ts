@@ -14,7 +14,7 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         uncommonProcess: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           name: 'elrond.elstc.co',
-          hosts: ['Hello World', 'Hello World'],
+          hosts: [{ id: 'host-id-1', name: 'hello-world' }],
           instances: 93,
           title: 'Hello World',
         },
@@ -26,7 +26,10 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         uncommonProcess: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           name: 'siem-kibana',
-          hosts: ['Hello World', 'Hello World'],
+          hosts: [
+            { id: 'host-id-1', name: 'hello-world' },
+            { id: 'host-id-2', name: 'hello-world-2' },
+          ],
           instances: 97,
           title: 'Hello World',
         },

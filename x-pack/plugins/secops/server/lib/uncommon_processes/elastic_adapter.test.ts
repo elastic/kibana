@@ -12,7 +12,31 @@ describe('elasticsearch_adapter', () => {
     const bucket1: UncommonProcessBucket = {
       key: '123',
       hosts: {
-        buckets: [],
+        buckets: [
+          {
+            key: '123',
+            host: {
+              hits: {
+                total: 0,
+                max_score: 0,
+                hits: [
+                  {
+                    _index: 'hit-1',
+                    _type: 'type-1',
+                    _id: 'id-1',
+                    _score: 0,
+                    _source: {
+                      host: {
+                        name: 'host-1',
+                        id: 'host-id-1',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
       },
       process: {
         hits: {
@@ -28,7 +52,54 @@ describe('elasticsearch_adapter', () => {
     const bucket2: UncommonProcessBucket = {
       key: '345',
       hosts: {
-        buckets: [],
+        buckets: [
+          {
+            key: '123',
+            host: {
+              hits: {
+                total: 0,
+                max_score: 0,
+                hits: [
+                  {
+                    _index: 'hit-1',
+                    _type: 'type-1',
+                    _id: 'id-1',
+                    _score: 0,
+                    _source: {
+                      host: {
+                        name: 'host-1',
+                        id: 'host-id-1',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          {
+            key: '345',
+            host: {
+              hits: {
+                total: 0,
+                max_score: 0,
+                hits: [
+                  {
+                    _index: 'hit-2',
+                    _type: 'type-2',
+                    _id: 'id-2',
+                    _score: 0,
+                    _source: {
+                      host: {
+                        name: 'host-2',
+                        id: 'host-id-2',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
       },
       process: {
         hits: {
@@ -43,13 +114,13 @@ describe('elasticsearch_adapter', () => {
     };
 
     test('will return a single host correctly', () => {
-      const hosts = getHosts([bucket1]);
-      expect(hosts).toEqual(['123']);
+      const hosts = getHosts(bucket1.hosts.buckets);
+      expect(hosts).toEqual([{ id: '123', name: 'host-1' }]);
     });
 
     test('will return two hosts correctly', () => {
-      const hosts = getHosts([bucket1, bucket2]);
-      expect(hosts).toEqual(['123', '345']);
+      const hosts = getHosts(bucket2.hosts.buckets);
+      expect(hosts).toEqual([{ id: '123', name: 'host-1' }, { id: '345', name: 'host-2' }]);
     });
 
     test('will return no hosts when given an empty array', () => {
@@ -68,15 +139,12 @@ describe('elasticsearch_adapter', () => {
         value: 100,
         relation: 'eq',
       },
-      hosts: ['host-1', 'host-2'],
+      hosts: [{ id: 'host-id-1', name: 'host-name-1' }, { id: 'host-id-1', name: 'host-name-1' }],
       _source: {
         '@timestamp': 'time',
         process: {
           name: 'process-1',
           title: 'title-1',
-        },
-        host: {
-          name: 'name-1',
         },
       },
       cursor: 'cursor-1',
@@ -87,15 +155,15 @@ describe('elasticsearch_adapter', () => {
       const fields: ReadonlyArray<string> = ['name'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
       expect(data).toEqual({
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
+        cursor: { tiebreaker: null, value: 'cursor-1' },
         uncommonProcess: {
-          name: 'process-1',
           _id: 'id-123',
-          hosts: ['host-1', 'host-2'],
+          hosts: [
+            { id: 'host-id-1', name: 'host-name-1' },
+            { id: 'host-id-1', name: 'host-name-1' },
+          ],
           instances: 100,
+          name: 'process-1',
         },
       });
     });
@@ -104,16 +172,16 @@ describe('elasticsearch_adapter', () => {
       const fields: ReadonlyArray<string> = ['name', 'title'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
       expect(data).toEqual({
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
+        cursor: { tiebreaker: null, value: 'cursor-1' },
         uncommonProcess: {
+          _id: 'id-123',
+          hosts: [
+            { id: 'host-id-1', name: 'host-name-1' },
+            { id: 'host-id-1', name: 'host-name-1' },
+          ],
+          instances: 100,
           name: 'process-1',
           title: 'title-1',
-          _id: 'id-123',
-          hosts: ['host-1', 'host-2'],
-          instances: 100,
         },
       });
     });

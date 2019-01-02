@@ -167,9 +167,13 @@ export interface GeoEcsFields {
 }
 
 export interface HostEcsFields {
+  id?: string | null;
+
   hostname?: string | null;
 
   ip?: string | null;
+
+  name?: string | null;
 }
 
 export interface SourceEcsFields {
@@ -257,7 +261,7 @@ export interface UncommonProcessItem {
 
   instances: number;
 
-  hosts?: (string | null)[] | null;
+  hosts: HostEcsFields[];
 }
 
 export interface SayMyName {
@@ -765,17 +769,31 @@ export namespace GeoEcsFieldsResolvers {
 
 export namespace HostEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
+    id?: IdResolver<string | null, TypeParent, Context>;
+
     hostname?: HostnameResolver<string | null, TypeParent, Context>;
 
     ip?: IpResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
   }
 
+  export type IdResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type HostnameResolver<
     R = string | null,
     Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
     R = string | null,
     Parent = HostEcsFields,
     Context = SecOpsContext
@@ -1036,7 +1054,7 @@ export namespace UncommonProcessItemResolvers {
 
     instances?: InstancesResolver<number, TypeParent, Context>;
 
-    hosts?: HostsResolver<(string | null)[] | null, TypeParent, Context>;
+    hosts?: HostsResolver<HostEcsFields[], TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -1060,7 +1078,7 @@ export namespace UncommonProcessItemResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type HostsResolver<
-    R = (string | null)[] | null,
+    R = HostEcsFields[],
     Parent = UncommonProcessItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

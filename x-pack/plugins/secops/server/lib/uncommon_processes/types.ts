@@ -11,7 +11,7 @@ import {
   UncommonProcessesData,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { ESQuery, SearchHit, TotalHit } from '../types';
+import { ESQuery, Hit, Hits, HostHits, SearchHit, TotalHit } from '../types';
 
 export interface UncommonProcessesAdapter {
   getUncommonProcesses(
@@ -29,39 +29,28 @@ export interface UncommonProcessesRequestOptions {
 }
 
 type StringOrNumber = string | number;
-export interface UncommonProcessHit {
-  _index: string;
-  _type: string;
-  _id: string;
-  _score: number | null;
+export interface UncommonProcessHit extends Hit {
   total: TotalHit;
-  hosts: string[];
+  hosts: Array<{ id: string; name: string }>;
   _source: {
     '@timestamp': string;
     process: {
       name: string;
       title: string;
     };
-    host: {
-      name: string;
-    };
   };
   cursor: string;
   sort: StringOrNumber[];
 }
 
+export type ProcessHits = Hits<TotalHit, UncommonProcessHit>;
+
 export interface UncommonProcessBucket {
   key: string;
   hosts: {
-    buckets: [];
+    buckets: Array<{ key: string; host: HostHits }>;
   };
-  process: {
-    hits: {
-      total: TotalHit;
-      max_score: number | null;
-      hits: UncommonProcessHit[];
-    };
-  };
+  process: ProcessHits;
 }
 
 export interface UncommonProcessData extends SearchHit {

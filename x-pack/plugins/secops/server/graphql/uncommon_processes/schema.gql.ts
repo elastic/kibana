@@ -12,7 +12,7 @@ export const uncommonProcessesSchema = gql`
     name: String!
     title: String
     instances: Int!
-    hosts: [String]
+    hosts: [HostEcsFields!]!
   }
 
   type UncommonProcessesEdges {

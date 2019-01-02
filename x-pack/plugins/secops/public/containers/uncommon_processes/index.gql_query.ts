@@ -23,7 +23,10 @@ export const uncommonProcessesQuery = gql`
             name
             title
             instances
-            hosts
+            hosts {
+              id
+              name
+            }
           }
           cursor {
             value

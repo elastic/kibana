@@ -14,6 +14,8 @@ import { SourceStatus } from './source_status';
 import { SourceConfigurations, Sources } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
 
+export * from './hosts';
+
 export interface AppDomainLibs {
   events: Events;
   fields: IndexFields;
@@ -127,4 +129,19 @@ export interface TermAggregation {
 export interface TotalHit {
   value: number;
   relation: string;
+}
+
+export interface Hit {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number | null;
+}
+
+export interface Hits<T, U> {
+  hits: {
+    total: T;
+    max_score: number | null;
+    hits: U[];
+  };
 }

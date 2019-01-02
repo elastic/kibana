@@ -27,7 +27,7 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
     const hits: HostHit[] = getOr([], 'aggregations.group_by_host.buckets', response).map(
-      (bucket: HostBucket) => ({ ...head(bucket.host.hits.hits), cursor: bucket.key.host_name })
+      (bucket: HostBucket) => ({ ...head(bucket.host.hits.hits), cursor: bucket.key!.host_name })
     );
     const hostsEdges = hits.map(hit => formatHostsData(options.fields, hit, hostsFieldsMap));
     const hasNextPage = hostsEdges.length === limit + 1;

@@ -10,6 +10,7 @@ import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 import { rootSchema } from '../../../common/graphql/root/schema.gql';
 import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
+import { eventsSchema } from '../events';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 import { uncommonProcessesSchema } from './schema.gql';
@@ -31,7 +32,10 @@ const testCaseSource = {
               name
               title
               instances
-              hosts
+              hosts {
+                id
+                name
+              }
             }
             cursor{
               value
@@ -82,6 +86,7 @@ describe('Test Source Schema', () => {
     sharedSchema,
     sourcesSchema,
     sourceStatusSchema,
+    eventsSchema,
     uncommonProcessesSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });

@@ -6,8 +6,10 @@
 
 import { HostsData } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-export * from './elasticsearch_adapter';
 import { HostsAdapter, HostsRequestOptions } from './types';
+
+export * from './elasticsearch_adapter';
+export * from './types';
 
 export class Hosts {
   constructor(private readonly adapter: HostsAdapter) {}

@@ -16,7 +16,7 @@ export const mockUncommonProcessesData = {
       {
         uncommonProcess: {
           _id: '3PsyhGcB0WOhS6qy2LAB',
-          hosts: ['Hello World', 'Hello World'],
+          hosts: [{ id: 'Hello World', name: 'Hello World' }],
           instances: 93,
           name: 'galadriel.elstc.co',
           title: 'Hello World',
@@ -28,7 +28,7 @@ export const mockUncommonProcessesData = {
       {
         uncommonProcess: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
-          hosts: ['Hello World', 'Hello World'],
+          hosts: [{ id: 'Hello World', name: 'Hello World' }],
           instances: 97,
           name: 'elrond.elstc.co',
           title: 'Hello World',

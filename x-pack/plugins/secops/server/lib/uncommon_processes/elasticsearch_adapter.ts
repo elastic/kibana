@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
-import { TermAggregation } from '../types';
+import { HostHits, TermAggregation } from '../types';
 import { buildQuery, processFieldsMap } from './query.dsl';
 import {
   UncommonProcessBucket,
@@ -30,6 +30,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
       'search',
       buildQuery(options)
     );
+
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response);
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response);
@@ -65,8 +66,11 @@ export const getHits = (
     hosts: getHosts(bucket.hosts.buckets),
   }));
 
-export const getHosts = (buckets: ReadonlyArray<UncommonProcessBucket>): string[] =>
-  buckets.map((bucket: Readonly<UncommonProcessBucket>) => bucket.key);
+export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
+  buckets.map(bucket => ({
+    id: bucket.key,
+    name: bucket.host.hits.hits[0]._source.host.name,
+  }));
 
 export const formatUncommonProcessesData = (
   fields: ReadonlyArray<string>,
