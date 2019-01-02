@@ -33,8 +33,8 @@ export const SpaceCard = (props: Props) => {
 };
 
 function renderSpaceAvatar(space: Space) {
-  // resetting aria-label here because the title of the EuiCard that the SpaceAvatar lives in is already
-  // announcing the space name. See https://github.com/elastic/kibana/issues/27748
+  // not announcing space name here because the title of the EuiCard that the SpaceAvatar lives in is already
+  // announcing it. See https://github.com/elastic/kibana/issues/27748
   return <SpaceAvatar space={space} size={'l'} announceSpaceName={false} />;
 }
 
