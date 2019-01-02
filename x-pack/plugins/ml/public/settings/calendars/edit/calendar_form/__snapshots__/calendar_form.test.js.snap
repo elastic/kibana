@@ -1,5 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CalendarForm CalendarId shown as title when editing 1`] = `
+<EuiTitle
+  size="m"
+  textTransform="none"
+>
+  <h1
+    className="euiTitle euiTitle--medium"
+  >
+    <FormattedMessage
+      defaultMessage="Calendar {calendarId}"
+      id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
+      values={
+        Object {
+          "calendarId": "test-calendar",
+        }
+      }
+    >
+      Calendar test-calendar
+    </FormattedMessage>
+  </h1>
+</EuiTitle>
+`;
+
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm>
   <React.Fragment>

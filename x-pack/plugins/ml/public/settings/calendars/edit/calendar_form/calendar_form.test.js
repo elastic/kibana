@@ -62,11 +62,7 @@ describe('CalendarForm', () => {
     );
     const calendarId = wrapper.find('EuiTitle');
 
-    expect(
-      calendarId.containsMatchingElement(
-        <h1>Calendar test-calendar</h1>
-      )
-    ).toBeTruthy();
+    expect(calendarId).toMatchSnapshot();
   });
 
 });
