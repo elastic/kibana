@@ -17,26 +17,44 @@
  * under the License.
  */
 
+import Color from 'color';
+
+const getDecorationColor = (color, fill) => {
+  const initialColor = new Color(color).rgb();
+
+  const opacity = Math.min(Number(fill) * initialColor.valpha, 1);
+  const [r, g, b] = initialColor.color;
+
+  return {
+    fill: opacity > 0,
+    fillColor: new Color([
+      r, g, b, opacity
+    ]).string()
+  };
+};
+
 export default series => {
   const pointSize = series.point_size != null ? Number(series.point_size) : Number(series.line_width);
   const showPoints = series.chart_type === 'line' && pointSize !== 0;
+  const decorationColor = getDecorationColor(series.color, series.fill);
+
   return {
     stack: series.stacked && series.stacked !== 'none' || false,
     lines: {
+      ...decorationColor,
       show: series.chart_type === 'line' && series.line_width !== 0,
-      fill: Number(series.fill),
       lineWidth: Number(series.line_width),
       steps: series.steps || false
+    },
+    bars: {
+      ...decorationColor,
+      show: series.chart_type === 'bar',
+      lineWidth: Number(series.line_width)
     },
     points: {
       show: showPoints,
       radius: 1,
       lineWidth: showPoints ? pointSize : 5
-    },
-    bars: {
-      show: series.chart_type === 'bar',
-      fill: Number(series.fill),
-      lineWidth: Number(series.line_width)
     }
   };
 };

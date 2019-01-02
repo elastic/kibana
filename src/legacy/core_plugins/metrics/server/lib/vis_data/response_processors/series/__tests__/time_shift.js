@@ -37,7 +37,7 @@ describe('timeShift(resp, panel, series)', () => {
       offset_time: '1h',
       point_size: 1,
       fill: 0,
-      color: '#F00',
+      color: 'rgb(255, 0, 0)',
       id: 'test',
       split_mode: 'everything',
       metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }]
@@ -72,7 +72,7 @@ describe('timeShift(resp, panel, series)', () => {
     const next = timeShift(resp, panel, series)(results => results);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(results).to.have.length(1);
-    expect(results[0]).to.have.property('color', '#FF0000');
+    expect(results[0]).to.have.property('color', 'rgb(255, 0, 0)');
     expect(results[0]).to.have.property('id', 'test');
     expect(results[0]).to.have.property('label', 'Average of cpu');
     expect(results[0]).to.have.property('lines');

@@ -35,8 +35,8 @@ describe('seriesAgg(resp, panel, series)', () => {
       stacked: false,
       line_width: 1,
       point_size: 1,
-      fill: 0,
-      color: '#F00',
+      fill: '0.5',
+      color: 'rgba(255, 0, 0, 0.5)',
       id: 'test',
       label: 'Total CPU',
       split_mode: 'terms',
@@ -106,12 +106,23 @@ describe('seriesAgg(resp, panel, series)', () => {
 
     expect(results[0]).to.eql({
       id: 'test',
-      color: '#F00',
+      color: 'rgba(255, 0, 0, 0.5)',
       label: 'Total CPU',
       stack: false,
-      lines: { show: true, fill: 0, lineWidth: 1, steps: false },
+      lines: {
+        show: true,
+        fill: true,
+        fillColor: 'rgba(255, 0, 0, 0.25)',
+        lineWidth: 1,
+        steps: false
+      },
       points: { show: true, radius: 1, lineWidth: 1 },
-      bars: { fill: 0, lineWidth: 1, show: false },
+      bars: {
+        fill: true,
+        fillColor: 'rgba(255, 0, 0, 0.25)',
+        lineWidth: 1,
+        show: false
+      },
       data: [
         [ 1, 0.5 ],
         [ 2, 0.5 ]

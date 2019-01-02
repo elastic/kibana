@@ -34,7 +34,7 @@ describe('getDefaultDecoration', () => {
       expect(result.lines)
         .to.have.property('show', true);
       expect(result.lines)
-        .to.have.property('fill', 1);
+        .to.have.property('fill', true);
       expect(result.lines)
         .to.have.property('lineWidth', 10);
       expect(result.points)
@@ -46,7 +46,7 @@ describe('getDefaultDecoration', () => {
       expect(result.bars)
         .to.have.property('show', false);
       expect(result.bars)
-        .to.have.property('fill', 1);
+        .to.have.property('fill', true);
       expect(result.bars)
         .to.have.property('lineWidth', 10);
     });
@@ -103,7 +103,7 @@ describe('getDefaultDecoration', () => {
       expect(result.bars)
         .to.have.property('show', true);
       expect(result.bars)
-        .to.have.property('fill', 1);
+        .to.have.property('fill', true);
       expect(result.bars)
         .to.have.property('lineWidth', 10);
     });
