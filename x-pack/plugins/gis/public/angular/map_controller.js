@@ -127,7 +127,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       });
 
       if (savedMap.id !== $route.current.params.id) {
-        kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        $scope.$evalAsync(() => {
+          kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        });
       }
     }
     return { id };
