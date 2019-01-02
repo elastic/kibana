@@ -24,7 +24,7 @@ import {
   ReindexOperation,
   ReindexStatus,
   ReindexStep,
-} from 'x-pack/plugins/upgrade_assistant/server/lib/reindex_indices';
+} from 'x-pack/plugins/upgrade_assistant/server/lib/reindex_service';
 import { LoadingState } from '../../../../types';
 
 const POLL_INTERVAL = 1000;
@@ -121,8 +121,7 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
   }
 
   public async componentDidMount() {
-    await this.checkStatus(false);
-    this.setState({ loadingState: LoadingState.Success });
+    this.checkStatus();
   }
 
   public render() {
@@ -173,25 +172,16 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
 
   private startReindex = async (): Promise<void> => {
     const { indexName } = this.props;
-    const { reindexStatus: originalStatus } = this.state;
-
-    // Optimistically assume we get started.
-    this.setState({ reindexStatus: ReindexStatus.inProgress, step: ReindexStep.created });
-
     const request = APIClient.post<ReindexOperation>(
       chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
     );
 
-    // Kick off status checks immediately
-    if (originalStatus !== ReindexStatus.failed) {
-      this.checkStatus(true);
-    }
-
     const resp = await request;
     this.updateReindexState(resp.data);
+    this.checkStatus();
   };
 
-  private checkStatus = async (poll: boolean): Promise<void> => {
+  private checkStatus = async (): Promise<void> => {
     const { indexName } = this.props;
 
     try {
@@ -200,38 +190,20 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
       );
       this.updateReindexState(resp.data);
 
-      // If still not complete, poll again for status after POLL_INTERVAL
-      if (resp.data.status !== ReindexStatus.inProgress) {
-        return;
-      } else if (resp.data.lastCompletedStep < ReindexStep.reindexCompleted) {
-        await delay(POLL_INTERVAL);
-        return this.checkStatus(true);
-      } else {
-        // otherwise attempt to complete
-        return this.completeReindex();
+      if (resp.data.status === ReindexStatus.inProgress) {
+        setTimeout(this.checkStatus, POLL_INTERVAL);
       }
     } catch (e) {
       if (e.response && e.response.status === 404) {
-        if (poll) {
-          // for 404s, just check again
-          await delay(POLL_INTERVAL);
-          return this.checkStatus(true);
-        }
+        // for 404s ignore
       } else {
         throw e;
       }
     }
-  };
 
-  private completeReindex = async (): Promise<void> => {
-    const { indexName } = this.props;
-
-    const resp = await APIClient.put<ReindexOperation>(
-      chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
-    );
-
-    // TODO: when complete, or on close?, refresh the depreaction list
-    this.updateReindexState(resp.data);
+    if (this.state.loadingState === LoadingState.Loading) {
+      this.setState({ loadingState: LoadingState.Success });
+    }
   };
 
   private updateReindexState = (reindexOp: ReindexOperation) => {

@@ -149,7 +149,7 @@ import {
 
 export class Cluster {
   public callWithRequest: CallClusterWithRequest;
-  public callWithInternalUser: CallClusterWithInternalUser;
+  public callWithInternalUser: CallCluster;
   public constructor(config: ClusterConfig);
 }
 
@@ -376,7 +376,7 @@ export interface CallClusterWithRequest {
   ): Promise<T>;
 }
 
-export interface CallClusterWithInternalUser {
+export interface CallCluster {
   /* tslint:disable */
   (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: CallClusterOptions): ReturnType<ESClient['bulk']>;
   (endpoint: 'clearScroll', params: ClearScrollParams, options?: CallClusterOptions): ReturnType<ESClient['clearScroll']>;

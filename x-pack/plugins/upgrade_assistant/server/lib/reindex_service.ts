@@ -7,8 +7,9 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import moment from 'moment';
-import { CallClusterWithRequest, Request } from 'src/legacy/core_plugins/elasticsearch';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  FindResponse,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsClient,
@@ -46,14 +47,14 @@ export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 export interface ReindexService {
   createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  findAllInProgressOperations(): Promise<FindResponse<ReindexOperation>>;
   findReindexOperation(indexName: string): Promise<ReindexSavedObject>;
   processNextStep(reindexOp: ReindexSavedObject): Promise<ReindexSavedObject>;
 }
 
 export const reindexServiceFactory = (
   client: SavedObjectsClient,
-  callWithRequest: CallClusterWithRequest,
-  request: Request
+  callCluster: CallCluster
 ): ReindexService => {
   // ------ Utility functions used internally
 
@@ -127,7 +128,7 @@ export const reindexServiceFactory = (
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const putReadonly = await callWithRequest(request, 'indices.putSettings', {
+    const putReadonly = await callCluster('indices.putSettings', {
       index: indexName,
       body: { 'index.blocks.write': true },
     });
@@ -145,9 +146,9 @@ export const reindexServiceFactory = (
    */
   const createNewIndex = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName } = reindexOp.attributes;
-    const { settings, mappings } = await getIndexSettings(callWithRequest, request, indexName);
+    const { settings, mappings } = await getIndexSettings(callCluster, indexName);
 
-    const createIndex = await callWithRequest(request, 'indices.create', {
+    const createIndex = await callCluster('indices.create', {
       index: newIndexName,
       body: {
         settings,
@@ -168,7 +169,7 @@ export const reindexServiceFactory = (
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const startReindex = (await callWithRequest(request, 'reindex', {
+    const startReindex = (await callCluster('reindex', {
       refresh: true,
       waitForCompletion: false,
       body: {
@@ -191,7 +192,7 @@ export const reindexServiceFactory = (
     const taskId = reindexOp.attributes.reindexTaskId;
 
     // Check reindexing task progress
-    const taskResponse = await callWithRequest(request, 'tasks.get', {
+    const taskResponse = await callCluster('tasks.get', {
       taskId,
       waitForCompletion: false,
     });
@@ -202,7 +203,7 @@ export const reindexServiceFactory = (
       });
 
       // Delete the task from ES .tasks index
-      const deleteTaskResp = await callWithRequest(request, 'delete', {
+      const deleteTaskResp = await callCluster('delete', {
         index: '.tasks',
         type: '_doc',
         id: taskId,
@@ -225,7 +226,7 @@ export const reindexServiceFactory = (
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName } = reindexOp.attributes;
 
-    const aliasResponse = await callWithRequest(request, 'indices.updateAliases', {
+    const aliasResponse = await callCluster('indices.updateAliases', {
       body: {
         actions: [
           { add: { index: newIndexName, alias: indexName } },
@@ -248,7 +249,7 @@ export const reindexServiceFactory = (
 
   return {
     async createReindexOperation(indexName: string) {
-      const indexExists = callWithRequest(request, 'indices.exists', { index: indexName });
+      const indexExists = callCluster('indices.exists', { index: indexName });
       if (!indexExists) {
         throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
       }
@@ -291,10 +292,19 @@ export const reindexServiceFactory = (
       return findResponse.saved_objects[0];
     },
 
-    async processNextStep(reindexOp: ReindexSavedObject) {
-      try {
-        reindexOp = await acquireLock(reindexOp);
+    findAllInProgressOperations() {
+      return client.find<ReindexOperation>({
+        type: REINDEX_OP_TYPE,
+        search: ReindexStatus.inProgress.toString(),
+        searchFields: ['status'],
+      });
+    },
 
+    async processNextStep(reindexOp: ReindexSavedObject) {
+      // If locking the operation fails, we don't want to catch it.
+      reindexOp = await acquireLock(reindexOp);
+
+      try {
         switch (reindexOp.attributes.lastCompletedStep) {
           case ReindexStep.created:
             reindexOp = await setReadonly(reindexOp);
@@ -330,12 +340,8 @@ export const reindexServiceFactory = (
   };
 };
 
-const getIndexSettings = async (
-  callWithRequest: CallClusterWithRequest,
-  request: Request,
-  indexName: string
-) => {
-  const indexInfo = await callWithRequest(request, 'transport.request', {
+const getIndexSettings = async (callCluster: CallCluster, indexName: string) => {
+  const indexInfo = await callCluster('transport.request', {
     path: `/${encodeURIComponent(indexName)}?flat_settings`,
   });
 

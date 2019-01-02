@@ -7,11 +7,27 @@
 import Boom from 'boom';
 import { Server } from 'hapi';
 
-import { reindexServiceFactory, ReindexStep } from '../lib/reindex_indices';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { SavedObjectsClient } from 'src/server/saved_objects';
+import { reindexServiceFactory, ReindexStep } from '../lib/reindex_service';
+import { ReindexWorker } from '../lib/reindex_worker';
 
 export function registerReindexIndicesRoutes(server: Server) {
   const BASE_PATH = '/api/upgrade_assistant/reindex';
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
+    'admin'
+  );
+  const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
+    callWithInternalUser
+  );
+  const savedObjectsClient = new server.savedObjects.SavedObjectsClient(
+    savedObjectsRepository
+  ) as SavedObjectsClient;
+  const worker = new ReindexWorker(savedObjectsClient, callWithInternalUser, server.log);
+
+  // server.events.on('start', () => worker.start());
+  worker.start();
+  server.events.on('stop', () => worker.stop());
 
   // Start reindex for an index
   server.route({
@@ -20,16 +36,13 @@ export function registerReindexIndicesRoutes(server: Server) {
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
-      const reindexService = reindexServiceFactory(client, callWithRequest, request);
+      const callCluster = callWithRequest.bind(null, request) as CallCluster;
+      const reindexService = reindexServiceFactory(client, callCluster);
 
       try {
         // Create the reindex operation
-        let reindexOp = await reindexService.createReindexOperation(indexName);
-
-        // Keep processing until the reindex has started.
-        while (reindexOp.attributes.lastCompletedStep < ReindexStep.reindexStarted) {
-          reindexOp = await reindexService.processNextStep(reindexOp);
-        }
+        const reindexOp = await reindexService.createReindexOperation(indexName);
+        worker.forceRefresh();
 
         return reindexOp.attributes;
       } catch (e) {
@@ -49,9 +62,11 @@ export function registerReindexIndicesRoutes(server: Server) {
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
-      const reindexService = reindexServiceFactory(client, callWithRequest, request);
+      const callCluster = callWithRequest.bind(null, request) as CallCluster;
+      const reindexService = reindexServiceFactory(client, callCluster);
 
-      let reindexOp = await reindexService.findReindexOperation(indexName);
+      const reindexOp = await reindexService.findReindexOperation(indexName);
+      return reindexOp.attributes;
 
       // If the reindex has not been completed yet, poll ES for status and attempt to move to next state.
       // TODO: ignore version conflicts
@@ -64,34 +79,6 @@ export function registerReindexIndicesRoutes(server: Server) {
       }
 
       return reindexOp.attributes;
-    },
-  });
-
-  // Complete the process after reindex is done.
-  server.route({
-    path: `${BASE_PATH}/{indexName}`,
-    method: 'PUT',
-    async handler(request) {
-      const client = request.getSavedObjectsClient();
-      const { indexName } = request.params;
-      const reindexService = reindexServiceFactory(client, callWithRequest, request);
-
-      try {
-        let reindexOp = await reindexService.findReindexOperation(indexName);
-
-        if (reindexOp.attributes.lastCompletedStep < ReindexStep.reindexCompleted) {
-          return Boom.badRequest(`Index has not finished reindexing yet.`);
-        }
-
-        // Finish the rest of the process.
-        while (reindexOp.attributes.lastCompletedStep < ReindexStep.aliasCreated) {
-          reindexOp = await reindexService.processNextStep(reindexOp);
-        }
-
-        return reindexOp.attributes;
-      } catch (e) {
-        return Boom.boomify(e, { statusCode: 500 });
-      }
     },
   });
 

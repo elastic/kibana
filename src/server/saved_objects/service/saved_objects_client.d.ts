@@ -84,32 +84,35 @@ export interface SavedObject<T extends SavedObjectAttributes> {
   attributes: T;
 }
 
-export interface SavedObjectsClient {
-  errors: any;
-  create: <T extends SavedObjectAttributes>(
+export declare class SavedObjectsClient {
+  public errors: any;
+
+  constructor(repository: any);
+
+  public create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T,
     options?: CreateOptions
-  ) => Promise<SavedObject<T>>;
-  bulkCreate: <T extends SavedObjectAttributes>(
+  ): Promise<SavedObject<T>>;
+  public bulkCreate<T extends SavedObjectAttributes>(
     objects: Array<BulkCreateObject<T>>,
     options?: CreateOptions
-  ) => Promise<BulkCreateResponse<T>>;
-  delete: (type: string, id: string, options?: BaseOptions) => Promise<{}>;
-  find: <T extends SavedObjectAttributes>(options: FindOptions) => Promise<FindResponse<T>>;
-  bulkGet: <T extends SavedObjectAttributes>(
+  ): Promise<BulkCreateResponse<T>>;
+  public delete(type: string, id: string, options?: BaseOptions): Promise<{}>;
+  public find<T extends SavedObjectAttributes>(options: FindOptions): Promise<FindResponse<T>>;
+  public bulkGet<T extends SavedObjectAttributes>(
     objects: BulkGetObjects,
     options?: BaseOptions
-  ) => Promise<BulkGetResponse<T>>;
-  get: <T extends SavedObjectAttributes>(
+  ): Promise<BulkGetResponse<T>>;
+  public get<T extends SavedObjectAttributes>(
     type: string,
     id: string,
     options?: BaseOptions
-  ) => Promise<SavedObject<T>>;
-  update: <T extends SavedObjectAttributes>(
+  ): Promise<SavedObject<T>>;
+  public update<T extends SavedObjectAttributes>(
     type: string,
     id: string,
     attributes: Partial<T>,
     options?: UpdateOptions
-  ) => Promise<SavedObject<T>>;
+  ): Promise<SavedObject<T>>;
 }
