@@ -17,9 +17,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { autoFollowPatternUrl } from '../services/documentation_links';
+import { followerIndexUrl } from '../services/documentation_links';
 
-export const AutoFollowPatternPageTitle = ({ title }) => (
+export const FollowerIndexPageTitle = ({ title }) => (
   <Fragment>
     <EuiSpacer size="xs" />
 
@@ -35,13 +35,13 @@ export const AutoFollowPatternPageTitle = ({ title }) => (
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={autoFollowPatternUrl}
+            href={followerIndexUrl}
             target="_blank"
             iconType="help"
           >
             <FormattedMessage
-              id="xpack.crossClusterReplication.readDocsAutoFollowPatternButtonLabel"
-              defaultMessage="Auto-follow pattern docs"
+              id="xpack.crossClusterReplication.readDocsFollowerIndexButtonLabel"
+              defaultMessage="Follower index docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -50,6 +50,6 @@ export const AutoFollowPatternPageTitle = ({ title }) => (
   </Fragment>
 );
 
-AutoFollowPatternPageTitle.propTypes = {
+FollowerIndexPageTitle.propTypes = {
   title: PropTypes.node.isRequired,
 };

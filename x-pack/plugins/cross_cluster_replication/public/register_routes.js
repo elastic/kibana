@@ -24,7 +24,7 @@ if (chrome.getInjected('ccrUiEnabled')) {
     template: template,
     controllerAs: 'ccr',
     controller: class CrossClusterReplicationController {
-      constructor($scope, $route, $http) {
+      constructor($scope, $route, $http, $q) {
         /**
          * React-router's <Redirect> does not play well with the angular router. It will cause this controller
          * to re-execute without the $destroy handler being called. This means that the app will be mounted twice
@@ -35,7 +35,7 @@ if (chrome.getInjected('ccrUiEnabled')) {
 
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
-        setHttpClient($http);
+        setHttpClient($http, $q);
 
         $scope.$$postDigest(() => {
           elem = document.getElementById(CCR_REACT_ROOT);

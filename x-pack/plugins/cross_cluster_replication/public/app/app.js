@@ -14,7 +14,8 @@ import { BASE_PATH } from '../../common/constants';
 import {
   CrossClusterReplicationHome,
   AutoFollowPatternAdd,
-  AutoFollowPatternEdit
+  AutoFollowPatternEdit,
+  FollowerIndexAdd,
 } from './sections';
 
 export class App extends Component {
@@ -52,6 +53,7 @@ export class App extends Component {
           <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/follower_indices`} />
           <Route exact path={`${BASE_PATH}/auto_follow_patterns/add`} component={AutoFollowPatternAdd} />
           <Route exact path={`${BASE_PATH}/auto_follow_patterns/edit/:id`} component={AutoFollowPatternEdit} />
+          <Route exact path={`${BASE_PATH}/follower_indices/add`} component={FollowerIndexAdd} />
           <Route exact path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
         </Switch>
       </div>

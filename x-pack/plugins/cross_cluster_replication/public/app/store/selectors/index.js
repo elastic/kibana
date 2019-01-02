@@ -59,5 +59,3 @@ export const getSelectedFollowerIndex = (view = 'detail') => createSelector(getF
   return followerIndexState.byId[followerIndexState[propId]];
 });
 export const getListFollowerIndices = createSelector(getFollowerIndices, (followerIndices) =>  objectToArray(followerIndices));
-
-
