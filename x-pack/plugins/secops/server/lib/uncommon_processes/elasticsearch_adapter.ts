@@ -8,8 +8,7 @@ import { getOr } from 'lodash/fp';
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
-import { HostHits } from '../hosts/types';
-import { TermAggregation } from '../types';
+import { HostHits, TermAggregation } from '../types';
 import { buildQuery, processFieldsMap } from './query.dsl';
 import {
   UncommonProcessBucket,

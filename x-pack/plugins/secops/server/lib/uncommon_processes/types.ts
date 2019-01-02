@@ -11,8 +11,7 @@ import {
   UncommonProcessesData,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { HostHits } from '../hosts/types';
-import { ESQuery, Hit, Hits, SearchHit, TotalHit } from '../types';
+import { ESQuery, Hit, Hits, HostHits, SearchHit, TotalHit } from '../types';
 
 export interface UncommonProcessesAdapter {
   getUncommonProcesses(
