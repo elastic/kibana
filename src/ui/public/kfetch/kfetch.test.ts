@@ -27,6 +27,7 @@ jest.mock('../metadata', () => ({
   },
 }));
 
+// @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import {
   addInterceptor,
