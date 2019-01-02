@@ -5,7 +5,7 @@
  */
 
 import { EuiAvatar } from '@elastic/eui';
-import React from 'react';
+import React, { SFC } from 'react';
 import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../common';
 import { Space } from '../../common/model/space';
 
@@ -16,7 +16,7 @@ interface Props {
   announceSpaceName?: boolean;
 }
 
-export const SpaceAvatar = (props: Props) => {
+export const SpaceAvatar: SFC<Props> = (props: Props) => {
   const { space, size, announceSpaceName, ...rest } = props;
 
   const spaceName = space.name ? space.name.trim() : '';
