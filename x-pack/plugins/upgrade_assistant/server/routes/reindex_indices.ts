@@ -67,18 +67,6 @@ export function registerReindexIndicesRoutes(server: Server) {
 
       const reindexOp = await reindexService.findReindexOperation(indexName);
       return reindexOp.attributes;
-
-      // If the reindex has not been completed yet, poll ES for status and attempt to move to next state.
-      // TODO: ignore version conflicts
-      try {
-        if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
-          reindexOp = await reindexService.processNextStep(reindexOp);
-        }
-      } catch {
-        // noop
-      }
-
-      return reindexOp.attributes;
     },
   });
 

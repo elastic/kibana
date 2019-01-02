@@ -40,6 +40,7 @@ export interface ReindexOperation extends SavedObjectAttributes {
   lastCompletedStep: ReindexStep;
   locked: string | null;
   reindexTaskId: string | null;
+  reindexTaskPercComplete: number | null;
   errorMessage: string | null;
 }
 
@@ -181,6 +182,7 @@ export const reindexServiceFactory = (
     return updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.reindexStarted,
       reindexTaskId: startReindex.task,
+      reindexTaskPercComplete: 0,
     });
   };
 
@@ -198,25 +200,33 @@ export const reindexServiceFactory = (
     });
 
     if (taskResponse.completed) {
-      reindexOp = await updateReindexOp(reindexOp, {
-        lastCompletedStep: ReindexStep.reindexCompleted,
-      });
+      if (taskResponse.task.status.created < taskResponse.task.status.total) {
+        const failureExample = JSON.stringify(taskResponse.response.failures[0]);
+        throw Boom.badData(`Reindexing failed with failures like: ${failureExample}`);
+      }
 
       // Delete the task from ES .tasks index
       const deleteTaskResp = await callCluster('delete', {
         index: '.tasks',
-        type: '_doc',
+        type: 'task',
         id: taskId,
       });
 
       if (deleteTaskResp.result !== 'deleted') {
         throw Boom.badImplementation(`Could not delete reindexing task ${taskId}`);
       }
-    } else {
-      // TODO: update reindexing progress
-    }
 
-    return reindexOp;
+      // Update the status
+      return updateReindexOp(reindexOp, {
+        lastCompletedStep: ReindexStep.reindexCompleted,
+        reindexTaskPercComplete: 1,
+      });
+    } else {
+      const perc = taskResponse.task.status.created / taskResponse.task.status.total;
+      return updateReindexOp(reindexOp, {
+        reindexTaskPercComplete: perc,
+      });
+    }
   };
 
   /**
@@ -275,6 +285,7 @@ export const reindexServiceFactory = (
         lastCompletedStep: ReindexStep.created,
         locked: null,
         reindexTaskId: null,
+        reindexTaskPercComplete: null,
         errorMessage: null,
       });
     },
@@ -352,12 +363,19 @@ const getIndexSettings = async (callCluster: CallCluster, indexName: string) => 
   const settings = removeUnsettableSettings(indexInfo[indexName].settings);
   const mappings = indexInfo[indexName].mappings;
 
+  for (const mappingType in mappings) {
+    if (mappings[mappingType]._all) {
+      delete mappings[mappingType]._all;
+    }
+  }
+
   return { settings, mappings };
 };
 
 const removeUnsettableSettings = (settings: object) =>
   omit(settings, [
     'index.uuid',
+    'index.blocks.write',
     'index.creation_date',
     'index.routing.allocation.initial_recovery._id',
     'index.version.created',

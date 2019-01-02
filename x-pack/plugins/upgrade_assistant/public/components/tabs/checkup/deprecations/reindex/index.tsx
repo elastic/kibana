@@ -43,10 +43,12 @@ const APIClient = axios.create({
 const ReindexProgress: React.StatelessComponent<{
   step?: ReindexStep;
   reindexStatus?: ReindexStatus;
+  reindexTaskPercComplete: number | null;
   errorMessage: string | null;
-}> = ({ step = -1, reindexStatus, errorMessage }) => {
+}> = ({ step = -1, reindexStatus, reindexTaskPercComplete, errorMessage }) => {
   const details = (
-    thisStep: ReindexStep
+    thisStep: ReindexStep,
+    otherContent: ReactNode = null
   ): { status: 'complete' | 'incomplete' | 'danger'; children: ReactNode } => {
     if (reindexStatus === undefined) {
       return { status: 'incomplete', children: null };
@@ -64,32 +66,35 @@ const ReindexProgress: React.StatelessComponent<{
     } else {
       return {
         status: step >= thisStep ? 'complete' : 'incomplete',
-        children: null,
+        children: otherContent,
       };
     }
   };
+
+  const reindexProgressBar =
+    step < ReindexStep.reindexStarted ? null : reindexTaskPercComplete === 0 ? (
+      <EuiProgress size="s" />
+    ) : (
+      <EuiProgress size="s" value={reindexTaskPercComplete || 0} max={1} />
+    );
 
   return (
     <EuiSteps
       steps={[
         {
-          title: 'Index set to read-only',
+          title: 'Setting old index to read-only',
           ...details(ReindexStep.readonly),
         },
         {
-          title: 'New index created',
+          title: 'Creating new index',
           ...details(ReindexStep.newIndexCreated),
         },
         {
-          title: 'Reindexing started',
-          ...details(ReindexStep.reindexStarted),
+          title: 'Reindexing documents',
+          ...details(ReindexStep.reindexCompleted, reindexProgressBar),
         },
         {
-          title: 'Reindex completed',
-          ...details(ReindexStep.reindexCompleted),
-        },
-        {
-          title: 'Aliases switched over',
+          title: 'Creating alias',
           ...details(ReindexStep.aliasCreated),
         },
       ]}
@@ -104,12 +109,11 @@ interface ReindexFlyoutProps {
 
 interface ReindexFlyoutState {
   loadingState: LoadingState;
-  reindexStatus?: ReindexStatus;
   step?: ReindexStep;
+  reindexStatus?: ReindexStatus;
+  reindexTaskPercComplete: number | null;
   errorMessage: string | null;
 }
-
-const delay = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
 class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutState> {
   constructor(props: ReindexFlyoutProps) {
@@ -117,6 +121,7 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
     this.state = {
       loadingState: LoadingState.Loading,
       errorMessage: null,
+      reindexTaskPercComplete: null,
     };
   }
 
@@ -126,7 +131,7 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
 
   public render() {
     const { indexName, closeFlyout } = this.props;
-    const { loadingState, reindexStatus, step, errorMessage } = this.state;
+    const { loadingState, reindexStatus, reindexTaskPercComplete, step, errorMessage } = this.state;
 
     const loading =
       loadingState === LoadingState.Loading || reindexStatus === ReindexStatus.inProgress;
@@ -148,22 +153,21 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
               system, this may cause problems and you may need to use a different strategy to
               reindex this index.
             </EuiCallOut>
-            <EuiSpacer />
-            <EuiButton
-              color="warning"
-              onClick={this.startReindex}
-              disabled={loading || reindexStatus === ReindexStatus.completed}
-            >
-              {reindexStatus === ReindexStatus.failed ? 'Try again' : 'Begin reindex'}
-            </EuiButton>
-            <EuiSpacer />
-            {loading && <EuiProgress size="xs" />}
-            <EuiSpacer />
+            <EuiSpacer size="l" />
             <ReindexProgress
               step={step}
               reindexStatus={reindexStatus}
+              reindexTaskPercComplete={reindexTaskPercComplete}
               errorMessage={errorMessage}
             />
+            <EuiButton
+              color="warning"
+              onClick={this.startReindex}
+              isLoading={loading}
+              disabled={loading || reindexStatus === ReindexStatus.completed}
+            >
+              {this.buttonLabel}
+            </EuiButton>
           </EuiFlyoutBody>
         </EuiFlyout>
       </EuiPortal>
@@ -215,9 +219,24 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
     this.setState({
       step: reindexOp.lastCompletedStep,
       reindexStatus: reindexOp.status,
+      reindexTaskPercComplete: reindexOp.reindexTaskPercComplete,
       errorMessage: reindexOp.errorMessage,
     });
   };
+
+  private get buttonLabel() {
+    const { reindexStatus } = this.state;
+    switch (reindexStatus) {
+      case ReindexStatus.failed:
+        return 'Try again';
+      case ReindexStatus.inProgress:
+        return 'Reindexing…';
+      case ReindexStatus.completed:
+        return 'Done!';
+      default:
+        return 'Start reindexing';
+    }
+  }
 }
 
 interface ReindexButtonProps {

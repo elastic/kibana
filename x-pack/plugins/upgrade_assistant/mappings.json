@@ -19,6 +19,9 @@
       "reindexTaskId": {
         "type": "text"
       },
+      "reindexTaskPercComplete": {
+        "type": "float"
+      },
       "errorMessage": {
         "type": "text"
       }
