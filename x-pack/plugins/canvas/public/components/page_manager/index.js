@@ -9,6 +9,7 @@ import { compose, withState } from 'recompose';
 import * as pageActions from '../../state/actions/pages';
 import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, getWorkpad, getPages, isWriteable } from '../../state/selectors/workpad';
+import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { PageManager as Component } from './page_manager';
 
 const mapStateToProps = state => {
@@ -19,7 +20,7 @@ const mapStateToProps = state => {
     pages: getPages(state),
     selectedPage: getSelectedPage(state),
     workpadId: id,
-    workpadCSS: css,
+    workpadCSS: css || DEFAULT_WORKPAD_CSS,
   };
 };
 

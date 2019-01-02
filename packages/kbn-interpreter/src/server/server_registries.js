@@ -48,8 +48,6 @@ export const populateServerRegistries = types => {
   const remainingTypes = types;
   const populatedTypes = {};
 
-  const globalKeys = Object.keys(global);
-
   const loadType = () => {
     const type = remainingTypes.pop();
     getPluginPaths(type).then(paths => {
@@ -57,14 +55,10 @@ export const populateServerRegistries = types => {
       global.canvas.register = d => registries[type].register(d);
 
       paths.forEach(path => {
-        require(path);
+        require(path); // eslint-disable-line import/no-dynamic-require
       });
 
-      Object.keys(global).forEach(key => {
-        if (!globalKeys.includes(key)) {
-          delete global[key];
-        }
-      });
+      delete global.canvas;
 
       populatedTypes[type] = registries[type];
       if (remainingTypes.length) loadType();
