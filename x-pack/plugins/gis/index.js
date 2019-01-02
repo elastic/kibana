@@ -46,13 +46,16 @@ export function gis(kibana) {
       if (gisEnabled) {
         const thisPlugin = this;
         const xpackMainPlugin = server.plugins.xpack_main;
+        let routesInitialized = false;
 
         watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
           async license => {
-            if (license && license.gis) {
+            if (license && license.gis && !routesInitialized) {
+              routesInitialized = true;
               initRoutes(server);
             }
-          });
+          }
+        );
 
         xpackMainPlugin.info
           .feature(thisPlugin.id)
