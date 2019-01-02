@@ -7,6 +7,7 @@
 import { DatabaseAdapter } from './adapters/database/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMBeatsDomain } from './beats';
+import { ConfigurationBlocksLib } from './configuration_blocks';
 import { BackendFrameworkLib } from './framework';
 import { CMTagsDomain } from './tags';
 import { CMTokensDomain } from './tokens';
@@ -19,6 +20,7 @@ export interface CMServerLibs {
   beats: CMBeatsDomain;
   tags: CMTagsDomain;
   tokens: CMTokensDomain;
+  configurationBlocks: ConfigurationBlocksLib;
 }
 
 export enum BeatEnrollmentStatus {

@@ -20,7 +20,7 @@ import { flatten, intersection, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { EnrollBeat } from '../../components/enroll_beats';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatsTableType, Table } from '../../components/table';
@@ -204,7 +204,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     );
   }
 
-  private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
+  private notifyBeatDisenrolled = async (beats: CMBeat[]) => {
     const { intl } = this.props;
     let title;
     let text;
@@ -251,7 +251,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
 
   private notifyUpdatedTagAssociation = (
     action: 'added' | 'removed',
-    beats: CMPopulatedBeat[],
+    beats: CMBeat[],
     tag: string
   ) => {
     const { intl } = this.props;
@@ -312,12 +312,12 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     });
   };
 
-  private getSelectedBeats = (): CMPopulatedBeat[] => {
+  private getSelectedBeats = (): CMBeat[] => {
     if (!this.tableRef.current) {
       return [];
     }
     const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
-    const beats: CMPopulatedBeat[] = [];
+    const beats: CMBeat[] = [];
     selectedIds.forEach((id: any) => {
       const beat = this.props.containers.beats.state.list.find(b => b.id === id);
       if (beat) {

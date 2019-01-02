@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-import { isEqual } from 'lodash';
 import React from 'react';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
@@ -32,7 +31,8 @@ import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
-  tag: Pick<BeatTag, Exclude<keyof BeatTag, 'last_updated'>>;
+  tag: BeatTag;
+  configuration_blocks: ConfigurationBlock[];
   onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
   attachedBeats?: CMBeat[];
@@ -55,7 +55,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
-    const { tag, attachedBeats } = this.props;
+    const { tag, attachedBeats, configuration_blocks } = this.props;
     return (
       <div>
         <EuiFlexGroup>
@@ -118,11 +118,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         <EuiSpacer />
         <EuiHorizontalRule />
 
-        <EuiFlexGroup
-          alignItems={
-            tag.configuration_blocks && tag.configuration_blocks.length ? 'stretch' : 'center'
-          }
-        >
+        <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h3>
@@ -145,11 +141,8 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           <EuiFlexItem>
             <div>
               <ConfigList
-                configs={tag.configuration_blocks}
+                configs={configuration_blocks}
                 onConfigClick={(action: string, config: ConfigurationBlock) => {
-                  const selectedIndex = tag.configuration_blocks.findIndex(c => {
-                    return isEqual(config, c);
-                  });
                   if (action === 'delete') {
                     const configs = [...tag.configuration_blocks];
                     configs.splice(selectedIndex, 1);

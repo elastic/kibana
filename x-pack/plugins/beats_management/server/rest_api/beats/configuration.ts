@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { omit } from 'lodash';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -28,7 +27,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     const accessToken = request.headers['kbn-beats-access-token'];
 
     let beat;
-    let tags;
+    let configurationBlocks: ConfigurationBlock[];
     try {
       beat = await libs.beats.getById(libs.framework.internalUser, beatId);
       if (beat === null) {
@@ -50,23 +49,17 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
         last_checkin: new Date(),
       });
 
-      tags = await libs.tags.getTagsWithIds(libs.framework.internalUser, beat.tags || []);
+      if (beat.tags) {
+        configurationBlocks = await libs.configurationBlocks.getForTags(
+          libs.framework.internalUser,
+          beat.tags
+        );
+      } else {
+        configurationBlocks = [];
+      }
     } catch (err) {
       return wrapEsError(err);
     }
-
-    const configurationBlocks = tags.reduce((blocks: ConfigurationBlock[], tag: BeatTag) => {
-      blocks = blocks.concat(
-        tag.configuration_blocks.reduce((acc: ConfigurationBlock[], block: ConfigurationBlock) => {
-          acc.push({
-            ...omit(block, ['configs']),
-            config: block.config,
-          });
-          return acc;
-        }, [])
-      );
-      return blocks;
-    }, []);
 
     return {
       configuration_blocks: configurationBlocks,

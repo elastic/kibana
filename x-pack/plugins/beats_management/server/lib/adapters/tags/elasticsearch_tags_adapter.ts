@@ -6,10 +6,10 @@
 
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { CMBeat } from '../../../../common/domain_types';
+import { BeatTag } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
 import { FrameworkUser } from '../framework/adapter_types';
-import { CMTagsAdapter, StoredBeatTag } from './adapter_types';
+import { CMTagsAdapter } from './adapter_types';
 
 export class ElasticsearchTagsAdapter implements CMTagsAdapter {
   private database: DatabaseAdapter;
@@ -18,7 +18,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     this.database = database;
   }
 
-  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<StoredBeatTag[]> {
+  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]> {
     const params = {
       ignore: [404],
       _source: true,
@@ -65,7 +65,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
     const beatsResponse = await this.database.search(user, params);
 
-    const beats = get<CMBeat[]>(beatsResponse, 'hits.hits', []).map(
+    const beats = get<BeatTag[]>(beatsResponse, 'hits.hits', []).map(
       (beat: any) => beat._source.beat
     );
 
@@ -74,7 +74,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     if (activeBeats.length !== 0) {
       return false;
     }
-    const beatIds = inactiveBeats.map((beat: CMBeat) => beat.id);
+    const beatIds = inactiveBeats.map((beat: BeatTag) => beat.id);
 
     const bulkBeatsUpdates = flatten(
       beatIds.map(beatId => {
@@ -105,7 +105,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     return true;
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<StoredBeatTag[]> {
+  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]> {
     if (tagIds.length === 0) {
       return [];
     }
@@ -130,7 +130,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       }));
   }
 
-  public async upsertTag(user: FrameworkUser, tag: StoredBeatTag): Promise<{}> {
+  public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<{}> {
     const body = {
       tag,
       type: 'tag',

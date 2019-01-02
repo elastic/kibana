@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { intersection, uniq, values } from 'lodash';
-import { validateConfigurationBlocks } from '../../common/config_block_validation';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
 import { ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
 import { entries } from '../utils/polyfills';
@@ -34,13 +33,13 @@ export class ConfigurationBlocksLib {
     return await this.adapter.delete(user, ids);
   }
 
-  public async saveTag(user: FrameworkUser, tagId: string, config: ConfigurationBlock) {
-    try {
-      await this.preventDupeConfigurationBlocks(config.configuration_blocks);
-      validateConfigurationBlocks(config.configuration_blocks);
-    } catch (e) {
-      return { isValid: false, result: e.message };
-    }
+  public async save(user: FrameworkUser, tagId: string, block: ConfigurationBlock[]) {
+    // try {
+    //   await this.preventDupeConfigurationBlocks(block.config);
+    //   validateConfigurationBlocks(block.config);
+    // } catch (e) {
+    //   return { isValid: false, result: e.message };
+    // }
 
     // const existingTag = (await this.tagAdapter.getTagsWithIds(user, [tagId]))[0];
 
@@ -52,15 +51,9 @@ export class ConfigurationBlocksLib {
 
     // configBlockIds = configBlockIds.concat(existingTag.configuration_block_ids);
 
-    const tag = {
-      color: config.color,
-      name: tagId,
-      id: tagId,
-      last_updated: new Date(),
-    };
     return {
       isValid: true,
-      result: await this.tagAdapter.upsertTag(user, tag),
+      result: await this.adapter.create(user, block),
     };
   }
 

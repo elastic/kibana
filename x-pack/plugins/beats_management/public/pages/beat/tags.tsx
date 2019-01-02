@@ -7,13 +7,13 @@
 import { EuiGlobalToastList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { CMBeat } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatDetailTagsTable, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/types';
 
 interface BeatTagsPageProps {
-  beat: CMPopulatedBeat;
+  beat: CMBeat;
   libs: FrontendLibs;
   refreshBeat(): void;
 }

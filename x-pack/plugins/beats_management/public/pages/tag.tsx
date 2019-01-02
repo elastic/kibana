@@ -12,15 +12,16 @@ import 'brace/theme/github';
 import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMBeat, CMPopulatedBeat } from '../../common/domain_types';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../common/domain_types';
 import { PrimaryLayout } from '../components/layouts/primary';
 import { TagEdit } from '../components/tag';
 import { AppPageProps } from '../frontend_types';
 
 interface TagPageState {
   showFlyout: boolean;
-  attachedBeats: CMPopulatedBeat[] | null;
+  attachedBeats: CMBeat[] | null;
   tag: BeatTag;
+  configuration_blocks: ConfigurationBlock[];
 }
 class TagPageComponent extends React.PureComponent<
   AppPageProps & {
@@ -42,10 +43,10 @@ class TagPageComponent extends React.PureComponent<
       attachedBeats: null,
       tag: {
         id: props.match.params.action === 'create' ? '' : props.match.params.tagid,
+        name: '',
         color: this.rgb2hex(randomColor),
-        configuration_blocks: [],
-        last_updated: new Date(),
       },
+      configuration_blocks: [],
     };
 
     if (props.match.params.action !== 'create') {
@@ -161,7 +162,7 @@ class TagPageComponent extends React.PureComponent<
     this.props.goTo(`/overview/configuration_tags`);
   };
   private getNumExclusiveConfigurationBlocks = () =>
-    this.state.tag.configuration_blocks
+    this.state.configuration_blocks
       .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }

@@ -14,7 +14,7 @@ interface TagBadgeProps {
   onClick?: () => void;
   onClickAriaLabel?: string;
   maxIdRenderSize?: number;
-  tag: { color?: string; disabled?: boolean; id: string };
+  tag: { color: string; disabled?: boolean; id: string };
 }
 
 export const TagBadge = (props: TagBadgeProps) => {

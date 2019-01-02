@@ -15,6 +15,7 @@ import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_fram
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
 import { CMBeatsDomain } from '../beats';
+import { ConfigurationBlocksLib } from '../configuration_blocks';
 import { CMTagsDomain } from '../tags';
 import { CMTokensDomain } from '../tokens';
 import { CMServerLibs } from '../types';
@@ -25,11 +26,10 @@ export function compose(server: KibanaLegacyServer): CMServerLibs {
     new KibanaBackendFrameworkAdapter(PLUGIN.ID, server, CONFIG_PREFIX)
   );
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
-
-  const tags = new CMTagsDomain(
-    new ElasticsearchTagsAdapter(database),
+  const configurationBlocks = new ConfigurationBlocksLib(
     new ElasticsearchConfigurationBlockAdapter(database)
   );
+  const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
   const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {
     framework,
   });
@@ -45,6 +45,7 @@ export function compose(server: KibanaLegacyServer): CMServerLibs {
     beats,
     tags,
     tokens,
+    configurationBlocks,
   };
 
   return libs;

@@ -5,10 +5,12 @@
  */
 
 import { MemoryBeatsAdapter } from '../adapters/beats/memory_beats_adapter';
+import { MemoryConfigurationBlockAdapter } from '../adapters/configuration_blocks/memory_tags_adapter';
 import { HapiBackendFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
 import { CMBeatsDomain } from '../beats';
+import { ConfigurationBlocksLib } from '../configuration_blocks';
 import { BackendFrameworkLib } from '../framework';
 import { CMTagsDomain } from '../tags';
 import { CMTokensDomain } from '../tokens';
@@ -17,7 +19,10 @@ import { CMServerLibs } from '../types';
 export function compose(server: any): CMServerLibs {
   const framework = new BackendFrameworkLib(new HapiBackendFrameworkAdapter(undefined, server));
 
-  const tags = new CMTagsDomain(new MemoryTagsAdapter(server.tagsDB || []), {} as any);
+  const configurationBlocks = new ConfigurationBlocksLib(
+    new MemoryConfigurationBlockAdapter(server.configsDB || [])
+  );
+  const tags = new CMTagsDomain(new MemoryTagsAdapter(server.tagsDB || []));
   const tokens = new CMTokensDomain(new MemoryTokensAdapter(server.tokensDB || []), {
     framework,
   });
@@ -32,6 +37,7 @@ export function compose(server: any): CMServerLibs {
     beats,
     tags,
     tokens,
+    configurationBlocks,
   };
 
   return libs;

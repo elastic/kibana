@@ -4,39 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Chance from 'chance'; // eslint-disable-line
+import { ConfigurationBlock } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
-import { CMTagsAdapter, StoredBeatTag } from './../tags/adapter_types';
+import { ConfigurationBlockAdapter } from './adapter_types';
 
-export class MemoryTagsAdapter implements CMTagsAdapter {
-  private tagsDB: StoredBeatTag[] = [];
+const chance = new Chance();
 
-  constructor(tagsDB: StoredBeatTag[]) {
-    this.tagsDB = tagsDB;
+export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapter {
+  private db: ConfigurationBlock[] = [];
+
+  constructor(db: ConfigurationBlock[]) {
+    this.db = db.map(config => {
+      if (config.id === undefined) {
+        config.id = chance.word();
+      }
+      return config as ConfigurationBlock & { id: string };
+    });
   }
 
-  public async getAll(user: FrameworkUser) {
-    return this.tagsDB;
+  public async getByIds(user: FrameworkUser, ids: string[]) {
+    return this.db.filter(block => ids.includes(block.id));
   }
-  public async delete(user: FrameworkUser, tagIds: string[]) {
-    this.tagsDB = this.tagsDB.filter(tag => !tagIds.includes(tag.id));
-
-    return true;
+  public async delete(user: FrameworkUser, blockIds: string[]) {
+    this.db = this.db.filter(block => !blockIds.includes(block.id));
   }
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
-    return this.tagsDB.filter(tag => tagIds.includes(tag.id));
+  public async getForTags(user: FrameworkUser, tagIds: string[]) {
+    return this.db.filter(block => tagIds.includes(block.id));
   }
 
-  public async upsertTag(user: FrameworkUser, tag: StoredBeatTag) {
-    const existingTagIndex = this.tagsDB.findIndex(t => t.id === tag.id);
-    if (existingTagIndex !== -1) {
-      this.tagsDB[existingTagIndex] = tag;
-    } else {
-      this.tagsDB.push(tag);
-    }
-    return tag;
+  public async create(user: FrameworkUser, blocks: ConfigurationBlock[]) {
+    return blocks.map(block => {
+      const existingIndex = this.db.findIndex(t => t.id === block.id);
+      if (existingIndex !== -1) {
+        this.db[existingIndex] = block;
+      } else {
+        this.db.push(block);
+      }
+      return block.id;
+    });
   }
 
-  public setDB(tagsDB: StoredBeatTag[]) {
-    this.tagsDB = tagsDB;
+  public setDB(db: ConfigurationBlock[]) {
+    this.db = db.map(block => {
+      if (block.id === undefined) {
+        block.id = chance.word();
+      }
+      return block;
+    });
   }
 }

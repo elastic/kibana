@@ -22,12 +22,7 @@ export class CMTagsDomain {
     // });
     // const configBlocks = await Promise.all(pConfigBlocks);
 
-    return tags.map(({ last_updated, ...tag }) => {
-      return {
-        ...tag,
-        last_updated: new Date(last_updated),
-      };
-    });
+    return tags;
   }
 
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]> {

@@ -21,14 +21,14 @@ import React from 'react';
 import { configBlockSchemas } from 'x-pack/plugins/beats_management/common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
 
 interface PageProps {
-  beat: CMPopulatedBeat;
+  beat: CMBeat;
   intl: InjectedIntl;
 }
 

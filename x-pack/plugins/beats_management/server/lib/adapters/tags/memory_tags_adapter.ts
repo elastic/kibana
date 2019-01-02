@@ -5,12 +5,12 @@
  */
 
 import { FrameworkUser } from '../framework/adapter_types';
-import { CMTagsAdapter, StoredBeatTag } from './adapter_types';
+import { CMBeat, CMTagsAdapter } from './adapter_types';
 
 export class MemoryTagsAdapter implements CMTagsAdapter {
-  private tagsDB: StoredBeatTag[] = [];
+  private tagsDB: CMBeat[] = [];
 
-  constructor(tagsDB: StoredBeatTag[]) {
+  constructor(tagsDB: CMBeat[]) {
     this.tagsDB = tagsDB;
   }
 
@@ -26,7 +26,7 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return this.tagsDB.filter(tag => tagIds.includes(tag.id));
   }
 
-  public async upsertTag(user: FrameworkUser, tag: StoredBeatTag) {
+  public async upsertTag(user: FrameworkUser, tag: CMBeat) {
     const existingTagIndex = this.tagsDB.findIndex(t => t.id === tag.id);
     if (existingTagIndex !== -1) {
       this.tagsDB[existingTagIndex] = tag;
@@ -36,7 +36,7 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return tag;
   }
 
-  public setDB(tagsDB: StoredBeatTag[]) {
+  public setDB(tagsDB: CMBeat[]) {
     this.tagsDB = tagsDB;
   }
 }

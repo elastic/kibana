@@ -30,6 +30,7 @@ export const createConfigurationBlockInterface = (
 ) =>
   t.interface(
     {
+      id: t.union([t.undefined, t.string]),
       type: configType,
       description: t.union([t.undefined, t.string]),
       tag: t.string,
@@ -39,8 +40,12 @@ export const createConfigurationBlockInterface = (
     'ConfigBlock'
   );
 const BaseConfigurationBlock = createConfigurationBlockInterface();
-export interface ConfigurationBlock extends t.TypeOf<typeof BaseConfigurationBlock> {
-  id?: string;
+export interface ConfigurationBlock
+  extends Pick<
+    t.TypeOf<typeof BaseConfigurationBlock>,
+    Exclude<keyof t.TypeOf<typeof BaseConfigurationBlock>, 'id'>
+  > {
+  id: string;
 }
 
 export interface CMBeat {
@@ -97,6 +102,12 @@ export const RuntimeBeatTag = t.interface(
     name: t.string,
     color: t.string,
   },
-  'StoredBeatTag'
+  'CMBeat'
 );
-export interface BeatTag extends t.TypeOf<typeof RuntimeBeatTag> {}
+export interface BeatTag
+  extends Pick<
+    t.TypeOf<typeof RuntimeBeatTag>,
+    Exclude<keyof t.TypeOf<typeof RuntimeBeatTag>, 'id'>
+  > {
+  id: string;
+}
