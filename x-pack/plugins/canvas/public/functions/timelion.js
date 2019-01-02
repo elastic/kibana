@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import { flatten } from 'lodash';
-import { fetch } from '../../../../common/lib/fetch';
-import { buildBoolArray } from '../../../../server/lib/build_bool_array';
+import { fetch } from '../../common/lib/fetch';
+import { buildBoolArray } from '../../server/lib/build_bool_array';
 
 export const timelion = () => ({
   name: 'timelion',
@@ -43,7 +44,7 @@ export const timelion = () => ({
   },
   type: 'datatable',
   help: 'Use timelion to extract one or more timeseries from many sources',
-  fn: (context, args, handlers) => {
+  fn: (context, args) => {
     // Timelion requires a time range. Use the time range from the timefilter element in the
     // workpad, if it exists. Otherwise fall back on the function args.
     const timeFilter = context.and.find(and => and.type === 'time');
@@ -70,12 +71,9 @@ export const timelion = () => ({
       },
     };
 
-    return fetch(`${handlers.serverUri}/api/timelion/run`, {
+    return fetch(chrome.addBasePath(`/api/timelion/run`), {
       method: 'POST',
       responseType: 'json',
-      headers: {
-        ...handlers.httpHeaders,
-      },
       data: body,
     }).then(resp => {
       const seriesList = resp.data.sheet[0].list;
