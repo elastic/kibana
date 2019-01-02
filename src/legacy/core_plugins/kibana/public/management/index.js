@@ -79,7 +79,7 @@ export function updateLandingPage(version) {
             <EuiText>
               <FormattedMessage
                 id="kbn.management.landing.subhead"
-                defaultMessage="Manage your data, permissions, and content from an administrator level"
+                defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
               />
             </EuiText>
           </div>

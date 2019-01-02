@@ -18,6 +18,7 @@
  */
 
 import { EuiIcon, EuiSideNav, IconType } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { IndexedArray } from 'ui/indexed_array';
 
@@ -72,13 +73,17 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
   public render() {
     return (
       <EuiSideNav
-        mobileTitle="Management Nav"
+        mobileTitle={this.renderMobileTitle()}
         isOpenOnMobile={this.state.isSideNavOpenOnMobile}
         toggleOpenOnMobile={this.toggleOpenOnMobile}
         items={sideNavItems(this.props.sections, this.props.selectedId)}
-        style={{ width: 192 }}
+        style={{ width: 192, paddingBottom: '16px' }}
       />
     );
+  }
+
+  private renderMobileTitle() {
+    return <FormattedMessage id="management.nav.menu" defaultMessage="Management menu" />;
   }
 
   private toggleOpenOnMobile = () => {
