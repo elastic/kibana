@@ -17,11 +17,13 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue="diff from typical"
+        <EuiExpression
+          color="secondary"
           description="when"
           isActive={false}
           onClick={[Function]}
+          uppercase={true}
+          value="diff from typical"
         />
       }
       closePopover={[Function]}
@@ -42,7 +44,8 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         <EuiPopoverTitle>
           When
         </EuiPopoverTitle>
-        <EuiExpression
+        <div
+          className="euiExpression"
           style={
             Object {
               "width": 200,
@@ -73,7 +76,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
             }
             value="diff_from_typical"
           />
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>
@@ -84,11 +87,13 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue="123"
+        <EuiExpression
+          color="secondary"
           description="is greater than"
           isActive={false}
           onClick={[Function]}
+          uppercase={true}
+          value="123"
         />
       }
       closePopover={[Function]}
@@ -109,7 +114,9 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         <EuiPopoverTitle>
           Is
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
             alignItems="stretch"
             component="div"
@@ -180,7 +187,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>
@@ -218,11 +225,13 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue=""
+        <EuiExpression
+          color="secondary"
           description="when"
           isActive={false}
           onClick={[Function]}
+          uppercase={true}
+          value=""
         />
       }
       closePopover={[Function]}
@@ -243,7 +252,8 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         <EuiPopoverTitle>
           When
         </EuiPopoverTitle>
-        <EuiExpression
+        <div
+          className="euiExpression"
           style={
             Object {
               "width": 200,
@@ -273,7 +283,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
               ]
             }
           />
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>
@@ -284,11 +294,13 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue="123"
+        <EuiExpression
+          color="secondary"
           description="is "
           isActive={false}
           onClick={[Function]}
+          uppercase={true}
+          value="123"
         />
       }
       closePopover={[Function]}
@@ -309,7 +321,9 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         <EuiPopoverTitle>
           Is
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
             alignItems="stretch"
             component="div"
@@ -379,7 +393,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>

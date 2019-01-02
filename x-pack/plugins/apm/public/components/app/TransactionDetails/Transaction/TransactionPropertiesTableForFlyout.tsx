@@ -4,20 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
 import React from 'react';
-import { Transaction } from '../../../../../typings/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-// @ts-ignore
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
   PropertiesTable
 } from '../../../shared/PropertiesTable';
-// @ts-ignore
-import { Tab } from '../../../shared/UIComponents';
 
 // Ensure the selected tab exists or use the first
 function getCurrentTab(tabs: string[] = [], selectedTab?: string) {

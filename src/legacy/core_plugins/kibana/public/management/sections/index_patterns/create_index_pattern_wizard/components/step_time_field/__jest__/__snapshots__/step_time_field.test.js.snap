@@ -46,7 +46,7 @@ exports[`StepTimeField should render a loading state when creating the index pat
         size="m"
       >
         <FormattedMessage
-          defaultMessage="Creating index pattern..."
+          defaultMessage="Creating index pattern…"
           id="kbn.management.createIndexPattern.stepTime.creatingLabel"
           values={Object {}}
         />

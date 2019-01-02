@@ -36,6 +36,8 @@ export function findExpressionType(name, type) {
     }
   }, []);
 
-  if (matches.length > 1) throw new Error(`Found multiple expressions with name "${name}"`);
+  if (matches.length > 1) {
+    throw new Error(`Found multiple expressions with name "${name}"`);
+  }
   return matches[0] || null;
 }

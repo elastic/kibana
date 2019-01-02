@@ -19,6 +19,8 @@
 
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
+import { i18n } from '@kbn/i18n';
+
 import { IS_KIBANA_RELEASE } from '../../../utils';
 
 export function getUiSettingDefaults() {
@@ -36,52 +38,121 @@ export function getUiSettingDefaults() {
       readonly: true
     },
     'query:queryString:options': {
-      name: 'Query string options',
+      name: i18n.translate('kbn.advancedSettings.query.queryStringOptionsTitle', {
+        defaultMessage: 'Query string options',
+      }),
       value: '{ "analyze_wildcard": true }',
-      description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">Options</a> for the lucene query string parser',
+      description:
+        i18n.translate('kbn.advancedSettings.query.queryStringOptionsText', {
+          defaultMessage: '{optionsLink} for the lucene query string parser',
+          description: 'Part of composite text: kbn.advancedSettings.query.queryStringOptions.optionsLinkText + ' +
+                       'kbn.advancedSettings.query.queryStringOptionsText',
+          values: {
+            optionsLink:
+              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">' +
+              i18n.translate('kbn.advancedSettings.query.queryStringOptions.optionsLinkText', {
+                defaultMessage: 'Options',
+              }) +
+              '</a>',
+          },
+        }),
       type: 'json'
     },
     'query:allowLeadingWildcards': {
-      name: 'Allow leading wildcards in query',
+      name: i18n.translate('kbn.advancedSettings.query.allowWildcardsTitle', {
+        defaultMessage: 'Allow leading wildcards in query',
+      }),
       value: true,
-      description: `When set, * is allowed as the first character in a query clause. Currently only applies when experimental query
-        features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options`,
+      description: i18n.translate('kbn.advancedSettings.query.allowWildcardsText', {
+        defaultMessage:
+          'When set, * is allowed as the first character in a query clause. ' +
+          'Currently only applies when experimental query features are enabled in the query bar. ' +
+          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}',
+        values: {
+          queryStringOptionsPattern: 'query:queryString:options',
+        },
+      }),
     },
     'k7design': {
-      name: 'Use the new K7 UI design',
+      name: i18n.translate('kbn.advancedSettings.k7designTitle', {
+        defaultMessage: 'Use the new K7 UI design',
+      }),
       value: IS_KIBANA_RELEASE,
-      description: `When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are
-        implemented.`,
+      description: i18n.translate('kbn.advancedSettings.k7designText', {
+        defaultMessage:
+          'When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are implemented.',
+      }),
     },
     'search:queryLanguage': {
-      name: 'Query language',
+      name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
+        defaultMessage: 'Query language',
+      }),
       value: 'lucene',
-      description: `Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.`,
+      description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
+        defaultMessage:
+          'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
+      }),
       type: 'select',
       options: ['lucene', 'kuery']
     },
     'sort:options': {
-      name: 'Sort options',
+      name: i18n.translate('kbn.advancedSettings.sortOptionsTitle', {
+        defaultMessage: 'Sort options',
+      }),
       value: '{ "unmapped_type": "boolean" }',
-      description: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html"
-        target="_blank" rel="noopener noreferrer">Options</a> for the Elasticsearch sort parameter`,
+      description: i18n.translate('kbn.advancedSettings.sortOptionsText', {
+        defaultMessage: '{optionsLink} for the Elasticsearch sort parameter',
+        description: 'Part of composite text: kbn.advancedSettings.sortOptions.optionsLinkText + ' +
+                     'kbn.advancedSettings.sortOptionsText',
+        values: {
+          optionsLink:
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.sortOptions.optionsLinkText', {
+              defaultMessage: 'Options',
+            }) +
+            '</a>',
+        },
+      }),
       type: 'json'
     },
     'dateFormat': {
-      name: 'Date format',
+      name: i18n.translate('kbn.advancedSettings.dateFormatTitle', {
+        defaultMessage: 'Date format',
+      }),
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',
-      description: `When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/"
-        target="_blank" rel="noopener noreferrer">format</a>`,
+      description: i18n.translate('kbn.advancedSettings.dateFormatText', {
+        defaultMessage: 'When displaying a pretty formatted date, use this {formatLink}',
+        description: 'Part of composite text: kbn.advancedSettings.dateFormatText + ' +
+                     'kbn.advancedSettings.dateFormat.optionsLinkText',
+        values: {
+          formatLink:
+            '<a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.dateFormat.optionsLinkText', {
+              defaultMessage: 'format',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'dateFormat:tz': {
-      name: 'Timezone for date formatting',
+      name: i18n.translate('kbn.advancedSettings.dateFormat.timezoneTitle', {
+        defaultMessage: 'Timezone for date formatting',
+      }),
       value: 'Browser',
-      description: `Which timezone should be used. "Browser" will use the timezone detected by your browser.`,
+      description: i18n.translate('kbn.advancedSettings.dateFormat.timezoneText', {
+        defaultMessage:
+          'Which timezone should be used. {defaultOption} will use the timezone detected by your browser.',
+        values: {
+          defaultOption: '"Browser"',
+        },
+      }),
       type: 'select',
       options: ['Browser', ...moment.tz.names()]
     },
     'dateFormat:scaled': {
-      name: 'Scaled date format',
+      name: i18n.translate('kbn.advancedSettings.dateFormat.scaledTitle', {
+        defaultMessage: 'Scaled date format',
+      }),
       type: 'json',
       value:
 `[
@@ -92,150 +163,280 @@ export function getUiSettingDefaults() {
   ["P1DT", "YYYY-MM-DD"],
   ["P1YT", "YYYY"]
 ]`,
-      description: (
-        `Values that define the format used in situations where time-based
-         data is rendered in order, and formatted timestamps should adapt to the
-         interval between measurements. Keys are
-         <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank" rel="noopener noreferrer">
-        ISO8601 intervals.</a>`
-      )
+      description: i18n.translate('kbn.advancedSettings.dateFormat.scaledText', {
+        defaultMessage:
+          'Values that define the format used in situations where time-based ' +
+          'data is rendered in order, and formatted timestamps should adapt to the ' +
+          'interval between measurements. Keys are {intervalsLink}.',
+        description:
+          'Part of composite text: kbn.advancedSettings.dateFormat.scaledText + ' +
+          'kbn.advancedSettings.dateFormat.scaled.intervalsLinkText',
+        values: {
+          intervalsLink:
+            '<a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.dateFormat.scaled.intervalsLinkText', {
+              defaultMessage: 'ISO8601 intervals',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'dateFormat:dow': {
-      name: 'Day of week',
+      name: i18n.translate('kbn.advancedSettings.dateFormat.dayOfWeekTitle', {
+        defaultMessage: 'Day of week',
+      }),
       value: defaultWeekday,
-      description: `What day should weeks start on?`,
+      description: i18n.translate('kbn.advancedSettings.dateFormat.dayOfWeekText', {
+        defaultMessage: 'What day should weeks start on?',
+      }),
       type: 'select',
       options: weekdays
     },
     'defaultIndex': {
-      name: 'Default index',
+      name: i18n.translate('kbn.advancedSettings.defaultIndexTitle', {
+        defaultMessage: 'Default index',
+      }),
       value: null,
-      description: `The index to access if no index is set`,
+      description: i18n.translate('kbn.advancedSettings.defaultIndexText', {
+        defaultMessage: 'The index to access if no index is set',
+      }),
     },
     'defaultColumns': {
-      name: 'Default columns',
+      name: i18n.translate('kbn.advancedSettings.defaultColumnsTitle', {
+        defaultMessage: 'Default columns',
+      }),
       value: ['_source'],
-      description: `Columns displayed by default in the Discovery tab`,
+      description: i18n.translate('kbn.advancedSettings.defaultColumnsText', {
+        defaultMessage: 'Columns displayed by default in the Discovery tab',
+      }),
       category: ['discover'],
     },
     'metaFields': {
-      name: 'Meta fields',
+      name: i18n.translate('kbn.advancedSettings.metaFieldsTitle', {
+        defaultMessage: 'Meta fields',
+      }),
       value: ['_source', '_id', '_type', '_index', '_score'],
-      description: `Fields that exist outside of _source to merge into our document when displaying it`,
+      description: i18n.translate('kbn.advancedSettings.metaFieldsText', {
+        defaultMessage:
+          'Fields that exist outside of _source to merge into our document when displaying it',
+      }),
     },
     'discover:sampleSize': {
-      name: 'Number of rows',
+      name: i18n.translate('kbn.advancedSettings.discover.sampleSizeTitle', {
+        defaultMessage: 'Number of rows',
+      }),
       value: 500,
-      description: `The number of rows to show in the table`,
+      description: i18n.translate('kbn.advancedSettings.discover.sampleSizeText', {
+        defaultMessage: 'The number of rows to show in the table',
+      }),
       category: ['discover'],
     },
     'discover:aggs:terms:size': {
-      name: 'Number of terms',
+      name: i18n.translate('kbn.advancedSettings.discover.aggsTermsSizeTitle', {
+        defaultMessage: 'Number of terms',
+      }),
       value: 20,
       type: 'number',
-      description: `Determines how many terms will be visualized when clicking the "visualize"
-        button, in the field drop downs, in the discover sidebar.`,
+      description: i18n.translate('kbn.advancedSettings.discover.aggsTermsSizeText', {
+        defaultMessage:
+          'Determines how many terms will be visualized when clicking the "visualize" ' +
+          'button, in the field drop downs, in the discover sidebar.',
+      }),
       category: ['discover'],
     },
     'discover:sort:defaultOrder': {
-      name: 'Default sort direction',
+      name: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderTitle', {
+        defaultMessage: 'Default sort direction',
+      }),
       value: 'desc',
       options: ['desc', 'asc'],
       type: 'select',
-      description: `Controls the default sort direction for time based index patterns in the Discover app.`,
+      description: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderText', {
+        defaultMessage:
+          'Controls the default sort direction for time based index patterns in the Discover app.',
+      }),
       category: ['discover'],
     },
     'doc_table:highlight': {
-      name: 'Highlight results',
+      name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
+        defaultMessage: 'Highlight results',
+      }),
       value: true,
-      description: `Highlight results in Discover and Saved Searches Dashboard.
-        Highlighting makes requests slow when working on big documents.`,
+      description: i18n.translate('kbn.advancedSettings.docTableHighlightText', {
+        defaultMessage:
+          'Highlight results in Discover and Saved Searches Dashboard. ' +
+          'Highlighting makes requests slow when working on big documents.',
+      }),
       category: ['discover'],
     },
     'courier:maxSegmentCount': {
-      name: 'Maximum segment count',
+      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
+        defaultMessage: 'Maximum segment count',
+      }),
       value: 30,
-      description: `Requests in discover are split into segments to prevent massive requests from being sent to
-        elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might
-        cause requests to take much longer to process.`,
+      description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
+        defaultMessage:
+          'Requests in discover are split into segments to prevent massive requests from being sent to elasticsearch. ' +
+          'This setting attempts to prevent the list of segments from getting too long, ' +
+          'which might cause requests to take much longer to process.',
+      }),
       category: ['search'],
     },
     'courier:ignoreFilterIfFieldNotInIndex': {
-      name: 'Ignore filter(s)',
+      name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
+        defaultMessage: 'Ignore filter(s)',
+      }),
       value: false,
-      description: `This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes.
-        When set to false, all filters are applied to all visualizations.
-        When set to true, filter(s) will be ignored for a visualization
-        when the visualization's index does not contain the filtering field.`,
+      description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
+        defaultMessage:
+          'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
+          'When set to false, all filters are applied to all visualizations. ' +
+          'When set to true, filter(s) will be ignored for a visualization ' +
+          `when the visualization's index does not contain the filtering field.`,
+      }),
       category: ['search'],
     },
     'courier:setRequestPreference': {
-      name: 'Request preference',
+      name: i18n.translate('kbn.advancedSettings.courier.requestPreferenceTitle', {
+        defaultMessage: 'Request preference',
+      }),
       value: 'sessionId',
       options: ['sessionId', 'custom', 'none'],
       type: 'select',
-      description: `Allows you to set which shards handle your search requests.
-        <ul>
-          <li><strong>sessionId:</strong> restricts operations to execute all search requests on the same shards.
-            This has the benefit of reusing shard caches across requests.</li>
-          <li><strong>custom:</strong> allows you to define a your own preference.
-            Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
-          <li><strong>none:</strong> means do not set a preference.
-            This might provide better performance because requests can be spread across all shard copies.
-            However, results might be inconsistent because different shards might be in different refresh states.</li>
-        </ul>`,
+      description: i18n.translate('kbn.advancedSettings.courier.requestPreferenceText', {
+        defaultMessage:
+          `Allows you to set which shards handle your search requests.
+          <ul>
+            <li><strong>sessionId:</strong> restricts operations to execute all search requests on the same shards.
+              This has the benefit of reusing shard caches across requests.</li>
+            <li><strong>custom:</strong> allows you to define a your own preference.
+              Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
+            <li><strong>none:</strong> means do not set a preference.
+              This might provide better performance because requests can be spread across all shard copies.
+              However, results might be inconsistent because different shards might be in different refresh states.</li>
+          </ul>`,
+      }),
       category: ['search'],
     },
     'courier:customRequestPreference': {
-      name: 'Custom request preference',
+      name: i18n.translate('kbn.advancedSettings.courier.customRequestPreferenceTitle', {
+        defaultMessage: 'Custom request preference',
+      }),
       value: '_local',
       type: 'string',
-      description: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html"
-        target="_blank" rel="noopener noreferrer">Request Preference</a>
-        used when <strong>courier:setRequestPreference</strong> is set to "custom".`,
+      description: i18n.translate('kbn.advancedSettings.courier.customRequestPreferenceText', {
+        defaultMessage:
+          '{requestPreferenceLink} used when {setRequestReferenceSetting} is set to {customSettingValue}.',
+        description:
+          'Part of composite text: kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText + ' +
+          'kbn.advancedSettings.courier.customRequestPreferenceText',
+        values: {
+          setRequestReferenceSetting: '<strong>courier:setRequestPreference</strong>',
+          customSettingValue: '"custom"',
+          requestPreferenceLink:
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText', {
+              defaultMessage: 'Request Preference',
+            }) +
+            '</a>',
+        },
+      }),
       category: ['search'],
     },
     'courier:maxConcurrentShardRequests': {
-      name: 'Max Concurrent Shard Requests',
+      name: i18n.translate('kbn.advancedSettings.courier.maxRequestsTitle', {
+        defaultMessage: 'Max Concurrent Shard Requests',
+      }),
       value: 0,
       type: 'number',
-      description: `Controls the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
-        target="_blank" rel="noopener noreferrer">max_concurrent_shard_requests</a>
-        setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.`,
+      description: i18n.translate('kbn.advancedSettings.courier.maxRequestsText', {
+        defaultMessage:
+          'Controls the {maxRequestsLink} setting used for _msearch requests sent by Kibana. ' +
+          'Set to 0 to disable this config and use the Elasticsearch default.',
+        values: {
+          maxRequestsLink:
+            `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+            target="_blank" rel="noopener noreferrer" >max_concurrent_shard_requests</a>`
+        },
+      }),
+      category: ['search'],
+    },
+    'search:includeFrozen': {
+      name: 'Search in frozen indices',
+      description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
+        target="_blank" rel="noopener noreferrer">frozen indices</a> in results if enabled. Searching through frozen indices
+        might increase the search time.`,
+      value: false,
       category: ['search'],
     },
     'fields:popularLimit': {
-      name: 'Popular fields limit',
+      name: i18n.translate('kbn.advancedSettings.fieldsPopularLimitTitle', {
+        defaultMessage: 'Popular fields limit',
+      }),
       value: 10,
-      description: `The top N most popular fields to show`,
+      description: i18n.translate('kbn.advancedSettings.fieldsPopularLimitText', {
+        defaultMessage: 'The top N most popular fields to show',
+      }),
     },
     'histogram:barTarget': {
-      name: 'Target bars',
+      name: i18n.translate('kbn.advancedSettings.histogram.barTargetTitle', {
+        defaultMessage: 'Target bars',
+      }),
       value: 50,
-      description: `Attempt to generate around this many bars when using "auto" interval in date histograms`,
+      description: i18n.translate('kbn.advancedSettings.histogram.barTargetText', {
+        defaultMessage:
+          'Attempt to generate around this many bars when using "auto" interval in date histograms',
+      }),
     },
     'histogram:maxBars': {
-      name: 'Maximum bars',
+      name: i18n.translate('kbn.advancedSettings.histogram.maxBarsTitle', {
+        defaultMessage: 'Maximum bars',
+      }),
       value: 100,
-      description: `Never show more than this many bars in date histograms, scale values if needed`,
+      description: i18n.translate('kbn.advancedSettings.histogram.maxBarsText', {
+        defaultMessage:
+          'Never show more than this many bars in date histograms, scale values if needed',
+      }),
     },
     'visualize:enableLabs': {
-      name: 'Enable experimental visualizations',
+      name: i18n.translate('kbn.advancedSettings.visualizeEnableLabsTitle', {
+        defaultMessage: 'Enable experimental visualizations',
+      }),
       value: true,
-      description: `Allows users to create, view, and edit experimental visualizations. If disabled,
-        only visualizations that are considered production-ready are available to the user.`,
+      description: i18n.translate('kbn.advancedSettings.visualizeEnableLabsText', {
+        defaultMessage:
+          `Allows users to create, view, and edit experimental visualizations. If disabled,
+          only visualizations that are considered production-ready are available to the user.`,
+      }),
       category: ['visualization'],
     },
     'visualization:tileMap:maxPrecision': {
-      name: 'Maximum tile map precision',
+      name: i18n.translate('kbn.advancedSettings.visualization.tileMap.maxPrecisionTitle', {
+        defaultMessage: 'Maximum tile map precision',
+      }),
       value: 7,
-      description: `The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, 12 is the max.
-      <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
-      target="_blank" rel="noopener noreferrer">Explanation of cell dimensions</a>`,
+      description: i18n.translate('kbn.advancedSettings.visualization.tileMap.maxPrecisionText', {
+        defaultMessage:
+          'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, 12 is the max. {cellDimensionsLink}',
+        description:
+          'Part of composite text: kbn.advancedSettings.visualization.tileMap.maxPrecisionText + ' +
+          'kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',
+        values: {
+          cellDimensionsLink:
+            `<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
+            target="_blank" rel="noopener noreferrer">` +
+            i18n.translate('kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText', {
+              defaultMessage: 'Explanation of cell dimensions',
+            }) +
+            '</a>',
+        },
+      }),
       category: ['visualization'],
     },
     'visualization:tileMap:WMSdefaults': {
-      name: 'Default WMS properties',
+      name: i18n.translate('kbn.advancedSettings.visualization.tileMap.wmsDefaultsTitle', {
+        defaultMessage: 'Default WMS properties',
+      }),
       value: JSON.stringify({
         enabled: false,
         url: undefined,
@@ -249,79 +450,144 @@ export function getUiSettingDefaults() {
         }
       }, null, 2),
       type: 'json',
-      description: `Default <a href="http://leafletjs.com/reference.html#tilelayer-wms"
-        target="_blank" rel="noopener noreferrer">properties</a> for the WMS map server support in the coordinate map`,
+      description: i18n.translate('kbn.advancedSettings.visualization.tileMap.wmsDefaultsText', {
+        defaultMessage:
+          'Default {propertiesLink} for the WMS map server support in the coordinate map',
+        description:
+          'Part of composite text: kbn.advancedSettings.visualization.tileMap.wmsDefaultsText + ' +
+          'kbn.advancedSettings.visualization.tileMap.wmsDefaults.propertiesLinkText',
+        values: {
+          propertiesLink:
+            '<a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.visualization.tileMap.wmsDefaults.propertiesLinkText', {
+              defaultMessage: 'properties',
+            }) +
+            '</a>',
+        },
+      }),
       category: ['visualization'],
     },
     'visualization:regionmap:showWarnings': {
-      name: 'Show region map warning',
+      name: i18n.translate('kbn.advancedSettings.visualization.showRegionMapWarningsTitle', {
+        defaultMessage: 'Show region map warning',
+      }),
       value: true,
-      description: `Whether the region map shows a warning when terms cannot be joined to a shape on the map.`,
+      description: i18n.translate('kbn.advancedSettings.visualization.showRegionMapWarningsText', {
+        defaultMessage:
+          'Whether the region map shows a warning when terms cannot be joined to a shape on the map.',
+      }),
       category: ['visualization'],
     },
     'visualization:colorMapping': {
-      name: 'Color mapping',
+      name: i18n.translate('kbn.advancedSettings.visualization.colorMappingTitle', {
+        defaultMessage: 'Color mapping',
+      }),
       value: JSON.stringify({
         Count: '#00A69B'
       }),
       type: 'json',
-      description: `Maps values to specified colors within visualizations`,
+      description: i18n.translate('kbn.advancedSettings.visualization.colorMappingText', {
+        defaultMessage: 'Maps values to specified colors within visualizations',
+      }),
       category: ['visualization'],
     },
     'visualization:loadingDelay': {
-      name: 'Loading delay',
+      name: i18n.translate('kbn.advancedSettings.visualization.loadingDelayTitle', {
+        defaultMessage: 'Loading delay',
+      }),
       value: '2s',
-      description: `Time to wait before dimming visualizations during query`,
+      description: i18n.translate('kbn.advancedSettings.visualization.loadingDelayText', {
+        defaultMessage: 'Time to wait before dimming visualizations during query',
+      }),
       category: ['visualization'],
     },
     'visualization:dimmingOpacity': {
-      name: 'Dimming opacity',
+      name: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityTitle', {
+        defaultMessage: 'Dimming opacity',
+      }),
       value: 0.5,
       type: 'number',
-      description: `The opacity of the chart items that are dimmed when highlighting another element of the chart.
-        The lower this number, the more the highlighted element will stand out.
-        This must be a number between 0 and 1.`,
+      description: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityText', {
+        defaultMessage:
+          'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
+          'The lower this number, the more the highlighted element will stand out. ' +
+          'This must be a number between 0 and 1.',
+      }),
       category: ['visualization'],
     },
     'csv:separator': {
-      name: 'CSV separator',
+      name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
+        defaultMessage: 'CSV separator',
+      }),
       value: ',',
-      description: `Separate exported values with this string`,
+      description: i18n.translate('kbn.advancedSettings.csv.separatorText', {
+        defaultMessage: 'Separate exported values with this string',
+      }),
     },
     'csv:quoteValues': {
-      name: 'Quote CSV values',
+      name: i18n.translate('kbn.advancedSettings.csv.quoteValuesTitle', {
+        defaultMessage: 'Quote CSV values',
+      }),
       value: true,
-      description: `Should values be quoted in csv exports?`,
+      description: i18n.translate('kbn.advancedSettings.csv.quoteValuesText', {
+        defaultMessage: 'Should values be quoted in csv exports?',
+      }),
     },
     'history:limit': {
-      name: 'History limit',
+      name: i18n.translate('kbn.advancedSettings.historyLimitTitle', {
+        defaultMessage: 'History limit',
+      }),
       value: 10,
-      description: `In fields that have history (e.g. query inputs), show this many recent values`,
+      description: i18n.translate('kbn.advancedSettings.historyLimitText', {
+        defaultMessage:
+          'In fields that have history (e.g. query inputs), show this many recent values',
+      }),
     },
     'shortDots:enable': {
-      name: 'Shorten fields',
+      name: i18n.translate('kbn.advancedSettings.shortenFieldsTitle', {
+        defaultMessage: 'Shorten fields',
+      }),
       value: false,
-      description: `Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz`,
+      description: i18n.translate('kbn.advancedSettings.shortenFieldsText', {
+        defaultMessage: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz',
+      }),
     },
     'truncate:maxHeight': {
-      name: 'Maximum table cell height',
+      name: i18n.translate('kbn.advancedSettings.maxCellHeightTitle', {
+        defaultMessage: 'Maximum table cell height',
+      }),
       value: 115,
-      description: `The maximum height that a cell in a table should occupy. Set to 0 to disable truncation`,
+      description: i18n.translate('kbn.advancedSettings.maxCellHeightText', {
+        defaultMessage:
+          'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+      }),
     },
     'indexPattern:fieldMapping:lookBack': {
-      name: 'Recent matching patterns',
+      name: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingTitle', {
+        defaultMessage: 'Recent matching patterns',
+      }),
       value: 5,
-      description: `For index patterns containing timestamps in their names, look for this many recent matching
-        patterns from which to query the field mapping`
+      description: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingText', {
+        defaultMessage:
+          'For index patterns containing timestamps in their names, look for this many recent matching ' +
+          'patterns from which to query the field mapping',
+      }),
     },
     'indexPatterns:warnAboutUnsupportedTimePatterns': {
-      name: 'Time pattern warning',
+      name: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningTitle', {
+        defaultMessage: 'Time pattern warning',
+      }),
       value: false,
-      description: `When an index pattern is using the now unsupported "time pattern" format, a warning will
-        be displayed once per session that is using this pattern. Set this to false to disable that warning.`
+      description: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningText', {
+        defaultMessage:
+          'When an index pattern is using the now unsupported "time pattern" format, a warning will ' +
+          'be displayed once per session that is using this pattern. Set this to false to disable that warning.',
+      }),
     },
     'format:defaultTypeMap': {
-      name: 'Field type format name',
+      name: i18n.translate('kbn.advancedSettings.format.defaultTypeMapTitle', {
+        defaultMessage: 'Field type format name',
+      }),
       value:
 `{
   "ip": { "id": "ip", "params": {} },
@@ -332,54 +598,147 @@ export function getUiSettingDefaults() {
   "_default_": { "id": "string", "params": {} }
 }`,
       type: 'json',
-      description: `Map of the format name to use by default for each field type.
-        "_default_" is used if the field type is not mentioned explicitly`
+      description: i18n.translate('kbn.advancedSettings.format.defaultTypeMapText', {
+        defaultMessage:
+          'Map of the format name to use by default for each field type. ' +
+          '{defaultFormat} is used if the field type is not mentioned explicitly',
+        values: {
+          defaultFormat: '"_default_"',
+        },
+      }),
     },
     'format:number:defaultPattern': {
-      name: 'Number format',
+      name: i18n.translate('kbn.advancedSettings.format.numberFormatTitle', {
+        defaultMessage: 'Number format',
+      }),
       value: '0,0.[000]',
       type: 'string',
-      description: `Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "number" format`
+      description: i18n.translate('kbn.advancedSettings.format.numberFormatText', {
+        defaultMessage:
+          'Default {numeralFormatLink} for the "number" format',
+        description:
+          'Part of composite text: kbn.advancedSettings.format.numberFormatText + ' +
+          'kbn.advancedSettings.format.numberFormat.numeralFormatLinkText',
+        values: {
+          numeralFormatLink:
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.format.numberFormat.numeralFormatLinkText', {
+              defaultMessage: 'numeral format',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'format:bytes:defaultPattern': {
-      name: 'Bytes format',
+      name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
+        defaultMessage: 'Bytes format',
+      }),
       value: '0,0.[000]b',
       type: 'string',
-      description: `Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "bytes" format`
+      description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
+        defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',
+        description:
+          'Part of composite text: kbn.advancedSettings.format.bytesFormatText + ' +
+          'kbn.advancedSettings.format.bytesFormat.numeralFormatLinkText',
+        values: {
+          numeralFormatLink:
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.format.bytesFormat.numeralFormatLinkText', {
+              defaultMessage: 'numeral format',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'format:percent:defaultPattern': {
-      name: 'Percent format',
+      name: i18n.translate('kbn.advancedSettings.format.percentFormatTitle', {
+        defaultMessage: 'Percent format',
+      }),
       value: '0,0.[000]%',
       type: 'string',
-      description: `Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "percent" format`
+      description: i18n.translate('kbn.advancedSettings.format.percentFormatText', {
+        defaultMessage: 'Default {numeralFormatLink} for the "percent" format',
+        description:
+          'Part of composite text: kbn.advancedSettings.format.percentFormatText + ' +
+          'kbn.advancedSettings.format.percentFormat.numeralFormatLinkText',
+        values: {
+          numeralFormatLink:
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.format.percentFormat.numeralFormatLinkText', {
+              defaultMessage: 'numeral format',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'format:currency:defaultPattern': {
-      name: 'Currency format',
+      name: i18n.translate('kbn.advancedSettings.format.currencyFormatTitle', {
+        defaultMessage: 'Currency format',
+      }),
       value: '($0,0.[00])',
       type: 'string',
-      description: `Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "currency" format`
+      description: i18n.translate('kbn.advancedSettings.format.currencyFormatText', {
+        defaultMessage: 'Default {numeralFormatLink} for the "currency" format',
+        description:
+          'Part of composite text: kbn.advancedSettings.format.currencyFormatText + ' +
+          'kbn.advancedSettings.format.currencyFormat.numeralFormatLinkText',
+        values: {
+          numeralFormatLink:
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.format.currencyFormat.numeralFormatLinkText', {
+              defaultMessage: 'numeral format',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'format:number:defaultLocale': {
-      name: 'Formatting locale',
+      name: i18n.translate('kbn.advancedSettings.format.formattingLocaleTitle', {
+        defaultMessage: 'Formatting locale',
+      }),
       value: 'en',
       type: 'select',
       options: numeralLanguageIds,
-      description: `<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">Numeral language</a> locale`
+      description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
+        defaultMessage:
+          `{numeralLanguageLink} locale`,
+        description:
+          'Part of composite text: kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText + ' +
+          'kbn.advancedSettings.format.formattingLocaleText',
+        values: {
+          numeralLanguageLink:
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText', {
+              defaultMessage: 'Numeral language',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'savedObjects:perPage': {
-      name: 'Objects per page',
+      name: i18n.translate('kbn.advancedSettings.savedObjects.perPageTitle', {
+        defaultMessage: 'Objects per page',
+      }),
       value: 20,
       type: 'number',
-      description: `Number of objects to show per page in the load dialog`
+      description: i18n.translate('kbn.advancedSettings.savedObjects.perPageText', {
+        defaultMessage: 'Number of objects to show per page in the load dialog',
+      }),
     },
     'savedObjects:listingLimit': {
-      name: 'Objects listing limit',
+      name: i18n.translate('kbn.advancedSettings.savedObjects.listingLimitTitle', {
+        defaultMessage: 'Objects listing limit',
+      }),
       type: 'number',
       value: 1000,
-      description: `Number of objects to fetch for the listing pages`
+      description: i18n.translate('kbn.advancedSettings.savedObjects.listingLimitText', {
+        defaultMessage: 'Number of objects to fetch for the listing pages',
+      }),
     },
     'timepicker:timeDefaults': {
-      name: 'Time picker defaults',
+      name: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsTitle', {
+        defaultMessage: 'Time picker defaults',
+      }),
       value:
 `{
   "from": "now-15m",
@@ -387,20 +746,28 @@ export function getUiSettingDefaults() {
   "mode": "quick"
 }`,
       type: 'json',
-      description: `The timefilter selection to use when Kibana is started without one`
+      description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
+        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+      }),
     },
     'timepicker:refreshIntervalDefaults': {
-      name: 'Time picker refresh interval',
+      name: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
+        defaultMessage: 'Time picker refresh interval',
+      }),
       value:
 `{
   "pause": false,
   "value": 0
 }`,
       type: 'json',
-      description: `The timefilter's default refresh interval`
+      description: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsText', {
+        defaultMessage: `The timefilter's default refresh interval`,
+      }),
     },
     'timepicker:quickRanges': {
-      name: 'Time picker quick ranges',
+      name: i18n.translate('kbn.advancedSettings.timepicker.quickRangesTitle', {
+        defaultMessage: 'Time picker quick ranges',
+      }),
       value: JSON.stringify([
         { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
         { from: 'now/w',    to: 'now/w',    display: 'This week',             section: 0 },
@@ -429,121 +796,223 @@ export function getUiSettingDefaults() {
 
       ], null, 2),
       type: 'json',
-      description: `The list of ranges to show in the Quick section of the time picker.
-        This should be an array of objects, with each object containing "from", "to" (see
-        <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
-        target="_blank" rel="noopener noreferrer">accepted formats</a>),
-        "display" (the title to be displayed), and "section" (which column to put the option in).`
+      description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
+        defaultMessage:
+          'The list of ranges to show in the Quick section of the time picker. This should be an array of objects, ' +
+          'with each object containing "from", "to" (see {acceptedFormatsLink}), ' +
+          '"display" (the title to be displayed), and "section" (which column to put the option in).',
+        description:
+          'Part of composite text: kbn.advancedSettings.timepicker.quickRangesText + ' +
+          'kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText',
+        values: {
+          acceptedFormatsLink:
+            `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
+            target="_blank" rel="noopener noreferrer">` +
+            i18n.translate('kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
+              defaultMessage: 'accepted formats',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'dashboard:defaultDarkTheme': {
-      name: 'Dark theme',
+      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
+        defaultMessage: 'Dark theme',
+      }),
       value: false,
-      description: `New dashboards use dark theme by default`,
+      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
+        defaultMessage: 'New dashboards use dark theme by default',
+      }),
       category: ['dashboard'],
     },
     'filters:pinnedByDefault': {
-      name: 'Pin filters by default',
+      name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
+        defaultMessage: 'Pin filters by default',
+      }),
       value: false,
-      description: `Whether the filters should have a global state (be pinned) by default`
+      description: i18n.translate('kbn.advancedSettings.pinFiltersText', {
+        defaultMessage: 'Whether the filters should have a global state (be pinned) by default',
+      }),
     },
     'filterEditor:suggestValues': {
-      name: 'Filter editor suggest values',
+      name: i18n.translate('kbn.advancedSettings.suggestFilterValuesTitle', {
+        defaultMessage: 'Filter editor suggest values',
+      }),
       value: true,
-      description: `Set this property to false to prevent the filter editor from suggesting values for fields.`
+      description: i18n.translate('kbn.advancedSettings.suggestFilterValuesText', {
+        defaultMessage: 'Set this property to false to prevent the filter editor from suggesting values for fields.',
+      }),
     },
     'notifications:banner': {
-      name: 'Custom banner notification',
+      name: i18n.translate('kbn.advancedSettings.notifications.bannerTitle', {
+        defaultMessage: 'Custom banner notification',
+      }),
       value: '',
       type: 'markdown',
-      description: `A custom banner intended for temporary notices to all users.
-        <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
-          target="_blank" rel="noopener noreferrer">Markdown supported</a>.`,
+      description: i18n.translate('kbn.advancedSettings.notifications.bannerText', {
+        defaultMessage: 'A custom banner intended for temporary notices to all users. {markdownLink}.',
+        description:
+          'Part of composite text: kbn.advancedSettings.notifications.bannerText + ' +
+          'kbn.advancedSettings.notifications.banner.markdownLinkText',
+        values: {
+          markdownLink:
+            `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
+            target="_blank" rel="noopener noreferrer">` +
+            i18n.translate('kbn.advancedSettings.notifications.banner.markdownLinkText', {
+              defaultMessage: 'Markdown supported',
+            }) +
+            '</a>',
+        },
+      }),
       category: ['notifications'],
     },
     'notifications:lifetime:banner': {
-      name: 'Banner notification lifetime',
+      name: i18n.translate('kbn.advancedSettings.notifications.bannerLifetimeTitle', {
+        defaultMessage: 'Banner notification lifetime',
+      }),
       value: 3000000,
-      description: `The time in milliseconds which a banner notification
-        will be displayed on-screen for. Setting to Infinity will disable the countdown.`,
+      description: i18n.translate('kbn.advancedSettings.notifications.bannerLifetimeText', {
+        defaultMessage:
+          'The time in milliseconds which a banner notification will be displayed on-screen for. ' +
+          'Setting to {infinityValue} will disable the countdown.',
+        values: {
+          infinityValue: 'Infinity',
+        },
+      }),
       type: 'number',
       category: ['notifications'],
     },
     'notifications:lifetime:error': {
-      name: 'Error notification lifetime',
+      name: i18n.translate('kbn.advancedSettings.notifications.errorLifetimeTitle', {
+        defaultMessage: 'Error notification lifetime',
+      }),
       value: 300000,
-      description: `The time in milliseconds which an error notification
-        'will be displayed on-screen for. Setting to Infinity will disable.`,
+      description: i18n.translate('kbn.advancedSettings.notifications.errorLifetimeText', {
+        defaultMessage:
+          'The time in milliseconds which an error notification will be displayed on-screen for. ' +
+          'Setting to {infinityValue} will disable.',
+        values: {
+          infinityValue: 'Infinity',
+        }
+      }),
       type: 'number',
       category: ['notifications'],
     },
     'notifications:lifetime:warning': {
-      name: 'Warning notification lifetime',
+      name: i18n.translate('kbn.advancedSettings.notifications.warningLifetimeTitle', {
+        defaultMessage: 'Warning notification lifetime',
+      }),
       value: 10000,
-      description: `The time in milliseconds which a warning notification
-        'will be displayed on-screen for. Setting to Infinity will disable.`,
+      description: i18n.translate('kbn.advancedSettings.notifications.warningLifetimeText', {
+        defaultMessage:
+          'The time in milliseconds which a warning notification will be displayed on-screen for. ' +
+          'Setting to {infinityValue} will disable.',
+        values: {
+          infinityValue: 'Infinity',
+        },
+      }),
       type: 'number',
       category: ['notifications'],
     },
     'notifications:lifetime:info': {
-      name: 'Info notification lifetime',
+      name: i18n.translate('kbn.advancedSettings.notifications.infoLifetimeTitle', {
+        defaultMessage: 'Info notification lifetime',
+      }),
       value: 5000,
-      description: `The time in milliseconds which an information notification
-        will be displayed on-screen for. Setting to Infinity will disable.`,
+      description: i18n.translate('kbn.advancedSettings.notifications.infoLifetimeText', {
+        defaultMessage:
+          'The time in milliseconds which an information notification will be displayed on-screen for. ' +
+          'Setting to {infinityValue} will disable.',
+        values: {
+          infinityValue: 'Infinity',
+        },
+      }),
       type: 'number',
       category: ['notifications'],
     },
     'metrics:max_buckets': {
-      name: 'Maximum buckets',
+      name: i18n.translate('kbn.advancedSettings.maxBucketsTitle', {
+        defaultMessage: 'Maximum buckets',
+      }),
       value: 2000,
-      description: `The maximum number of buckets a single datasource can return`
+      description: i18n.translate('kbn.advancedSettings.maxBucketsText', {
+        defaultMessage: 'The maximum number of buckets a single datasource can return',
+      }),
     },
     'state:storeInSessionStorage': {
-      name: 'Store URLs in session storage',
+      name: i18n.translate('kbn.advancedSettings.storeUrlTitle', {
+        defaultMessage: 'Store URLs in session storage',
+      }),
       value: false,
-      description: `The URL can sometimes grow to be too large for some browsers to
-        handle. To counter-act this we are testing if storing parts of the URL in
-        session storage could help. Please let us know how it goes!`
+      description: i18n.translate('kbn.advancedSettings.storeUrlText', {
+        defaultMessage:
+          'The URL can sometimes grow to be too large for some browsers to handle. ' +
+          'To counter-act this we are testing if storing parts of the URL in session storage could help. ' +
+          'Please let us know how it goes!'
+      }),
     },
     'indexPattern:placeholder': {
-      name: 'Index pattern placeholder',
+      name: i18n.translate('kbn.advancedSettings.indexPatternPlaceholderTitle', {
+        defaultMessage: 'Index pattern placeholder',
+      }),
       value: '',
-      description: `The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".`,
+      description: i18n.translate('kbn.advancedSettings.indexPatternPlaceholderText', {
+        defaultMessage:
+          'The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".',
+      }),
     },
     'context:defaultSize': {
-      name: 'Context size',
+      name: i18n.translate('kbn.advancedSettings.context.defaultSizeTitle', {
+        defaultMessage: 'Context size',
+      }),
       value: 5,
-      description: `The number of surrounding entries to show in the context view`,
+      description: i18n.translate('kbn.advancedSettings.context.defaultSizeText', {
+        defaultMessage: 'The number of surrounding entries to show in the context view',
+      }),
       category: ['discover'],
     },
     'context:step': {
-      name: 'Context size step',
+      name: i18n.translate('kbn.advancedSettings.context.sizeStepTitle', {
+        defaultMessage: 'Context size step',
+      }),
       value: 5,
-      description: `The step size to increment or decrement the context size by`,
+      description: i18n.translate('kbn.advancedSettings.context.sizeStepText', {
+        defaultMessage: 'The step size to increment or decrement the context size by',
+      }),
       category: ['discover'],
     },
     'context:tieBreakerFields': {
-      name: 'Tie breaker fields',
+      name: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsTitle', {
+        defaultMessage: 'Tie breaker fields',
+      }),
       value: ['_doc'],
-      description: `A comma-separated list of fields to use for tie-breaking between documents
-        that have the same timestamp value. From this list the first field that
-        is present and sortable in the current index pattern is used.`,
+      description: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsText', {
+        defaultMessage:
+          'A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. ' +
+          'From this list the first field that is present and sortable in the current index pattern is used.',
+      }),
       category: ['discover'],
     },
     'accessibility:disableAnimations': {
-      name: 'Disable Animations',
+      name: i18n.translate('kbn.advancedSettings.disableAnimationsTitle', {
+        defaultMessage: 'Disable Animations',
+      }),
       value: false,
-      description: `
-        Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.
-      `,
+      description: i18n.translate('kbn.advancedSettings.disableAnimationsText', {
+        defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
+      }),
       category: ['accessibility'],
     },
     'rollups:enableIndexPatterns': {
-      name: 'Enable rollup index patterns',
+      name: i18n.translate('kbn.advancedSettings.rollupIndexPatternsTitle', {
+        defaultMessage: 'Enable rollup index patterns',
+      }),
       value: true,
-      description: `
-        Enable the creation of index patterns which capture rollup indices, which in turn enable
-        visualizations based on rollup data. Refresh the page to apply the changes.
-      `,
+      description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
+        defaultMessage:
+          'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
+          'visualizations based on rollup data. Refresh the page to apply the changes.',
+      }),
       category: ['rollups'],
     },
   };

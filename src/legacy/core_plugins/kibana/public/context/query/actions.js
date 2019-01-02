@@ -27,7 +27,7 @@ import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 
-export function QueryActionsProvider(courier, Private, Promise) {
+export function QueryActionsProvider(courier, Private, Promise, i18n) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
   const {
@@ -81,7 +81,9 @@ export function QueryActionsProvider(courier, Private, Promise) {
         (error) => {
           setFailedStatus(state)('anchor', { error });
           toastNotifications.addDanger({
-            title: 'Unable to load the anchor document',
+            title: i18n('kbn.context.unableToLoadAnchorDocumentDescription', {
+              defaultMessage: 'Unable to load the anchor document'
+            }),
             text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;
@@ -125,7 +127,9 @@ export function QueryActionsProvider(courier, Private, Promise) {
         (error) => {
           setFailedStatus(state)('predecessors', { error });
           toastNotifications.addDanger({
-            title: 'Unable to load documents',
+            title: i18n('kbn.context.unableToLoadDocumentDescription', {
+              defaultMessage: 'Unable to load documents'
+            }),
             text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;

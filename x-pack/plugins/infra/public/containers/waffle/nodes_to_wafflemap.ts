@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
-import { InfraNode, InfraNodePath } from '../../../common/graphql/types';
+
+import { InfraNode, InfraNodePath } from '../../graphql/types';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,
@@ -50,7 +51,7 @@ function findOrCreateGroupWithNodes(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithNodes.allName', {
             defaultMessage: 'All',
           })
-        : last(path).value,
+        : last(path).label,
     count: 0,
     width: 0,
     squareSize: 0,
@@ -74,7 +75,7 @@ function findOrCreateGroupWithGroups(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithGroups.allName', {
             defaultMessage: 'All',
           })
-        : last(path).value,
+        : last(path).label,
     count: 0,
     width: 0,
     squareSize: 0,
@@ -83,10 +84,12 @@ function findOrCreateGroupWithGroups(
 }
 
 function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
+  const nodePathItem = last(node.path);
   return {
-    id: node.path.map(p => p.value).join('/'),
+    pathId: node.path.map(p => p.value).join('/'),
     path: node.path,
-    name: last(node.path).value,
+    id: nodePathItem.value,
+    name: nodePathItem.label,
     metric: node.metric,
   };
 }
