@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
 import {
   colors,
@@ -64,6 +64,7 @@ const ItemText = styled.span`
   align-items: center;
   height: ${px(units.plus)};
 
+  /* add margin to all direct descendants */
   & > * {
     margin-right: ${px(units.half)};
   }
@@ -99,7 +100,7 @@ interface IWaterfallItemProps {
 function PrefixIcon({ item }: { item: IWaterfallItem }) {
   if (item.docType === 'span') {
     // icon for database spans
-    const isDbType = item.span.span.type === 'db';
+    const isDbType = item.span.span.type.startsWith('db');
     if (isDbType) {
       return <EuiIcon type="database" />;
     }
@@ -118,18 +119,13 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   return <EuiIcon type="merge" />;
 }
 
-const StyledDuration = styled.span`
-  font-size: ${fontSizes.small};
-  color: ${colors.gray2};
-`;
-
 function Duration({ item }: { item: IWaterfallItem }) {
-  return <StyledDuration>{asTime(item.duration)}</StyledDuration>;
+  return (
+    <EuiText color="subdued" size="xs">
+      {asTime(item.duration)}
+    </EuiText>
+  );
 }
-
-const StyledStatusCode = styled.span`
-  font-size: ${fontSizes.small};
-`;
 
 function HttpStatusCode({ item }: { item: IWaterfallItem }) {
   // http status code for transactions of type 'request'
@@ -143,7 +139,7 @@ function HttpStatusCode({ item }: { item: IWaterfallItem }) {
     return null;
   }
 
-  return <StyledStatusCode>{httpStatusCode}</StyledStatusCode>;
+  return <EuiText size="xs">{httpStatusCode}</EuiText>;
 }
 
 function NameLabel({ item }: { item: IWaterfallItem }) {
