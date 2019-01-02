@@ -43,20 +43,15 @@ export async function loadTransaction({
   traceId,
   kuery
 }: IUrlParams) {
-  const result = await callApi<TransactionAPIResponse>(
-    {
-      pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
-      query: {
-        traceId,
-        start,
-        end,
-        esFilterQuery: await getEncodedEsQuery(kuery)
-      }
-    },
-    {
-      camelcase: false
+  const result = await callApi<TransactionAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
+    query: {
+      traceId,
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
-  );
+  });
 
   return addVersion(result);
 }
