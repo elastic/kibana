@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
-import { reindexServiceFactory, ReindexStep } from '../lib/reindex_service';
+import { reindexServiceFactory, ReindexStatus } from '../lib/reindex_service';
 import { ReindexWorker } from '../lib/reindex_worker';
 
 export function registerReindexIndicesRoutes(server: Server) {
@@ -23,9 +23,11 @@ export function registerReindexIndicesRoutes(server: Server) {
   const savedObjectsClient = new server.savedObjects.SavedObjectsClient(
     savedObjectsRepository
   ) as SavedObjectsClient;
-  const worker = new ReindexWorker(savedObjectsClient, callWithInternalUser, server.log);
 
-  // server.events.on('start', () => worker.start());
+  // Cannot pass server.log directly because it's value will change.
+  const log: Server['log'] = (...rest: Parameters<Server['log']>) => server.log(...rest);
+  const worker = new ReindexWorker(savedObjectsClient, callWithInternalUser, log);
+
   worker.start();
   server.events.on('stop', () => worker.stop());
 
@@ -66,6 +68,13 @@ export function registerReindexIndicesRoutes(server: Server) {
       const reindexService = reindexServiceFactory(client, callCluster);
 
       const reindexOp = await reindexService.findReindexOperation(indexName);
+
+      // If the reindexOp is in progress but our worker hasn't picked it up, force it to refresh.
+      if (reindexOp.attributes.status === ReindexStatus.inProgress && !worker.includes(reindexOp)) {
+        server.log(['debug', 'upgrade_assistant'], 'Manually refreshing worker.');
+        worker.forceRefresh();
+      }
+
       return reindexOp.attributes;
     },
   });

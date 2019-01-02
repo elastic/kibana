@@ -153,7 +153,7 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
               system, this may cause problems and you may need to use a different strategy to
               reindex this index.
             </EuiCallOut>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="xl" />
             <ReindexProgress
               step={step}
               reindexStatus={reindexStatus}
@@ -176,13 +176,20 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
 
   private startReindex = async (): Promise<void> => {
     const { indexName } = this.props;
-    const request = APIClient.post<ReindexOperation>(
-      chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
-    );
 
-    const resp = await request;
-    this.updateReindexState(resp.data);
-    this.checkStatus();
+    try {
+      // Optimistically assume it will start.
+      this.setState({ reindexStatus: ReindexStatus.inProgress });
+      const request = APIClient.post<ReindexOperation>(
+        chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
+      );
+
+      const resp = await request;
+      this.updateReindexState(resp.data);
+      this.checkStatus();
+    } catch (e) {
+      this.setState({ reindexStatus: ReindexStatus.failed });
+    }
   };
 
   private checkStatus = async (): Promise<void> => {

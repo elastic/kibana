@@ -18,31 +18,61 @@ import {
 } from './reindex_service';
 
 const POLL_INTERVAL = 30000;
-const UPDATE_INTERVAL = 1000;
 
 const LOG_TAGS = ['upgrade_assistant', 'reindex_worker'];
 
+/**
+ * A singleton worker that will coordinate two polling loops:
+ *   (1) A longer loop that polls for reindex operations that are in progress. If any are found, loop (2) is started.
+ *   (2) A tighter loop that pushes each in progress reindex operation through ReindexService.processNextStep. If all
+ *       updated reindex operations are complete, this loop will terminate.
+ *
+ * The worker can also be forced to start loop (2) by calling forceRefresh(). This is done when we know a new reindex
+ * operation has been started.
+ *
+ * This worker can be ran on multiple nodes without conflicts or dropped jobs. Reindex operations are locked by the
+ * ReindexService and if any operation is locked longer than the ReindexService's timeout, it is assumed to have been
+ * locked by a node that is no longer running (crashed or shutdown). In this case, another node may safely acquire
+ * the lock for this reindex operation.
+ */
 export class ReindexWorker {
-  private readonly reindexService: ReindexService;
+  private static workerSingleton?: ReindexWorker;
   private continuePolling: boolean = false;
-  private continueUpdatingOperations: boolean = false;
+  private updateOperationLoopRunning: boolean = false;
   private inProgressOps: ReindexSavedObject[] = [];
+  private readonly reindexService: ReindexService;
+
+  private processNextStep: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>;
 
   constructor(
     client: SavedObjectsClient,
     callWithInternalUser: CallCluster,
     private readonly log: Server['log']
   ) {
+    if (ReindexWorker.workerSingleton) {
+      throw new Error(`More than one ReindexWorker cannot be created.`);
+    }
+
     this.reindexService = reindexServiceFactory(client, callWithInternalUser);
+    this.processNextStep = swallowExceptions(this.reindexService.processNextStep, this.log);
+    ReindexWorker.workerSingleton = this;
   }
 
+  /**
+   * Begins loop (1) to begin checking for in progress reindex operations.
+   */
   public start = () => {
-    // this.log(['info'], `Starting worker...`);
+    this.log(['debug', ...LOG_TAGS], `Starting worker...`);
     this.continuePolling = true;
     this.pollForOperations();
   };
 
+  /**
+   * Stops the worker from processing any further reindex operations.
+   */
   public stop = () => {
+    this.log(['debug', ...LOG_TAGS], `Stopping worker...`);
+    this.updateOperationLoopRunning = false;
     this.continuePolling = false;
   };
 
@@ -53,43 +83,30 @@ export class ReindexWorker {
     this.refresh();
   };
 
-  private updateOperations = async () => {
-    // this.log(['info'], `Updating ${this.inProgressOps.length} operations`);
-    const updatedOps = await Promise.all(
-      this.inProgressOps.map(swallowExceptions(this.reindexService.processNextStep))
-    );
+  /**
+   * Returns whether or not the given ReindexOperation is in the worker's queue.
+   */
+  public includes = (reindexOp: ReindexSavedObject) => {
+    return this.inProgressOps.map(o => o.id).includes(reindexOp.id);
+  };
 
-    // Only update the array if all the ids lineup, otherwise refresh it completely to account for any new operations
-    const inProgressIds = this.inProgressOps.map(o => o.id);
-    const updatedIds = updatedOps.map(o => o.id);
-    if (isEqual(inProgressIds, updatedIds)) {
-      this.inProgressOps = updatedOps.filter(
-        op => op.attributes.status === ReindexStatus.inProgress
-      );
+  private startUpdateOperationLoop = async () => {
+    this.updateOperationLoopRunning = true;
 
-      if (this.inProgressOps.length === 0) {
-        this.continueUpdatingOperations = false;
-      }
+    while (this.inProgressOps.length > 0) {
+      this.log(['debug', ...LOG_TAGS], `Updating ${this.inProgressOps.length} reindex operations`);
 
-      if (this.continueUpdatingOperations) {
-        const anyWaitingReindex = this.inProgressOps.find(
-          op => op.attributes.lastCompletedStep === ReindexStep.reindexStarted
-        );
-
-        // If any are waiting on ES to complete, wait before next operation.
-        if (anyWaitingReindex) {
-          setTimeout(this.updateOperations, UPDATE_INTERVAL);
-        } else {
-          this.updateOperations();
-        }
-      }
-    } else {
-      this.refresh();
+      // Push each operation through the state machine and refresh.
+      await Promise.all(this.inProgressOps.map(this.processNextStep));
+      await this.refresh();
     }
+
+    this.updateOperationLoopRunning = false;
   };
 
   private pollForOperations = async () => {
-    // this.log(['info'], `Polling for operations`);
+    this.log(['debug', ...LOG_TAGS], `Polling for reindex operations`);
+
     await this.refresh();
 
     if (this.continuePolling) {
@@ -98,24 +115,32 @@ export class ReindexWorker {
   };
 
   private refresh = async () => {
-    // TODO: handlie paging
     const resp = await this.reindexService.findAllInProgressOperations();
     this.inProgressOps = resp.saved_objects;
 
-    // If there are jobs to update and we're not already updating operations, kick it off.
-    if (this.inProgressOps.length > 0 && !this.continueUpdatingOperations) {
-      this.continueUpdatingOperations = true;
-      this.updateOperations();
+    // If there are operations in progress and we're not already updating operations, kick off the update loop
+    if (!this.updateOperationLoopRunning) {
+      this.startUpdateOperationLoop();
     }
   };
 }
 
 const swallowExceptions = (
-  func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>
+  func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>,
+  log: Server['log']
 ) => async (reindexOp: ReindexSavedObject) => {
   try {
     return await func(reindexOp);
   } catch (e) {
+    if (reindexOp.attributes.locked) {
+      log(['debug', ...LOG_TAGS], `Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
+    } else {
+      log(
+        ['warning', ...LOG_TAGS],
+        `Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`
+      );
+    }
+
     return reindexOp;
   }
 };
