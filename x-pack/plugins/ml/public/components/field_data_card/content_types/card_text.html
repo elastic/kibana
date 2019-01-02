@@ -1,27 +1,38 @@
 <div ng-if="card.existsInDocs === true" class="card-contents">
   <div ng-if="card.stats.examples.length > 0" class="stats euiText">
-    <div class="stat"><ng-pluralize count="card.stats.examples.length" when="{'1':'value', 'other':'examples'}">examples</ng-pluralize></div>
+    <div class="stat"
+      i18n-id="xpack.ml.fieldDataCard.cardText.examples"
+      i18n-default-message="{examplesLength, plural, one {value} other {examples}}"
+      i18n-values="{ examplesLength: card.stats.examples.length }"
+    ></div>
     <div ng-repeat="example in card.stats.examples">
       {{ example }}
     </div>
   </div>
-<div ng-if="card.stats.examples.length === 0" class="not-exist-message">
-  <div>
-    <p>
-      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> No examples were obtained for this field.
-    </p>
-    <p>
-      This field was not present in the <span class="text-code">_source</span>
-      field of documents queried.
-    </p>
-    <p>
-      It may be populated, for example, using a
-      <span class="text-code">copy_to</span> parameter in the document mapping,
-      or be pruned from the <span class="text-code">_source</span> field afer
-      indexing through the use of <span class="text-code">includes</span> and
-      <span class="text-code">excludes</span> parameters.
-    </p>
+  <div ng-if="card.stats.examples.length === 0" class="not-exist-message">
+    <div>
+      <p>
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        <span i18n-id="xpack.ml.fieldDataCard.cardText.noExamples.noExamplesObtained"
+          i18n-default-message="No examples were obtained for this field."
+        ></span>
+      </p>
+      <p i18n-id="xpack.ml.fieldDataCard.cardText.noExamples.sourceNotPresentDescription"
+        i18n-default-message="This field was not present in the {sourceField}
+        field of documents queried."
+        i18n-values="{ html_sourceField: '<span class=\'text-code\'>_source</span>' }"
+      ></p>
+      <p i18n-id="xpack.ml.fieldDataCard.cardText.noExamples.populateExamplesDescription"
+        i18n-default-message="It may be populated, for example, using a {copyToField} parameter
+        in the document mapping, or be pruned from the {sourceField} field after
+        indexing through the use of {includesField} and {excludesField} parameters."
+        i18n-values="{
+          html_copyToField: '<span class=\'text-code\'>copy_to</span>',
+          html_sourceField: '<span class=\'text-code\'>_source</span>',
+          html_includesField: '<span class=\'text-code\'>includes</span>',
+          html_excludesField: '<span class=\'text-code\'>excludes</span>',
+        }"
+      ></p>
+    </div>
   </div>
-</div>
-
 </div>

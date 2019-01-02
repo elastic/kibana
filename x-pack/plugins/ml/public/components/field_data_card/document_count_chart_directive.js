@@ -26,7 +26,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlDocumentCountChart', function (Private) {
+module.directive('mlDocumentCountChart', function (Private, i18n) {
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
     const svgHeight = scope.height = attrs.height ? +attrs.height : 400;
@@ -157,7 +157,15 @@ module.directive('mlDocumentCountChart', function (Private) {
 
       function showChartTooltip(data, rect) {
         const formattedDate = formatHumanReadableDateTime(data.time);
-        const contents = `${formattedDate}<br/><hr/>count: ${data.value}`;
+        const dateContent = i18n('xpack.ml.fieldDataCard.documentCountChartTooltip.date', {
+          defaultMessage: '{formattedDate}',
+          values: { formattedDate },
+        });
+        const countContent = i18n('xpack.ml.fieldDataCard.documentCountChartTooltip.count', {
+          defaultMessage: 'count: {count}',
+          values: { count: data.value },
+        });
+        const contents = `${dateContent}<br/><hr/>${countContent}`;
 
         // Calculate the y offset.
         // rectY are mouseY are relative to top of the chart area.

@@ -1,16 +1,34 @@
 <div ng-if="card.existsInDocs === true" class="card-contents">
   <div class="stats euiText">
     <div class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
-      {{ card.stats.count }} <ng-pluralize count="card.stats.count" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
-      ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
+      <span i18n-id="xpack.ml.fieldDataCard.cardNumber.documentsCount"
+        i18n-default-message="{documentsCount} {documentsCount, plural, one {document} other {documents}} ({percentage}%)"
+        i18n-values="{
+          documentsCount: card.stats.count,
+          percentage: 100 * card.stats.count / card.stats.sampleCount
+        }"
+      ></span>
     </div>
-    <div class="stat"><i class="fa fa-cubes" aria-hidden="true"></i> {{ card.stats.cardinality }} distinct
-      <ng-pluralize count="card.stats.cardinality" when="{'1':'value', 'other':'values'}">values</ng-pluralize>
+   <div class="stat"><i class="fa fa-cubes" aria-hidden="true"></i>
+      <span
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.distinctValues"
+        i18n-default-message="{cardinality} distinct {cardinality, plural, one {value} other {values}}"
+        i18n-values="{ cardinality: card.stats.cardinality }"
+      ></span>
     </div>
     <div>
-      <div class="stat min heading">min</div>
-      <div class="stat median heading">median</div>
-      <div class="stat max heading">max</div>
+      <div class="stat min heading"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.min"
+        i18n-default-message="min"
+      ></div>
+      <div class="stat median heading"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.median"
+        i18n-default-message="median"
+      ></div>
+      <div class="stat max heading"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.max"
+        i18n-default-message="max"
+      ></div>
     </div>
     <div>
       <div class="stat min">{{ card.stats.min | formatField:card.fieldFormat }}</div>
@@ -23,9 +41,16 @@
     <select class="kuiSelect"
       ng-model="detailsMode"
       ng-change="detailsModeChanged(detailsMode)"
-      aria-label="Select metric details display">
-      <option value="distribution">distribution of values</option>
-      <option value="top">top values</option>
+      aria-label="{{ ::'xpack.ml.fieldDataCard.cardNumber.metricDetailsAriaLabel' | i18n: {defaultMessage: 'Select metric details display'} }}"
+    >
+      <option value="distribution"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.metricDetails.byDistributionOfValuesDropDownOptionLabel"
+        i18n-default-message="distribution of values"
+      ></option>
+      <option value="top"
+        i18n-id="xpack.ml.fieldDataCard.cardNumber.metricDetails.byTopValuesDropDownOptionLabel"
+        i18n-default-message="top values"
+      ></option>
     </select>
   </div>
   <div class="details-container" ng-switch on="detailsMode">

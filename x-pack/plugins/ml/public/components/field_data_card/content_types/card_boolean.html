@@ -1,43 +1,53 @@
 <div ng-if="card.existsInDocs === true" class="card-contents">
   <div class="stats euiText">
     <div class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
-    {{ card.stats.count }} <ng-pluralize count="card.stats.count" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
-      ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
+      <span i18n-id="xpack.ml.fieldDataCard.cardBoolean.documentsCount"
+        i18n-default-message="{documentsCount} {documentsCount, plural, one {document} other {documents}} ({percentage}%)"
+        i18n-values="{
+          documentsCount: card.stats.count,
+          percentage: 100 * card.stats.count / card.stats.sampleCount
+        }"
+      ></span>
     </div>
   </div>
 
   <div class="stats euiText">
-    <div class="stat">values</div>
+    <div class="stat"
+      i18n-id="xpack.ml.fieldDataCard.cardBoolean.values"
+      i18n-default-message="values"
+    ></div>
       <div class="top-value">
         <div class="field-label"
-          tooltip-html-unsafe="true"
-          tooltip-append-to-body="true"
-          tooltip-placement="right">
-          true
-        </div>
+          tooltip-html-unsafe="{{:: 'xpack.ml.fieldDataCard.cardBoolean.values.trueTooltip' | i18n: { defaultMessage: 'true' } }}"
+          tooltip-append-to-body="1"
+          tooltip-placement="right"
+          i18n-id="xpack.ml.fieldDataCard.cardBoolean.values.true"
+          i18n-default-message="true"
+        ></div>
         <div class="top-value-bar-holder">
           <div class="top-value-bar boolean"
             ng-attr-style="width: {{card.stats.count > 0 ? 100 * card.stats.trueCount/card.stats.count : 0}}%;"
-            tooltip-html-unsafe="{{ card.stats.count > 0 ? 100 * card.stats.trueCount/card.stats.count : 0 | number:1 }}%"
+            tooltip-html-unsafe="{{:: 'xpack.ml.fieldDataCard.cardBoolean.values.truePercentageTooltip' | i18n: { defaultMessage: '{truePercentage}%', values: {{ truePercentage: card.stats.count > 0 ? 100 * card.stats.trueCount/card.stats.count : 0 }} } }}"
             tooltip-placement="right"
-            tooltip-append-to-body="true">
+            tooltip-append-to-body="1">
           </div>
         </div>
         <div class="count-label">{{card.stats.trueCount}}</div>
       </div>
       <div class="top-value">
         <div class="field-label"
-          tooltip-html-unsafe="true"
-          tooltip-append-to-body="true"
-          tooltip-placement="right">
-          false
-        </div>
+          tooltip-html-unsafe="{{:: 'xpack.ml.fieldDataCard.cardBoolean.values.falseTooltip' | i18n: { defaultMessage: 'false' } }}"
+          tooltip-append-to-body="1"
+          i18n-id="xpack.ml.fieldDataCard.cardBoolean.values.false"
+          i18n-default-message="false"
+          tooltip-placement="right"
+        ></div>
         <div class="top-value-bar-holder">
           <div class="top-value-bar boolean"
             ng-attr-style="width: {{card.stats.count > 0 ? 100 * card.stats.falseCount/card.stats.count : 0}}%;"
-            tooltip-html-unsafe="{{card.stats.count > 0 ? 100 * card.stats.falseCount/card.stats.count : 0 | number:1 }}%"
+            tooltip-html-unsafe="{{:: 'xpack.ml.fieldDataCard.cardBoolean.values.falsePercentageTooltip' | i18n: { defaultMessage: '{falsePercentage}%', values: {{ falsePercentage: card.stats.count > 0 ? 100 * card.stats.falseCount/card.stats.count : 0 }} } }}"
             tooltip-placement="right"
-            tooltip-append-to-body="true">
+            tooltip-append-to-body="1">
           </div>
         </div>
         <div class="count-label">{{card.stats.falseCount}}</div>

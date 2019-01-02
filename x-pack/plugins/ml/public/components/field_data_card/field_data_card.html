@@ -12,7 +12,10 @@
   <div ng-if="card.existsInDocs === false" class="card-contents">
     <div class="not-exist-message">
       <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-      This field does not appear in any documents for the selected time range
+      <span
+        i18n-id="xpack.ml.fieldDataCard.noDocumentsInSelectedTimeRange"
+        i18n-default-message="This field does not appear in any documents for the selected time range"
+      ></span>
     </div>
   </div>
 

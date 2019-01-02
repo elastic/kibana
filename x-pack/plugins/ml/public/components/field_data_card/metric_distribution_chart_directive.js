@@ -21,7 +21,7 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlMetricDistributionChart', function () {
+module.directive('mlMetricDistributionChart', function (i18n) {
 
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
@@ -174,12 +174,18 @@ module.directive('mlMetricDistributionChart', function () {
       const maxPercentile = _.get(scope, ['card', 'stats', 'distribution', 'maxPercentile']);
       const minPercent = ordinalSuffix(minPercentile);
       const maxPercent = ordinalSuffix(maxPercentile);
+
+      const chartText = i18n('xpack.ml.fieldDataCard.metricDistributionChart.chartText', {
+        defaultMessage: 'Displaying {minPercent} - {maxPercent} percentiles',
+        values: { minPercent, maxPercent },
+      });
+
       svg.append('text')
         .attr('x', chartWidth / 2)
         .attr('y', 10)
         .attr('class', 'info-text')
         .attr('transform', `translate(${margin.left}, ${margin.top})`)
-        .text(`Displaying ${minPercent} - ${maxPercent} percentiles`);
+        .text(chartText);
 
       const translateTop = margin.top + infoLabelHeight;
       chartGroup = svg.append('g')
@@ -245,20 +251,33 @@ module.directive('mlMetricDistributionChart', function () {
           }
         }
 
-        let contents = `value:${xVal}`;
+        let contents;
         const bar = scope.processedData[processedDataIdx];
         const minValFormatted =  scope.card.fieldFormat.convert(bar.dataMin, 'text');
         if (bar.dataMax > bar.dataMin) {
           const maxValFormatted =  scope.card.fieldFormat.convert(bar.dataMax, 'text');
-          contents = `${bar.percent}% of documents have<br>values between ${minValFormatted} and ${maxValFormatted}`;
+          contents = i18n('xpack.ml.fieldDataCard.metricDistributionChartInBetweenValuesTooltip', {
+            defaultMessage: '{barPercentage}% of documents have<br>values between {minValFormatted} and {maxValFormatted}',
+            values: {
+              barPercentage: bar.percent,
+              minValFormatted,
+              maxValFormatted,
+            },
+          });
         } else {
-          contents = `${bar.percent}% of documents have<br>a value of ${minValFormatted}`;
+          contents = i18n('xpack.ml.fieldDataCard.metricDistributionChartExactValueTooltip', {
+            defaultMessage: '{bar.percent}% of documents have<br>a value of {minValFormatted}',
+            values: {
+              barPercentage: bar.percent,
+              minValFormatted
+            },
+          });
         }
 
-        contents = `<div class='eui-textCenter'>${contents}</div>`;
+        const htmlContents = `<div class='eui-textCenter'>${contents}</div>`;
 
         if (path.length && path[0].length) {
-          mlChartTooltipService.show(contents, path[0][0], {
+          mlChartTooltipService.show(htmlContents, path[0][0], {
             x: xPos + 5,
             y: yPos + 10
           });
@@ -269,7 +288,6 @@ module.directive('mlMetricDistributionChart', function () {
     init();
     drawAxes();
     drawDistributionArea();
-
   }
 
   return {
