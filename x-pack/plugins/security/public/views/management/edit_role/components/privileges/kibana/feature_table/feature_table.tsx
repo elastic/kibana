@@ -11,13 +11,12 @@ import {
   EuiInMemoryTable,
   // @ts-ignore
   EuiSuperSelect,
-  EuiSwitch,
   EuiText,
   IconType,
 } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
-import { EffectivePrivileges } from 'plugins/security/lib/get_effective_privileges';
+import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges_inst';
 import React, { Component } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';
@@ -30,7 +29,7 @@ interface Props {
   effectivePrivileges: EffectivePrivileges;
   privilegeDefinition: PrivilegeDefinition;
   intl: InjectedIntl;
-  spaceId?: string;
+  spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   disabled?: boolean;
 }
@@ -41,6 +40,10 @@ interface ToolTipDefinition {
 }
 
 export class FeatureTable extends Component<Props, {}> {
+  public static defaultProps = {
+    spacesIndex: -1,
+  };
+
   public render() {
     const { role, features } = this.props;
 
@@ -49,9 +52,7 @@ export class FeatureTable extends Component<Props, {}> {
       role,
     }));
 
-    return (
-      <EuiInMemoryTable columns={this.getColumns(this.props.effectivePrivileges)} items={items} />
-    );
+    return <EuiInMemoryTable columns={this.getColumns()} items={items} />;
   }
 
   public onChange = (featureId: string) => (privilege: string) => {
@@ -62,7 +63,7 @@ export class FeatureTable extends Component<Props, {}> {
     }
   };
 
-  private getColumns = (effectivePrivileges: EffectivePrivileges) => [
+  private getColumns = () => [
     {
       field: 'feature',
       name: this.props.intl.formatMessage({
@@ -125,50 +126,54 @@ export class FeatureTable extends Component<Props, {}> {
           return null;
         }
 
+        const effectivePrivilegesInstance = this.props.effectivePrivileges;
+
+        const enabledFeaturePrivileges = featurePrivileges.filter(p =>
+          effectivePrivilegesInstance.canAssignSpaceFeaturePrivilege(
+            record.feature.id,
+            p,
+            this.props.spacesIndex
+          )
+        );
+
+        const privilegeExplanation = effectivePrivilegesInstance.explainActualSpaceFeaturePrivilege(
+          record.feature.id,
+          this.props.spacesIndex
+        );
+
         const featureId = record.feature.id;
 
-        const effectiveFeaturePrivileges = this.getEffectiveFeaturePrivileges(
-          featureId,
-          effectivePrivileges
-        );
+        const allowsNone =
+          effectivePrivilegesInstance.getHighestGrantedSpaceFeaturePrivilege(
+            featureId,
+            this.props.spacesIndex
+          ) === NO_PRIVILEGE_VALUE;
 
-        const allowedFeaturePrivileges = this.getAllowedFeaturePrivileges(
-          featureId,
-          effectivePrivileges
-        );
+        const actualPrivilegeValue = privilegeExplanation.privilege;
 
-        const allowsNone = effectiveFeaturePrivileges.length === 0;
+        const canChangePrivilege =
+          !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
 
-        const assignedFeaturePrivileges = this.getAssignedFeaturePrivileges(featureId);
-
-        const actualPrivilegeValue =
-          assignedFeaturePrivileges.length === 0
-            ? effectiveFeaturePrivileges
-            : assignedFeaturePrivileges;
-
-        if (this.props.disabled) {
-          return <EuiText>{actualPrivilegeValue[0]}</EuiText>;
+        if (!canChangePrivilege) {
+          return (
+            <EuiText>
+              {actualPrivilegeValue || 'None'}{' '}
+              <sup>
+                <EuiIconTip
+                  type={'lock'}
+                  content={this.props.intl.formatMessage({
+                    id: 'foo',
+                    defaultMessage: privilegeExplanation.details,
+                  })}
+                  size={'s'}
+                />
+              </sup>
+            </EuiText>
+          );
         }
 
-        // if (featurePrivileges.length === 1) {
-        //   const isAllowedPrivilege = allowedFeaturePrivileges.includes(featurePrivileges[0]);
-        //   const isChecked = actualPrivilegeValue.length > 0;
-
-        //   return (
-        //     <EuiSwitch
-        //       checked={actualPrivilegeValue.length > 0}
-        //       disabled={isChecked && !allowsNone}
-        //       onChange={e =>
-        //         this.onChange(featureId)(
-        //           e.target.checked ? featurePrivileges[0] : NO_PRIVILEGE_VALUE
-        //         )
-        //       }
-        //     />
-        //   );
-        // }
-
         const privilegeOptions = featurePrivileges.map(privilege => {
-          const isAllowedPrivilege = allowedFeaturePrivileges.includes(privilege);
+          const isAllowedPrivilege = enabledFeaturePrivileges.includes(privilege);
           return {
             disabled: !isAllowedPrivilege,
             value: privilege,
@@ -189,7 +194,7 @@ export class FeatureTable extends Component<Props, {}> {
               {
                 disabled: !allowsNone,
                 value: NO_PRIVILEGE_VALUE,
-                inputDisplay: <EuiText>None</EuiText>,
+                inputDisplay: <EuiText color="subdued">None</EuiText>,
                 dropdownDisplay: (
                   <EuiText>
                     <strong>No privileges</strong>
@@ -199,38 +204,10 @@ export class FeatureTable extends Component<Props, {}> {
               ...privilegeOptions,
             ]}
             hasDividers
-            valueOfSelected={actualPrivilegeValue[0] || NO_PRIVILEGE_VALUE}
+            valueOfSelected={actualPrivilegeValue || NO_PRIVILEGE_VALUE}
           />
         );
       },
     },
   ];
-
-  private getEffectiveFeaturePrivileges(
-    featureId: string,
-    effectivePrivileges: EffectivePrivileges
-  ): string[] {
-    if (this.props.spaceId) {
-      return effectivePrivileges.grants.space.feature[featureId] || [];
-    }
-    return effectivePrivileges.grants.global.feature[featureId] || [];
-  }
-
-  private getAllowedFeaturePrivileges(
-    featureId: string,
-    effectivePrivileges: EffectivePrivileges
-  ): string[] {
-    if (this.props.spaceId) {
-      return effectivePrivileges.allows.space.feature[featureId] || [];
-    }
-    return effectivePrivileges.allows.global.feature[featureId] || [];
-  }
-
-  private getAssignedFeaturePrivileges(featureId: string): string[] {
-    const { role, spaceId } = this.props;
-    if (spaceId && role.kibana.space.hasOwnProperty(spaceId)) {
-      return role.kibana.space[spaceId].feature[featureId] || [];
-    }
-    return role.kibana.global.feature[featureId] || [];
-  }
 }

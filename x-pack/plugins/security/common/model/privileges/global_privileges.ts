@@ -7,6 +7,10 @@
 export class GlobalPrivileges {
   constructor(private readonly globalPrivilegesMap: Record<string, string[]>) {}
 
+  public getAllPrivileges(): string[] {
+    return Object.keys(this.globalPrivilegesMap);
+  }
+
   public getActions(privilege: string): string[] {
     return this.globalPrivilegesMap[privilege] || [];
   }

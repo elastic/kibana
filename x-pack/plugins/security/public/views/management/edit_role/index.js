@@ -72,6 +72,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
               feature: {}
             },
             space: {},
+            spaces: [],
           },
           _unrecognized_applications: [],
         }));

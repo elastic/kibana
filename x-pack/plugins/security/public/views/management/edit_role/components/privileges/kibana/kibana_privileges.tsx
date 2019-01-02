@@ -5,7 +5,7 @@
  */
 
 import { InjectedIntl } from '@kbn/i18n/react';
-import { getEffectivePrivileges } from 'plugins/security/lib/get_effective_privileges';
+import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges_factory';
 import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
@@ -52,12 +52,14 @@ export class KibanaPrivileges extends Component<Props, {}> {
       features,
     } = this.props;
 
+    const effectivePrivilegesFactory = new EffectivePrivilegesFactory(privilegeDefinition);
+
     if (spacesEnabled) {
       return (
         <SpaceAwarePrivilegeForm
           privilegeDefinition={privilegeDefinition}
           role={role}
-          effectivePrivileges={getEffectivePrivileges(privilegeDefinition, role)}
+          effectivePrivilegesFactory={effectivePrivilegesFactory}
           spaces={spaces}
           uiCapabilities={uiCapabilities}
           features={features}
@@ -72,7 +74,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
           privilegeDefinition={privilegeDefinition}
           features={features}
           role={role}
-          effectivePrivileges={getEffectivePrivileges(privilegeDefinition, role)}
+          effectivePrivileges={effectivePrivilegesFactory.getInstance(role)}
           onChange={onChange}
           editable={editable}
           intl={this.props.intl}

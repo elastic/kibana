@@ -15,16 +15,18 @@ import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { getSpaceColor } from '../../../../../../../../spaces/common/space_attributes';
 
-const spaceToOption = (space?: Space) => {
+const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {
-    return { label: '', isGroupLabelOption: false };
+    return { label: '' };
   }
 
   return {
     id: space.id,
     label: space.name,
     color: getSpaceColor(space),
-    isGroupLabelOption: false,
+    disabled:
+      (currentSelection === 'global' && space.id !== '*') ||
+      (currentSelection === 'spaces' && space.id === '*'),
   };
 };
 
@@ -53,7 +55,16 @@ export class SpaceSelector extends Component<Props, {}> {
 
     return (
       <EuiComboBox
-        options={this.props.spaces.map(spaceToOption)}
+        options={this.props.spaces.map(space =>
+          spaceToOption(
+            space,
+            this.props.selectedSpaceIds.includes('*')
+              ? 'global'
+              : this.props.selectedSpaceIds.length > 0
+              ? 'spaces'
+              : undefined
+          )
+        )}
         renderOption={renderOption}
         selectedOptions={this.props.selectedSpaceIds.map(spaceIdToOption(this.props.spaces))}
         isDisabled={this.props.disabled}

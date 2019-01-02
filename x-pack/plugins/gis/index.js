@@ -67,6 +67,31 @@ export function gis(kibana) {
       server.injectUiAppVars('gis', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'gis',
+        name: 'Maps',
+        icon: 'gisApp',
+        navLinkId: 'gis',
+        privileges: {
+          all: {
+            app: ['gis'],
+            savedObject: {
+              all: ['gis-map'],
+              read: ['config'],
+            },
+            ui: [],
+          },
+          read: {
+            app: ['gis'],
+            savedObject: {
+              all: [],
+              read: ['config', 'gis-map'],
+            },
+            ui: [],
+          }
+        }
+      });
     }
   });
 }

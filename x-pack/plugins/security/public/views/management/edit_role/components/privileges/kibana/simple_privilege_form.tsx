@@ -13,7 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { EffectivePrivileges } from 'plugins/security/lib/get_effective_privileges';
+import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges_inst';
 import React, { Component, Fragment } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';

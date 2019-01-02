@@ -5,48 +5,40 @@
  */
 
 import {
+  EuiAccordion,
+  EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
-  // @ts-ignore
-  EuiDescribedFormGroup,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiFormRow,
-  EuiOverlayMask,
-  EuiSpacer,
+  EuiIconTip,
   // @ts-ignore
-  EuiSuperSelect,
-  EuiSwitch,
+  EuiInMemoryTable,
+  // @ts-ignore
+  EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { EffectivePrivileges } from 'plugins/security/lib/get_effective_privileges';
+import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges_factory';
+import { PRIVILEGE_SOURCE } from 'plugins/security/lib/effective_privileges_inst';
 import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
+import { getSpaceColor } from 'x-pack/plugins/spaces/common';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { Role } from '../../../../../../../common/model/role';
-import { isReservedRole } from '../../../../../../lib/role';
-import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { copyRole } from '../../../lib/copy_role';
 import { RoleValidator } from '../../../lib/validate_role';
-import { FeatureTable } from './feature_table/feature_table';
-import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
-import { PrivilegeCalloutWarning } from './privilege_callout_warning';
-import { PrivilegeSpaceForm } from './privilege_space_form';
-import { PrivilegeSpaceTable } from './privilege_space_table';
+import { NewPrivilegeSpaceForm } from './new_privilege_space_form';
+import { PrivilegeMatrix } from './privilege_matrix';
 
 interface Props {
   privilegeDefinition: PrivilegeDefinition;
   role: Role;
-  effectivePrivileges: EffectivePrivileges;
+  effectivePrivilegesFactory: EffectivePrivilegesFactory;
   spaces: Space[];
   onChange: (role: Role) => void;
   editable: boolean;
@@ -56,48 +48,35 @@ interface Props {
   features: Feature[];
 }
 
-interface SpacePrivileges {
-  [spaceId: string]: {
-    minimum: string[];
-    feature: {
-      [featureId: string]: string[];
-    };
-  };
-}
-
 interface State {
-  spacePrivileges: SpacePrivileges;
   role: Role | null;
-  editingSpaceId: string | null;
-  isCustomizingGlobalPrivileges: boolean;
-  showGlobalFeatureTable: boolean;
+  editingIndex: number;
   showSpacePrivilegeEditor: boolean;
+  showPrivilegeMatrix: boolean;
 }
 
 class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
+  private globalSpaceEntry: Space = {
+    id: '*',
+    name: '* (all spaces)',
+    color: '#afafaf',
+    initials: '*',
+    disabledFeatures: [],
+  };
+
   constructor(props: Props) {
     super(props);
-    const { role } = props;
-
-    const assignedPrivileges = role.kibana;
-    const spacePrivileges = {
-      ...assignedPrivileges.space,
-    };
-
-    const hasCustomizedGlobalFeatures = Object.keys(role.kibana.global.feature).length > 0;
 
     this.state = {
-      spacePrivileges,
-      showGlobalFeatureTable: hasCustomizedGlobalFeatures,
       showSpacePrivilegeEditor: false,
+      showPrivilegeMatrix: false,
       role: null,
-      editingSpaceId: null,
-      isCustomizingGlobalPrivileges: hasCustomizedGlobalFeatures,
+      editingIndex: -1,
     };
   }
 
   public render() {
-    const { uiCapabilities, intl } = this.props;
+    const { uiCapabilities, effectivePrivilegesFactory } = this.props;
 
     if (!uiCapabilities.spaces.manage) {
       return (
@@ -139,363 +118,339 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
         </EuiCallOut>
       );
     }
-    const basePrivilege = this.getDisplayedBasePrivilege();
 
-    const description = (
-      <p>
-        <FormattedMessage
-          id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.minimumActionsUserCanPerformInYourSpacesDescription"
-          defaultMessage="Specify the minimum actions users can perform in your spaces."
-        />
-      </p>
-    );
+    let availableSpaces: Space[] = [];
+    if (this.state.showSpacePrivilegeEditor) {
+      availableSpaces = [...this.getAvailableSpaces()];
+      if (this.state.editingIndex >= 0) {
+        const form = this.props.role.kibana.spaces[this.state.editingIndex];
 
-    let helptext;
-    if (basePrivilege === NO_PRIVILEGE_VALUE) {
-      helptext = intl.formatMessage({
-        id: 'xpack.security.management.editRoles.spaceAwarePrivilegeForm.noAccessToSpacesHelpText',
-        defaultMessage: 'No access to spaces',
-      });
-    } else if (basePrivilege === 'all') {
-      helptext = intl.formatMessage({
-        id:
-          'xpack.security.management.editRoles.spaceAwarePrivilegeForm.viewEditShareAppsWithinAllSpacesHelpText',
-        defaultMessage: 'View, edit, and share objects and apps within all spaces',
-      });
-    } else if (basePrivilege === 'read') {
-      helptext = intl.formatMessage({
-        id:
-          'xpack.security.management.editRoles.spaceAwarePrivilegeForm.viewObjectsAndAppsWithinAllSpacesHelpText',
-        defaultMessage: 'View objects and apps within all spaces',
-      });
+        const displaySpaces = this.getDisplaySpaces();
+        const selectedSpaces = form.spaces
+          .map(spaceId => displaySpaces.find(s => s.id === spaceId))
+          .filter(Boolean) as Space[];
+
+        availableSpaces.push(...selectedSpaces);
+      }
     }
 
     return (
       <Fragment>
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.minPrivilegesForAllSpacesTitle"
-                defaultMessage="Minimum privileges for all spaces"
-              />
-            </h3>
-          }
-          description={description}
-        >
-          <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
-            <EuiSuperSelect
-              disabled={!this.props.editable}
-              onChange={this.onKibanaBasePrivilegeChange}
-              options={[
-                {
-                  value: NO_PRIVILEGE_VALUE,
-                  inputDisplay: <EuiText>None</EuiText>,
-                  dropdownDisplay: (
-                    <EuiText>
-                      <strong>None</strong>
-                      <p>No access to Spaces</p>
-                    </EuiText>
-                  ),
-                },
-                {
-                  value: 'custom',
-                  inputDisplay: <EuiText>Custom</EuiText>,
-                  dropdownDisplay: (
-                    <EuiText>
-                      <strong>Custom</strong>
-                      <p>Customize access to Kibana</p>
-                    </EuiText>
-                  ),
-                },
-                {
-                  value: 'read',
-                  inputDisplay: <EuiText>Read</EuiText>,
-                  dropdownDisplay: (
-                    <EuiText>
-                      <strong>Read</strong>
-                      <p>Grants read-only access to all of Kibana</p>
-                    </EuiText>
-                  ),
-                },
-                {
-                  value: 'all',
-                  inputDisplay: <EuiText>All</EuiText>,
-                  dropdownDisplay: (
-                    <EuiText>
-                      <strong>All</strong>
-                      <p>Grants full access to Kibana</p>
-                    </EuiText>
-                  ),
-                },
-              ]}
-              hasDividers
-              valueOfSelected={basePrivilege}
-            />
-          </EuiFormRow>
-          {this.state.isCustomizingGlobalPrivileges && (
-            <Fragment>
-              {/* <EuiFormRow label={'Control features for all spaces'}>
-                <EuiSwitch
-                  checked={this.state.showGlobalFeatureTable}
-                  onChange={e => this.setState({ showGlobalFeatureTable: e.target.checked })}
-                />
-              </EuiFormRow>
-              {this.state.showGlobalFeatureTable && ( */}
-              <EuiFormRow>
-                <FeatureTable
-                  role={this.props.role}
-                  features={this.props.features}
-                  privilegeDefinition={this.props.privilegeDefinition}
-                  effectivePrivileges={this.props.effectivePrivileges}
-                  intl={this.props.intl}
-                  onChange={this.onGlobalFeaturePrivilegesChange}
-                />
-              </EuiFormRow>
-              {/* )} */}
-            </Fragment>
-          )}
-        </EuiDescribedFormGroup>
-
-        {this.renderSpacePrivileges(basePrivilege)}
-      </Fragment>
-    );
-  }
-
-  private getDisplayedBasePrivilege() {
-    if (this.state.isCustomizingGlobalPrivileges) {
-      return 'custom';
-    }
-
-    const assignedPrivileges = this.props.role.kibana;
-
-    return assignedPrivileges.global.minimum.length > 0
-      ? assignedPrivileges.global.minimum[0]
-      : NO_PRIVILEGE_VALUE;
-  }
-
-  private renderSpacePrivileges = (basePrivilege: string) => {
-    const { role, spaces } = this.props;
-
-    const canAssignSpacePrivileges = basePrivilege !== 'all';
-    const hasAssignedSpacePrivileges = Object.keys(this.state.spacePrivileges).length > 0;
-
-    const unassignedSpaces = this.getUnassignedSpaces();
-    const showAddPrivilegeButton = canAssignSpacePrivileges && unassignedSpaces.length > 0;
-
-    return (
-      <Fragment>
-        <EuiTitle size={'xs'}>
-          <h3>
-            <FormattedMessage
-              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.higherPrivilegesForIndividualSpacesTitle"
-              defaultMessage="Higher privileges for individual spaces"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size={'s'} />
-        <EuiText
-          // @ts-ignore
-          grow={false}
-          size={'s'}
-          color={'subdued'}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
-              defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
-              {read} for all spaces, you can set the privileges to {all}
-              for an individual space."
-              values={{
-                read: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.readText"
-                      defaultMessage="read"
-                    />
-                  </strong>
-                ),
-                all: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.allText"
-                      defaultMessage="all"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size={'s'} />
-        {(basePrivilege !== NO_PRIVILEGE_VALUE || isReservedRole(this.props.role)) && (
-          <PrivilegeCalloutWarning
-            basePrivilege={basePrivilege}
-            isReservedRole={isReservedRole(this.props.role)}
+        {this.renderKibanaPrivileges()}
+        {this.state.showSpacePrivilegeEditor && (
+          <NewPrivilegeSpaceForm
+            role={this.props.role}
+            effectivePrivilegesFactory={effectivePrivilegesFactory}
+            privilegeDefinition={this.props.privilegeDefinition}
+            features={this.props.features}
+            intl={this.props.intl}
+            onChange={this.onSpacesPrivilegeChange}
+            onCancel={this.onCancelEditPrivileges}
+            spaces={availableSpaces}
+            editingIndex={this.state.editingIndex}
           />
         )}
-
-        {canAssignSpacePrivileges && (
-          <Fragment>
-            <PrivilegeSpaceTable
-              role={role}
-              spaces={spaces}
-              onEdit={this.onEditSpacePrivileges}
-              onDelete={this.onDeleteSpacePrivileges}
-            />
-
-            {hasAssignedSpacePrivileges && <EuiSpacer />}
-
-            {this.getSpaceForms(unassignedSpaces)}
-          </Fragment>
-        )}
-
-        <EuiFlexGroup
-          // @ts-ignore
-          alignItems={'baseline'}
-        >
-          {showAddPrivilegeButton && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="addSpacePrivilegeButton"
-                size={'s'}
-                iconType={'plusInCircle'}
-                onClick={this.addSpacePrivilege}
-              >
-                <FormattedMessage
-                  id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
-                  defaultMessage="Add space privilege"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <ImpactedSpacesFlyout role={role} spaces={spaces} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </Fragment>
+    );
+  }
+
+  private renderKibanaPrivileges = () => {
+    const { role, effectivePrivilegesFactory } = this.props;
+
+    const { global } = role.kibana;
+
+    const globalPrivilege = this.locateGlobalPrivilege();
+
+    const spacePrivileges = this.getSortedPrivileges();
+
+    const displaySpaces = this.getDisplaySpaces();
+
+    const effectivePrivileges = effectivePrivilegesFactory.getInstance(
+      this.state.role || this.props.role
+    );
+
+    const items: any[] = [];
+    if (global.minimum.length > 0 || Object.keys(global.feature).length > 0) {
+      items.push({
+        isGlobal: true,
+        spaces: [
+          {
+            id: '*',
+            name: 'Global (all spaces)',
+            initials: '*',
+            color: '#afafaf',
+          },
+        ],
+        headerSpaces: [
+          {
+            id: '*',
+            name: 'Global (all spaces)',
+            initials: '*',
+            color: '#afafaf',
+          },
+        ],
+        privileges: {
+          minimum: global.minimum,
+          feature: global.feature,
+        },
+      });
+    }
+
+    spacePrivileges.forEach((spacePrivs, spacesIndex) => {
+      items.push({
+        spacesIndex,
+        spaces: spacePrivs.spaces.map(spaceId => displaySpaces.find(space => space.id === spaceId)),
+        headerSpaces: spacePrivs.spaces
+          .filter((s, index, arr) => arr.length < 5 || index < 3)
+          .map(spaceId => displaySpaces.find(space => space.id === spaceId)),
+        privileges: {
+          minimum: spacePrivs.minimum,
+          feature: spacePrivs.feature,
+        },
+      });
+    });
+
+    interface TableRow {
+      spaces: Space[];
+      displaySpaces: Space[];
+      spacesIndex: number;
+      privileges: {
+        minimum: string[];
+        feature: {
+          [featureId: string]: string[];
+        };
+      };
+    }
+    const rows: TableRow[] = spacePrivileges.map((spacePrivs, spacesIndex) => {
+      const spaces = spacePrivs.spaces.map(spaceId =>
+        displaySpaces.find(space => space.id === spaceId)
+      ) as Space[];
+
+      return {
+        spaces,
+        displaySpaces: spaces.filter((s, index, arr) => arr.length < 5 || index < 3),
+        spacesIndex,
+        privileges: {
+          minimum: spacePrivs.minimum,
+          feature: spacePrivs.feature,
+        },
+      };
+    });
+
+    const columns = [
+      {
+        field: 'displaySpaces',
+        name: 'Spaces',
+        width: '60%',
+        render: (spaces: Space[], record: TableRow) => {
+          return (
+            <EuiFlexGroup wrap gutterSize={'s'}>
+              {spaces.map((space: Space) => (
+                <EuiFlexItem grow={false} key={space.id}>
+                  <EuiBadge color={getSpaceColor(space)}>{space.name}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+              {record.spaces.length > spaces.length ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <ul>
+                        {record.spaces.map(s => (
+                          <li key={s.id}>{s.name}</li>
+                        ))}
+                      </ul>
+                    }
+                  >
+                    <EuiText>({record.spaces.length - spaces.length} more)</EuiText>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          );
+        },
+      },
+      {
+        field: 'privileges',
+        name: 'Privileges',
+        render: (privileges: any, record: any) => {
+          const actualPrivilege = effectivePrivileges.explainActualSpaceBasePrivilege(
+            record.spacesIndex
+          );
+
+          const hasCustomizations = Object.keys(privileges.feature).length > 0;
+
+          switch (actualPrivilege.source) {
+            case PRIVILEGE_SOURCE.NONE:
+            case PRIVILEGE_SOURCE.ASSIGNED:
+              return (
+                <EuiText>
+                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
+                  <br />
+                  <em>configured directly</em>
+                </EuiText>
+              );
+            case PRIVILEGE_SOURCE.EFFECTIVE:
+              return (
+                <EuiText>
+                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
+                  <br />
+                  <em>{actualPrivilege.details}</em>
+                </EuiText>
+              );
+            case PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED:
+              return (
+                <EuiText>
+                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
+                  <br />
+                  <em>{actualPrivilege.details}</em>
+                </EuiText>
+              );
+            default:
+              return <EuiText color="danger">{'**unknown**'}</EuiText>;
+          }
+        },
+      },
+      {
+        name: 'Actions',
+        actions: [
+          {
+            description: 'Edit these privileges',
+            icon: 'pencil',
+            onClick: item => {
+              this.setState({
+                editingIndex: item.spacesIndex,
+                showSpacePrivilegeEditor: true,
+              });
+            },
+          },
+          {
+            description: 'Delete these privileges',
+            icon: 'trash',
+            color: 'danger',
+            onClick: (item: TableRow) => {
+              const roleCopy = copyRole(this.props.role);
+              roleCopy.kibana.spaces.splice(item.spacesIndex, 1);
+              this.props.onChange(roleCopy);
+            },
+          },
+        ],
+      },
+    ];
+
+    const table = <EuiInMemoryTable columns={columns} items={rows} />;
+
+    if (items.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          iconType="lock"
+          title={<h2>No access to Kibana</h2>}
+          titleSize={'s'}
+          body={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="foo"
+                  defaultMessage="This role does not grant any access to Kibana."
+                />
+              </p>
+            </Fragment>
+          }
+          actions={this.getAvailablePrivilegeButtons()}
+        />
+      );
+    }
+
+    return (
+      <div>
+        {table}
+        {<EuiSpacer />}
+        {this.getAvailablePrivilegeButtons()}
+        <EuiSpacer />
+        <EuiAccordion id="privilegeMatrix" buttonContent={'Show privilege matrix'}>
+          <PrivilegeMatrix
+            role={this.props.role}
+            effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.props.role)}
+            privilegeDefinition={this.props.privilegeDefinition}
+            features={this.props.features}
+            spaces={this.getDisplaySpaces()}
+          />
+        </EuiAccordion>
+      </div>
     );
   };
 
-  private getSpaceForms = (unassignedSpaces: Space[]) => {
-    if (!this.props.editable || !this.state.showSpacePrivilegeEditor) {
+  private getAvailablePrivilegeButtons = () => {
+    const hasAvailableSpaces = this.getAvailableSpaces().length > 0;
+
+    if (!hasAvailableSpaces) {
       return null;
     }
 
-    const editing = Boolean(this.state.editingSpaceId);
-    const title = editing ? `Edit space privilege` : `New space privilege`;
-
     return (
-      <EuiOverlayMask>
-        <EuiFlyout onClose={this.closeFlyout} size="s">
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h1>{title}</h1>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <PrivilegeSpaceForm
-              mode={editing ? 'edit' : 'create'}
-              hasCustomizedGlobalPrivileges={this.state.isCustomizingGlobalPrivileges}
-              spaceId={this.state.editingSpaceId}
-              spaces={editing ? this.props.spaces : unassignedSpaces}
-              effectivePrivileges={this.props.effectivePrivileges}
-              privilegeDefinition={this.props.privilegeDefinition}
-              validator={this.props.validator}
-              role={this.props.role}
-              features={this.props.features}
-              onChange={this.onPrivilegeSpaceFormChange}
-              onDelete={() => null}
-            />
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
-                  Close
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.onSaveClick} fill>
-                  Save
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      </EuiOverlayMask>
+      <div>
+        <EuiButton color="primary" onClick={this.addSpacePrivilege} iconType={'spacesApp'}>
+          Add a privilege
+        </EuiButton>
+        <EuiSpacer size={'s'} />
+        <EuiText color={'subdued'} size={'s'}>
+          <FormattedMessage
+            id="foo"
+            defaultMessage="Customize by existing spaces or groups of existing spaces."
+          />
+        </EuiText>
+      </div>
     );
   };
 
-  private closeFlyout = () => {
-    this.setState({
-      showSpacePrivilegeEditor: false,
-    });
+  private getDisplaySpaces = () => {
+    return [this.globalSpaceEntry, ...this.props.spaces];
   };
 
-  private onEditSpacePrivileges = (spaceId: string) => {
-    this.setState({
-      showSpacePrivilegeEditor: true,
-      editingSpaceId: spaceId,
-      role: copyRole(this.props.role),
-    });
+  private getAvailableSpaces = () => {
+    const { spaces: spacePrivileges } = this.props.role.kibana;
+
+    const displaySpaces = this.getDisplaySpaces();
+
+    const assignedSpaces: Space[] = _.uniq(spacePrivileges.flatMap(entry => entry.spaces))
+      .map(spaceId => displaySpaces.find(s => s.id === spaceId))
+      .filter(Boolean) as Space[];
+
+    return _.difference([this.globalSpaceEntry, ...this.props.spaces], assignedSpaces) as Space[];
   };
 
-  private onDeleteSpacePrivileges = (spaceId: string) => {
-    const role = copyRole(this.props.role);
-    delete role.kibana.space[spaceId];
-    this.props.onChange(role);
+  private locateGlobalPrivilege = () => {
+    const { spaces: spacePrivileges } = this.props.role.kibana;
+    return (
+      spacePrivileges.find(privileges => privileges.spaces.includes('*')) || {
+        spaces: ['*'],
+        minimum: [],
+        feature: {},
+      }
+    );
   };
 
-  private onPrivilegeSpaceFormChange = (role: Role) => {
-    this.setState({
-      role,
-    });
-  };
-
-  private onSaveClick = () => {
-    if (this.state.role) {
-      this.props.onChange(this.state.role);
-    }
-    this.setState({
-      showSpacePrivilegeEditor: false,
+  private getSortedPrivileges = () => {
+    const { spaces: spacePrivileges } = this.props.role.kibana;
+    return spacePrivileges.sort((priv1, priv2) => {
+      return priv1.spaces.includes('*') ? -1 : priv1.spaces.includes('*') ? 1 : 0;
     });
   };
 
   private addSpacePrivilege = () => {
     this.setState({
-      editingSpaceId: null,
       showSpacePrivilegeEditor: true,
+      editingIndex: -1,
     });
   };
 
-  private onKibanaBasePrivilegeChange = (privilege: string) => {
-    const role = copyRole(this.props.role);
-
-    // Remove base privilege value
-    role.kibana.global.minimum = [];
-
-    if (privilege !== NO_PRIVILEGE_VALUE && privilege !== 'custom') {
-      role.kibana.global.minimum = [privilege];
-    }
-
-    this.setState({
-      isCustomizingGlobalPrivileges: privilege === 'custom',
-    });
-
+  private onSpacesPrivilegeChange = (role: Role) => {
+    this.setState({ showSpacePrivilegeEditor: false, editingIndex: -1 });
     this.props.onChange(role);
   };
 
-  private onGlobalFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
-    const role = copyRole(this.props.role);
-    role.kibana.global.feature[featureId] = [...privileges];
-    this.props.onChange(role);
+  private onCancelEditPrivileges = () => {
+    this.setState({ showSpacePrivilegeEditor: false });
   };
-
-  private getUnassignedSpaces() {
-    const assignedSpaceIds = Object.keys(this.props.role.kibana.space);
-    return this.props.spaces.filter(space => !assignedSpaceIds.includes(space.id));
-  }
 }
 
 export const SpaceAwarePrivilegeForm = injectI18n(SpaceAwarePrivilegeFormUI);
