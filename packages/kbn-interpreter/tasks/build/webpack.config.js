@@ -36,6 +36,7 @@ module.exports = function ({ sourceMaps }, { watch }) {
     entry: {
       'types/all': resolve(PLUGIN_SOURCE_DIR, 'types/register.js'),
       'functions/browser/all': resolve(PLUGIN_SOURCE_DIR, 'functions/browser/register.js'),
+      'functions/browser/common': resolve(PLUGIN_SOURCE_DIR, 'functions/common/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually
