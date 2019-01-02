@@ -10,7 +10,7 @@
  * React component for a checkbox element to toggle charts display.
  */
 import React, { Component } from 'react';
-
+import { injectI18n } from '@kbn/i18n/react';
 import {
   EuiCheckbox
 } from '@elastic/eui';
@@ -41,10 +41,16 @@ class CheckboxShowCharts extends Component {
   };
 
   render() {
+    const { intl } = this.props;
     return (
       <EuiCheckbox
         id={makeId()}
-        label="Show charts"
+        label={
+          intl.formatMessage({
+            id: 'xpack.ml.controls.checkboxShowChartsLabel',
+            defaultMessage: 'Show charts'
+          })
+        }
         checked={this.state.checked}
         onChange={this.onChange}
       />
@@ -52,4 +58,5 @@ class CheckboxShowCharts extends Component {
   }
 }
 
-export { CheckboxShowCharts };
+const withIntl = injectI18n(CheckboxShowCharts);
+export { withIntl as CheckboxShowCharts };

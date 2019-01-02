@@ -12,12 +12,14 @@ import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { SelectSeverity } from './select_severity';
+import { SelectSeverity, getSeverityOptions } from './select_severity';
 
 module.service('mlSelectSeverityService', function (Private) {
   const stateFactory = Private(stateFactoryProvider);
+  const warningSeverity = getSeverityOptions()[0];
+
   this.state = stateFactory('mlSelectSeverity', {
-    threshold: { display: 'warning', val: 0 }
+    threshold: { display: warningSeverity.display, val: warningSeverity.val }
   });
 })
   .directive('mlSelectSeverity', function ($injector) {

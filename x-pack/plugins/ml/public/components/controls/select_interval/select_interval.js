@@ -11,26 +11,42 @@
  */
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiSelect
 } from '@elastic/eui';
 
 
-const OPTIONS = [
-  { value: 'auto', text: 'Auto' },
-  { value: 'hour', text: '1 hour' },
-  { value: 'day', text: '1 day' },
-  { value: 'second', text: 'Show all' }
-];
+const getIntervalOptions = () => {
+  const auto = i18n.translate('xpack.ml.controls.selectInterval.auto', {
+    defaultMessage: 'Auto',
+  });
+  const oneHour = i18n.translate('xpack.ml.controls.selectInterval.oneHour', {
+    defaultMessage: '1 Hour',
+  });
+  const oneDay = i18n.translate('xpack.ml.controls.selectInterval.oneDay', {
+    defaultMessage: '1 Day',
+  });
+  const showAll = i18n.translate('xpack.ml.controls.selectInterval.showAll', {
+    defaultMessage: 'Show all',
+  });
+
+  return [
+    { value: 'auto', text: auto },
+    { value: 'hour', text: oneHour },
+    { value: 'day', text: oneDay },
+    { value: 'second', text: showAll }
+  ];
+};
 
 function optionValueToInterval(value) {
   // Builds the corresponding interval object with the required display and val properties
   // from the specified value.
-  const option = OPTIONS.find(opt => (opt.value === value));
+  const option = getIntervalOptions().find(opt => (opt.value === value));
 
   // Default to auto if supplied value doesn't map to one of the options.
-  let interval = OPTIONS[0];
+  let interval = getIntervalOptions()[0];
   if (option !== undefined) {
     interval = { display: option.text, val: option.value };
   }
@@ -66,7 +82,7 @@ class SelectInterval extends Component {
   render() {
     return (
       <EuiSelect
-        options={OPTIONS}
+        options={getIntervalOptions()}
         className="ml-select-interval"
         value={this.state.value}
         onChange={this.onChange}
@@ -75,4 +91,4 @@ class SelectInterval extends Component {
   }
 }
 
-export { SelectInterval };
+export { SelectInterval, getIntervalOptions };

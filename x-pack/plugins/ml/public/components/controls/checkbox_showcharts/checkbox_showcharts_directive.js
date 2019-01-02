@@ -12,6 +12,8 @@ import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { injectI18nProvider } from '@kbn/i18n/react';
+
 import { CheckboxShowCharts } from './checkbox_showcharts';
 
 module.service('mlCheckboxShowChartsService', function (Private) {
@@ -25,7 +27,7 @@ module.service('mlCheckboxShowChartsService', function (Private) {
     const mlCheckboxShowChartsService = $injector.get('mlCheckboxShowChartsService');
 
     return reactDirective(
-      CheckboxShowCharts,
+      injectI18nProvider(CheckboxShowCharts),
       undefined,
       { restrict: 'E' },
       { mlCheckboxShowChartsService }

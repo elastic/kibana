@@ -12,12 +12,13 @@ import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { SelectInterval } from './select_interval';
+import { SelectInterval, getIntervalOptions } from './select_interval';
 
 module.service('mlSelectIntervalService', function (Private) {
   const stateFactory = Private(stateFactoryProvider);
+  const autoInterval = getIntervalOptions()[0];
   this.state = stateFactory('mlSelectInterval', {
-    interval: { display: 'Auto', val: 'auto' }
+    interval: { display: autoInterval.text, val: autoInterval.value }
   });
 })
   .directive('mlSelectInterval', function ($injector) {

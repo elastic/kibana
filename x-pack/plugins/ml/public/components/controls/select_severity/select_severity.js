@@ -12,6 +12,8 @@
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiHealth,
@@ -30,20 +32,34 @@ const optionsMap = {
   'critical': 75,
 };
 
-const SEVERITY_OPTIONS = [
-  { val: 0, display: 'warning', color: getSeverityColor(0) },
-  { val: 25, display: 'minor', color: getSeverityColor(25) },
-  { val: 50, display: 'major', color: getSeverityColor(50) },
-  { val: 75, display: 'critical', color: getSeverityColor(75) },
-];
+const getSeverityOptions = () => {
+  const warning = i18n.translate('xpack.ml.controls.selectSeverity.warning', {
+    defaultMessage: 'warning',
+  });
+  const minor = i18n.translate('xpack.ml.controls.selectSeverity.minor', {
+    defaultMessage: 'minor',
+  });
+  const major = i18n.translate('xpack.ml.controls.selectSeverity.major', {
+    defaultMessage: 'major',
+  });
+  const critical = i18n.translate('xpack.ml.controls.selectSeverity.critical', {
+    defaultMessage: 'critical',
+  });
+  return [
+    { val: 0, display: warning, color: getSeverityColor(0) },
+    { val: 25, display: minor, color: getSeverityColor(25) },
+    { val: 50, display: major, color: getSeverityColor(50) },
+    { val: 75, display: critical, color: getSeverityColor(75) },
+  ];
+};
 
 function optionValueToThreshold(value) {
   // Get corresponding threshold object with required display and val properties from the specified value.
-  let threshold = SEVERITY_OPTIONS.find(opt => (opt.val === value));
+  let threshold = getSeverityOptions().find(opt => (opt.val === value));
 
   // Default to warning if supplied value doesn't map to one of the options.
   if (threshold === undefined) {
-    threshold = SEVERITY_OPTIONS[0];
+    threshold = getSeverityOptions()[0];
   }
 
   return threshold;
@@ -59,7 +75,7 @@ class SelectSeverity extends Component {
     }
 
     this.state = {
-      valueDisplay: SEVERITY_OPTIONS[0].display,
+      valueDisplay: getSeverityOptions()[0].display,
     };
   }
 
@@ -70,7 +86,7 @@ class SelectSeverity extends Component {
       const thresholdValue = _.get(thresholdState, 'val', 0);
       const threshold = optionValueToThreshold(thresholdValue);
       // set initial selected option equal to threshold value
-      const selectedOption = SEVERITY_OPTIONS.find(opt => (opt.val === threshold.val));
+      const selectedOption = getSeverityOptions().find(opt => (opt.val === threshold.val));
       this.mlSelectSeverityService.state.set('threshold', threshold);
       this.setState({ valueDisplay: selectedOption.display, });
     }
@@ -90,7 +106,7 @@ class SelectSeverity extends Component {
   }
 
   getOptions = () =>
-    SEVERITY_OPTIONS.map(({ color, display, val }) => ({
+    getSeverityOptions().map(({ color, display, val }) => ({
       value: display,
       inputDisplay: (
         <Fragment>
@@ -106,7 +122,13 @@ class SelectSeverity extends Component {
           </EuiHealth>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            <p className="euiTextColor--subdued">{`score ${val} and above`}</p>
+            <p className="euiTextColor--subdued">
+              <FormattedMessage
+                id="xpack.ml.controls.selectSeverity.scoreDetailsDropDownDescription"
+                defaultMessage="score {score} and above"
+                values={{ score: val }}
+              />
+            </p>
           </EuiText>
         </Fragment>
       ),
@@ -140,4 +162,4 @@ SelectSeverity.defaultProps = {
   classNames: ''
 };
 
-export { SelectSeverity };
+export { SelectSeverity, getSeverityOptions };
