@@ -33,11 +33,30 @@ export {
 } from './meta_filter';
 
 // The actual filter types
-export { CustomFilter } from './custom_filter';
-export { ExistsFilter } from './exists_filter';
-export { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
-export { GeoPolygonFilter } from './geo_polygon_filter';
-export { PhraseFilter } from './phrase_filter';
-export { PhrasesFilter } from './phrases_filter';
-export { QueryFilter } from './query_filter';
-export { RangeFilter } from './range_filter';
+import { CustomFilter } from './custom_filter';
+import { ExistsFilter } from './exists_filter';
+import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
+import { GeoPolygonFilter } from './geo_polygon_filter';
+import { PhraseFilter } from './phrase_filter';
+import { PhrasesFilter } from './phrases_filter';
+import { QueryFilter } from './query_filter';
+import { RangeFilter } from './range_filter';
+export {
+  CustomFilter,
+  ExistsFilter,
+  GeoBoundingBoxFilter,
+  GeoPolygonFilter,
+  PhraseFilter,
+  PhrasesFilter,
+  QueryFilter,
+  RangeFilter,
+};
+
+// Any filter associated with a field (used in the filter bar/editor)
+export type FieldFilter =
+  | ExistsFilter
+  | GeoBoundingBoxFilter
+  | GeoPolygonFilter
+  | PhraseFilter
+  | PhrasesFilter
+  | RangeFilter;

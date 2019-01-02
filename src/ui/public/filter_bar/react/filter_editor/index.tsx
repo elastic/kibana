@@ -20,8 +20,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
-  EuiComboBoxOptionProps,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,209 +27,79 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { noop } from 'lodash';
+import {
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+} from '@kbn/es-query';
+import { get } from 'lodash';
 import React, { Component } from 'react';
-import { MetaFilter } from '../../filters';
-
-const fieldOptions = [
-  {
-    label: 'Fields',
-    isGroupLabelOption: true,
-  },
-  {
-    label: 'field_1',
-  },
-  {
-    label: 'field_2',
-  },
-  {
-    label: 'field_3',
-  },
-  {
-    label: 'field_4',
-  },
-];
-const operatorOptions = [
-  {
-    label: 'Operators',
-    isGroupLabelOption: true,
-  },
-  {
-    label: 'IS',
-  },
-  {
-    label: 'IS NOT',
-  },
-  {
-    label: 'IS ONE OF',
-  },
-  {
-    label: 'EXISTS',
-  },
-];
-const valueOptions = [
-  {
-    label: 'Values',
-    isGroupLabelOption: true,
-  },
-  {
-    label: 'Value 1',
-  },
-  {
-    label: 'Value 2',
-  },
-  {
-    label: 'Value 3',
-  },
-  {
-    label: 'Value 4',
-  },
-];
+import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { FieldFilter, MetaFilter } from '../../filters';
+import { FieldInput } from './field_input';
+import {
+  getFieldFromFilter,
+  getFilterableFields,
+  getFilterParams,
+  getIndexPatternFromFilter,
+  getOperatorFromFilter,
+} from './lib/filter_editor_utils';
+import { Operator } from './lib/filter_operators';
+import { OperatorInput } from './operator_input';
+import { PhraseValueInput } from './phrase_value_input';
 
 interface Props {
   filter: MetaFilter;
+  indexPatterns: IndexPattern[];
+  onSubmit: (filter: MetaFilter) => void;
+  onCancel: () => void;
 }
 
 interface State {
-  selectedField: EuiComboBoxOptionProps[];
-  selectedOperand: EuiComboBoxOptionProps[];
-  selectedValues: EuiComboBoxOptionProps[];
-  valueOptions: EuiComboBoxOptionProps[];
-  operatorOptions: EuiComboBoxOptionProps[];
-  fieldOptions: EuiComboBoxOptionProps[];
+  selectedField?: IndexPatternField;
+  selectedOperator?: Operator;
+  params: any;
   useCustomLabel: boolean;
   customLabel: string | null;
 }
 
 export class FilterEditor extends Component<Props, State> {
-  public state = {
-    fieldOptions,
-    operatorOptions,
-    valueOptions,
-    selectedField: [],
-    selectedOperand: [],
-    selectedValues: [],
-    useCustomLabel: false,
-    customLabel: null,
-  };
-
-  public onFieldChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
-    // We should only get back either 0 or 1 options.
-    this.setState({
-      selectedField: selectedOptions,
-    });
-  };
-
-  public onOperandChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
-    // We should only get back either 0 or 1 options.
-    this.setState({
-      selectedOperand: selectedOptions,
-    });
-  };
-
-  public onValuesChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
-    this.setState({
-      selectedValues: selectedOptions,
-    });
-  };
-
-  public onCustomLabelSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      useCustomLabel: event.target.checked,
-    });
-  };
-
-  public onFieldSearchChange = (searchValue: string) => {
-    this.setState({
-      fieldOptions: fieldOptions.filter(option =>
-        option.label.toLowerCase().includes(searchValue.toLowerCase())
-      ),
-    });
-  };
-
-  public onOperandSearchChange = (searchValue: string) => {
-    this.setState({
-      operatorOptions: operatorOptions.filter(option =>
-        option.label.toLowerCase().includes(searchValue.toLowerCase())
-      ),
-    });
-  };
-
-  public onValuesSearchChange = (searchValue: string) => {
-    this.setState({
-      valueOptions: valueOptions.filter(option =>
-        option.label.toLowerCase().includes(searchValue.toLowerCase())
-      ),
-    });
-  };
-
-  public resetForm = () => {
-    this.setState({
-      selectedField: [],
-      selectedOperand: [],
-      selectedValues: [],
-      useCustomLabel: false,
-      customLabel: null,
-    });
-  };
+  public constructor(props: Props) {
+    super(props);
+    this.state = {
+      selectedField: this.getSelectedField(),
+      selectedOperator: this.getSelectedOperator(),
+      params: getFilterParams(props.filter),
+      useCustomLabel: props.filter.meta.alias !== null,
+      customLabel: props.filter.meta.alias,
+    };
+  }
 
   public render() {
     return (
       <div>
         <EuiFlexGroup>
           <EuiFlexItem style={{ maxWidth: '188px' }}>
-            <EuiFormRow label="Field">
-              <EuiComboBox
-                placeholder={
-                  this.state.selectedOperand.length < 1 ? 'Start here' : 'Select a field'
-                }
-                options={this.state.fieldOptions}
-                selectedOptions={this.state.selectedField}
-                onChange={this.onFieldChange}
-                onSearchChange={this.onFieldSearchChange}
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
-              />
-            </EuiFormRow>
+            <FieldInput
+              options={this.getFieldOptions()}
+              value={this.state.selectedField}
+              onChange={this.onFieldChange}
+            />
           </EuiFlexItem>
           <EuiFlexItem style={{ maxWidth: '188px' }}>
-            <EuiFormRow label="Operand">
-              <EuiComboBox
-                placeholder={
-                  this.state.selectedField.length < 1 ? 'Select a field first' : 'Select an operand'
-                }
-                isDisabled={this.state.selectedField.length < 1}
-                options={this.state.operatorOptions}
-                selectedOptions={this.state.selectedOperand}
-                onChange={this.onOperandChange}
-                onSearchChange={this.onOperandSearchChange}
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
-              />
-            </EuiFormRow>
+            <OperatorInput
+              field={this.state.selectedField}
+              value={this.state.selectedOperator}
+              onChange={this.onOperatorChange}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
 
-        <div>
-          <EuiFormRow label="Value(s)">
-            <EuiComboBox
-              placeholder={
-                this.state.selectedField.length < 1 && this.state.selectedOperand.length < 1
-                  ? 'Waiting on previous selections'
-                  : 'Select one or more values'
-              }
-              isDisabled={
-                this.state.selectedField.length < 1 || this.state.selectedOperand.length < 1
-              }
-              options={this.state.valueOptions}
-              selectedOptions={this.state.selectedValues}
-              onChange={this.onValuesChange}
-              onSearchChange={this.onValuesSearchChange}
-            />
-          </EuiFormRow>
-        </div>
+        <div>{this.renderParamsEditor()}</div>
 
         <EuiSpacer size="m" />
 
@@ -245,7 +113,10 @@ export class FilterEditor extends Component<Props, State> {
           <div>
             <EuiSpacer size="m" />
             <EuiFormRow label="Custom label">
-              <EuiFieldText value={`${this.state.customLabel}`} onChange={noop} />
+              <EuiFieldText
+                value={`${this.state.customLabel}`}
+                onChange={this.onCustomLabelChange}
+              />
             </EuiFormRow>
           </div>
         )}
@@ -254,25 +125,122 @@ export class FilterEditor extends Component<Props, State> {
 
         <EuiFlexGroup direction="rowReverse" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton isDisabled={this.state.selectedValues.length < 1} fill onClick={noop}>
-              Add
+            <EuiButton fill onClick={this.onSubmit}>
+              Save
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" onClick={this.props.filter ? noop : this.resetForm}>
-              {this.props.filter ? 'Cancel' : 'Reset form'}
+            <EuiButtonEmpty flush="right" onClick={this.props.onCancel}>
+              Cancel
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            {this.props.filter && (
-              <EuiButtonEmpty flush="left" color="danger">
-                Delete
-              </EuiButtonEmpty>
-            )}
-          </EuiFlexItem>
         </EuiFlexGroup>
       </div>
     );
+  }
+
+  private getFieldOptions() {
+    return getFilterableFields(this.props.indexPatterns);
+  }
+
+  private getSelectedIndexPattern() {
+    return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
+  }
+
+  private getSelectedField() {
+    const indexPattern = this.getSelectedIndexPattern();
+    return indexPattern && getFieldFromFilter(this.props.filter as FieldFilter, indexPattern);
+  }
+
+  private getSelectedOperator() {
+    return getOperatorFromFilter(this.props.filter);
+  }
+
+  private onFieldChange = (selectedField?: IndexPatternField) => {
+    const selectedOperator = undefined;
+    const params = undefined;
+    this.setState({ selectedField, selectedOperator, params });
+  };
+
+  private onOperatorChange = (selectedOperator?: Operator) => {
+    // Only reset params when the operator type changes
+    const params =
+      get(this.state.selectedOperator, 'type') === get(selectedOperator, 'type')
+        ? this.state.params
+        : undefined;
+    this.setState({ selectedOperator, params });
+  };
+
+  private onCustomLabelSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      useCustomLabel: event.target.checked,
+      customLabel: event.target.checked ? '' : null,
+    });
+  };
+
+  private onCustomLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      customLabel: event.target.value,
+    });
+  };
+
+  private onParamsChange = (params: any) => {
+    this.setState({ params });
+  };
+
+  private onSubmit = () => {
+    const filter: MetaFilter | null = this.buildFilter();
+    if (filter === null) {
+      throw new Error('Cannot call onSubmit with empty filter');
+    }
+    filter.meta.negate = get(this.state.selectedOperator, 'negate') || false;
+    filter.meta.alias = this.state.useCustomLabel ? this.state.customLabel : null;
+    filter.$state = {
+      store: this.props.filter.$state.store,
+    };
+    this.props.onSubmit(filter);
+  };
+
+  private buildFilter(): MetaFilter | null {
+    const { selectedField, selectedOperator, params } = this.state;
+    const indexPattern = this.getSelectedIndexPattern();
+    if (!selectedField || !selectedOperator || !indexPattern) {
+      return null;
+    }
+    switch (selectedOperator.type) {
+      case 'phrase':
+        return buildPhraseFilter(selectedField, params, indexPattern);
+      case 'phrases':
+        return buildPhrasesFilter(selectedField, params.phrases, indexPattern);
+      case 'range':
+        const newParams = { gte: params.range.from, lt: params.range.to };
+        return buildRangeFilter(selectedField, newParams, indexPattern);
+      case 'exists':
+        return buildExistsFilter(selectedField, indexPattern);
+      case 'query':
+        return buildQueryFilter(params.query, indexPattern.id);
+      default:
+        throw new Error(`Unknown operator type: ${selectedOperator.type}`);
+    }
+  }
+
+  private renderParamsEditor() {
+    const indexPattern = this.getSelectedIndexPattern();
+    if (!indexPattern || !this.state.selectedOperator) {
+      return '';
+    }
+
+    switch (this.state.selectedOperator.type) {
+      case 'phrase':
+        return (
+          <PhraseValueInput
+            indexPattern={indexPattern}
+            field={this.state.selectedField}
+            value={this.state.params}
+            onChange={this.onParamsChange}
+          />
+        );
+    }
   }
 }

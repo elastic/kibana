@@ -140,6 +140,7 @@ export class SearchBar extends Component<Props, State> {
               className="globalFilterGroup__filterBar"
               filters={this.props.filters}
               onFiltersUpdated={this.props.onFiltersUpdated}
+              indexPatterns={this.props.indexPatterns}
             />
           </div>
         </div>

@@ -20,17 +20,23 @@
 import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { isFilterPinned, MetaFilter } from '../filters';
+import { IndexPattern } from 'ui/index_patterns';
+import {
+  isFilterPinned,
+  MetaFilter,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  toggleFilterPinned,
+} from '../filters';
 import { getFilterDisplayText } from '../filters/filter_views';
 import { FilterEditor } from './filter_editor';
 
 interface Props {
   filter: MetaFilter;
+  indexPatterns: IndexPattern[];
   className?: string;
-  onTogglePinned: (filter: MetaFilter) => void;
-  onToggleNegated: (filter: MetaFilter) => void;
-  onToggleDisabled: (filter: MetaFilter) => void;
-  onRemove: (filter: MetaFilter) => void;
+  onUpdate: (filter: MetaFilter) => void;
+  onRemove: () => void;
 }
 
 interface State {
@@ -61,7 +67,7 @@ export class FilterItem extends Component<Props, State> {
         id={'foo'}
         className={classes}
         title={'foo'}
-        iconOnClick={() => this.props.onRemove(filter)}
+        iconOnClick={() => this.props.onRemove()}
         iconOnClickAriaLabel={`Delete filter`}
         iconType="cross"
         // @ts-ignore
@@ -87,7 +93,7 @@ export class FilterItem extends Component<Props, State> {
             icon: 'pin',
             onClick: () => {
               this.closePopover();
-              this.props.onTogglePinned(filter);
+              this.onTogglePinned();
             },
           },
           {
@@ -100,7 +106,7 @@ export class FilterItem extends Component<Props, State> {
             icon: `${negate ? 'plusInCircle' : 'minusInCircle'}`,
             onClick: () => {
               this.closePopover();
-              this.props.onToggleNegated(filter);
+              this.onToggleNegated();
             },
           },
           {
@@ -108,7 +114,7 @@ export class FilterItem extends Component<Props, State> {
             icon: `${disabled ? 'eye' : 'eyeClosed'}`,
             onClick: () => {
               this.closePopover();
-              this.props.onToggleDisabled(filter);
+              this.onToggleDisabled();
             },
           },
           {
@@ -116,7 +122,7 @@ export class FilterItem extends Component<Props, State> {
             icon: 'trash',
             onClick: () => {
               this.closePopover();
-              this.props.onRemove(filter);
+              this.props.onRemove();
             },
           },
         ],
@@ -124,9 +130,15 @@ export class FilterItem extends Component<Props, State> {
       {
         id: 1,
         width: 400,
+        title: 'Edit filter',
         content: (
           <div style={{ padding: 16 }}>
-            <FilterEditor filter={filter} />
+            <FilterEditor
+              filter={filter}
+              indexPatterns={this.props.indexPatterns}
+              onSubmit={this.onSubmit}
+              onCancel={this.closePopover}
+            />
           </div>
         ),
       },
@@ -156,5 +168,25 @@ export class FilterItem extends Component<Props, State> {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
+  };
+
+  private onSubmit = (filter: MetaFilter) => {
+    this.closePopover();
+    this.props.onUpdate(filter);
+  };
+
+  private onTogglePinned = () => {
+    const filter = toggleFilterPinned(this.props.filter);
+    this.props.onUpdate(filter);
+  };
+
+  private onToggleNegated = () => {
+    const filter = toggleFilterNegated(this.props.filter);
+    this.props.onUpdate(filter);
+  };
+
+  private onToggleDisabled = () => {
+    const filter = toggleFilterDisabled(this.props.filter);
+    this.props.onUpdate(filter);
   };
 }

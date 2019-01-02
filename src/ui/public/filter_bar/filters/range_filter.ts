@@ -19,14 +19,16 @@
 
 import { FilterMeta, MetaFilter } from './meta_filter';
 
+export interface RangeFilterParams {
+  gt?: number | string;
+  gte?: number | string;
+  lte?: number | string;
+  lt?: number | string;
+}
+
 export type RangeFilterMeta = FilterMeta & {
   key: string; // The name of the field
-  params: {
-    gt?: number | string;
-    gte?: number | string;
-    lte?: number | string;
-    lt?: number | string;
-  };
+  params: RangeFilterParams;
 };
 
 export type RangeFilter = MetaFilter & {

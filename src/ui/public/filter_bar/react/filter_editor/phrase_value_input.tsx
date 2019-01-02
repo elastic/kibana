@@ -17,31 +17,31 @@
  * under the License.
  */
 
-/**
- * WARNING: these types are incomplete
- */
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import React, { Component } from 'react';
+import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
 
-export interface IndexPattern {
-  id: string;
-  fields: IndexPatternField[];
-  title: string;
+interface Props {
+  indexPattern?: IndexPattern;
+  field?: IndexPatternField;
+  value?: string;
+  onChange: (value: string) => void;
 }
 
-export interface IndexPatternField {
-  name: string;
-  type: string;
-  aggregatable: boolean;
-  filterable: boolean;
-}
+export class PhraseValueInput extends Component<Props> {
+  public render() {
+    return (
+      <EuiFormRow label="Value">
+        <EuiFieldText
+          placeholder="The value to match against the selected field"
+          value={this.props.value || ''}
+          onChange={this.onChange}
+        />
+      </EuiFormRow>
+    );
+  }
 
-export interface StaticIndexPatternField {
-  name: string;
-  type: string;
-  aggregatable: boolean;
-  searchable: boolean;
-}
-
-export interface StaticIndexPattern {
-  fields: StaticIndexPatternField[];
-  title: string;
+  private onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.onChange(e.target.value);
+  };
 }
