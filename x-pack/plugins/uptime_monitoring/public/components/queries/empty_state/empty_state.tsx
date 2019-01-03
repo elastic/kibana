@@ -51,7 +51,7 @@ export const EmptyState = ({
                     {
                       <EuiLink
                         target="_blank"
-                        href="https://www.elastic.co/guide/en/beats/heartbeat/6.5/configuring-howto-heartbeat.html"
+                        href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
                       >
                         Configure Heartbeat
                       </EuiLink>
