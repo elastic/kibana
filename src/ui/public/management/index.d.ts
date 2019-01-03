@@ -17,15 +17,15 @@
  * under the License.
  */
 
-export {
-  PAGE_TITLE_COMPONENT,
-  PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT,
-} from '../../../legacy/core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
-export {
-  registerSettingsComponent
-} from '../../../legacy/core_plugins/kibana/public/management/sections/settings/components/component_registry';
-export { Field } from '../../../legacy/core_plugins/kibana/public/management/sections/settings/components/field/field';
-export { management } from './sections_register';
-export { SidebarNav } from './components';
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
+declare module 'ui/management' {
+  export const PAGE_TITLE_COMPONENT: string;
+  export const PAGE_SUBTITLE_COMPONENT: string;
+  export const PAGE_FOOTER_COMPONENT: string;
+  export const SidebarNav: React.SFC<any>;
+  export function registerSettingsComponent(
+    id: string,
+    component: string | React.SFC<any>,
+    allowOverride: boolean
+  ): void;
+  export const management: any; // TODO - properly provide types
+}
