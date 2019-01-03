@@ -40,8 +40,11 @@ set in kibana.yml, make sure it is set to `chromium`.
 
 [NOTE]
 ============
-Some operating systems can't support Chromium usage. Check for Reporting
-support in your operating system in the Kibana support matrix.
+Reporting 7.0 uses a version of the Chromium headless browser that RHEL 6,
+CentOS 6.x, and other old versions of Linux derived from RHEL 6. This change
+effectively removes RHEL 6 OS server support from Kibana Reporting. Users with
+RHEL 6 must upgrade to RHEL 7 to use Kibana Reporting starting with version
+7.0.0 of the Elastic stack.
 ============
 
 [float]
