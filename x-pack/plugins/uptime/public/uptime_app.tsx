@@ -135,12 +135,12 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
               <EuiHeaderSection grow={true}>
                 <EuiHeaderSectionItem border="right">
                   <EuiHeaderLogo
-                    aria-label="Go to Uptime Monitoring home page"
+                    aria-label="Go to Uptime home page"
                     href="#/"
                     iconType="heartbeatApp"
-                    iconTitle="Uptime Monitoring"
+                    iconTitle="Uptime"
                   >
-                    Uptime Monitoring
+                    Uptime
                     <EuiIcon style={{ paddingLeft: '8px' }} size="xl" type="beaker" />
                   </EuiHeaderLogo>
                 </EuiHeaderSectionItem>
