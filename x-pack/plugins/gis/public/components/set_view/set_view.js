@@ -40,7 +40,7 @@ export class SetView  extends React.Component {
     });
   }
 
-  _renderNumberFormRow = ({ value, min, max, onChange, label }) => {
+  _renderNumberFormRow = ({ value, min, max, onChange, label, dataTestSubj }) => {
     const isInvalid = value === '' || value > max || value < min;
     const error = isInvalid ? `Must be between ${min} and ${max}` : null;
     return {
@@ -55,6 +55,7 @@ export class SetView  extends React.Component {
             value={value}
             onChange={onChange}
             isInvalid={isInvalid}
+            data-test-subj={dataTestSubj}
           />
         </EuiFormRow>
       )
@@ -80,7 +81,8 @@ export class SetView  extends React.Component {
       min: -90,
       max: 90,
       onChange: this._onLatChange,
-      label: 'latitude'
+      label: 'latitude',
+      dataTestSubj: 'latitudeInput',
     });
 
     const { isInvalid: isLonInvalid, component: lonFormRow } = this._renderNumberFormRow({
@@ -88,7 +90,8 @@ export class SetView  extends React.Component {
       min: -180,
       max: 180,
       onChange: this._onLonChange,
-      label: 'longitude'
+      label: 'longitude',
+      dataTestSubj: 'longitudeInput',
     });
 
     const { isInvalid: isZoomInvalid, component: zoomFormRow } = this._renderNumberFormRow({
@@ -96,7 +99,8 @@ export class SetView  extends React.Component {
       min: 0,
       max: 24,
       onChange: this._onZoomChange,
-      label: 'zoom'
+      label: 'zoom',
+      dataTestSubj: 'zoomInput',
     });
 
     return (
@@ -112,6 +116,7 @@ export class SetView  extends React.Component {
           <EuiButton
             disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
             onClick={this.onSubmit}
+            data-test-subj="submitViewButton"
           >
             Go
           </EuiButton>

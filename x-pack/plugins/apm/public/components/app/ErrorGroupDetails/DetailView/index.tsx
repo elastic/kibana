@@ -112,7 +112,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     {
       fieldName: ERROR_EXC_HANDLED,
       label: 'Handled',
-      val: get(error, ERROR_EXC_HANDLED, 'N/A'),
+      val: String(get(error, ERROR_EXC_HANDLED, 'N/A')),
       width: '25%'
     },
     {

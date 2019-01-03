@@ -639,6 +639,7 @@ module
       moveToAdvancedJobCreation(job);
     };
 
+    let lastEstimatedModelMemoryLimit = null;
     $scope.setModelMemoryLimit = function () {
       const formConfig = $scope.formConfig;
       ml.calculateModelMemoryLimit({
@@ -652,10 +653,32 @@ module
         latestMs: formConfig.end
       })
         .then((resp) => {
-          formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          // To avoid overwriting a possible custom set model memory limit,
+          // it only gets set to the estimation if the current limit is either
+          // the default value or the value of the previous estimation.
+          // That's our best guess if the value hasn't been customized.
+          // It doesn't get it if the user intentionally for whatever reason (re)set
+          // the value to either the default or pervious estimate.
+          // Because the string based limit could contain e.g. MB/Mb/mb
+          // all strings get lower cased for comparison.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
+          if (
+            currentModelMemoryLimit === defaultModelMemoryLimit ||
+            currentModelMemoryLimit === lastEstimatedModelMemoryLimit
+          ) {
+            formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          }
+          lastEstimatedModelMemoryLimit = resp.modelMemoryLimit.toLowerCase();
         })
         .catch(() => {
-          formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          // To avoid overwriting a possible custom set model memory limit,
+          // the limit is reset to the default only if the current limit matches
+          // the previous estimated limit.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          if (currentModelMemoryLimit === lastEstimatedModelMemoryLimit) {
+            formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          }
         });
     };
 
