@@ -5,36 +5,26 @@
  */
 
 import {
-  EuiAccordion,
-  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
-  EuiInMemoryTable,
-  // @ts-ignore
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import {
-  EffectivePrivilegesFactory,
-  PRIVILEGE_SOURCE,
-} from 'plugins/security/lib/effective_privileges';
+import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges';
 import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
-import { getSpaceColor } from 'x-pack/plugins/spaces/common';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { Role } from '../../../../../../../../common/model/role';
-import { copyRole } from '../../../../lib/copy_role';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
 import { PrivilegeSpaceForm } from './privilege_space_form';
+import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
   privilegeDefinition: PrivilegeDefinition;
@@ -156,211 +146,48 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   }
 
   private renderKibanaPrivileges = () => {
-    const { role, effectivePrivilegesFactory } = this.props;
+    const { role } = this.props;
 
-    const { global } = role.kibana;
+    const { spaces } = role.kibana;
 
-    const globalPrivilege = this.locateGlobalPrivilege();
-
-    const spacePrivileges = this.getSortedPrivileges();
-
-    const displaySpaces = this.getDisplaySpaces();
-
-    const effectivePrivileges = effectivePrivilegesFactory.getInstance(
-      this.state.role || this.props.role
-    );
-
-    const items: any[] = [];
-    if (global.minimum.length > 0 || Object.keys(global.feature).length > 0) {
-      items.push({
-        isGlobal: true,
-        spaces: [
-          {
-            id: '*',
-            name: 'Global (all spaces)',
-            initials: '*',
-            color: '#afafaf',
-          },
-        ],
-        headerSpaces: [
-          {
-            id: '*',
-            name: 'Global (all spaces)',
-            initials: '*',
-            color: '#afafaf',
-          },
-        ],
-        privileges: {
-          minimum: global.minimum,
-          feature: global.feature,
-        },
-      });
-    }
-
-    spacePrivileges.forEach((spacePrivs, spacesIndex) => {
-      items.push({
-        spacesIndex,
-        spaces: spacePrivs.spaces.map(spaceId => displaySpaces.find(space => space.id === spaceId)),
-        headerSpaces: spacePrivs.spaces
-          .filter((s, index, arr) => arr.length < 5 || index < 3)
-          .map(spaceId => displaySpaces.find(space => space.id === spaceId)),
-        privileges: {
-          minimum: spacePrivs.minimum,
-          feature: spacePrivs.feature,
-        },
-      });
-    });
-
-    interface TableRow {
-      spaces: Space[];
-      displaySpaces: Space[];
-      spacesIndex: number;
-      privileges: {
-        minimum: string[];
-        feature: {
-          [featureId: string]: string[];
-        };
-      };
-    }
-    const rows: TableRow[] = spacePrivileges.map((spacePrivs, spacesIndex) => {
-      const spaces = spacePrivs.spaces.map(spaceId =>
-        displaySpaces.find(space => space.id === spaceId)
-      ) as Space[];
-
-      return {
-        spaces,
-        displaySpaces: spaces.filter((s, index, arr) => arr.length < 5 || index < 3),
-        spacesIndex,
-        privileges: {
-          minimum: spacePrivs.minimum,
-          feature: spacePrivs.feature,
-        },
-      };
-    });
-
-    const columns = [
-      {
-        field: 'displaySpaces',
-        name: 'Spaces',
-        width: '60%',
-        render: (spaces: Space[], record: TableRow) => {
-          return (
-            <EuiFlexGroup wrap gutterSize={'s'}>
-              {spaces.map((space: Space) => (
-                <EuiFlexItem grow={false} key={space.id}>
-                  <EuiBadge color={getSpaceColor(space)}>{space.name}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-              {record.spaces.length > spaces.length ? (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={
-                      <ul>
-                        {record.spaces.map(s => (
-                          <li key={s.id}>{s.name}</li>
-                        ))}
-                      </ul>
-                    }
-                  >
-                    <EuiText>({record.spaces.length - spaces.length} more)</EuiText>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        field: 'privileges',
-        name: 'Privileges',
-        render: (privileges: any, record: any) => {
-          const actualPrivilege = effectivePrivileges.explainActualSpaceBasePrivilege(
-            record.spacesIndex
-          );
-
-          const hasCustomizations = Object.keys(privileges.feature).length > 0;
-
-          switch (actualPrivilege.source) {
-            case PRIVILEGE_SOURCE.NONE:
-            case PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY:
-              return (
-                <EuiText>
-                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                </EuiText>
-              );
-            case PRIVILEGE_SOURCE.EFFECTIVE:
-              return (
-                <EuiText>
-                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                </EuiText>
-              );
-            case PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED:
-              return (
-                <EuiText>
-                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                </EuiText>
-              );
-            default:
-              return <EuiText color="danger">{'**unknown**'}</EuiText>;
-          }
-        },
-      },
-      {
-        name: 'Actions',
-        actions: [
-          {
-            description: 'Edit these privileges',
-            icon: 'pencil',
-            onClick: item => {
-              this.setState({
-                editingIndex: item.spacesIndex,
-                showSpacePrivilegeEditor: true,
-              });
-            },
-          },
-          {
-            description: 'Delete these privileges',
-            icon: 'trash',
-            color: 'danger',
-            onClick: (item: TableRow) => {
-              const roleCopy = copyRole(this.props.role);
-              roleCopy.kibana.spaces.splice(item.spacesIndex, 1);
-              this.props.onChange(roleCopy);
-            },
-          },
-        ],
-      },
-    ];
-
-    const table = <EuiInMemoryTable columns={columns} items={rows} />;
-
-    if (items.length === 0) {
-      return (
-        <EuiEmptyPrompt
-          iconType="lock"
-          title={<h2>No access to Kibana</h2>}
-          titleSize={'s'}
-          body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="foo"
-                  defaultMessage="This role does not grant any access to Kibana."
-                />
-              </p>
-            </Fragment>
-          }
-          actions={this.getAvailablePrivilegeButtons(false)}
+    const hasAnyPrivileges = spaces.length > 0;
+    if (hasAnyPrivileges) {
+      const table = (
+        <PrivilegeSpaceTable
+          role={this.props.role}
+          displaySpaces={this.getDisplaySpaces()}
+          effectivePrivilegesFactory={this.props.effectivePrivilegesFactory}
+          onChange={this.props.onChange}
+          onEdit={this.onEditSpacesPrivileges}
         />
+      );
+
+      return (
+        <div>
+          {table}
+          {<EuiSpacer />}
+          {this.getAvailablePrivilegeButtons(true)}
+        </div>
       );
     }
 
     return (
-      <div>
-        {table}
-        {<EuiSpacer />}
-        {this.getAvailablePrivilegeButtons(true)}
-      </div>
+      <EuiEmptyPrompt
+        iconType="lock"
+        title={<h2>No access to Kibana</h2>}
+        titleSize={'s'}
+        body={
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="foo"
+                defaultMessage="This role does not grant any access to Kibana."
+              />
+            </p>
+          </Fragment>
+        }
+        actions={this.getAvailablePrivilegeButtons(false)}
+      />
     );
   };
 
@@ -439,24 +266,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     return _.difference([this.globalSpaceEntry, ...this.props.spaces], assignedSpaces) as Space[];
   };
 
-  private locateGlobalPrivilege = () => {
-    const { spaces: spacePrivileges } = this.props.role.kibana;
-    return (
-      spacePrivileges.find(privileges => privileges.spaces.includes('*')) || {
-        spaces: ['*'],
-        minimum: [],
-        feature: {},
-      }
-    );
-  };
-
-  private getSortedPrivileges = () => {
-    const { spaces: spacePrivileges } = this.props.role.kibana;
-    return spacePrivileges.sort((priv1, priv2) => {
-      return priv1.spaces.includes('*') ? -1 : priv1.spaces.includes('*') ? 1 : 0;
-    });
-  };
-
   private addSpacePrivilege = () => {
     this.setState({
       showSpacePrivilegeEditor: true,
@@ -467,6 +276,13 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   private onSpacesPrivilegeChange = (role: Role) => {
     this.setState({ showSpacePrivilegeEditor: false, editingIndex: -1 });
     this.props.onChange(role);
+  };
+
+  private onEditSpacesPrivileges = (spacesIndex: number) => {
+    this.setState({
+      editingIndex: spacesIndex,
+      showSpacePrivilegeEditor: true,
+    });
   };
 
   private onCancelEditPrivileges = () => {
