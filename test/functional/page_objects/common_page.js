@@ -48,10 +48,13 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
-    async navigateToUrl(appName, subUrl) {
+    async navigateToUrl(appName, subUrl, {
+      basePath = '',
+      loginIfPrompted = true
+    }) {
+      // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
-        ...config.get(['apps', appName]),
-        // Overwrite the default hash with the URL we really want.
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
         hash: `${appName}/${subUrl}`,
       };
 
@@ -59,7 +62,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
         await browser.get(appUrl);
-        const currentUrl = await this.loginIfPrompted(appUrl);
+        if (!loginIfPrompted) {
+          return;
+        }
+
+        const currentUrl = loginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
         if (!currentUrl.includes(appUrl)) {
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
         }
@@ -89,9 +96,13 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
 
-    navigateToApp(appName) {
+    navigateToApp(appName, basePath) {
       const self = this;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
+      const appConfig = config.get(['apps', appName]);
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        pathname: `${basePath || ''}${appConfig.pathname}`,
+        hash: appConfig.hash
+      });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
