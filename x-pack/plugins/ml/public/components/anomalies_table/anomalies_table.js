@@ -221,7 +221,10 @@ function getColumns(
         const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
         const categoryTabIndex = 1;
         return (
-          <EuiLink onClick={() => toggleRow(item, categoryTabIndex)}>
+          <EuiLink
+            className="mlAnomalyCategoryExamples__link"
+            onClick={() => toggleRow(item, categoryTabIndex)}
+          >
             {examples.map((example, i) => {
               return <span key={`example${i}`} className="category-example">{example}</span>;
             }
