@@ -16,7 +16,7 @@ import {
 } from 'src/server/saved_objects/service/saved_objects_client';
 
 // TODO: base on elasticsearch.requestTimeout?
-const LOCK_WINDOW = moment.duration(90, 'seconds');
+export const LOCK_WINDOW = moment.duration(90, 'seconds');
 
 export enum ReindexStep {
   created,
@@ -80,8 +80,8 @@ export const reindexServiceFactory = (
     const now = moment();
     if (reindexOp.attributes.locked) {
       const lockedTime = moment(reindexOp.attributes.locked);
-      // If the object has been locked for more than 90 seconds, assume the process that locked it died.
-      if (lockedTime.add(LOCK_WINDOW) > now) {
+      // If the object has been locked for more than the LOCK_WINDOW, assume the process that locked it died.
+      if (now.subtract(LOCK_WINDOW) < lockedTime) {
         throw Boom.conflict(
           `Another Kibana process is currently modifying this reindex operation.`
         );

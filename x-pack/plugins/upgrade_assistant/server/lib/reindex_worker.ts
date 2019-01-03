@@ -3,19 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEqual } from 'lodash';
-
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { Server } from 'src/server/kbn_server';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 
-import {
-  ReindexSavedObject,
-  ReindexService,
-  reindexServiceFactory,
-  ReindexStatus,
-  ReindexStep,
-} from './reindex_service';
+import { ReindexSavedObject, ReindexService, reindexServiceFactory } from './reindex_service';
 
 const POLL_INTERVAL = 30000;
 
