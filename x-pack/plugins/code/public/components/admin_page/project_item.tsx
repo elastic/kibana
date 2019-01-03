@@ -37,12 +37,14 @@ class CodeProjectItem extends React.PureComponent<{
   deleteRepo: (uri: string) => void;
   indexRepo: (uri: string) => void;
   initRepoCommand: (uri: string) => void;
+  openSettings: (uri: string, url: string) => void;
 }> {
   public render() {
     const { project, status } = this.props;
-    const { name, org, nextUpdateTimestamp, uri } = project;
+    const { name, org, nextUpdateTimestamp, uri, url } = project;
     const onClickDelete = () => this.props.deleteRepo(uri);
     const onClickIndex = () => this.props.indexRepo(uri);
+    const onClickSettings = () => this.props.openSettings(uri, url);
     let footer = null;
     if (!status || status.state === RepoState.READY) {
       footer = <Footer>LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}</Footer>;
@@ -82,7 +84,7 @@ class CodeProjectItem extends React.PureComponent<{
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <div className="code-project-button">
+                <div className="code-project-button" onClick={onClickSettings} role="button">
                   <EuiIcon type="gear" />
                   <EuiText size="xs" color="subdued">
                     Settings

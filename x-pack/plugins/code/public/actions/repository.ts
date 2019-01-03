@@ -6,8 +6,13 @@
 
 import { createAction } from 'redux-actions';
 
-import { Repository } from '../../model';
+import { Repository, RepositoryConfig } from '../../model';
 import { RepoConfigs } from '../../model/workspace';
+
+export interface RepoConfigPayload {
+  repoUri: string;
+  config: RepositoryConfig;
+}
 
 export const fetchRepos = createAction('FETCH REPOS');
 export const fetchReposSuccess = createAction<Repository[]>('FETCH REPOS SUCCESS');
@@ -35,3 +40,7 @@ export const fetchRepoConfigFailed = createAction<Error>('FETCH REPO CONFIGS FAI
 export const initRepoCommand = createAction<string>('INIT REPO CMD');
 
 export const gotoRepo = createAction<string>('GOTO REPO');
+
+export const switchLanguageServer = createAction<RepoConfigPayload>('SWITCH LANGUAGE SERVER');
+export const switchLanguageServerSuccess = createAction('SWITCH LANGUAGE SERVER SUCCESS');
+export const switchLanguageServerFailed = createAction<Error>('SWITCH LANGUAGE SERVER FAILED');
