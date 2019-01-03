@@ -84,7 +84,13 @@
                   value="{{job.id}}"
                   ng-model="$parent.$parent.selectedJobRadio"
                   ng-disabled='job.disabled' />
-                <span ng-class="{'disabled-job': job.disabled}" aria-label="Job ID {{job.id}}">{{job.id}}</span>
+                <span
+                  ng-class="{'disabled-job': job.disabled}"
+                  aria-label="{{ 'xpack.ml.jobSelectList.jobIdAriaLabel' | i18n: {
+                    defaultMessage: 'Job ID {jobId}',
+                    values: { jobId: job.id }
+                  } }}"
+                >{{job.id}}</span>
               </span>
             </div>
             <div>
@@ -93,7 +99,7 @@
               </div>
               <div
                 class='gant-bar'
-                aria-label="{{ 'xpack.ml.jobSelectList.applyButtonAriaLabel' | i18n: {
+                aria-label="{{ 'xpack.ml.jobSelectList.timeRangeAriaLabel' | i18n: {
                   defaultMessage: 'time range {jobTimeRangeLabel}',
                   values: { jobTimeRangeLabel: job.timeRange.label }
                 } }}"
