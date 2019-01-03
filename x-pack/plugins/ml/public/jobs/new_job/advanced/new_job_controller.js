@@ -181,11 +181,11 @@ module.controller('MlNewJob',
         {
           index: 2,
           title: i18n('xpack.ml.newJob.advanced.tabs.dataDescriptionLabel', { defaultMessage: 'Data Description' }),
-          hidden: false
+          hidden: true
         },
         { index: 3, title: i18n('xpack.ml.newJob.advanced.tabs.datafeedLabel', { defaultMessage: 'Datafeed' }) },
         { index: 4, title: i18n('xpack.ml.newJob.advanced.tabs.editJsonLabel', { defaultMessage: 'Edit JSON' }) },
-        { index: 5, title: i18n('xpack.ml.newJob.advanced.tabs.dataPreviewLabel', { defaultMessage: 'Data Preview' }), hidden: false },
+        { index: 5, title: i18n('xpack.ml.newJob.advanced.tabs.dataPreviewLabel', { defaultMessage: 'Data Preview' }), hidden: true },
       ],
       validation: {
         tabs: [
