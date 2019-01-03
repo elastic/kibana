@@ -22,6 +22,7 @@ import { Dispatch } from 'redux';
 import styled, { ThemeProvider } from 'styled-components';
 import chrome from 'ui/chrome';
 
+import { AppSettings } from '../../components/app_settings';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
@@ -105,13 +106,22 @@ const HomePageComponent = pure<Props>(({ theme }) => (
                   headers={headers}
                 />
               </Flyout>
-              <MyEuiFlexGroup justifyContent="flexEnd" alignItems="center">
-                <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                  <RangeDatePicker id="global" />
-                </EuiFlexItem>
-              </MyEuiFlexGroup>
               <PageHeader data-test-subj="pageHeader">
-                <Navigation data-test-subj="navigation" />
+                <HeaderFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
+                    <Navigation data-test-subj="navigation" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" wrap={false}>
+                      <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
+                        <RangeDatePicker id="global" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
+                        <AppSettings />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </HeaderFlexGroup>
               </PageHeader>
               <PageContent data-test-subj="pageContent">
                 <Pane data-test-subj="pane">
@@ -145,6 +155,6 @@ const mapStateToProps = (state: State) => ({
 
 export const HomePage = connect(mapStateToProps)(HomePageComponent);
 
-const MyEuiFlexGroup = styled(EuiFlexGroup)`
-  margin: 2px 0px;
+const HeaderFlexGroup = styled(EuiFlexGroup)`
+  margin-bottom: 2px;
 `;

@@ -21,25 +21,22 @@ interface FlyoutPaneProps {
   width: number;
 }
 
-/** SIDE EFFECT: This container has selectors that override EUI flyout styles  */
 const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
-  & > span > div {
-    .euiFlyout {
-      min-width: 150px !important;
-      width: ${({ width }) => `${width}px !important`};
-    }
-    .euiFlyoutHeader {
-      align-items: center !important;
-      display: flex !important;
-      flex-direction: row !important;
-      height: ${({ headerHeight }) => `${headerHeight}px !important`};
-      max-height: ${({ headerHeight }) => `${headerHeight}px !important`};
-      overflow: hidden;
-    }
-    .euiFlyoutBody {
-      overflow-y: hidden !important;
-      padding: 10px 24px 24px 24px !important;
-    }
+  .timeline-flyout {
+    min-width: 150px;
+    width: ${({ width }) => `${width}px`};
+  }
+  .timeline-flyout-header {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    height: ${({ headerHeight }) => `${headerHeight}px`};
+    max-height: ${({ headerHeight }) => `${headerHeight}px`};
+    overflow: hidden;
+  }
+  .timeline-flyout-body {
+    overflow-y: hidden;
+    padding: 10px 24px 24px 24px;
   }
 `;
 
@@ -63,6 +60,7 @@ export const FlyoutPane = pure<FlyoutPaneProps>(
       width={width}
     >
       <EuiFlyout
+        className="timeline-flyout"
         size="l"
         maxWidth="95%"
         onClose={onClose}
@@ -71,7 +69,7 @@ export const FlyoutPane = pure<FlyoutPaneProps>(
         hideCloseButton={true}
       >
         <ResizeHandle height={flyoutHeight} timelineId={timelineId} />
-        <EuiFlyoutHeader hasBorder>
+        <EuiFlyoutHeader hasBorder className="timeline-flyout-header">
           <FlyoutHeaderContainer>
             <WrappedCloseButton>
               <EuiToolTip content="Close">
@@ -85,7 +83,9 @@ export const FlyoutPane = pure<FlyoutPaneProps>(
             <FlyoutHeader timelineId={timelineId} />
           </FlyoutHeaderContainer>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody data-test-subj="flyoutChildren">{children}</EuiFlyoutBody>
+        <EuiFlyoutBody data-test-subj="flyoutChildren" className="timeline-flyout-body">
+          {children}
+        </EuiFlyoutBody>
       </EuiFlyout>
     </EuiFlyoutContainer>
   )
