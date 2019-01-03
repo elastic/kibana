@@ -130,7 +130,6 @@ module.controller('MlNewJob',
     $scope.mode = MODE.NEW;
     $scope.saveLock = false;
     $scope.indices = {};
-    $scope.types = {};
     $scope.fields = {};
     $scope.dateFields = {};
     $scope.catFields = {};
@@ -198,7 +197,6 @@ module.controller('MlNewJob',
       indexTextOk: false,
       fieldsUpToDate: false,
       indices: {},
-      types: {},
       isDatafeed: true,
       useDedicatedIndex: false,
       enableModelPlot: false,
@@ -214,7 +212,6 @@ module.controller('MlNewJob',
         scrollSizeText: '',
         scrollSizeDefault: 1000,
         indicesText: '',
-        typesText: '',
         scriptFields: [],
       },
       saveStatus: {
@@ -826,11 +823,6 @@ module.controller('MlNewJob',
           scrollSize = '';
         }
 
-        clear($scope.types);
-        _.each(datafeedConfig.types, (type) => {
-          $scope.types[type] = $scope.ui.types[type];
-        });
-
         clear($scope.indices);
         _.each(datafeedConfig.indices, (index) => {
           $scope.indices[index] = $scope.ui.indices[index];
@@ -847,8 +839,6 @@ module.controller('MlNewJob',
 
         $scope.ui.fieldsUpToDate = fieldsUpToDate;
 
-        const types = Array.isArray(datafeedConfig.types) ? datafeedConfig.types : [];
-
         $scope.ui.datafeed = {
           queryText: angular.toJson(datafeedConfig.query, true),
           queryDelayText: queryDelay,
@@ -858,7 +848,6 @@ module.controller('MlNewJob',
           scrollSizeText: scrollSize,
           scrollSizeDefault: scrollSizeDefault,
           indicesText,
-          typesText: types.join(','),
           scriptFields,
         };
 
@@ -978,22 +967,6 @@ module.controller('MlNewJob',
           indices = df.indicesText.split(',').map(i => i.trim());
         }
 
-        let types = [];
-        if (df.typesText) {
-          types = df.typesText.split(',');
-          for (let i = 0; i < types.length; i++) {
-            types[i] = types[i].trim();
-          }
-        }
-        // if the selected types is different to all types
-        // the user must have edited the json, so use the types object
-        // otherwise, the types object is the same as all types, so set
-        // types to an empty array
-        const typeKeys = Object.keys($scope.ui.types);
-        if (_.difference(typeKeys, types).length === 0) {
-          types = [];
-        }
-
         // create datafeedConfig if it doesn't already exist
         if (!$scope.job.datafeed_config) {
           $scope.job.datafeed_config = {};
@@ -1025,7 +998,6 @@ module.controller('MlNewJob',
         }
 
         config.indices = indices;
-        config.types = types;
       }
     }
 
@@ -1264,7 +1236,7 @@ module.controller('MlNewJob',
       });
     }
 
-    // using the selected indices and types, perform a search
+    // using the selected indices, perform a search
     // on the ES server and display the results in the Data preview tab
     function loadDataPreview() {
       createJSONText();

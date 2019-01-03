@@ -36,6 +36,7 @@ export function LayerControl(props) {
         <EuiButtonEmpty
           size="xs"
           onClick={toggleSetViewVisibility}
+          data-test-subj="toggleSetViewVisibilityButton"
         >
           Set view
         </EuiButtonEmpty>)}
