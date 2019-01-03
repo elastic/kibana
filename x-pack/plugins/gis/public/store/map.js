@@ -11,13 +11,14 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
+  ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
   PROMOTE_TEMPORARY_LAYERS,
   TOGGLE_LAYER_VISIBLE,
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
-  REPLACE_LAYERLIST,
   SET_TIME_FILTERS,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
@@ -82,15 +83,14 @@ const INITIAL_STATE = {
     refreshTimerLastTriggeredAt: null,
   },
   selectedLayerId: null,
-  layerList: []
+  layerList: [],
+  waitingForMapReadyLayerList: [],
 };
 
 export function map(state = INITIAL_STATE, action) {
   window._state = state;
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
-    case REPLACE_LAYERLIST:
-      return { ...state, layerList: [ ...action.layerList] };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:
@@ -182,6 +182,19 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state, layerList: [...state.layerList.filter(
           ({ id }) => id !== action.id)]
+      };
+    case ADD_WAITING_FOR_MAP_READY_LAYER:
+      return {
+        ...state,
+        waitingForMapReadyLayerList: [
+          ...state.waitingForMapReadyLayerList,
+          action.layer
+        ]
+      };
+    case CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST:
+      return {
+        ...state,
+        waitingForMapReadyLayerList: []
       };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:

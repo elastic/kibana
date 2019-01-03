@@ -16,20 +16,35 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 
   public async get(id: string): Promise<CMBeat | null> {
-    return await this.REST.get<CMBeat>(`/api/beats/agent/${id}`);
+    try {
+      return await this.REST.get<CMBeat>(`/api/beats/agent/${id}`);
+    } catch (e) {
+      return null;
+    }
   }
 
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
-    const beat = await this.REST.get<CMBeat>(`/api/beats/agent/unknown/${enrollmentToken}`);
-    return beat;
+    try {
+      return await this.REST.get<CMBeat>(`/api/beats/agent/unknown/${enrollmentToken}`);
+    } catch (e) {
+      return null;
+    }
   }
 
   public async getAll(ESQuery?: string): Promise<CMBeat[]> {
-    return (await this.REST.get<{ beats: CMBeat[] }>('/api/beats/agents/all', { ESQuery })).beats;
+    try {
+      return (await this.REST.get<{ beats: CMBeat[] }>('/api/beats/agents/all', { ESQuery })).beats;
+    } catch (e) {
+      return [];
+    }
   }
 
   public async getBeatsWithTag(tagId: string): Promise<CMBeat[]> {
-    return (await this.REST.get<{ beats: CMBeat[] }>(`/api/beats/agents/tag/${tagId}`)).beats;
+    try {
+      return (await this.REST.get<{ beats: CMBeat[] }>(`/api/beats/agents/tag/${tagId}`)).beats;
+    } catch (e) {
+      return [];
+    }
   }
 
   public async update(id: string, beatData: Partial<CMBeat>): Promise<boolean> {

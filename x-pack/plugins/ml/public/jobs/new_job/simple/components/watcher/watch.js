@@ -19,7 +19,6 @@ export const watch = {
         indices: [
           ML_RESULTS_INDEX_PATTERN
         ],
-        types: [],
         body: {
           size: 0,
           query: {
