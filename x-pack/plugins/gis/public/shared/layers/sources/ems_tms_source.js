@@ -11,6 +11,7 @@ import {
   EuiSelect,
   EuiFormRow
 } from '@elastic/eui';
+import _ from 'lodash';
 
 
 export class EMSTMSSource extends TMSSource {
@@ -28,11 +29,11 @@ export class EMSTMSSource extends TMSSource {
 
   static renderEditor({ dataSourcesMeta, onPreviewSource }) {
 
-    const emsTmsOptionsRaw = (dataSourcesMeta) ? dataSourcesMeta.ems.tms : [];
-    const emsVectorOptions = emsTmsOptionsRaw ? emsTmsOptionsRaw.map((file) => ({
-      value: file.id,
-      text: file.id //due to now having human readable names
-    })) : [];
+    const emsTmsOptionsRaw = _.get(dataSourcesMeta, "ems.tms", []);
+    const emsTileOptions = emsTmsOptionsRaw.map((service) => ({
+      value: service.id,
+      text: service.id //due to not having human readable names
+    }));
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].value;
@@ -41,10 +42,10 @@ export class EMSTMSSource extends TMSSource {
       onPreviewSource(emsTMSSource);
     };
     return (
-      <EuiFormRow label="Layer">
+      <EuiFormRow label="Tile service">
         <EuiSelect
           hasNoInitialSelection
-          options={emsVectorOptions}
+          options={emsTileOptions}
           onChange={onChange}
         />
       </EuiFormRow>
