@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
+import mkdirp from 'mkdirp';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
@@ -318,6 +319,17 @@ export class WorkspaceHandler {
   ): Promise<Repository> {
     const workspaceDir = path.join(this.workspacePath, repositoryUri, revision);
     this.log.info(`clone workspace ${workspaceDir} from url ${bareRepo.path()}`);
+    const parentDir = path.dirname(workspaceDir);
+    // on windows, git clone will failed if parent folder is not exists;
+    await new Promise((resolve, reject) =>
+      mkdirp(parentDir, err => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      })
+    );
     return await Clone.clone(bareRepo.path(), workspaceDir);
   }
 

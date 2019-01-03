@@ -227,8 +227,15 @@ export class LspIndexer extends AbstractIndexer {
     }
 
     const localFilePath = `${localRepoPath}${filePath}`;
+    const lstat = util.promisify(fs.lstat);
+    const stat = await lstat(localFilePath);
+
+    const readLink = util.promisify(fs.readlink);
     const readFile = util.promisify(fs.readFile);
-    const content = await readFile(localFilePath, 'utf8');
+    const content = stat.isSymbolicLink()
+      ? await readLink(localFilePath, 'utf8')
+      : await readFile(localFilePath, 'utf8');
+
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
       repoUri,
