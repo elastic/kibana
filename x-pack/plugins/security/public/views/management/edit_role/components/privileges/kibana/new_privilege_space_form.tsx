@@ -175,26 +175,37 @@ export class NewPrivilegeSpaceForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        {this.state.selectedSpaceIds.length > 0 && (
-          <EuiFormRow
-            label={intl.formatMessage({ id: 'foo', defaultMessage: 'Customize by feature' })}
-          >
-            <FeatureTable
-              role={this.state.role}
-              features={this.props.features}
-              effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(
-                this.state.role
-              )}
-              intl={this.props.intl}
-              onChange={this.onFeaturePrivilegesChange}
-              privilegeDefinition={this.props.privilegeDefinition}
-              spacesIndex={this.state.editingIndex}
-              disabled={this.state.selectedMinimumPrivilege.length > 0}
-            />
-          </EuiFormRow>
-        )}
+        <EuiFormRow
+          label={this.getFeatureListLabel(this.state.selectedMinimumPrivilege.length > 0)}
+        >
+          <FeatureTable
+            role={this.state.role}
+            features={this.props.features}
+            effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.state.role)}
+            intl={this.props.intl}
+            onChange={this.onFeaturePrivilegesChange}
+            privilegeDefinition={this.props.privilegeDefinition}
+            spacesIndex={this.state.editingIndex}
+            showLocks={this.state.selectedMinimumPrivilege.length === 0}
+            disabled={this.state.selectedMinimumPrivilege.length > 0}
+          />
+        </EuiFormRow>
       </EuiForm>
     );
+  };
+
+  private getFeatureListLabel = (disabled: boolean) => {
+    if (disabled) {
+      return this.props.intl.formatMessage({
+        id: 'foo',
+        defaultMessage: 'Summary of feature privileges',
+      });
+    } else {
+      return this.props.intl.formatMessage({
+        id: 'foo',
+        defaultMessage: 'Customize by feature',
+      });
+    }
   };
 
   private getPrivilegeCallout = () => {

@@ -36,6 +36,7 @@ interface Props {
   spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   disabled?: boolean;
+  showLocks?: boolean;
 }
 
 interface ToolTipDefinition {
@@ -46,6 +47,7 @@ interface ToolTipDefinition {
 export class FeatureTable extends Component<Props, {}> {
   public static defaultProps = {
     spacesIndex: -1,
+    showLocks: true,
   };
 
   public render() {
@@ -149,17 +151,19 @@ export class FeatureTable extends Component<Props, {}> {
         if (!canChangePrivilege) {
           return (
             <EuiText>
-              {actualPrivilegeValue || 'None'}{' '}
-              <sup>
-                <EuiIconTip
-                  type={'lock'}
-                  content={this.props.intl.formatMessage({
-                    id: 'foo',
-                    defaultMessage: privilegeExplanation.details,
-                  })}
-                  size={'s'}
-                />
-              </sup>
+              {_.capitalize(actualPrivilegeValue || 'None')}{' '}
+              {this.props.showLocks && (
+                <sup>
+                  <EuiIconTip
+                    type={'lock'}
+                    content={this.props.intl.formatMessage({
+                      id: 'foo',
+                      defaultMessage: privilegeExplanation.details,
+                    })}
+                    size={'s'}
+                  />
+                </sup>
+              )}
             </EuiText>
           );
         }
