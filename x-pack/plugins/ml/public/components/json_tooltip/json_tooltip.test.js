@@ -8,9 +8,13 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { JsonTooltip } from './json_tooltip';
-import tooltips from './tooltips.json';
+import { getTooltips } from './tooltips';
 
 describe('JsonTooltip', () => {
+  let tooltips;
+  beforeAll(() => {
+    tooltips = getTooltips();
+  });
 
   test(`Plain initialization doesn't throw an error`, () => {
     const wrapper = shallow(<JsonTooltip />);
