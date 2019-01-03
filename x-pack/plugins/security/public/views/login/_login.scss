@@ -38,9 +38,10 @@
 }
 
 .loginWelcome__logo {
-  margin-bottom: $euiSizeXL;
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
+
+  margin-bottom: $euiSizeXL;
 }
 
 .loginWelcome__footerAction {
@@ -65,8 +66,9 @@
 @keyframes loginWelcome_FadeIn {
   from {
     opacity: 0;
-    transform: translateY(200px), scale(0.75);
+    transform: translateY(200px), scale(.75);
   }
+
   to {
     opacity: 1;
     transform: translateY(0), scale(1);
