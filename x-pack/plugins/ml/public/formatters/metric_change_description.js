@@ -67,18 +67,30 @@ export function getMetricChangeDescription(actualProp, typicalProp) {
     iconType = isHigher ? 'sortUp' : 'sortDown';
     if (typical !== 0 && actual !== 0) {
       const factor = isHigher ? actual / typical : typical / actual;
-      const direction = isHigher ? 'higher' : 'lower';
       if (factor > 1.5) {
         if (factor <= 100) {
-          message = `${Math.round(factor)}x ${direction}`;
+          message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndHalfxHigherDescription', {
+            defaultMessage: '{factor}x higher',
+            values: { factor: Math.round(factor) },
+          }) : i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndHalfxLowerDescription', {
+            defaultMessage: '{factor}x lower',
+            values: { factor: Math.round(factor) },
+          });
         } else {
-          message = i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThan100xDescription', {
-            defaultMessage: 'More than 100x {direction}',
-            values: { direction },
+          message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThan100xHigherDescription', {
+            defaultMessage: 'More than 100x higher',
+          }) : i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThan100xLowerDescription', {
+            defaultMessage: 'More than 100x lower',
           });
         }
       } else if (factor >= 1.05) {
-        message = `${factor.toPrecision(2)}x ${direction}`;
+        message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndFiveHundredthsxHigherDescription', {
+          defaultMessage: '{factor}x higher',
+          values: { factor: factor.toPrecision(2) },
+        }) : i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndFiveHundredthsxLowerDescription', {
+          defaultMessage: '{factor}x lower',
+          values: { factor: factor.toPrecision(2) },
+        });
       } else {
         message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.unusuallyHighDescription', {
           defaultMessage: 'Unusually high',
