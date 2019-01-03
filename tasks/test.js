@@ -31,7 +31,11 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:server', ['checkPlugins', 'run:mocha']);
+  grunt.registerTask('test:mocha', ['checkPlugins', 'run:mocha']);
+  grunt.registerTask('test:server', () => {
+    grunt.log.writeln('`grunt test:server` is deprecated - use `grunt test:mocha`');
+    grunt.task.run(['test:mocha']);
+  });
 
   grunt.registerTask('test:browser', ['checkPlugins', 'run:browserSCSS', 'run:browserTestServer', 'karma:unit']);
 
