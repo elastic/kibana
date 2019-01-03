@@ -1,0 +1,603 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnomalyDetails Renders correctly 1`] = `
+<AnomalyDetails
+  anomaly={
+    Object {
+      "actual": Array [
+        1,
+      ],
+      "actualSort": 1,
+      "detector": "count by mlcategory",
+      "detectorIndex": 0,
+      "entityName": "mlcategory",
+      "entityValue": "1",
+      "isTimeSeriesViewDetector": false,
+      "jobId": "it-ops-count-by-mlcategory-one",
+      "metricDescriptionSort": 82.83851409101328,
+      "rowId": "1546553208554_0",
+      "severity": 25.662,
+      "source": Object {
+        "actual": Array [
+          1,
+        ],
+        "bucket_span": 900,
+        "by_field_name": "mlcategory",
+        "by_field_value": "1",
+        "detector_index": 0,
+        "function": "count",
+        "function_description": "count",
+        "initial_record_score": 41.00971774894037,
+        "is_interim": false,
+        "job_id": "it-ops-count-by-mlcategory-one",
+        "mlcategory": Array [
+          "1",
+        ],
+        "multi_bucket_impact": 0,
+        "probability": 0.004741615571416013,
+        "record_score": 25.662,
+        "result_type": "record",
+        "timestamp": 1486062900000,
+        "typical": Array [
+          0.012071679592192066,
+        ],
+      },
+      "time": 1486018800000,
+      "typical": Array [
+        0.012071679592192066,
+      ],
+      "typicalSort": 0.012071679592192066,
+    }
+  }
+  examples={
+    Array [
+      "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+      "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+    ]
+  }
+  influencersLimit={5}
+  isAggregatedData={true}
+  tabIndex={0}
+>
+  <EuiTabbedContent
+    initialSelectedTab={
+      Object {
+        "content": <React.Fragment>
+          <div
+            className="ml-anomalies-table-details"
+          >
+            <React.Fragment>
+              <EuiText
+                grow={true}
+                size="xs"
+              >
+                <h4>
+                  Description
+                </h4>
+                minor anomaly in count by mlcategory found for mlcategory 1
+              </EuiText>
+            </React.Fragment>
+            <EuiSpacer
+              size="m"
+            />
+            <React.Fragment>
+              <EuiText
+                grow={true}
+                size="xs"
+              >
+                <h4>
+                  Details on highest severity anomaly
+                </h4>
+              </EuiText>
+              <EuiDescriptionList
+                align="left"
+                className="anomaly-description-list"
+                compressed={false}
+                listItems={
+                  Array [
+                    Object {
+                      "description": <EntityCell
+                        entityName="mlcategory"
+                        entityValue="1"
+                      />,
+                      "title": "mlcategory",
+                    },
+                    Object {
+                      "description": "February 2nd 2017, 12:15:00 to February 2nd 2017, 12:30:00",
+                      "title": "time",
+                    },
+                    Object {
+                      "description": "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+                      "title": "category examples",
+                    },
+                    Object {
+                      "description": "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+                      "title": "",
+                    },
+                    Object {
+                      "description": "count",
+                      "title": "function",
+                    },
+                    Object {
+                      "description": 1,
+                      "title": "actual",
+                    },
+                    Object {
+                      "description": 0.0121,
+                      "title": "typical",
+                    },
+                    Object {
+                      "description": "it-ops-count-by-mlcategory-one",
+                      "title": "job ID",
+                    },
+                    Object {
+                      "description": 0.004741615571416013,
+                      "title": "probability",
+                    },
+                  ]
+                }
+                textStyle="normal"
+                type="column"
+              />
+            </React.Fragment>
+          </div>
+        </React.Fragment>,
+        "id": "Details",
+        "name": "Details",
+      }
+    }
+    onTabClick={[Function]}
+    size="s"
+    tabs={
+      Array [
+        Object {
+          "content": <React.Fragment>
+            <div
+              className="ml-anomalies-table-details"
+            >
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    Description
+                  </h4>
+                  minor anomaly in count by mlcategory found for mlcategory 1
+                </EuiText>
+              </React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    Details on highest severity anomaly
+                  </h4>
+                </EuiText>
+                <EuiDescriptionList
+                  align="left"
+                  className="anomaly-description-list"
+                  compressed={false}
+                  listItems={
+                    Array [
+                      Object {
+                        "description": <EntityCell
+                          entityName="mlcategory"
+                          entityValue="1"
+                        />,
+                        "title": "mlcategory",
+                      },
+                      Object {
+                        "description": "February 2nd 2017, 12:15:00 to February 2nd 2017, 12:30:00",
+                        "title": "time",
+                      },
+                      Object {
+                        "description": "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+                        "title": "category examples",
+                      },
+                      Object {
+                        "description": "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+                        "title": "",
+                      },
+                      Object {
+                        "description": "count",
+                        "title": "function",
+                      },
+                      Object {
+                        "description": 1,
+                        "title": "actual",
+                      },
+                      Object {
+                        "description": 0.0121,
+                        "title": "typical",
+                      },
+                      Object {
+                        "description": "it-ops-count-by-mlcategory-one",
+                        "title": "job ID",
+                      },
+                      Object {
+                        "description": 0.004741615571416013,
+                        "title": "probability",
+                      },
+                    ]
+                  }
+                  textStyle="normal"
+                  type="column"
+                />
+              </React.Fragment>
+            </div>
+          </React.Fragment>,
+          "id": "Details",
+          "name": "Details",
+        },
+        Object {
+          "content": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="stretch"
+              className="mlAnomalyCategoryExamples"
+              component="div"
+              direction="column"
+              gutterSize="m"
+              justifyContent="center"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </React.Fragment>,
+          "id": "Category examples",
+          "name": "Category examples",
+        },
+      ]
+    }
+  >
+    <div>
+      <EuiTabs
+        expand={false}
+        size="s"
+      >
+        <div
+          className="euiTabs euiTabs--small"
+          role="tablist"
+        >
+          <EuiTab
+            aria-controls="i65749270-0fb0-11e9-966f-63289d85d4fe_660ab7f0-0fb0-11e9-966f-63289d85d4fe"
+            disabled={false}
+            id="Details"
+            isSelected={true}
+            key="Details"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="i65749270-0fb0-11e9-966f-63289d85d4fe_660ab7f0-0fb0-11e9-966f-63289d85d4fe"
+              aria-selected={true}
+              className="euiTab euiTab-isSelected"
+              disabled={false}
+              id="Details"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Details
+              </span>
+            </button>
+          </EuiTab>
+          <EuiTab
+            aria-controls="i65749270-0fb0-11e9-966f-63289d85d4fe_660ab7f0-0fb0-11e9-966f-63289d85d4fe"
+            disabled={false}
+            id="Category examples"
+            isSelected={false}
+            key="Category examples"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="i65749270-0fb0-11e9-966f-63289d85d4fe_660ab7f0-0fb0-11e9-966f-63289d85d4fe"
+              aria-selected={false}
+              className="euiTab"
+              disabled={false}
+              id="Category examples"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Category examples
+              </span>
+            </button>
+          </EuiTab>
+        </div>
+      </EuiTabs>
+      <div
+        aria-labelledby="Details"
+        id="i65749270-0fb0-11e9-966f-63289d85d4fe_660ab7f0-0fb0-11e9-966f-63289d85d4fe"
+        role="tabpanel"
+      >
+        <div
+          className="ml-anomalies-table-details"
+        >
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <div
+              className="euiText euiText--extraSmall"
+            >
+              <h4>
+                Description
+              </h4>
+              minor anomaly in count by mlcategory found for mlcategory 1
+            </div>
+          </EuiText>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <div
+              className="euiText euiText--extraSmall"
+            >
+              <h4>
+                Details on highest severity anomaly
+              </h4>
+            </div>
+          </EuiText>
+          <EuiDescriptionList
+            align="left"
+            className="anomaly-description-list"
+            compressed={false}
+            listItems={
+              Array [
+                Object {
+                  "description": <EntityCell
+                    entityName="mlcategory"
+                    entityValue="1"
+                  />,
+                  "title": "mlcategory",
+                },
+                Object {
+                  "description": "February 2nd 2017, 12:15:00 to February 2nd 2017, 12:30:00",
+                  "title": "time",
+                },
+                Object {
+                  "description": "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+                  "title": "category examples",
+                },
+                Object {
+                  "description": "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+                  "title": "",
+                },
+                Object {
+                  "description": "count",
+                  "title": "function",
+                },
+                Object {
+                  "description": 1,
+                  "title": "actual",
+                },
+                Object {
+                  "description": 0.0121,
+                  "title": "typical",
+                },
+                Object {
+                  "description": "it-ops-count-by-mlcategory-one",
+                  "title": "job ID",
+                },
+                Object {
+                  "description": 0.004741615571416013,
+                  "title": "probability",
+                },
+              ]
+            }
+            textStyle="normal"
+            type="column"
+          >
+            <dl
+              className="euiDescriptionList euiDescriptionList--column anomaly-description-list"
+            >
+              <EuiDescriptionListTitle
+                key="title-0"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  mlcategory
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-0"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <EntityCell
+                    entityName="mlcategory"
+                    entityValue="1"
+                  >
+                    mlcategory 1
+                  </EntityCell>
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-1"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  time
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-1"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  February 2nd 2017, 12:15:00 to February 2nd 2017, 12:30:00
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-2"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  category examples
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-2"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-3"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-3"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-4"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  function
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-4"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  count
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-5"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  actual
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-5"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  1
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-6"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  typical
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-6"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  0.0121
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-7"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  job ID
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-7"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  it-ops-count-by-mlcategory-one
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="title-8"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  probability
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="description-8"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  0.004741615571416013
+                </dd>
+              </EuiDescriptionListDescription>
+            </dl>
+          </EuiDescriptionList>
+        </div>
+      </div>
+    </div>
+  </EuiTabbedContent>
+</AnomalyDetails>
+`;
