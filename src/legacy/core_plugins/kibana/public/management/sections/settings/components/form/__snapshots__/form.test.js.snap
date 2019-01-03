@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Form should not render no settings message when instructed not to 1`] = `<React.Fragment />`;
+exports[`Form should not render no settings message when instructed not to 1`] = `<Fragment />`;
 
 exports[`Form should render no settings message when there are no settings 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiPanel
     grow={true}
     hasShadow={false}
@@ -29,7 +29,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
       }
     />
   </EuiPanel>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`Form should render normally 1`] = `
