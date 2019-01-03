@@ -522,6 +522,7 @@ class DashboardListingUi extends React.Component {
           <EuiButton
             href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
             data-test-subj="newDashboardLink"
+            fill
           >
             <FormattedMessage
               id="kbn.dashboard.listing.createNewDashboardButtonLabel"
