@@ -74,6 +74,18 @@ export const createFollowerIndex = (followerIndex) => (
   httpClient.post(`${apiPrefix}/follower_indices`, followerIndex).then(extractData)
 );
 
+export const pauseFollowerIndex = (id) => (
+  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}/pause`).then(extractData)
+);
+
+export const resumeFollowerIndex = (id) => (
+  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}/resume`).then(extractData)
+);
+
+export const unfollowFollowerIndex = (id) => (
+  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}/unfollow`).then(extractData)
+);
+
 /* Stats */
 export const loadAutoFollowStats = () => (
   httpClient.get(`${apiPrefixIndexManagement}/stats/auto-follow`).then(extractData)

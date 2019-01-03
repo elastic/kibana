@@ -138,7 +138,8 @@ export const registerFollowerIndexRoutes = (server) => {
       const { id } = request.params;
 
       try {
-        return await callWithRequest('ccr.resumeFollowerIndex', { id });
+        // TODO: Remove empty body when fixed in ES: https://github.com/elastic/elasticsearch/issues/37022
+        return await callWithRequest('ccr.resumeFollowerIndex', { id, body: {} });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
