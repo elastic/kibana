@@ -15,6 +15,7 @@ export const fetchReposFailed = createAction<Error>('FETCH REPOS FAILED');
 
 export const deleteRepo = createAction<string>('DELETE REPOS');
 export const deleteRepoSuccess = createAction<string>('DELETE REPOS SUCCESS');
+export const deleteRepoFinished = createAction<string>('DELETE REPOS FINISHED');
 export const deleteRepoFailed = createAction<Error>('DELETE REPOS FAILED');
 
 export const indexRepo = createAction<string>('INDEX REPOS');

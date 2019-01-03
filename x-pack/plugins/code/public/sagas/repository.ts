@@ -26,6 +26,9 @@ import {
   indexRepoSuccess,
   initRepoCommand,
   loadUserConfig,
+  updateCloneProgress,
+  updateDeleteProgress,
+  updateIndexProgress,
 } from '../actions';
 import { loadLanguageServers } from '../actions/language_server';
 import { history } from '../utils/url';
@@ -56,6 +59,12 @@ function* handleDeleteRepo(action: Action<string>) {
   try {
     yield call(requestDeleteRepo, action.payload || '');
     yield put(deleteRepoSuccess(action.payload || ''));
+    yield put(
+      updateDeleteProgress({
+        repoUri: action.payload as string,
+        progress: 0,
+      })
+    );
   } catch (err) {
     yield put(deleteRepoFailed(err));
   }
@@ -65,6 +74,12 @@ function* handleIndexRepo(action: Action<string>) {
   try {
     yield call(requestIndexRepo, action.payload || '');
     yield put(indexRepoSuccess(action.payload || ''));
+    yield put(
+      updateIndexProgress({
+        repoUri: action.payload as string,
+        progress: 0,
+      })
+    );
   } catch (err) {
     yield put(indexRepoFailed(err));
   }
@@ -82,6 +97,12 @@ function* handleImportRepo(action: Action<string>) {
   try {
     const data = yield call(requestImportRepo, action.payload || '');
     yield put(importRepoSuccess(data));
+    yield put(
+      updateCloneProgress({
+        repoUri: action.payload as string,
+        progress: 0,
+      })
+    );
   } catch (err) {
     yield put(importRepoFailed(err));
   }

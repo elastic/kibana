@@ -87,4 +87,5 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
 });
 
+// @ts-ignore
 export const Main = connect(mapStateToProps)(CodeMain);

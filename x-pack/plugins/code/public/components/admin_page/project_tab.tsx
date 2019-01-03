@@ -53,7 +53,7 @@ class CodeProjectTab extends React.PureComponent<
   };
 
   public render() {
-    const { projects, isAdmin } = this.props;
+    const { projects, isAdmin, status } = this.props;
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && (
       <EuiModal onClose={this.closeModal}>

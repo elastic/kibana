@@ -9,7 +9,12 @@ import io from 'socket.io-client';
 import chrome from 'ui/chrome';
 
 import { SocketKind } from '../model';
-import { loadStatusSuccess } from './actions';
+import {
+  loadStatusSuccess,
+  updateCloneProgress,
+  updateDeleteProgress,
+  updateIndexProgress,
+} from './actions';
 import { installLanguageServerSuccess } from './actions/language_server';
 
 export function bindSocket(store: Store) {
@@ -18,26 +23,46 @@ export function bindSocket(store: Store) {
 
   socket.on(SocketKind.CLONE_PROGRESS, (data: any) => {
     const { repoUri, progress, cloneProgress } = data;
-    store.dispatch(
-      loadStatusSuccess({
-        repoUri,
-        status: {
-          uri: repoUri,
+    if (progress === 100) {
+      store.dispatch(
+        loadStatusSuccess({
+          repoUri,
+          status: {
+            uri: repoUri,
+            progress,
+            cloneProgress,
+          },
+        })
+      );
+    } else {
+      store.dispatch(
+        updateCloneProgress({
+          repoUri,
           progress,
           cloneProgress,
-        },
+        })
+      );
+    }
+  });
+
+  socket.on(SocketKind.INDEX_PROGRESS, (data: any) => {
+    const { repoUri, progress } = data;
+    store.dispatch(
+      updateIndexProgress({
+        progress,
+        repoUri,
       })
     );
   });
 
-  socket.on(SocketKind.INDEX_PROGRESS, (data: any) => {
-    // const { repoUri, progress } = data;
-    // TODO(qianliang): distribute index progress update actions to store.
-  });
-
   socket.on(SocketKind.DELETE_PROGRESS, (data: any) => {
-    // const { repoUri, progress } = data;
-    // TODO(qianliang): distribute delete progress update actions to store.
+    const { repoUri, progress } = data;
+    store.dispatch(
+      updateDeleteProgress({
+        progress,
+        repoUri,
+      })
+    );
   });
 
   socket.on(SocketKind.INSTALL_PROGRESS, (data: any) => {
