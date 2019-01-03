@@ -59,19 +59,15 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
 `;
 
 exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
-<React.Fragment>
+<Fragment>
   <span
     className="ml-explorer-chart-label"
   >
     <span
       className="ml-explorer-chart-label-detector"
     >
-      <React.Fragment>
-        high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
-      </React.Fragment>
-      <React.Fragment>
-         
-      </React.Fragment>
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+       
     </span>
     <span
       className="ml-explorer-chart-info-icon"
@@ -114,5 +110,5 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
       key="nginx.access.remote_ip 72.57.0.53"
     />
   </span>
-</React.Fragment>
+</Fragment>
 `;
