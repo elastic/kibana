@@ -20,7 +20,6 @@ Object {
     "query_delay": "86658ms",
     "scroll_size": 1000,
     "state": "stopped",
-    "types": Array [],
   },
   "detectorIndex": 0,
   "detectorLabel": "mean(responsetime)",
