@@ -20,7 +20,7 @@ export class ASource {
     this._descriptor = descriptor;
   }
 
-  destory() {}
+  destroy() {}
 
   renderDetails() {
     return (<div>{`Here be details for source`}</div>);
@@ -40,6 +40,10 @@ export class ASource {
   }
 
   isFieldAware() {
+    return false;
+  }
+
+  isRefreshTimerAware() {
     return false;
   }
 

@@ -298,7 +298,7 @@ React component as a pure function:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-const MyComponentContent = ({ intl }) => (
+export const MyComponent = injectI18n({ intl }) => (
   <input
     type="text"
     placeholder={intl.formatMessage(
@@ -311,13 +311,11 @@ const MyComponentContent = ({ intl }) => (
       { name, unreadCount }
     )}
   />
-);
+));
 
-MyComponentContent.propTypes = {
+MyComponent.WrappedComponent.propTypes = {
   intl: intlShape.isRequired,
 };
-
-export const MyComponent = injectI18n(MyComponentContent);
 ```
 
 React component as a class:
@@ -326,27 +324,27 @@ React component as a class:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-class MyComponentContent extends React.Component {
-  static propTypes = {
-    intl: intlShape.isRequired,
-  };
+export const MyComponent = injectI18n(
+  class MyComponent extends React.Component {
+    static propTypes = {
+      intl: intlShape.isRequired,
+    };
 
-  render() {
-    const { intl } = this.props;
+    render() {
+      const { intl } = this.props;
 
-    return (
-      <input
-        type="text"
-        placeholder={intl.formatMessage({
-          id: 'kbn.management.objects.searchPlaceholder',
-          defaultMessage: 'Search',
-        })}
-      />
-    );
+      return (
+        <input
+          type="text"
+          placeholder={intl.formatMessage({
+            id: 'kbn.management.objects.searchPlaceholder',
+            defaultMessage: 'Search',
+          })}
+        />
+      );
+    }
   }
-}
-
-export const MyComponent = injectI18n(MyComponentContent);
+);
 ```
 
 ## AngularJS
