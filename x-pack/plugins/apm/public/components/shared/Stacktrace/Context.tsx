@@ -19,13 +19,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
-
-registerLanguage('javascript', javascript);
-registerLanguage('python', python);
-registerLanguage('ruby', ruby);
-
 import styled from 'styled-components';
-
 import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import {
   borderRadius,
@@ -34,6 +28,10 @@ import {
   unit,
   units
 } from '../../../style/variables';
+
+registerLanguage('javascript', javascript);
+registerLanguage('python', python);
+registerLanguage('ruby', ruby);
 
 const ContextContainer = styled.div`
   position: relative;
