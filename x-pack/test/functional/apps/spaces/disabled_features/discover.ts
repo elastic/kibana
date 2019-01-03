@@ -23,42 +23,37 @@ export default function({ getPageObjects, getService }: TestInvoker) {
 
   describe('discover', () => {
     before(async () => {
-      await esArchiver.load('spaces/disabled_features');
       await esArchiver.loadIfNeeded('logstash_functional');
-    });
-
-    after(async () => {
-      await esArchiver.unload('security/feature_privileges');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
+        // we need to load the following in every situation as deleting
+        // a space deletes all of the associated saved objects
+        await esArchiver.load('spaces/disabled_features');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
           disabledFeatures: [],
         });
-        await PageObjects.security.login(null, null, {
-          expectSpaceSelector: true,
-        });
-        await PageObjects.spaceSelector.clickSpaceCard('custom_space');
-        await PageObjects.spaceSelector.expectHomePage('custom_space');
       });
 
       after(async () => {
-        await PageObjects.security.logout();
         await spacesService.delete('custom_space');
+        await esArchiver.unload('spaces/disabled_features');
       });
 
       it('shows discover navlink', async () => {
+        await PageObjects.common.navigateToApp('home', {
+          basePath: '/s/custom_space',
+        });
         const navLinks = await getAppNavLinks();
         expect(navLinks).to.contain('Discover');
       });
 
       it('shows save button', async () => {
-        await PageObjects.common.navigateToUrl('discover', '', {
+        await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
-          loginIfPrompted: false,
         });
         await testSubjects.existOrFail('discoverSaveButton');
       });
@@ -66,32 +61,38 @@ export default function({ getPageObjects, getService }: TestInvoker) {
 
     describe('space with Discover disabled', () => {
       before(async () => {
+        // we need to load the following in every situation as deleting
+        // a space deletes all of the associated saved objects
+        await esArchiver.load('spaces/disabled_features');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
           disabledFeatures: ['discover'],
         });
-        await PageObjects.security.login(null, null, {
-          expectSpaceSelector: true,
-        });
-        await PageObjects.spaceSelector.clickSpaceCard('custom_space');
-        await PageObjects.spaceSelector.expectHomePage('custom_space');
       });
 
       after(async () => {
-        await PageObjects.security.logout();
         await spacesService.delete('custom_space');
+        await esArchiver.unload('spaces/disabled_features');
       });
 
       it(`doesn't show discover navlink`, async () => {
+        await PageObjects.common.navigateToApp('home', {
+          basePath: '/s/custom_space',
+        });
         const navLinks = await getAppNavLinks();
         expect(navLinks).not.to.contain('Discover');
       });
 
       it(`redirects to the home page`, async () => {
+        // to test whether they're being redirected properly, we first load
+        // the discover app in the default space, and then we load up the discover
+        // app in the custom space and ensure we end up on the home page
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space',
-          loginIfPrompted: false,
+          shouldLoginIfPrompted: false,
+          ensureCurrentUrl: false,
         });
         await PageObjects.spaceSelector.expectHomePage('custom_space');
       });

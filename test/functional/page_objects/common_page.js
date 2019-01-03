@@ -50,8 +50,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      */
     async navigateToUrl(appName, subUrl, {
       basePath = '',
-      loginIfPrompted = true
-    }) {
+      ensureCurrentUrl = true,
+      shouldLoginIfPrompted = true
+    } = {}) {
       // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
         pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
@@ -62,12 +63,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
         await browser.get(appUrl);
-        if (!loginIfPrompted) {
-          return;
-        }
 
-        const currentUrl = loginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
-        if (!currentUrl.includes(appUrl)) {
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
+
+        if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
         }
       });
@@ -96,11 +95,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
 
-    navigateToApp(appName, basePath) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-        pathname: `${basePath || ''}${appConfig.pathname}`,
+        pathname: `${basePath}${appConfig.pathname}`,
         hash: appConfig.hash
       });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
@@ -137,13 +136,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               return browser.refresh();
             })
             .then(async function () {
-              const currentUrl = await self.loginIfPrompted(appUrl);
+              const currentUrl = shouldLoginIfPrompted ? await self.loginIfPrompted(appUrl) : browser.getCurrentUrl();
 
               if (currentUrl.includes('app/kibana')) {
                 await testSubjects.find('kibanaChrome');
               }
             })
             .then(async function () {
+
               const currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
               const maxAdditionalLengthOnNavUrl = 230;
               // On several test failures at the end of the TileMap test we try to navigate back to
