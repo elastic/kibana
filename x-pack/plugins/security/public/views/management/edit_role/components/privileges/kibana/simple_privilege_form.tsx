@@ -36,12 +36,9 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
   public render() {
     const { role } = this.props;
 
-    const assignedPrivileges = role.kibana;
+    const form = this.locateGlobalPrivilege(role);
 
-    const kibanaPrivilege =
-      assignedPrivileges.global.minimum.length > 0
-        ? assignedPrivileges.global.minimum[0]
-        : NO_PRIVILEGE_VALUE;
+    const kibanaPrivilege = form.minimum.length > 0 ? form.minimum[0] : NO_PRIVILEGE_VALUE;
 
     const description = (
       <p>
@@ -115,7 +112,7 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
               valueOfSelected={kibanaPrivilege}
             />
           </EuiFormRow>
-          {kibanaPrivilege !== NO_PRIVILEGE_VALUE && (
+          {kibanaPrivilege === 'custom' && (
             <EuiFormRow>
               <FeatureTable
                 role={this.props.role}
@@ -124,6 +121,7 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
                 features={this.props.features}
                 intl={this.props.intl}
                 onChange={this.onFeaturePrivilegeChange}
+                spacesIndex={-1}
               />
             </EuiFormRow>
           )}
@@ -135,19 +133,46 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
   public onKibanaPrivilegeChange = (privilege: string) => {
     const role = copyRole(this.props.role);
 
+    const form = this.locateGlobalPrivilege(role, true);
+
     // Remove base privilege value
-    role.kibana.global.minimum = [];
+    form.minimum = [];
 
     if (privilege !== NO_PRIVILEGE_VALUE) {
-      role.kibana.global.minimum = [privilege];
+      form.minimum = [privilege];
     }
 
     this.props.onChange(role);
   };
 
-  public onFeaturePrivilegeChange(featureId: string, privileges: string[]) {
+  public onFeaturePrivilegeChange = (featureId: string, privileges: string[]) => {
     const role = copyRole(this.props.role);
-    role.kibana.global.feature[featureId] = [...privileges];
+    const form = this.locateGlobalPrivilege(role, true);
+    if (privileges.length > 0) {
+      form.feature[featureId] = [...privileges];
+    } else {
+      delete form.feature[featureId];
+    }
     this.props.onChange(role);
-  }
+  };
+
+  private locateGlobalPrivilege = (role: Role, createIfMissing = false) => {
+    const { spaces: spacePrivileges } = role.kibana;
+    const existing = spacePrivileges.find(privileges => privileges.spaces.includes('*'));
+    if (existing) {
+      return existing;
+    }
+
+    const newEntry = {
+      spaces: ['*'],
+      minimum: [],
+      feature: {},
+    };
+
+    if (createIfMissing) {
+      spacePrivileges.push(newEntry);
+    }
+
+    return newEntry;
+  };
 }

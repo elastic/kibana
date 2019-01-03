@@ -17,6 +17,10 @@ import {
 import { InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges';
+import {
+  ExplanationResult,
+  PRIVILEGE_SOURCE,
+} from 'plugins/security/lib/effective_privileges/effective_privileges';
 import React, { Component } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';
@@ -117,37 +121,25 @@ export class FeatureTable extends Component<Props, {}> {
         defaultMessage: 'Privilege',
       }),
       render: (roleEntry: Role, record: Record<string, any>) => {
+        const featureId = record.feature.id;
+
         const featurePrivileges = this.props.privilegeDefinition
           .getFeaturePrivileges()
-          .getPrivileges(record.feature.id);
+          .getPrivileges(featureId);
 
         if (!featurePrivileges) {
           // TODO
           return null;
         }
 
-        const effectivePrivilegesInstance = this.props.effectivePrivileges;
-
-        const enabledFeaturePrivileges = featurePrivileges.filter(p =>
-          effectivePrivilegesInstance.canAssignSpaceFeaturePrivilege(
-            record.feature.id,
-            p,
-            this.props.spacesIndex
-          )
+        const enabledFeaturePrivileges = this.getEnabledFeaturePrivileges(
+          featurePrivileges,
+          featureId
         );
 
-        const privilegeExplanation = effectivePrivilegesInstance.explainActualSpaceFeaturePrivilege(
-          record.feature.id,
-          this.props.spacesIndex
-        );
+        const privilegeExplanation = this.getPrivilegeExplanation(featureId);
 
-        const featureId = record.feature.id;
-
-        const allowsNone =
-          effectivePrivilegesInstance.getHighestGrantedSpaceFeaturePrivilege(
-            featureId,
-            this.props.spacesIndex
-          ) === NO_PRIVILEGE_VALUE;
+        const allowsNone = this.allowsNoneForPrivilegeAssignment(featureId);
 
         const actualPrivilegeValue = privilegeExplanation.privilege;
 
@@ -210,4 +202,44 @@ export class FeatureTable extends Component<Props, {}> {
       },
     },
   ];
+
+  private getEnabledFeaturePrivileges = (featurePrivileges: string[], featureId: string) => {
+    const { effectivePrivileges, spacesIndex } = this.props;
+    if (spacesIndex >= 0) {
+      return featurePrivileges.filter(p =>
+        effectivePrivileges.canAssignSpaceFeaturePrivilege(featureId, p, this.props.spacesIndex)
+      );
+    }
+    // Global feature privileges are not limited by effective privileges.
+    return featurePrivileges;
+  };
+
+  private getPrivilegeExplanation = (featureId: string): ExplanationResult => {
+    const { effectivePrivileges, spacesIndex } = this.props;
+    if (spacesIndex >= 0) {
+      return effectivePrivileges.explainActualSpaceFeaturePrivilege(featureId, spacesIndex);
+    }
+
+    // Global feature privileges are not limited by effective privileges.
+    return {
+      privilege: effectivePrivileges.getActualGlobalFeaturePrivilege(featureId),
+      source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
+      details: '',
+    };
+  };
+
+  private allowsNoneForPrivilegeAssignment = (featureId: string): boolean => {
+    const { effectivePrivileges, spacesIndex } = this.props;
+    if (spacesIndex >= 0) {
+      return (
+        effectivePrivileges.getHighestGrantedSpaceFeaturePrivilege(
+          featureId,
+          this.props.spacesIndex
+        ) === NO_PRIVILEGE_VALUE
+      );
+    }
+
+    // Global feature privileges are not limited by effective privileges.
+    return true;
+  };
 }

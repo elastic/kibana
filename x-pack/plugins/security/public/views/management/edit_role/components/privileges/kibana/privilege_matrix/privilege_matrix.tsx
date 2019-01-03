@@ -16,11 +16,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges';
-import { SpaceAvatar } from 'plugins/spaces/components';
 import React, { Component, Fragment } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 
 interface Props {

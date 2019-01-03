@@ -31,6 +31,12 @@ export enum PRIVILEGE_SOURCE {
   EFFECTIVE_OVERRIDES_ASSIGNED,
 }
 
+export interface ExplanationResult {
+  privilege: string;
+  source: PRIVILEGE_SOURCE;
+  details: string;
+}
+
 /**
  * Encapsulates logic for determining which privileges are assigned at a base and feature level, for both global and space-specific privileges.
  *
@@ -86,7 +92,10 @@ export class EffectivePrivileges {
     return this.explainActualSpaceFeaturePrivilege(featureId, spacesIndex).privilege;
   }
 
-  public explainActualSpaceFeaturePrivilege(featureId: string, spacesIndex: number) {
+  public explainActualSpaceFeaturePrivilege(
+    featureId: string,
+    spacesIndex: number
+  ): ExplanationResult {
     const { feature = {} as FeaturePrivilegeSet } = this.role.kibana.spaces[spacesIndex] || {};
     const assignedFeaturePrivilege = feature[featureId]
       ? feature[featureId][0]
@@ -137,7 +146,7 @@ export class EffectivePrivileges {
     return this.explainActualSpaceBasePrivilege(spacesIndex).privilege;
   }
 
-  public explainActualSpaceBasePrivilege(spacesIndex: number) {
+  public explainActualSpaceBasePrivilege(spacesIndex: number): ExplanationResult {
     const { minimum = [] as string[] } = this.role.kibana.spaces[spacesIndex] || {};
     const globalBasePrivilege = this.globalPrivilege.minimum;
 
@@ -210,7 +219,7 @@ export class EffectivePrivileges {
     });
 
     if (!highestGranted) {
-      throw new Error('Unexpected condition -- should have located a granted minimum privilege');
+      return NO_PRIVILEGE_VALUE;
     }
     return highestGranted;
   }
@@ -232,7 +241,7 @@ export class EffectivePrivileges {
     });
 
     if (!highestGranted) {
-      throw new Error('Unexpected condition -- should have located a granted feature privilege');
+      return NO_PRIVILEGE_VALUE;
     }
     return highestGranted;
   }

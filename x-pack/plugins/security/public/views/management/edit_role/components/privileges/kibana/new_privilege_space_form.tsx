@@ -189,6 +189,7 @@ export class NewPrivilegeSpaceForm extends Component<Props, State> {
               onChange={this.onFeaturePrivilegesChange}
               privilegeDefinition={this.props.privilegeDefinition}
               spacesIndex={this.state.editingIndex}
+              disabled={this.state.selectedMinimumPrivilege.length > 0}
             />
           </EuiFormRow>
         )}
@@ -243,7 +244,7 @@ export class NewPrivilegeSpaceForm extends Component<Props, State> {
     }
 
     this.setState({
-      selectedMinimumPrivilege: [minimumPrivilege],
+      selectedMinimumPrivilege: minimumPrivilege === 'custom' ? [] : [minimumPrivilege],
       role,
     });
   };
