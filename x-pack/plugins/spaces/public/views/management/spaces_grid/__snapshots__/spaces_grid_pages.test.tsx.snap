@@ -136,6 +136,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
 exports[`SpacesGridPage renders the list of spaces 1`] = `
 Array [
   <Component
+    announceSpaceName={true}
     size="s"
     space={
       Object {
@@ -176,6 +177,7 @@ Array [
     </EuiAvatar>
   </Component>,
   <Component
+    announceSpaceName={true}
     size="s"
     space={
       Object {
@@ -215,6 +217,7 @@ Array [
     </EuiAvatar>
   </Component>,
   <Component
+    announceSpaceName={true}
     size="s"
     space={
       Object {
