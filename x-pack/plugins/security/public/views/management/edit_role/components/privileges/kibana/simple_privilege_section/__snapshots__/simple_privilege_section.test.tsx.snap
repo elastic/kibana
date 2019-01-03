@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
+<React.Fragment>
+  <EuiDescribedFormGroup
+    description={
+      <p>
+        <FormattedMessage
+          defaultMessage="Specifies the Kibana privilege for this role."
+          id="xpack.security.management.editRoles.simplePrivilegeForm.specifyPrivilegeForRoleDescription"
+          values={Object {}}
+        />
+      </p>
+    }
+    fullWidth={false}
+    gutterSize="l"
+    title={
+      <h3>
+        <FormattedMessage
+          defaultMessage="Kibana privileges"
+          id="xpack.security.management.editRoles.simplePrivilegeForm.kibanaPrivilegesTitle"
+          values={Object {}}
+        />
+      </h3>
+    }
+    titleSize="xs"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={true}
+    >
+      <EuiSuperSelect
+        compressed={false}
+        disabled={false}
+        fullWidth={false}
+        hasDividers={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "dropdownDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                <strong>
+                  None
+                </strong>
+                <p>
+                  No access to Kibana
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                None
+              </EuiText>,
+              "value": "none",
+            },
+            Object {
+              "dropdownDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                <strong>
+                  Custom
+                </strong>
+                <p>
+                  Customize access to Kibana
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                Custom
+              </EuiText>,
+              "value": "custom",
+            },
+            Object {
+              "dropdownDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                <strong>
+                  Read
+                </strong>
+                <p>
+                  Grants read-only access to all of Kibana
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                Read
+              </EuiText>,
+              "value": "read",
+            },
+            Object {
+              "dropdownDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                <strong>
+                  All
+                </strong>
+                <p>
+                  Grants full access to Kibana
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText
+                grow={true}
+                size="m"
+              >
+                All
+              </EuiText>,
+              "value": "all",
+            },
+          ]
+        }
+        valueOfSelected="none"
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+</React.Fragment>
+`;

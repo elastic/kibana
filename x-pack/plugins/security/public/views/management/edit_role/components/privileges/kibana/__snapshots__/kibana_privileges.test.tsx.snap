@@ -5,14 +5,33 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
   iconType="logoKibana"
   title="Kibana"
 >
-  <InjectIntl(SpaceAwarePrivilegeFormUI)
+  <InjectIntl(SpaceAwarePrivilegeSectionUI)
     editable={true}
-    kibanaAppPrivileges={
-      Array [
-        "all",
-      ]
+    effectivePrivilegesFactory={
+      EffectivePrivilegesFactory {
+        "privilegeDefinition": PrivilegeDefinition {
+          "privilegeActionMap": Object {
+            "features": Object {},
+            "global": Object {},
+            "space": Object {},
+          },
+        },
+        "rankedFeaturePrivileges": Object {},
+        "rankedGlobalBasePrivileges": Array [],
+        "rankedSpaceBasePrivileges": Array [],
+      }
     }
+    features={Array []}
     onChange={[MockFunction]}
+    privilegeDefinition={
+      PrivilegeDefinition {
+        "privilegeActionMap": Object {
+          "features": Object {},
+          "global": Object {},
+          "space": Object {},
+        },
+      }
+    }
     role={
       Object {
         "elasticsearch": Object {
@@ -21,8 +40,17 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
           "run_as": Array [],
         },
         "kibana": Object {
-          "global": Array [],
-          "space": Object {},
+          "global": Object {
+            "feature": Object {},
+            "minimum": Array [],
+          },
+          "space": Object {
+            "someSpace": Object {
+              "feature": Object {},
+              "minimum": Array [],
+            },
+          },
+          "spaces": Array [],
         },
         "name": "",
       }
@@ -44,6 +72,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     }
     uiCapabilities={
       Object {
+        "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
         "spaces": Object {

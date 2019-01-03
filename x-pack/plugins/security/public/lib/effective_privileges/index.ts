@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EffectivePrivileges, PRIVILEGE_SOURCE } from './effective_privileges';
+export { EffectivePrivileges, PRIVILEGE_SOURCE, ExplanationResult } from './effective_privileges';
 export { EffectivePrivilegesFactory } from './effective_privileges_factory';

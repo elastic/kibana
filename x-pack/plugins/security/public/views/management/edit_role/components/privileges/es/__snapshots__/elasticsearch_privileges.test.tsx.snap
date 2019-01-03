@@ -58,7 +58,10 @@ exports[`it renders without crashing 1`] = `
                   "run_as": Array [],
                 },
                 "kibana": Object {
-                  "global": Array [],
+                  "global": Object {
+                    "feature": Object {},
+                    "minimum": Array [],
+                  },
                   "space": Object {},
                 },
                 "name": "",
@@ -182,7 +185,10 @@ exports[`it renders without crashing 1`] = `
               "run_as": Array [],
             },
             "kibana": Object {
-              "global": Array [],
+              "global": Object {
+                "feature": Object {},
+                "minimum": Array [],
+              },
               "space": Object {},
             },
             "name": "",

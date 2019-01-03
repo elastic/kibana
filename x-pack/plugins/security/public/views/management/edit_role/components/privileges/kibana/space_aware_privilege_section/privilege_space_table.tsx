@@ -12,14 +12,15 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import {
-  EffectivePrivilegesFactory,
-  PRIVILEGE_SOURCE,
-} from 'plugins/security/lib/effective_privileges';
+import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { getSpaceColor } from 'x-pack/plugins/spaces/common';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import {
+  EffectivePrivilegesFactory,
+  PRIVILEGE_SOURCE,
+} from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
 
 interface Props {
@@ -47,31 +48,31 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
     const effectivePrivileges = effectivePrivilegesFactory.getInstance(this.props.role);
 
     const items: any[] = [];
-    if (global.minimum.length > 0 || Object.keys(global.feature).length > 0) {
-      items.push({
-        isGlobal: true,
-        spaces: [
-          {
-            id: '*',
-            name: 'Global (all spaces)',
-            initials: '*',
-            color: '#afafaf',
-          },
-        ],
-        headerSpaces: [
-          {
-            id: '*',
-            name: 'Global (all spaces)',
-            initials: '*',
-            color: '#afafaf',
-          },
-        ],
-        privileges: {
-          minimum: global.minimum,
-          feature: global.feature,
-        },
-      });
-    }
+    // if (global.minimum.length > 0 || Object.keys(global.feature).length > 0) {
+    //   items.push({
+    //     isGlobal: true,
+    //     spaces: [
+    //       {
+    //         id: '*',
+    //         name: 'Global (all spaces)',
+    //         initials: '*',
+    //         color: '#afafaf',
+    //       },
+    //     ],
+    //     headerSpaces: [
+    //       {
+    //         id: '*',
+    //         name: 'Global (all spaces)',
+    //         initials: '*',
+    //         color: '#afafaf',
+    //       },
+    //     ],
+    //     privileges: {
+    //       minimum: global.minimum,
+    //       feature: global.feature,
+    //     },
+    //   });
+    // }
 
     spacePrivileges.forEach((spacePrivs, spacesIndex) => {
       items.push({

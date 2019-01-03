@@ -1,0 +1,379 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
+<EuiOverlayMask>
+  <EuiFlyout
+    closeButtonAriaLabel="Closes this dialog"
+    hideCloseButton={false}
+    maxWidth={true}
+    onClose={[Function]}
+    ownFocus={false}
+    size="s"
+  >
+    <EuiFlyoutHeader
+      hasBorder={false}
+    >
+      <EuiTitle
+        size="m"
+        textTransform="none"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Spaces privileges"
+            id="foo"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiForm>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Spaces"
+        >
+          <SpaceSelector
+            onChange={[Function]}
+            selectedSpaceIds={Array []}
+            spaces={
+              Array [
+                Object {
+                  "_reserved": true,
+                  "description": "",
+                  "disabledFeatures": Array [],
+                  "id": "default",
+                  "name": "Default Space",
+                },
+                Object {
+                  "description": "",
+                  "disabledFeatures": Array [],
+                  "id": "marketing",
+                  "name": "Marketing",
+                },
+              ]
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          helpText="Default privilege for apps and settings not listed in the table below."
+          label="Base privilege"
+        >
+          <EuiSuperSelect
+            compressed={false}
+            fullWidth={false}
+            hasDividers={true}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "dropdownDisplay": <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    <strong>
+                      Custom
+                    </strong>
+                    <p>
+                      Customize access to this space
+                    </p>
+                  </EuiText>,
+                  "inputDisplay": <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    Custom
+                  </EuiText>,
+                  "value": "custom",
+                },
+                Object {
+                  "disabled": false,
+                  "dropdownDisplay": <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    <strong>
+                      Read
+                    </strong>
+                    <p>
+                      Grants read-only access to all features in selected spaces
+                    </p>
+                  </EuiText>,
+                  "inputDisplay": <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    Read
+                  </EuiText>,
+                  "value": "read",
+                },
+                Object {
+                  "disabled": false,
+                  "dropdownDisplay": <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    <strong>
+                      All
+                    </strong>
+                    <p>
+                      Grants full access to all features in selected spaces
+                    </p>
+                  </EuiText>,
+                  "inputDisplay": <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    All
+                  </EuiText>,
+                  "value": "all",
+                },
+              ]
+            }
+            valueOfSelected="custom"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Customize by feature"
+        >
+          <FeatureTable
+            disabled={false}
+            effectivePrivileges={
+              EffectivePrivileges {
+                "assignedGlobalBaseActions": Array [],
+                "globalPrivilege": Object {
+                  "feature": Object {},
+                  "minimum": Array [],
+                  "spaces": Array [],
+                },
+                "privilegeDefinition": PrivilegeDefinition {
+                  "privilegeActionMap": Object {
+                    "features": Object {},
+                    "global": Object {},
+                    "space": Object {},
+                  },
+                },
+                "rankedFeaturePrivileges": Object {},
+                "rankedGlobalBasePrivileges": Array [],
+                "rankedSpaceBasePrivileges": Array [],
+                "role": Object {
+                  "elasticsearch": Object {
+                    "cluster": Array [
+                      "all",
+                    ],
+                    "indices": Array [],
+                    "run_as": Array [],
+                  },
+                  "kibana": Object {
+                    "global": Object {
+                      "feature": Object {},
+                      "minimum": Array [],
+                    },
+                    "spaces": Array [
+                      Object {
+                        "feature": Object {},
+                        "minimum": Array [],
+                        "spaces": Array [],
+                      },
+                    ],
+                  },
+                  "name": "test role",
+                },
+              }
+            }
+            features={Array []}
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
+              }
+            }
+            onChange={[Function]}
+            privilegeDefinition={
+              PrivilegeDefinition {
+                "privilegeActionMap": Object {
+                  "features": Object {},
+                  "global": Object {},
+                  "space": Object {},
+                },
+              }
+            }
+            role={
+              Object {
+                "elasticsearch": Object {
+                  "cluster": Array [
+                    "all",
+                  ],
+                  "indices": Array [],
+                  "run_as": Array [],
+                },
+                "kibana": Object {
+                  "global": Object {
+                    "feature": Object {},
+                    "minimum": Array [],
+                  },
+                  "spaces": Array [
+                    Object {
+                      "feature": Object {},
+                      "minimum": Array [],
+                      "spaces": Array [],
+                    },
+                  ],
+                },
+                "name": "test role",
+              }
+            }
+            showLocks={true}
+            spacesIndex={0}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </EuiFlyoutBody>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="l"
+        justifyContent="spaceBetween"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiButtonEmpty
+            color="primary"
+            flush="left"
+            iconSide="left"
+            iconType="cross"
+            onClick={[Function]}
+            type="button"
+          >
+            Close
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiButton
+            color="primary"
+            disabled={true}
+            fill={true}
+            iconSide="left"
+            onClick={[Function]}
+            type="button"
+          >
+            Save
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  </EuiFlyout>
+</EuiOverlayMask>
+`;

@@ -6,6 +6,8 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
+import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
@@ -22,6 +24,7 @@ const buildProps = (customProps: any = {}) => {
       },
       kibana: {
         global: { minimum: [], feature: {} },
+        spaces: [],
         space: {},
       },
     },
@@ -42,21 +45,23 @@ const buildProps = (customProps: any = {}) => {
         manage: true,
       },
     },
+    features: [],
     editable: true,
     kibanaAppPrivileges: ['all', 'read'],
     onChange: jest.fn(),
     validator: new RoleValidator(),
+    effectivePrivilegesFactory: new EffectivePrivilegesFactory(
+      new PrivilegeDefinition({
+        features: {},
+        global: {},
+        space: {},
+      })
+    ),
     ...customProps,
   };
 };
 
 describe('<SpaceAwarePrivilegeForm>', () => {
-  it('renders without crashing', () => {
-    expect(
-      shallowWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...buildProps()} />)
-    ).toMatchSnapshot();
-  });
-
   it('shows the space table if exisitng space privileges are declared', () => {
     const props = buildProps({
       role: {
@@ -65,9 +70,13 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
         kibana: {
           global: ['read'],
-          space: {
-            default: ['all'],
-          },
+          spaces: [
+            {
+              spaces: ['default'],
+              minimum: ['all'],
+              feature: {},
+            },
+          ],
         },
       },
     });
@@ -87,7 +96,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
     expect(table).toMatchSnapshot();
   });
 
-  it('adds a form row when clicking the "Add Space Privilege" button', () => {
+  it('Renders flyout after clicking "Add a privilege" button', () => {
     const props = buildProps({
       role: {
         elasticsearch: {
@@ -95,9 +104,13 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
         kibana: {
           global: ['read'],
-          space: {
-            default: ['all'],
-          },
+          spaces: [
+            {
+              spaces: ['default'],
+              minimum: ['all'],
+              feature: {},
+            },
+          ],
         },
       },
     });
@@ -119,9 +132,13 @@ describe('<SpaceAwarePrivilegeForm>', () => {
           },
           kibana: {
             global: ['read'],
-            space: {
-              default: ['all'],
-            },
+            spaces: [
+              {
+                spaces: ['default'],
+                minimum: ['all'],
+                feature: {},
+              },
+            ],
           },
         },
       });
@@ -145,9 +162,13 @@ describe('<SpaceAwarePrivilegeForm>', () => {
           },
           kibana: {
             global: [],
-            space: {
-              default: ['all'],
-            },
+            spaces: [
+              {
+                spaces: ['default'],
+                minimum: ['all'],
+                feature: {},
+              },
+            ],
           },
         },
       });

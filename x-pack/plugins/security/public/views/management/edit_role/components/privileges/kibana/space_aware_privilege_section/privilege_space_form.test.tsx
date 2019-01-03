@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
+import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 
@@ -28,16 +29,18 @@ const buildProps = (customProps = {}) => {
         disabledFeatures: [],
       },
     ],
-    spaceId: null,
     privilegeDefinition: new PrivilegeDefinition({
       features: {},
       global: {},
       space: {},
     }),
-    effectivePrivileges: {
-      allows: { global: { feature: {} }, space: { minimum: [], feature: {} } },
-      grants: { global: { feature: {} }, space: { minimum: [], feature: {} } },
-    },
+    effectivePrivilegesFactory: new EffectivePrivilegesFactory(
+      new PrivilegeDefinition({
+        global: {},
+        features: {},
+        space: {},
+      })
+    ),
     features: [],
     role: {
       name: 'test role',
@@ -51,21 +54,27 @@ const buildProps = (customProps = {}) => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [
+          {
+            spaces: [],
+            minimum: [],
+            feature: {},
+          },
+        ],
       },
     },
     onChange: jest.fn(),
+    onCancel: jest.fn(),
     onDelete: jest.fn(),
     validator: new RoleValidator(),
     intl: {} as any,
+    editingIndex: 0,
     ...customProps,
   };
 };
 
 describe('<PrivilegeSpaceForm>', () => {
   it('renders without crashing', () => {
-    expect(
-      shallowWithIntl(<PrivilegeSpaceForm.WrappedComponent {...buildProps()} />)
-    ).toMatchSnapshot();
+    expect(shallowWithIntl(<PrivilegeSpaceForm {...buildProps()} />)).toMatchSnapshot();
   });
 });

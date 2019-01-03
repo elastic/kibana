@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+// @ts-ignore
+import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PrivilegeSelector } from './privilege_selector';
@@ -20,6 +21,7 @@ const buildProps = (customProps?: any) => {
       },
       kibana: {
         global: { minimum: [], feature: {} },
+        spaces: [],
         space: {},
       },
     },
@@ -38,9 +40,9 @@ describe('<SimplePrivilegeForm>', () => {
   it('displays "none" when no privilege is selected', () => {
     const props = buildProps();
     const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
-    const selector = wrapper.find(PrivilegeSelector);
+    const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
-      value: 'none',
+      valueOfSelected: 'none',
     });
   });
 
@@ -49,22 +51,29 @@ describe('<SimplePrivilegeForm>', () => {
       role: {
         elasticsearch: {},
         kibana: {
-          global: ['read'],
+          // global: ['read'],
+          spaces: [
+            {
+              spaces: ['*'],
+              minimum: ['read'],
+              feature: {},
+            },
+          ],
         },
       },
     });
     const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
-    const selector = wrapper.find(PrivilegeSelector);
+    const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
-      value: 'read',
+      valueOfSelected: 'read',
     });
   });
 
   it('fires its onChange callback when the privilege changes', () => {
     const props = buildProps();
     const wrapper = mountWithIntl(<SimplePrivilegeSection {...props} />);
-    const selector = wrapper.find(PrivilegeSelector).find('select');
-    selector.simulate('change', { target: { value: 'all' } });
+    const selector = wrapper.find(EuiSuperSelect);
+    (selector.props() as any).onChange('all');
 
     expect(props.onChange).toHaveBeenCalledWith({
       name: '',
@@ -74,8 +83,12 @@ describe('<SimplePrivilegeForm>', () => {
         run_as: [],
       },
       kibana: {
-        global: ['all'],
+        global: {
+          feature: {},
+          minimum: [],
+        },
         space: {},
+        spaces: [{ feature: {}, minimum: ['all'], spaces: ['*'] }],
       },
     });
   });

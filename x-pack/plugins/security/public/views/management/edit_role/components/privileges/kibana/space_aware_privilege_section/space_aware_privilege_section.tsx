@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   EuiButton,
   EuiCallOut,
@@ -14,6 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import _ from 'lodash';
 import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges';
 import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
@@ -200,7 +200,12 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     }
 
     const addPrivilegeButton = (
-      <EuiButton color="primary" onClick={this.addSpacePrivilege} iconType={'spacesApp'}>
+      <EuiButton
+        color="primary"
+        onClick={this.addSpacePrivilege}
+        iconType={'spacesApp'}
+        data-test-subj={'addSpacePrivilegeButton'}
+      >
         Add a privilege
       </EuiButton>
     );
@@ -259,7 +264,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
 
     const displaySpaces = this.getDisplaySpaces();
 
-    const assignedSpaces: Space[] = _.uniq(spacePrivileges.flatMap(entry => entry.spaces))
+    const assignedSpaces: Space[] = _.uniq(_.flatten(spacePrivileges.map(entry => entry.spaces)))
       .map(spaceId => displaySpaces.find(s => s.id === spaceId))
       .filter(Boolean) as Space[];
 
