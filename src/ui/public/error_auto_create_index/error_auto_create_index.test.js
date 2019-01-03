@@ -26,7 +26,7 @@ jest.mock('../metadata', () => ({
   },
 }));
 
-import fetchMock from 'fetch-mock';
+import fetchMock from 'fetch-mock/es5/client';
 import { kfetch } from 'ui/kfetch';
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
