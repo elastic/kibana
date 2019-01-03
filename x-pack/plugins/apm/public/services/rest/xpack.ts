@@ -20,7 +20,7 @@ export interface LicenseApiResponse {
     index_management: StringMap;
     logstash: StringMap;
     ml: {
-      isAvailable: boolean;
+      is_available: boolean;
       license_type: number;
       has_expired: boolean;
       enable_links: boolean;

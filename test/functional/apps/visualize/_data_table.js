@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
-      await PageObjects.visualize.selectField('_source', 'metrics');
+      await PageObjects.visualize.selectField('agent.raw', 'metrics');
       await PageObjects.visualize.clickGo();
       const data = await PageObjects.visualize.getTableVisData();
       log.debug(data);

@@ -497,10 +497,9 @@ export class JobCreateUi extends Component {
     return (
       <Fragment>
         <EuiPage>
-          <EuiPageBody>
+          <EuiPageBody restrictWidth>
             <EuiPageContent
               horizontalPosition="center"
-              className="rollupJobWizardPage"
             >
               <EuiPageContentHeader>
                 <EuiTitle size="l">
