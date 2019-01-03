@@ -19,6 +19,7 @@
 
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
+import { resolve } from 'path';
 
 import manageUuid from './server/lib/manage_uuid';
 import { searchApi } from './server/routes/api/search';
@@ -72,7 +73,7 @@ export default function (kibana) {
         }),
         main: 'plugins/kibana/kibana',
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       links: [
         {
           id: 'kibana:discover',

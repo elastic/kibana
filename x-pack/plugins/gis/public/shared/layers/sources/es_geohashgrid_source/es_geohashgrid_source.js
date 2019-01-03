@@ -135,6 +135,10 @@ export class ESGeohashGridSource extends VectorSource {
     return true;
   }
 
+  isRefreshTimerAware() {
+    return true;
+  }
+
   getFieldNames() {
     return this.getMetricFields().map(({ propertyKey }) => {
       return propertyKey;

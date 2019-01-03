@@ -25,6 +25,22 @@ export default function ({ getPageObjects }) {
       await PageObjects.gis.closeInspector();
     });
 
+    it('should re-fetch join with refresh timer', async () => {
+      async function getRequestTimestamp() {
+        await PageObjects.gis.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        const requestStats = await PageObjects.gis.getInspectorTableData();
+        const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
+        await PageObjects.gis.closeInspector();
+        return requestTimestamp;
+      }
+
+      const beforeRefreshTimerTimestamp = await getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp.length).to.be(24);
+      await PageObjects.gis.triggerSingleRefresh(1000);
+      const afterRefreshTimerTimestamp = await getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+    });
+
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.gis.getMapboxStyle();
       expect(mapboxStyle.sources.n1t6f.data.features.length).to.equal(3);

@@ -120,7 +120,7 @@ export default function ({ getService }) {
           {
             name: 'test_cluster',
             seeds: [
-              '127.0.0.1:9300'
+              'localhost:9300'
             ],
             isConnected: true,
             connectedNodesCount: 1,
