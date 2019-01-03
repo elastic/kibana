@@ -6,9 +6,6 @@
 
 import mockAnnotationsOverlap from './__mocks__/mock_annotations_overlap.json';
 
-import { shallow } from 'enzyme';
-import React from 'react';
-
 import { getAnnotationLevels } from './timeseries_chart_annotations';
 
 describe('Timeseries Chart Annotations: getAnnotationLevels()', () => {
