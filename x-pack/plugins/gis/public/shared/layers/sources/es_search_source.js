@@ -149,8 +149,16 @@ export class ESSearchSource extends VectorSource {
     }
 
     let featureCollection;
+    const flattenHit = hit => {
+      const properties = indexPattern.flattenHit(hit);
+      // remove metaFields
+      indexPattern.metaFields.forEach(metaField => {
+        delete properties[metaField];
+      });
+      return properties;
+    };
     try {
-      featureCollection = hitsToGeoJson(resp.hits.hits, geoField.name, geoField.type);
+      featureCollection = hitsToGeoJson(resp.hits.hits, flattenHit, geoField.name, geoField.type);
     } catch(error) {
       throw new Error(`Unable to convert search response to geoJson feature collection, error: ${error.message}`);
     }
