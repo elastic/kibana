@@ -147,4 +147,28 @@ export const registerFollowerIndexRoutes = (server) => {
       }
     },
   });
+
+  /**
+   * Unfollow follower index's leader index
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}/unfollow`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+
+      try {
+        return await callWithRequest('ccr.unfollowFollowerIndex', { id });
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
 };

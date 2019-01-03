@@ -36,6 +36,7 @@ const registerHandlers = () => {
     2: 'create',
     3: 'pause',
     4: 'resume',
+    5: 'unfollow',
   };
 
   const server = {
@@ -165,6 +166,20 @@ describe('[CCR API Routes] Follower Index', () => {
     });
 
     it('should return 200 status when follower index is resumed', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 1 } });
+      expect(response).toEqual({ acknowledge: true });
+    });
+  });
+
+  describe('unfollow()', () => {
+    beforeEach(() => {
+      resetHttpRequestResponses();
+      routeHandler = routeHandlers.unfollow;
+    });
+
+    it('should return 200 status when follower index unfollows its leader', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
       const response = await routeHandler({ params: { id: 1 } });
