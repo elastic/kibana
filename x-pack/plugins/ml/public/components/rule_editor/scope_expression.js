@@ -17,7 +17,6 @@ import React, {
 import {
   EuiCheckbox,
   EuiExpression,
-  EuiExpressionButton,
   EuiPopoverTitle,
   EuiFlexItem,
   EuiFlexGroup,
@@ -96,7 +95,7 @@ export class ScopeExpression extends Component {
     return (
       <div style={POPOVER_STYLE}>
         <EuiPopoverTitle>Is</EuiPopoverTitle>
-        <EuiExpression>
+        <div className="euiExpression">
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 150 }}>
               <EuiSelect
@@ -117,7 +116,7 @@ export class ScopeExpression extends Component {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     );
   }
@@ -141,10 +140,10 @@ export class ScopeExpression extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiExpressionButton
+          <EuiExpression
             className="scope-field-button"
             description="when"
-            buttonValue={fieldName}
+            value={fieldName}
             isActive={false}
             onClick={(event) => event.preventDefault()}
           />
@@ -155,9 +154,9 @@ export class ScopeExpression extends Component {
             <EuiPopover
               id="operatorValuePopover"
               button={(
-                <EuiExpressionButton
+                <EuiExpression
                   description={`is ${filterTypeToText(filterType)}`}
-                  buttonValue={filterId || ''}
+                  value={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}
                 />

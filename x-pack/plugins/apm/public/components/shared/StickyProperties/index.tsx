@@ -20,7 +20,7 @@ import {
 } from '../../../style/variables';
 
 export interface IStickyProperty {
-  val: any;
+  val: React.ReactNode | Date;
   label: string;
   fieldName?: string;
   width?: 0 | string;
@@ -40,6 +40,7 @@ const PropertyLabel = styled.div`
     cursor: help;
   }
 `;
+PropertyLabel.displayName = 'PropertyLabel';
 
 const PropertyValueDimmed = styled.span`
   color: ${colors.gray3};
@@ -49,6 +50,7 @@ const PropertyValue = styled.div`
   display: inline-block;
   line-height: ${px(unit)};
 `;
+PropertyValue.displayName = 'PropertyValue';
 
 const PropertyValueTruncated = styled.span`
   display: inline-block;
@@ -90,7 +92,7 @@ function getPropertyValue({
   truncated = false
 }: Partial<IStickyProperty>) {
   if (fieldName === '@timestamp') {
-    return <TimestampValue timestamp={val} />;
+    return <TimestampValue timestamp={val as Date} />;
   }
 
   if (truncated) {

@@ -105,7 +105,6 @@ export function explorerChartsContainerServiceFactory(
       const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
       return mlResultsService.getMetricData(
         config.datafeedConfig.indices,
-        config.datafeedConfig.types,
         config.entityFields,
         datafeedQuery,
         config.metricFunction,
@@ -165,7 +164,6 @@ export function explorerChartsContainerServiceFactory(
       const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
       return mlResultsService.getEventDistributionData(
         config.datafeedConfig.indices,
-        config.datafeedConfig.types,
         splitField,
         filterField,
         datafeedQuery,
