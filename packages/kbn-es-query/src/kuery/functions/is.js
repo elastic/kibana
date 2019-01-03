@@ -44,6 +44,7 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
 export function toElasticsearchQuery(node, indexPattern) {
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
 
+  const fieldName = ast.toElasticsearchQuery(fieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
 
@@ -80,7 +81,10 @@ export function toElasticsearchQuery(node, indexPattern) {
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
-  const isMatchAllQuery = isExistsQuery && fields && indexPattern && fields.length === indexPattern.fields.length;
+  const isAllFieldsQuery =
+    (fieldNameArg.type === 'wildcard' && fieldName === '*')
+    || (fields && indexPattern && fields.length === indexPattern.fields.length);
+  const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {
     return { match_all: {} };
