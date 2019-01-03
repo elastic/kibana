@@ -49,7 +49,7 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <Link to={`/${uri}`}>
-              <EuiText>
+              <EuiText data-test-subj="codeRepositoryItem">
                 <EuiTextColor color="subdued">{org}</EuiTextColor>/<strong>{name}</strong>
               </EuiText>
             </Link>

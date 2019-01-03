@@ -22,6 +22,7 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
+  CodeHomePageProvider,
 } from './page_objects';
 
 import {
@@ -82,6 +83,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/gis'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
+      resolve(__dirname, './apps/code'),
     ],
 
     // define the name and providers for services that should be
@@ -135,6 +137,7 @@ export default async function ({ readConfigFile }) {
       gis: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
+      code: CodeHomePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -196,6 +199,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
+      code: {
+        pathname: '/app/code',
+        hash: '/admin',
+      }
     },
 
     // choose where esArchiver should load archives from
