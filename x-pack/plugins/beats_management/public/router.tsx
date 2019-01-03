@@ -13,18 +13,7 @@ import { BeatsContainer } from './containers/beats';
 import { TagsContainer } from './containers/tags';
 import { URLStateProps, WithURLState } from './containers/with_url_state';
 import { FrontendLibs } from './lib/types';
-import { RouteTreeBuilder } from './utils/page_loader/page_loader';
-
-// See ./utils/page_loader/readme.md for details on how this works
-// suffice to to say it dynamicly creates routes and pages based on the filesystem
-// This is to ensure that the patterns are followed and types assured
-// @ts-ignore
-const requirePages = require.context('./pages', true, /\.tsx$/);
-const routeTreeBuilder = new RouteTreeBuilder(requirePages);
-const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
-  '/tag': ['action', 'tagid?'],
-  '/beat': ['beatId'],
-});
+import { routeMap } from './pages/index';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -124,7 +113,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
         <WithURLState>
           {(URLProps: URLStateProps) => (
             <ChildRoutes
-              routes={routesFromFilesystem}
+              routes={routeMap}
               {...URLProps}
               {...{
                 libs: this.props.libs,
