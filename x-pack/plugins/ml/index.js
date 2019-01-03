@@ -40,7 +40,7 @@ export const ml = (kibana) => {
     uiExports: {
       app: {
         title: i18n.translate('xpack.ml.mlNavTitle', {
-          defaultMessage: 'Machine Le$arning'
+          defaultMessage: 'Machine Learning'
         }),
         description: i18n.translate('xpack.ml.mlNavDescription', {
           defaultMessage: 'Machine Learning for the Elastic Stack'
