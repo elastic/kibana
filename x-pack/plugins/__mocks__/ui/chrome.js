@@ -36,8 +36,13 @@ function getInjected(key) {
   }
 }
 
+function getXsrfToken() {
+  return 'kbn';
+}
+
 export default {
   getInjected,
   addBasePath,
-  getUiSettingsClient
+  getUiSettingsClient,
+  getXsrfToken
 };

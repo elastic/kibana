@@ -24,10 +24,14 @@ export function registerReindexIndicesRoutes(server: Server) {
     savedObjectsRepository
   ) as SavedObjectsClient;
 
-  // Cannot pass server.log directly because it's value changes during startup?.
+  // Cannot pass server.log directly because it's value changes during startup (?).
+  // Use this function to proxy through.
   const log: Server['log'] = (
-    ...args: [string | string[], string | object | (() => any) | undefined, number?]
-  ) => server.log(...args);
+    tags: string | string[],
+    data?: string | object | (() => any),
+    timestamp?: number
+  ) => server.log(tags, data, timestamp);
+
   const worker = new ReindexWorker(savedObjectsClient, callWithInternalUser, log);
 
   worker.start();
