@@ -8,6 +8,7 @@ import { get, set } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange } from '../../../../common/domain_types';
 import { ErrorListItem } from '../../../../common/graphql/types';
+import { getDateHistogramIntervalMillis } from '../../../util';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -79,9 +80,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
     const aggs = {
       timeseries: {
-        auto_date_histogram: {
+        date_histogram: {
           field: '@timestamp',
-          buckets: 50,
+          interval: getDateHistogramIntervalMillis(dateRangeStart, dateRangeEnd),
         },
         aggs: {
           max_content: { max: { field: 'http.rtt.content.us' } },
@@ -265,9 +266,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                 },
               },
               histogram: {
-                auto_date_histogram: {
+                date_histogram: {
                   field: '@timestamp',
-                  buckets: 50,
+                  interval: getDateHistogramIntervalMillis(dateRangeStart, dateRangeEnd),
                 },
                 aggs: {
                   status: {

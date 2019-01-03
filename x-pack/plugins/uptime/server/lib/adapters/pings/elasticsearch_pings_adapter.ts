@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
+import { getDateHistogramIntervalMillis } from '../../../util';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -150,9 +151,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
         aggs: {
           timeseries: {
-            auto_date_histogram: {
+            date_histogram: {
               field: '@timestamp',
-              buckets: 50,
+              interval: getDateHistogramIntervalMillis(dateRangeStart, dateRangeEnd),
             },
             aggs: {
               by_id: {
