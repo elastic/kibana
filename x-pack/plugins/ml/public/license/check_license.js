@@ -33,25 +33,7 @@ export function checkFullLicense(Private, kbnBaseUrl, kbnUrl) {
   } else {
 
     // ML is enabled
-    licenseHasExpired = (features.hasExpired || false);
-    // If the license has expired ML app will still work for 7 days and then
-    // the job management endpoints (e.g. create job, start datafeed) will be restricted.
-    // Therefore we need to keep the app enabled but show an info banner to the user.
-    if(licenseHasExpired) {
-      const message = features.message;
-      if (expiredLicenseBannerId === undefined) {
-        // Only show the banner once with no way to dismiss it
-        expiredLicenseBannerId = banners.add({
-          component: (
-            <EuiCallOut
-              iconType="iInCircle"
-              color="warning"
-              title={message}
-            />
-          ),
-        });
-      }
-    }
+    setLicenseExpired(features);
     return Promise.resolve(features);
   }
 }
@@ -67,6 +49,7 @@ export function checkBasicLicense(Private, kbnBaseUrl) {
   } else {
 
     // ML is enabled
+    setLicenseExpired(features);
     return Promise.resolve(features);
   }
 }
@@ -87,6 +70,28 @@ export function checkLicenseExpired(Private, kbnBaseUrl, kbnUrl) {
     .catch(() => {
       return Promise.halt();
     });
+}
+
+function setLicenseExpired(features) {
+  licenseHasExpired = (features.hasExpired || false);
+  // If the license has expired ML app will still work for 7 days and then
+  // the job management endpoints (e.g. create job, start datafeed) will be restricted.
+  // Therefore we need to keep the app enabled but show an info banner to the user.
+  if(licenseHasExpired) {
+    const message = features.message;
+    if (expiredLicenseBannerId === undefined) {
+      // Only show the banner once with no way to dismiss it
+      expiredLicenseBannerId = banners.add({
+        component: (
+          <EuiCallOut
+            iconType="iInCircle"
+            color="warning"
+            title={message}
+          />
+        ),
+      });
+    }
+  }
 }
 
 function getFeatures(Private) {
