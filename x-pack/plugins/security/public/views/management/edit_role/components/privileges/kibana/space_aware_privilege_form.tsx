@@ -282,28 +282,22 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
 
           switch (actualPrivilege.source) {
             case PRIVILEGE_SOURCE.NONE:
-            case PRIVILEGE_SOURCE.ASSIGNED:
+            case PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY:
               return (
                 <EuiText>
                   {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                  <br />
-                  <em>configured directly</em>
                 </EuiText>
               );
             case PRIVILEGE_SOURCE.EFFECTIVE:
               return (
                 <EuiText>
                   {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                  <br />
-                  <em>{actualPrivilege.details}</em>
                 </EuiText>
               );
             case PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED:
               return (
                 <EuiText>
                   {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                  <br />
-                  <em>{actualPrivilege.details}</em>
                 </EuiText>
               );
             default:
