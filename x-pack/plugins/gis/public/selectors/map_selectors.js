@@ -109,7 +109,7 @@ export const getMapZoom = ({ map }) => map.mapState.zoom ?
 export const getMapCenter = ({ map }) => map.mapState.center ?
   map.mapState.center : { lat: 0, lon: 0 };
 
-export const getMouseCoordinates = ({ map }) => map.mouseCoordinates;
+export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 
 export const getMapColors = ({ map }) => {
   return map.layerList.reduce((accu, layer) => {

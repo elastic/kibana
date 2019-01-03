@@ -34,13 +34,16 @@ map-listing, .gisListingPage {
   flex-grow: 1;
 }
 
-.LayerControl {
+.widgetOverlay {
   position: absolute;
   z-index: 100;
   min-width: 17rem;
   top: $euiSizeM;
   right: $euiSizeM;
   max-width: 24rem;
+}
+
+.WidgetControl {
   padding-bottom: 8px;
   border-color: transparent;
 
@@ -48,7 +51,7 @@ map-listing, .gisListingPage {
     @include euiBottomShadowLarge;
   }
 
-  .LayerControl--header {
+  .WidgetControl--header {
     padding: 16px 16px 8px;
   }
 }

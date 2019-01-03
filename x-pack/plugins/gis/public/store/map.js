@@ -79,11 +79,11 @@ const INITIAL_STATE = {
       lat: 32.82
     },
     extent: null,
+    mouseCoordinates: null,
     timeFilters: null,
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
   },
-  mouseCoordinates: null,
   selectedLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],

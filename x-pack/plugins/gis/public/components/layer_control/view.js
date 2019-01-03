@@ -11,10 +11,8 @@ import {
   EuiPanel,
   EuiButtonEmpty,
   EuiTitle,
-  EuiPopover
 } from '@elastic/eui';
 import { LayerTOC } from '../layer_toc';
-import { SetView } from '../set_view';
 
 export function LayerControl(props) {
   const addLayer = (
@@ -22,35 +20,10 @@ export function LayerControl(props) {
       Add layer
     </EuiButtonEmpty>);
 
-  const toggleSetViewVisibility = () => {
-    if (props.isSetViewOpen) {
-      props.closeSetView();
-      return;
-    }
-
-    props.openSetView();
-  };
-  const setView = (
-    <EuiPopover
-      button={(
-        <EuiButtonEmpty
-          size="xs"
-          onClick={toggleSetViewVisibility}
-          data-test-subj="toggleSetViewVisibilityButton"
-        >
-          Set view
-        </EuiButtonEmpty>)}
-      isOpen={props.isSetViewOpen}
-      closePopover={props.closeSetView}
-    >
-      <SetView />
-    </EuiPopover>
-  );
-
   return (
-    <EuiPanel className="LayerControl" hasShadow paddingSize="none">
+    <EuiPanel className="WidgetControl" hasShadow paddingSize="none">
       <EuiFlexGroup
-        className="LayerControl--header"
+        className="WidgetControl--header"
         justifyContent="spaceBetween"
         alignItems="center"
         responsive={false}
@@ -60,9 +33,6 @@ export function LayerControl(props) {
           <EuiTitle size="s">
             <h1>Layers</h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {setView}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {addLayer}

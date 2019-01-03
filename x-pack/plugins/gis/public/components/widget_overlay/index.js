@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function MouseCoordinates() {
-  return null;
-}
+import { connect } from 'react-redux';
+import { WidgetOverlay } from './widget_overlay';
+
+const connectedWidgetOverlay = connect(null, null)(WidgetOverlay);
+export { connectedWidgetOverlay as WidgetOverlay };

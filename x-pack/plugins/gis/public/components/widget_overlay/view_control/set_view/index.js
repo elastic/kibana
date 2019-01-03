@@ -6,9 +6,9 @@
 
 import { connect } from 'react-redux';
 import { SetView } from './set_view';
-import { mapExtentChanged } from '../../actions/store_actions';
-import { getMapZoom, getMapCenter } from "../../selectors/map_selectors";
-import { closeSetView } from '../../store/ui';
+import { mapExtentChanged } from '../../../../actions/store_actions';
+import { getMapZoom, getMapCenter } from "../../../../selectors/map_selectors";
+import { closeSetView } from '../../../../store/ui';
 
 function mapStateToProps(state = {}) {
   return {
