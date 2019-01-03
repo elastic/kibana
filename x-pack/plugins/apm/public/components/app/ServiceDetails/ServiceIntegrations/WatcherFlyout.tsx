@@ -24,8 +24,7 @@ import {
   EuiText,
   EuiTitle
 } from '@elastic/eui';
-import { memoize } from 'lodash';
-import { padLeft, range } from 'lodash';
+import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
