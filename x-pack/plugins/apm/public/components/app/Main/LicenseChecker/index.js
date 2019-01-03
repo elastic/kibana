@@ -11,7 +11,7 @@ function LicenseChecker() {
   return (
     <LicenceRequest
       render={({ data, status }) => {
-        if (status === STATUS.SUCCESS && !data.license.isActive) {
+        if (status === STATUS.SUCCESS && !data.license.is_active) {
           window.location = '#/invalid-license';
         }
         return null;

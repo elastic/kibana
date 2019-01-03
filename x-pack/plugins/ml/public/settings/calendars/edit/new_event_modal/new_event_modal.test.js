@@ -6,7 +6,7 @@
 
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { NewEventModal } from './new_event_modal';
 import moment from 'moment';
@@ -24,8 +24,8 @@ const stateTimestamps = {
 describe('NewEventModal', () => {
 
   it('Add button disabled if description empty', () => {
-    const wrapper = shallow(
-      <NewEventModal {...testProps} />
+    const wrapper = shallowWithIntl(
+      <NewEventModal.WrappedComponent {...testProps} />
     );
 
     const addButton = wrapper.find('EuiButton').first();
@@ -33,7 +33,7 @@ describe('NewEventModal', () => {
   });
 
   it('if endDate is less than startDate should set startDate one day before endDate', () => {
-    const wrapper = shallow(<NewEventModal {...testProps} />);
+    const wrapper = shallowWithIntl(<NewEventModal.WrappedComponent {...testProps} />);
     const instance = wrapper.instance();
     instance.setState({
       startDate: moment(stateTimestamps.startDate),
@@ -53,7 +53,7 @@ describe('NewEventModal', () => {
   });
 
   it('if startDate is greater than endDate should set endDate one day after startDate', () => {
-    const wrapper = shallow(<NewEventModal {...testProps} />);
+    const wrapper = shallowWithIntl(<NewEventModal.WrappedComponent {...testProps} />);
     const instance = wrapper.instance();
     instance.setState({
       startDate: moment(stateTimestamps.startDate),
