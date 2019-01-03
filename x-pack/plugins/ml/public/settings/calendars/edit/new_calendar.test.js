@@ -46,7 +46,7 @@ jest.mock('./utils', () => ({
   })),
 }));
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { NewCalendar } from './new_calendar';
 
@@ -84,16 +84,16 @@ const props = {
 describe('NewCalendar', () => {
 
   test('Renders new calendar form', () => {
-    const wrapper = shallow(
-      <NewCalendar {...props}/>
+    const wrapper = shallowWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Import modal shown on Import Events button click', () => {
-    const wrapper = mount(
-      <NewCalendar {...props}/>
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_import_events"]');
@@ -104,8 +104,8 @@ describe('NewCalendar', () => {
   });
 
   test('New event modal shown on New event button click', () => {
-    const wrapper = mount(
-      <NewCalendar {...props}/>
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_new_event"]');
@@ -116,8 +116,8 @@ describe('NewCalendar', () => {
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', () => {
-    const wrapper = mount(
-      <NewCalendar {...props}/>
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const instance = wrapper.instance();
@@ -135,8 +135,8 @@ describe('NewCalendar', () => {
       canCreateCalendar: false,
     };
 
-    const wrapper = mount(
-      <NewCalendar {...noCreateProps} />
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...noCreateProps} />
     );
 
     const buttons = wrapper.find('[data-testid="ml_save_calendar_button"]');

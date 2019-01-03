@@ -19,6 +19,8 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 const template = `
   <ml-nav-menu name="settings" />
   <div class="mlCalendarManagement">
@@ -61,7 +63,9 @@ module.directive('mlNewCalendar', function ($route) {
       };
 
       ReactDOM.render(
-        React.createElement(NewCalendar, props),
+        <I18nProvider>
+          {React.createElement(NewCalendar, props)}
+        </I18nProvider>,
         element[0]
       );
     }
