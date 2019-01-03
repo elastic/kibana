@@ -40,7 +40,7 @@ export interface Feature {
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
-const prohibitedFeatureIds: Array<keyof UICapabilities> = ['management', 'navLinks'];
+const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'management', 'navLinks'];
 
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
