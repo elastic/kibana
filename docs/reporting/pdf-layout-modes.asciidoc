@@ -5,7 +5,7 @@ When creating a PDF report, there are two layout modes *Optimize PDF for printin
 
 --
 [role="screenshot"]
-image:reporting/images/pdf-reporting.png["PDF Reporting",link="pdf-reporting.png"]
+image:reporting/images/preserve-layout-switch.png["PDF Reporting",link="preserve-layout-switch.png"]
 --
 
 [float]
