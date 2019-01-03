@@ -44,9 +44,7 @@ function isValidTimeRange(timeRange) {
   return (interval !== null);
 }
 
-export const CustomUrlList = injectI18n(class extends Component {
-  static DisplayName = 'CustomUrlList';
-
+export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
     customUrls: PropTypes.array.isRequired,
@@ -115,7 +113,7 @@ export const CustomUrlList = injectI18n(class extends Component {
           console.log('Error obtaining URL for test:', resp);
           toastNotifications.addDanger(
             this.props.intl.formatMessage({
-              id: 'xpack.ml.customUrlsList.obtainingUrlToTestConfigurationErrorMessage',
+              id: 'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
               defaultMessage: 'An error occurred obtaining the URL to test the configuration'
             })
           );
@@ -137,7 +135,7 @@ export const CustomUrlList = injectI18n(class extends Component {
       const isInvalidLabel = !isValidLabel(label, otherUrls);
       const invalidLabelError = (isInvalidLabel === true) ? [
         intl.formatMessage({
-          id: 'xpack.ml.customUrlsList.invalidLabelErrorMessage',
+          id: 'xpack.ml.customUrlEditorList.labelIsNotUniqueErrorMessage',
           defaultMessage: 'A unique label must be supplied'
         })
       ] : [];
@@ -147,7 +145,7 @@ export const CustomUrlList = injectI18n(class extends Component {
       const isInvalidTimeRange = !(isValidTimeRange(timeRange));
       const invalidIntervalError = (isInvalidTimeRange === true) ? [
         intl.formatMessage({
-          id: 'xpack.ml.customUrlsList.invalidFormatErrorMessage',
+          id: 'xpack.ml.customUrlEditorList.invalidFormatErrorMessage',
           defaultMessage: 'Invalid format'
         })
       ] : [];
@@ -157,7 +155,7 @@ export const CustomUrlList = injectI18n(class extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow
               label={<FormattedMessage
-                id="xpack.ml.customUrlsList.labelLabel"
+                id="xpack.ml.customUrlEditorList.labelLabel"
                 defaultMessage="Label"
               />}
               isInvalid={isInvalidLabel}
@@ -173,7 +171,7 @@ export const CustomUrlList = injectI18n(class extends Component {
           <EuiFlexItem>
             <EuiFormRow
               label={<FormattedMessage
-                id="xpack.ml.customUrlsList.urlLabel"
+                id="xpack.ml.customUrlEditorList.urlLabel"
                 defaultMessage="URL"
               />}
             >
@@ -186,7 +184,7 @@ export const CustomUrlList = injectI18n(class extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow
               label={<FormattedMessage
-                id="xpack.ml.customUrlsList.timeRangeLabel"
+                id="xpack.ml.customUrlEditorList.timeRangeLabel"
                 defaultMessage="Time range"
               />}
               error={invalidIntervalError}
@@ -204,7 +202,7 @@ export const CustomUrlList = injectI18n(class extends Component {
             <EuiFormRow hasEmptyLabelSpace>
               <EuiToolTip
                 content={<FormattedMessage
-                  id="xpack.ml.customUrlsList.testCustomUrlTooltip"
+                  id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
                   defaultMessage="Test custom URL"
                 />}
               >
@@ -214,7 +212,7 @@ export const CustomUrlList = injectI18n(class extends Component {
                   onClick={() => this.onTestButtonClick(index)}
                   iconType="popout"
                   aria-label={intl.formatMessage({
-                    id: 'xpack.ml.customUrlsList.testCustomUrlAriaLabel',
+                    id: 'xpack.ml.customUrlEditorList.testCustomUrlAriaLabel',
                     defaultMessage: 'Test custom URL'
                   })}
                 />
@@ -225,7 +223,7 @@ export const CustomUrlList = injectI18n(class extends Component {
             <EuiFormRow hasEmptyLabelSpace>
               <EuiToolTip
                 content={<FormattedMessage
-                  id="xpack.ml.customUrlsList.deleteCustomUrlTooltip"
+                  id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
                   defaultMessage="Delete custom URL"
                 />}
               >
@@ -235,7 +233,7 @@ export const CustomUrlList = injectI18n(class extends Component {
                   onClick={() => this.onDeleteButtonClick(index)}
                   iconType="trash"
                   aria-label={intl.formatMessage({
-                    id: 'xpack.ml.customUrlsList.deleteCustomUrlAriaLabel',
+                    id: 'xpack.ml.customUrlEditorList.deleteCustomUrlAriaLabel',
                     defaultMessage: 'Delete custom URL'
                   })}
                 />

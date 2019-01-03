@@ -57,8 +57,7 @@ function getLinkToOptions() {
   }];
 }
 
-export const CustomUrlEditor = injectI18n(class extends Component {
-  static DisplayName = 'CustomUrlEditor';
+export const CustomUrlEditor = injectI18n(class CustomUrlEditor extends Component {
   static propTypes = {
     customUrl: PropTypes.object,
     setEditCustomUrl: PropTypes.func.isRequired,
