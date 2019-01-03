@@ -17,20 +17,5 @@
  * under the License.
  */
 
-import { Build } from './build';
-
-export async function buildAll(styleSheets = [], log) {
-  const bundles = await Promise.all(styleSheets.map(async styleSheet => {
-
-    if (!styleSheet.localPath.endsWith('.scss')) {
-      return;
-    }
-
-    const bundle = new Build(styleSheet.localPath, log);
-    await bundle.build();
-
-    return bundle;
-  }));
-
-  return bundles.filter(v => v);
-}
+require('../src/setup_node_env');
+require('../src/dev/run_sasslint');
