@@ -49,13 +49,34 @@
   </div>
 
   <div class="conditions-list-container" >
-    <div class="title"><span aria-describedby="ml_aria_description_new_action_ruleconditions">Conditions</span><i ml-info-icon="new_action_ruleconditions" /></div>
+    <div class="title">
+      <span
+        aria-describedby="ml_aria_description_new_action_ruleconditions"
+        i18n-id="xpack.ml.newJob.advanced.detectorFilterModal.conditionsTitle"
+        i18n-default-message="Conditions"
+      ></span>
+      <i ml-info-icon="new_action_ruleconditions" />
+    </div>
     <div class="table-title">
-      <div><span aria-describedby="ml_aria_description_new_action_conditiontype">Type</span><i ml-info-icon="new_action_conditiontype" /></div>
+      <div>
+        <span
+          aria-describedby="ml_aria_description_new_action_conditiontype"
+          i18n-id="xpack.ml.newJob.advanced.detectorFilterModal.conditionTypeTitle"
+          i18n-default-message="Type"
+        ></span>
+        <i ml-info-icon="new_action_conditiontype" />
+      </div>
       <div><span aria-describedby="ml_aria_description_new_action_fieldname">field_name</span><i ml-info-icon="new_action_fieldname" /></div>
       <div><span aria-describedby="ml_aria_description_new_action_fieldvalue">field_value</span><i ml-info-icon="new_action_fieldvalue" /></div>
       <div><span aria-describedby="ml_aria_description_new_action_condition">lt/gt</span><i ml-info-icon="new_action_condition" /></div>
-      <div><span aria-describedby="ml_aria_description_new_action_value">value</span><i ml-info-icon="new_action_value" /></div>
+      <div>
+        <span
+          aria-describedby="ml_aria_description_new_action_value"
+          i18n-id="xpack.ml.newJob.advanced.detectorFilterModal.conditionValueLabel"
+          i18n-default-message="value"
+        ></span>
+        <i ml-info-icon="new_action_value" />
+      </div>
       <div></div>
     </div>
     <div ng-repeat="cond in filter.ruleConditions track by $index" class="rule-condition">
@@ -103,7 +124,7 @@
       </div>
       <div>
         <button
-          aria-label="Remove Condition"
+          aria-label="{{ ::'xpack.ml.newJob.advanced.detectorFilterModal.removeConditionButtonAriaLabel' | i18n: {defaultMessage: 'Remove Condition'} }}"
           ng-click="removeCondition($index)"
           tooltip-append-to-body="true"
           type="button"
@@ -114,12 +135,14 @@
     </div>
   </div>
   <button
-    aria-label="Add new condition"
+    aria-label="{{ ::'xpack.ml.newJob.advanced.detectorFilterModal.addNewConditionButtonAriaLabel' | i18n: {defaultMessage: 'Add new condition'} }}"
     ng-click="addNewCondition()"
     type="button"
-    class="kuiButton kuiButton--primary kuiButton--small add-new">
-      <i aria-hidden="true" class="fa fa-plus"></i> Add new condition
-  </button>
+    class="kuiButton kuiButton--primary kuiButton--small add-new"
+    i18n-id="xpack.ml.newJob.advanced.detectorFilterModal.addNewConditionButtonLabel"
+    i18n-default-message="{icon} Add new condition"
+    i18n-values="{ html_icon: '<i aria-hidden=\'true\' class=\'fa fa-plus\'></i>' }"
+  ></button>
 
   <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
 
@@ -127,14 +150,15 @@
     ng-click="save()"
     ng-disabled="(saveLock === true || filter.ruleConditions.length === 0)"
     class="kuiButton kuiButton--primary"
-    aria-label="Save">
-    {{ (editMode? "Update" : "Add") }}
+    aria-label="{{ ::'xpack.ml.newJob.advanced.detectorFilterModal.saveButtonAriaLabel' | i18n: {defaultMessage: 'Save'} }}">
+    {{ (editMode? updateButtonLabel : addButtonLabel) }}
   </button>
   <button
     ng-click="cancel()"
     ng-disabled="(saveLock === true)"
     class="kuiButton kuiButton--primary"
-    aria-label="Cancel">
-    Cancel
-  </button>
+    aria-label="{{ ::'xpack.ml.newJob.advanced.detectorFilterModal.cancelButtonAriaLabel' | i18n: {defaultMessage: 'Cancel'} }}"
+    i18n-id="xpack.ml.newJob.advanced.detectorFilterModal.cancelButtonLabel"
+    i18n-default-message="Cancel"
+  ></button>
 </div>
