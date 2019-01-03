@@ -72,7 +72,6 @@
     "indices": [
       "farequote-2017"
     ],
-    "types": [],
     "query": {
       "match_all": {
         "boost": 1
