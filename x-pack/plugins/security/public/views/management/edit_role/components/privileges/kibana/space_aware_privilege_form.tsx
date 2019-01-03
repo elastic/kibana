@@ -350,7 +350,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
               </p>
             </Fragment>
           }
-          actions={this.getAvailablePrivilegeButtons()}
+          actions={this.getAvailablePrivilegeButtons(false)}
         />
       );
     }
@@ -359,32 +359,27 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
       <div>
         {table}
         {<EuiSpacer />}
-        {this.getAvailablePrivilegeButtons()}
-        <EuiSpacer />
-        <EuiAccordion id="privilegeMatrix" buttonContent={'Show privilege matrix'}>
-          <PrivilegeMatrix
-            role={this.props.role}
-            effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.props.role)}
-            features={this.props.features}
-            spaces={this.getDisplaySpaces()}
-          />
-        </EuiAccordion>
+        {this.getAvailablePrivilegeButtons(true)}
       </div>
     );
   };
 
-  private getAvailablePrivilegeButtons = () => {
+  private getAvailablePrivilegeButtons = (hasPrivilegesAssigned: boolean) => {
     const hasAvailableSpaces = this.getAvailableSpaces().length > 0;
 
-    if (!hasAvailableSpaces) {
+    // This shouldn't happen organically...
+    if (!hasAvailableSpaces && !hasPrivilegesAssigned) {
       return null;
     }
 
-    return (
-      <div>
-        <EuiButton color="primary" onClick={this.addSpacePrivilege} iconType={'spacesApp'}>
-          Add a privilege
-        </EuiButton>
+    const addPrivilegeButton = (
+      <EuiButton color="primary" onClick={this.addSpacePrivilege} iconType={'spacesApp'}>
+        Add a privilege
+      </EuiButton>
+    );
+
+    const addPrivilegeDescription = (
+      <Fragment>
         <EuiSpacer size={'s'} />
         <EuiText color={'subdued'} size={'s'}>
           <FormattedMessage
@@ -392,6 +387,38 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
             defaultMessage="Customize by existing spaces or groups of existing spaces."
           />
         </EuiText>
+      </Fragment>
+    );
+
+    if (!hasPrivilegesAssigned) {
+      return (
+        <div>
+          {addPrivilegeButton}
+          {addPrivilegeDescription}
+        </div>
+      );
+    }
+
+    const viewMatrixButton = (
+      <PrivilegeMatrix
+        role={this.props.role}
+        effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.props.role)}
+        features={this.props.features}
+        spaces={this.getDisplaySpaces()}
+      />
+    );
+
+    if (!hasAvailableSpaces) {
+      return viewMatrixButton;
+    }
+
+    return (
+      <div>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          {hasAvailableSpaces && <EuiFlexItem grow={false}>{addPrivilegeButton}</EuiFlexItem>}
+          {hasPrivilegesAssigned && <EuiFlexItem grow={false}>{viewMatrixButton}</EuiFlexItem>}
+        </EuiFlexGroup>
+        {hasAvailableSpaces && addPrivilegeDescription}
       </div>
     );
   };

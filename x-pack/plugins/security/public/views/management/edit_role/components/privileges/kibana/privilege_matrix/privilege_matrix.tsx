@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   // @ts-ignore
   EuiInMemoryTable,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiOverlayMask,
   // @ts-ignore
   EuiSuperSelect,
   EuiText,
@@ -30,8 +37,45 @@ interface Props {
   effectivePrivileges: EffectivePrivileges;
 }
 
-export class PrivilegeMatrix extends Component<Props, {}> {
+interface State {
+  showModal: boolean;
+}
+
+export class PrivilegeMatrix extends Component<Props, State> {
+  public state = {
+    showModal: false,
+  };
   public render() {
+    let modal = null;
+    if (this.state.showModal) {
+      modal = (
+        <EuiOverlayMask>
+          <EuiModal onClose={this.hideModal}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>Privilege matrix</EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>{this.renderTable()}</EuiModalBody>
+            <EuiModalFooter>
+              <EuiButton onClick={this.hideModal} fill>
+                Close
+              </EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
+        </EuiOverlayMask>
+      );
+    }
+
+    return (
+      <Fragment>
+        <EuiButton onClick={this.showModal} fill>
+          Show privilege matrix
+        </EuiButton>
+        {modal}
+      </Fragment>
+    );
+  }
+
+  private renderTable = () => {
     const { role, features } = this.props;
 
     const { global, spaces: spacePrivileges = [] } = role.kibana;
@@ -191,8 +235,18 @@ export class PrivilegeMatrix extends Component<Props, {}> {
       }),
     ];
 
-    const table = <EuiInMemoryTable columns={columns} items={rows} />;
+    return <EuiInMemoryTable columns={columns} items={rows} />;
+  };
 
-    return table;
-  }
+  private hideModal = () => {
+    this.setState({
+      showModal: false,
+    });
+  };
+
+  private showModal = () => {
+    this.setState({
+      showModal: true,
+    });
+  };
 }
