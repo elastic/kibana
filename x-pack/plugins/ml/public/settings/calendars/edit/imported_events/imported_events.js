@@ -13,6 +13,7 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 import { EventsTable } from '../events_table/';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 export function ImportedEvents({
@@ -27,10 +28,21 @@ export function ImportedEvents({
       <EuiSpacer size="s"/>
       <EuiFlexItem>
         <EuiText>
-          <h4>Events to import: {events.length}</h4>
+          <h4>
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.importedEvents.eventsToImportTitle"
+              defaultMessage="Events to import: {eventsCount}"
+              values={{ eventsCount: events.length }}
+            />
+          </h4>
           {showRecurringWarning && (
             <EuiText color="danger">
-              <p>Recurring events not supported. Only the first event will be imported.</p>
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.calendarsEdit.importedEvents.recurringEventsNotSupportedDescription"
+                  defaultMessage="Recurring events not supported. Only the first event will be imported."
+                />
+              </p>
             </EuiText>)
           }
         </EuiText>
@@ -45,7 +57,10 @@ export function ImportedEvents({
       <EuiFlexItem grow={false}>
         <EuiCheckbox
           id="ml-include-past-events"
-          label="Include past events"
+          label={<FormattedMessage
+            id="xpack.ml.calendarsEdit.importedEvents.includePastEventsLabel"
+            defaultMessage="Include past events"
+          />}
           checked={includePastEvents}
           onChange={onCheckboxToggle}
         />
