@@ -12,8 +12,9 @@ import { ActionCreator } from 'typescript-fsa';
 import { defaultTo } from 'lodash/fp';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+
 // @ts-ignore
-import { applyTheme } from '../../../../../../src/ui/public/theme';
+import { applyTheme } from 'ui/theme';
 import { State } from '../../store';
 import { appActions, themeSelector } from '../../store/local/app';
 import { Theme } from '../../store/local/app/model';
