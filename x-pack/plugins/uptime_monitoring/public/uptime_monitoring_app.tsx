@@ -27,6 +27,7 @@ import {
   EuiPageContent,
   EuiPopover,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import moment, { Moment } from 'moment';
 import React from 'react';
@@ -141,7 +142,12 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     iconTitle="Uptime Monitoring"
                   >
                     Uptime Monitoring
-                    <EuiIcon style={{ paddingLeft: '8px' }} size="xl" type="beaker" />
+                    <EuiToolTip
+                      position="right"
+                      content="The Uptime UI is currently an experimental feature"
+                    >
+                      <EuiIcon style={{ paddingLeft: '8px' }} size="xl" type="beaker" />
+                    </EuiToolTip>
                   </EuiHeaderLogo>
                 </EuiHeaderSectionItem>
                 {!isUsingK7Design && (
@@ -241,7 +247,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       iconType="help"
                       href="https://discuss.elastic.co/c/beats/heartbeat"
                     >
-                      Help
+                      Uptime feedback
                     </EuiHeaderLink>
                   </EuiHeaderLinks>
                 </EuiHeaderSection>
