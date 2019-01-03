@@ -3,69 +3,69 @@
 exports[`RouteTreeBuilder routeTreeFromPaths Should create a route tree 1`] = `
 Array [
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/tag",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/beat",
     "routes": Array [
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/beat/detail",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/beat/tags",
       },
     ],
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/error/enforce_security",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/error/invalid_license",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/error/no_access",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/overview",
     "routes": Array [
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/overview/enrolled_beats",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/overview/tag_configurations",
       },
     ],
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/walkthrough/initial",
     "routes": Array [
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/walkthrough/initial/beat",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/walkthrough/initial/finish",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/walkthrough/initial/tag",
       },
     ],
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "*",
   },
 ]
@@ -74,69 +74,69 @@ Array [
 exports[`RouteTreeBuilder routeTreeFromPaths Should create a route tree, with top level route having params 1`] = `
 Array [
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/tag/:action/:tagid?",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/beat",
     "routes": Array [
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/beat/detail",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/beat/tags",
       },
     ],
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/error/enforce_security",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/error/invalid_license",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/error/no_access",
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/overview",
     "routes": Array [
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/overview/enrolled_beats",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/overview/tag_configurations",
       },
     ],
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "/walkthrough/initial",
     "routes": Array [
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/walkthrough/initial/beat",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/walkthrough/initial/finish",
       },
       Object {
-        "component": null,
+        "component": "testPage",
         "path": "/walkthrough/initial/tag",
       },
     ],
   },
   Object {
-    "component": null,
+    "component": "testPage",
     "path": "*",
   },
 ]
