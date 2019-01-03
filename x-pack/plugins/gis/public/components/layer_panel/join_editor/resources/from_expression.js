@@ -6,11 +6,13 @@
 
 import React from 'react';
 
+import { EuiExpression } from '@elastic/eui';
+
 export function FromExpression({ leftSourceName }) {
   return (
-    <div className="euiExpressionButton euiText">
-      <span className="euiExpressionButton__description">FROM</span>{' '}
-      <span className="euiExpressionButton__value">{`${leftSourceName} left`}</span>
-    </div>
+    <EuiExpression
+      description="FROM"
+      value={`${leftSourceName} left`}
+    />
   );
 }

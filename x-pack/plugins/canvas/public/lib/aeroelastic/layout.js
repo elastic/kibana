@@ -27,6 +27,7 @@ const matrix = require('./matrix');
 const matrix2d = require('./matrix2d');
 
 const {
+  arrayToMap,
   disjunctiveUnion,
   identity,
   flatten,
@@ -207,7 +208,10 @@ const contentShape = allShapes => shape =>
     ? contentShape(allShapes)(allShapes.find(s => s.id === shape.parent))
     : shape;
 
-const contentShapes = (allShapes, shapes) => shapes.map(contentShape(allShapes));
+const contentShapes = (allShapes, shapes) => {
+  const idMap = arrayToMap(allShapes.map(shape => shape.id));
+  return shapes.filter(shape => idMap[shape.id]).map(contentShape(allShapes));
+};
 
 const selectionState = select(
   (

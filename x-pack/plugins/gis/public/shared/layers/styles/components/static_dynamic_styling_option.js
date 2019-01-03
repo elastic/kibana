@@ -74,7 +74,7 @@ export class StaticDynamicStyleSelector extends React.Component {
     }
   }
 
-  _changeStyle = type => {
+  _getStyleUpdateFunction = type => {
     const { property } = this.props;
     return options => {
       const styleDescriptor = {
@@ -87,7 +87,8 @@ export class StaticDynamicStyleSelector extends React.Component {
 
   _onTypeToggle = (() => {
     let lastOptions = {
-      color: null
+      // TODO: Move default to central location with other defaults
+      color: 'rgba(0,0,0,0.4)'
     };
     const { DYNAMIC, STATIC } = VectorStyle.STYLE_TYPE;
     return ({ target }, currentOptions) => {
@@ -96,7 +97,7 @@ export class StaticDynamicStyleSelector extends React.Component {
         isDynamic: target.checked
       }, () => {
         if (!_.isEqual(lastOptions, currentOptions)) {
-          lastOptions && this._changeStyle(selectedStyleType)(lastOptions);
+          lastOptions && this._getStyleUpdateFunction(selectedStyleType)(lastOptions);
           lastOptions = currentOptions;
         }
       });
@@ -111,7 +112,7 @@ export class StaticDynamicStyleSelector extends React.Component {
         styleSelector = (
           <DynamicSelector
             fields={this.state.ordinalFields}
-            onChange={this._changeStyle(VectorStyle.STYLE_TYPE.DYNAMIC)}
+            onChange={this._getStyleUpdateFunction(VectorStyle.STYLE_TYPE.DYNAMIC)}
             selectedOptions={currentOptions}
           />
         );
@@ -122,7 +123,7 @@ export class StaticDynamicStyleSelector extends React.Component {
       const StaticSelector = this.props.StaticSelector;
       styleSelector = (
         <StaticSelector
-          changeOptions={this._changeStyle(VectorStyle.STYLE_TYPE.STATIC)}
+          changeOptions={this._getStyleUpdateFunction(VectorStyle.STYLE_TYPE.STATIC)}
           selectedOptions={currentOptions}
         />
       );

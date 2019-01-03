@@ -45,6 +45,7 @@ export function bucketFetcher(
   transactionName: string,
   transactionType: string,
   transactionId: string,
+  traceId: string,
   bucketSize: number,
   setup: Setup
 ): Promise<ESResponse> {
@@ -77,6 +78,7 @@ export function bucketFetcher(
         bool: {
           filter,
           should: [
+            { term: { [TRACE_ID]: traceId } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRANSACTION_SAMPLED]: true } }
           ]

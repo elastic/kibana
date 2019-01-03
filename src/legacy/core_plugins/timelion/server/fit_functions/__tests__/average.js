@@ -17,13 +17,12 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../average`);
 import moment from 'moment';
 const expect = require('chai').expect;
 import _ from 'lodash';
 
-describe(filename, function () {
+describe('average.js', function () {
 
   describe('average', function () {
     it('fills holes in the data', function () {
