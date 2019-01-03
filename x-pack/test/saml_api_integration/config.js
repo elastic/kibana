@@ -49,9 +49,9 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
         '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
         '--xpack.security.authProviders=[\"saml\"]',
-        '--logging.events.log=[\"info\", \"warning\", \"error\", \"security\"]',
-        '--logging.events.request=[\"*\"]',
-        '--logging.events.error=[\"*\"]',
+        '--logging.events.log="[\"info\", \"warning\", \"error\", \"security\"]"',
+        '--logging.events.request="[\"*\"]"',
+        '--logging.events.error="[\"*\"]"',
       ],
     },
   };
