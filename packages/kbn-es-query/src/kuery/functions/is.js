@@ -65,7 +65,7 @@ export function toElasticsearchQuery(node, indexPattern) {
     };
   }
 
-  const fields = getFields(fieldNameArg, indexPattern);
+  const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
 
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
@@ -80,7 +80,7 @@ export function toElasticsearchQuery(node, indexPattern) {
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
-  const isMatchAllQuery = isExistsQuery && fields && fields.length === indexPattern.fields.length;
+  const isMatchAllQuery = isExistsQuery && fields && indexPattern && fields.length === indexPattern.fields.length;
 
   if (isMatchAllQuery) {
     return { match_all: {} };
