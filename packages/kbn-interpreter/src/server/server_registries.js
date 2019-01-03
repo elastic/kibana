@@ -20,46 +20,33 @@
 import { i18n } from '@kbn/i18n';
 import { getPluginPaths } from './get_plugin_paths';
 
-let resolve = null;
-let called = false;
-
-const populatePromise = new Promise(_resolve => {
-  resolve = _resolve;
-});
-
-export const getServerRegistries = () => {
-  return populatePromise;
-};
 
 export const populateServerRegistries = registries => {
-  if (called) {
-    return populatePromise;
-  }
-  called = true;
   if (!registries) throw new Error('registries are required');
 
-  const remainingTypes = Object.keys(registries);
-  const populatedTypes = {};
+  return new Promise(resolve => {
+    const remainingTypes = Object.keys(registries);
+    const populatedTypes = {};
 
-  const loadType = () => {
-    const type = remainingTypes.pop();
-    getPluginPaths(type).then(paths => {
-      global.canvas = global.canvas || {};
-      global.canvas.register = d => registries[type].register(d);
-      global.canvas.i18n = i18n;
+    const loadType = () => {
+      const type = remainingTypes.pop();
+      getPluginPaths(type).then(paths => {
+        global.canvas = global.canvas || {};
+        global.canvas.register = d => registries[type].register(d);
+        global.canvas.i18n = i18n;
 
-      paths.forEach(path => {
-        require(path); // eslint-disable-line import/no-dynamic-require
+        paths.forEach(path => {
+          require(path); // eslint-disable-line import/no-dynamic-require
+        });
+
+        delete global.canvas;
+
+        populatedTypes[type] = registries[type];
+        if (remainingTypes.length) loadType();
+        else resolve(populatedTypes);
       });
+    };
 
-      delete global.canvas;
-
-      populatedTypes[type] = registries[type];
-      if (remainingTypes.length) loadType();
-      else resolve(populatedTypes);
-    });
-  };
-
-  if (remainingTypes.length) loadType();
-  return populatePromise;
+    if (remainingTypes.length) loadType();
+  });
 };

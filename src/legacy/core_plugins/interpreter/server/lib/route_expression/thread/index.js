@@ -34,8 +34,10 @@ export function getWorker() {
   // handle run requests
   worker.on('message', msg => {
     const { type, value, id } = msg;
+    console.log(`received message id: ${id}, type: ${type}, value: ${value}, threadId: ${msg.threadId}`);
     if (type === 'run') {
       const { threadId } = msg;
+      if (!heap[threadId]) return;
       const { ast, context } = value;
       heap[threadId]
         .onFunctionNotFound(ast, context)
@@ -92,13 +94,16 @@ export const thread = ({ onFunctionNotFound, serialize, deserialize }) => {
         worker.send({ type: 'run', id, value: { ast, context: serialize(context) } });
 
         return new Promise((resolve, reject) => {
+          console.log(`creating new promise with id: ${id}`);
           heap[id] = {
             time: new Date().getTime(),
             resolve: value => {
+              console.log(`resolving promise with id ${id}`, value);
               delete heap[id];
               resolve(deserialize(value));
             },
             reject: e => {
+              console.log(`rejecting promise with id ${id}`, e);
               delete heap[id];
               reject(e);
             },

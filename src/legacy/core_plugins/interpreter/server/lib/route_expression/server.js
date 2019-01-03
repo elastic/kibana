@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { getServerRegistries } from '@kbn/interpreter/server';
 import { interpretProvider } from '@kbn/interpreter/common';
 import { createHandlers } from '../create_handlers';
 
 export const server = async ({ onFunctionNotFound, server, request }) => {
-  const { serverFunctions, types } = await getServerRegistries(['serverFunctions', 'types']);
+  const { serverFunctions, types } = server.plugins.interpreter;
 
   return {
     interpret: (ast, context) => {

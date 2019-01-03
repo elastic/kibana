@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getServerRegistries } from '@kbn/interpreter/server';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';
@@ -41,8 +40,5 @@ export default async function(server /*options*/) {
 
   registerCanvasUsageCollector(server);
   loadSampleData(server);
-
-  // Do not initialize the app until the registries are populated
-  await getServerRegistries();
   routes(server);
 }

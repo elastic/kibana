@@ -19,7 +19,6 @@
 
 import socket from 'socket.io';
 import { serializeProvider } from '@kbn/interpreter/common';
-import { getServerRegistries } from '@kbn/interpreter/server';
 import { routeExpressionProvider } from '../lib/route_expression/index';
 import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread/index';
@@ -70,9 +69,7 @@ export function socketApi(server) {
     }
 
     socket.on('getFunctionList', () => {
-      getServerRegistries().then(({ serverFunctions }) =>
-        socket.emit('functionList', serverFunctions.toJS())
-      );
+      socket.emit('functionList', server.plugins.interpreter.serverFunctions.toJS());
     });
 
     socket.on('run', async ({ ast, context, id }) => {
