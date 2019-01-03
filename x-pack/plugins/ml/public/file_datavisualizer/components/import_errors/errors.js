@@ -123,7 +123,11 @@ function toString(error) {
             errorObj.more = error.error.response;
           }
           return errorObj;
+        }
 
+        if (error.error.message !== undefined) {
+          // this will catch javascript errors such as JSON parsing issues
+          return { msg: error.error.message };
         }
       } else {
         return { msg: error.error };

@@ -171,16 +171,16 @@ export class ALayer {
     }
 
     const previousBufferGeometry = turf.bboxPolygon([
-      previousBuffer.min_lon,
-      previousBuffer.min_lat,
-      previousBuffer.max_lon,
-      previousBuffer.max_lat
+      previousBuffer.minLon,
+      previousBuffer.minLat,
+      previousBuffer.maxLon,
+      previousBuffer.maxLat
     ]);
     const newBufferGeometry = turf.bboxPolygon([
-      newBuffer.min_lon,
-      newBuffer.min_lat,
-      newBuffer.max_lon,
-      newBuffer.max_lat
+      newBuffer.minLon,
+      newBuffer.minLat,
+      newBuffer.maxLon,
+      newBuffer.maxLat
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
     return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
