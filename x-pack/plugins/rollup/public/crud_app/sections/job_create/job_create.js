@@ -494,22 +494,32 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.rollupJobs.createTitle"
-                  defaultMessage="Create rollup job"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageContentHeader>
+            <EuiPageContent
+              horizontalPosition="center"
+            >
+              <EuiPageContentHeader>
+                <EuiTitle size="m">
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.createTitle"
+                      defaultMessage="Create rollup job"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiPageContentHeader>
 
-          {saveErrorFeedback}
+              {saveErrorFeedback}
 
-          <EuiStepsHorizontal steps={this.getSteps()} />
+              <EuiStepsHorizontal steps={this.getSteps()} />
 
+              <EuiSpacer />
+
+              {this.renderCurrentStep()}
+
+              <EuiSpacer size="l" />
+
+              {this.renderNavigation()}
+            </EuiPageContent>
           <EuiSpacer />
 
           {this.renderCurrentStep()}

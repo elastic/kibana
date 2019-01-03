@@ -15,6 +15,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
     grow={false}
   >
     <Component
+      announceSpaceName={true}
       space={
         Object {
           "id": "my-space",

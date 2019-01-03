@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isEmpty, flatten } from 'lodash';
 import { scaleLinear } from 'd3-scale';
 import { XYPlot } from 'react-vis';
 import d3 from 'd3';
@@ -35,12 +35,12 @@ const getYScale = (yMin, yMax) => {
 };
 
 function getFlattenedCoordinates(visibleSeries, enabledSeries) {
-  const enabledCoordinates = _.flatten(enabledSeries.map(serie => serie.data));
-  if (!_.isEmpty(enabledCoordinates)) {
+  const enabledCoordinates = flatten(enabledSeries.map(serie => serie.data));
+  if (!isEmpty(enabledCoordinates)) {
     return enabledCoordinates;
   }
 
-  return _.flatten(visibleSeries.map(serie => serie.data));
+  return flatten(visibleSeries.map(serie => serie.data));
 }
 
 export function getPlotValues(
@@ -52,7 +52,7 @@ export function getPlotValues(
     visibleSeries,
     enabledSeries
   );
-  if (_.isEmpty(flattenedCoordinates)) {
+  if (isEmpty(flattenedCoordinates)) {
     return null;
   }
 
