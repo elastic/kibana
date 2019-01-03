@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotFoundPage } from 'x-pack/plugins/infra/public/pages/404';
 import { BeatDetailPage } from './beat/details';
 import { BeatDetailsPage } from './beat/index';
 import { BeatTagsPage } from './beat/tags';
