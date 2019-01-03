@@ -80,7 +80,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bdVaJa eSuqza"
+              className="sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"
@@ -111,7 +111,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bdVaJa eSuqza"
+              className="sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"
@@ -142,7 +142,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bwzfXH gzqToY"
+              className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"
@@ -175,7 +175,7 @@ exports[`render correctly 1`] = `
                 role="button"
               >
                 <span
-                  className="sc-bdVaJa eSuqza"
+                  className="sc-bdVaJa fsxEnI"
                 />
                 <svg
                   className="euiIcon euiIcon--medium"
@@ -241,7 +241,7 @@ exports[`render correctly 1`] = `
                 role="button"
               >
                 <span
-                  className="sc-bwzfXH gzqToY"
+                  className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
                 />
                 <svg
                   className="euiIcon euiIcon--medium"
@@ -274,7 +274,7 @@ exports[`render correctly 1`] = `
                     role="button"
                   >
                     <span
-                      className="sc-bdVaJa eSuqza"
+                      className="sc-bdVaJa fsxEnI"
                     />
                     <svg
                       className="euiIcon euiIcon--medium"
@@ -305,7 +305,7 @@ exports[`render correctly 1`] = `
                     role="button"
                   >
                     <span
-                      className="sc-bdVaJa eSuqza"
+                      className="sc-bdVaJa fsxEnI"
                     />
                     <svg
                       className="euiIcon euiIcon--medium"
@@ -375,7 +375,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bdVaJa eSuqza"
+              className="sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"
@@ -406,7 +406,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bdVaJa eSuqza"
+              className="sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"
@@ -437,7 +437,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bdVaJa eSuqza"
+              className="sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"
@@ -468,7 +468,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bdVaJa eSuqza"
+              className="sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"
@@ -499,7 +499,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <span
-              className="sc-bdVaJa eSuqza"
+              className="sc-bdVaJa fsxEnI"
             />
             <svg
               className="euiIcon euiIcon--medium"

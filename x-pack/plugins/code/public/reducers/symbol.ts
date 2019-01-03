@@ -10,9 +10,11 @@ import { Action, handleActions } from 'redux-actions';
 
 import { Location, SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
 import {
+  closeSymbolPath,
   loadStructure,
   loadStructureFailed,
   loadStructureSuccess,
+  openSymbolPath,
   SymbolsPayload,
 } from '../actions';
 
@@ -20,7 +22,8 @@ const SPECIAL_SYMBOL_NAME = '{...}';
 const SPECIAL_CONTAINER_NAME = '';
 
 export interface SymbolWithMembers extends SymbolInformation {
-  members?: Set<SymbolInformation>;
+  members?: Set<SymbolWithMembers>;
+  path?: string;
 }
 
 type Container = SymbolWithMembers | undefined;
@@ -31,12 +34,14 @@ export interface SymbolState {
   error?: Error;
   loading: boolean;
   lastRequestPath?: string;
+  openPaths: string[];
 }
 
 const initialState: SymbolState = {
   symbols: {},
   loading: false,
   structureTree: {},
+  openPaths: [],
 };
 
 const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
@@ -48,13 +53,13 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
       character: oneLocationStartCharacter,
     } = oneLocation.range.start;
     const {
-      line: anotherLocationEndLine,
-      character: anotherLocationEndCharacter,
-    } = anotherLocation.range.end;
+      line: anotherLocationStartLine,
+      character: anotherLocationStartCharacter,
+    } = anotherLocation.range.start;
     return (
-      oneLocationStartLine > anotherLocationEndLine ||
-      (oneLocationStartLine === anotherLocationEndLine &&
-        oneLocationStartCharacter >= anotherLocationEndCharacter)
+      oneLocationStartLine > anotherLocationStartLine ||
+      (oneLocationStartLine === anotherLocationStartLine &&
+        oneLocationStartCharacter >= anotherLocationStartCharacter)
     );
   }
 
@@ -79,10 +84,13 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
       container = findContainer(s.containerName || '', s.location);
     }
     if (container) {
+      if (!container.path) {
+        container.path = container.name;
+      }
       if (container.members) {
-        container.members.add(s);
+        container.members.add({ ...s, path: `${container.path}/${s.name}` });
       } else {
-        container.members = new Set([s]);
+        container.members = new Set([{ ...s, path: `${container.path}/${s.name}` }]);
       }
     } else {
       structureTree.push(s);
@@ -119,6 +127,20 @@ export const symbol = handleActions(
         return state;
       }
     },
+    [String(openSymbolPath)]: (state: SymbolState, action: any) =>
+      produce<SymbolState>(state, draft => {
+        const path = action.payload!;
+        if (!state.openPaths.includes(path)) {
+          draft.openPaths.push(path);
+        }
+      }),
+    [String(closeSymbolPath)]: (state: SymbolState, action: any) =>
+      produce<SymbolState>(state, draft => {
+        const idx = state.openPaths.indexOf(action.payload!);
+        if (idx >= 0) {
+          draft.openPaths.splice(idx, 1);
+        }
+      }),
   },
   initialState
 );
