@@ -33,11 +33,8 @@ const CourierRequestHandlerProvider = function () {
    * This function builds tabular data from the response and attaches it to the
    * inspector. It will only be called when the data view in the inspector is opened.
    */
-  async function buildTabularInspectorData(vis, searchSource, aggConfigs) {
-    const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, {
-      partialRows: true,
-      metricsAtAllLevels: vis.isHierarchical(),
-    });
+  async function buildTabularInspectorData(vis, searchSource, aggConfigs, tabifyParams) {
+    const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, tabifyParams);
     const columns = table.columns.map((col, index) => {
       const field = col.aggConfig.getField();
       const isCellContentFilterable =
@@ -165,7 +162,10 @@ const CourierRequestHandlerProvider = function () {
         searchSource.finalResponse = resp;
 
         vis.API.inspectorAdapters.data.setTabularLoader(
-          () => buildTabularInspectorData(vis, searchSource, lastAggConfig),
+          () => buildTabularInspectorData(vis, searchSource, lastAggConfig, {
+            minimalColumns,
+            partialRows: true,
+          }),
           { returnsFormattedValues: true }
         );
 
