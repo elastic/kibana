@@ -27,7 +27,7 @@ image::apm/images/apm-services-overview.png[Example view of services table the A
 === Transactions
 
 Selecting a service on the Services overview page will bring you to the Transaction overview page. 
-A [`transaction`] describes an event captured by an Elastic APM agent instrumenting a service.
+A {apm-overview-ref-v}/transactions.html[Transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
 On this page, each `transaction.type` is displayed separately to make it easy for you to navigate to any transaction.
@@ -36,20 +36,34 @@ By default, transactions are sorted by _Impact_. Impact helps show the most used
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
 
-NOTE: For more details on transactions and , refer to the documentation for each [APM Agent] you're instrumenting.
-
-[NOTE]
+[IMPORTANT]
 ====
-You might see some transactions named "unknown route". This indicates that the agent detected an incoming HTTP request to your application, but didn’t know which route in your service the HTTP request matched.
+The Kibana UI will only display helpful information when the transactions in your service are named correctly.
 
-This could simply be a 404 request, which by definition don’t match any route, or it might be a symptom that the agent either wasn’t installed correctly, or doesn't support your framework. For more details and other troubleshooting, refer to the documentation for each APM Agent you're instrumenting. 
+Elastic APM Agents come with built-in support for popular frameworks out-of-the-box. However, if you only see one route in the Transaction overview page, or have transactions named "unknown route", it could be a symptom that the agent either wasn't installed correctly, or doesn't support your framework. 
+
+For further details, other troubleshooting, and custom implementation instructions, refer to the documentation for each {apm-agents-ref}[APM Agent] you're instrumenting.
 ====
-
 
 [[spans]]
 === Spans
 
-A span is defined as the duration of a single event. Spans are automatically captured by the APM agents, but you can also define custom spans. Each span has a type and is defined by a different colour in the Timeline visualization (also known as the waterfall).
+Selecting a Transaction on the Transaction overview page will bring you to the Transaction detail page.
+The Transaction detail page shows a high level overview of the transaction duration, requests per minute, and response time distribution of transactions. 
+
+[role="screenshot"]
+image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]
+
+This page also breaks each transaction down into it's spans and allows you to look at them. 
+
+A {apm-overview-ref-v}/transaction-spans.html[span] is defined as the duration of a single event.
+Spans are automatically captured by APM agents, and you can also define custom spans.
+Each span has a type and is defined by a different colour in the Timeline visualization (also known as the waterfall).
+
+The waterfall shows a sample from the selected "Transactions duration distribution" bucket, and in the current time range.
+You can select a new bucket at any time by clicking on the waterfall.
+The transaction detail will update with a new sample from the new bucket.
+It is especially important to look at the buckets on the right hand side of the graph as these are the requests that took longest to serve.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-detail.png[Example view of transactions detail page in the APM UI in Kibana]
@@ -62,48 +76,71 @@ image::apm/images/apm-span-detail.png[Example view of a span detail in the APM U
 [[errors]]
 === Errors
 
-Errors are defined as groups of exceptions with matching exception or log messages. Each error group features a breakdown of the exception including the stackframes from when the error occurred and additional contextual information to help debug the issue.
+{apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
+
+The Errors overview page provides a high level view of the error message and culprit, number of occurrences, and the most recent occurrence.
 
 [role="screenshot"]
 image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM UI in Kibana]
 
+Selecting an error brings you to the error group page.
+Each error group features a breakdown of the exception including the stackframes from when the error occurred and additional contextual information to help debug the issue.
+
 [role="screenshot"]
 image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
 
+[float]
 [[errors-alerts-with-watcher]]
-=== Errors alerts with Watcher
+==== Errors alerts with Watcher
 
-You can use the power of the alerting features with Watcher to get alerts on error occurrences. The Watcher assistant, which is available on the Errors overview page, can help you set up a watch per service.
+You can use the power of the alerting features with Watcher to get alerts on error occurrences.
+The Watcher assistant, which is available on the Errors overview page, can help you set up a watch per service.
 
-Configure the watch with occurrences threshold and time interval and set the desired actions, such as email or Slack notifications. Your team can be set up with alerts in minutes.
+Configure the watch with an occurrences threshold, time interval, and the desired actions, such as email or Slack notifications.
+With Watcher, your team can set up alerts within minutes.
 
 Watches are managed separately in the dedicated Watcher UI available in Advanced Settings.
 
 [role="screenshot"]
 image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM UI in Kibana]
 
+[[metrics]]
+=== Metrics
+
+//Todo: Add text...
+
+[role="screenshot"]
+image::apm/images/apm-metrics.png[Example view of the Metrics overview in APM UI in Kibana]
+
 [[machine-learning-integration]]
 === Machine Learning integration
 
-The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on transaction response times. The response time graph will show the expected bounds and annotate the graph when the anomaly score is 75 or above.
+The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on transaction response times.
+The response time graph will show the expected bounds and annotate the graph when the anomaly score is 75 or above.
 
 [role="screenshot"]
 image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM UI in Kibana]
 
-Jobs can be created per transaction type and based on the average response time. You can manage jobs in the Machine Learning jobs management page. It might take some time for results to appear on the graph.
+Jobs can be created per transaction type and based on the average response time.
+You can manage jobs in the Machine Learning jobs management page.
+It might take some time for results to appear on the graph.
 
 [[query-bar]]
 === Query bar
 
-The query bar is a powerful data query feature. Similar to the query bar in {kibana-ref}/discover.html[Discover] it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in. It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include. The query bar is available on Services, Transaction and Errors views, and any input will persist as you move between them.
+The query bar is a powerful data query feature.
+Similar to the query bar in {kibana-ref}/discover.html[Discover], it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in.
+It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include.
+The query bar is available on Services, Transaction, and Errors views, and any input will persist as you move between them.
 
 [role="screenshot"]
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in Kibana]
 
 ==== Example queries
 
-* Exclude response times faster than 2000 ms; `transaction.duration.us > 2000000`
-* Filter by response status code; `context.response.status_code >= 400`
-* Filter by single user ID; `context.user.id : 12`
+* Exclude response times slower than 2000 ms: `transaction.duration.us > 2000000`
+* Filter by response status code: `context.response.status_code >= 400`
+* Filter by single user ID: `context.user.id : 12`
+* View _all_ transactions for an endpoint, instead of just a sample - `processor.event: "transaction" AND transaction.name: "<TRANSACTION_NAME_HERE>"`
 
-Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities in the Kibana query language.
+Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities in the {kib} query language.
