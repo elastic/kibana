@@ -37,6 +37,8 @@ export default async function ({ readConfigFile }) {
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
         `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/v1/saml`,
         'xpack.security.authc.realms.saml.saml1.attributes.principal=urn:oid:0.0.7',
+        'logger.org.elasticsearch.xpack.security.authc.TokenService=TRACE',
+        'logger.org.elasticsearch.xpack.security.rest.action.oauth2=DEBUG',
       ],
     },
 
@@ -47,6 +49,9 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
         '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
         '--xpack.security.authProviders=[\"saml\"]',
+        '--logging.events.log=[\"info\", \"warning\", \"error\", \"security\"]',
+        '--logging.events.request=[\"*\"]',
+        '--logging.events.error=[\"*\"]',
       ],
     },
   };
