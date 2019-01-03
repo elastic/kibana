@@ -22,6 +22,7 @@ function getMockOriginalInjectedVars() {
         bar: true,
       },
       management: {},
+      catalogue: {},
       feature: {
         someCapability: true,
       },
@@ -63,6 +64,7 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {},
       otherFeature: {},
     });
   });
@@ -88,6 +90,7 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {},
       newFeature: {},
       otherFeature: {},
     });
@@ -115,6 +118,7 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -147,6 +151,7 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -210,6 +215,7 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {},
       newFeature: {
         capability1: true,
         capability2: true,

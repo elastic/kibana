@@ -16,6 +16,7 @@ export interface FeaturePrivilegeDefinition {
   management?: {
     [sectionId: string]: string[];
   };
+  catalogue?: string[];
   api?: string[];
   app: string[];
   savedObject: {
@@ -63,6 +64,7 @@ const schema = Joi.object({
           tooltip: Joi.string(),
         }),
         management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
+        catalogue: Joi.array().items(Joi.string()),
         api: Joi.array().items(Joi.string()),
         app: Joi.array()
           .items(Joi.string())

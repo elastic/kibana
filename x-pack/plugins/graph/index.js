@@ -57,6 +57,7 @@ export function graph(kibana) {
         navLinkId: 'graph',
         privileges: {
           all: {
+            catalogue: ['graph'],
             app: ['graph'],
             savedObject: {
               all: ['graph-workspace'],
@@ -65,6 +66,7 @@ export function graph(kibana) {
             ui: [],
           },
           read: {
+            catalogue: ['graph'],
             app: ['graph'],
             savedObject: {
               all: [],
