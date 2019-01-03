@@ -45,20 +45,15 @@ export async function loadTransaction({
   kuery
 }: IUrlParams) {
   try {
-    const result = await callApi<TransactionAPIResponse>(
-      {
-        pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
-        query: {
-          traceId,
-          start,
-          end,
-          esFilterQuery: await getEncodedEsQuery(kuery)
-        }
-      },
-      {
-        camelcase: false
+    const result = await callApi<TransactionAPIResponse>({
+      pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
+      query: {
+        traceId,
+        start,
+        end,
+        esFilterQuery: await getEncodedEsQuery(kuery)
       }
-    );
+    });
     return addVersion(result);
   } catch (e) {
     const err: KFetchError = e;
