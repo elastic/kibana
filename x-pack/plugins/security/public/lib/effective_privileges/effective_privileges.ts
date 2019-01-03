@@ -4,30 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { FeaturePrivilegeSet } from '../../common/model/privileges/feature_privileges';
-import { PrivilegeDefinition } from '../../common/model/privileges/privilege_definition';
-import { Role } from '../../common/model/role';
-import { NO_PRIVILEGE_VALUE } from '../views/management/edit_role/lib/constants';
+import { FeaturePrivilegeSet } from '../../../common/model/privileges/feature_privileges';
+import { PrivilegeDefinition } from '../../../common/model/privileges/privilege_definition';
+import { Role } from '../../../common/model/role';
+import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 
-interface EnforcerResponse {
+interface PrivilegeValidationResponse {
   allowed: boolean;
   details: string;
 }
 
+/**
+ * Describes the source of a privilege.
+ */
 export enum PRIVILEGE_SOURCE {
+  /** No privilege assigned */
   NONE,
-  ASSIGNED,
+
+  /** Privilege is assigned directly to the entity */
+  ASSIGNED_DIRECTLY,
+
+  /** Privilege is derived from either a space base privilege, or global base privilege */
   EFFECTIVE,
+
+  /** Privilege was originally assigned directly, but has been superceded by a more-permissive base privilege */
   EFFECTIVE_OVERRIDES_ASSIGNED,
 }
 
+/**
+ * Encapsulates logic for determining which privileges are assigned at a base and feature level, for both global and space-specific privileges.
+ *
+ * Terminology:
+ *   - Global: denotes privileges that are assigned to the "*" resource, which cascades to all current and future spaces.
+ *   - Base Privilege: The privilege assigned either globally or at the space level, which cascades to all features.
+ *   - Feature Privilege: The privilege assigned either globally or at the space level for a specific feature.
+ */
 export class EffectivePrivileges {
+  // reference to the global privilege definition
   private globalPrivilege: {
     spaces?: string[];
     minimum: string[];
     feature: FeaturePrivilegeSet;
   };
 
+  // list of privilege actions that comprise the global minimum (base) privilege
   private assignedGlobalBaseActions: string[];
 
   constructor(
@@ -43,6 +63,11 @@ export class EffectivePrivileges {
       : [];
   }
 
+  /**
+   * Determines the actual global privilege assigned for a specific feature.
+   *
+   * @param featureId the feature id.
+   */
   public getActualGlobalFeaturePrivilege(featureId: string) {
     const { feature = {} as FeaturePrivilegeSet } = this.globalPrivilege || {};
     const assignedFeaturePrivilege = feature[featureId]
@@ -91,7 +116,7 @@ export class EffectivePrivileges {
     if (allowsAssigned.allowed) {
       return {
         privilege: assignedFeaturePrivilege,
-        source: PRIVILEGE_SOURCE.ASSIGNED,
+        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
         details: 'Assigned directly',
       };
     } else {
@@ -129,7 +154,7 @@ export class EffectivePrivileges {
     if (allowsAssigned.allowed) {
       return {
         privilege: minimum[0],
-        source: PRIVILEGE_SOURCE.ASSIGNED,
+        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
         details: `Assigned directly`,
       };
     }
@@ -141,7 +166,10 @@ export class EffectivePrivileges {
     };
   }
 
-  public allowsGlobalFeaturePrivilege(featureId: string, privilege: string): EnforcerResponse {
+  public allowsGlobalFeaturePrivilege(
+    featureId: string,
+    privilege: string
+  ): PrivilegeValidationResponse {
     if (this.globalPrivilege.minimum.length === 0) {
       return {
         allowed: true,
@@ -301,7 +329,7 @@ export class EffectivePrivileges {
     featureId: string,
     privilege: string,
     spacesIndex: number
-  ): EnforcerResponse {
+  ): PrivilegeValidationResponse {
     const { minimum = [], spaces = [] } = this.role.kibana.spaces[spacesIndex] || {};
     const globalFeaturePrivileges = this.globalPrivilege.feature[featureId] || [];
 
@@ -336,7 +364,10 @@ export class EffectivePrivileges {
     };
   }
 
-  public allowsSpaceBasePrivilege(basePrivilege: string, spacesIndex: number): EnforcerResponse {
+  public allowsSpaceBasePrivilege(
+    basePrivilege: string,
+    spacesIndex: number
+  ): PrivilegeValidationResponse {
     if (this.globalPrivilege.minimum.length === 0) {
       return {
         allowed: true,

@@ -15,10 +15,9 @@ import {
   // @ts-ignore
   EuiToolTip,
 } from '@elastic/eui';
-import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges_inst';
+import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges';
 import { SpaceAvatar } from 'plugins/spaces/components';
 import React, { Component, Fragment } from 'react';
-import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
@@ -28,7 +27,6 @@ interface Props {
   role: Role;
   spaces: Space[];
   features: Feature[];
-  privilegeDefinition: PrivilegeDefinition;
   effectivePrivileges: EffectivePrivileges;
 }
 

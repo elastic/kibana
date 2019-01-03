@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { PrivilegeDefinition } from '../../common/model/privileges/privilege_definition';
-import { Role } from '../../common/model/role';
-import { EffectivePrivileges } from './effective_privileges_inst';
+import { PrivilegeDefinition } from '../../../common/model/privileges/privilege_definition';
+import { Role } from '../../../common/model/role';
+import { EffectivePrivileges } from './effective_privileges';
 
 export class EffectivePrivilegesFactory {
   private rankedSpaceBasePrivileges: string[];

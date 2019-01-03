@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges_factory';
+import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges';
 import React, { Component } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';

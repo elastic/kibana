@@ -12,7 +12,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   // @ts-ignore
   EuiInMemoryTable,
   // @ts-ignore
@@ -21,8 +20,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges_factory';
-import { PRIVILEGE_SOURCE } from 'plugins/security/lib/effective_privileges_inst';
+import {
+  EffectivePrivilegesFactory,
+  PRIVILEGE_SOURCE,
+} from 'plugins/security/lib/effective_privileges';
 import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
@@ -370,7 +371,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           <PrivilegeMatrix
             role={this.props.role}
             effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.props.role)}
-            privilegeDefinition={this.props.privilegeDefinition}
             features={this.props.features}
             spaces={this.getDisplaySpaces()}
           />
