@@ -25,7 +25,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Label"
-            id="xpack.ml.customUrlsList.labelLabel"
+            id="xpack.ml.customUrlEditorList.labelLabel"
             values={Object {}}
           />
         }
@@ -51,7 +51,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="URL"
-            id="xpack.ml.customUrlsList.urlLabel"
+            id="xpack.ml.customUrlEditorList.urlLabel"
             values={Object {}}
           />
         }
@@ -78,7 +78,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Time range"
-            id="xpack.ml.customUrlsList.timeRangeLabel"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
             values={Object {}}
           />
         }
@@ -107,7 +107,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           content={
             <FormattedMessage
               defaultMessage="Test custom URL"
-              id="xpack.ml.customUrlsList.testCustomUrlTooltip"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
               values={Object {}}
             />
           }
@@ -139,7 +139,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           content={
             <FormattedMessage
               defaultMessage="Delete custom URL"
-              id="xpack.ml.customUrlsList.deleteCustomUrlTooltip"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
               values={Object {}}
             />
           }
@@ -182,7 +182,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Label"
-            id="xpack.ml.customUrlsList.labelLabel"
+            id="xpack.ml.customUrlEditorList.labelLabel"
             values={Object {}}
           />
         }
@@ -208,7 +208,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="URL"
-            id="xpack.ml.customUrlsList.urlLabel"
+            id="xpack.ml.customUrlEditorList.urlLabel"
             values={Object {}}
           />
         }
@@ -235,7 +235,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Time range"
-            id="xpack.ml.customUrlsList.timeRangeLabel"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
             values={Object {}}
           />
         }
@@ -264,7 +264,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           content={
             <FormattedMessage
               defaultMessage="Test custom URL"
-              id="xpack.ml.customUrlsList.testCustomUrlTooltip"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
               values={Object {}}
             />
           }
@@ -296,7 +296,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           content={
             <FormattedMessage
               defaultMessage="Delete custom URL"
-              id="xpack.ml.customUrlsList.deleteCustomUrlTooltip"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
               values={Object {}}
             />
           }
@@ -339,7 +339,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Label"
-            id="xpack.ml.customUrlsList.labelLabel"
+            id="xpack.ml.customUrlEditorList.labelLabel"
             values={Object {}}
           />
         }
@@ -365,7 +365,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="URL"
-            id="xpack.ml.customUrlsList.urlLabel"
+            id="xpack.ml.customUrlEditorList.urlLabel"
             values={Object {}}
           />
         }
@@ -392,7 +392,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Time range"
-            id="xpack.ml.customUrlsList.timeRangeLabel"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
             values={Object {}}
           />
         }
@@ -421,7 +421,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           content={
             <FormattedMessage
               defaultMessage="Test custom URL"
-              id="xpack.ml.customUrlsList.testCustomUrlTooltip"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
               values={Object {}}
             />
           }
@@ -453,7 +453,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           content={
             <FormattedMessage
               defaultMessage="Delete custom URL"
-              id="xpack.ml.customUrlsList.deleteCustomUrlTooltip"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
               values={Object {}}
             />
           }
