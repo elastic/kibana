@@ -30,6 +30,7 @@ declare module 'hapi' {
   interface PluginProperties {
     elasticsearch: ElasticsearchPlugin;
     kibana: any;
+    spaces: any;
     // add new plugin types here
   }
 

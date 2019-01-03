@@ -26,19 +26,19 @@ export interface CreateOptions extends BaseOptions {
   override?: boolean;
 }
 
-export interface BulkCreateObject<T extends SavedObjectAttributes> {
+export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
   id?: string;
   type: string;
   attributes: T;
   extraDocumentProperties?: string[];
 }
 
-export interface BulkCreateResponse<T extends SavedObjectAttributes> {
+export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
   savedObjects: Array<SavedObject<T>>;
 }
 
 export interface FindOptions extends BaseOptions {
-  type: string | string[];
+  type?: string | string[];
   page?: number;
   perPage?: number;
   sortField?: string;
@@ -48,7 +48,7 @@ export interface FindOptions extends BaseOptions {
   searchFields?: string[];
 }
 
-export interface FindResponse<T extends SavedObjectAttributes> {
+export interface FindResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
   total: number;
   per_page: number;
@@ -65,7 +65,7 @@ export interface BulkGetObject {
 }
 export type BulkGetObjects = BulkGetObject[];
 
-export interface BulkGetResponse<T extends SavedObjectAttributes> {
+export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
   savedObjects: Array<SavedObject<T>>;
 }
 
@@ -73,7 +73,7 @@ export interface SavedObjectAttributes {
   [key: string]: string | number | boolean | null;
 }
 
-export interface SavedObject<T extends SavedObjectAttributes> {
+export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
   version?: number;
@@ -89,27 +89,29 @@ export declare class SavedObjectsClient {
 
   constructor(repository: any);
 
-  public create<T extends SavedObjectAttributes>(
+  public create<T extends SavedObjectAttributes = any>(
     type: string,
     attributes: T,
     options?: CreateOptions
   ): Promise<SavedObject<T>>;
-  public bulkCreate<T extends SavedObjectAttributes>(
+  public bulkCreate<T extends SavedObjectAttributes = any>(
     objects: Array<BulkCreateObject<T>>,
     options?: CreateOptions
   ): Promise<BulkCreateResponse<T>>;
   public delete(type: string, id: string, options?: BaseOptions): Promise<{}>;
-  public find<T extends SavedObjectAttributes>(options: FindOptions): Promise<FindResponse<T>>;
-  public bulkGet<T extends SavedObjectAttributes>(
+  public find<T extends SavedObjectAttributes = any>(
+    options: FindOptions
+  ): Promise<FindResponse<T>>;
+  public bulkGet<T extends SavedObjectAttributes = any>(
     objects: BulkGetObjects,
     options?: BaseOptions
   ): Promise<BulkGetResponse<T>>;
-  public get<T extends SavedObjectAttributes>(
+  public get<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
     options?: BaseOptions
   ): Promise<SavedObject<T>>;
-  public update<T extends SavedObjectAttributes>(
+  public update<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
     attributes: Partial<T>,

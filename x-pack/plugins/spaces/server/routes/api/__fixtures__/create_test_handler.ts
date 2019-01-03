@@ -5,11 +5,12 @@
  */
 
 // @ts-ignore
-import { PluginProperties, Server } from 'hapi';
+import { Server } from 'hapi';
+import { Legacy } from 'kibana';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
 
-interface KibanaServer extends Server {
+interface KibanaServer extends Legacy.Server {
   savedObjects: any;
 }
 
@@ -45,17 +46,6 @@ const baseConfig: TestConfig = {
   'server.basePath': '',
   'xpack.spaces.maxSpaces': 1000,
 };
-
-// Merge / extend default interfaces for hapi. This is all faked out below.
-declare module 'hapi' {
-  interface Server {
-    savedObjects: any;
-  }
-
-  interface PluginProperties {
-    spaces: any;
-  }
-}
 
 export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: any) => void) {
   const teardowns: TeardownFn[] = [];

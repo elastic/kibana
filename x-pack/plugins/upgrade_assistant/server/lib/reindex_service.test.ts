@@ -9,7 +9,6 @@ import { SavedObjectsClient } from 'src/server/saved_objects';
 import {
   LOCK_WINDOW,
   REINDEX_OP_TYPE,
-  ReindexOperation,
   ReindexSavedObject,
   ReindexService,
   reindexServiceFactory,
