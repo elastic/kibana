@@ -9,7 +9,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { EventItem, GetEventsQuery, KpiItem } from '../../graphql/types';
+import { Direction, EventItem, GetEventsQuery, KpiItem } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { eventsQuery } from './index.gql_query';
 
@@ -43,6 +43,15 @@ export const EventsQuery = pure<EventsProps>(
           interval: '12h',
           from: startDate,
           to: endDate,
+        },
+        pagination: {
+          limit: 5,
+          cursor: null,
+          tiebreaker: null,
+        },
+        sortField: {
+          sortFieldId: 'timestamp',
+          direction: 'descending' as Direction,
         },
       }}
     >

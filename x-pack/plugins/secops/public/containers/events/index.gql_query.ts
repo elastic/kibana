@@ -7,43 +7,64 @@
 import gql from 'graphql-tag';
 
 export const eventsQuery = gql`
-  query GetEventsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {
+  query GetEventsQuery(
+    $sourceId: ID!
+    $timerange: TimerangeInput!
+    $pagination: PaginationInput!
+    $sortField: SortField!
+    $filterQuery: String
+  ) {
     source(id: $sourceId) {
       id
-      getEvents(timerange: $timerange, filterQuery: $filterQuery) {
-        events {
-          _id
-          timestamp
+      Events(
+        timerange: $timerange
+        pagination: $pagination
+        sortField: $sortField
+        filterQuery: $filterQuery
+      ) {
+        totalCount
+        pageInfo {
+          endCursor {
+            value
+            tiebreaker
+          }
+          hasNextPage
+        }
+        edges {
           event {
-            type
-            severity
-            module
-            category
-            id
-          }
-          host {
-            hostname
-            ip
-          }
-          source {
-            ip
-            port
-          }
-          destination {
-            ip
-            port
-          }
-          geo {
-            region_name
-            country_iso_code
-          }
-          suricata {
-            eve {
-              proto
-              flow_id
-              alert {
-                signature
-                signature_id
+            _id
+            timestamp
+            event {
+              type
+              severity
+              module
+              category
+              id
+            }
+            host {
+              name
+              ip
+            }
+            source {
+              ip
+              port
+            }
+            destination {
+              ip
+              port
+            }
+            geo {
+              region_name
+              country_iso_code
+            }
+            suricata {
+              eve {
+                proto
+                flow_id
+                alert {
+                  signature
+                  signature_id
+                }
               }
             }
           }

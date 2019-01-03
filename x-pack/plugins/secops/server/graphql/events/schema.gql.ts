@@ -27,7 +27,6 @@ export const eventsSchema = gql`
 
   type HostEcsFields {
     id: String
-    hostname: String
     ip: String
     name: String
   }
@@ -59,6 +58,7 @@ export const eventsSchema = gql`
 
   type EventItem {
     _id: String
+    _index: String
     destination: DestinationEcsFields
     event: EventEcsFields
     geo: GeoEcsFields
@@ -68,13 +68,25 @@ export const eventsSchema = gql`
     timestamp: String
   }
 
+  type EventEdges {
+    event: EventItem!
+    cursor: CursorType!
+  }
+
   type EventsData {
     kpiEventType: [KpiItem!]!
-    events: [EventItem!]!
+    edges: [EventEdges!]!
+    totalCount: Int!
+    pageInfo: PageInfo!
   }
 
   extend type Source {
-    "Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
-    getEvents(timerange: TimerangeInput!, filterQuery: String): EventsData
+    "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
+    Events(
+      timerange: TimerangeInput!
+      pagination: PaginationInput!
+      sortField: SortField!
+      filterQuery: String
+    ): EventsData
   }
 `;

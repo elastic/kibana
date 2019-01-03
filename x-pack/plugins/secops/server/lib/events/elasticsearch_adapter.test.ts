@@ -5,11 +5,11 @@
  */
 import { formatEventsData } from './elasticsearch_adapter';
 import { eventFieldsMap } from './query.dsl';
-import { EventData } from './types';
+import { EventHit } from './types';
 
 describe('events elasticsearch_adapter', () => {
   describe('#formatEventsData', () => {
-    const hit: EventData = {
+    const hit: EventHit = {
       _index: 'index-123',
       _type: 'type-123',
       _id: 'id-123',

@@ -27,8 +27,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-  /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  getEvents?: EventsData | null;
+  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+  Events?: EventsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -42,6 +42,8 @@ export interface SourceConfiguration {
   logAlias: string;
   /** The alias to read auditbeat data from */
   auditbeatAlias: string;
+  /** The alias to read packetbeat data from */
+  packetbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -98,7 +100,11 @@ export interface IndexField {
 export interface EventsData {
   kpiEventType: KpiItem[];
 
-  events: EventItem[];
+  edges: EventEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
 }
 
 export interface KpiItem {
@@ -107,8 +113,16 @@ export interface KpiItem {
   count: number;
 }
 
+export interface EventEdges {
+  event: EventItem;
+
+  cursor: CursorType;
+}
+
 export interface EventItem {
   _id?: string | null;
+
+  _index?: string | null;
 
   destination?: DestinationEcsFields | null;
 
@@ -152,8 +166,6 @@ export interface GeoEcsFields {
 export interface HostEcsFields {
   id?: string | null;
 
-  hostname?: string | null;
-
   ip?: string | null;
 
   name?: string | null;
@@ -183,6 +195,18 @@ export interface SuricataAlertData {
   signature_id?: number | null;
 }
 
+export interface CursorType {
+  value: string;
+
+  tiebreaker?: string | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -207,18 +231,6 @@ export interface HostItem {
   version?: string | null;
 
   os?: string | null;
-}
-
-export interface CursorType {
-  value: string;
-
-  tiebreaker?: string | null;
-}
-
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
 }
 
 export interface UncommonProcessesData {
@@ -274,6 +286,12 @@ export interface PaginationInput {
   tiebreaker?: string | null;
 }
 
+export interface SortField {
+  sortFieldId?: string | null;
+
+  direction?: Direction | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -282,8 +300,12 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface GetEventsSourceArgs {
+export interface EventsSourceArgs {
   timerange: TimerangeInput;
+
+  pagination: PaginationInput;
+
+  sortField: SortField;
 
   filterQuery?: string | null;
 }
@@ -315,6 +337,11 @@ export enum IndexType {
   AUDITBEAT = 'AUDITBEAT',
 }
 
+export enum Direction {
+  ascending = 'ascending',
+  descending = 'descending',
+}
+
 // ====================================================
 // END: Typescript template
 // ====================================================
@@ -327,6 +354,8 @@ export namespace GetEventsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
+    pagination: PaginationInput;
+    sortField: SortField;
     filterQuery?: string | null;
   };
 
@@ -341,25 +370,51 @@ export namespace GetEventsQuery {
 
     id: string;
 
-    getEvents?: GetEvents | null;
+    Events?: Events | null;
   };
 
-  export type GetEvents = {
+  export type Events = {
     __typename?: 'EventsData';
 
-    events: Events[];
+    totalCount: number;
+
+    pageInfo: PageInfo;
+
+    edges: Edges[];
 
     kpiEventType: KpiEventType[];
   };
 
-  export type Events = {
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+
+    tiebreaker?: string | null;
+  };
+
+  export type Edges = {
+    __typename?: 'EventEdges';
+
+    event: Event;
+  };
+
+  export type Event = {
     __typename?: 'EventItem';
 
     _id?: string | null;
 
     timestamp?: string | null;
 
-    event?: Event | null;
+    event?: _Event | null;
 
     host?: Host | null;
 
@@ -372,7 +427,7 @@ export namespace GetEventsQuery {
     suricata?: Suricata | null;
   };
 
-  export type Event = {
+  export type _Event = {
     __typename?: 'EventEcsFields';
 
     type?: string | null;
@@ -389,7 +444,7 @@ export namespace GetEventsQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    hostname?: string | null;
+    name?: string | null;
 
     ip?: string | null;
   };

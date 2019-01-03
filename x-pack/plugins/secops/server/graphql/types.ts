@@ -56,8 +56,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-  /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  getEvents?: EventsData | null;
+  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+  Events?: EventsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -71,6 +71,8 @@ export interface SourceConfiguration {
   logAlias: string;
   /** The alias to read auditbeat data from */
   auditbeatAlias: string;
+  /** The alias to read packetbeat data from */
+  packetbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -127,7 +129,11 @@ export interface IndexField {
 export interface EventsData {
   kpiEventType: KpiItem[];
 
-  events: EventItem[];
+  edges: EventEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
 }
 
 export interface KpiItem {
@@ -136,8 +142,16 @@ export interface KpiItem {
   count: number;
 }
 
+export interface EventEdges {
+  event: EventItem;
+
+  cursor: CursorType;
+}
+
 export interface EventItem {
   _id?: string | null;
+
+  _index?: string | null;
 
   destination?: DestinationEcsFields | null;
 
@@ -181,8 +195,6 @@ export interface GeoEcsFields {
 export interface HostEcsFields {
   id?: string | null;
 
-  hostname?: string | null;
-
   ip?: string | null;
 
   name?: string | null;
@@ -212,6 +224,18 @@ export interface SuricataAlertData {
   signature_id?: number | null;
 }
 
+export interface CursorType {
+  value: string;
+
+  tiebreaker?: string | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -236,18 +260,6 @@ export interface HostItem {
   version?: string | null;
 
   os?: string | null;
-}
-
-export interface CursorType {
-  value: string;
-
-  tiebreaker?: string | null;
-}
-
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
 }
 
 export interface UncommonProcessesData {
@@ -303,6 +315,12 @@ export interface PaginationInput {
   tiebreaker?: string | null;
 }
 
+export interface SortField {
+  sortFieldId?: string | null;
+
+  direction?: Direction | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -311,8 +329,12 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface GetEventsSourceArgs {
+export interface EventsSourceArgs {
   timerange: TimerangeInput;
+
+  pagination: PaginationInput;
+
+  sortField: SortField;
 
   filterQuery?: string | null;
 }
@@ -342,6 +364,11 @@ export enum IndexType {
   ANY = 'ANY',
   LOGS = 'LOGS',
   AUDITBEAT = 'AUDITBEAT',
+}
+
+export enum Direction {
+  ascending = 'ascending',
+  descending = 'descending',
 }
 
 // ====================================================
@@ -386,8 +413,8 @@ export namespace SourceResolvers {
     configuration?: ConfigurationResolver<SourceConfiguration, TypeParent, Context>;
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, Context>;
-    /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-    getEvents?: GetEventsResolver<EventsData | null, TypeParent, Context>;
+    /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+    Events?: EventsResolver<EventsData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
     /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -411,13 +438,17 @@ export namespace SourceResolvers {
     Parent,
     Context
   >;
-  export type GetEventsResolver<
+  export type EventsResolver<
     R = EventsData | null,
     Parent = Source,
     Context = SecOpsContext
-  > = Resolver<R, Parent, Context, GetEventsArgs>;
-  export interface GetEventsArgs {
+  > = Resolver<R, Parent, Context, EventsArgs>;
+  export interface EventsArgs {
     timerange: TimerangeInput;
+
+    pagination: PaginationInput;
+
+    sortField: SortField;
 
     filterQuery?: string | null;
   }
@@ -462,6 +493,8 @@ export namespace SourceConfigurationResolvers {
     logAlias?: LogAliasResolver<string, TypeParent, Context>;
     /** The alias to read auditbeat data from */
     auditbeatAlias?: AuditbeatAliasResolver<string, TypeParent, Context>;
+    /** The alias to read packetbeat data from */
+    packetbeatAlias?: PacketbeatAliasResolver<string, TypeParent, Context>;
     /** The field mapping to use for this source */
     fields?: FieldsResolver<SourceFields, TypeParent, Context>;
   }
@@ -472,6 +505,11 @@ export namespace SourceConfigurationResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatAliasResolver<
+    R = string,
+    Parent = SourceConfiguration,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketbeatAliasResolver<
     R = string,
     Parent = SourceConfiguration,
     Context = SecOpsContext
@@ -648,7 +686,11 @@ export namespace EventsDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = EventsData> {
     kpiEventType?: KpiEventTypeResolver<KpiItem[], TypeParent, Context>;
 
-    events?: EventsResolver<EventItem[], TypeParent, Context>;
+    edges?: EdgesResolver<EventEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
   }
 
   export type KpiEventTypeResolver<
@@ -656,8 +698,18 @@ export namespace EventsDataResolvers {
     Parent = EventsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type EventsResolver<
-    R = EventItem[],
+  export type EdgesResolver<
+    R = EventEdges[],
+    Parent = EventsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = EventsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
     Parent = EventsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -682,9 +734,30 @@ export namespace KpiItemResolvers {
   >;
 }
 
+export namespace EventEdgesResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = EventEdges> {
+    event?: EventResolver<EventItem, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type EventResolver<R = EventItem, Parent = EventEdges, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = EventEdges,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace EventItemResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = EventItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
+
+    _index?: IndexResolver<string | null, TypeParent, Context>;
 
     destination?: DestinationResolver<DestinationEcsFields | null, TypeParent, Context>;
 
@@ -706,6 +779,11 @@ export namespace EventItemResolvers {
     Parent,
     Context
   >;
+  export type IndexResolver<
+    R = string | null,
+    Parent = EventItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type DestinationResolver<
     R = DestinationEcsFields | null,
     Parent = EventItem,
@@ -825,19 +903,12 @@ export namespace HostEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
     id?: IdResolver<string | null, TypeParent, Context>;
 
-    hostname?: HostnameResolver<string | null, TypeParent, Context>;
-
     ip?: IpResolver<string | null, TypeParent, Context>;
 
     name?: NameResolver<string | null, TypeParent, Context>;
   }
 
   export type IdResolver<
-    R = string | null,
-    Parent = HostEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type HostnameResolver<
     R = string | null,
     Parent = HostEcsFields,
     Context = SecOpsContext
@@ -930,6 +1001,44 @@ export namespace SuricataAlertDataResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace CursorTypeResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = CursorType> {
+    value?: ValueResolver<string, TypeParent, Context>;
+
+    tiebreaker?: TiebreakerResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ValueResolver<R = string, Parent = CursorType, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TiebreakerResolver<
+    R = string | null,
+    Parent = CursorType,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PageInfoResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = PageInfo> {
+    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+
+    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+  }
+
+  export type EndCursorResolver<
+    R = CursorType | null,
+    Parent = PageInfo,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HasNextPageResolver<
+    R = boolean | null,
+    Parent = PageInfo,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace HostsDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = HostsData> {
     edges?: EdgesResolver<HostsEdges[], TypeParent, Context>;
@@ -1013,44 +1122,6 @@ export namespace HostItemResolvers {
     Parent,
     Context
   >;
-}
-
-export namespace CursorTypeResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = CursorType> {
-    value?: ValueResolver<string, TypeParent, Context>;
-
-    tiebreaker?: TiebreakerResolver<string | null, TypeParent, Context>;
-  }
-
-  export type ValueResolver<R = string, Parent = CursorType, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TiebreakerResolver<
-    R = string | null,
-    Parent = CursorType,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace PageInfoResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = PageInfo> {
-    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
-
-    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
-  }
-
-  export type EndCursorResolver<
-    R = CursorType | null,
-    Parent = PageInfo,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type HasNextPageResolver<
-    R = boolean | null,
-    Parent = PageInfo,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
 }
 
 export namespace UncommonProcessesDataResolvers {

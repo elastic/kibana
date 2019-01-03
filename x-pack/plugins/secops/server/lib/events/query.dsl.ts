@@ -6,12 +6,12 @@
 
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { FilterQuery } from '../types';
+import { FilterQuery, SortRequest, SortRequestDirection } from '../types';
 import { EventsRequestOptions } from './types';
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
-  'host.hostname': 'host.name',
+  'host.name': 'host.name',
   'host.ip': 'host.ip',
   'event.category': 'suricata.eve.alert.category',
   'event.id': 'suricata.eve.flow_id',
@@ -32,8 +32,10 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
 
 export const buildQuery = (options: EventsRequestOptions) => {
   const { to, from } = options.timerange;
+  const { limit, cursor, tiebreaker } = options.pagination;
+  const { sortFieldId, direction } = options.sortField;
   const { fields, filterQuery } = options;
-  const esFields = reduceFields(fields, eventFieldsMap);
+  const esFields = [...reduceFields(fields, eventFieldsMap)];
   const filter = [
     ...createQueryFilterClauses(filterQuery as FilterQuery),
     {
@@ -60,9 +62,20 @@ export const buildQuery = (options: EventsRequestOptions) => {
       }
     : {};
 
-  return {
+  let sort: SortRequest = [];
+  if (sortFieldId) {
+    const field: string = sortFieldId === 'timestamp' ? '@timestamp' : sortFieldId;
+    const dir: SortRequestDirection = direction === 'descending' ? 'desc' : 'asc';
+    sort = [...sort, { [field]: dir }, { [options.sourceConfiguration.fields.tiebreaker]: dir }];
+  }
+
+  const queryDsl = {
     allowNoIndices: true,
-    index: options.sourceConfiguration.logAlias,
+    index: [
+      options.sourceConfiguration.logAlias,
+      options.sourceConfiguration.auditbeatAlias,
+      options.sourceConfiguration.packetbeatAlias,
+    ],
     ignoreUnavailable: true,
     body: {
       aggregations: agg,
@@ -81,13 +94,21 @@ export const buildQuery = (options: EventsRequestOptions) => {
           filter,
         },
       },
-      size: 25,
-      sort: [
-        {
-          [options.sourceConfiguration.fields.timestamp]: 'desc',
-        },
-      ],
+      size: limit + 1,
+      sort,
       _source: esFields,
     },
   };
+
+  if (cursor && tiebreaker) {
+    return {
+      ...queryDsl,
+      body: {
+        ...queryDsl.body,
+        search_after: [cursor, tiebreaker],
+      },
+    };
+  }
+
+  return queryDsl;
 };
