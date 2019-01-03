@@ -23,7 +23,7 @@ module.exports = {
       browsers: [
         'last 2 versions',
         '> 5%',
-        'Safari 7' // for PhantomJS support
+        'Safari 7' // for PhantomJS support: https://github.com/elastic/kibana/issues/27136
       ]
     })
   ]
