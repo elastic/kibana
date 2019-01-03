@@ -15,9 +15,9 @@
 }
 
 /* hide unusable controls */
-.global-nav,
+.kbnGlobalNav,
 kbn-top-nav,
-.toaster-container,
+.kbnToaster__container,
 filter-bar,
 ::-webkit-scrollbar {
   display: none !important;

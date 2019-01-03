@@ -15,6 +15,9 @@ exports[`Overrides render overrides 1`] = `
     }
   >
     <EuiSuperSelect
+      compressed={false}
+      fullWidth={false}
+      hasDividers={false}
       onChange={[Function]}
       options={
         Array [
@@ -59,6 +62,9 @@ exports[`Overrides render overrides 1`] = `
     }
   >
     <EuiSuperSelect
+      compressed={false}
+      fullWidth={false}
+      hasDividers={false}
       onChange={[Function]}
       options={
         Array [
@@ -475,6 +481,9 @@ exports[`Overrides render overrides 1`] = `
     }
   >
     <EuiSuperSelect
+      compressed={false}
+      fullWidth={false}
+      hasDividers={false}
       onChange={[Function]}
       options={Array []}
     />

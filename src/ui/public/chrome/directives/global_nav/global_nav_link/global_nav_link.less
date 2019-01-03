@@ -4,7 +4,7 @@
   display: inline-block;
 
   &:hover {
-    background-color: darken(@globalColorBlue, 15%);
+    background-color: darken(@globalColorBlue, 2%);
   }
 
   &.active {
@@ -27,11 +27,11 @@
   }
 
   &:hover {
-    background-color: darken(@globalColorBlue, 15%);
+    background-color: darken(@globalColorBlue, 2%);
   }
 
   &.active {
-    background-color: @globalColorBlue;
+    background-color: darken(@globalColorBlue, 4%);
 
     .global-nav-link__anchor {
       color: @white;
@@ -56,15 +56,31 @@
     &:focus, &:hover {
       color: @globalColorWhite;
     }
+
+    &:focus {
+      box-shadow: none !important;
+      background-color: darken(@globalColorBlue, 5%);
+    }
+  }
+
+  .global-nav-link__euiIcon {
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .euiIcon--app .euiIcon__fillSecondary {
+      fill: #FFF;
+    }
   }
 
   .global-nav-link__icon {
     display: inline-block;
     width: @global-nav-closed-width;
     height: @app-icon-height;
-    float: left;
+    line-height: @app-icon-height;
     text-align: center;
-    font-size: 1.7em;
   }
 
     /**

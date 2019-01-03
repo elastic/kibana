@@ -25,7 +25,15 @@ import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
 
-export class NewCalendar extends Component {
+import { injectI18n } from '@kbn/i18n/react';
+
+export const NewCalendar = injectI18n(class NewCalendar extends Component {
+  static propTypes = {
+    calendarId: PropTypes.string,
+    canCreateCalendar: PropTypes.bool.isRequired,
+    canDeleteCalendar: PropTypes.bool.isRequired,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -99,21 +107,61 @@ export class NewCalendar extends Component {
     } catch (error) {
       console.log(error);
       this.setState({ loading: false });
-      toastNotifications.addDanger('An error occurred loading calendar form data. Try refreshing the page.');
+      toastNotifications.addDanger(
+        this.props.intl.formatMessage({
+          id: 'xpack.ml.calendarsEdit.errorWithLoadingCalendarFromDataErrorMessage',
+          defaultMessage: 'An error occurred loading calendar form data. Try refreshing the page.'
+        })
+      );
     }
   }
 
-  onCreate = async () => {
-    const calendar = this.setUpCalendarForApi();
-    this.setState({ saving: true });
+  isDuplicateId = () => {
+    const { calendars, formCalendarId } = this.state;
 
-    try {
-      await ml.addCalendar(calendar);
-      window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
-    } catch (error) {
-      console.log('Error saving calendar', error);
-      this.setState({ saving: false });
-      toastNotifications.addDanger(`An error occurred creating calendar ${calendar.calendarId}`);
+    for (let i = 0; i < calendars.length; i++) {
+      if (calendars[i].calendar_id === formCalendarId) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  onCreate = async () => {
+    const { formCalendarId } = this.state;
+    const { intl } = this.props;
+
+    if (this.isDuplicateId()) {
+      toastNotifications.addDanger(
+        intl.formatMessage(
+          {
+            id: 'xpack.ml.calendarsEdit.canNotCreateCalendarWithExistingIdErrorMessag',
+            defaultMessage: 'Cannot create calendar with id [{formCalendarId}] as it already exists.'
+          },
+          { formCalendarId }
+        )
+      );
+    } else {
+      const calendar = this.setUpCalendarForApi();
+      this.setState({ saving: true });
+
+      try {
+        await ml.addCalendar(calendar);
+        window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+      } catch (error) {
+        console.log('Error saving calendar', error);
+        this.setState({ saving: false });
+        toastNotifications.addDanger(
+          intl.formatMessage(
+            {
+              id: 'xpack.ml.calendarsEdit.errorWithCreatingCalendarErrorMessage',
+              defaultMessage: 'An error occurred creating calendar {calendarId}'
+            },
+            { calendarId: calendar.calendarId }
+          )
+        );
+      }
     }
   }
 
@@ -127,7 +175,15 @@ export class NewCalendar extends Component {
     } catch (error) {
       console.log('Error saving calendar', error);
       this.setState({ saving: false });
-      toastNotifications.addDanger(`An error occurred saving calendar ${calendar.calendarId}. Try refreshing the page.`);
+      toastNotifications.addDanger(
+        this.props.intl.formatMessage(
+          {
+            id: 'xpack.ml.calendarsEdit.errorWithUpdatingCalendarErrorMessage',
+            defaultMessage: 'An error occurred saving calendar {calendarId}. Try refreshing the page.'
+          },
+          { calendarId: calendar.calendarId }
+        )
+      );
     }
   }
 
@@ -285,6 +341,8 @@ export class NewCalendar extends Component {
         >
           <CalendarForm
             calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
+            canCreateCalendar={this.props.canCreateCalendar}
+            canDeleteCalendar={this.props.canDeleteCalendar}
             description={selectedCalendar ? selectedCalendar.description : description}
             eventsList={events}
             groupIds={groupIdOptions}
@@ -310,8 +368,4 @@ export class NewCalendar extends Component {
       </EuiPage>
     );
   }
-}
-
-NewCalendar.propTypes = {
-  calendarId: PropTypes.string,
-};
+});

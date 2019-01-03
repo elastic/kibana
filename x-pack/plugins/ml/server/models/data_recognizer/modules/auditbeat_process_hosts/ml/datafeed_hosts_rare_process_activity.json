@@ -1,0 +1,28 @@
+{
+  "job_id": "JOB_ID",
+  "indexes": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "query":{
+    "bool": {
+      "must":[
+        {
+          "match": {
+            "event.type": "syscall"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "exists": {
+            "field": "docker.container.id"
+          }
+        }
+      ]
+  }
+},
+  "scroll_size": 1000,
+  "chunking_config": {
+    "mode": "auto"
+  }
+}

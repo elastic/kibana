@@ -17,6 +17,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
     >
       <AddItemPopover
         addItems={[MockFunction]}
+        canCreateFilter={true}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -41,7 +42,11 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
         onClick={[MockFunction]}
         type="button"
       >
-        Delete item
+        <FormattedMessage
+          defaultMessage="Delete item"
+          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
@@ -73,6 +78,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
     >
       <AddItemPopover
         addItems={[MockFunction]}
+        canCreateFilter={true}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -97,7 +103,11 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
         onClick={[MockFunction]}
         type="button"
       >
-        Delete item
+        <FormattedMessage
+          defaultMessage="Delete item"
+          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
