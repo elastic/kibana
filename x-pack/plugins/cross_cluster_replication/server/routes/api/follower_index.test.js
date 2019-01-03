@@ -34,6 +34,8 @@ const registerHandlers = () => {
     0: 'list',
     1: 'get',
     2: 'create',
+    3: 'pause',
+    4: 'resume',
   };
 
   const server = {
@@ -138,6 +140,34 @@ describe('[CCR API Routes] Follower Index', () => {
         },
       });
 
+      expect(response).toEqual({ acknowledge: true });
+    });
+  });
+
+  describe('pause()', () => {
+    beforeEach(() => {
+      resetHttpRequestResponses();
+      routeHandler = routeHandlers.pause;
+    });
+
+    it('should return 200 status when follower index is paused', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 1 } });
+      expect(response).toEqual({ acknowledge: true });
+    });
+  });
+
+  describe('resume()', () => {
+    beforeEach(() => {
+      resetHttpRequestResponses();
+      routeHandler = routeHandlers.resume;
+    });
+
+    it('should return 200 status when follower index is resumed', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 1 } });
       expect(response).toEqual({ acknowledge: true });
     });
   });

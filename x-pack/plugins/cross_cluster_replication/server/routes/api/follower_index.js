@@ -98,4 +98,53 @@ export const registerFollowerIndexRoutes = (server) => {
       }
     },
   });
+
+
+  /**
+   * Pauses a follower index
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}/pause`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+
+      try {
+        return await callWithRequest('ccr.pauseFollowerIndex', { id });
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
+
+  /**
+   * Resumes a follower index
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}/resume`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+
+      try {
+        return await callWithRequest('ccr.resumeFollowerIndex', { id });
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
 };
