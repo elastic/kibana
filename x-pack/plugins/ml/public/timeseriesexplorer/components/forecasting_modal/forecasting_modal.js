@@ -284,7 +284,6 @@ class ForecastingModal extends Component {
       if (entityFieldNames.length > 0) {
         ml.getCardinalityOfFields({
           index: job.datafeed_config.indices,
-          types: job.datafeed_config.types,
           fieldNames: entityFieldNames,
           query: job.datafeed_config.query,
           timeFieldName: job.data_description.time_field,

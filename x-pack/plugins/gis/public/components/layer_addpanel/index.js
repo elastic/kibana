@@ -10,7 +10,7 @@ import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE }
   from '../../store/ui';
 import { getTemporaryLayers, getDataSources } from "../../selectors/map_selectors";
 import {
-  addPreviewLayer,
+  addLayer,
   removeLayer,
   clearTemporaryLayers,
   setSelectedLayer,
@@ -39,7 +39,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(clearTemporaryLayers());
     },
     previewLayer: (layer) => {
-      dispatch(addPreviewLayer(layer));
+      dispatch(addLayer(layer.toLayerDescriptor()));
     },
     removeLayer: id => dispatch(removeLayer(id)),
     nextAction: id => {

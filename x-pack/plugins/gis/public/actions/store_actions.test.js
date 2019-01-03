@@ -5,6 +5,7 @@
  */
 
 jest.mock('../selectors/map_selectors', () => ({}));
+jest.mock('../kibana_services', () => ({}));
 
 import { mapExtentChanged } from './store_actions';
 
