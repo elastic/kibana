@@ -17,23 +17,18 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from '..';
-
-export interface SavedObjectsClientWrapperOptions<Request = any> {
-  client: SavedObjectsClient;
-  request: Request;
+export interface SavedObjectsRepositoryOptions {
+  index: string | string[];
+  mappings: unknown;
+  callCluster: unknown;
+  schema: unknown;
+  serializer: unknown;
+  migrator: unknown;
+  onBeforeWrite: unknown;
 }
 
-export type SavedObjectsClientWrapperFactory<Request = any> = (
-  options: SavedObjectsClientWrapperOptions<Request>
-) => SavedObjectsClient;
+export declare class SavedObjectsRepository {
+  // ATTENTION: this interface is incomplete
 
-export interface ScopedSavedObjectsClientProvider<Request = any> {
-  // ATTENTION: these types are incomplete
-
-  addClientWrapperFactory(
-    priority: number,
-    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
-  ): void;
-  getClient(request: Request): SavedObjectsClient;
+  constructor(options: SavedObjectsRepositoryOptions);
 }

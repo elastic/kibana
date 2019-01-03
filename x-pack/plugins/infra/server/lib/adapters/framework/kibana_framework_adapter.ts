@@ -6,14 +6,11 @@
 
 import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { Request, ResponseToolkit, Server } from 'hapi';
-import * as runtimeTypes from 'io-ts';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter'
 import { Legacy } from 'kibana';
+
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
-  InfraFrameworkIndexPatternsService,
   InfraFrameworkRequest,
   InfraFrameworkRouteOptions,
   InfraResponse,
@@ -30,17 +27,9 @@ import {
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
-  private server: Legacy.Server;
 
-  constructor(hapiServer: Legacy.Server) {
-    this.server = hapiServer;
-    // const kbnServer = KbnServerType.decode(hapiServer);
-    // if (kbnServer.isRight()) {
-    //   this.server = kbnServer
-    // } else {
-    //   kbnServer.value
-    // }
-    this.version = hapiServer.plugins.kibana.status.plugin.version;
+  constructor(private server: Legacy.Server) {
+    this.version = server.plugins.kibana.status.plugin.version;
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -108,10 +97,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
   public getIndexPatternsService(
     request: InfraFrameworkRequest<Legacy.Request>
-  ): InfraFrameworkIndexPatternsService {
-    if (!isServerWithIndexPatternsServiceFactory(this.server)) {
-      throw new Error('Failed to access indexPatternsService for the request');
-    }
+  ): Legacy.IndexPatternsService {
     return this.server.indexPatternsServiceFactory({
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
@@ -126,7 +112,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public getSavedObjectsClient(request: InfraFrameworkRequest) {
-    return null;
+    return this.server.savedObjects.getScopedSavedObjectsClient(request);
   }
 
   public async makeTSVBRequest(
@@ -169,29 +155,3 @@ export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
     query,
   };
 }
-
-interface ServerWithIndexPatternsServiceFactory extends Legacy.Server {
-  indexPatternsServiceFactory(options: {
-    callCluster: (...args: any[]) => any;
-  }): InfraFrameworkIndexPatternsService;
-}
-
-const isServerWithIndexPatternsServiceFactory = (
-  server: Legacy.Server
-): server is ServerWithIndexPatternsServiceFactory =>
-  typeof (server as any).indexPatternsServiceFactory === 'function';
-
-const KbnServerType = runtimeTypes.type({
-  indexPatternsServiceFactory: runtimeTypes.Function,
-  plugins: runtimeTypes.type({
-    kibana: runtimeTypes.type({
-      status: runtimeTypes.type({
-        plugin: runtimeTypes.type({
-          version: runtimeTypes.string,
-        }),
-      }),
-    }),
-  }),
-});
-
-type KbnServer = runtimeTypes.TypeOf<typeof KbnServerType>;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { Legacy } from 'kibana';
 import { countBy } from 'lodash';
 
 // Support telemetry for additional agent types by appending definitions in
@@ -39,7 +39,7 @@ export function createApmTelementry(
 }
 
 export function storeApmTelemetry(
-  server: Server,
+  server: Legacy.Server,
   apmTelemetry: ApmTelemetry
 ): void {
   const savedObjectsClient = getSavedObjectsClient(server);
@@ -49,7 +49,7 @@ export function storeApmTelemetry(
   });
 }
 
-export function getSavedObjectsClient(server: Server): any {
+export function getSavedObjectsClient(server: Legacy.Server): any {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'
