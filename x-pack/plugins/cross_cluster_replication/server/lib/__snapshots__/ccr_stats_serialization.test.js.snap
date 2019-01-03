@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`[CCR] auto-follow stats serialization should deserialize auto-follow stats 1`] = `
+Object {
+  "autoFollowedClusters": Array [
+    Object {
+      "clusterName": "new-york",
+      "lastSeenMetadataVersion": 15,
+      "timeSinceLastCheckMillis": 2426,
+    },
+  ],
+  "numberOfFailedFollowIndices": 0,
+  "numberOfFailedRemoteClusterStateRequests": 0,
+  "numberOfSuccessfulFollowIndices": 0,
+  "recentAutoFollowErrors": Array [
+    Object {
+      "autoFollowException": Object {
+        "reason": "index to follow [kibana_sample_1] for pattern [pattern-1] matches with other patterns [pattern-2]",
+        "type": "exception",
+      },
+      "leaderIndex": "pattern-1:kibana_sample_1",
+    },
+    Object {
+      "autoFollowException": Object {
+        "reason": "index to follow [kibana_sample_1] for pattern [pattern-2] matches with other patterns [pattern-1]",
+        "type": "exception",
+      },
+      "leaderIndex": "pattern-2:kibana_sample_1",
+    },
+  ],
+}
+`;

@@ -83,7 +83,7 @@ exports[`after fetch initialFilter 1`] = `
             <EuiButton
               color="primary"
               data-test-subj="newDashboardLink"
-              fill={false}
+              fill={true}
               href="#/dashboard"
               iconSide="left"
               type="button"
@@ -333,7 +333,7 @@ exports[`after fetch renders table rows 1`] = `
             <EuiButton
               color="primary"
               data-test-subj="newDashboardLink"
-              fill={false}
+              fill={true}
               href="#/dashboard"
               iconSide="left"
               type="button"
@@ -501,7 +501,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             <EuiButton
               color="primary"
               data-test-subj="newDashboardLink"
-              fill={false}
+              fill={true}
               href="#/dashboard"
               iconSide="left"
               type="button"

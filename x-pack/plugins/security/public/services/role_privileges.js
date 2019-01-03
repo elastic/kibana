@@ -19,6 +19,8 @@ const clusterPrivileges = [
   'monitor_watcher',
   'read_ccr',
   'manage_ccr',
+  'manage_ilm',
+  'read_ilm',
 ];
 const indexPrivileges = [
   'all',
@@ -34,6 +36,7 @@ const indexPrivileges = [
   'view_index_metadata',
   'read_cross_cluster',
   'manage_follow_index',
+  'manage_ilm',
 ];
 
 export function getClusterPrivileges() {
