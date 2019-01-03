@@ -34,6 +34,8 @@ export interface RequestHandlerParams {
   queryFilter: QueryFilter;
   uiState: PersistedState;
   partialRows?: boolean;
+  metricsAtAllLevels?: boolean;
+  minimalColumns?: boolean;
 }
 
 export type RequestHandler = <T>(vis: Vis, params: RequestHandlerParams) => T;
