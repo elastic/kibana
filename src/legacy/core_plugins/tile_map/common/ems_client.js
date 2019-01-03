@@ -19,12 +19,13 @@
 
 import MarkdownIt from 'markdown-it';
 import _ from 'lodash';
-import { modifyUrl } from '../../../core/public/utils';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
+import fetch from 'node-fetch';
+import { format as formatUrl, parse as parseUrl } from 'url';
 
 const extendUrl = (url, props) => (
-  modifyUrl(url, parsed => _.merge(parsed, props))
+  modifyUrlLocal(url, parsed => _.merge(parsed, props))
 );
 
 const markdownIt = new MarkdownIt({
@@ -32,6 +33,49 @@ const markdownIt = new MarkdownIt({
   linkify: true
 });
 
+/**
+ * plugins cannot have upstream dependencies on core/*-kibana.
+ * Work-around by copy-pasting modifyUrl routine here.
+ * @param url
+ * @param block
+ */
+function modifyUrlLocal(url, block) {
+
+  const parsed = parseUrl(url, true);
+
+  // copy over the most specific version of each
+  // property. By default, the parsed url includes
+  // several conflicting properties (like path and
+  // pathname + search, or search and query) and keeping
+  // track of which property is actually used when they
+  // are formatted is harder than necessary
+  const meaningfulParts = {
+    protocol: parsed.protocol,
+    slashes: parsed.slashes,
+    auth: parsed.auth,
+    hostname: parsed.hostname,
+    port: parsed.port,
+    pathname: parsed.pathname,
+    query: parsed.query || {},
+    hash: parsed.hash,
+  };
+
+  // the block modifies the meaningfulParts object, or returns a new one
+  const modifiedParts = block(meaningfulParts) || meaningfulParts;
+
+  // format the modified/replaced meaningfulParts back into a url
+  return formatUrl({
+    protocol: modifiedParts.protocol,
+    slashes: modifiedParts.slashes,
+    auth: modifiedParts.auth,
+    hostname: modifiedParts.hostname,
+    port: modifiedParts.port,
+    pathname: modifiedParts.pathname,
+    query: modifiedParts.query,
+    hash: modifiedParts.hash,
+  });
+
+}
 
 /**
  *  Unescape a url template that was escaped by encodeURI() so leaflet

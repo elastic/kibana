@@ -68,7 +68,7 @@ exports[`DetailView should render StickyProperties 1`] = `
       Object {
         "fieldName": "error.exception.handled",
         "label": "Handled",
-        "val": true,
+        "val": "true",
         "width": "25%",
       },
       Object {

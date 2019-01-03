@@ -12,9 +12,6 @@
     "indices": [
       "filebeat-7.0.0*"
     ],
-    "types": [
-      "doc"
-    ],
     "query": {
       "match_all": {
         "boost": 1
