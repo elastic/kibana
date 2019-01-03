@@ -72,6 +72,8 @@ export default function navLinksTests({ getService }: TestInvoker) {
           // if we don't have access at the space itself, we're
           // redirected to the space selector and the ui capabilities
           // are lagely irrelevant because they won't be consumed
+          case 'no_kibana_privileges at everything_space':
+          case 'no_kibana_privileges at nothing_space':
           case 'everything_space_all at nothing_space':
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':

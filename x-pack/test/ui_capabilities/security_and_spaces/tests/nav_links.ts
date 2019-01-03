@@ -53,6 +53,8 @@ export default function navLinksTests({ getService }: TestInvoker) {
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
+          case 'no_kibana_privileges at everything_space':
+          case 'no_kibana_privileges at nothing_space':
           case 'everything_space_all at nothing_space':
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':

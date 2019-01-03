@@ -5,7 +5,23 @@
  */
 import { Space, User } from '../common/types';
 
-// these are the users that we care about
+const NoKibanaPrivileges: User = {
+  username: 'no_kibana_privileges',
+  fullName: 'no_kibana_privileges',
+  password: 'no_kibana_privileges-password',
+  role: {
+    name: 'no_kibana_privileges',
+    elasticsearch: {
+      indices: [
+        {
+          names: ['foo'],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 const Superuser: User = {
   username: 'superuser',
   fullName: 'superuser',
@@ -186,6 +202,7 @@ const NothingSpaceRead: User = {
 };
 
 export const Users: User[] = [
+  NoKibanaPrivileges,
   Superuser,
   LegacyAll,
   LegacyRead,
@@ -233,6 +250,24 @@ interface Scenario {
   user: User;
   space: Space;
 }
+
+interface NoKibanaPrivilegesAtEverythingSpace extends Scenario {
+  id: 'no_kibana_privileges at everything_space';
+}
+const NoKibanaPrivilegesAtEverythingSpace: NoKibanaPrivilegesAtEverythingSpace = {
+  id: 'no_kibana_privileges at everything_space',
+  user: NoKibanaPrivileges,
+  space: EverythingSpace,
+};
+
+interface NoKibanaPrivilegesAtNothingSpace extends Scenario {
+  id: 'no_kibana_privileges at nothing_space';
+}
+const NoKibanaPrivilegesAtNothingSpace: NoKibanaPrivilegesAtNothingSpace = {
+  id: 'no_kibana_privileges at nothing_space',
+  user: NoKibanaPrivileges,
+  space: NothingSpace,
+};
 
 interface SuperuserAtEverythingSpace extends Scenario {
   id: 'superuser at everything_space';
@@ -433,6 +468,8 @@ const NothingSpaceReadAtNothingSpace: NothingSpaceReadAtNothingSpace = {
 };
 
 export type UserAtSpaceScenarios =
+  | NoKibanaPrivilegesAtEverythingSpace
+  | NoKibanaPrivilegesAtNothingSpace
   | SuperuserAtEverythingSpace
   | SuperuserAtNothingSpace
   | LegacyAllAtEverythingSpace
@@ -456,6 +493,8 @@ export type UserAtSpaceScenarios =
   | NothingSpaceReadAtEverythingSpace
   | NothingSpaceReadAtNothingSpace;
 export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
+  NoKibanaPrivilegesAtEverythingSpace,
+  NoKibanaPrivilegesAtNothingSpace,
   SuperuserAtEverythingSpace,
   SuperuserAtNothingSpace,
   LegacyAllAtEverythingSpace,
