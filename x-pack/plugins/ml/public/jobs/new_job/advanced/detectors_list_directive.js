@@ -21,7 +21,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobDetectorsList', function ($modal) {
+module.directive('mlJobDetectorsList', function ($modal, i18n) {
   return {
     restrict: 'AE',
     replace: true,
@@ -97,7 +97,16 @@ module.directive('mlJobDetectorsList', function ($modal) {
               then: function (callback) {
                 callback({
                   success: false,
-                  message: 'exclude_frequent value must be: "all", "none", "by" or "over"'
+                  message: i18n('xpack.ml.newJob.advanced.detectorsList.invalidExcludeFrequentParameterErrorMessage', {
+                    defaultMessage: '{excludeFrequentParam} value must be: {allValue}, {noneValue}, {byValue} or {overValue}',
+                    values: {
+                      excludeFrequentParam: 'exclude_frequent',
+                      allValue: '"all"',
+                      noneValue: '"none"',
+                      byValue: '"by"',
+                      overValue: '"over"'
+                    }
+                  })
                 });
               }
             };
@@ -114,7 +123,11 @@ module.directive('mlJobDetectorsList', function ($modal) {
           .catch((resp) => {
             return {
               success: false,
-              message: (resp.message || 'Validation failed')
+              message: (
+                resp.message || i18n('xpack.ml.newJob.advanced.detectorsList.validationFailedErrorMessage', {
+                  defaultMessage: 'Validation failed'
+                })
+              )
             };
           });
       }
