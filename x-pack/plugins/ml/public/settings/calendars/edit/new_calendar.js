@@ -136,7 +136,7 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       toastNotifications.addDanger(
         intl.formatMessage(
           {
-            id: 'xpack.ml.calendarsEdit.cannotCreateCalendarWithExistingIdErrorMessage',
+            id: 'xpack.ml.calendarsEdit.canNotCreateCalendarWithExistingIdErrorMessag',
             defaultMessage: 'Cannot create calendar with id [{formCalendarId}] as it already exists.'
           },
           { formCalendarId }
