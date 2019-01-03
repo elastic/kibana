@@ -24,7 +24,7 @@ import { mlChartTooltipService } from '../../../../../components/chart_tooltip/c
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlPopulationJobChart', function () {
+module.directive('mlPopulationJobChart', function (i18n) {
 
   function link(scope, element) {
 
@@ -233,12 +233,14 @@ module.directive('mlPopulationJobChart', function () {
       const formattedDate = formatHumanReadableDateTime(data.date);
       contents += `${formattedDate}<br/><hr/>`;
       contents += `${mlEscape(scope.overFieldName)}: ${mlEscape(data.label)}<br/>`;
-      if (scope.chartData.fieldFormat !== undefined) {
-        contents += `Value: ${scope.chartData.fieldFormat.convert(data.value, 'text')}`;
-      } else {
-        contents += `Value: ${parseInt(data.value)}`;
-      }
-
+      contents += i18n('xpack.ml.newJob.simple.population.chartTooltipValueLabel', {
+        defaultMessage: 'Value: {dataValue}',
+        values: {
+          dataValue: scope.chartData.fieldFormat !== undefined
+            ? scope.chartData.fieldFormat.convert(data.value, 'text')
+            : parseInt(data.value)
+        }
+      });
       mlChartTooltipService.show(contents, el, {
         x: 5,
         y: 10
