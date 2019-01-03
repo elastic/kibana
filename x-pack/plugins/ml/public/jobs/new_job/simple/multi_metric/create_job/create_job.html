@@ -4,11 +4,22 @@
   <div ng-controller="MlCreateMultiMetricJob" class="multi-metric-job-container">
     <div class="row">
       <div class="col-md-6">
-        <h1 class="euiTitle euiTitle--large">New job from {{ui.pageTitle}}</h1>
+        <h1
+          class="euiTitle euiTitle--large"
+          i18n-id="xpack.ml.newJob.simple.multiMetric.newJobFromTitle"
+          i18n-default-message="New job from {pageTitle}"
+          i18n-values="{ pageTitle: ui.pageTitle }"
+        ></h1>
       </div>
       <div class="col-md-6">
         <div class="pull-right">
-          <span style="font-size:10px;" ng-show="formConfig.chartInterval !== undefined">Chart interval: {{formConfig.chartInterval.getInterval().expression}}</span>
+          <span
+            style="font-size:10px;"
+            ng-show="formConfig.chartInterval !== undefined"
+            i18n-id="xpack.ml.newJob.simple.multiMetric.chartIntervalLabel"
+            i18n-default-message="Chart interval: {interval}"
+            i18n-values="{ interval: formConfig.chartInterval.getInterval().expression }"
+          ></span>
           <ml-full-time-range-selector
             disabled='(jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)'
             index-pattern='ui.indexPattern'
@@ -23,7 +34,11 @@
     <div class="row">
       <div class="col-md-4">
         <div class="row form-controls">
-          <h4 class="euiTitle euiTitle--small">Job settings</h4>
+          <h4
+            class="euiTitle euiTitle--small"
+            i18n-id="xpack.ml.newJob.simple.multiMetric.jobSettingsTitle"
+            i18n-default-message="Job settings"
+          ></h4>
           <div>
             <div class='form-section'>
               <ml-fields-selection></ml-fields-selection>
@@ -31,16 +46,19 @@
 
             <div class='form-section form-section-overflow' >
               <h4 class="euiTitle euiTitle--small">
-                Split Data
+                <span
+                  i18n-id="xpack.ml.newJob.simple.multiMetric.splitDataTitle"
+                  i18n-default-message="Split Data"
+                ></span>
                 <button
                   ng-if="formConfig.splitField !== undefined && (!ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)"
                   ng-click="splitReset()"
-                  aria-label="Reset Split Data to none."
+                  aria-label="{{ ::'xpack.ml.newJob.simple.multiMetric.removeSplitButtonAriaLabel' | i18n: {defaultMessage: 'Reset Split Data to none.'} }}"
                   ng-disabled="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
                   class="euiButton euiButton--primary euiButton--small remove-split"
-                >
-                  Remove split
-                </button>
+                  i18n-id="xpack.ml.newJob.simple.multiMetric.removeSplitButtonLabel"
+                  i18n-default-message="Remove split"
+                ></button>
               </h4>
               <div class="euiSpacer euiSpacer--s"></div>
               <div class="row">
@@ -51,7 +69,7 @@
                       ng-change="splitChange()"
                       ng-disabled="ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
                     >
-                        <ui-select-match placeholder="Select a field">
+                        <ui-select-match placeholder="{{ ::'xpack.ml.newJob.simple.multiMetric.splitFieldPlaceholder' | i18n: {defaultMessage: 'Select a field'} }}">
                           <ml-field-type-icon type="$select.selected.mlType"></ml-field-type-icon>{{$select.selected.name}}
                         </ui-select-match>
                         <ui-select-choices repeat="field in ui.splitFields | filter: { name: $select.search }" group-by="'mlType'">
@@ -79,7 +97,11 @@
 
             <div class='form-section' >
               <div ng-show="jobState !== JOB_STATE.FINISHED">
-                <h4 class="euiTitle euiTitle--small">Job Details</h4>
+                <h4
+                  class="euiTitle euiTitle--small"
+                  i18n-id="xpack.ml.newJob.simple.multiMetric.jobDetailsTitle"
+                  i18n-default-message="Job Details"
+                ></h4>
                 <div class="euiSpacer euiSpacer--s"></div>
               </div>
 
@@ -88,7 +110,12 @@
                   <ml-general-job-details></ml-general-job-details>
 
                   <div class="form-group">
-                    <a href="" ng-click="moveToAdvancedJobCreation()">Move to advanced job configuration</a>
+                    <a
+                      href=""
+                      ng-click="moveToAdvancedJobCreation()"
+                      i18n-id="xpack.ml.newJob.simple.multiMetric.moveToAdvancedJobConfigurationLinkText"
+                      i18n-default-message="Move to advanced job configuration"
+                    ></a>
                   </div>
 
                   <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive">
@@ -104,33 +131,47 @@
                     </div>
                     <div class="euiFlexItem euiFlexItem--flexGrowZero">
                       <button
-                        aria-label="Create Job"
+                        aria-label="{{ ::'xpack.ml.newJob.simple.multiMetric.createJobButtonAriaLabel' | i18n: {defaultMessage: 'Create Job'} }}"
                         ng-click="createJob()"
                         type="button"
                         ng-show="jobState === JOB_STATE.NOT_STARTED"
                         ng-disabled="!ui.formValid"
                         class="euiButton euiButton--primary euiButton--small euiButton--fill">
-                        <span class="euiButton__content">
-                          Create Job
-                        </span>
+                        <span
+                          class="euiButton__content"
+                          i18n-id="xpack.ml.newJob.simple.multiMetric.createJobButtonLabel"
+                          i18n-default-message="Create Job"
+                        ></span>
                       </button>
                     </div>
                   </div>
 
-                  <div class='job-state-info' ng-show="jobState === JOB_STATE.RUNNING">Analysis running <i class='fa fa-spinner fa-spin'></i></div>
-                  <div class='job-state-info' ng-show="jobState === JOB_STATE.STOPPING">Analysis stopping <i class='fa fa-spinner fa-spin'></i></div>
+                  <div class='job-state-info' ng-show="jobState === JOB_STATE.RUNNING">
+                    <span
+                      i18n-id="xpack.ml.newJob.simple.multiMetric.analysisRunningLabel"
+                      i18n-default-message="Analysis running"
+                    ></span>
+                    <i class='fa fa-spinner fa-spin'></i>
+                  </div>
+                  <div class='job-state-info' ng-show="jobState === JOB_STATE.STOPPING">
+                    <span
+                      i18n-id="xpack.ml.newJob.simple.multiMetric.analysisStoppingLabel"
+                      i18n-default-message="Analysis stopping"
+                    ></span>
+                    <i class='fa fa-spinner fa-spin'></i>
+                  </div>
 
                   <div class="euiSpacer euiSpacer--s"></div>
 
                   <button
-                    aria-label="Stop Job"
+                    aria-label="{{ ::'xpack.ml.newJob.simple.multiMetric.stopJobButtonAriaLabel' | i18n: {defaultMessage: 'Stop Job'} }}"
                     ng-click="stopJob()"
                     type="button"
                     ng-show="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING"
                     ng-disabled="jobState === JOB_STATE.STOPPING"
                     class="euiButton euiButton--danger euiButton--small">
                     <span class="euiButton__content">
-                      {{(jobState === JOB_STATE.STOPPING) ? 'Analysis stopping' : 'Stop analysis' }}
+                      {{(jobState === JOB_STATE.STOPPING) ? analysisStoppingLabel : stopAnalysisLabel }}
                     </span>
                   </button>
 
@@ -138,38 +179,49 @@
                     href='{{resultsUrl}}'
                     id="job_running_view_results_link"
                     ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
-                    aria-label="View results of running job"
+                    aria-label="{{ ::'xpack.ml.newJob.simple.multiMetric.viewResultsOfRunningJobAriaLabel' | i18n: {defaultMessage: 'View results of running job'} }}"
                     ng-show="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING"
                     class="euiButton euiButton--primary euiButton--small euiButton--fill">
-                    <span class="euiButton__content">
-                      View Results
-                    </span>
+                    <span
+                      class="euiButton__content"
+                      i18n-id="xpack.ml.newJob.simple.multiMetric.viewResultsOfRunningJobLinkText"
+                      i18n-default-message="View Results"
+                    ></span>
                   </a>
                 </div>
                 <div ng-show="jobState === JOB_STATE.FINISHED">
-                  <h3 class="euiTitle euiTitle--large">Job {{formConfig.jobId }} created
-                    <i style="color:green;" class="fa fa-check" aria-label="Job finished"></i>
+                  <h3 class="euiTitle euiTitle--large">
+                    <span
+                      i18n-id="xpack.ml.newJob.simple.multiMetric.jobCreatedTitle"
+                      i18n-default-message="Job {jobId} created"
+                      i18n-values="{ jobId: formConfig.jobId }"
+                    ></span>
+                    <i style="color:green;" class="fa fa-check" aria-label="{{ ::'xpack.ml.newJob.simple.multiMetric.jobFinishedAriaLabel' | i18n: {defaultMessage: 'Job finished'} }}"></i>
                   </h3>
                   <div class="euiSpacer euiSpacer--m"></div>
 
                   <button
-                    aria-label="Reset"
+                    aria-label="{{ ::'xpack.ml.newJob.simple.multiMetric.resetButtonAriaLabel' | i18n: {defaultMessage: 'Reset'} }}"
                     ng-click="resetJob()"
                     type="button"
                     class="euiButton euiButton--primary euiButton--small euiButton--fill">
-                    <span class="euiButton__content">
-                      Reset
-                    </span>
+                    <span
+                      class="euiButton__content"
+                      i18n-id="xpack.ml.newJob.simple.multiMetric.resetButtonLabel"
+                      i18n-default-message="Reset"
+                    ></span>
                   </button>
                   <a
                     href='{{resultsUrl}}'
                     id="job_finished_view_results_link"
                     ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
-                    aria-label="View results of finished job"
+                    aria-label="{{ ::'xpack.ml.newJob.simple.multiMetric.viewResultsOfFinishedJobAriaLabel' | i18n: {defaultMessage: 'View results of finished job'} }}"
                     class="euiButton euiButton--primary euiButton--small euiButton--fill">
-                    <span class="euiButton__content">
-                      View Results
-                    </span>
+                    <span
+                      class="euiButton__content"
+                      i18n-id="xpack.ml.newJob.simple.multiMetric.viewResultsOfFinishedJobLinkText"
+                      i18n-default-message="View Results"
+                    ></span>
                   </a>
                 </div>
 
@@ -188,10 +240,18 @@
       </div>
       <div class="col-md-8">
         <div class="row charts-container">
-          <h4 class="euiTitle euiTitle--small">Results</h4>
+          <h4
+            class="euiTitle euiTitle--small"
+            i18n-id="xpack.ml.newJob.simple.multiMetric.resultsTitle"
+            i18n-default-message="Results"
+          ></h4>
           <div>
             <div class='chart-list-panel event-rate-container' style='height: {{ui.eventRateChartHeight + 70}}px;'>
-              <label class="kuiFormLabel">Document count</label>
+              <label
+                class="kuiFormLabel"
+                i18n-id="xpack.ml.newJob.simple.multiMetric.documentCountLabel"
+                i18n-default-message="Document count"
+              ></label>
 
               <div class='chart-container'>
                 <div style='height: {{ui.eventRateChartHeight + 25}}px;'>
@@ -211,8 +271,27 @@
                     </div>
                     <div class='status-label' ng-if="chartStates.eventRate === CHART_STATE.NO_RESULTS">
                       <div class='no-results'>
-                        <h4 class="euiTitle euiTitle--small"><i class="fa fa-info-circle"></i> No results found</h4>
-                        <span>Consider using the <a ng-click="setFullTimeRange()">full {{ui.indexPattern.title}} data</a></span>
+                        <h4 class="euiTitle euiTitle--small">
+                          <i class="fa fa-info-circle"></i>
+                          <span
+                            i18n-id="xpack.ml.newJob.simple.multiMetric.documentCountChart.noResultsFoundTitle"
+                            i18n-default-message="No results found"
+                          ></span>
+                        </h4>
+                        <span>
+                          <span
+                            i18n-id="xpack.ml.newJob.simple.multiMetric.documentCountChart.considerUsingText"
+                            i18n-default-message="Consider using the"
+                            i18n-description="Part of composite text xpack.ml.newJob.simple.multiMetric.documentCountChart.considerUsingText + xpack.ml.newJob.simple.multiMetric.documentCountChart.fullIndexPatternDataLinkText"
+                          ></span>
+                          <a
+                            ng-click="setFullTimeRange()"
+                            i18n-id="xpack.ml.newJob.simple.multiMetric.documentCountChart.fullIndexPatternDataLinkText"
+                            i18n-default-message="full {indexPatternTitle} data"
+                            i18n-values="{ indexPatternTitle: ui.indexPattern.title }"
+                            i18n-description="Part of composite text xpack.ml.newJob.simple.multiMetric.documentCountChart.considerUsingText + xpack.ml.newJob.simple.multiMetric.documentCountChart.fullIndexPatternDataLinkText"
+                          ></a>
+                        </span>
                       </div>
                     </div>
                 </div>
@@ -244,7 +323,13 @@
                         </div>
                         <div class='status-label' ng-show="chartStates.fields[id] === CHART_STATE.NO_RESULTS">
                           <div class='no-results'>
-                            <h4 class="euiTitle euiTitle--small"><i class="fa fa-info-circle"></i> No results found</h4>
+                            <h4 class="euiTitle euiTitle--small">
+                              <i class="fa fa-info-circle"></i>
+                              <span
+                                i18n-id="xpack.ml.newJob.simple.multiMetric.chart.noResultsFoundTitle"
+                                i18n-default-message="No results found"
+                              ></span>
+                            </h4>
                           </div>
                         </div>
                     </div>
