@@ -75,9 +75,15 @@
     min-width: 150px;
   }
 
+  .euiLink {
+    width: 100%;
+  }
+
   .category-example {
     display: block;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .interim-result {

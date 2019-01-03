@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiInMemoryTable,
+  EuiLink,
   EuiText,
 } from '@elastic/eui';
 
@@ -208,6 +209,28 @@ function getColumns(
     sortable: true
   });
 
+  const showExamples = items.some(item => item.entityName === 'mlcategory');
+  if (showExamples === true) {
+    columns.push({
+      name: 'category examples',
+      sortable: false,
+      truncateText: true,
+      render: (item) => {
+        const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
+        return (
+          <EuiLink onClick={() => toggleRow(item)}>
+            {examples.map((example, i) => {
+              return <span key={`example${i}`} className="category-example">{example}</span>;
+            }
+            )}
+          </EuiLink>
+        );
+      },
+      textOnly: true,
+      width: '13%'
+    });
+  }
+
   const showLinks = (showViewSeriesLink === true) || items.some(item => showLinksMenuForItem(item));
 
   if (showLinks === true) {
@@ -230,27 +253,6 @@ function getColumns(
         }
       },
       sortable: false
-    });
-  }
-
-  const showExamples = items.some(item => item.entityName === 'mlcategory');
-  if (showExamples === true) {
-    columns.push({
-      name: 'category examples',
-      sortable: false,
-      truncateText: true,
-      render: (item) => {
-        const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
-        return (
-          <EuiText size="xs">
-            {examples.map((example, i) => {
-              return <span key={`example${i}`} className="category-example">{example}</span>;
-            }
-            )}
-          </EuiText>
-        );
-      },
-      textOnly: true,
     });
   }
 
