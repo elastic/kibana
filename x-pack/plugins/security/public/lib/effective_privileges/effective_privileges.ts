@@ -77,7 +77,7 @@ export class EffectivePrivileges {
   public getActualGlobalFeaturePrivilege(featureId: string) {
     const { feature = {} as FeaturePrivilegeSet } = this.globalPrivilege || {};
     const assignedFeaturePrivilege = feature[featureId]
-      ? feature[featureId][0]
+      ? feature[featureId][0] || NO_PRIVILEGE_VALUE
       : NO_PRIVILEGE_VALUE;
 
     const effectivePrivilege = this.getHighestGrantedGlobalFeaturePrivilege(featureId);
@@ -98,7 +98,7 @@ export class EffectivePrivileges {
   ): ExplanationResult {
     const { feature = {} as FeaturePrivilegeSet } = this.role.kibana.spaces[spacesIndex] || {};
     const assignedFeaturePrivilege = feature[featureId]
-      ? feature[featureId][0]
+      ? feature[featureId][0] || NO_PRIVILEGE_VALUE
       : NO_PRIVILEGE_VALUE;
 
     if (assignedFeaturePrivilege === NO_PRIVILEGE_VALUE) {
@@ -154,7 +154,7 @@ export class EffectivePrivileges {
       const isSet = globalBasePrivilege.length > 0;
 
       return {
-        privilege: globalBasePrivilege[0],
+        privilege: isSet ? globalBasePrivilege[0] : NO_PRIVILEGE_VALUE,
         source: isSet ? PRIVILEGE_SOURCE.EFFECTIVE : PRIVILEGE_SOURCE.NONE,
         details: isSet ? `Granted via global base privilege` : `Not assigned`,
       };

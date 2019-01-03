@@ -8,6 +8,7 @@ import { FeaturePrivilegeSet } from 'x-pack/plugins/security/common/model/privil
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
+import { PRIVILEGE_SOURCE } from './effective_privileges';
 import { EffectivePrivilegesFactory } from './effective_privileges_factory';
 
 const defaultPrivilegeDefinition = new PrivilegeDefinition({
@@ -88,7 +89,11 @@ const buildEffectivePrivileges = (
 };
 
 describe('EffectivePrivileges', () => {
-  describe('#getActualSpaceFeaturePrivilege', () => {
+  // implementation detail: `get*Privileges` uses `explain*Privileges`,
+  // so these tests will assert that the results of the two functions are the same. The alternatives are to duplicate all of these tests,
+  // or to create enough abstractions to make the bulk if this re-usable, which isn't very easy to understand.
+
+  describe('#explainActualSpaceBasePrivilege', () => {
     it(`returns 'none' when no privileges are assigned`, () => {
       const role = buildRole({
         spacesPrivileges: [
@@ -101,6 +106,33 @@ describe('EffectivePrivileges', () => {
       });
 
       const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceBasePrivilege(0)).toMatchObject({
+        privilege: NO_PRIVILEGE_VALUE,
+        source: PRIVILEGE_SOURCE.NONE,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceBasePrivilege(0)).toEqual(NO_PRIVILEGE_VALUE);
+    });
+  });
+
+  describe('#explainActualSpaceFeaturePrivilege', () => {
+    it(`returns 'none' when no privileges are assigned`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 0)).toMatchObject({
+        privilege: NO_PRIVILEGE_VALUE,
+        source: PRIVILEGE_SOURCE.NONE,
+        details: expect.any(String),
+      });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual(
         NO_PRIVILEGE_VALUE
       );
@@ -120,6 +152,11 @@ describe('EffectivePrivileges', () => {
       });
 
       const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 0)).toMatchObject({
+        privilege: 'read',
+        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
+        details: expect.any(String),
+      });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual('read');
     });
 
@@ -135,6 +172,11 @@ describe('EffectivePrivileges', () => {
       });
 
       const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 0)).toMatchObject({
+        privilege: 'read',
+        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        details: expect.any(String),
+      });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual('read');
     });
 
@@ -154,7 +196,12 @@ describe('EffectivePrivileges', () => {
       });
 
       const effectivePrivileges = buildEffectivePrivileges(role);
-      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual('read');
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
+        privilege: 'read',
+        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('read');
     });
 
     it(`returns 'read' when assigned effectively via global feature privilege`, () => {
@@ -175,7 +222,12 @@ describe('EffectivePrivileges', () => {
       });
 
       const effectivePrivileges = buildEffectivePrivileges(role);
-      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual('read');
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
+        privilege: 'read',
+        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('read');
     });
 
     it(`returns 'all' when assigned effectively via global base privilege overriding global feature privilege`, () => {
@@ -196,7 +248,12 @@ describe('EffectivePrivileges', () => {
       });
 
       const effectivePrivileges = buildEffectivePrivileges(role);
-      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual('all');
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
+        privilege: 'all',
+        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
     });
 
     it(`returns 'all' when assigned effectively via global feature privilege overriding global base privilege`, () => {
@@ -217,7 +274,66 @@ describe('EffectivePrivileges', () => {
       });
 
       const effectivePrivileges = buildEffectivePrivileges(role);
-      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual('all');
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
+        privilege: 'all',
+        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
+    });
+
+    it(`returns 'all' when assigned effectively via global base privilege overriding directly assigned feature privilege`, () => {
+      const role = buildRole({
+        globalPrivilege: {
+          minimum: ['all'],
+          feature: {},
+        },
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: [],
+            feature: {
+              feature1: ['read'],
+            },
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
+        privilege: 'all',
+        source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
+    });
+
+    it(`returns 'all' when assigned effectively via global feature privilege overriding directly assigned feature privilege`, () => {
+      const role = buildRole({
+        globalPrivilege: {
+          minimum: ['read'],
+          feature: {
+            feature1: ['all'],
+          },
+        },
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: [],
+            feature: {
+              feature1: ['read'],
+            },
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
+        privilege: 'all',
+        source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
     });
   });
 });
