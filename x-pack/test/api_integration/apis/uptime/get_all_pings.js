@@ -22,7 +22,7 @@ export default function ({ getService }) {
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
         .get(
-          `/api/uptime_monitoring/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
+          `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         )
         .expect(200);
 
@@ -33,7 +33,7 @@ export default function ({ getService }) {
     it('should sort pings according to timestamp', async () => {
       const { body: apiResponse } = await supertest
         .get(
-          `/api/uptime_monitoring/pings?sort=asc&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
+          `/api/uptime/pings?sort=asc&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         )
         .expect(200);
       expect(apiResponse.length).to.be(2);
@@ -44,7 +44,7 @@ export default function ({ getService }) {
     it('should return results of n length', async () => {
       const { body: apiResponse } = await supertest
         .get(
-          `/api/uptime_monitoring/pings?size=1&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
+          `/api/uptime/pings?size=1&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         )
         .expect(200);
 
@@ -57,7 +57,7 @@ export default function ({ getService }) {
       dateRangeEnd = moment('2002-01-02').valueOf();
       const { body: apiResponse } = await supertest
         .get(
-          `/api/uptime_monitoring/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
+          `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         )
         .expect(200);
 
