@@ -803,10 +803,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.8.1":
-  version "5.8.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.8.1.tgz#33467c059699a4626256d7197451400500831a66"
-  integrity sha512-y1hn27p9lm5P1sru8jHFbdKx6FzG5mQXc2cyS2Fc/T0SVH1n9Pj44OilM/NyVQNiR2pHKat+Hqc2SRrCcpeDmQ==
+"@elastic/eui@6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.0.1.tgz#6dd60ee534f5a5d99e28913b9d7dd6df96af0596"
+  integrity sha512-l/3s5ea13Um2A4aa4KXRbA8nAXyC0nz5S/w8Sr96ok8qtM1PT+SuBPq9CTEdZ89MHfC9EIwezBFX1pU8sX194A==
   dependencies:
     "@types/numeral" "^0.0.25"
     classnames "^2.2.5"
@@ -1342,10 +1342,10 @@
   resolved "https://registry.yarnpkg.com/@types/expect.js/-/expect.js-0.3.29.tgz#28dd359155b84b8ecb094afc3f4b74c3222dca3b"
   integrity sha1-KN01kVW4S47LCUr8P0t0wyItyjs=
 
-"@types/fetch-mock@^5.12.2":
-  version "5.12.2"
-  resolved "https://registry.yarnpkg.com/@types/fetch-mock/-/fetch-mock-5.12.2.tgz#8c96517ff74303031c65c5da2d99858e34c844d2"
-  integrity sha512-5YopFLn3TCnzQ1Z49xeKuOOcNGLlSNiWnEhcGA7uI6aSpZvb7vZHnpP0bbf2RNQ0P9sSgiHvr6IKj9nsTQR3sA==
+"@types/fetch-mock@7.2.1":
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/@types/fetch-mock/-/fetch-mock-7.2.1.tgz#5630999aa75532e00af42a54cbe05e1651f4a080"
+  integrity sha512-zuLhLEK4gOPxhkiUhqbG4p0lKY2ePEE//5NHTTn/vjYl0XWpfk2x0Fw7EWKtCjlggEsuc1GvpasD46X9PSZFaA==
 
 "@types/form-data@^2.2.1":
   version "2.2.1"
@@ -5993,6 +5993,20 @@ copy-webpack-plugin@^4.5.2:
     p-limit "^1.0.0"
     serialize-javascript "^1.4.0"
 
+copy-webpack-plugin@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/copy-webpack-plugin/-/copy-webpack-plugin-4.6.0.tgz#e7f40dd8a68477d405dd1b7a854aae324b158bae"
+  integrity sha512-Y+SQCF+0NoWQryez2zXn5J5knmr9z/9qSQt7fbL78u83rxmigOy8X5+BFn8CFSuX+nKT8gpYwJX68ekqtQt6ZA==
+  dependencies:
+    cacache "^10.0.4"
+    find-cache-dir "^1.0.0"
+    globby "^7.1.1"
+    is-glob "^4.0.0"
+    loader-utils "^1.1.0"
+    minimatch "^3.0.4"
+    p-limit "^1.0.0"
+    serialize-javascript "^1.4.0"
+
 core-js@^1.0.0:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
@@ -8714,14 +8728,15 @@ fecha@^2.3.3:
   resolved "https://registry.yarnpkg.com/fecha/-/fecha-2.3.3.tgz#948e74157df1a32fd1b12c3a3c3cdcb6ec9d96cd"
   integrity sha512-lUGBnIamTAwk4znq5BcqsDaxSmZ9nDVJaij6NvRt/Tg4R69gERA+otPKbS86ROw9nxVMw2/mp1fnaiWqbs6Sdg==
 
-fetch-mock@^5.13.1:
-  version "5.13.1"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-5.13.1.tgz#955794a77f3d972f1644b9ace65a0fdfd60f1df7"
-  integrity sha512-eWUo2KI4sRGnRu8tKELCBfasALM5BfvrCxdI7J02j3eUM9mf+uYzJkURA0PSn/29JVapVrYFm+z+9XijXu1PdA==
+fetch-mock@7.3.0:
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.3.0.tgz#4bf41190c19477c4c86ce1739972035bb02b3add"
+  integrity sha512-KxBeS8vsADFbWPVomuwxYqOJ2obZo6CidgkypjDPeu6zl+tAJvh2GfLDmJ8u//xgBGM9iOGwOxafeqAclilH2A==
   dependencies:
-    glob-to-regexp "^0.3.0"
-    node-fetch "^1.3.3"
-    path-to-regexp "^1.7.0"
+    babel-polyfill "^6.26.0"
+    glob-to-regexp "^0.4.0"
+    path-to-regexp "^2.2.1"
+    whatwg-url "^6.5.0"
 
 figgy-pudding@^3.1.0, figgy-pudding@^3.5.1:
   version "3.5.1"
@@ -9561,6 +9576,11 @@ glob-to-regexp@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.3.0.tgz#8c5a1494d2066c570cc3bfe4496175acc4d502ab"
   integrity sha1-jFoUlNIGbFcMw7/kSWF1rMTVAqs=
+
+glob-to-regexp@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.4.0.tgz#49bd677b1671022bd10921c3788f23cdebf9c7e6"
+  integrity sha512-fyPCII4vn9Gvjq2U/oDAfP433aiE64cyP/CJjRJcpVGjqqNdioUYn9+r0cSzT1XPwmGAHuTT7iv+rQT8u/YHKQ==
 
 glob-watcher@^0.0.6:
   version "0.0.6"
@@ -11992,7 +12012,7 @@ isobject@^3.0.0, isobject@^3.0.1:
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
 
-isomorphic-fetch@2.2.1, isomorphic-fetch@^2.1.1:
+isomorphic-fetch@^2.1.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/isomorphic-fetch/-/isomorphic-fetch-2.2.1.tgz#611ae1acf14f5e81f729507472819fe9733558a9"
   integrity sha1-YRrhrPFPXoH3KVB0coGf6XM1WKk=
@@ -15026,7 +15046,7 @@ node-fetch@2.1.2:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
   integrity sha1-q4hOjn5X44qUR1POxwb3iNF2i7U=
 
-node-fetch@^1.0.1, node-fetch@^1.3.3:
+node-fetch@^1.0.1:
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.3.tgz#980f6f72d85211a5347c6b2bc18c5b84c3eb47ef"
   integrity sha512-NhZ4CsKx7cYm2vSrBAr2PvFOe6sWDf0UYLRqA6svUYg7+/TSfVAu49jYC4BvQ4Sms9SZgdqGBgroqfDhJdTyKQ==
@@ -16178,6 +16198,11 @@ path-to-regexp@^1.7.0:
   integrity sha1-Wf3g9DW62suhA6hOnTvGTpa5k30=
   dependencies:
     isarray "0.0.1"
+
+path-to-regexp@^2.2.1:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-2.4.0.tgz#35ce7f333d5616f1c1e1bfe266c3aba2e5b2e704"
+  integrity sha512-G6zHoVqC6GGTQkZwF4lkuEyMbVOjoBKAEybQUypI1WTkqinCOrq2x6U2+phkJ1XsEMTy4LjtwPI7HW+NVrRR2w==
 
 path-type@3.0.0, path-type@^3.0.0:
   version "3.0.0"
@@ -22835,12 +22860,12 @@ whatwg-encoding@^1.0.4:
   dependencies:
     iconv-lite "0.4.23"
 
-whatwg-fetch@2.0.4, whatwg-fetch@^2.0.3:
+whatwg-fetch@2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.4.tgz#dde6a5df315f9d39991aa17621853d720b85566f"
   integrity sha512-dcQ1GWpOD/eEQ97k66aiEVpNnapVj90/+R+SXTPYGHpYBBypfKJEQjLrvMZ7YXbKm21gXd4NcuxUTjiv1YtLng==
 
-whatwg-fetch@>=0.10.0:
+whatwg-fetch@>=0.10.0, whatwg-fetch@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-3.0.0.tgz#fc804e458cc460009b1a2b966bc8817d2578aefb"
   integrity sha512-9GSJUgz1D4MfyKU7KRqwOjXCXTqWdFNvEr7eUBYchQiVc744mqK/MzXPNR2WsPkmkOa4ywfg8C2n8h+13Bey1Q==
@@ -22858,6 +22883,15 @@ whatwg-url@^6.3.0:
     lodash.sortby "^4.7.0"
     tr46 "^1.0.0"
     webidl-conversions "^4.0.1"
+
+whatwg-url@^6.5.0:
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-6.5.0.tgz#f2df02bff176fd65070df74ad5ccbb5a199965a8"
+  integrity sha512-rhRZRqx/TLJQWUpQ6bmrt2UV4f0HCQ463yQuONJqC6fO2VoEb1pTYddbe59SkYq87aoM5A3bdhMZiUiVws+fzQ==
+  dependencies:
+    lodash.sortby "^4.7.0"
+    tr46 "^1.0.1"
+    webidl-conversions "^4.0.2"
 
 whatwg-url@^7.0.0:
   version "7.0.0"

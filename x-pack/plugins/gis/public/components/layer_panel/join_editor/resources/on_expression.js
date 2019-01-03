@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import {
   EuiPopover,
   EuiPopoverTitle,
-  EuiExpressionButton,
+  EuiExpression,
   EuiFormRow,
   EuiComboBox,
 } from '@elastic/eui';
@@ -108,10 +108,10 @@ export class OnExpression extends Component {
         withTitle
         initialFocus="body" /* avoid initialFocus on Combobox */
         button={
-          <EuiExpressionButton
+          <EuiExpression
             onClick={this._togglePopover}
             description="ON"
-            buttonValue={
+            value={
               leftValue && rightValue
                 ? `left.${leftValue} = right.${rightValue}`
                 : '-- select --'

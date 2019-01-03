@@ -31,7 +31,7 @@ export function DisabledLabVisualization({ title }: { title: string }) {
         <FormattedMessage
           id="kbn.visualize.disabledLabVisualizationTitle"
           defaultMessage="{title} is a lab visualization."
-          values={{ title }}
+          values={{ title: <em className="visDisabledLabVisualization__title">{title}</em> }}
         />
       </div>
       <div className="kuiVerticalRhythm">
