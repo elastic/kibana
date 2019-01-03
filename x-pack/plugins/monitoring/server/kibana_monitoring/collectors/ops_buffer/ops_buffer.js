@@ -17,7 +17,7 @@ import { CloudDetector } from '../../../cloud';
 export function opsBuffer(server) {
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
-  //FIXME: loose promise on the run here, need to be tracked!!!!
+
   if(server.config().get('xpack.monitoring.tests.cloud_detector.enabled')) {
     cloudDetector.detectCloudService();
   }
