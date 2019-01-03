@@ -14,7 +14,7 @@ import {
   EuiIconTip,
   EuiSpacer
 } from '@elastic/eui';
-import { VisibilityToggle } from '../../../shared/components/visibility_toggle';
+import { VisibilityToggle } from '../../../../../shared/components/visibility_toggle';
 
 export class TOCEntry extends React.Component {
 

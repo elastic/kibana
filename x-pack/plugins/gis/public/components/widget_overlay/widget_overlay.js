@@ -9,7 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { LayerControl } from '../layer_control';
+import { LayerControl } from './layer_control';
 import { ViewControl } from './view_control';
 
 export function WidgetOverlay() {

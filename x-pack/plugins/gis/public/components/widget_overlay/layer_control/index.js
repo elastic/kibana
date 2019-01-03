@@ -9,7 +9,7 @@ import { LayerControl } from './view';
 import {
   updateFlyout,
   FLYOUT_STATE
-} from '../../store/ui';
+} from '../../../store/ui';
 
 function mapDispatchToProps(dispatch) {
   return {

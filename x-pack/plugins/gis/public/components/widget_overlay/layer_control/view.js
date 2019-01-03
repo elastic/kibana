@@ -12,7 +12,7 @@ import {
   EuiButtonEmpty,
   EuiTitle,
 } from '@elastic/eui';
-import { LayerTOC } from '../layer_toc';
+import { LayerTOC } from './layer_toc';
 
 export function LayerControl(props) {
   const addLayer = (
