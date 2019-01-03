@@ -1109,11 +1109,6 @@
   resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.50.tgz#8b6599088d80f68ef0cad7d3a2062248ebe72b3d"
   integrity sha512-D3KB0PdaxdwtA44yOpK+NtptTscKWgUzXmf8fiLaaVxnX+b7QQ+dUMsyeVDweCQ6VX4PMwkd6x2hJ0X+ISIsoQ==
 
-"@types/angular@^1.6.50":
-  version "1.6.52"
-  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.52.tgz#7bbb3a46139594b50936234a09e2e33f2f5402f7"
-  integrity sha512-0Z9Sot6/vaEIHHaXpHLKX8g4hCOmC+0LNZw8nEXhYgtw/VNjsaf30hhe+WOXHuk+/+Qze/OBrogPU+lCEURrhQ==
-
 "@types/async@2.0.49":
   version "2.0.49"
   resolved "https://registry.yarnpkg.com/@types/async/-/async-2.0.49.tgz#92e33d13f74c895cb9a7f38ba97db8431ed14bc0"

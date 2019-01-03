@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestInvoker } from '../lib/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -13,7 +13,7 @@ import { TestInvoker } from '../lib/types';
  */
 
 // tslint:disable:no-default-export
-export default function({ loadTestFile }: TestInvoker) {
+export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('disabled features', () => {
     loadTestFile(require.resolve('./discover'));
   });

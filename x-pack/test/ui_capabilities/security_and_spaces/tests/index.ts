@@ -6,12 +6,15 @@
 
 import { SpacesService } from '../../../common/services';
 import { SecurityService } from '../../../common/services';
-import { TestInvoker } from '../../../common/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function uiCapabilitesTests({ loadTestFile, getService }: TestInvoker) {
+export default function uiCapabilitesTests({
+  loadTestFile,
+  getService,
+}: KibanaFunctionalTestDefaultProviders) {
   const securityService: SecurityService = getService('security');
   const spacesService: SpacesService = getService('spaces');
 

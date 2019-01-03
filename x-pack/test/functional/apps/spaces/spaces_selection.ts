@@ -3,10 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestInvoker } from './lib/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable:no-default-export
-export default function spaceSelectorFunctonalTests({ getService, getPageObjects }: TestInvoker) {
+export default function spaceSelectorFunctonalTests({
+  getService,
+  getPageObjects,
+}: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'spaceSelector', 'home']);
 

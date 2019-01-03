@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { TestInvoker } from '../../../common/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
@@ -13,7 +13,7 @@ import {
 import { UserAtSpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function navLinksTests({ getService }: TestInvoker) {
+export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('discover', () => {

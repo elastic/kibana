@@ -5,7 +5,7 @@
  */
 
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
-import { TestInvoker } from '../../common/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 import { UICapabilitiesProvider } from './services';
 
 interface CreateTestConfigOptions {
@@ -17,7 +17,7 @@ interface CreateTestConfigOptions {
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 
-  return async ({ readConfigFile }: TestInvoker) => {
+  return async ({ readConfigFile }: KibanaFunctionalTestDefaultProviders) => {
     const xPackFunctionalTestsConfig = await readConfigFile(
       require.resolve('../../functional/config.js')
     );

@@ -5,11 +5,14 @@
  */
 
 import { SpacesService } from '../../../common/services';
-import { TestInvoker } from '../../../common/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function uiCapabilitesTests({ loadTestFile, getService }: TestInvoker) {
+export default function uiCapabilitesTests({
+  loadTestFile,
+  getService,
+}: KibanaFunctionalTestDefaultProviders) {
   const spacesService: SpacesService = getService('spaces');
 
   describe('ui capabilities', function() {

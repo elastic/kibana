@@ -8,7 +8,7 @@ import cheerio from 'cheerio';
 import { UICapabilities } from 'ui/capabilities';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import { TestInvoker } from '../../../common/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { LogService } from '../../../types/services';
 
 export interface BasicCredentials {
@@ -87,7 +87,7 @@ export class UICapabilitiesService {
   }
 }
 
-export function UICapabilitiesProvider({ getService }: TestInvoker) {
+export function UICapabilitiesProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
   const log = getService('log');
   const config = getService('config');
   const noAuthUrl = formatUrl({

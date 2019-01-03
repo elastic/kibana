@@ -5,10 +5,10 @@
  */
 import expect from 'expect.js';
 import { SpacesService } from 'x-pack/test/common/services';
-import { TestInvoker } from '../lib/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // tslint:disable:no-default-export
-export default function({ getPageObjects, getService }: TestInvoker) {
+export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
