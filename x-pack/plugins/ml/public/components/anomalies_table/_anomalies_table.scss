@@ -86,14 +86,14 @@
     text-overflow: ellipsis;
   }
 
-  .category-example-tab-item {
+  .mlAnomalyCategoryExamples {
+    padding: 2%;
+  }
+
+  .mlAnomalyCategoryExamples__item {
     display: block;
     white-space: wrap;
     font-family: $euiCodeFontFamily;
-  }
-
-  .mlAnomalyDetails {
-    padding: 2%;
   }
 
   .interim-result {

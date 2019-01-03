@@ -228,12 +228,12 @@ export class AnomalyDetails extends Component {
         direction="column"
         justifyContent="center"
         gutterSize="m"
-        className="mlAnomalyDetails"
+        className="mlAnomalyCategoryExamples"
       >
         {this.props.examples.map((example, i) => {
           return (
             <EuiFlexItem key={`example${i}`}>
-              <span className="category-example-tab-item">{example}</span>
+              <span className="mlAnomalyCategoryExamples__item">{example}</span>
             </EuiFlexItem>
           );
         })}

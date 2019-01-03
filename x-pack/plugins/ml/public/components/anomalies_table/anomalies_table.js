@@ -203,11 +203,13 @@ function getColumns(
     }
   }
 
-  columns.push({
-    field: 'jobId',
-    name: 'job ID',
-    sortable: true
-  });
+  if (examplesByJobId && Object.keys(examplesByJobId).length > 1) {
+    columns.push({
+      field: 'jobId',
+      name: 'job ID',
+      sortable: true
+    });
+  }
 
   const showExamples = items.some(item => item.entityName === 'mlcategory');
   if (showExamples === true) {
