@@ -86,6 +86,16 @@
     text-overflow: ellipsis;
   }
 
+  .category-example-tab-item {
+    display: block;
+    white-space: wrap;
+    font-family: $euiCodeFontFamily;
+  }
+
+  .mlAnomalyDetails {
+    padding: 2%;
+  }
+
   .interim-result {
     font-style: italic;
   }

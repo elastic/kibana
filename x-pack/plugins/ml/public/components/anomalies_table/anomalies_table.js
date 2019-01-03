@@ -217,8 +217,9 @@ function getColumns(
       truncateText: true,
       render: (item) => {
         const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
+        const categoryTabIndex = 1;
         return (
-          <EuiLink onClick={() => toggleRow(item)}>
+          <EuiLink onClick={() => toggleRow(item, categoryTabIndex)}>
             {examples.map((example, i) => {
               return <span key={`example${i}`} className="category-example">{example}</span>;
             }
@@ -296,7 +297,7 @@ class AnomaliesTable extends Component {
     return null;
   }
 
-  toggleRow = (item) => {
+  toggleRow = (item, tab = 0) => {
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
@@ -305,6 +306,7 @@ class AnomaliesTable extends Component {
         _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue]) : undefined;
       itemIdToExpandedRowMap[item.rowId] = (
         <AnomalyDetails
+          tabIndex={tab}
           anomaly={item}
           examples={examples}
           isAggregatedData={this.isShowingAggregatedData()}
