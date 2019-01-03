@@ -12,8 +12,8 @@ import {
   EuiHighlight,
 } from '@elastic/eui';
 import React, { Component } from 'react';
-import { Space } from '../../../../../../../../spaces/common/model/space';
-import { getSpaceColor } from '../../../../../../../../spaces/common/space_attributes';
+import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { getSpaceColor } from '../../../../../../../../../spaces/common/space_attributes';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {

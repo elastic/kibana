@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PrivilegeMatrix } from './privilege_matrix';
+export { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';

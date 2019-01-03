@@ -29,12 +29,12 @@ import { UICapabilities } from 'ui/capabilities';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { getSpaceColor } from 'x-pack/plugins/spaces/common';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { Space } from '../../../../../../../../spaces/common/model/space';
-import { Role } from '../../../../../../../common/model/role';
-import { copyRole } from '../../../lib/copy_role';
-import { RoleValidator } from '../../../lib/validate_role';
-import { NewPrivilegeSpaceForm } from './new_privilege_space_form';
+import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { Role } from '../../../../../../../../common/model/role';
+import { copyRole } from '../../../../lib/copy_role';
+import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
+import { PrivilegeSpaceForm } from './privilege_space_form';
 
 interface Props {
   privilegeDefinition: PrivilegeDefinition;
@@ -56,7 +56,7 @@ interface State {
   showPrivilegeMatrix: boolean;
 }
 
-class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
+class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   private globalSpaceEntry: Space = {
     id: '*',
     name: '* (all spaces)',
@@ -139,7 +139,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
       <Fragment>
         {this.renderKibanaPrivileges()}
         {this.state.showSpacePrivilegeEditor && (
-          <NewPrivilegeSpaceForm
+          <PrivilegeSpaceForm
             role={this.props.role}
             effectivePrivilegesFactory={effectivePrivilegesFactory}
             privilegeDefinition={this.props.privilegeDefinition}
@@ -474,4 +474,4 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
   };
 }
 
-export const SpaceAwarePrivilegeForm = injectI18n(SpaceAwarePrivilegeFormUI);
+export const SpaceAwarePrivilegeSection = injectI18n(SpaceAwarePrivilegeSectionUI);

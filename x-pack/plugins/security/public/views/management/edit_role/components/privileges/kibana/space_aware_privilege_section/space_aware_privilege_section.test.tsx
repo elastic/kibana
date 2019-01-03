@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { RoleValidator } from '../../../lib/validate_role';
+import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
-import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 
 const buildProps = (customProps: any = {}) => {
   return {
@@ -53,7 +53,7 @@ const buildProps = (customProps: any = {}) => {
 describe('<SpaceAwarePrivilegeForm>', () => {
   it('renders without crashing', () => {
     expect(
-      shallowWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...buildProps()} />)
+      shallowWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...buildProps()} />)
     ).toMatchSnapshot();
   });
 
@@ -72,7 +72,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
       },
     });
 
-    const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toHaveLength(1);
@@ -81,7 +81,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
   it('hides the space table if there are no existing space privileges', () => {
     const props = buildProps();
 
-    const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toMatchSnapshot();
@@ -102,7 +102,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
       },
     });
 
-    const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
     expect(wrapper.find(PrivilegeSpaceForm)).toHaveLength(0);
 
     wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]').simulate('click');
@@ -126,7 +126,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -152,7 +152,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -171,7 +171,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = shallowWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
+      const wrapper = shallowWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
       expect(wrapper).toMatchSnapshot();
     });
   });

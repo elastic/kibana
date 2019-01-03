@@ -7,7 +7,7 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PrivilegeSelector } from './privilege_selector';
-import { SimplePrivilegeForm } from './simple_privilege_form';
+import { SimplePrivilegeSection } from './simple_privilege_section';
 
 const buildProps = (customProps?: any) => {
   return {
@@ -32,12 +32,12 @@ const buildProps = (customProps?: any) => {
 
 describe('<SimplePrivilegeForm>', () => {
   it('renders without crashing', () => {
-    expect(shallowWithIntl(<SimplePrivilegeForm {...buildProps()} />)).toMatchSnapshot();
+    expect(shallowWithIntl(<SimplePrivilegeSection {...buildProps()} />)).toMatchSnapshot();
   });
 
   it('displays "none" when no privilege is selected', () => {
     const props = buildProps();
-    const wrapper = shallowWithIntl(<SimplePrivilegeForm {...props} />);
+    const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(PrivilegeSelector);
     expect(selector.props()).toMatchObject({
       value: 'none',
@@ -53,7 +53,7 @@ describe('<SimplePrivilegeForm>', () => {
         },
       },
     });
-    const wrapper = shallowWithIntl(<SimplePrivilegeForm {...props} />);
+    const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(PrivilegeSelector);
     expect(selector.props()).toMatchObject({
       value: 'read',
@@ -62,7 +62,7 @@ describe('<SimplePrivilegeForm>', () => {
 
   it('fires its onChange callback when the privilege changes', () => {
     const props = buildProps();
-    const wrapper = mountWithIntl(<SimplePrivilegeForm {...props} />);
+    const wrapper = mountWithIntl(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(PrivilegeSelector).find('select');
     selector.simulate('change', { target: { value: 'all' } });
 

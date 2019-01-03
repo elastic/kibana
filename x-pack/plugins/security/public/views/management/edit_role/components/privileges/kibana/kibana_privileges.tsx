@@ -14,8 +14,8 @@ import { Space } from '../../../../../../../../spaces/common/model/space';
 import { Role } from '../../../../../../../common/model/role';
 import { RoleValidator } from '../../../lib/validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
-import { SimplePrivilegeForm } from './simple_privilege_form';
-import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
+import { SimplePrivilegeSection } from './simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 
 interface Props {
   role: Role;
@@ -56,7 +56,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
 
     if (spacesEnabled) {
       return (
-        <SpaceAwarePrivilegeForm
+        <SpaceAwarePrivilegeSection
           privilegeDefinition={privilegeDefinition}
           role={role}
           effectivePrivilegesFactory={effectivePrivilegesFactory}
@@ -70,7 +70,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
       );
     } else {
       return (
-        <SimplePrivilegeForm
+        <SimplePrivilegeSection
           privilegeDefinition={privilegeDefinition}
           features={features}
           role={role}

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+// @ts-ignore
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,34 +27,57 @@ import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privi
 import React, { Component } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';
+import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { copyRole } from '../../../lib/copy_role';
-import { FeatureTable } from './feature_table/feature_table';
+import { copyRole } from '../../../../lib/copy_role';
+import { FeatureTable } from '../feature_table';
+import { SpaceSelector } from './space_selector';
 
 interface Props {
   role: Role;
-  privilegeDefinition: PrivilegeDefinition;
   effectivePrivilegesFactory: EffectivePrivilegesFactory;
+  privilegeDefinition: PrivilegeDefinition;
   features: Feature[];
+  spaces: Space[];
+  editingIndex: number;
   onChange: (role: Role) => void;
   onCancel: () => void;
   intl: InjectedIntl;
 }
 
 interface State {
+  editingIndex: number;
+  selectedSpaceIds: string[];
   selectedMinimumPrivilege: string[];
   role: Role;
 }
 
-export class NewPrivilegeGlobalForm extends Component<Props, State> {
+export class PrivilegeSpaceForm extends Component<Props, State> {
+  public static defaultProps = {
+    editingIndex: -1,
+  };
+
   constructor(props: Props) {
     super(props);
 
     const role = copyRole(props.role);
 
+    let editingIndex = props.editingIndex;
+    if (editingIndex < 0) {
+      // create new form
+      editingIndex =
+        role.kibana.spaces.push({
+          spaces: [],
+          minimum: [],
+          feature: {},
+        }) - 1;
+    }
+
     this.state = {
       role,
-      selectedMinimumPrivilege: [...role.kibana.global.minimum],
+      editingIndex,
+      selectedSpaceIds: [...role.kibana.spaces[editingIndex].spaces],
+      selectedMinimumPrivilege: [...role.kibana.spaces[editingIndex].minimum],
     };
   }
 
@@ -65,7 +88,7 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
           <EuiFlyoutHeader>
             <EuiTitle>
               <h1>
-                <FormattedMessage id="fo" defaultMessage="Global Kibana privilege" />
+                <FormattedMessage id="foo" defaultMessage="Spaces privileges" />
               </h1>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -78,7 +101,7 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.onSaveClick} fill>
+                <EuiButton onClick={this.onSaveClick} fill disabled={!this.canSave()}>
                   Save
                 </EuiButton>
               </EuiFlexItem>
@@ -90,20 +113,18 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
   }
 
   private getForm = () => {
-    const { intl } = this.props;
+    const { intl, spaces } = this.props;
     return (
       <EuiForm>
-        <EuiFormRow>
-          <EuiCallOut
-            iconType={'iInCircle'}
-            color={'primary'}
-            title={intl.formatMessage({
-              id: 'foo',
-              defaultMessage:
-                'These settings will apply to all current and future spaces and supercede any custom space privileges.',
-            })}
+        <EuiFormRow label={intl.formatMessage({ id: 'foo', defaultMessage: 'Spaces' })}>
+          <SpaceSelector
+            selectedSpaceIds={this.state.selectedSpaceIds}
+            onChange={this.onSelectedSpacesChange}
+            spaces={spaces}
           />
         </EuiFormRow>
+
+        {this.getPrivilegeCallout()}
 
         <EuiFormRow
           label={intl.formatMessage({ id: 'foo', defaultMessage: 'Base privilege' })}
@@ -114,7 +135,7 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
           })}
         >
           <EuiSuperSelect
-            onChange={this.onMinimumPrivilegeChange}
+            onChange={this.onSpaceMinimumPrivilegeChange}
             options={[
               {
                 value: 'custom',
@@ -122,7 +143,7 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
                 dropdownDisplay: (
                   <EuiText>
                     <strong>Custom</strong>
-                    <p>Customize access</p>
+                    <p>Customize access to this space</p>
                   </EuiText>
                 ),
               },
@@ -133,7 +154,7 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
                 dropdownDisplay: (
                   <EuiText>
                     <strong>Read</strong>
-                    <p>Grants read-only access to all features</p>
+                    <p>Grants read-only access to all features in selected spaces</p>
                   </EuiText>
                 ),
               },
@@ -144,7 +165,7 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
                 dropdownDisplay: (
                   <EuiText>
                     <strong>All</strong>
-                    <p>Grants full access to all features</p>
+                    <p>Grants full access to all features in selected spaces</p>
                   </EuiText>
                 ),
               },
@@ -155,7 +176,7 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
         </EuiFormRow>
 
         <EuiFormRow
-          label={intl.formatMessage({ id: 'foo', defaultMessage: 'Customize by feature' })}
+          label={this.getFeatureListLabel(this.state.selectedMinimumPrivilege.length > 0)}
         >
           <FeatureTable
             role={this.state.role}
@@ -164,10 +185,43 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
             intl={this.props.intl}
             onChange={this.onFeaturePrivilegesChange}
             privilegeDefinition={this.props.privilegeDefinition}
+            spacesIndex={this.state.editingIndex}
+            showLocks={this.state.selectedMinimumPrivilege.length === 0}
+            disabled={this.state.selectedMinimumPrivilege.length > 0}
           />
         </EuiFormRow>
       </EuiForm>
     );
+  };
+
+  private getFeatureListLabel = (disabled: boolean) => {
+    if (disabled) {
+      return this.props.intl.formatMessage({
+        id: 'foo',
+        defaultMessage: 'Summary of feature privileges',
+      });
+    } else {
+      return this.props.intl.formatMessage({
+        id: 'foo',
+        defaultMessage: 'Customize by feature',
+      });
+    }
+  };
+
+  private getPrivilegeCallout = () => {
+    if (this.state.selectedSpaceIds.includes('*')) {
+      return (
+        <EuiFormRow>
+          <EuiCallOut
+            color="primary"
+            iconType="iInCircle"
+            title={'These privileges will apply to all current and future spaces'}
+          />
+        </EuiFormRow>
+      );
+    }
+
+    return null;
   };
 
   private closeFlyout = () => {
@@ -178,32 +232,64 @@ export class NewPrivilegeGlobalForm extends Component<Props, State> {
     this.props.onChange(this.state.role);
   };
 
-  private onMinimumPrivilegeChange = (minimumPrivilege: string) => {
+  private onSelectedSpacesChange = (selectedSpaceIds: string[]) => {
     const role = copyRole(this.state.role);
 
+    const form = role.kibana.spaces[this.state.editingIndex];
+    form.spaces = [...selectedSpaceIds];
+
+    this.setState({
+      selectedSpaceIds,
+      role,
+    });
+  };
+
+  private onSpaceMinimumPrivilegeChange = (minimumPrivilege: string) => {
+    const role = copyRole(this.state.role);
+    const form = role.kibana.spaces[this.state.editingIndex];
+
     if (minimumPrivilege === 'custom') {
-      role.kibana.global.minimum = [];
+      form.minimum = [];
     } else {
-      role.kibana.global.minimum = [minimumPrivilege];
+      form.minimum = [minimumPrivilege];
     }
 
     this.setState({
-      selectedMinimumPrivilege: [minimumPrivilege],
+      selectedMinimumPrivilege: minimumPrivilege === 'custom' ? [] : [minimumPrivilege],
       role,
     });
   };
 
   private getDisplayedMinimumPrivilege = () => {
-    return this.state.role.kibana.global.minimum[0] || 'custom';
+    const form = this.state.role.kibana.spaces[this.state.editingIndex];
+    return form.minimum[0] || 'custom';
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
     const role = copyRole(this.state.role);
-    const form = role.kibana.global;
-    form.feature[featureId] = [...privileges];
+    const form = role.kibana.spaces[this.state.editingIndex];
+
+    if (privileges.length === 0) {
+      delete form.feature[featureId];
+    } else {
+      form.feature[featureId] = [...privileges];
+    }
 
     this.setState({
       role,
     });
+  };
+
+  private canSave = () => {
+    if (this.state.selectedSpaceIds.length === 0) {
+      return false;
+    }
+
+    const form = this.state.role.kibana.spaces[this.state.editingIndex];
+    if (form.minimum.length === 0 && Object.keys(form.feature).length === 0) {
+      return false;
+    }
+
+    return true;
   };
 }

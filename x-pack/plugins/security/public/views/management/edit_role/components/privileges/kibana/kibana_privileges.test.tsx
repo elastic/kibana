@@ -9,8 +9,8 @@ import React from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';
-import { SimplePrivilegeForm } from './simple_privilege_form';
-import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
+import { SimplePrivilegeSection } from './simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 
 const buildProps = (customProps = {}) => {
   return {
@@ -26,6 +26,7 @@ const buildProps = (customProps = {}) => {
           minimum: [] as string[],
           feature: {},
         },
+        spaces: [],
         space: {
           someSpace: {
             minimum: [] as string[],
@@ -58,6 +59,7 @@ const buildProps = (customProps = {}) => {
     uiCapabilities: {
       navLinks: {},
       management: {},
+      catalogue: {},
       spaces: {
         manage: true,
       },
@@ -78,14 +80,14 @@ describe('<KibanaPrivileges>', () => {
   it('renders the simple privilege form when spaces is disabled', () => {
     const props = buildProps({ spacesEnabled: false });
     const wrapper = shallow(<KibanaPrivileges {...props} />);
-    expect(wrapper.find(SimplePrivilegeForm)).toHaveLength(1);
-    expect(wrapper.find(SpaceAwarePrivilegeForm)).toHaveLength(0);
+    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
   });
 
   it('renders the space-aware privilege form when spaces is enabled', () => {
     const props = buildProps({ spacesEnabled: true });
     const wrapper = shallow(<KibanaPrivileges {...props} />);
-    expect(wrapper.find(SimplePrivilegeForm)).toHaveLength(0);
-    expect(wrapper.find(SpaceAwarePrivilegeForm)).toHaveLength(1);
+    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(0);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
   });
 });
