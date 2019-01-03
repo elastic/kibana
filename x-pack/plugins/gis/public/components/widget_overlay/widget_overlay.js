@@ -15,7 +15,7 @@ import { ViewControl } from './view_control';
 export function WidgetOverlay() {
   return (
     <EuiFlexGroup
-      className="widgetOverlay"
+      className="gisWidgetOverlay"
       direction="column"
       justifyContent="spaceBetween"
     >

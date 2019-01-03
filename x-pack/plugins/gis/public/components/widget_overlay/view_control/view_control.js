@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,6 +28,7 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
     <EuiPopover
       button={(
         <EuiButtonEmpty
+          flush="right"
           size="xs"
           onClick={toggleSetViewVisibility}
           data-test-subj="toggleSetViewVisibilityButton"
@@ -42,29 +43,38 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
   );
 
   function renderMouseCoordinates() {
-    if (!mouseCoordinates) {
-      return null;
-    }
-
     return (
-      <EuiText>
-        lat: {mouseCoordinates.lat}, lon: {mouseCoordinates.lon}
-      </EuiText>
+      <Fragment>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <p>
+              <strong>lat:</strong> {mouseCoordinates && mouseCoordinates.lat}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <p>
+              <strong>long:</strong> {mouseCoordinates && mouseCoordinates.lon}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </Fragment>
     );
   }
 
   return (
-    <EuiPanel className="WidgetControl" hasShadow paddingSize="none">
+    <EuiPanel className="gisWidgetControl" hasShadow paddingSize="s">
       <EuiFlexGroup
         justifyContent="spaceBetween"
         alignItems="center"
-        gutterSize="none"
+        gutterSize="s"
       >
+
+        {renderMouseCoordinates()}
+
         <EuiFlexItem grow={false}>
           {setView}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {renderMouseCoordinates()}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -21,30 +21,28 @@ export function LayerControl(props) {
     </EuiButtonEmpty>);
 
   return (
-    <EuiPanel className="WidgetControl" hasShadow paddingSize="none">
-      <EuiFlexGroup
-        className="WidgetControl--header"
-        justifyContent="spaceBetween"
-        alignItems="center"
-        responsive={false}
-        gutterSize="none"
-      >
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h1>Layers</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {addLayer}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiPanel className="gisWidgetControl" hasShadow paddingSize="none" grow={false}>
+      <EuiFlexItem className="gisWidgetControl__header" grow={false}>
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          gutterSize="none"
+        >
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h1>Layers</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {addLayer}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <LayerTOC />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <EuiFlexItem className="gisWidgetControl__tocHolder">
+        <LayerTOC />
+      </EuiFlexItem>
     </EuiPanel>
   );
 }
