@@ -34,147 +34,6 @@ Array [
 
 exports[`when response has data Initially should have correct markup 1`] = `
 Array [
-  .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  font-size: 12px;
-  color: #666666;
-  cursor: pointer;
-  opacity: 1;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.c2 {
-  width: 11px;
-  height: 11px;
-  margin-right: 5.5px;
-  background: #3185fc;
-  border-radius: 100%;
-}
-
-.c5 {
-  width: 11px;
-  height: 11px;
-  margin-right: 5.5px;
-  background: #ecae23;
-  border-radius: 100%;
-}
-
-.c6 {
-  width: 11px;
-  height: 11px;
-  margin-right: 5.5px;
-  background: #f98510;
-  border-radius: 100%;
-}
-
-.c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: end;
-  -webkit-justify-content: flex-end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
-}
-
-.c0 div {
-  margin-right: 16px;
-}
-
-.c0 div:last-child {
-  margin-right: 0;
-}
-
-.c3 {
-  white-space: nowrap;
-  color: #999999;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c4 {
-  margin-left: 4px;
-  color: #000000;
-  display: inline-block;
-}
-
-<div
-    className="c0"
-  >
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c2"
-        color="#3185fc"
-        radius={11}
-      />
-      <span
-        className="c3"
-      >
-        Avg.
-        <span
-          className="c4"
-        >
-          468 ms
-        </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c5"
-        color="#ecae23"
-        radius={11}
-      />
-      <span
-        className="c3"
-      >
-        95th percentile
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c6"
-        color="#f98510"
-        radius={11}
-      />
-      <span
-        className="c3"
-      >
-        99th percentile
-      </span>
-    </div>
-  </div>,
   <div
     style={
       Object {
@@ -398,12 +257,28 @@ Array [
           </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
-            style={Object {}}
+            style={
+              Object {
+                "line": Object {
+                  "fill": "none",
+                  "stroke": "none",
+                },
+              }
+            }
             transform="translate(0,16)"
           >
             <line
               className="rv-xy-plot__axis__line"
-              style={Object {}}
+              style={
+                Object {
+                  "fill": "none",
+                  "line": Object {
+                    "fill": "none",
+                    "stroke": "none",
+                  },
+                  "stroke": "none",
+                }
+              }
               x1={80}
               x2={80}
               y1={0}
@@ -415,12 +290,28 @@ Array [
             >
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 208)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -429,7 +320,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -438,12 +336,28 @@ Array [
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 104)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -452,7 +366,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -461,12 +382,28 @@ Array [
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -475,7 +412,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -1073,52 +1017,6 @@ Array [
       </div>
     </div>
   </div>,
-]
-`;
-
-exports[`when response has data Initially should have correct state 1`] = `
-Object {
-  "isDrawing": false,
-  "selectionEnd": null,
-  "selectionStart": null,
-  "seriesEnabledState": Array [],
-}
-`;
-
-exports[`when response has data when dragging without releasing should display SelectionMarker 1`] = `
-<rect
-  fill="black"
-  fillOpacity="0.1"
-  height={208}
-  pointerEvents="none"
-  width={240}
-  x={320}
-  y={16}
-/>
-`;
-
-exports[`when response has data when setting hoverX should display tooltip 1`] = `
-Array [
-  Object {
-    "color": "#3185fc",
-    "text": "Avg.",
-    "value": 438704.4,
-  },
-  Object {
-    "color": "#ecae23",
-    "text": "95th",
-    "value": 1557383.999999999,
-  },
-  Object {
-    "color": "#f98510",
-    "text": "99th",
-    "value": 1820377.1200000006,
-  },
-]
-`;
-
-exports[`when response has data when setting hoverX should match snapshots 1`] = `
-Array [
   .c1 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1129,7 +1027,7 @@ Array [
   -ms-flex-align: center;
   align-items: center;
   font-size: 12px;
-  color: #666666;
+  color: #69707D;
   cursor: pointer;
   opacity: 1;
   -webkit-user-select: none;
@@ -1171,23 +1069,27 @@ Array [
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: end;
-  -webkit-justify-content: flex-end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
+  -webkit-box-pack: space-around;
+  -webkit-justify-content: space-around;
+  -ms-flex-pack: space-around;
+  justify-content: space-around;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
-.c0 div {
+.c0 > div {
+  margin-top: 8px;
   margin-right: 16px;
 }
 
-.c0 div:last-child {
+.c0 > div:last-child {
   margin-right: 0;
 }
 
 .c3 {
   white-space: nowrap;
-  color: #999999;
+  color: #98A2B3;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1260,6 +1162,52 @@ Array [
       </span>
     </div>
   </div>,
+]
+`;
+
+exports[`when response has data Initially should have correct state 1`] = `
+Object {
+  "isDrawing": false,
+  "selectionEnd": null,
+  "selectionStart": null,
+  "seriesEnabledState": Array [],
+}
+`;
+
+exports[`when response has data when dragging without releasing should display SelectionMarker 1`] = `
+<rect
+  fill="black"
+  fillOpacity="0.1"
+  height={208}
+  pointerEvents="none"
+  width={240}
+  x={320}
+  y={16}
+/>
+`;
+
+exports[`when response has data when setting hoverX should display tooltip 1`] = `
+Array [
+  Object {
+    "color": "#3185fc",
+    "text": "Avg.",
+    "value": 438704.4,
+  },
+  Object {
+    "color": "#ecae23",
+    "text": "95th",
+    "value": 1557383.999999999,
+  },
+  Object {
+    "color": "#f98510",
+    "text": "99th",
+    "value": 1820377.1200000006,
+  },
+]
+`;
+
+exports[`when response has data when setting hoverX should match snapshots 1`] = `
+Array [
   .c5 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1270,7 +1218,7 @@ Array [
   -ms-flex-align: center;
   align-items: center;
   font-size: 12px;
-  color: #666666;
+  color: #69707D;
   cursor: initial;
   opacity: 1;
   -webkit-user-select: none;
@@ -1308,7 +1256,7 @@ Array [
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  border: 1px solid #d9d9d9;
+  border: 1px solid #D3DAE6;
   background: #ffffff;
   border-radius: 5px;
   font-size: 14px;
@@ -1316,11 +1264,11 @@ Array [
 }
 
 .c1 {
-  background: #f5f5f5;
-  border-bottom: 1px solid #d9d9d9;
+  background: #F5F7FA;
+  border-bottom: 1px solid #D3DAE6;
   border-radius: 5px 5px 0 0;
   padding: 8px;
-  color: #999999;
+  color: #98A2B3;
 }
 
 .c2 {
@@ -1330,7 +1278,7 @@ Array [
 }
 
 .c10 {
-  color: #999999;
+  color: #98A2B3;
   margin: 8px;
   font-size: 12px;
 }
@@ -1352,11 +1300,12 @@ Array [
 }
 
 .c4 {
-  color: #999999;
+  color: #98A2B3;
+  padding-bottom: 0;
 }
 
 .c7 {
-  color: #666666;
+  color: #69707D;
   font-size: 14px;
 }
 
@@ -1583,12 +1532,28 @@ Array [
           </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
-            style={Object {}}
+            style={
+              Object {
+                "line": Object {
+                  "fill": "none",
+                  "stroke": "none",
+                },
+              }
+            }
             transform="translate(0,16)"
           >
             <line
               className="rv-xy-plot__axis__line"
-              style={Object {}}
+              style={
+                Object {
+                  "fill": "none",
+                  "line": Object {
+                    "fill": "none",
+                    "stroke": "none",
+                  },
+                  "stroke": "none",
+                }
+              }
               x1={80}
               x2={80}
               y1={0}
@@ -1600,12 +1565,28 @@ Array [
             >
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 208)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -1614,7 +1595,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -1623,12 +1611,28 @@ Array [
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 104)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -1637,7 +1641,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -1646,12 +1657,28 @@ Array [
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -1660,7 +1687,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -2418,6 +2452,151 @@ Array [
       </div>
     </div>
   </div>,
+  .c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  font-size: 12px;
+  color: #69707D;
+  cursor: pointer;
+  opacity: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c2 {
+  width: 11px;
+  height: 11px;
+  margin-right: 5.5px;
+  background: #3185fc;
+  border-radius: 100%;
+}
+
+.c5 {
+  width: 11px;
+  height: 11px;
+  margin-right: 5.5px;
+  background: #ecae23;
+  border-radius: 100%;
+}
+
+.c6 {
+  width: 11px;
+  height: 11px;
+  margin-right: 5.5px;
+  background: #f98510;
+  border-radius: 100%;
+}
+
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: space-around;
+  -webkit-justify-content: space-around;
+  -ms-flex-pack: space-around;
+  justify-content: space-around;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c0 > div {
+  margin-top: 8px;
+  margin-right: 16px;
+}
+
+.c0 > div:last-child {
+  margin-right: 0;
+}
+
+.c3 {
+  white-space: nowrap;
+  color: #98A2B3;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c4 {
+  margin-left: 4px;
+  color: #000000;
+  display: inline-block;
+}
+
+<div
+    className="c0"
+  >
+    <div
+      className="c1"
+      disabled={false}
+      fontSize="12px"
+      onClick={[Function]}
+    >
+      <span
+        className="c2"
+        color="#3185fc"
+        radius={11}
+      />
+      <span
+        className="c3"
+      >
+        Avg.
+        <span
+          className="c4"
+        >
+          468 ms
+        </span>
+      </span>
+    </div>
+    <div
+      className="c1"
+      disabled={false}
+      fontSize="12px"
+      onClick={[Function]}
+    >
+      <span
+        className="c5"
+        color="#ecae23"
+        radius={11}
+      />
+      <span
+        className="c3"
+      >
+        95th percentile
+      </span>
+    </div>
+    <div
+      className="c1"
+      disabled={false}
+      fontSize="12px"
+      onClick={[Function]}
+    >
+      <span
+        className="c6"
+        color="#f98510"
+        radius={11}
+      />
+      <span
+        className="c3"
+      >
+        99th percentile
+      </span>
+    </div>
+  </div>,
 ]
 `;
 
@@ -2432,7 +2611,6 @@ Object {
 
 exports[`when response has no data Initially should have correct markup 1`] = `
 Array [
-  "",
   <div
     style={
       Object {
@@ -2817,12 +2995,28 @@ Array [
           </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
-            style={Object {}}
+            style={
+              Object {
+                "line": Object {
+                  "fill": "none",
+                  "stroke": "none",
+                },
+              }
+            }
             transform="translate(0,16)"
           >
             <line
               className="rv-xy-plot__axis__line"
-              style={Object {}}
+              style={
+                Object {
+                  "fill": "none",
+                  "line": Object {
+                    "fill": "none",
+                    "stroke": "none",
+                  },
+                  "stroke": "none",
+                }
+              }
               x1={80}
               x2={80}
               y1={0}
@@ -2834,12 +3028,28 @@ Array [
             >
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 208)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -2848,7 +3058,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -2857,12 +3074,28 @@ Array [
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 104)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -2871,7 +3104,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -2880,12 +3120,28 @@ Array [
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
-                style={Object {}}
+                style={
+                  Object {
+                    "line": Object {
+                      "fill": "none",
+                      "stroke": "none",
+                    },
+                  }
+                }
                 transform="translate(0, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "fill": "none",
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                      "stroke": "none",
+                    }
+                  }
                   x1={0}
                   x2={-0}
                   y1={0}
@@ -2894,7 +3150,14 @@ Array [
                 <text
                   className="rv-xy-plot__axis__tick__text"
                   dy="0.32em"
-                  style={Object {}}
+                  style={
+                    Object {
+                      "line": Object {
+                        "fill": "none",
+                        "stroke": "none",
+                      },
+                    }
+                  }
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
@@ -2910,7 +3173,7 @@ Array [
               "left": "50%",
               "position": "absolute",
               "top": "50%",
-              "transform": "translate(calc(-50% + 80px),calc(-50% + -16px - 15px))",
+              "transform": "translate(calc(-50% + 30px),calc(-50% + -16px - 15px))",
             }
           }
         >
@@ -2951,6 +3214,7 @@ Array [
       </div>
     </div>
   </div>,
+  "",
 ]
 `;
 

@@ -46,7 +46,7 @@ jest.mock('./utils', () => ({
   })),
 }));
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { NewCalendar } from './new_calendar';
 
@@ -76,19 +76,24 @@ const calendars = [
     }]
   }];
 
+const props = {
+  canCreateCalendar: true,
+  canDeleteCalendar: true
+};
+
 describe('NewCalendar', () => {
 
   test('Renders new calendar form', () => {
-    const wrapper = shallow(
-      <NewCalendar />
+    const wrapper = shallowWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Import modal shown on Import Events button click', () => {
-    const wrapper = mount(
-      <NewCalendar />
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_import_events"]');
@@ -99,8 +104,8 @@ describe('NewCalendar', () => {
   });
 
   test('New event modal shown on New event button click', () => {
-    const wrapper = mount(
-      <NewCalendar />
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_new_event"]');
@@ -111,8 +116,8 @@ describe('NewCalendar', () => {
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', () => {
-    const wrapper = mount(
-      <NewCalendar />
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const instance = wrapper.instance();
@@ -122,6 +127,22 @@ describe('NewCalendar', () => {
     });
     wrapper.update();
     expect(instance.isDuplicateId()).toBe(true);
+  });
+
+  test('Save button is disabled if canCreateCalendar is false', () => {
+    const noCreateProps = {
+      ...props,
+      canCreateCalendar: false,
+    };
+
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...noCreateProps} />
+    );
+
+    const buttons = wrapper.find('[data-testid="ml_save_calendar_button"]');
+    const saveButton = buttons.find('EuiButton');
+
+    expect(saveButton.prop('isDisabled')).toBe(true);
   });
 
 });

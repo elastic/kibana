@@ -11,11 +11,8 @@ import { StringMap } from '../../../../typings/common';
 import { legacyDecodeURIComponent } from '../../../utils/url';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
-// @ts-ignore
-import ErrorGroupOverview from '../ErrorGroupOverview';
+import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
-// @ts-ignore
-import TransactionOverview from '../TransactionOverview';
 import { Home } from './Home';
 
 interface BreadcrumbArgs {
@@ -58,7 +55,7 @@ export const routes = [
   {
     exact: true,
     path: '/:serviceName/errors',
-    component: ErrorGroupOverview,
+    component: ServiceDetails,
     breadcrumb: 'Errors'
   },
   {
@@ -76,12 +73,7 @@ export const routes = [
         component: Home,
         breadcrumb: 'Services'
       },
-      {
-        exact: true,
-        path: '/traces',
-        component: Home,
-        breadcrumb: 'Traces'
-      },
+      { exact: true, path: '/traces', component: Home, breadcrumb: 'Traces' },
       {
         exact: true,
         path: '/:serviceName',
@@ -96,15 +88,22 @@ export const routes = [
   {
     exact: true,
     path: '/:serviceName/transactions',
-    component: TransactionOverview,
+    component: ServiceDetails,
     breadcrumb: 'Transactions'
   },
+  // Have to split this out as its own route to prevent duplicate breadcrumbs from both matching
+  // if we use :transactionType? as a single route here
   {
     exact: true,
     path: '/:serviceName/transactions/:transactionType',
-    component: TransactionOverview,
-    breadcrumb: ({ match }: BreadcrumbArgs) =>
-      legacyDecodeURIComponent(match.params.transactionType)
+    component: ServiceDetails,
+    breadcrumb: null
+  },
+  {
+    exact: true,
+    path: '/:serviceName/metrics',
+    component: ServiceDetails,
+    breadcrumb: 'Metrics'
   },
   {
     exact: true,

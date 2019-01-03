@@ -30,7 +30,7 @@ jest.mock('../../../services/ml_api_service', () => ({
   }
 }));
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ml } from '../../../services/ml_api_service';
 
@@ -66,25 +66,28 @@ const testingState = {
   isDestroyModalVisible: false,
   calendarId: null,
   selectedForDeletion: [],
-  canCreateCalendar: true,
-  canDeleteCalendar: true,
   nodesAvailable: true,
+};
+
+const props = {
+  canCreateCalendar: true,
+  canDeleteCalendar: true
 };
 
 describe('CalendarsList', () => {
 
   test('loads calendars on mount', () => {
     ml.calendars = jest.fn();
-    shallow(
-      <CalendarsList />
+    shallowWithIntl(
+      <CalendarsList.WrappedComponent {...props}/>
     );
 
     expect(ml.calendars).toHaveBeenCalled();
   });
 
   test('Renders calendar list with calendars', () => {
-    const wrapper = shallow(
-      <CalendarsList />
+    const wrapper = shallowWithIntl(
+      <CalendarsList.WrappedComponent {...props}/>
     );
 
     wrapper.instance().setState(testingState);
@@ -93,8 +96,8 @@ describe('CalendarsList', () => {
   });
 
   test('Sets selected calendars list on checkbox change', () => {
-    const wrapper = mount(
-      <CalendarsList />
+    const wrapper = mountWithIntl(
+      <CalendarsList.WrappedComponent {...props}/>
     );
 
     const instance = wrapper.instance();

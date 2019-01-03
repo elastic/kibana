@@ -94,7 +94,7 @@ export async function getErrorGroups({
     params.body.query.bool.filter.push(esFilterQuery);
   }
 
-  // sort buckets by last occurence of error
+  // sort buckets by last occurrence of error
   if (sortField === 'latestOccurrenceAt') {
     params.body.aggs.error_groups.terms.order = {
       max_timestamp: sortDirection

@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse, SearchResponse } from 'elasticsearch';
+import {
+  AggregationSearchResponse,
+  ESFilter,
+  SearchResponse
+} from 'elasticsearch';
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -41,32 +45,40 @@ export function bucketFetcher(
   transactionName: string,
   transactionType: string,
   transactionId: string,
+  traceId: string,
   bucketSize: number,
   setup: Setup
 ): Promise<ESResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
   const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
+    { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
   const params = {
     index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ],
+          filter,
           should: [
+            { term: { [TRACE_ID]: traceId } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRANSACTION_SAMPLED]: true } }
           ]
@@ -95,10 +107,6 @@ export function bucketFetcher(
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   return client<void, Aggs>('search', params);
 }

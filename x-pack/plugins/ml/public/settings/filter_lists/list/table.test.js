@@ -12,7 +12,7 @@ jest.mock('../../../privilege/check_privilege', () => ({
 }));
 jest.mock('../../../services/ml_api_service', () => 'ml');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { FilterListsTable } from './table';
@@ -25,6 +25,8 @@ describe('Filter Lists Table', () => {
   const requiredProps = {
     setSelectedFilterLists,
     refreshFilterLists,
+    canCreateFilter: true,
+    canDeleteFilter: true
   };
 
   const testFilterLists = [
@@ -48,7 +50,7 @@ describe('Filter Lists Table', () => {
       filterLists: testFilterLists
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <FilterListsTable {...props} />
     );
 
@@ -63,7 +65,7 @@ describe('Filter Lists Table', () => {
       selectedFilterLists: [testFilterLists[0]],
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <FilterListsTable {...props} />
     );
 

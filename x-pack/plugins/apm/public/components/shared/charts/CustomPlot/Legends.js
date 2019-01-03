@@ -20,9 +20,12 @@ import {
 const Container = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-around;
+  flex-wrap: wrap;
 
-  div {
+  /* add margin to all direct descendant divs */
+  & > div {
+    margin-top: ${px(units.half)};
     margin-right: ${px(unit)};
     &:last-child {
       margin-right: 0;

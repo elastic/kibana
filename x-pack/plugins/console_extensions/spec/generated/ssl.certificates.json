@@ -1,0 +1,11 @@
+{
+  "ssl.certificates": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ssl/certificates"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-ssl.html"
+  }
+}
