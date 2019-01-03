@@ -15,6 +15,7 @@ import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
+import { EsClientWithRequest } from '../utils/esclient_with_request';
 
 export function repositoryRoute(
   server: Server,
@@ -40,10 +41,7 @@ export function repositoryRoute(
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
-      const repoObjectClient = new RepositoryObjectClient(
-        // @ts-ignore
-        req.server.plugins.elasticsearch.getCluster('data').getClient()
-      );
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
       try {
         // Check if the repository already exists
@@ -88,10 +86,7 @@ export function repositoryRoute(
     async handler(req, h) {
       const repoUri: string = req.params.uri as string;
       const log = new Log(req.server);
-      const repoObjectClient = new RepositoryObjectClient(
-        // @ts-ignore
-        req.server.plugins.elasticsearch.getCluster('data').getClient()
-      );
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
         // Check if the repository already exists. If not, an error will be thrown.
         await repoObjectClient.getRepository(repoUri);
@@ -131,10 +126,7 @@ export function repositoryRoute(
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       try {
-        const repoObjectClient = new RepositoryObjectClient(
-          // @ts-ignore
-          req.server.plugins.elasticsearch.getCluster('data').getClient()
-        );
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepository(repoUri);
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
@@ -151,10 +143,7 @@ export function repositoryRoute(
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       try {
-        const repoObjectClient = new RepositoryObjectClient(
-          // @ts-ignore
-          req.server.plugins.elasticsearch.getCluster('data').getClient()
-        );
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepositoryGitStatus(repoUri);
       } catch (error) {
         const msg = `Get repository clone status ${repoUri} error: ${error}`;
@@ -171,10 +160,7 @@ export function repositoryRoute(
     async handler(req) {
       const log = new Log(req.server);
       try {
-        const repoObjectClient = new RepositoryObjectClient(
-          // @ts-ignore
-          req.server.plugins.elasticsearch.getCluster('data').getClient()
-        );
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getAllRepositories();
       } catch (error) {
         const msg = `Get all repositories error: ${error}`;
@@ -194,10 +180,7 @@ export function repositoryRoute(
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       try {
-        const repoObjectClient = new RepositoryObjectClient(
-          // @ts-ignore
-          req.server.plugins.elasticsearch.getCluster('data').getClient()
-        );
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
 
         const payload = {
@@ -231,10 +214,7 @@ export function repositoryRoute(
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
-      const repoObjectClient = new RepositoryObjectClient(
-        // @ts-ignore
-        req.server.plugins.elasticsearch.getCluster('data').getClient()
-      );
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
       try {
         // Check if the repository exists
@@ -265,10 +245,7 @@ export function repositoryRoute(
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       try {
-        const repoObjectClient = new RepositoryObjectClient(
-          // @ts-ignore
-          req.server.plugins.elasticsearch.getCluster('data').getClient()
-        );
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepositoryConfig(repoUri);
       } catch (error) {
         const msg = `Get repository config ${repoUri} error: ${error}`;

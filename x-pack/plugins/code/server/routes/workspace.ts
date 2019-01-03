@@ -7,18 +7,14 @@
 import Boom from 'boom';
 import hapi, { RequestQuery } from 'hapi';
 
-import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
+import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { ServerLoggerFactory } from '../utils/server_logger_factory';
 
-export function workspaceRoute(
-  server: hapi.Server,
-  serverOptions: ServerOptions,
-  client: EsClient
-) {
+export function workspaceRoute(server: hapi.Server, serverOptions: ServerOptions) {
   server.route({
     path: '/api/code/workspace',
     method: 'GET',
@@ -40,7 +36,7 @@ export function workspaceRoute(
         const workspaceHandler = new WorkspaceHandler(
           serverOptions.repoPath,
           serverOptions.workspacePath,
-          client,
+          new EsClientWithRequest(req),
           new ServerLoggerFactory(server)
         );
         try {

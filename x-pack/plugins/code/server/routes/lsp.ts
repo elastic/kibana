@@ -25,6 +25,7 @@ import {
   mergeRanges,
 } from '../utils/composite_source_merger';
 import { detectLanguage } from '../utils/detect_language';
+import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
 
 export function lspRoute(
@@ -171,12 +172,13 @@ export function lspRoute(
   });
 }
 
-export function symbolByQnameRoute(server: hapi.Server, symbolSearchClient: SymbolSearchClient) {
+export function symbolByQnameRoute(server: hapi.Server, log: Log) {
   server.route({
     path: '/api/lsp/symbol/{qname}',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req) {
       try {
+        const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
         const res = await symbolSearchClient.findByQname(req.params.qname);
         return res;
       } catch (error) {

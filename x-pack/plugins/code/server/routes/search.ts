@@ -8,12 +8,11 @@ import Boom from 'boom';
 
 import hapi from 'hapi';
 import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';
+import { Log } from '../log';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
+import { EsClientWithRequest } from '../utils/esclient_with_request';
 
-export function repositorySearchRoute(
-  server: hapi.Server,
-  repoSearchClient: RepositorySearchClient
-) {
+export function repositorySearchRoute(server: hapi.Server, log: Log) {
   server.route({
     path: '/api/code/search/repo',
     method: 'GET',
@@ -28,6 +27,7 @@ export function repositorySearchRoute(
         page,
       };
       try {
+        const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
         const res = await repoSearchClient.search(searchReq);
         return res;
       } catch (error) {
@@ -50,6 +50,7 @@ export function repositorySearchRoute(
         page,
       };
       try {
+        const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
         const res = await repoSearchClient.suggest(searchReq);
         return res;
       } catch (error) {
@@ -59,7 +60,7 @@ export function repositorySearchRoute(
   });
 }
 
-export function documentSearchRoute(server: hapi.Server, docSearchClient: DocumentSearchClient) {
+export function documentSearchRoute(server: hapi.Server, log: Log) {
   server.route({
     path: '/api/code/search/doc',
     method: 'GET',
@@ -76,6 +77,7 @@ export function documentSearchRoute(server: hapi.Server, docSearchClient: Docume
         repoFileters: repos ? decodeURIComponent(repos as string).split(',') : [],
       };
       try {
+        const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
         const res = await docSearchClient.search(searchReq);
         return res;
       } catch (error) {
@@ -98,6 +100,7 @@ export function documentSearchRoute(server: hapi.Server, docSearchClient: Docume
         page,
       };
       try {
+        const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
         const res = await docSearchClient.suggest(searchReq);
         return res;
       } catch (error) {
@@ -107,7 +110,7 @@ export function documentSearchRoute(server: hapi.Server, docSearchClient: Docume
   });
 }
 
-export function symbolSearchRoute(server: hapi.Server, symbolSearchClient: SymbolSearchClient) {
+export function symbolSearchRoute(server: hapi.Server, log: Log) {
   const symbolSearchHandler = async (req: hapi.Request) => {
     let page = 1;
     const { p, q } = req.query as hapi.RequestQuery;
@@ -119,6 +122,7 @@ export function symbolSearchRoute(server: hapi.Server, symbolSearchClient: Symbo
       page,
     };
     try {
+      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
       const res = await symbolSearchClient.suggest(searchReq);
       return res;
     } catch (error) {
