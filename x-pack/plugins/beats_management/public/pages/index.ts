@@ -21,7 +21,6 @@ import { InitialWalkthroughPage } from './walkthrough/initial/index';
 import { InitialTagPage } from './walkthrough/initial/tag';
 
 export const routeMap = [
-  { path: '/__404', component: NotFoundPage },
   { path: '/tag/:action/:tagid?', component: TagPage },
   {
     path: '/beat/:beatId',
