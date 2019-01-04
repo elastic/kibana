@@ -24,7 +24,8 @@
       "space": {
         "name": "Default",
         "description": "This is the default space!",
-        "disabledFeatures": []
+        "disabledFeatures": [],
+        "_reserved": true
       },
       "type": "space",
       "migrationVersion": {
