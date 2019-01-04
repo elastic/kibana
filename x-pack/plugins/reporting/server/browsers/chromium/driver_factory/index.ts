@@ -45,25 +45,31 @@ export class HeadlessChromiumDriverFactory {
     this.browserConfig = browserConfig;
   }
 
-  public test({ viewport, browserTimezone }: ILaunchArgs) {
+  public test({ viewport, browserTimezone }: ILaunchArgs, log: (message: string) => any) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
       viewport,
-      verboseLogging: this.logger.isVerbose,
+      verboseLogging: true,
       disableSandbox: this.browserConfig.disableSandbox,
       proxyConfig: this.browserConfig.proxy,
     });
 
-    return puppeteer.launch({
-      userDataDir,
-      executablePath: this.binaryPath,
-      ignoreHTTPSErrors: true,
-      args: chromiumArgs,
-      env: {
-        TZ: browserTimezone,
-      },
-    });
+    return puppeteer
+      .launch({
+        userDataDir,
+        executablePath: this.binaryPath,
+        ignoreHTTPSErrors: true,
+        args: chromiumArgs,
+        env: {
+          TZ: browserTimezone,
+        },
+      })
+      .catch((error: Error) => {
+        log(`Issues testing chromium launch, you may have troubles generating reports: ` + error);
+        log(`See chromium's log output in ${path.join(this.binaryPath, '..', 'chrome_debug.log')}`);
+        return null;
+      });
   }
 
   public create({ viewport, browserTimezone }: ILaunchArgs) {
