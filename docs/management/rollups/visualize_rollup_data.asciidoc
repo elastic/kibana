@@ -17,7 +17,9 @@ image::images/management_create_rollup_menu.png[Create index pattern menu]
 You can match an index pattern to only rolled up data, or mix both rolled up 
 and raw data to visualize all data together.  An index pattern can match only one 
 rolled up index, not multiple. There is no restriction on the number of standard 
-indices that an index pattern can match. Combination index patterns use the same 
+indices that an index pattern can match. 
+
+Combination index patterns use the same 
 notation as other multiple indices in {es}. To match multiple indices to create a 
 combination index pattern, use a comma to separate the names, with no space after the comma. 
 The notation for wildcards (`*`) and the ability to "exclude" (`-`) also apply 
