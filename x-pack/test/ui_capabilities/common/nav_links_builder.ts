@@ -3,32 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Features } from './features';
 
-class NavLinks {
-  public apm = 'apm';
-  public canvas = 'canvas';
-  public graph = 'graph';
-  public gis = 'gis';
-  public infrastructure = 'infra:home';
-  public logs = 'infra:logs';
-  public dashboard = 'kibana:dashboard';
-  public devTools = 'kibana:dev_tools';
-  public discover = 'kibana:discover';
-  public management = 'kibana:management';
-  public visualize = 'kibana:visualize';
-  public ml = 'ml';
-  public monitoring = 'monitoring';
-  public timelion = 'timelion';
-}
-const navLinks = new NavLinks();
+const features = new Features();
 
-type FeatureId = keyof NavLinks;
+type FeatureId = keyof Features;
 
 const build = (callback: (featureId: FeatureId) => boolean) => {
-  return Object.entries(navLinks).reduce(
-    (acc, [featureId, navLinkId]) => ({
+  return Object.entries(features).reduce(
+    (acc, [featureId, feature]) => ({
       ...acc,
-      [navLinkId]: callback(featureId as FeatureId),
+      [feature.navLinkId]: callback(featureId as FeatureId),
     }),
     {}
   );

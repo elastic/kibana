@@ -52,7 +52,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'dev_tools_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('devTools'));
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('dev_tools'));
             break;
           case 'discover_disabled_space':
             expect(uiCapabilities.success).to.be(true);

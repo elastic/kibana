@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Features } from '../common/features';
 import { Space } from '../common/types';
 
 // For all scenarios, we define both an instance in addition
@@ -25,22 +26,7 @@ interface NothingSpace extends Space {
 const NothingSpace: NothingSpace = {
   id: 'nothing_space',
   name: 'nothing_space',
-  disabledFeatures: [
-    'advancedSettings',
-    'apm',
-    'canvas',
-    'dashboard',
-    'dev_tools',
-    'discover',
-    'graph',
-    'gis',
-    'infrastructure',
-    'logs',
-    'ml',
-    'monitoring',
-    'timelion',
-    'visualize',
-  ],
+  disabledFeatures: Object.keys(new Features()),
 };
 
 interface AdvancedSettingsDisabledSpace extends Space {
