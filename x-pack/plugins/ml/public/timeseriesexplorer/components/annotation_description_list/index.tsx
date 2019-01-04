@@ -13,56 +13,82 @@ import React from 'react';
 
 import { EuiDescriptionList } from '@elastic/eui';
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Annotation } from '../../../../common/types/annotations';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 interface Props {
   annotation: Annotation;
+  intl: InjectedIntl;
 }
 
-export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
-  const listItems = [
-    {
-      title: 'Job ID',
-      description: annotation.job_id,
-    },
-    {
-      title: 'Start',
-      description: formatHumanReadableDateTimeSeconds(annotation.timestamp),
-    },
-  ];
+export const AnnotationDescriptionList: React.SFC<Props> = injectI18n(
+  // tslint:disable-next-line:no-shadowed-variable
+  function AnnotationDescriptionList({ annotation, intl }): React.SFC<Props> {
+    const listItems = [
+      {
+        title: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.jobIdTitle',
+          defaultMessage: 'Job ID',
+        }),
+        description: annotation.job_id,
+      },
+      {
+        title: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.startTitle',
+          defaultMessage: 'Start',
+        }),
+        description: formatHumanReadableDateTimeSeconds(annotation.timestamp),
+      },
+    ];
 
-  if (annotation.end_timestamp !== undefined) {
-    listItems.push({
-      title: 'End',
-      description: formatHumanReadableDateTimeSeconds(annotation.end_timestamp),
-    });
+    if (annotation.end_timestamp !== undefined) {
+      listItems.push({
+        title: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.endTitle',
+          defaultMessage: 'End',
+        }),
+        description: formatHumanReadableDateTimeSeconds(annotation.end_timestamp),
+      });
+    }
+
+    if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
+      listItems.push({
+        title: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdTitle',
+          defaultMessage: 'Created',
+        }),
+        description: formatHumanReadableDateTimeSeconds(annotation.create_time),
+      });
+      listItems.push({
+        title: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdByTitle',
+          defaultMessage: 'Created by',
+        }),
+        description: annotation.create_username,
+      });
+      listItems.push({
+        title: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.lastModifiedTitle',
+          defaultMessage: 'Last modified',
+        }),
+        description: formatHumanReadableDateTimeSeconds(annotation.modified_time),
+      });
+      listItems.push({
+        title: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.modifiedByTitle',
+          defaultMessage: 'Modified by',
+        }),
+        description: annotation.modified_username,
+      });
+    }
+
+    return (
+      <EuiDescriptionList
+        className="ml-annotation-description-list"
+        type="column"
+        listItems={listItems}
+      />
+    );
   }
-
-  if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
-    listItems.push({
-      title: 'Created',
-      description: formatHumanReadableDateTimeSeconds(annotation.create_time),
-    });
-    listItems.push({
-      title: 'Created by',
-      description: annotation.create_username,
-    });
-    listItems.push({
-      title: 'Last modified',
-      description: formatHumanReadableDateTimeSeconds(annotation.modified_time),
-    });
-    listItems.push({
-      title: 'Modified by',
-      description: annotation.modified_username,
-    });
-  }
-
-  return (
-    <EuiDescriptionList
-      className="ml-annotation-description-list"
-      type="column"
-      listItems={listItems}
-    />
-  );
-};
+);

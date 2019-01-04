@@ -71,6 +71,7 @@ export const ml = (kibana) => {
           function forbidApiAccess() {
             const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
             if (licenseCheckResults.isAvailable) {
+              throw Boom.forbidden(licenseCheckResults.message);
               return null;
             } else {
               throw Boom.forbidden(licenseCheckResults.message);

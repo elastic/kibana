@@ -13,11 +13,13 @@ const module = uiModules.get('apps/ml', ['react']);
 
 import { ForecastingModal } from './forecasting_modal';
 
+import { injectI18nProvider } from '@kbn/i18n/react';
+
 module.directive('mlForecastingModal', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
   return reactDirective(
-    ForecastingModal,
-    undefined,
+    injectI18nProvider(ForecastingModal),
+    Object.keys(ForecastingModal.WrappedComponent.propTypes || {}),
     { restrict: 'E' },
     { timefilter }
   );
