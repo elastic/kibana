@@ -71,7 +71,7 @@ export class SAMLAuthenticationProvider {
  * @returns {boolean}
  */
   isAccessTokenExpiredError(err) {
-    this._options.log(['debug', 'security', 'saml'], `Unable to authenticateViaState: ${util.inspect(err.body)}`);
+    this._options.log(['debug', 'security', 'saml'], `Determining if error is token expired error: ${util.inspect(err.body)}`);
     return err.body
       && err.body.error
       && err.body.error.reason === 'token expired';
