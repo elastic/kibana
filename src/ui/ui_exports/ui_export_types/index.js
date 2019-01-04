@@ -30,6 +30,10 @@ export {
 } from './saved_object';
 
 export {
+  taskDefinitions
+} from './task_definitions';
+
+export {
   app,
   apps,
 } from './ui_apps';
