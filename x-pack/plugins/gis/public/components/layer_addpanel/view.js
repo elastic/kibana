@@ -5,16 +5,7 @@
  */
 
 import React from 'react';
-import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
-import { WMSSource } from '../../shared/layers/sources/wms_source';
-import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
-import { EMSTMSSource } from '../../shared/layers/sources/ems_tms_source';
-import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
-import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
-import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
-
 import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
-
 import {
   EuiSpacer,
   EuiButton,
@@ -28,7 +19,7 @@ import {
   EuiSuperSelect,
   EuiPanel,
 } from '@elastic/eui';
-import { KibanaTilemapSource } from '../../shared/layers/sources/kibana_tilemap_source';
+
 export class AddLayerPanel extends React.Component {
 
   constructor() {
@@ -132,26 +123,14 @@ export class AddLayerPanel extends React.Component {
       dataSourcesMeta: this.props.dataSourcesMeta
     };
 
-    switch(this.state.sourceType) {
-      case EMSFileSource.type:
-        return EMSFileSource.renderEditor(editorProperties);
-      case EMSTMSSource.type:
-        return EMSTMSSource.renderEditor(editorProperties);
-      case XYZTMSSource.type:
-        return XYZTMSSource.renderEditor(editorProperties);
-      case ESGeohashGridSource.type:
-        return ESGeohashGridSource.renderEditor(editorProperties);
-      case ESSearchSource.type:
-        return ESSearchSource.renderEditor(editorProperties);
-      case KibanaRegionmapSource.type:
-        return KibanaRegionmapSource.renderEditor(editorProperties);
-      case WMSSource.type:
-        return WMSSource.renderEditor(editorProperties);
-      case KibanaTilemapSource.type:
-        return KibanaTilemapSource.renderEditor(editorProperties);
-      default:
-        throw new Error(`Unexepected source type: ${this.state.sourceType}`);
+    const Source = ALL_SOURCES.find((Source) => {
+      return Source.type === this.state.sourceType;
+    });
+    if (!Source) {
+      throw new Error(`Unexepected source type: ${this.state.sourceType}`);
     }
+
+    return Source.renderEditor(editorProperties);
   }
 
   _renderAddLayerForm() {
