@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
-export const ExplorerNoResults = () => (
+export const ExplorerNoJobsFound = () => (
   <EuiEmptyPrompt
     iconType="alert"
     title={

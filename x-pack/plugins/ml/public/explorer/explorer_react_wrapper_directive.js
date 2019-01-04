@@ -8,6 +8,8 @@
  * AngularJS directive wrapper for rendering Anomaly Explorer's React component.
  */
 
+import _ from 'lodash';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -21,10 +23,11 @@ import { I18nProvider } from '@kbn/i18n/react';
 module.directive('mlExplorerReactWrapper', function () {
   function link(scope, element) {
     function render() {
-      const props = {
-        jobs: scope.jobs,
-        loading: scope.loading,
-      };
+      const props = _.pick(scope, [
+        'hasResults',
+        'jobs',
+        'loading'
+      ]);
 
       ReactDOM.render(
         <I18nProvider>{React.createElement(Explorer, props)}</I18nProvider>,

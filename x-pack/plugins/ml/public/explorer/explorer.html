@@ -12,20 +12,6 @@
 
   <ml-explorer-react-wrapper />
 
-  <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
-    <div class="no-results euiText">
-      <div
-        i18n-id="xpack.ml.explorer.noResultsFoundLabel"
-        i18n-default-message="{icon} No results found"
-        i18n-values="{ html_icon: '<i class=\'fa fa-info-circle\' ></i>' }"
-      ></div>
-      <div
-        i18n-id="xpack.ml.explorer.tryWideningTimeSelectionLabel"
-        i18n-default-message="Try widening the time selection or moving further back in time"
-      ></div>
-    </div>
-  </div>
-
   <div ng-if="jobs.length > 0 && loading === false && hasResults === true">
     <div class="results-container">
 

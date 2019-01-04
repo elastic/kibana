@@ -12,12 +12,14 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
 
-import { ExplorerNoResults } from './components/explorer_no_results';
+import { ExplorerNoJobsFound } from './components/explorer_no_jobs_found';
+import { ExplorerNoResultsFound } from './components/explorer_no_results_found';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 
 export const Explorer = injectI18n(
   class Explorer extends React.Component {
     static propTypes = {
+      hasResults: PropTypes.bool,
       jobs: PropTypes.array,
       loading: PropTypes.bool,
     };
@@ -25,7 +27,7 @@ export const Explorer = injectI18n(
     dummyMethod = () => {};
 
     render() {
-      const { intl, jobs, loading } = this.props;
+      const { intl, hasResults, jobs, loading } = this.props;
       return (
         <div>
           {loading && (
@@ -36,7 +38,8 @@ export const Explorer = injectI18n(
               })}
             />
           )}
-          {jobs.length === 0 && loading === false && <ExplorerNoResults />}
+          {jobs.length === 0 && loading === false && <ExplorerNoJobsFound />}
+          {jobs.length > 0 && loading === false && hasResults === false && <ExplorerNoResultsFound />}
         </div>
       );
     }
