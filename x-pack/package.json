@@ -203,6 +203,10 @@
     "moment-duration-format": "^1.3.0",
     "moment-timezone": "^0.5.14",
     "ngreact": "^0.5.1",
+<<<<<<< HEAD
+=======
+    "node-fetch": "^2.1.2",
+>>>>>>> 0a1b86ad3c... Upgrades style-it to 2.1.2 (#27824)
     "nodemailer": "^4.6.4",
     "object-path-immutable": "^0.5.3",
     "papaparse": "^4.6.0",
@@ -251,17 +255,32 @@
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
     "squel": "^5.12.2",
+<<<<<<< HEAD
     "stream-stream": "^1.2.6",
     "style-it": "^1.6.12",
+=======
+    "style-it": "2.1.2",
+>>>>>>> 0a1b86ad3c... Upgrades style-it to 2.1.2 (#27824)
     "styled-components": "3.3.3",
     "tar-fs": "1.13.0",
     "tinycolor2": "1.3.0",
     "tinymath": "1.1.1",
+<<<<<<< HEAD
     "tslib": "^1.9.3",
+=======
+    "topojson-client": "3.0.0",
+    "tslib": "^1.9.3",
+    "turf": "3.0.14",
+>>>>>>> 0a1b86ad3c... Upgrades style-it to 2.1.2 (#27824)
     "typescript-fsa": "^2.5.0",
     "typescript-fsa-reducers": "^0.4.5",
     "ui-select": "0.19.4",
     "unbzip2-stream": "1.0.9",
+<<<<<<< HEAD
+=======
+    "unstated": "^2.1.1",
+    "url-parse": "1.3.0",
+>>>>>>> 0a1b86ad3c... Upgrades style-it to 2.1.2 (#27824)
     "uuid": "3.0.1",
     "venn.js": "0.2.9",
     "xregexp": "3.2.0"
