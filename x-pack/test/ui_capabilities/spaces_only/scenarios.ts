@@ -6,7 +6,10 @@
 
 import { Space } from '../common/types';
 
-// these are the spaces that we care about
+// For all scenarios, we define both an instance in addition
+// to a "type" definition so that we can use the exhaustive switch in
+// typescript to ensure all scenarios are handled.
+
 interface EverythingSpace extends Space {
   id: 'everything_space';
 }

@@ -216,7 +216,6 @@ export const Users: User[] = [
   NothingSpaceRead,
 ];
 
-// these are the spaces that we care about
 const EverythingSpace: Space = {
   id: 'everything_space',
   name: 'everything_space',
@@ -245,6 +244,10 @@ const NothingSpace: Space = {
 };
 
 export const Spaces: Space[] = [EverythingSpace, NothingSpace];
+
+// For all scenarios, we define both an instance in addition
+// to a "type" definition so that we can use the exhaustive switch in
+// typescript to ensure all scenarios are handled.
 
 interface Scenario {
   user: User;

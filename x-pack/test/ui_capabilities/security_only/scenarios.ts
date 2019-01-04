@@ -6,6 +6,10 @@
 
 import { User } from '../common/types';
 
+// For all scenarios, we define both an instance in addition
+// to a "type" definition so that we can use the exhaustive switch in
+// typescript to ensure all scenarios are handled.
+
 interface NoKibanaPrivileges extends User {
   username: 'no_kibana_privileges';
 }
