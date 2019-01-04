@@ -14,7 +14,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
 
-  describe('sources', () => {
+  describe('hosts', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
@@ -26,8 +26,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1514782800000,
-              from: 1546318799999,
+              to: 1546554465535,
+              from: 1483306065535,
             },
             pagination: {
               limit: 1,
@@ -37,14 +37,13 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const hosts = resp.data.source.Hosts;
-
           expect(hosts.edges.length).to.be(1);
           expect(hosts.totalCount).to.be(2);
-          expect(hosts.pageInfo.endCursor!.value).to.equal('6f7be6fb33e6c77f057266415c094408');
+          expect(hosts.pageInfo.endCursor!.value).to.equal('aa7ca589f1b8220002f2fc61c64cfbf1');
         });
     });
 
-    it('Make sure that we the pagination is working in Hosts query', () => {
+    it('Make sure that pagination is working in Hosts query', () => {
       return client
         .query<GetHostsQuery.Query>({
           query: hostsQuery,
@@ -52,12 +51,12 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1514782800000,
-              from: 1546318799999,
+              to: 1546554465535,
+              from: 1483306065535,
             },
             pagination: {
               limit: 2,
-              cursor: '6f7be6fb33e6c77f057266415c094408',
+              cursor: 'aa7ca589f1b8220002f2fc61c64cfbf1',
             },
           },
         })
@@ -66,7 +65,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(1);
           expect(hosts.totalCount).to.be(2);
-          expect(hosts.edges[0]!.host.name).to.be('elrond.elstc.co');
+          expect(hosts.edges[0]!.host.name).to.be('siem-general');
         });
     });
   });

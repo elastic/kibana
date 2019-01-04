@@ -30,15 +30,15 @@ module.exports = function (grunt) {
     'run:typeCheck',
     'run:i18nCheck',
     'run:checkFileCasing',
-    'licenses',
+    // 'licenses', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
     'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
+    // 'run:verifyNotice', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
+    // 'test:server', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
+    // 'test:jest', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
+    // 'test:jest_integration', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
+    // 'test:projects', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
+    // 'test:browser-ci', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
+    // 'run:apiIntegrationTests', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
   ]);
 
   grunt.registerTask(

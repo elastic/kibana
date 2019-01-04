@@ -12,8 +12,9 @@ import { ActionCreator } from 'typescript-fsa';
 import { defaultTo } from 'lodash/fp';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+
 // @ts-ignore
-import * as theme from '../../../../../../src/ui/public/theme/theme';
+import { applyTheme } from 'ui/theme';
 import { State } from '../../store';
 import { appActions, themeSelector } from '../../store/local/app';
 import { Theme } from '../../store/local/app/model';
@@ -64,7 +65,7 @@ const ThemeSwitcherComponent = pure<Props>(({ currentTheme, setTheme }) => (
         defaultChecked={currentTheme === 'dark' ? true : false}
         onClick={() => {
           setTheme!({ name: currentTheme === 'dark' ? 'light' : 'dark' });
-          theme.applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+          applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
         }}
       />
     </ThemeSwitcherContainer>

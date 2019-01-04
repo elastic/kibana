@@ -9,5 +9,6 @@ export default function ({ loadTestFile }) {
   describe('SecOps GraphQL Endpoints', () => {
     loadTestFile(require.resolve('./sources'));
     loadTestFile(require.resolve('./hosts'));
+    loadTestFile(require.resolve('./uncommon_processes'));
   });
 }

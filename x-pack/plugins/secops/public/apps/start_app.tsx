@@ -14,8 +14,8 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import * as dark from '@elastic/eui/dist/eui_theme_k6_dark.json';
 
 // @ts-ignore
-import * as theme from '../../../../../src/ui/public/theme/theme';
-theme.applyTheme('dark');
+import { applyTheme } from 'ui/theme';
+applyTheme('dark');
 
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';

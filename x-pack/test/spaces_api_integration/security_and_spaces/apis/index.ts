@@ -13,7 +13,7 @@ export default function({ loadTestFile, getService }: TestInvoker) {
   const supertest = getService('supertest');
 
   describe('spaces api with security', function() {
-    this.tags('ciGroup5');
+    this.tags('ciGroup1'); // DO NOT CHECK THIS BACK INTO MASTER -- THIS IS TEMP FROM ciGroup5 to ciGroup1 for secops to keep this running quickly
 
     before(async () => {
       await createUsersAndRoles(es, supertest);
