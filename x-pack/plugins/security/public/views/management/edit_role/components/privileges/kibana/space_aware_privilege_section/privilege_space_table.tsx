@@ -5,6 +5,7 @@
  */
 import {
   EuiBadge,
+  EuiBadgeProps,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
@@ -13,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { getSpaceColor } from 'x-pack/plugins/spaces/common';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
@@ -23,6 +24,8 @@ import {
 } from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
 
+const SPACES_DISPLAY_COUNT = 4;
+
 interface Props {
   role: Role;
   effectivePrivilegesFactory: EffectivePrivilegesFactory;
@@ -31,82 +34,47 @@ interface Props {
   displaySpaces: Space[];
 }
 
+type TableSpace = Space &
+  Partial<{
+    deleted: boolean;
+  }>;
+
+interface TableRow {
+  spaces: TableSpace[];
+  spacesIndex: number;
+  privileges: {
+    minimum: string[];
+    feature: {
+      [featureId: string]: string[];
+    };
+  };
+}
+
 export class PrivilegeSpaceTable extends Component<Props, {}> {
   public render() {
     return this.renderKibanaPrivileges();
   }
 
   private renderKibanaPrivileges = () => {
-    const { role, effectivePrivilegesFactory, displaySpaces } = this.props;
-
-    const { global } = role.kibana;
-
-    const globalPrivilege = this.locateGlobalPrivilege();
+    const { effectivePrivilegesFactory, displaySpaces } = this.props;
 
     const spacePrivileges = this.getSortedPrivileges();
 
     const effectivePrivileges = effectivePrivilegesFactory.getInstance(this.props.role);
 
-    const items: any[] = [];
-    // if (global.minimum.length > 0 || Object.keys(global.feature).length > 0) {
-    //   items.push({
-    //     isGlobal: true,
-    //     spaces: [
-    //       {
-    //         id: '*',
-    //         name: 'Global (all spaces)',
-    //         initials: '*',
-    //         color: '#afafaf',
-    //       },
-    //     ],
-    //     headerSpaces: [
-    //       {
-    //         id: '*',
-    //         name: 'Global (all spaces)',
-    //         initials: '*',
-    //         color: '#afafaf',
-    //       },
-    //     ],
-    //     privileges: {
-    //       minimum: global.minimum,
-    //       feature: global.feature,
-    //     },
-    //   });
-    // }
-
-    spacePrivileges.forEach((spacePrivs, spacesIndex) => {
-      items.push({
-        spacesIndex,
-        spaces: spacePrivs.spaces.map(spaceId => displaySpaces.find(space => space.id === spaceId)),
-        headerSpaces: spacePrivs.spaces
-          .filter((s, index, arr) => arr.length < 5 || index < 3)
-          .map(spaceId => displaySpaces.find(space => space.id === spaceId)),
-        privileges: {
-          minimum: spacePrivs.minimum,
-          feature: spacePrivs.feature,
-        },
-      });
-    });
-
-    interface TableRow {
-      spaces: Space[];
-      displaySpaces: Space[];
-      spacesIndex: number;
-      privileges: {
-        minimum: string[];
-        feature: {
-          [featureId: string]: string[];
-        };
-      };
-    }
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, spacesIndex) => {
-      const spaces = spacePrivs.spaces.map(spaceId =>
-        displaySpaces.find(space => space.id === spaceId)
+      const spaces = spacePrivs.spaces.map(
+        spaceId =>
+          displaySpaces.find(space => space.id === spaceId) || {
+            id: spaceId,
+            name: '',
+            disabledFeatures: [],
+            deleted: true,
+          }
       ) as Space[];
 
       return {
         spaces,
-        displaySpaces: spaces.filter((s, index, arr) => arr.length < 5 || index < 3),
         spacesIndex,
         privileges: {
           minimum: spacePrivs.minimum,
@@ -115,20 +83,31 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
       };
     });
 
+    const getExtraBadgeProps = (space: TableSpace): EuiBadgeProps => {
+      if (space.deleted) {
+        return {
+          iconType: 'asterisk',
+        };
+      }
+      return {};
+    };
+
     const columns = [
       {
-        field: 'displaySpaces',
+        field: 'spaces',
         name: 'Spaces',
         width: '60%',
-        render: (spaces: Space[], record: TableRow) => {
+        render: (spaces: TableSpace[], record: TableRow) => {
           return (
             <EuiFlexGroup wrap gutterSize={'s'}>
-              {spaces.map((space: Space) => (
+              {spaces.slice(0, SPACES_DISPLAY_COUNT).map((space: TableSpace) => (
                 <EuiFlexItem grow={false} key={space.id}>
-                  <EuiBadge color={getSpaceColor(space)}>{space.name}</EuiBadge>
+                  <EuiBadge {...getExtraBadgeProps(space)} color={getSpaceColor(space)}>
+                    {space.name}
+                  </EuiBadge>
                 </EuiFlexItem>
               ))}
-              {record.spaces.length > spaces.length ? (
+              {record.spaces.length > SPACES_DISPLAY_COUNT ? (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={
@@ -139,7 +118,7 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
                       </ul>
                     }
                   >
-                    <EuiText>({record.spaces.length - spaces.length} more)</EuiText>
+                    <EuiText>({spaces.length - SPACES_DISPLAY_COUNT} more)</EuiText>
                   </EuiToolTip>
                 </EuiFlexItem>
               ) : null}
@@ -150,7 +129,7 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
       {
         field: 'privileges',
         name: 'Privileges',
-        render: (privileges: any, record: any) => {
+        render: (privileges: any, record: TableRow) => {
           const actualPrivilege = effectivePrivileges.explainActualSpaceBasePrivilege(
             record.spacesIndex
           );
@@ -207,17 +186,6 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
     ];
 
     return <EuiInMemoryTable columns={columns} items={rows} />;
-  };
-
-  private locateGlobalPrivilege = () => {
-    const { spaces: spacePrivileges } = this.props.role.kibana;
-    return (
-      spacePrivileges.find(privileges => privileges.spaces.includes('*')) || {
-        spaces: ['*'],
-        minimum: [],
-        feature: {},
-      }
-    );
   };
 
   private getSortedPrivileges = () => {
