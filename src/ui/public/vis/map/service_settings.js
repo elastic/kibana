@@ -20,8 +20,11 @@
 import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
+import { defaultLayerLoadWarning } from './map_messages';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
-import { EMSClientV66 } from '../../../../legacy/core_plugins/tile_map/common/ems_client';
+import { EMSClientV66 } from
+  '../../../../legacy/core_plugins/tile_map/common/ems_client';
+
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -115,7 +118,15 @@ uiModules.get('kibana')
 
 
         if  (mapConfig.includeElasticMapsService) {
+
           const servicesFromManifest = await this._emsClient.getTMSServices();
+
+          const emsDefault = !allServices.length;
+          const manifestServicesUnavab = !servicesFromManifest.length;
+          if (emsDefault && manifestServicesUnavab) {
+            defaultLayerLoadWarning();
+          }
+
           const strippedServiceFromManifest = servicesFromManifest.map((service) => {
             //shim for compatibility
             const shim = {
@@ -151,7 +162,6 @@ uiModules.get('kibana')
         });
         return  (layer) ? layer.getEMSHotLink() : null;
       }
-
 
       async _getUrlTemplateForEMSTMSLayer(tmsServiceConfig) {
         const tmsServices = await this._emsClient.getTMSServices();
@@ -219,7 +229,6 @@ uiModules.get('kibana')
         });
         return json.data;
       }
-
     }
 
     return new ServiceSettings();
