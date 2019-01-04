@@ -441,26 +441,17 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
           if (typeof marker.byFieldName !== 'undefined' && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             const byFieldName = mlEscape(marker.byFieldName);
-            if (numberOfCauses === 1) {
-              contents += intl.formatMessage({
-                id: 'xpack.ml.explorer.distributionChart.oneUnusualByFieldValueLabel',
-                defaultMessage: '{br} 1 unusual {byFieldName} value'
-              }, {
-                br: '<br />',
-                byFieldName
-              });
-            } else {
-              intl.formatMessage({
-                id: 'xpack.ml.explorer.distributionChart.moreThanOneUnusualByFieldValuesLabel',
-                defaultMessage: '{br} {numberOfCauses}{plusSign} unusual {byFieldName} values'
-              }, {
-                br: '<br />',
-                numberOfCauses,
-                byFieldName,
-                // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-                plusSign: numberOfCauses < 10 ? '' : '+'
-              });
-            }
+            contents += intl.formatMessage({
+              id: 'xpack.ml.explorer.distributionChart.unusualByFieldValuesLabel',
+              defaultMessage:
+                '{br} { numberOfCauses, plural, one {# unusual {byFieldName} value} other {#{plusSign} unusual {byFieldName} values}}'
+            }, {
+              br: '<br />',
+              numberOfCauses,
+              byFieldName,
+              // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
+              plusSign: numberOfCauses < 10 ? '' : '+',
+            });
           }
         }
       } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
