@@ -93,6 +93,74 @@ describe('EffectivePrivileges', () => {
   // so these tests will assert that the results of the two functions are the same. The alternatives are to duplicate all of these tests,
   // or to create enough abstractions to make the bulk if this re-usable, which isn't very easy to understand.
 
+  describe('#getActualGlobalFeaturePrivilege', () => {
+    it(`returns 'none' when no privileges are assigned`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.getActualGlobalFeaturePrivilege('feature1')).toEqual(
+        NO_PRIVILEGE_VALUE
+      );
+    });
+
+    it(`returns 'read' when assigned directly`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: [],
+            feature: {
+              feature1: ['read'],
+            },
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.getActualGlobalFeaturePrivilege('feature1')).toEqual('read');
+    });
+
+    it(`returns 'read' when assigned effectively via base privilege`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: ['read'],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.getActualGlobalFeaturePrivilege('feature1')).toEqual('read');
+    });
+
+    it(`returns 'all' when assigned directly, overriding base privilege of 'read'`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: ['read'],
+            feature: {
+              feature1: ['all'],
+            },
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.getActualGlobalFeaturePrivilege('feature1')).toEqual('all');
+    });
+  });
+
   describe('#explainActualSpaceBasePrivilege', () => {
     it(`returns 'none' when no privileges are assigned`, () => {
       const role = buildRole({
@@ -112,6 +180,78 @@ describe('EffectivePrivileges', () => {
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceBasePrivilege(0)).toEqual(NO_PRIVILEGE_VALUE);
+    });
+
+    it(`returns 'read' when assigned directly`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: ['read'],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceBasePrivilege(0)).toMatchObject({
+        privilege: 'read',
+        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceBasePrivilege(0)).toEqual('read');
+    });
+
+    it(`returns 'read' when assigned globally`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: ['read'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            minimum: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceBasePrivilege(1)).toMatchObject({
+        privilege: 'read',
+        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceBasePrivilege(1)).toEqual('read');
+    });
+
+    it(`returns 'all' when assigned globally, overriding space base of 'read'`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            minimum: ['read'],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.explainActualSpaceBasePrivilege(1)).toMatchObject({
+        privilege: 'all',
+        source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        supercededPrivilege: 'read',
+        overrideSource: 'global base privilege',
+        details: expect.any(String),
+      });
+      expect(effectivePrivileges.getActualSpaceBasePrivilege(1)).toEqual('all');
     });
   });
 
@@ -303,6 +443,8 @@ describe('EffectivePrivileges', () => {
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'all',
         source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        supercededPrivilege: 'read',
+        overrideSource: 'global base privilege',
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
@@ -331,9 +473,127 @@ describe('EffectivePrivileges', () => {
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'all',
         source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        supercededPrivilege: 'read',
+        overrideSource: 'global feature privilege',
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
+    });
+  });
+
+  describe('#canAssignSpaceFeaturePrivilege', () => {
+    it('returns true when no privileges are assigned', () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceFeaturePrivilege('feature1', 'all', 0)).toEqual(
+        true
+      );
+    });
+
+    it(`returns false when global base of 'all' supercedes 'read'`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            minimum: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceFeaturePrivilege('feature1', 'read', 1)).toEqual(
+        false
+      );
+    });
+
+    it(`returns false when space base of 'all' supercedes 'read'`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: ['all'],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceFeaturePrivilege('feature1', 'read', 0)).toEqual(
+        false
+      );
+    });
+
+    it(`returns true when space base of 'read' matches 'read'`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: ['read'],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceFeaturePrivilege('feature1', 'read', 0)).toEqual(
+        true
+      );
+    });
+
+    it(`returns true when global base of 'read' matches 'read'`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            minimum: ['read'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            minimum: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceFeaturePrivilege('feature1', 'read', 1)).toEqual(
+        true
+      );
+    });
+
+    it(`doesn't care if an invalid privilege is already assigned`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            minimum: ['all'],
+            feature: {
+              feature1: ['read'],
+            },
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceFeaturePrivilege('feature1', 'read', 0)).toEqual(
+        false
+      );
     });
   });
 });

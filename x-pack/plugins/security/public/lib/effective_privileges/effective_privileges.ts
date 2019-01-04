@@ -133,18 +133,18 @@ export class EffectivePrivileges {
 
     const scenarios: ActionSet[] = [
       {
-        name: 'Global base privilege',
+        name: 'global base privilege',
         actions: this.assignedGlobalBaseActions,
       },
       {
-        name: 'Space base privilege',
+        name: 'space base privilege',
         actions: this.privilegeDefinition.getSpacesPrivileges().getActions(minimum[0]),
       },
     ];
 
     if (globalFeaturePrivileges.length > 0 && !spaces.includes('*')) {
       scenarios.push({
-        name: 'Global feature privilege',
+        name: 'global feature privilege',
         actions: this.privilegeDefinition
           .getFeaturePrivileges()
           .getActions(featureId, globalFeaturePrivileges[0]),
@@ -156,7 +156,7 @@ export class EffectivePrivileges {
 
     if (hasAssignedFeaturePrivilege) {
       spaceFeaturePrivilegeScenario = {
-        name: 'Space feature privilege',
+        name: 'space feature privilege',
         actions: this.privilegeDefinition
           .getFeaturePrivileges()
           .getActions(featureId, assignedFeaturePrivilege),

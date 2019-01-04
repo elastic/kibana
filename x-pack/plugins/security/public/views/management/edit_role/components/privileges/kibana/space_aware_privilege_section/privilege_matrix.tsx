@@ -22,12 +22,15 @@ import {
   // @ts-ignore
   EuiToolTip,
 } from '@elastic/eui';
-import { EffectivePrivileges, PRIVILEGE_SOURCE } from 'plugins/security/lib/effective_privileges';
 import React, { Component, Fragment } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
+import {
+  EffectivePrivileges,
+  PRIVILEGE_SOURCE,
+} from '../../../../../../../lib/effective_privileges';
 import { PrivilegeDisplay, SupercededPrivilegeDisplay } from './privilege_display';
 
 interface Props {
