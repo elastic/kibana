@@ -18,12 +18,16 @@
  */
 
 import { EventEmitter } from 'events';
-import { createZoomWarningMsg } from './map_messages';
+import {
+  createZoomWarningMsg,
+  defaultLayerLoadWarning
+} from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
+
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -620,13 +624,38 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  _getTMSBaseLayer(options) {
-    return L.tileLayer(options.url, {
-      minZoom: options.minZoom,
-      maxZoom: options.maxZoom,
-      subdomains: options.subdomains || []
-    });
-  }
+  _getTMSBaseLayer = (function () {
+    let tilesCreated = 0;
+    let tilesLoaded = 0;
+    let tilesErrored = 0;
+    let tmsBaseLayer;
+    const checkIsValid = () => {
+      const loadingComplete = tilesCreated === tilesLoaded + tilesErrored;
+      if (loadingComplete) {
+        // If any tiles have loaded, is valid
+        tilesLoaded ? null : defaultLayerLoadWarning();
+      }
+    };
+    const { createTile } = L.TileLayer.prototype;
+
+    return ({ url, minZoom, maxZoom, subdomains }) => {
+      tmsBaseLayer = new (L.TileLayer.extend({
+        createTile: function (coords, done) {
+          tilesCreated++;
+          return createTile.call(this, coords, done);
+        }
+      }))(url, {
+        minZoom: minZoom,
+        maxZoom: maxZoom,
+        subdomains: subdomains || []
+      });
+      tmsBaseLayer.on('tileload', () => tilesLoaded++);
+      tmsBaseLayer.on('tileerror', () => tilesErrored++);
+      tmsBaseLayer.on('tileload tileerror', checkIsValid);
+
+      return tmsBaseLayer;
+    };
+  }());
 
   _getWMSBaseLayer(options) {
     const wmsOptions = {
@@ -639,7 +668,10 @@ export class KibanaMap extends EventEmitter {
       version: options.version || '1.3.0'
     };
 
-    return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
+    const wmsBaseLayer = (typeof options.url === 'string' && options.url.length)
+      ? L.tileLayer.wms(options.url, wmsOptions)
+      : null;
+    return wmsBaseLayer;
   }
 
   _updateExtent() {
