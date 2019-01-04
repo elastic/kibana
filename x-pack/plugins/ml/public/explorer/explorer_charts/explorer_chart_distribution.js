@@ -36,6 +36,8 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 
 import { CHART_TYPE } from '../explorer_constants';
 
+import { injectI18n } from '@kbn/i18n/react';
+
 const CONTENT_WRAPPER_HEIGHT = 215;
 
 // If a rare/event-distribution chart has a cardinality of 10 or less,
@@ -45,7 +47,7 @@ const CONTENT_WRAPPER_HEIGHT = 215;
 // not the cardinality of the full source data set.
 const Y_AXIS_LABEL_THRESHOLD = 10;
 
-export class ExplorerChartDistribution extends React.Component {
+export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribution extends React.Component {
   static propTypes = {
     seriesConfig: PropTypes.object,
     mlSelectSeverityService: PropTypes.object.isRequired
@@ -62,7 +64,8 @@ export class ExplorerChartDistribution extends React.Component {
   renderChart() {
     const {
       tooManyBuckets,
-      mlSelectSeverityService
+      mlSelectSeverityService,
+      intl,
     } = this.props;
 
     const element = this.rootNode;
@@ -414,31 +417,69 @@ export class ExplorerChartDistribution extends React.Component {
       if (_.has(marker, 'anomalyScore')) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
-        contents += `anomaly score: ${displayScore}`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.explorer.distributionChart.anomalyScoreLabel',
+          defaultMessage: 'anomaly score: {displayScore}'
+        }, { displayScore });
         if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
-          contents += (`<br/>value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`);
+          contents += intl.formatMessage({
+            id: 'xpack.ml.explorer.distributionChart.valueLabel',
+            defaultMessage: '{br}value: {value}'
+          }, {
+            br: '<br />',
+            value: formatValue(marker.value, config.functionDescription, fieldFormat)
+          });
           if (typeof marker.numberOfCauses === 'undefined' || marker.numberOfCauses === 1) {
-            contents += (`<br/>typical: ${formatValue(marker.typical, config.functionDescription, fieldFormat)}`);
+            contents += intl.formatMessage({
+              id: 'xpack.ml.explorer.distributionChart.typicalLabel',
+              defaultMessage: '{br}typical: {typicalValue}'
+            }, {
+              br: '<br />',
+              typicalValue: formatValue(marker.typical, config.functionDescription, fieldFormat)
+            });
           }
           if (typeof marker.byFieldName !== 'undefined' && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             const byFieldName = mlEscape(marker.byFieldName);
             if (numberOfCauses === 1) {
-              contents += `<br/> 1 unusual ${byFieldName} value`;
-            } else if (numberOfCauses < 10) {
-              contents += `<br/> ${numberOfCauses} unusual ${byFieldName} values`;
+              contents += intl.formatMessage({
+                id: 'xpack.ml.explorer.distributionChart.oneUnusualByFieldValueLabel',
+                defaultMessage: '{br} 1 unusual {byFieldName} value'
+              }, {
+                br: '<br />',
+                byFieldName
+              });
             } else {
-              // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-              contents += `<br/> ${numberOfCauses}+ unusual ${byFieldName} values`;
+              intl.formatMessage({
+                id: 'xpack.ml.explorer.distributionChart.moreThanOneUnusualByFieldValuesLabel',
+                defaultMessage: '{br} {numberOfCauses}{plusSign} unusual {byFieldName} values'
+              }, {
+                br: '<br />',
+                numberOfCauses,
+                byFieldName,
+                // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
+                plusSign: numberOfCauses < 10 ? '' : '+'
+              });
             }
           }
         }
       } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
-        contents += `value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',
+          defaultMessage: 'value: {value}'
+        }, {
+          value: formatValue(marker.value, config.functionDescription, fieldFormat)
+        });
       }
 
       if (_.has(marker, 'scheduledEvents')) {
-        contents += `<div><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}</div>`;
+        contents += '<div><hr/>' + intl.formatMessage({
+          id: 'xpack.ml.explorer.distributionChart.scheduledEventsLabel',
+          defaultMessage: 'Scheduled events:{br}{scheduledEventsValue}'
+        }, {
+          br: '<br />',
+          scheduledEventsValue: marker.scheduledEvents.map(mlEscape).join('<br/>')
+        }) + '</div>';
       }
 
       mlChartTooltipService.show(contents, circle, {
@@ -481,4 +522,4 @@ export class ExplorerChartDistribution extends React.Component {
       </div>
     );
   }
-}
+});
