@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana_2",
+    "index": ".kibana",
     "settings": {
       "index": {
         "number_of_shards": "1",
@@ -430,9 +430,6 @@
           }
         }
       }
-    },
-    "aliases": {
-      ".kibana": {}
     }
   }
 }
