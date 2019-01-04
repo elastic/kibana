@@ -45,14 +45,14 @@ let _socket;
 export const initialize = async () => {
   await loadBrowserRegistries(types, basePath);
   _socket = await createSocket(basePath, functionsRegistry);
-  return await initializeInterpreter(_socket, typesRegistry, functionsRegistry);
+  return initializeInterpreter(_socket, typesRegistry, functionsRegistry);
 };
 
 const getInterpreter = async () => {
   if (!_interpreter) {
     _interpreter = initialize();
   }
-  return _interpreter;
+  return await _interpreter;
 };
 
 

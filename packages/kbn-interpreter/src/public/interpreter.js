@@ -52,10 +52,19 @@ export async function initializeInterpreter(socket, typesRegistry, functionsRegi
   });
 
   // Create the function list
+  let gotFunctionList = false;
   socket.once('functionList', (fl) => {
+    gotFunctionList = true;
     resolve(fl);
   });
-  socket.emit('getFunctionList');
+
+  const interval = setInterval(() => {
+    if (gotFunctionList) {
+      clearInterval(interval);
+      return;
+    }
+    socket.emit('getFunctionList');
+  }, 1000);
 
   return { getInitializedFunctions, interpretAst };
 }
