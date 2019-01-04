@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelizeKeys } from 'humps';
-import 'isomorphic-fetch';
 import { startsWith } from 'lodash';
 import { kfetch, KFetchOptions } from 'ui/kfetch';
+import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 
 function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   const debugEnabled =
@@ -29,9 +28,8 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
 
 export async function callApi<T = void>(
   fetchOptions: KFetchOptions,
-  { camelcase = true, prependBasePath = true } = {}
+  options?: KFetchKibanaOptions
 ): Promise<T> {
   const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
-  const res = await kfetch(combinedFetchOptions, { prependBasePath });
-  return camelcase ? camelizeKeys(res) : res;
+  return await kfetch(combinedFetchOptions, options);
 }

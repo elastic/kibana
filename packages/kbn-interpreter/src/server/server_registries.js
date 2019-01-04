@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { typesRegistry } from '../common/lib/types_registry';
 import { functionsRegistry as serverFunctions } from '../common/lib/functions_registry';
 import { getPluginPaths } from './get_plugin_paths';
@@ -53,6 +54,7 @@ export const populateServerRegistries = types => {
     getPluginPaths(type).then(paths => {
       global.canvas = global.canvas || {};
       global.canvas.register = d => registries[type].register(d);
+      global.canvas.i18n = i18n;
 
       paths.forEach(path => {
         require(path); // eslint-disable-line import/no-dynamic-require

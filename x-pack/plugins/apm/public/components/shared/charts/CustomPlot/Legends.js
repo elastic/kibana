@@ -22,9 +22,10 @@ const Container = styled.div`
   align-items: center;
   justify-content: space-around;
   flex-wrap: wrap;
-  padding-top: 15px;
 
-  div {
+  /* add margin to all direct descendant divs */
+  & > div {
+    margin-top: ${px(units.half)};
     margin-right: ${px(unit)};
     &:last-child {
       margin-right: 0;

@@ -12,7 +12,11 @@ export interface FrameworkAdapter {
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
-  renderUIAtPath(path: string, component: React.ReactElement<any>): void;
+  renderUIAtPath(
+    path: string,
+    component: React.ReactElement<any>,
+    toController: 'management' | 'self'
+  ): void;
   registerManagementSection(settings: {
     id?: string;
     name: string;
