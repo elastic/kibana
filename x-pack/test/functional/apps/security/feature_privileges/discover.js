@@ -155,7 +155,9 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it(`redirects to the home page`, async () => {
-        await PageObjects.common.navigateToUrl('discover');
+        await PageObjects.common.navigateToUrl('discover', '', {
+          ensureCurrentUrl: false,
+        });
         await testSubjects.existOrFail('homeApp');
       });
     });
