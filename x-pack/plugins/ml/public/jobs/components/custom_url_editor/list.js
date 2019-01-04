@@ -145,7 +145,7 @@ export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
       const isInvalidTimeRange = !(isValidTimeRange(timeRange));
       const invalidIntervalError = (isInvalidTimeRange === true) ? [
         intl.formatMessage({
-          id: 'xpack.ml.customUrlEditorList.invalidFormatErrorMessage',
+          id: 'xpack.ml.customUrlEditorList.invalidTimeRangeFormatErrorMessage',
           defaultMessage: 'Invalid format'
         })
       ] : [];
