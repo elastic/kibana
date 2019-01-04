@@ -12,8 +12,9 @@ import {
   // @ts-ignore
   EuiSuperSelect,
   EuiText,
-  IconType,
+  EuiTextProps,
 } from '@elastic/eui';
+import { EuiIconProps } from '@elastic/eui/src/components/icon/icon';
 import { InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -44,6 +45,15 @@ interface ToolTipDefinition {
   tooltip: string;
 }
 
+interface TableFeature extends Feature {
+  hasAnyPrivilegeAssigned: boolean;
+}
+
+interface TableRow {
+  feature: TableFeature;
+  role: Role;
+}
+
 export class FeatureTable extends Component<Props, {}> {
   public static defaultProps = {
     spacesIndex: -1,
@@ -51,10 +61,15 @@ export class FeatureTable extends Component<Props, {}> {
   };
 
   public render() {
-    const { role, features } = this.props;
+    const { role, features, effectivePrivileges, spacesIndex } = this.props;
 
-    const items = features.map(feature => ({
-      feature,
+    const items: TableRow[] = features.map(feature => ({
+      feature: {
+        ...feature,
+        hasAnyPrivilegeAssigned:
+          effectivePrivileges.getActualSpaceFeaturePrivilege(feature.id, spacesIndex) !==
+          NO_PRIVILEGE_VALUE,
+      },
       role,
     }));
 
@@ -76,7 +91,7 @@ export class FeatureTable extends Component<Props, {}> {
         id: 'xpack.roles.management.enabledRoleFeaturesFeatureColumnTitle',
         defaultMessage: 'Feature',
       }),
-      render: (feature: Feature) => {
+      render: (feature: TableFeature) => {
         const tooltips = Object.entries(feature.privileges).reduce(
           (acc: ToolTipDefinition[], [privilegeId, privilege]) => {
             if (!privilege.metadata || !privilege.metadata.tooltip) {
@@ -108,9 +123,16 @@ export class FeatureTable extends Component<Props, {}> {
           );
         }
 
+        const textProps: EuiTextProps = {};
+        const iconProps: EuiIconProps = {};
+        if (!feature.hasAnyPrivilegeAssigned) {
+          textProps.color = 'subdued';
+          iconProps.color = 'subdued';
+        }
+
         return (
-          <EuiText>
-            <EuiIcon type={feature.icon as IconType} />
+          <EuiText {...textProps}>
+            <EuiIcon {...iconProps} type={feature.icon} />
             &ensp; {feature.name} {tooltipElement}
           </EuiText>
         );
@@ -122,7 +144,7 @@ export class FeatureTable extends Component<Props, {}> {
         id: 'xpack.roles.management.enabledRoleFeaturesEnabledColumnTitle',
         defaultMessage: 'Privilege',
       }),
-      render: (roleEntry: Role, record: Record<string, any>) => {
+      render: (roleEntry: Role, record: TableRow) => {
         const featureId = record.feature.id;
 
         const featurePrivileges = this.props.privilegeDefinition
@@ -190,7 +212,7 @@ export class FeatureTable extends Component<Props, {}> {
               {
                 disabled: !allowsNone,
                 value: NO_PRIVILEGE_VALUE,
-                inputDisplay: <EuiText color="subdued">None</EuiText>,
+                inputDisplay: <EuiText>None</EuiText>,
                 dropdownDisplay: (
                   <EuiText>
                     <strong>No privileges</strong>
