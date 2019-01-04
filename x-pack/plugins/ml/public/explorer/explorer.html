@@ -12,23 +12,6 @@
 
   <ml-explorer-react-wrapper />
 
-  <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
-    <div class="no-results euiText">
-      <div
-        i18n-id="xpack.ml.explorer.noJobsFoundLabel"
-        i18n-default-message="{icon} No jobs found"
-        i18n-values="{ html_icon: '<i class=\'fa fa-exclamation-triangle\' ></i>' }"
-      ></div>
-      <div>
-        <a
-          href="ml#/jobs"
-          i18n-id="xpack.ml.explorer.createNewJobLinkText"
-          i18n-default-message="Create new job"
-        ></a>
-      </div>
-    </div>
-  </div>
-
   <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
     <div class="no-results euiText">
       <div

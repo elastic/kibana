@@ -22,6 +22,7 @@ module.directive('mlExplorerReactWrapper', function () {
   function link(scope, element) {
     function render() {
       const props = {
+        jobs: scope.jobs,
         loading: scope.loading,
       };
 

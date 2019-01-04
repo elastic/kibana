@@ -12,18 +12,20 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
 
+import { ExplorerNoResults } from './components/explorer_no_results';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 
 export const Explorer = injectI18n(
   class Explorer extends React.Component {
     static propTypes = {
-      loading: PropTypes.bool
-    }
+      jobs: PropTypes.array,
+      loading: PropTypes.bool,
+    };
 
-    dummyMethod = () => { };
+    dummyMethod = () => {};
 
     render() {
-      const { intl, loading } = this.props;
+      const { intl, jobs, loading } = this.props;
       return (
         <div>
           {loading && (
@@ -34,6 +36,7 @@ export const Explorer = injectI18n(
               })}
             />
           )}
+          {jobs.length === 0 && loading === false && <ExplorerNoResults />}
         </div>
       );
     }
