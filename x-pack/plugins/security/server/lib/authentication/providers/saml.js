@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import util from 'util';
 import Boom from 'boom';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
@@ -29,17 +30,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
  * }} HeaderAuthAttempt
  */
 
-/**
- * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
- * has been rejected because of expired token, otherwise returns `false`.
- * @param {Object} err Error returned from Elasticsearch.
- * @returns {boolean}
- */
-function isAccessTokenExpiredError(err) {
-  return err.body
-    && err.body.error
-    && err.body.error.reason === 'token expired';
-}
+
 
 /**
  * Checks the error returned by Elasticsearch as the result of `getAccessToken` call and returns `true` if
@@ -74,6 +65,19 @@ export class SAMLAuthenticationProvider {
   }
 
   /**
+ * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
+ * has been rejected because of expired token, otherwise returns `false`.
+ * @param {Object} err Error returned from Elasticsearch.
+ * @returns {boolean}
+ */
+  isAccessTokenExpiredError(err) {
+    this._options.log(['debug', 'security', 'saml'], `Unable to authenticateViaState: ${util.inspect(err.body)}`);
+    return err.body
+      && err.body.error
+      && err.body.error.reason === 'token expired';
+  }
+
+  /**
    * Performs SAML request authentication.
    * @param {Hapi.Request} request HapiJS request instance.
    * @param {Object} [state] Optional state object associated with the provider.
@@ -92,7 +96,7 @@ export class SAMLAuthenticationProvider {
 
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this._authenticateViaState(request, state);
-      if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
+      if (authenticationResult.failed() && this.isAccessTokenExpiredError(authenticationResult.error)) {
         authenticationResult = await this._authenticateViaRefreshToken(request, state);
       }
     }
