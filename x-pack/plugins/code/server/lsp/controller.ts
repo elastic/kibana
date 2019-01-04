@@ -8,12 +8,14 @@ import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { LanguageServerStatus } from '../../common/language_server';
 import {
+  LanguageDisabled,
   LanguageServerNotInstalled,
   UnknownErrorCode,
   UnknownFileLanguage,
 } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
+import { RepositoryConfigController } from '../repository_config_controller';
 import { ServerOptions } from '../server_options';
 import { detectLanguage } from '../utils/detect_language';
 import { LoggerFactory } from '../utils/log_factory';
@@ -51,7 +53,8 @@ export class LanguageServerController implements ILanguageServerHandler {
     readonly options: ServerOptions,
     readonly targetHost: string,
     readonly installManager: InstallManager,
-    readonly loggerFactory: LoggerFactory
+    readonly loggerFactory: LoggerFactory,
+    readonly repoConfigController: RepositoryConfigController
   ) {
     this.log = loggerFactory.getLogger([]);
     this.languageServers = LanguageServers.map(def => ({
@@ -76,6 +79,11 @@ export class LanguageServerController implements ILanguageServerHandler {
     if (file) {
       // #todo add test for this
       const lang = await detectLanguage(file.replace('file://', ''));
+      if (await this.repoConfigController.isLanguageDisabled(request.documentUri!, lang)) {
+        return Promise.reject(
+          new ResponseError(LanguageDisabled, `language disabled for the file`)
+        );
+      }
       return this.dispatchRequest(lang, request);
     } else {
       return Promise.reject(

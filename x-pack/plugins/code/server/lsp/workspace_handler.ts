@@ -120,6 +120,7 @@ export class WorkspaceHandler {
           params.textDocument.uri
         );
         if (filePath) {
+          request.documentUri = payload.textDocument.uri;
           payload.textDocument.uri = request.resolvedFilePath = filePath;
           request.workspacePath = workspacePath;
           request.workspaceRevision = workspaceRevision;

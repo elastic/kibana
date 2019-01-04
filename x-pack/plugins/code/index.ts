@@ -24,6 +24,7 @@ import {
   IndexWorker,
   UpdateWorker,
 } from './server/queue';
+import { RepositoryConfigController } from './server/repository_config_controller';
 import { RepositoryServiceFactory } from './server/repository_service_factory';
 import { fileRoute } from './server/routes/file';
 import { installRoute } from './server/routes/install';
@@ -110,13 +111,15 @@ export const code = (kibana: any) =>
       // @ts-ignore
       const esClient: EsClient = adminCluster.getClient();
 
+      const repoConfigController = new RepositoryConfigController(esClient);
       const installManager = new InstallManager(serverOptions);
       const lspService = new LspService(
         '127.0.0.1',
         serverOptions,
         esClient,
         installManager,
-        new ServerLoggerFactory(server)
+        new ServerLoggerFactory(server),
+        repoConfigController
       );
       // Initialize indexing factories.
       const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, esClient, log);
@@ -180,7 +183,8 @@ export const code = (kibana: any) =>
         cloneWorker,
         deleteWorker,
         indexWorker,
-        repoIndexInitializerFactory
+        repoIndexInitializerFactory,
+        repoConfigController
       );
       repositorySearchRoute(server, log);
       documentSearchRoute(server, log);

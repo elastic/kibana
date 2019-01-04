@@ -19,6 +19,7 @@ import { RepositoryGitStatusReservedField, RepositoryTypeName } from '../indexer
 import { InstallManager } from "../lsp/install_manager";
 import * as os from "os";
 import assert from 'assert';
+import { RepositoryConfigController } from '../repository_config_controller';
 
 
 
@@ -108,7 +109,7 @@ describe('lsp_service tests', () => {
     let esClient = mockEsClient();
     const revision = 'master';
 
-    const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory());
+    const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory(), new RepositoryConfigController(esClient));
     try {
       const params = {
         textDocument: {
@@ -154,7 +155,7 @@ describe('lsp_service tests', () => {
   it("unload a workspace", async () => {
     let esClient = mockEsClient();
     const revision = 'master';
-    const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory());
+    const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory(), new RepositoryConfigController(esClient));
     try {
       const params = {
         textDocument: {

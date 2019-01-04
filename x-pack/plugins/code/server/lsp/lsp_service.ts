@@ -8,6 +8,7 @@ import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import { LanguageServerStatus } from '../../common/language_server';
 import { EsClient } from '../lib/esqueue';
+import { RepositoryConfigController } from '../repository_config_controller';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { LanguageServerController } from './controller';
@@ -22,7 +23,8 @@ export class LspService {
     serverOptions: ServerOptions,
     client: EsClient,
     installManager: InstallManager,
-    loggerFactory: LoggerFactory
+    loggerFactory: LoggerFactory,
+    repoConfigController: RepositoryConfigController
   ) {
     this.workspaceHandler = new WorkspaceHandler(
       serverOptions.repoPath,
@@ -34,7 +36,8 @@ export class LspService {
       serverOptions,
       targetHost,
       installManager,
-      loggerFactory
+      loggerFactory,
+      repoConfigController
     );
   }
 
