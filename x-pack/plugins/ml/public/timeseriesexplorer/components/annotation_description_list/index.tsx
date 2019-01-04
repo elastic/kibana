@@ -22,9 +22,7 @@ interface Props {
   intl: InjectedIntl;
 }
 
-export const AnnotationDescriptionList: React.ComponentClass<
-  Pick<Props, 'annotation'>
-> = injectI18n(({ annotation, intl }) => {
+export const AnnotationDescriptionList = injectI18n(({ annotation, intl }: Props) => {
   const listItems = [
     {
       title: intl.formatMessage({

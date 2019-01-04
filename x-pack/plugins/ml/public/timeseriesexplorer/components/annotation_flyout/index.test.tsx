@@ -21,7 +21,7 @@ describe('AnnotationFlyout', () => {
       saveAction: jest.fn(),
     };
 
-    const wrapper = shallowWitIntl(<AnnotationFlyout {...props} />);
+    const wrapper = shallowWithIntl(<AnnotationFlyout {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });
