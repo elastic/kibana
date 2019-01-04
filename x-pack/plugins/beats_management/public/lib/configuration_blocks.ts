@@ -11,7 +11,44 @@ import { ConfigBlockSchema, ConfigurationBlock } from '../../common/domain_types
 export class ConfigBlocksLib {
   constructor(private readonly configSchemas: ConfigBlockSchema[]) {}
 
-  public jsonConfigToUserYaml(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
+  public async create(block: ConfigurationBlock): Promise<boolean> {
+    return new Promise<boolean>(resolve => {
+      resolve(true);
+    });
+  }
+
+  public async getForTag(tagId: string, page: number = 1): Promise<ConfigurationBlock[]> {
+    return new Promise<ConfigurationBlock[]>(resolve => {
+      resolve(
+        tagId !== 'first'
+          ? []
+          : [
+              {
+                id: 'foo',
+                type: 'filebeat.inputs',
+                description: 'some description',
+                tag: 'first',
+                config: {},
+                last_updated: 1546628516,
+              },
+            ]
+      );
+    });
+  }
+
+  public async update(block: ConfigurationBlock): Promise<boolean> {
+    return new Promise<boolean>(resolve => {
+      resolve(true);
+    });
+  }
+
+  public async delete(id: string): Promise<boolean> {
+    return new Promise<boolean>(resolve => {
+      resolve(true);
+    });
+  }
+
+  private jsonConfigToUserYaml(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
     // configuration_blocks yaml, JS cant read YAML so we parse it into JS,
     // because beats flattens all fields, and we need more structure.
     // we take tagConfigs, grab the config that applies here, render what we can into
@@ -58,7 +95,7 @@ export class ConfigBlocksLib {
     });
   }
 
-  public userConfigsToJson(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
+  private userConfigsToJson(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
     // configurations is the JS representation of the config yaml,
     // so here we take that JS and convert it into a YAML string.
     // we do so while also flattening "other" into the flat yaml beats expect

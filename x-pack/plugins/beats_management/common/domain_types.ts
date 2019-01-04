@@ -6,17 +6,6 @@
 import * as t from 'io-ts';
 import { configBlockSchemas } from './config_schemas';
 
-const DateType = new t.Type<Date, string>(
-  'DateFromString',
-  (m): m is Date => m instanceof Date,
-  (m, c) =>
-    t.string.validate(m, c).chain(s => {
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
-    }),
-  a => a.toISOString()
-);
-
 export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
 
 // Here we create the runtime check for a genaric, unknown beat config type.
@@ -35,7 +24,7 @@ export const createConfigurationBlockInterface = (
       description: t.union([t.undefined, t.string]),
       tag: t.string,
       config: beatConfigInterface,
-      last_updated: DateType,
+      last_updated: t.number,
     },
     'ConfigBlock'
   );
@@ -112,4 +101,6 @@ export interface BeatTag
   > {
   id: string;
   hasConfigurationBlocksTypes: string[];
+  // Used by the UI and api when a tag exists but is an invalid option
+  disabled?: boolean;
 }

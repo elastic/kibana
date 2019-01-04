@@ -17,7 +17,7 @@ import { TagBadge } from '../../tag/tag_badge';
 import { AssignmentActionType } from '../index';
 
 interface TagBadgeListProps {
-  items: any[];
+  items: object[] | Promise<object[]>;
   disabled: boolean;
   name: string;
   action?: AssignmentActionType;
@@ -26,6 +26,7 @@ interface TagBadgeListProps {
 
 interface ComponentState {
   isPopoverOpen: boolean;
+  items: object[];
 }
 
 export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentState> {
@@ -34,6 +35,7 @@ export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentSt
 
     this.state = {
       isPopoverOpen: false,
+      items: [],
     };
   }
 
@@ -61,7 +63,7 @@ export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentSt
       >
         <EuiContextMenuPanel>
           <EuiFlexGroup direction="column" gutterSize="xs" style={{ margin: 10 }}>
-            {this.props.items.map((tag: any) => (
+            {this.state.items.map((tag: any) => (
               <EuiFlexItem key={`${tag.id}`}>
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem>
@@ -80,9 +82,11 @@ export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentSt
       </EuiPopover>
     );
   }
-  private onButtonClick = () => {
+  private onButtonClick = async () => {
+    const items = await Promise.resolve(this.props.items);
     this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
+      items,
     }));
   };
 

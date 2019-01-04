@@ -168,7 +168,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               }}
               actions={beatsListActions}
               actionData={{
-                tags: this.filterTags(this.props.containers.tags.state.list),
+                tags: this.props.libs.tags.getTagsForBeats(this.getSelectedBeats()),
               }}
               actionHandler={async (action: AssignmentActionType, payload: any) => {
                 switch (action) {
@@ -326,12 +326,6 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     return beats;
   };
 
-  private filterTags = (tags: BeatTag[]) => {
-    return tags;
-    // return this.selectedBeatConfigsRequireUniqueness()
-    //   ? tags.map(this.disableTagForUniquenessEnforcement)
-    //   : tags;
-  };
   // TODO  the following 3 methods will be re-added in some form in a followup PR due to scope of this aspect of the change
 
   // private configBlocksRequireUniqueness = (hasConfigurationBlocksTypes: string[]) =>
