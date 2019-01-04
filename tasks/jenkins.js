@@ -32,7 +32,7 @@ module.exports = function (grunt) {
     'run:checkFileCasing',
     // 'licenses', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
     'verifyDependencyVersions',
-    'run:verifyNotice',
+    // 'run:verifyNotice', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
     // 'test:server', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
     // 'test:jest', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
     // 'test:jest_integration', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
