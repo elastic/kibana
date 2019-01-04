@@ -31,6 +31,7 @@ import {
   SET_REFRESH_CONFIG,
   TRIGGER_REFRESH_TIMER,
   SET_MOUSE_COORDINATES,
+  CLEAR_MOUSE_COORDINATES,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -102,6 +103,14 @@ export function map(state = INITIAL_STATE, action) {
             lat: action.lat,
             lon: action.lon
           }
+        }
+      };
+    case CLEAR_MOUSE_COORDINATES:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          mouseCoordinates: null
         }
       };
     case LAYER_DATA_LOAD_STARTED:

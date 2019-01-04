@@ -92,12 +92,18 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('moveend', () => {
       this.props.extentChanged(this._getMapState());
     });
-    this._mbMap.on('mousemove', _.throttle(e => {
+    const throttledSetMouseCoordinates = _.throttle(e => {
       this.props.setMouseCoordinates({
         lat: _.round(e.lngLat.lat, DECIMAL_DEGREES_PRECISION),
         lon: _.round(e.lngLat.lng, DECIMAL_DEGREES_PRECISION)
       });
-    }, 100));
+    }, 100);
+    this._mbMap.on('mousemove', throttledSetMouseCoordinates);
+    this._mbMap.on('mouseout', () => {
+      throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
+      this.props.clearMouseCoordinates();
+    });
+
     this.props.onMapReady(this._getMapState());
   }
 

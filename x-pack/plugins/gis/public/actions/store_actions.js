@@ -45,6 +45,7 @@ export const UPDATE_LAYER_ALPHA_VALUE = 'UPDATE_LAYER_ALPHA_VALUE';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
 export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
+export const CLEAR_MOUSE_COORDINATES = 'CLEAR_MOUSE_COORDINATES';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -233,6 +234,10 @@ export function setMouseCoordinates({ lat, lon }) {
     lat,
     lon,
   };
+}
+
+export function clearMouseCoordinates() {
+  return { type: CLEAR_MOUSE_COORDINATES };
 }
 
 export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
