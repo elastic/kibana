@@ -248,17 +248,8 @@ export class FeatureTable extends Component<Props, {}> {
   };
 
   private allowsNoneForPrivilegeAssignment = (featureId: string): boolean => {
-    const { effectivePrivileges, spacesIndex } = this.props;
-    if (spacesIndex >= 0) {
-      return (
-        effectivePrivileges.getHighestGrantedSpaceFeaturePrivilege(
-          featureId,
-          this.props.spacesIndex
-        ) === NO_PRIVILEGE_VALUE
-      );
-    }
-
-    // Global feature privileges are not limited by effective privileges.
-    return true;
+    return [PRIVILEGE_SOURCE.NONE, PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY].includes(
+      this.getPrivilegeExplanation(featureId).source
+    );
   };
 }
