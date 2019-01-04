@@ -15,8 +15,8 @@ export default function spaceSelectorFunctonalTests({
 
   describe('Spaces', () => {
     describe('Space Selector', () => {
-      before(async () => await esArchiver.load('spaces'));
-      after(async () => await esArchiver.unload('spaces'));
+      before(async () => await esArchiver.load('spaces/selector'));
+      after(async () => await esArchiver.unload('spaces/selector'));
 
       afterEach(async () => {
         await PageObjects.security.logout();
