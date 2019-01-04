@@ -11,13 +11,6 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
-  const expectAppNavLinks = async (appNavLinkTexts) => {
-    const appSwitcher = await testSubjects.find('appSwitcher');
-    const appLinks = await testSubjects.findAllDescendant('appLink', appSwitcher);
-    const linksText = await Promise.all(appLinks.map(appLink => appLink.getVisibleText()));
-    expect(linksText).to.eql(appNavLinkTexts);
-  };
-
   describe('discover', () => {
     before(async () => {
       await esArchiver.load('security/feature_privileges');
@@ -62,7 +55,8 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        await expectAppNavLinks([
+        const navLinks = await PageObjects.common.getAppNavLinksText();
+        expect(navLinks).to.eql([
           'Discover',
           'Management',
         ]);
@@ -108,7 +102,8 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        await expectAppNavLinks([
+        const navLinks = await PageObjects.common.getAppNavLinksText();
+        expect(navLinks).to.eql([
           'Discover',
           'Management',
         ]);

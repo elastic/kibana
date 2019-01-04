@@ -241,6 +241,13 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
     }
 
+    async getAppNavLinksText() {
+      const appSwitcher = await testSubjects.find('appSwitcher');
+      const appLinks = await testSubjects.findAllDescendant('appLink', appSwitcher);
+      const linksText = await Promise.all(appLinks.map((appLink) => appLink.getVisibleText()));
+      return linksText;
+    }
+
     /**
      * Makes sure the modal overlay is not showing, tries a few times in case it is in the process of hiding.
      */

@@ -14,13 +14,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
-  const getAppNavLinks = async () => {
-    const appSwitcher = await testSubjects.find('appSwitcher');
-    const appLinks = await testSubjects.findAllDescendant('appLink', appSwitcher);
-    const linksText = await Promise.all(appLinks.map((appLink: any) => appLink.getVisibleText()));
-    return linksText;
-  };
-
   describe('discover', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -47,7 +40,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await getAppNavLinks();
+        const navLinks = await PageObjects.common.getAppNavLinksText();
         expect(navLinks).to.contain('Discover');
       });
 
@@ -80,7 +73,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await getAppNavLinks();
+        const navLinks = await PageObjects.common.getAppNavLinksText();
         expect(navLinks).not.to.contain('Discover');
       });
 
