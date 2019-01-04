@@ -18,32 +18,57 @@
  */
 
 
-import { initializeInterpreter as initialize } from '@kbn/interpreter/public';
+import { initializeInterpreter, loadBrowserRegistries, createSocket } from '@kbn/interpreter/public';
+import chrome from 'ui/chrome';
+import { functions } from './functions';
+import { functionsRegistry } from './functions_registry';
+import { typesRegistry } from './types_registry';
 
-let _resolve;
-const interpreterPromise = new Promise(resolve => { _resolve = resolve; });
-let interpreter;
-let _socket;
+const basePath = chrome.getBasePath();
 
-export const initializeInterpreter = async (socket, typesRegistry, functionsRegistry) => {
-  _socket = socket;
-  interpreter = await initialize(socket, typesRegistry, functionsRegistry);
-  _resolve(interpreter);
-  return interpreter;
+const types = {
+  browserFunctions: functionsRegistry,
+  types: typesRegistry
 };
 
+function addFunction(fnDef) {
+  functionsRegistry.register(fnDef);
+}
+
+functions.forEach(addFunction);
+
+
+let _interpreter;
+let _socket;
+
+
+export const initialize = async () => {
+  await loadBrowserRegistries(types, basePath);
+  _socket = await createSocket(basePath, functionsRegistry);
+  return await initializeInterpreter(_socket, typesRegistry, functionsRegistry);
+};
+
+const getInterpreter = async () => {
+  if (!_interpreter) {
+    _interpreter = initialize();
+  }
+  return _interpreter;
+};
+
+
 export const updateInterpreterFunctions = async () => {
+  await getInterpreter();
   _socket.emit('updateFunctionList');
 };
 
 export const getInitializedFunctions = async () => {
-  await interpreterPromise;
+  const interpreter = await getInterpreter();
   const result = await interpreter.getInitializedFunctions();
   return result;
 };
 
 export const interpretAst = async (ast, context, handlers) => {
-  await interpreterPromise;
+  const interpreter = await getInterpreter();
   const result = await interpreter.interpretAst(ast, context, handlers);
   return result;
 };

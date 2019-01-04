@@ -25,11 +25,6 @@ export default function (kibana) {
     id: 'interpreter',
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
-    },
     init,
   });
 }
