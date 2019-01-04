@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { once } from 'lodash';
+import { mergeAtType } from './reduce';
+import { alias, wrap, uniqueKeys } from './modify_reduce';
 
-const callWithRequest = once(server => {
-  const cluster = server.plugins.elasticsearch.getCluster('data');
-  return cluster.callWithRequest;
-});
-
-export const callWithRequestFactory = (server, request) => {
-  return (...args) => {
-    return callWithRequest(server)(request, ...args);
-  };
-};
+// How plugins define tasks that the task manager can run.
+export const taskDefinitions = wrap(
+  alias('taskDefinitions'),
+  uniqueKeys(),
+  mergeAtType,
+);

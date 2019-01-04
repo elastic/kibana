@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-const apiPrefix = chrome.addBasePath('/api/kibana');
-
-export async function getRemoteClusters($http) {
-  const response = await $http.get(`${apiPrefix}/clusters`);
-  return response.data;
+declare module 'ui/management' {
+  export const PAGE_TITLE_COMPONENT: string;
+  export const PAGE_SUBTITLE_COMPONENT: string;
+  export const PAGE_FOOTER_COMPONENT: string;
+  export const SidebarNav: React.SFC<any>;
+  export function registerSettingsComponent(
+    id: string,
+    component: string | React.SFC<any>,
+    allowOverride: boolean
+  ): void;
+  export const management: any; // TODO - properly provide types
 }
