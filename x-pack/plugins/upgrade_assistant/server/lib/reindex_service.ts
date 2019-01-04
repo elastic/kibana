@@ -171,14 +171,69 @@ export const reindexServiceFactory = (
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
+    const reindexBody = {
+      source: { index: indexName },
+      dest: { index: reindexOp.attributes.newIndexName },
+    } as any;
+
+    const booleanFieldPaths = await getBooleanFieldPaths(callCluster, indexName);
+    if (booleanFieldPaths.length) {
+      reindexBody.script = {
+        lang: 'painless',
+        source: `
+          // Updates a single field in a Map
+          void updateField(Map data, String fieldName) {
+            if (
+              data[fieldName] == 'yes' ||
+              data[fieldName] == '1' ||
+              (data[fieldName] instanceof Integer && data[fieldName] == 1) ||
+              data[fieldName] == 'on'
+            ) {
+              data[fieldName] = true;
+            } else if (
+              data[fieldName] == 'no' ||
+              data[fieldName] == '0' ||
+              (data[fieldName] instanceof Integer && data[fieldName] == 0) ||
+              data[fieldName] == 'off'
+            ) {
+              data[fieldName] = false;
+            }
+          }
+
+          // Recursively walks the fieldPath list and calls
+          void updateFieldPath(def data, List fieldPath) {
+            String pathHead = fieldPath[0];
+
+            if (fieldPath.getLength() == 1) {
+              if (data.get(pathHead) !== null) {
+                updateField(data, pathHead);
+              }
+            } else {
+              List fieldPathTail = fieldPath.subList(1, fieldPath.getLength());
+
+              if (data.get(pathHead) instanceof List) {
+                for (item in data[pathHead]) {
+                  updateFieldPath(item, fieldPathTail);
+                }
+              } else if (data.get(pathHead) instanceof Map) {
+                updateFieldPath(data[pathHead], fieldPathTail);
+              }
+            }
+          }
+
+          for (fieldPath in params.booleanFieldPaths) {
+            updateFieldPath(ctx._source, fieldPath)
+          }
+        `,
+        params: { booleanFieldPaths },
+      };
+    }
+
     const startReindex = (await callCluster('reindex', {
       refresh: true,
       waitForCompletion: false,
-      body: {
-        source: { index: indexName },
-        dest: { index: reindexOp.attributes.newIndexName },
-      },
-    })) as any;
+      body: reindexBody,
+    })) as { task: string };
 
     return updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.reindexStarted,
@@ -389,3 +444,55 @@ const removeUnsettableSettings = (settings: object) =>
     'index.blocks',
     'index.legacy',
   ]);
+
+/**
+ * Returns an array of field paths for all boolean fields, where each field path is an array of strings.
+ * Example:
+ *    For the mapping type:
+ *    ```
+ *      {
+ *        "field1": { "type": "boolean" },
+ *        "nested": {
+ *          "field2": { "type": "boolean" }
+ *        }
+ *      }
+ *    ```
+ *    The fieldPaths would be: `[['field1'], ['nested', 'field2']]`
+ *
+ * @param callCluster
+ * @param indexName
+ */
+const getBooleanFieldPaths = async (callCluster: CallCluster, indexName: string) => {
+  const results = await callCluster('indices.getMapping', { index: indexName });
+  const allMappings = results[indexName].mappings;
+  const mappingTypes = Object.keys(allMappings);
+
+  if (mappingTypes.length > 1) {
+    throw new Error(`Cannot reindex indices with more than one mapping type.`);
+  }
+
+  const mapping = allMappings[mappingTypes[0]];
+  return findBooleanFields(mapping.properties);
+};
+
+interface MappingProperties {
+  [key: string]: { type?: string; properties?: MappingProperties };
+}
+
+// Exported only for testing
+export const findBooleanFields = (properties: MappingProperties): string[][] =>
+  Object.keys(properties).reduce(
+    (res, propertyName) => {
+      if (properties[propertyName].type === 'boolean') {
+        // If this field is a boolean, add it
+        res.push([propertyName]);
+      } else if (properties[propertyName].properties) {
+        // If this is a nested object/array get the nested fields and prepend the field path with the current field.
+        const nested = findBooleanFields(properties[propertyName].properties!);
+        res = [...res, ...nested.map(n => [propertyName, ...n])];
+      }
+
+      return res;
+    },
+    [] as string[][]
+  );

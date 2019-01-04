@@ -7,6 +7,7 @@
 import moment = require('moment');
 import { SavedObjectsClient } from 'src/server/saved_objects';
 import {
+  findBooleanFields,
   LOCK_WINDOW,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
@@ -174,6 +175,10 @@ describe('reindexService', () => {
       indexName: 'myIndex',
       newIndexName: 'myIndex-updated',
     };
+    const settingsMappings = {
+      settings: { 'index.number_of_replicas': 7, 'index.blocks.write': true },
+      mappings: { _doc: { properties: { timestampl: { type: 'date' } } } },
+    };
 
     describe('created', () => {
       const reindexOp = {
@@ -213,10 +218,6 @@ describe('reindexService', () => {
         id: '1',
         attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.readonly },
       } as ReindexSavedObject;
-      const settingsMappings = {
-        settings: { 'index.number_of_replicas': 7, 'index.blocks.write': true },
-        mappings: { _doc: { properties: { timestampl: { type: 'date' } } } },
-      };
 
       // The more intricate details of how the settings are chosen are test separately.
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
@@ -264,12 +265,17 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('starts reindex, saves taskId, and updates lastCompletedStep', async () => {
-        callCluster.mockResolvedValue({ task: 'xyz' });
+        callCluster
+          .mockResolvedValueOnce({ myIndex: { mappings: settingsMappings.mappings } })
+          .mockResolvedValueOnce({ task: 'xyz' });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
         expect(updatedOp.attributes.reindexTaskId).toEqual('xyz');
         expect(updatedOp.attributes.reindexTaskPercComplete).toEqual(0);
-        expect(callCluster).toHaveBeenCalledWith('reindex', {
+        expect(callCluster).toHaveBeenCalledWith('indices.getMapping', {
+          index: 'myIndex',
+        });
+        expect(callCluster).toHaveBeenLastCalledWith('reindex', {
           refresh: true,
           waitForCompletion: false,
           body: {
@@ -377,6 +383,35 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+      });
+    });
+  });
+
+  describe('utilities', () => {
+    describe('findBooleanFields', () => {
+      it('returns nested fields', () => {
+        const mappingProperties = {
+          region: {
+            type: 'boolean',
+          },
+          manager: {
+            properties: {
+              age: { type: 'boolean' },
+              name: {
+                properties: {
+                  first: { type: 'text' },
+                  last: { type: 'boolean' },
+                },
+              },
+            },
+          },
+        };
+
+        expect(findBooleanFields(mappingProperties)).toEqual([
+          ['region'],
+          ['manager', 'age'],
+          ['manager', 'name', 'last'],
+        ]);
       });
     });
   });
