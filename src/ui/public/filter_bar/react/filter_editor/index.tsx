@@ -49,6 +49,7 @@ import {
 import { Operator } from './lib/filter_operators';
 import { OperatorInput } from './operator_input';
 import { PhraseValueInput } from './phrase_value_input';
+import { PhrasesValuesInput } from './phrases_values_input';
 
 interface Props {
   filter: MetaFilter;
@@ -212,7 +213,7 @@ export class FilterEditor extends Component<Props, State> {
       case 'phrase':
         return buildPhraseFilter(selectedField, params, indexPattern);
       case 'phrases':
-        return buildPhrasesFilter(selectedField, params.phrases, indexPattern);
+        return buildPhrasesFilter(selectedField, params, indexPattern);
       case 'range':
         const newParams = { gte: params.range.from, lt: params.range.to };
         return buildRangeFilter(selectedField, newParams, indexPattern);
@@ -232,12 +233,23 @@ export class FilterEditor extends Component<Props, State> {
     }
 
     switch (this.state.selectedOperator.type) {
+      case 'exists':
+        return '';
       case 'phrase':
         return (
           <PhraseValueInput
             indexPattern={indexPattern}
             field={this.state.selectedField}
             value={this.state.params}
+            onChange={this.onParamsChange}
+          />
+        );
+      case 'phrases':
+        return (
+          <PhrasesValuesInput
+            indexPattern={indexPattern}
+            field={this.state.selectedField}
+            values={this.state.params}
             onChange={this.onParamsChange}
           />
         );
