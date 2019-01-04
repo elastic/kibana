@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
@@ -251,21 +252,29 @@ export class SpacesGridPage extends Component<Props, State> {
         name: 'Actions',
         actions: [
           {
-            name: 'Edit',
-            description: 'Edit this space.',
-            onClick: this.onEditSpaceClick,
-            type: 'icon',
-            icon: 'pencil',
-            color: 'primary',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={`Edit ${record.name}.`}
+                  color={'primary'}
+                  iconType={'pencil'}
+                  onClick={() => this.onEditSpaceClick(record)}
+                />
+              );
+            },
           },
           {
             available: (record: Space) => !isReservedSpace(record),
-            name: 'Delete',
-            description: 'Delete this space.',
-            onClick: this.onDeleteSpaceClick,
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={`Delete ${record.name}.`}
+                  color={'danger'}
+                  iconType={'trash'}
+                  onClick={() => this.onDeleteSpaceClick(record)}
+                />
+              );
+            },
           },
         ],
       },
