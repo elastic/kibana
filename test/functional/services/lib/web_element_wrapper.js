@@ -28,6 +28,7 @@ export class WebElementWrapper {
     this._driver = webDriver.driver;
     this._By = webDriver.By;
     this._Keys = webDriver.Key;
+    this._LegacyAction = webDriver.LegacyActionSequence;
     this._defaultFindTimeout = timeout;
   }
 

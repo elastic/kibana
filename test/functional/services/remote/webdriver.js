@@ -19,6 +19,7 @@
 
 import { delay } from 'bluebird';
 import  { Builder, By, Key, until, logging } from 'selenium-webdriver';
+const { LegacyActionSequence } =  require('selenium-webdriver/lib/actions');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const geckoDriver = require('geckodriver');
@@ -67,7 +68,7 @@ async function attemptToCreateCommand(log, browserType) {
 
   if (attemptId !== attemptCounter) return; // abort
 
-  return { driver: session, By, Key, until };
+  return { driver: session, By, Key, until, LegacyActionSequence };
 }
 
 export async function initWebDriver({ log, browserType }) {

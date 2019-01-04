@@ -29,7 +29,7 @@ export async function RemoteProvider({ getService }) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
   }
 
-  const { driver, By, Key, until } = await initWebDriver({ log, browserType });
+  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver({ log, browserType });
 
   log.info('Remote initialized');
 
@@ -51,5 +51,5 @@ export async function RemoteProvider({ getService }) {
 
   lifecycle.on('cleanup', async () => await driver.quit());
 
-  return { driver, By, Key, until };
+  return { driver, By, Key, until, LegacyActionSequence };
 }

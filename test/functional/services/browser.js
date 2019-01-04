@@ -21,7 +21,7 @@ import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export async function BrowserProvider({ getService }) {
-  const { driver, Key } = await getService('__webdriver__').init();
+  const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
 
   return new class BrowserService {
     getKeys() {
@@ -111,29 +111,42 @@ export async function BrowserProvider({ getService }) {
      * Does a drag-and-drop action from one point to another
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
      *
-     * @param {{element: WebElementWrapper} from
-     * @param {{element: WebElementWrapper, xOffset: number, yOffset: number}} to
+     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} from
+     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
     async dragAndDrop(from, to) {
-      const actions = driver.actions({ bridge: true });
-      const _from = from.element._webElement;
+      let _from;
+      let _to;
+      const _fromOffset = (from.offset) ? { x: from.offset.x || 0,  y: from.offset.y || 0 } : { x: 0, y: 0 };
+      const _toOffset = (to.offset) ? { x: to.offset.x || 0,  y: to.offset.y || 0 } : { x: 0, y: 0 };
 
-      if (to.element instanceof WebElementWrapper && ((to.xOffset === undefined) || (to.yOffset === undefined))) {
-        const _to = to.element._webElement;
-        await actions.dragAndDrop(_from, _to).perform();
+      if (from.location instanceof WebElementWrapper) {
+        _from = from.location._webElement;
       } else {
-        let _to = { x: 0, y: 0 };
-        if (to.element instanceof WebElementWrapper) {
-          const position = await to.element.getPosition();
-          _to = { x: position.x, y: position.y };
-        }
-        const _toWithOffset = { x: _to.x + (to.xOffset || 0),  y: _to.y + (to.yOffset || 0) };
-        await actions
+        _from = from.location;
+      }
+
+      if (to.location instanceof WebElementWrapper) {
+        _to = to.location._webElement;
+      } else {
+        _to = to.location;
+      }
+
+      if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
+        const actions = driver.actions({ bridge: true });
+        return await actions
           .move({ origin: _from })
           .press()
-          .move({ x: Math.round(_toWithOffset.x), y: Math.round(_toWithOffset.y), origin: 'pointer' })
+          .move({ x: _to.x, y: _to.y, origin: 'pointer' })
           .release()
+          .perform();
+      } else {
+        return await new LegacyActionSequence(driver)
+          .mouseMove(_from, _fromOffset)
+          .mouseDown()
+          .mouseMove(_to, _toOffset)
+          .mouseUp()
           .perform();
       }
     }
