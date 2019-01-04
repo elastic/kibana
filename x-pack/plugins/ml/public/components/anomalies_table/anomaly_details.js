@@ -118,13 +118,6 @@ function getDetailsItems(anomaly, examples, filter) {
     description: timeDesc
   });
 
-  if (examples !== undefined && examples.length > 0) {
-    examples.forEach((example, index) => {
-      const title = (index === 0) ? 'category examples' : '';
-      items.push({ title, description: example });
-    });
-  }
-
   items.push({
     title: 'function',
     description: (source.function !== 'metric') ? source.function : source.function_description
@@ -192,30 +185,32 @@ export class AnomalyDetails extends Component {
       showAllInfluencers: false
     };
 
-    this.tabs = [{
-      id: 'Details',
-      name: 'Details',
-      content: (
-        <Fragment>
-          <div className="ml-anomalies-table-details">
-            {this.renderDescription()}
-            <EuiSpacer size="m" />
-            {this.renderDetails()}
-            {this.renderInfluencers()}
-          </div>
-        </Fragment>
-      )
-    },
-    {
-      id: 'Category examples',
-      name: 'Category examples',
-      content: (
-        <Fragment>
-          {this.renderCategoryExamples()}
-        </Fragment>
-      ),
+    if (this.props.examples !== undefined && this.props.examples.length > 0) {
+      this.tabs = [{
+        id: 'Details',
+        name: 'Details',
+        content: (
+          <Fragment>
+            <div className="ml-anomalies-table-details">
+              {this.renderDescription()}
+              <EuiSpacer size="m" />
+              {this.renderDetails()}
+              {this.renderInfluencers()}
+            </div>
+          </Fragment>
+        )
+      },
+      {
+        id: 'Category examples',
+        name: 'Category examples',
+        content: (
+          <Fragment>
+            {this.renderCategoryExamples()}
+          </Fragment>
+        ),
+      }
+      ];
     }
-    ];
   }
 
   toggleAllInfluencers() {
@@ -363,14 +358,26 @@ export class AnomalyDetails extends Component {
 
   render() {
     const { tabIndex } = this.props;
-    return (
-      <EuiTabbedContent
-        tabs={this.tabs}
-        size="s"
-        initialSelectedTab={this.tabs[tabIndex]}
-        onTabClick={() => {}}
-      />
-    );
+
+    if (this.tabs !== undefined) {
+      return (
+        <EuiTabbedContent
+          tabs={this.tabs}
+          size="s"
+          initialSelectedTab={this.tabs[tabIndex]}
+          onTabClick={() => {}}
+        />
+      );
+    } else {
+      return (
+        <div className="ml-anomalies-table-details">
+          {this.renderDescription()}
+          <EuiSpacer size="m" />
+          {this.renderDetails()}
+          {this.renderInfluencers()}
+        </div>
+      );
+    }
   }
 }
 
