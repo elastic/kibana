@@ -9,12 +9,11 @@ import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiCodeBlock,
-  EuiHorizontalRule,
-  EuiFormRow,
+  EuiContextMenu,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import { Popover } from '../popover';
 import { Clipboard } from '../clipboard';
@@ -27,53 +26,108 @@ export class WorkpadExport extends React.PureComponent {
     getExportUrl: PropTypes.func.isRequired,
   };
 
+  anchorElement = React.createRef();
+
+  flattenPanelTree(tree, array = []) {
+    array.push(tree);
+
+    if (tree.items) {
+      tree.items.forEach(item => {
+        if (item.panel) {
+          this.flattenPanelTree(item.panel, array);
+          item.panel = item.panel.id;
+        }
+      });
+    }
+
+    return array;
+  }
+
   exportPdf = () => {
     this.props.onExport('pdf');
   };
 
-  renderControls = closePopover => {
+  downloadWorkpad = () => {
+    this.props.onExport('json');
+  };
+
+  renderPDFControls = closePopover => {
     const pdfUrl = this.props.getExportUrl('pdf');
     return (
-      <div>
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow>
-            <EuiFormRow label="Click below to create a PDF. You'll be notified when the export is complete">
-              <EuiButton
-                onClick={() => {
-                  this.exportPdf();
-                  closePopover();
-                }}
-              >
-                Export as PDF
-              </EuiButton>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule size="half" />
-        <EuiFormRow label="To generate a PDF from a script or with Watcher, use this URL.">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem style={{ overflow: 'auto' }}>
-              <EuiCodeBlock style={{ whiteSpace: 'nowrap' }} paddingSize="s">
-                {pdfUrl}
-              </EuiCodeBlock>
-            </EuiFlexItem>
+      <div className="sharePanelContent" data-test-subj="shareReportingForm">
+        <EuiText size="s">
+          <p>PDFs can take a minute or two to generate based upon the size of your workpad</p>
+        </EuiText>
+        <EuiSpacer size="s" />
 
-            <EuiFlexItem grow={false}>
-              <Clipboard
-                content={pdfUrl}
-                onCopy={() => {
-                  this.props.onCopy('pdf');
-                  closePopover();
-                }}
-              >
-                <EuiButtonIcon aria-label="Copy to clipboard" iconType="copy" />
-              </Clipboard>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
+        {this.props.options}
+
+        <EuiButton
+          fill
+          onClick={() => {
+            closePopover();
+            this.exportPdf();
+          }}
+          size="s"
+          style={{ width: '100%' }}
+        >
+          Generate PDF
+        </EuiButton>
+        <EuiSpacer size="s" />
+
+        <EuiText size="s">
+          <p>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from
+            Watcher.
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+
+        <Clipboard
+          content={pdfUrl}
+          onCopy={() => {
+            this.props.onCopy('pdf');
+            closePopover();
+          }}
+        >
+          <EuiButton
+            aria-label="Copy to clipboard"
+            iconType="copy"
+            size="s"
+            style={{ width: '100%' }}
+          >
+            Copy POST URL
+          </EuiButton>
+        </Clipboard>
       </div>
     );
   };
+
+  renderPanelTree = closePopover => ({
+    id: 0,
+    title: 'Share this workpad',
+    items: [
+      {
+        name: 'Download as JSON',
+        icon: <EuiIcon type="exportAction" size="m" />,
+        onClick: () => {
+          closePopover();
+          this.downloadWorkpad();
+        },
+      },
+      {
+        name: 'PDF Reports',
+        icon: 'document',
+        panel: {
+          id: 1,
+          title: 'PDF Reports',
+          content: this.props.enabled
+            ? this.renderPDFControls(closePopover)
+            : this.renderDisabled(),
+        },
+      },
+    ],
+  });
 
   renderDisabled = () => {
     return (
@@ -90,18 +144,21 @@ export class WorkpadExport extends React.PureComponent {
 
   render() {
     const exportControl = togglePopover => (
-      <EuiButtonIcon iconType="exportAction" aria-label="Create PDF" onClick={togglePopover} />
+      <EuiButtonIcon iconType="share" aria-label="Share this workpad" onClick={togglePopover} />
     );
 
     return (
-      <Popover button={exportControl} tooltip="Export workpad" tooltipPosition="bottom">
+      <Popover
+        button={exportControl}
+        panelPaddingSize="none"
+        tooltip="Share workpad"
+        tooltipPosition="bottom"
+      >
         {({ closePopover }) => (
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false} style={{ maxWidth: '300px' }}>
-              {this.props.enabled && this.renderControls(closePopover)}
-              {!this.props.enabled && this.renderDisabled()}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={this.flattenPanelTree(this.renderPanelTree(closePopover))}
+          />
         )}
       </Popover>
     );
