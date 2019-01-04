@@ -16,12 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { flatten, get } from 'lodash';
 import React from 'react';
-import { configBlockSchemas } from 'x-pack/plugins/beats_management/common/config_schemas';
-import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
@@ -55,25 +52,26 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
         />
       );
     }
-    const configurationBlocks = flatten(
-      beat.full_tags.map((tag: BeatTag) => {
-        return tag.configuration_blocks.map(configuration => ({
-          // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
-          module: configuration.configs[0].module || null,
-          tagId: tag.id,
-          tagColor: tag.color,
-          ...beat,
-          ...configuration,
-          displayValue: get(
-            translateConfigSchema(configBlockSchemas).find(
-              config => config.id === configuration.type
-            ),
-            'text',
-            null
-          ),
-        }));
-      })
-    );
+    const configurationBlocks = [] as ConfigurationBlock[];
+    // const configurationBlocks = [] flatten(
+    //   beat.full_tags.map((tag: BeatTag) => {
+    //     return tag.configuration_blocks.map(configuration => ({
+    //       // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
+    //       module: configuration.configs[0].module || null,
+    //       tagId: tag.id,
+    //       tagColor: tag.color,
+    //       ...beat,
+    //       ...configuration,
+    //       displayValue: get(
+    //         translateConfigSchema(configBlockSchemas).find(
+    //           config => config.id === configuration.type
+    //         ),
+    //         'text',
+    //         null
+    //       ),
+    //     }));
+    //   })
+    // );
 
     const columns = [
       {

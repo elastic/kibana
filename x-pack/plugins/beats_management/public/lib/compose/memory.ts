@@ -20,6 +20,7 @@ import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_a
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
 import { BeatsLib } from '../beats';
+import { ConfigBlocksLib } from '../configuration_blocks';
 import { FrameworkLib } from '../framework';
 import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
@@ -38,9 +39,10 @@ export function compose(
     mockKueryToEsQuery,
     suggestions
   );
-  const tags = new TagsLib(new MemoryTagsAdapter([]), translateConfigSchema(configBlockSchemas));
+  const configBlocks = new ConfigBlocksLib(translateConfigSchema(configBlockSchemas));
+  const tags = new TagsLib(new MemoryTagsAdapter([]));
   const tokens = new MemoryTokensAdapter();
-  const beats = new BeatsLib(new MemoryBeatsAdapter([]), { tags });
+  const beats = new BeatsLib(new MemoryBeatsAdapter([]));
 
   const pluginUIModule = uiModules.get('app/beats_management');
 
@@ -61,6 +63,7 @@ export function compose(
     tags,
     tokens,
     beats,
+    configBlocks,
   };
   return libs;
 }

@@ -59,7 +59,7 @@ export class BeatsContainer extends Container<ContainerState> {
   };
 
   public toggleTagAssignment = async (tagId: string, beats: CMBeat[]) => {
-    if (beats.some(beat => beat.full_tags.some(({ id }) => id === tagId))) {
+    if (beats.some(beat => beat.tags !== undefined && beat.tags.some(id => id === tagId))) {
       await this.removeTagsFromBeats(beats, tagId);
       return 'removed';
     }

@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { intersection, uniq, values } from 'lodash';
-import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
-import { ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
-import { entries } from '../utils/polyfills';
+import { ConfigurationBlock } from '../../common/domain_types';
 import { ConfigurationBlockAdapter } from './adapters/configuration_blocks/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 
@@ -57,58 +54,58 @@ export class ConfigurationBlocksLib {
     };
   }
 
-  private preventDupeConfigurationBlocks(configurationBlocks: ConfigurationBlock[]) {
-    // Get all output types in the array of config blocks
-    const outputTypes: string[] = configurationBlocks.reduce((typesCollector: string[], block) => {
-      if (block.type !== 'output') {
-        return typesCollector;
-      }
+  // private preventDupeConfigurationBlocks(configurationBlocks: ConfigurationBlock[]) {
+  //   // Get all output types in the array of config blocks
+  //   const outputTypes: string[] = configurationBlocks.reduce((typesCollector: string[], block) => {
+  //     if (block.type !== 'output') {
+  //       return typesCollector;
+  //     }
 
-      typesCollector = [...typesCollector, ...Object.keys(block.config)];
-      return typesCollector;
-    }, []);
+  //     typesCollector = [...typesCollector, ...Object.keys(block.config)];
+  //     return typesCollector;
+  //   }, []);
 
-    // If not a provided output type, fail validation
-    if (outputTypes.some((type: string) => !OutputTypesArray.includes(type))) {
-      throw new Error('Invalid output type');
-    }
-    const types = uniq(configurationBlocks.map(block => block.type));
+  //   // If not a provided output type, fail validation
+  //   if (outputTypes.some((type: string) => !OutputTypesArray.includes(type))) {
+  //     throw new Error('Invalid output type');
+  //   }
+  //   const types = uniq(configurationBlocks.map(block => block.type));
 
-    // If none of the types in the given configuration blocks are uniqueness-enforcing,
-    // we don't need to perform any further validation checks.
-    const uniquenessEnforcingTypes = intersection(types, UNIQUENESS_ENFORCING_TYPES);
-    if (uniquenessEnforcingTypes.length === 0) {
-      return true;
-    }
+  //   // If none of the types in the given configuration blocks are uniqueness-enforcing,
+  //   // we don't need to perform any further validation checks.
+  //   const uniquenessEnforcingTypes = intersection(types, UNIQUENESS_ENFORCING_TYPES);
+  //   if (uniquenessEnforcingTypes.length === 0) {
+  //     return true;
+  //   }
 
-    // Count the number of uniqueness-enforcing types in the given configuration blocks
-    const typeCountMap = configurationBlocks.reduce((map: any, block) => {
-      const { type } = block;
-      if (!uniquenessEnforcingTypes.includes(type)) {
-        return map;
-      }
+  //   // Count the number of uniqueness-enforcing types in the given configuration blocks
+  //   const typeCountMap = configurationBlocks.reduce((map: any, block) => {
+  //     const { type } = block;
+  //     if (!uniquenessEnforcingTypes.includes(type)) {
+  //       return map;
+  //     }
 
-      const count = map[type] || 0;
-      return {
-        ...map,
-        [type]: count + 1,
-      };
-    }, {});
+  //     const count = map[type] || 0;
+  //     return {
+  //       ...map,
+  //       [type]: count + 1,
+  //     };
+  //   }, {});
 
-    // If there is no more than one of any uniqueness-enforcing types in the given
-    // configuration blocks, we don't need to perform any further validation checks.
-    if (values(typeCountMap).filter(count => count > 1).length === 0) {
-      return true;
-    }
+  //   // If there is no more than one of any uniqueness-enforcing types in the given
+  //   // configuration blocks, we don't need to perform any further validation checks.
+  //   if (values(typeCountMap).filter(count => count > 1).length === 0) {
+  //     return true;
+  //   }
 
-    const message = entries(typeCountMap)
-      .filter(([, count]) => count > 1)
-      .map(
-        ([type, count]) =>
-          `Expected only one configuration block of type '${type}' but found ${count}`
-      )
-      .join(' ');
+  //   const message = entries(typeCountMap)
+  //     .filter(([, count]) => count > 1)
+  //     .map(
+  //       ([type, count]) =>
+  //         `Expected only one configuration block of type '${type}' but found ${count}`
+  //     )
+  //     .join(' ');
 
-    throw new Error(message);
-  }
+  //   throw new Error(message);
+  // }
 }

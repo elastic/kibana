@@ -43,12 +43,8 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
           })}
           path={`/beat/${beat.id}/tags`}
         />
-        <Table
-          hideTableControls={true}
-          items={beat ? beat.full_tags : []}
-          ref={this.tableRef}
-          type={BeatDetailTagsTable}
-        />
+
+        <Table hideTableControls={true} items={[]} ref={this.tableRef} type={BeatDetailTagsTable} />
 
         <EuiGlobalToastList
           toasts={this.state.notifications}

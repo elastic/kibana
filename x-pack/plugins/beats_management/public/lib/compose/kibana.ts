@@ -21,6 +21,7 @@ import { AxiosRestAPIAdapter } from '../adapters/rest_api/axios_rest_api_adapter
 import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
 import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
 import { BeatsLib } from '../beats';
+import { ConfigBlocksLib } from '../configuration_blocks';
 import { ElasticsearchLib } from '../elasticsearch';
 import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
@@ -34,11 +35,10 @@ export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
 
-  const tags = new TagsLib(new RestTagsAdapter(api), translateConfigSchema(configBlockSchemas));
+  const configBlocks = new ConfigBlocksLib(translateConfigSchema(configBlockSchemas));
+  const tags = new TagsLib(new RestTagsAdapter(api));
   const tokens = new RestTokensAdapter(api);
-  const beats = new BeatsLib(new RestBeatsAdapter(api), {
-    tags,
-  });
+  const beats = new BeatsLib(new RestBeatsAdapter(api));
 
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
@@ -58,6 +58,7 @@ export function compose(): FrontendLibs {
     tags,
     tokens,
     beats,
+    configBlocks,
   };
   return libs;
 }

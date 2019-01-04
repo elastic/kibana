@@ -66,7 +66,7 @@ export class CMTagsDomain {
       color: config.color,
       name: tagId,
       id: tagId,
-      last_updated: new Date(),
+      hasConfigurationBlocksTypes: [],
     };
     return {
       isValid: true,

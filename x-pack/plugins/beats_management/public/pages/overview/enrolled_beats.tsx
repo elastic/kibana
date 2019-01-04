@@ -16,11 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { flatten, intersection, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { EnrollBeat } from '../../components/enroll_beats';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatsTableType, Table } from '../../components/table';
@@ -328,31 +327,32 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
   };
 
   private filterTags = (tags: BeatTag[]) => {
-    return this.selectedBeatConfigsRequireUniqueness()
-      ? tags.map(this.disableTagForUniquenessEnforcement)
-      : tags;
+    return tags;
+    // return this.selectedBeatConfigsRequireUniqueness()
+    //   ? tags.map(this.disableTagForUniquenessEnforcement)
+    //   : tags;
   };
+  // TODO  the following 3 methods will be re-added in some form in a followup PR due to scope of this aspect of the change
 
-  private configBlocksRequireUniqueness = (configurationBlocks: ConfigurationBlock[]) =>
-    intersection(UNIQUENESS_ENFORCING_TYPES, configurationBlocks.map(block => block.type))
-      .length !== 0;
+  // private configBlocksRequireUniqueness = (hasConfigurationBlocksTypes: string[]) =>
+  //   intersection(UNIQUENESS_ENFORCING_TYPES, hasConfigurationBlocksTypes).length !== 0;
 
-  private disableTagForUniquenessEnforcement = (tag: BeatTag) =>
-    this.configBlocksRequireUniqueness(tag.configuration_blocks) &&
-    // if > 0 beats are associated with the tag, it will result in disassociation, so do not disable it
-    !this.getSelectedBeats().some(beat => beat.full_tags.some(({ id }) => id === tag.id))
-      ? { ...tag, disabled: true }
-      : tag;
+  // private disableTagForUniquenessEnforcement = (tag: BeatTag) =>
+  //   this.configBlocksRequireUniqueness(tag.hasConfigurationBlocksTypes) &&
+  //   // if > 0 beats are associated with the tag, it will result in disassociation, so do not disable it
+  //   !this.getSelectedBeats().some(beat => beat.tags.some(id => id === tag.id))
+  //     ? { ...tag, disabled: true }
+  //     : tag;
 
-  private selectedBeatConfigsRequireUniqueness = () =>
-    // union beat tags
-    flatten(this.getSelectedBeats().map(({ full_tags }) => full_tags))
-      // map tag list to bool
-      .map(tag => {
-        return this.configBlocksRequireUniqueness(tag ? tag.configuration_blocks : []);
-      })
-      // reduce to result
-      .reduce((acc, cur) => acc || cur, false);
+  // private selectedBeatConfigsRequireUniqueness = () =>
+  //   // union beat tags
+  //   flatten(this.getSelectedBeats().map(({ tags }) => tags))
+  //     // map tag list to bool
+  //     .map(tag => {
+  //       return this.configBlocksRequireUniqueness(tag ? tag.configuration_blocks : []);
+  //     })
+  //     // reduce to result
+  //     .reduce((acc, cur) => acc || cur, false);
 }
 
 export const BeatsPage = injectI18n(BeatsPageComponent);

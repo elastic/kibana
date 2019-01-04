@@ -35,7 +35,6 @@ export class RestTagsAdapter implements CMTagsAdapter {
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
     const response = await this.REST.put<{ success: boolean }>(`/api/beats/tag/${tag.id}`, {
       color: tag.color,
-      configuration_blocks: tag.configuration_blocks,
     });
 
     return response.success ? tag : null;

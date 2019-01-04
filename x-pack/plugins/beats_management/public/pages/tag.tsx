@@ -45,6 +45,7 @@ class TagPageComponent extends React.PureComponent<
         id: props.match.params.action === 'create' ? '' : props.match.params.tagid,
         name: '',
         color: this.rgb2hex(randomColor),
+        hasConfigurationBlocksTypes: [],
       },
       configuration_blocks: [],
     };
@@ -80,6 +81,7 @@ class TagPageComponent extends React.PureComponent<
         <div>
           <TagEdit
             tag={this.state.tag}
+            configuration_blocks={this.state.configuration_blocks}
             onDetachBeat={
               this.mode === 'edit'
                 ? async (beatIds: string[]) => {

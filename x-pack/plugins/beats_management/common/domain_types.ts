@@ -63,10 +63,11 @@ export interface CMBeat {
   last_checkin?: Date;
   event_rate?: string;
   local_configuration_yml?: string;
-  tags?: string[];
+  tags: string[];
   central_configuration_yml?: string;
   metadata?: {};
   name?: string;
+  last_updated: number;
 }
 
 export interface ConfigBlockSchema {
@@ -110,4 +111,5 @@ export interface BeatTag
     Exclude<keyof t.TypeOf<typeof RuntimeBeatTag>, 'id'>
   > {
   id: string;
+  hasConfigurationBlocksTypes: string[];
 }

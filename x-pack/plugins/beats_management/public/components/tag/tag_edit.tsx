@@ -41,7 +41,7 @@ interface TagEditProps {
 interface TagEditState {
   showFlyout: boolean;
   tableRef: any;
-  selectedConfigIndex?: number;
+  selectedConfigId?: string;
 }
 
 export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
@@ -140,17 +140,19 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
+              {'config list onConfigClick not updated in tag_edit.tsx'}
               <ConfigList
                 configs={configuration_blocks}
                 onConfigClick={(action: string, config: ConfigurationBlock) => {
                   if (action === 'delete') {
-                    const configs = [...tag.configuration_blocks];
-                    configs.splice(selectedIndex, 1);
-                    this.updateTag('configuration_blocks', configs);
+                    alert('not re-implamented yet');
+                    // const configs = [...tag.configuration_blocks];
+                    // configs.splice(selectedIndex, 1);
+                    // this.updateTag('configuration_blocks', configs);
                   } else {
                     this.setState({
                       showFlyout: true,
-                      selectedConfigIndex: selectedIndex,
+                      // selectedConfigIndex: selectedIndex,
                     });
                   }
                 }}
@@ -194,24 +196,22 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
 
         {this.state.showFlyout && (
           <ConfigView
-            configBlock={
-              this.state.selectedConfigIndex !== undefined
-                ? tag.configuration_blocks[this.state.selectedConfigIndex]
-                : undefined
-            }
-            onClose={() => this.setState({ showFlyout: false, selectedConfigIndex: undefined })}
+            configBlock={configuration_blocks.find(
+              block => block.id !== undefined && block.id === this.state.selectedConfigId
+            )}
+            onClose={() => this.setState({ showFlyout: false, selectedConfigId: undefined })}
             onSave={(config: any) => {
-              this.setState({ showFlyout: false, selectedConfigIndex: undefined });
-              if (this.state.selectedConfigIndex !== undefined) {
-                const configs = [...tag.configuration_blocks];
-                configs[this.state.selectedConfigIndex] = config;
-                this.updateTag('configuration_blocks', configs);
-              } else {
-                this.updateTag('configuration_blocks', [
-                  ...(tag.configuration_blocks || []),
-                  config,
-                ]);
-              }
+              this.setState({ showFlyout: false, selectedConfigId: undefined });
+              // if (this.state.selectedConfigIndex !== undefined) {
+              //   const configs = [...tag.configuration_blocks];
+              //   configs[this.state.selectedConfigIndex] = config;
+              //   this.updateTag('configuration_blocks', configs);
+              // } else {
+              //   this.updateTag('configuration_blocks', [
+              //     ...(tag.configuration_blocks || []),
+              //     config,
+              //   ]);
+              // }
             }}
           />
         )}
