@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { WMSSource } from '../../shared/layers/sources/wms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
+import { EMSTMSSource } from '../../shared/layers/sources/ems_tms_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
 import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
@@ -140,6 +141,19 @@ export class AddLayerPanel extends React.Component {
         ),
       },
       {
+        value: EMSTMSSource.type,
+        inputDisplay: EMSTMSSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{EMSTMSSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">Tile services hosted by EMS.</p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
         value: KibanaRegionmapSource.type,
         inputDisplay: KibanaRegionmapSource.typeDisplayName,
         dropdownDisplay: (
@@ -209,6 +223,8 @@ export class AddLayerPanel extends React.Component {
     switch(this.state.sourceType) {
       case EMSFileSource.type:
         return EMSFileSource.renderEditor(editorProperties);
+      case EMSTMSSource.type:
+        return EMSTMSSource.renderEditor(editorProperties);
       case XYZTMSSource.type:
         return XYZTMSSource.renderEditor(editorProperties);
       case ESGeohashGridSource.type:
