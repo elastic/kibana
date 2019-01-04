@@ -7,18 +7,18 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
-  // EuiLoadingKibana,
+  EuiLoadingKibana,
   EuiToolTip,
-  // EuiOverlayMask,
+  EuiOverlayMask,
 } from '@elastic/eui';
-// import { API_STATUS } from '../../../../../constants';
-import { FollowerIndexDeleteProvider } from '../../../../../components';
+import { API_STATUS } from '../../../../../constants';
+import { FollowerIndexUnfollowProvider } from '../../../../../components';
+import { ContextMenu } from '../context_menu';
 
 export const FollowerIndicesTable = injectI18n(
   class extends PureComponent {
@@ -101,9 +101,9 @@ export const FollowerIndicesTable = injectI18n(
           {
             render: ({ name }) => {
               const label = i18n.translate(
-                'xpack.crossClusterReplication.followerIndexList.table.actionDeleteDescription',
+                'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
                 {
-                  defaultMessage: 'Delete follower index',
+                  defaultMessage: 'Unfollow leader index',
                 }
               );
 
@@ -112,16 +112,16 @@ export const FollowerIndicesTable = injectI18n(
                   content={label}
                   delay="long"
                 >
-                  <FollowerIndexDeleteProvider>
-                    {(deleteFollowerIndex) => (
+                  <FollowerIndexUnfollowProvider>
+                    {(unfollowFollowerIndex) => (
                       <EuiButtonIcon
                         aria-label={label}
-                        iconType="trash"
+                        iconType="indexFlush"
                         color="danger"
-                        onClick={() => deleteFollowerIndex(name)}
+                        onClick={() => unfollowFollowerIndex(name)}
                       />
                     )}
-                  </FollowerIndexDeleteProvider>
+                  </FollowerIndexUnfollowProvider>
                 </EuiToolTip>
               );
             },
@@ -131,15 +131,15 @@ export const FollowerIndicesTable = injectI18n(
     }
 
     renderLoading = () => {
-      // const { apiStatusDelete } = this.props;
-      //
-      // if (apiStatusDelete === API_STATUS.DELETING) {
-      //   return (
-      //     <EuiOverlayMask>
-      //       <EuiLoadingKibana size="xl"/>
-      //     </EuiOverlayMask>
-      //   );
-      // }
+      const { apiStatusDelete } = this.props;
+
+      if (apiStatusDelete === API_STATUS.DELETING) {
+        return (
+          <EuiOverlayMask>
+            <EuiLoadingKibana size="xl"/>
+          </EuiOverlayMask>
+        );
+      }
       return null;
     };
 
@@ -166,23 +166,9 @@ export const FollowerIndicesTable = injectI18n(
 
       const search = {
         toolsLeft: selectedItems.length ? (
-          <FollowerIndexDeleteProvider>
-            {(deleteFollowerIndex) => (
-              <EuiButton
-                iconType="trash"
-                color="danger"
-                onClick={() => deleteFollowerIndex(selectedItems.map(({ name }) => name))}
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.deleteFollowerIndexButtonLabel"
-                  defaultMessage="Delete follower {total, plural, one {index} other {indices}}"
-                  values={{
-                    total: selectedItems.length
-                  }}
-                />
-              </EuiButton>
-            )}
-          </FollowerIndexDeleteProvider>
+          <ContextMenu
+            followerIndices={selectedItems}
+          />
         ) : undefined,
         onChange: this.onSearch,
         box: {

@@ -6,22 +6,22 @@
 
 import { connect } from 'react-redux';
 
-// import { SECTIONS } from '../../../../../constants';
+import { SECTIONS } from '../../../../../constants';
 import { selectDetailFollowerIndex } from '../../../../../store/actions';
-// import { getApiStatus } from '../../../../../store/selectors';
+import { getApiStatus } from '../../../../../store/selectors';
 import { FollowerIndicesTable as FollowerIndicesTableComponent } from './follower_indices_table';
 
-// const scope = SECTIONS.FOLLOWER_INDEX;
-//
-// const mapStateToProps = (state) => ({
-//   // apiStatusDelete: getApiStatus(`${scope}-delete`)(state),
-// });
+const scope = SECTIONS.FOLLOWER_INDEX;
+
+const mapStateToProps = (state) => ({
+  apiStatusDelete: getApiStatus(`${scope}-delete`)(state),
+});
 //
 const mapDispatchToProps = (dispatch) => ({
   selectFollowerIndex: (name) => dispatch(selectDetailFollowerIndex(name)),
 });
 
 export const FollowerIndicesTable = connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps,
 )(FollowerIndicesTableComponent);

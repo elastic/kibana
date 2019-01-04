@@ -151,11 +151,36 @@ describe('[CCR API Routes] Follower Index', () => {
       routeHandler = routeHandlers.pause;
     });
 
-    it('should return 200 status when follower index is paused', async () => {
+    it('should pause a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 1 } });
-      expect(response).toEqual({ acknowledge: true });
+      const response = await routeHandler({ params: { id: '1' } });
+
+      expect(response.itemsPaused).toEqual(['1']);
+      expect(response.errors).toEqual([]);
+    });
+
+    it('should accept a list of ids to pause', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: '1,2,3' } });
+
+      expect(response.itemsPaused).toEqual(['1', '2', '3']);
+    });
+
+    it('should catch error and return them in array', async () => {
+      const error = new Error('something went wrong');
+      error.response = '{ "error": {} }';
+
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(error);
+
+      const response = await routeHandler({ params: { id: '1,2' } });
+
+      expect(response.itemsPaused).toEqual(['1']);
+      expect(response.errors[0].id).toEqual('2');
     });
   });
 
@@ -165,11 +190,36 @@ describe('[CCR API Routes] Follower Index', () => {
       routeHandler = routeHandlers.resume;
     });
 
-    it('should return 200 status when follower index is resumed', async () => {
+    it('should resume a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 1 } });
-      expect(response).toEqual({ acknowledge: true });
+      const response = await routeHandler({ params: { id: '1' } });
+
+      expect(response.itemsResumed).toEqual(['1']);
+      expect(response.errors).toEqual([]);
+    });
+
+    it('should accept a list of ids to resume', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: '1,2,3' } });
+
+      expect(response.itemsResumed).toEqual(['1', '2', '3']);
+    });
+
+    it('should catch error and return them in array', async () => {
+      const error = new Error('something went wrong');
+      error.response = '{ "error": {} }';
+
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(error);
+
+      const response = await routeHandler({ params: { id: '1,2' } });
+
+      expect(response.itemsResumed).toEqual(['1']);
+      expect(response.errors[0].id).toEqual('2');
     });
   });
 
@@ -179,11 +229,36 @@ describe('[CCR API Routes] Follower Index', () => {
       routeHandler = routeHandlers.unfollow;
     });
 
-    it('should return 200 status when follower index unfollows its leader', async () => {
+    it('should unfollow a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 1 } });
-      expect(response).toEqual({ acknowledge: true });
+      const response = await routeHandler({ params: { id: '1' } });
+
+      expect(response.itemsUnfollowed).toEqual(['1']);
+      expect(response.errors).toEqual([]);
+    });
+
+    it('should accept a list of ids to unfollow', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: '1,2,3' } });
+
+      expect(response.itemsUnfollowed).toEqual(['1', '2', '3']);
+    });
+
+    it('should catch error and return them in array', async () => {
+      const error = new Error('something went wrong');
+      error.response = '{ "error": {} }';
+
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(error);
+
+      const response = await routeHandler({ params: { id: '1,2' } });
+
+      expect(response.itemsUnfollowed).toEqual(['1']);
+      expect(response.errors[0].id).toEqual('2');
     });
   });
 });

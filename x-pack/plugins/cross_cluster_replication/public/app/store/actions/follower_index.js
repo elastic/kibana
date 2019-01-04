@@ -178,8 +178,8 @@ export const resumeFollowerIndex = (id) => (
 export const unfollowFollowerIndex = (id) => (
   sendApiRequest({
     label: t.FOLLOWER_INDEX_UNFOLLOW,
-    status: API_STATUS.SAVING,
-    scope,
+    status: API_STATUS.DELETING,
+    scope: `${scope}-delete`,
     handler: async () => (
       unfollowFollowerIndexRequest(id)
     ),
