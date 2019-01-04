@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { EuiBasicTable } from '@elastic/eui';
 import { get, sortByOrder } from 'lodash';
 import React, { Component } from 'react';
