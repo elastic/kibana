@@ -23,11 +23,17 @@ import { initializeInterpreter as initialize } from '@kbn/interpreter/public';
 let _resolve;
 const interpreterPromise = new Promise(resolve => { _resolve = resolve; });
 let interpreter;
+let _socket;
 
 export const initializeInterpreter = async (socket, typesRegistry, functionsRegistry) => {
+  _socket = socket;
   interpreter = await initialize(socket, typesRegistry, functionsRegistry);
   _resolve(interpreter);
   return interpreter;
+};
+
+export const updateInterpreterFunctions = async () => {
+  _socket.emit('updateFunctionList');
 };
 
 export const getInitializedFunctions = async () => {

@@ -23,8 +23,8 @@ export const routeExpressionProvider = environments => {
   async function routeExpression(ast, context = null) {
     // List of environments in order of preference
 
-    return Promise.all(environments).then(environments => {
-      const environmentFunctions = environments.map(env => env.getFunctions());
+    return Promise.all(environments).then(async environments => {
+      const environmentFunctions = await Promise.all(environments.map(env => env.getFunctions()));
 
       // Grab name of the first function in the chain
       const fnName = ast.chain[0].function.toLowerCase();
