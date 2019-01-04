@@ -34,6 +34,8 @@ export enum PRIVILEGE_SOURCE {
 
 export interface ExplanationResult {
   privilege: string;
+  supercededPrivilege?: string;
+  overrideSource?: string;
   source: PRIVILEGE_SOURCE;
   details: string;
 }
@@ -117,7 +119,10 @@ export class EffectivePrivileges {
    * @param featureId
    * @param spacesIndex
    */
-  public explainActualSpaceFeaturePrivilege(featureId: string, spacesIndex: number) {
+  public explainActualSpaceFeaturePrivilege(
+    featureId: string,
+    spacesIndex: number
+  ): ExplanationResult {
     const { feature = {} as FeaturePrivilegeSet } = this.role.kibana.spaces[spacesIndex] || {};
     const assignedFeaturePrivilege = feature[featureId]
       ? feature[featureId][0] || NO_PRIVILEGE_VALUE
@@ -181,6 +186,8 @@ export class EffectivePrivileges {
 
     return {
       privilege: winningScenario.privilege,
+      supercededPrivilege: hasAssignedFeaturePrivilege ? assignedFeaturePrivilege : undefined,
+      overrideSource: hasAssignedFeaturePrivilege ? winningScenario.scenario.name : undefined,
       source: hasAssignedFeaturePrivilege
         ? PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED
         : PRIVILEGE_SOURCE.EFFECTIVE,
@@ -234,6 +241,8 @@ export class EffectivePrivileges {
 
     return {
       privilege: globalBasePrivilege[0],
+      supercededPrivilege: minimum[0],
+      overrideSource: 'global base privilege',
       source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
       details: allowsAssigned.details,
     };
@@ -296,6 +305,23 @@ export class EffectivePrivileges {
   }
 
   private validateSpaceBasePrivilege(basePrivilege: string): PrivilegeValidationResponse {
+    const globalBase = this.globalPrivilege.minimum[0] || NO_PRIVILEGE_VALUE;
+    if (globalBase === NO_PRIVILEGE_VALUE) {
+      // nothing to do
+      return {
+        allowed: true,
+        details: `Global mimimum privilege not set.`,
+      };
+    }
+
+    if (globalBase === basePrivilege) {
+      // privileges match, this is allowed
+      return {
+        allowed: true,
+        details: `Global mimimum privilege matches space base privilege.`,
+      };
+    }
+
     const baseActions = [
       ...this.privilegeDefinition.getSpacesPrivileges().getActions(basePrivilege),
     ];
@@ -303,17 +329,13 @@ export class EffectivePrivileges {
     if (areActionsFullyCovered(this.assignedGlobalBaseActions, baseActions)) {
       return {
         allowed: false,
-        details: `Global mimimum privilege (${
-          this.globalPrivilege.minimum[0]
-        }) already grants all actions required by space:${basePrivilege}`,
+        details: `Global mimimum privilege (${globalBase}) already grants all actions required by space:${basePrivilege}`,
       };
     }
 
     return {
       allowed: true,
-      details: `Global mimimum privilege (${
-        this.globalPrivilege.minimum[0]
-      }) does not grant all actions required by space:${basePrivilege}`,
+      details: `Global mimimum privilege (${globalBase}) does not grant all actions required by space:${basePrivilege}`,
     };
   }
 

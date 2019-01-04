@@ -22,13 +22,13 @@ import {
   // @ts-ignore
   EuiToolTip,
 } from '@elastic/eui';
-import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges';
+import { EffectivePrivileges, PRIVILEGE_SOURCE } from 'plugins/security/lib/effective_privileges';
 import React, { Component, Fragment } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
-import { PrivilegeDisplay } from './privilege_display';
+import { PrivilegeDisplay, SupercededPrivilegeDisplay } from './privilege_display';
 
 interface Props {
   role: Role;
@@ -189,19 +189,39 @@ export class PrivilegeMatrix extends Component<Props, State> {
               // not global
 
               if (feature.isBase) {
-                const actualBasePrivileges = this.props.effectivePrivileges.getActualSpaceBasePrivilege(
+                const actualBasePrivileges = this.props.effectivePrivileges.explainActualSpaceBasePrivilege(
                   item.spacesIndex
                 );
 
-                return <PrivilegeDisplay privilege={actualBasePrivileges} />;
+                if (actualBasePrivileges.source === PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED) {
+                  return (
+                    <SupercededPrivilegeDisplay
+                      privilege={actualBasePrivileges.privilege}
+                      supercededPrivilege={actualBasePrivileges.supercededPrivilege}
+                      overrideSource={actualBasePrivileges.overrideSource}
+                    />
+                  );
+                }
+
+                return <PrivilegeDisplay privilege={actualBasePrivileges.privilege} />;
               }
 
-              const actualPrivileges = this.props.effectivePrivileges.getActualSpaceFeaturePrivilege(
+              const actualPrivileges = this.props.effectivePrivileges.explainActualSpaceFeaturePrivilege(
                 feature.id,
                 item.spacesIndex
               );
 
-              return <PrivilegeDisplay privilege={actualPrivileges} />;
+              if (actualPrivileges.source === PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED) {
+                return (
+                  <SupercededPrivilegeDisplay
+                    privilege={actualPrivileges.privilege}
+                    supercededPrivilege={actualPrivileges.supercededPrivilege}
+                    overrideSource={actualPrivileges.overrideSource}
+                  />
+                );
+              }
+
+              return <PrivilegeDisplay privilege={actualPrivileges.privilege} />;
             }
           },
         };

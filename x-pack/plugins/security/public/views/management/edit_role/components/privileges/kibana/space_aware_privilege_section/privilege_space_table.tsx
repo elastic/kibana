@@ -23,7 +23,7 @@ import {
   PRIVILEGE_SOURCE,
 } from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
-import { PrivilegeDisplay } from './privilege_display';
+import { PrivilegeDisplay, SupercededPrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -153,8 +153,10 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
               );
             case PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED:
               return (
-                <PrivilegeDisplay
-                  privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
+                <SupercededPrivilegeDisplay
+                  privilege={actualPrivilege.privilege}
+                  supercededPrivilege={actualPrivilege.supercededPrivilege}
+                  overrideSource={actualPrivilege.overrideSource}
                 />
               );
             default:
