@@ -74,17 +74,20 @@ export const createFollowerIndex = (followerIndex) => (
   httpClient.post(`${apiPrefix}/follower_indices`, followerIndex).then(extractData)
 );
 
-export const pauseFollowerIndex = (id) => (
-  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}/pause`).then(extractData)
-);
+export const pauseFollowerIndex = (id) => {
+  const ids = arrify(id).map(_id => encodeURIComponent(_id)).join(',');
+  return httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(ids)}/pause`).then(extractData);
+};
 
-export const resumeFollowerIndex = (id) => (
-  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}/resume`).then(extractData)
-);
+export const resumeFollowerIndex = (id) => {
+  const ids = arrify(id).map(_id => encodeURIComponent(_id)).join(',');
+  return httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(ids)}/resume`).then(extractData);
+};
 
-export const unfollowFollowerIndex = (id) => (
-  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}/unfollow`).then(extractData)
-);
+export const unfollowFollowerIndex = (id) => {
+  const ids = arrify(id).map(_id => encodeURIComponent(_id)).join(',');
+  return httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(ids)}/unfollow`).then(extractData);
+};
 
 /* Stats */
 export const loadAutoFollowStats = () => (

@@ -104,9 +104,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ccr.pauseFollowerIndex = ca({
     urls: [
       {
-        fmt: '/<%=name%>/_ccr/pause_follow',
+        fmt: '/<%=id%>/_ccr/pause_follow',
         req: {
-          name: {
+          id: {
             type: 'string'
           }
         }
@@ -118,9 +118,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ccr.resumeFollowerIndex = ca({
     urls: [
       {
-        fmt: '/<%=name%>/_ccr/resume_follow',
+        fmt: '/<%=id%>/_ccr/resume_follow',
         req: {
-          name: {
+          id: {
             type: 'string'
           }
         }
@@ -133,9 +133,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ccr.unfollowFollowerIndex = ca({
     urls: [
       {
-        fmt: '/<%=name%>/_ccr/unfollow',
+        fmt: '/<%=id%>/_ccr/unfollow',
         req: {
-          name: {
+          id: {
             type: 'string'
           }
         }

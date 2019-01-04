@@ -112,15 +112,27 @@ export const registerFollowerIndexRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
+      const ids = id.split(',');
 
-      try {
-        return await callWithRequest('ccr.pauseFollowerIndex', { id });
-      } catch(err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-        throw wrapUnknownError(err);
-      }
+      const itemsPaused = [];
+      const errors = [];
+
+      await Promise.all(ids.map((_id) => (
+        callWithRequest('ccr.pauseFollowerIndex', { id: _id })
+          .then(() => itemsPaused.push(_id))
+          .catch(err => {
+            if (isEsError(err)) {
+              errors.push({ id: _id, error: wrapEsError(err) });
+            } else {
+              errors.push({ id: _id, error: wrapUnknownError(err) });
+            }
+          })
+      )));
+
+      return {
+        itemsPaused,
+        errors
+      };
     },
   });
 
@@ -136,16 +148,28 @@ export const registerFollowerIndexRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
+      const ids = id.split(',');
 
-      try {
+      const itemsResumed = [];
+      const errors = [];
+
+      await Promise.all(ids.map((_id) => (
         // TODO: Remove empty body when fixed in ES: https://github.com/elastic/elasticsearch/issues/37022
-        return await callWithRequest('ccr.resumeFollowerIndex', { id, body: {} });
-      } catch(err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-        throw wrapUnknownError(err);
-      }
+        callWithRequest('ccr.resumeFollowerIndex', { id: _id, body: {} })
+          .then(() => itemsResumed.push(_id))
+          .catch(err => {
+            if (isEsError(err)) {
+              errors.push({ id: _id, error: wrapEsError(err) });
+            } else {
+              errors.push({ id: _id, error: wrapUnknownError(err) });
+            }
+          })
+      )));
+
+      return {
+        itemsResumed,
+        errors
+      };
     },
   });
 
@@ -159,17 +183,30 @@ export const registerFollowerIndexRoutes = (server) => {
       pre: [ licensePreRouting ]
     },
     handler: async (request) => {
+
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
+      const ids = id.split(',');
 
-      try {
-        return await callWithRequest('ccr.unfollowFollowerIndex', { id });
-      } catch(err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-        throw wrapUnknownError(err);
-      }
+      const itemsUnfollowed = [];
+      const errors = [];
+
+      await Promise.all(ids.map((_id) => (
+        callWithRequest('ccr.unfollowFollowerIndex', { id: _id })
+          .then(() => itemsUnfollowed.push(_id))
+          .catch(err => {
+            if (isEsError(err)) {
+              errors.push({ id: _id, error: wrapEsError(err) });
+            } else {
+              errors.push({ id: _id, error: wrapUnknownError(err) });
+            }
+          })
+      )));
+
+      return {
+        itemsUnfollowed,
+        errors
+      };
     },
   });
 };
