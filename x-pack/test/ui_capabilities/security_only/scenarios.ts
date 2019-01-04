@@ -354,6 +354,25 @@ const GisAll: GisAll = {
   },
 };
 
+interface GisRead extends User {
+  username: 'gis_read';
+}
+const GisRead: GisRead = {
+  username: 'gis_read',
+  fullName: 'gis_read',
+  password: 'gis_read-password',
+  role: {
+    name: 'gis_read_role',
+    kibana: {
+      global: {
+        feature: {
+          gis: ['read'],
+        },
+      },
+    },
+  },
+};
+
 interface InfrastructureAll extends User {
   username: 'infrastructure_all';
 }
@@ -525,6 +544,7 @@ export type UserScenarios =
   | GraphAll
   | GraphRead
   | GisAll
+  | GisRead
   | InfrastructureAll
   | LogsAll
   | MonitoringAll
@@ -552,6 +572,7 @@ export const UserScenarios: UserScenarios[] = [
   GraphAll,
   GraphRead,
   GisAll,
+  GisRead,
   InfrastructureAll,
   LogsAll,
   MonitoringAll,

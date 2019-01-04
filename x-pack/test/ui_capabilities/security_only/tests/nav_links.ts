@@ -81,6 +81,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             );
             break;
           case 'gis_all':
+          case 'gis_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
