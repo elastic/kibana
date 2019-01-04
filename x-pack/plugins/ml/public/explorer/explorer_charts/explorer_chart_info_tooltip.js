@@ -87,7 +87,7 @@ export const ExplorerChartInfoTooltip = injectI18n(function ExplorerChartInfoToo
     </div>
   );
 });
-ExplorerChartInfoTooltip.propTypes = {
+ExplorerChartInfoTooltip.WrappedComponent.propTypes = {
   jobId: PropTypes.string.isRequired,
   aggregationInterval: PropTypes.string,
   chartFunction: PropTypes.string,

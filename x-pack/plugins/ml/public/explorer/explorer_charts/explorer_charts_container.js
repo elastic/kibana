@@ -75,7 +75,7 @@ function ExplorerChartContainer({
             defaultMessage="{detectorLabel}{br}y-axis event distribution split by &quot;{fieldName}&quot;"
             values={{
               detectorLabel,
-              br: '<br />',
+              br: <br />,
               fieldName: byField.fieldName
             }}
           />
