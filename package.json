@@ -34,6 +34,7 @@
   },
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
+    "ci": "grunt jenkins:unit",
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
     "es": "node scripts/es",
