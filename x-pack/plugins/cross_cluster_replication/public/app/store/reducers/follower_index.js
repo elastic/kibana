@@ -32,6 +32,12 @@ export const reducer = (state = initialState, action) => {
     case t.FOLLOWER_INDEX_SELECT_DETAIL: {
       return { ...state, selectedDetailId: action.payload };
     }
+    case success(t.FOLLOWER_INDEX_UNFOLLOW): {
+      const byId = { ...state.byId };
+      const { itemsUnfollowed } = action.payload;
+      itemsUnfollowed.forEach(id => delete byId[id]);
+      return { ...state, byId };
+    }
     default:
       return state;
   }

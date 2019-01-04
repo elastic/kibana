@@ -117,6 +117,9 @@ export const pauseFollowerIndex = (id) => (
         if (response.itemsPaused.includes(followerIndexId)) {
           dispatch(selectDetailFollowerIndex(null));
         }
+
+        // Refresh list
+        dispatch(loadFollowerIndices(true));
       }
     }
   })
@@ -130,7 +133,7 @@ export const resumeFollowerIndex = (id) => (
     handler: async () => (
       resumeFollowerIndexRequest(id)
     ),
-    onSuccess(response) {
+    onSuccess(response, dispatch) {
       /**
        * We can have 1 or more follower index resume operation
        * that can fail or succeed. We will show 1 toast notification for each.
@@ -165,6 +168,9 @@ export const resumeFollowerIndex = (id) => (
 
         toastNotifications.addSuccess(successMessage);
       }
+
+      // Refresh list
+      dispatch(loadFollowerIndices(true));
     }
   })
 );
