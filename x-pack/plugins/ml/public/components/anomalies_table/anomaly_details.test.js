@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { AnomalyDetails } from './anomaly_details';
 
 const props = {
@@ -67,7 +67,7 @@ const props = {
 
 describe('AnomalyDetails', () => {
   test('Renders correctly', () => {
-    const wrapper = mount(
+    const wrapper = shallow(
       <AnomalyDetails {...props} />
     );
 
