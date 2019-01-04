@@ -92,11 +92,11 @@ export function timeBasedIndexCheck(indexPattern, showNotification = false) {
   if (indexPattern.isTimeBased() === false) {
     if (showNotification) {
       toastNotifications.addWarning({
-        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationMessageTitle', {
+        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
           defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
           values: { indexPatternTitle: indexPattern.title }
         }),
-        text: i18n.translate('xpack.ml.anomalyDetectionOnlyRunsOverTimeBasedIndicesNotificationMessageText', {
+        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
           defaultMessage: 'Anomaly detection only runs over time-based indices'
         }),
       });
