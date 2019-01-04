@@ -8,7 +8,7 @@ import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import { getLabelOfTextScale, isTextScale, TextScale } from '../../../common/log_text_scale';
+import { isTextScale, TextScale } from '../../../common/log_text_scale';
 
 interface LogTextScaleControlsProps {
   availableTextScales: TextScale[];
@@ -45,5 +45,31 @@ export class LogTextScaleControls extends React.PureComponent<LogTextScaleContro
         />
       </EuiFormRow>
     );
+  }
+}
+
+function getLabelOfTextScale(textScale: TextScale) {
+  switch (textScale) {
+    case 'small':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.customizeLogs.testSizeSmall"
+          defaultMessage="Small"
+        />
+      );
+    case 'medium':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.customizeLogs.testSizeMedium"
+          defaultMessage="Medium"
+        />
+      );
+    case 'large':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.customizeLogs.testSizeLarge"
+          defaultMessage="Large"
+        />
+      );
   }
 }
