@@ -26,7 +26,7 @@ export const TYPESCRIPT: LanguageServerDefinition = {
   launcher: TypescriptServerLauncher,
   installationType: InstallationType.Embed,
   embedPath: path.join(
-    path.dirname(require.resolve('elastic-javascript-typescript-langserver/package.json')),
+    path.dirname(require.resolve('@elastic/javascript-typescript-langserver/package.json')),
     'lib/language-server.js'
   ),
 };

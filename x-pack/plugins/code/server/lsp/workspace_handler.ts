@@ -13,8 +13,7 @@ import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
-import { Full } from 'elastic-lsp-extension';
-import { DetailSymbolInformation } from 'elastic-lsp-extension';
+import { DetailSymbolInformation, Full } from '@elastic/lsp-extension';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
