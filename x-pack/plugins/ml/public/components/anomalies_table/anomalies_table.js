@@ -70,6 +70,7 @@ function showLinksMenuForItem(item) {
 
 function getColumns(
   items,
+  jobIds,
   examplesByJobId,
   isAggregatedData,
   interval,
@@ -203,7 +204,7 @@ function getColumns(
     }
   }
 
-  if (examplesByJobId && Object.keys(examplesByJobId).length > 1) {
+  if (jobIds && jobIds.length > 1) {
     columns.push({
       field: 'jobId',
       name: 'job ID',
@@ -378,6 +379,7 @@ class AnomaliesTable extends Component {
 
     const columns = getColumns(
       tableData.anomalies,
+      tableData.jobIds,
       tableData.examplesByJobId,
       this.isShowingAggregatedData(),
       tableData.interval,
