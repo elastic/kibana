@@ -89,7 +89,7 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
-    const auditMessages = await getAuditMessagesSummary();
+    const auditMessages = await getAuditMessagesSummary(fullJobsList.length);
     const auditMessagesByJob = auditMessages.reduce((p, c) => {
       p[c.job_id] = c;
       return p;
@@ -110,6 +110,7 @@ export function jobsProvider(callWithRequest) {
         jobState: job.state,
         hasDatafeed,
         datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
+        datafeedIndices: (hasDatafeed && job.datafeed_config.indices) ? job.datafeed_config.indices : [],
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
         latestTimestampMs,
         earliestTimestampMs,

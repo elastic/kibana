@@ -33,7 +33,9 @@ export const timefilter = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args.from && !args.to) return context;
+    if (!args.from && !args.to) {
+      return context;
+    }
 
     const { from, to, column } = args;
     const filter = {
@@ -42,16 +44,24 @@ export const timefilter = () => ({
     };
 
     function parseAndValidate(str) {
-      if (!str) return;
+      if (!str) {
+        return;
+      }
 
       const moment = dateMath.parse(str);
-      if (!moment || !moment.isValid()) throw new Error(`Invalid date/time string ${str}`);
+      if (!moment || !moment.isValid()) {
+        throw new Error(`Invalid date/time string ${str}`);
+      }
       return moment.toISOString();
     }
 
-    if (to != null) filter.to = parseAndValidate(to);
+    if (to != null) {
+      filter.to = parseAndValidate(to);
+    }
 
-    if (from != null) filter.from = parseAndValidate(from);
+    if (from != null) {
+      filter.from = parseAndValidate(from);
+    }
 
     return { ...context, and: [...context.and, filter] };
   },

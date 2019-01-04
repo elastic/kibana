@@ -58,12 +58,12 @@
     ng-click="finder.sortHits(finder.hits)"
     aria-live="assertive"
   >
-    <span class="kuiScreenReaderOnly">Sort by</span>
+    <span class="euiScreenReaderOnly">Sort by</span>
     Name
     <span
       class="fa"
       ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-      <span class="kuiScreenReaderOnly">({{finder.isAscending ? 'ascending' : 'descending'}})</span>
+      <span class="euiScreenReaderOnly">({{finder.isAscending ? 'ascending' : 'descending'}})</span>
     </span>
   </button>
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">

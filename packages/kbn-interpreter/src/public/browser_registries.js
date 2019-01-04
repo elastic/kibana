@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import $script from 'scriptjs';
 
 let resolvePromise = null;
@@ -43,6 +44,7 @@ const loadBrowserRegistries = (registries, basePath) => {
       const type = remainingTypes.pop();
       window.canvas = window.canvas || {};
       window.canvas.register = d => registries[type].register(d);
+      window.canvas.i18n = i18n;
 
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?

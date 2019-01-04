@@ -56,11 +56,9 @@ export class VisualizeEmbeddable extends Embeddable {
     loader,
   }: VisualizeEmbeddableConfiguration) {
     super({
-      metadata: {
-        title: savedVisualization.title,
-        editUrl,
-        indexPattern: savedVisualization.vis.indexPattern,
-      },
+      title: savedVisualization.title,
+      editUrl,
+      indexPattern: savedVisualization.vis.indexPattern,
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedVisualization = savedVisualization;
@@ -189,6 +187,12 @@ export class VisualizeEmbeddable extends Embeddable {
     if (this.handler) {
       this.handler.destroy();
       this.handler.getElement().remove();
+    }
+  }
+
+  public reload() {
+    if (this.handler) {
+      this.handler.reload();
     }
   }
 
