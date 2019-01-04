@@ -142,7 +142,7 @@ export class WorkpadLoader extends React.PureComponent {
             <EuiFlexItem grow={false}>
               <EuiToolTip content="Download">
                 <EuiButtonIcon
-                  iconType="sortDown"
+                  iconType="exportAction"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
                   aria-label="Download Workpad"
                 />
