@@ -6,6 +6,19 @@
 
 import { EuiPage } from '@elastic/eui';
 import styled from 'styled-components';
+import { injectGlobal } from 'styled-components';
+
+// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
+// tslint:disable-next-line:no-unused-expression
+injectGlobal`
+  div.app-wrapper {
+    background-color: rgba(0,0,0,0);
+  }
+
+  div.application {
+    background-color: rgba(0,0,0,0);
+  }
+`;
 
 export const PageContainer = styled.div`
   display: flex;
