@@ -95,7 +95,7 @@ const DEFAULT_LANGUAGE = 'en';
 
 export class EMSClientV66 {
 
-  EMS_LOAD_TIMEOUT = 8000;
+  EMS_LOAD_TIMEOUT = 32000;
 
   constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language, landingPageUrl }) {
 
