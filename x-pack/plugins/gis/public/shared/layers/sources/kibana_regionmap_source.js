@@ -18,9 +18,9 @@ export class KibanaRegionmapSource extends VectorSource {
   static type = 'REGIONMAP_FILE';
   static typeDisplayName = 'Custom region boundaries';
 
-  constructor(descriptor, regionList) {
+  constructor(descriptor, { ymlFileLayers }) {
     super(descriptor);
-    this._regionList = regionList;
+    this._regionList = ymlFileLayers;
   }
 
   static createDescriptor(name) {

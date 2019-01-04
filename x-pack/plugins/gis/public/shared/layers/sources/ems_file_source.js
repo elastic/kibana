@@ -66,9 +66,9 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  constructor(descriptor, emsFiles) {
+  constructor(descriptor, { emsFileLayers }) {
     super(descriptor);
-    this._emsFiles = emsFiles;
+    this._emsFiles = emsFileLayers;
   }
 
   async getGeoJsonWithMeta() {

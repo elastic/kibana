@@ -64,9 +64,9 @@ export class EMSTMSSource extends TMSSource {
     );
   }
 
-  constructor(descriptor, emsTileServices) {
+  constructor(descriptor, { emsTmsServices }) {
     super(descriptor);
-    this._emsTileServices = emsTileServices;
+    this._emsTileServices = emsTmsServices;
   }
 
   renderDetails() {
