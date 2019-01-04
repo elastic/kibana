@@ -10,10 +10,7 @@
     state="appState">
   </filter-bar>
 
-  <ml-loading-indicator
-    label="{{ ::'xpack.ml.explorer.loadingLabel' | i18n: {defaultMessage: 'Loading'} }}"
-    is-loading="loading === true"
-  />
+  <ml-explorer-react-wrapper />
 
   <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
     <div class="no-results euiText">
