@@ -16,7 +16,7 @@ export async function getServerStatus({ setup }) {
         bool: {
           filter: {
             exists: {
-              field: 'listening'
+              field: 'observer.listening'
             }
           }
         }

@@ -6,11 +6,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PROPERTY_CONFIG = [
+export interface TabWithKey {
+  key: string;
+  label: string;
+  required: boolean;
+  presortedKeys: string[];
+}
+
+export interface Tab {
+  key: string;
+  label: string;
+}
+
+export const PROPERTY_CONFIG: TabWithKey[] = [
   {
-    key: 'request',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.requestLabel', {
-      defaultMessage: 'Request'
+    key: 'url',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.urlLabel', {
+      defaultMessage: 'Url'
     }),
     required: false,
     presortedKeys: [
@@ -23,9 +35,9 @@ export const PROPERTY_CONFIG = [
     ]
   },
   {
-    key: 'response',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.responseLabel', {
-      defaultMessage: 'Response'
+    key: 'http',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.httpLabel', {
+      defaultMessage: 'HTTP'
     }),
     required: false,
     presortedKeys: ['status_code', 'headers', 'headers_sent', 'finished']
