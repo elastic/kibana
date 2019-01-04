@@ -84,11 +84,26 @@ export class TaskManager {
     this.store = store;
     this.poller = poller;
 
-    kbnServer.afterPluginsInit(async () => {
-      this.isInitialized = true;
+    kbnServer.afterPluginsInit(() => {
       store.addSupportedTypes(Object.keys(this.definitions));
-      await store.init();
-      await poller.start();
+
+      const startStoreAndPoller = async () => {
+        try {
+          if (!this.isInitialized) {
+            await store.init();
+            await poller.start();
+            this.isInitialized = true;
+          }
+        } catch (err) {
+          this.isInitialized = false;
+          logger.warning(err.message);
+          // rety again to initialize store and poller, using the timing of
+          // task_manager's configurable poll interval
+          const retryInterval = config.get('xpack.task_manager.poll_interval');
+          setTimeout(() => startStoreAndPoller(), retryInterval);
+        }
+      };
+      startStoreAndPoller();
     });
   }
 
