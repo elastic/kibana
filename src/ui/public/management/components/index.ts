@@ -17,29 +17,4 @@
  * under the License.
  */
 
-import { callWithRequestFactory } from './call_with_request_factory';
-import handleEsError from '../../../lib/handle_es_error';
-
-async function fetchRemoteClusters(callWithRequest) {
-  const options = {
-    method: 'GET',
-    path: '_remote/info'
-  };
-  const remoteInfo = await callWithRequest('transport.request', options);
-  return Object.keys(remoteInfo);
-}
-
-export function registerClustersRoute(server) {
-  server.route({
-    path: '/api/kibana/clusters',
-    method: 'GET',
-    handler: async request => {
-      const callWithRequest = callWithRequestFactory(server, request);
-      try {
-        return await fetchRemoteClusters(callWithRequest);
-      } catch (error) {
-        throw handleEsError(error);
-      }
-    }
-  });
-}
+export { SidebarNav } from './sidebar_nav';
