@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DetailSymbolInformation } from 'elastic-lsp-extension';
+import { DetailSymbolInformation } from '@elastic/lsp-extension';
 import { kfetch } from 'ui/kfetch';
 import { Location } from 'vscode-languageserver';
 

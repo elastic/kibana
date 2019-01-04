@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DetailSymbolInformation } from 'elastic-lsp-extension';
+import { DetailSymbolInformation } from '@elastic/lsp-extension';
 import { IRange } from 'monaco-editor';
 
 import { Repository, SourceHit } from '../model';

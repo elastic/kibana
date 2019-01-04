@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SymbolLocator } from 'elastic-lsp-extension';
+import { SymbolLocator } from '@elastic/lsp-extension';
 import { editor, languages } from 'monaco-editor';
 import { Location } from 'vscode-languageserver-types';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
