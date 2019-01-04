@@ -5,7 +5,12 @@
  */
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
+import {
+  CloneProgress,
+  CloneWorkerProgress,
+  CloneWorkerResult,
+  WorkerReservedProgress,
+} from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
@@ -44,7 +49,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     try {
       return await this.objectClient.updateRepositoryGitStatus(repoUri, {
         revision,
-        progress: 100,
+        progress: WorkerReservedProgress.COMPLETED,
         cloneProgress: {
           isCloned: true,
         },

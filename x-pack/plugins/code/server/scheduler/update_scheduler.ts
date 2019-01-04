@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Repository } from '../../model';
+import { Repository, WorkerReservedProgress } from '../../model';
 import {
   RepositoryIndexName,
   RepositoryReservedField,
@@ -52,7 +52,7 @@ export class UpdateScheduler extends AbstractScheduler {
       if (
         cloneStatus.cloneProgress &&
         cloneStatus.cloneProgress.isCloned &&
-        cloneStatus.progress === 100
+        cloneStatus.progress === WorkerReservedProgress.COMPLETED
       ) {
         const payload = {
           uri: repo.uri,

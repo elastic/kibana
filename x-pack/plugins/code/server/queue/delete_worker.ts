@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 
-import { RepositoryUri } from '../../model';
+import { RepositoryUri, WorkerReservedProgress } from '../../model';
 import { WorkerProgress, WorkerResult } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { EsClient, Esqueue } from '../lib/esqueue';
@@ -40,7 +40,7 @@ export class DeleteWorker extends AbstractWorker {
     const { uri, dataPath } = job.payload;
 
     // 1. Notify repo delete start through websocket.
-    this.socketService.broadcastDeleteProgress(uri, 0);
+    this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.INIT);
 
     // 2. Cancel running workers
     // TODO: Add support for clone/update worker.
@@ -63,7 +63,11 @@ export class DeleteWorker extends AbstractWorker {
       uri
     );
 
-    const deleteWorkspacePromise = this.lspService.deleteWorkspace(uri);
+    const deleteWorkspacePromise = this.deletePromiseWrapper(
+      this.lspService.deleteWorkspace(uri),
+      'workspace',
+      uri
+    );
 
     try {
       await Promise.all([
@@ -74,7 +78,7 @@ export class DeleteWorker extends AbstractWorker {
       ]);
 
       // 5. Notify repo delete end through websocket.
-      this.socketService.broadcastDeleteProgress(uri, 100);
+      this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.COMPLETED);
 
       // 6. Delete the document index and alias where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are
@@ -93,7 +97,7 @@ export class DeleteWorker extends AbstractWorker {
       this.log.error(`Delete repository ${uri} error.`);
       this.log.error(error);
       // Notify repo delete failed through websocket.
-      this.socketService.broadcastDeleteProgress(uri, -100);
+      this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.ERROR);
       return {
         uri,
         res: false,
@@ -105,7 +109,7 @@ export class DeleteWorker extends AbstractWorker {
     const repoUri = job.payload.uri;
     const progress: WorkerProgress = {
       uri: repoUri,
-      progress: 0,
+      progress: WorkerReservedProgress.INIT,
       timestamp: new Date(),
     };
     return await this.objectClient.setRepositoryDeleteStatus(repoUri, progress);

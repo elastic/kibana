@@ -86,6 +86,13 @@ export interface IndexWorkerResult extends WorkerResult {
   stats: IndexStats;
 }
 
+export enum WorkerReservedProgress {
+  INIT = 0,
+  COMPLETED = 100,
+  ERROR = -100,
+  TIMEOUT = -200,
+}
+
 export interface WorkerProgress {
   // Job payload repository uri.
   uri: string;

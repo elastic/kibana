@@ -18,7 +18,7 @@ import { DetailSymbolInformation } from 'elastic-lsp-extension';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
-import { LspRequest } from '../../model';
+import { LspRequest, WorkerReservedProgress } from '../../model';
 import { getDefaultBranch, GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -53,7 +53,10 @@ export class WorkspaceHandler {
     try {
       const gitStatus = await this.objectClient.getRepositoryGitStatus(repositoryUri);
 
-      if (!RepositoryUtils.hasFullyCloned(gitStatus.cloneProgress) && gitStatus.progress !== 100) {
+      if (
+        !RepositoryUtils.hasFullyCloned(gitStatus.cloneProgress) &&
+        gitStatus.progress !== WorkerReservedProgress.COMPLETED
+      ) {
         throw Boom.internal(`repository has not been fully cloned yet.`);
       }
     } catch (error) {

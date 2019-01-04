@@ -10,6 +10,8 @@ import Git, { CloneOptions } from 'nodegit';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
+
+import { WorkerReservedProgress } from '../../model';
 import { LspIndexer } from '../indexer/lsp_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
@@ -97,7 +99,7 @@ function setupEsClientSpy() {
       _source: {
         [RepositoryGitStatusReservedField]: {
           uri: 'github.com/Microsoft/TypeScript-Node-Starter',
-          progress: 100,
+          progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
           cloneProgress: {
             isCloned: true,

@@ -6,7 +6,12 @@
 
 import sinon from 'sinon';
 
-import { CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
+import {
+  CloneWorkerProgress,
+  Repository,
+  WorkerProgress,
+  WorkerReservedProgress,
+} from '../../model';
 import {
   RepositoryDeleteStatusReservedField,
   RepositoryGitStatusReservedField,
@@ -144,7 +149,7 @@ test('CRUD of Repository Git Status', async () => {
   const indexSpy = sinon.spy(esClient, 'index');
   const cObj: CloneWorkerProgress = {
     uri: repoUri,
-    progress: 100,
+    progress: WorkerReservedProgress.COMPLETED,
     timestamp: new Date(),
   };
   await repoObjectClient.setRepositoryGitStatus(repoUri, cObj);
@@ -207,7 +212,7 @@ test('CRUD of Repository LSP Index Status', async () => {
   const indexSpy = sinon.spy(esClient, 'index');
   const cObj: WorkerProgress = {
     uri: repoUri,
-    progress: 100,
+    progress: WorkerReservedProgress.COMPLETED,
     timestamp: new Date(),
   };
   await repoObjectClient.setRepositoryLspIndexStatus(repoUri, cObj);
@@ -270,7 +275,7 @@ test('CRUD of Repository Delete Status', async () => {
   const indexSpy = sinon.spy(esClient, 'index');
   const cObj: CloneWorkerProgress = {
     uri: repoUri,
-    progress: 100,
+    progress: WorkerReservedProgress.COMPLETED,
     timestamp: new Date(),
   };
   await repoObjectClient.setRepositoryDeleteStatus(repoUri, cObj);

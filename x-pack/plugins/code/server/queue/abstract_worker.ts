@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 
-import { WorkerResult } from '../../model';
+import { WorkerReservedProgress, WorkerResult } from '../../model';
 import {
   CancellationToken,
   Esqueue,
@@ -97,22 +97,22 @@ export abstract class AbstractWorker implements Worker {
 
   public async onJobEnqueued(job: Job) {
     this.log.info(`${this.id} job enqueued with details ${JSON.stringify(job)}`);
-    return await this.updateProgress(job.payload.uri, 0);
+    return await this.updateProgress(job.payload.uri, WorkerReservedProgress.INIT);
   }
 
   public async onJobCompleted(job: Job, res: WorkerResult) {
     this.log.info(`${this.id} job completed with result ${JSON.stringify(res)}`);
-    return await this.updateProgress(res.uri, 100);
+    return await this.updateProgress(res.uri, WorkerReservedProgress.COMPLETED);
   }
 
   public async onJobExecutionError(res: any) {
-    this.log.info(`${this.id} job execution error ${JSON.stringify(res)}.`);
-    return await this.updateProgress(res.job.payload.uri, -100);
+    this.log.error(`${this.id} job execution error ${JSON.stringify(res)}.`);
+    return await this.updateProgress(res.job.payload.uri, WorkerReservedProgress.ERROR);
   }
 
   public async onJobTimeOut(res: any) {
-    this.log.info(`${this.id} job timed out ${JSON.stringify(res)}`);
-    return await this.updateProgress(res.job.payload.uri, -200);
+    this.log.error(`${this.id} job timed out ${JSON.stringify(res)}`);
+    return await this.updateProgress(res.job.payload.uri, WorkerReservedProgress.TIMEOUT);
   }
 
   public async updateProgress(uri: string, progress: number) {

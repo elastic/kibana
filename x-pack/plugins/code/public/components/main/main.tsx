@@ -8,8 +8,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
+
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { CloneProgress } from '../../../model';
+import { CloneProgress, WorkerReservedProgress } from '../../../model';
 import { MainRouteParams } from '../../common/types';
 import { RootState } from '../../reducers';
 import { cloneProgressSelector, progressSelector } from '../../selectors';
@@ -42,7 +43,11 @@ interface Props extends RouteComponentProps<MainRouteParams> {
 class CodeMain extends React.Component<Props> {
   public shouldRenderProgress() {
     const { progress, cloneProgress } = this.props;
-    return !!progress && progress < 100 && !RepositoryUtils.hasFullyCloned(cloneProgress);
+    return (
+      !!progress &&
+      progress < WorkerReservedProgress.COMPLETED &&
+      !RepositoryUtils.hasFullyCloned(cloneProgress)
+    );
   }
 
   public renderProgress() {

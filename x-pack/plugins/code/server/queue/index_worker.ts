@@ -6,7 +6,13 @@
 
 import moment from 'moment';
 
-import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
+import {
+  IndexStats,
+  IndexWorkerResult,
+  RepositoryUri,
+  WorkerProgress,
+  WorkerReservedProgress,
+} from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
@@ -38,7 +44,7 @@ export class IndexWorker extends AbstractWorker {
     const { payload, cancellationToken } = job;
     const { uri, revision } = payload;
 
-    this.socketService.broadcastIndexProgress(uri, 0);
+    this.socketService.broadcastIndexProgress(uri, WorkerReservedProgress.INIT);
 
     const indexerNumber = this.indexerFactories.length;
 
@@ -59,7 +65,7 @@ export class IndexWorker extends AbstractWorker {
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);
 
-    this.socketService.broadcastIndexProgress(uri, 100);
+    this.socketService.broadcastIndexProgress(uri, WorkerReservedProgress.COMPLETED);
 
     const res: IndexWorkerResult = {
       uri,
@@ -84,7 +90,7 @@ export class IndexWorker extends AbstractWorker {
   public async onJobCompleted(job: Job, res: WorkerProgress) {
     const { uri } = job.payload;
     await this.objectClient.updateRepositoryLspIndexStatus(uri, {
-      progress: 100,
+      progress: WorkerReservedProgress.COMPLETED,
       timestamp: new Date(),
     });
     return await super.onJobCompleted(job, res);

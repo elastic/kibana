@@ -7,6 +7,7 @@
 import sinon from 'sinon';
 import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
 
+import { WorkerReservedProgress } from '../../model';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -91,8 +92,8 @@ test('Execute delete job.', async () => {
   });
 
   expect(broadcastDeleteProgressSpy.calledTwice).toBeTruthy();
-  expect(broadcastDeleteProgressSpy.getCall(0).args[1]).toEqual(0);
-  expect(broadcastDeleteProgressSpy.getCall(1).args[1]).toEqual(100);
+  expect(broadcastDeleteProgressSpy.getCall(0).args[1]).toEqual(WorkerReservedProgress.INIT);
+  expect(broadcastDeleteProgressSpy.getCall(1).args[1]).toEqual(WorkerReservedProgress.COMPLETED);
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
 

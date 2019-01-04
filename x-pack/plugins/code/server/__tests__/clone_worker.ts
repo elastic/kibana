@@ -10,7 +10,8 @@ import Git from 'nodegit';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
-import { Repository } from '../../model';
+
+import { Repository, WorkerReservedProgress } from '../../model';
 import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { CloneWorker } from '../queue';
@@ -179,7 +180,10 @@ describe('clone_worker_tests', () => {
     );
 
     assert.ok(broadcastCloneProgressSpy.calledOnce);
-    assert.strictEqual(broadcastCloneProgressSpy.getCall(0).args[1], 100);
+    assert.strictEqual(
+      broadcastCloneProgressSpy.getCall(0).args[1],
+      WorkerReservedProgress.COMPLETED
+    );
     assert.ok(enqueueJobSpy.calledOnce);
     // EsClient update got called twice. One for updating default branch and revision
     // of a repository. The other for update git clone status.
