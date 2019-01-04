@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
+import chrome from 'ui/chrome';
+import { buildEmptyFilter } from 'ui/filter_bar/filters/meta_filter';
+import { FilterEditor } from 'ui/filter_bar/react/filter_editor';
 import { IndexPattern } from 'ui/index_patterns';
 import { FilterOptions } from 'ui/search_bar/components/filter_options';
 import {
@@ -33,6 +36,8 @@ import {
 } from '../filters';
 import { FilterItem } from './filter_item';
 
+const config = chrome.getUiSettingsClient();
+
 interface Props {
   filters: MetaFilter[];
   onFiltersUpdated: (filters: MetaFilter[]) => void;
@@ -40,7 +45,15 @@ interface Props {
   indexPatterns: IndexPattern[];
 }
 
-export class FilterBar extends Component<Props> {
+interface State {
+  isAddFilterPopoverOpen: boolean;
+}
+
+export class FilterBar extends Component<Props, State> {
+  public state = {
+    isAddFilterPopoverOpen: false,
+  };
+
   public render() {
     const classes = classNames('globalFilterBar', this.props.className);
 
@@ -73,6 +86,7 @@ export class FilterBar extends Component<Props> {
           >
             {/* TODO display pinned filters first*/}
             {this.renderItems()}
+            {this.renderAddFilter()}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -92,10 +106,46 @@ export class FilterBar extends Component<Props> {
     ));
   }
 
-  // private onAdd = (filter: MetaFilter) => {
-  //   const filters = [...this.props.filters, filter];
-  //   this.props.onFiltersUpdated(filters);
-  // };
+  private renderAddFilter() {
+    const isPinned = config.get('filters:pinnedByDefault');
+    const [indexPattern] = this.props.indexPatterns;
+    const index = indexPattern && indexPattern.id;
+    const newFilter = buildEmptyFilter(isPinned, index);
+
+    const button = (
+      <EuiButtonEmpty size="xs" onClick={this.onOpenAddFilterPopover}>
+        + Add filter
+      </EuiButtonEmpty>
+    );
+
+    return (
+      <EuiPopover
+        id="addFilterPopover"
+        button={button}
+        isOpen={this.state.isAddFilterPopoverOpen}
+        closePopover={this.onCloseAddFilterPopover}
+        anchorPosition="downCenter"
+        panelPaddingSize="none"
+      >
+        <EuiFlexItem grow={false}>
+          <div style={{ padding: 16, width: 400 }}>
+            <FilterEditor
+              filter={newFilter}
+              indexPatterns={this.props.indexPatterns}
+              onSubmit={this.onAdd}
+              onCancel={this.onCloseAddFilterPopover}
+            />
+          </div>
+        </EuiFlexItem>
+      </EuiPopover>
+    );
+  }
+
+  private onAdd = (filter: MetaFilter) => {
+    this.onCloseAddFilterPopover();
+    const filters = [...this.props.filters, filter];
+    this.props.onFiltersUpdated(filters);
+  };
 
   private onRemove = (i: number) => {
     const filters = [...this.props.filters];
@@ -141,5 +191,17 @@ export class FilterBar extends Component<Props> {
 
   private onRemoveAll = () => {
     this.props.onFiltersUpdated([]);
+  };
+
+  private onOpenAddFilterPopover = () => {
+    this.setState({
+      isAddFilterPopoverOpen: true,
+    });
+  };
+
+  private onCloseAddFilterPopover = () => {
+    this.setState({
+      isAddFilterPopoverOpen: false,
+    });
   };
 }

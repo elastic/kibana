@@ -33,13 +33,10 @@ export function getFieldFromFilter(filter: FieldFilter, indexPattern: IndexPatte
   return indexPattern.fields.find((field: any) => field.name === filter.meta.key);
 }
 
-export function getOperatorFromFilter(filter: MetaFilter | undefined) {
-  return (
-    filter &&
-    FILTER_OPERATORS.find(operator => {
-      return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
-    })
-  );
+export function getOperatorFromFilter(filter: MetaFilter) {
+  return FILTER_OPERATORS.find(operator => {
+    return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
+  });
 }
 
 export function getQueryDslFromFilter(filter: MetaFilter) {
@@ -59,8 +56,8 @@ export function getOperatorOptions(field: IndexPatternField) {
   });
 }
 
-export function getFilterParams(filter?: MetaFilter): any {
-  if (filter && filter.meta.type === 'phrase') {
+export function getFilterParams(filter: MetaFilter): any {
+  if (filter.meta.type === 'phrase') {
     return (filter as PhraseFilter).meta.params.query;
   }
 }

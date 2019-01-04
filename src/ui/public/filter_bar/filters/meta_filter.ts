@@ -27,11 +27,12 @@ export interface FilterState {
 }
 
 export interface FilterMeta {
-  type: string;
+  // index and type are optional only because when you create a new filter, there are no defaults
+  index?: string;
+  type?: string;
   disabled: boolean;
   negate: boolean;
   alias: string | null;
-  index: string;
 }
 
 export interface MetaFilter {
@@ -43,6 +44,19 @@ export interface MetaFilter {
 export interface LatLon {
   lat: number;
   lon: number;
+}
+
+export function buildEmptyFilter(isPinned: boolean, index?: string): MetaFilter {
+  const meta: FilterMeta = {
+    disabled: false,
+    negate: false,
+    alias: null,
+    index,
+  };
+  const $state: FilterState = {
+    store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+  };
+  return { meta, $state };
 }
 
 export function isFilterPinned(filter: MetaFilter) {
