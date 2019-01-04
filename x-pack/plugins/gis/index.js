@@ -67,8 +67,16 @@ export function gis(kibana) {
             all: {
               app: ['gis', 'kibana'],
               savedObject: {
-                all: [],
+                all: ['gis-map'],
                 read: ['config']
+              },
+              ui: [],
+            },
+            read: {
+              app: ['gis', 'kibana'],
+              savedObject: {
+                all: [],
+                read: ['gis-map', 'config']
               },
               ui: [],
             },
