@@ -12,15 +12,15 @@ exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
         "title": "Job ID",
       },
       Object {
-        "description": "February 9th 2016, 14:56:17",
+        "description": "February 9th 2016, 13:56:17",
         "title": "Start",
       },
       Object {
-        "description": "February 9th 2016, 19:19:28",
+        "description": "February 9th 2016, 18:19:28",
         "title": "End",
       },
       Object {
-        "description": "January 2nd 2019, 09:18:17",
+        "description": "January 2nd 2019, 08:18:17",
         "title": "Created",
       },
       Object {
@@ -28,7 +28,7 @@ exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
         "title": "Created by",
       },
       Object {
-        "description": "January 2nd 2019, 09:18:17",
+        "description": "January 2nd 2019, 08:18:17",
         "title": "Last modified",
       },
       Object {
