@@ -10,11 +10,14 @@ import { EffectivePrivileges } from './effective_privileges';
 import { compareActions } from './effective_privileges_utils';
 
 export class EffectivePrivilegesFactory {
-  private rankedSpaceBasePrivileges: string[];
+  /** All space base privileges, sorted from most permissive => least permissive. */
+  public readonly rankedSpaceBasePrivileges: string[];
 
-  private rankedGlobalBasePrivileges: string[];
+  /** All global base privileges, sorted from most permissive => least permissive. */
+  public readonly rankedGlobalBasePrivileges: string[];
 
-  private rankedFeaturePrivileges: {
+  /** All feature privileges, sorted from most permissive => least permissive. */
+  public readonly rankedFeaturePrivileges: {
     [featureId: string]: string[];
   };
 
@@ -52,6 +55,10 @@ export class EffectivePrivilegesFactory {
     });
   }
 
+  /**
+   * Creates an EffectivePrivileges instance for the specified role.
+   * @param role
+   */
   public getInstance(role: Role) {
     return new EffectivePrivileges(
       this.privilegeDefinition,
