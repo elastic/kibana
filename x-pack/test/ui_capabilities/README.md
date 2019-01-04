@@ -51,6 +51,8 @@ global dev_tools all
 global dev_tools read
 global discover all
 global discover read
+global gis all
+global gis read
 global graph all
 global graph read
 global infrastructure all
@@ -59,10 +61,10 @@ global logging all
 global logging read
 global management all
 global management read
-global monitoring all
-global monitoring read
 global ml all
 global ml read
+global monitoring all
+global monitoring read
 global timelion all
 global timelion read
 global visualize all
