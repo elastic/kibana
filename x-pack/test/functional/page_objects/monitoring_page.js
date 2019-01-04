@@ -38,6 +38,14 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
       });
     }
 
+    async waitForPageLoad() {
+      await retry.try(async () => {
+        if (await testSubjects.exists('monitoringPageLoading')) {
+          throw new Error('Page still loading');
+        }
+      });
+    }
+
     async tableGetRows(subj) {
       const table = await testSubjects.find(subj);
       return table.findAllByTagName('tr');

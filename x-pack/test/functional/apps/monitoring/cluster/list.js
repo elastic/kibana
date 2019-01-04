@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -121,6 +121,7 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the primary basic cluster goes to overview', async () => {
           const primaryBasicClusterLink = await clusterList.getClusterLink(SUPPORTED_CLUSTER_UUID);
           await primaryBasicClusterLink.click();
+          await PageObjects.monitoring.waitForPageLoad();
 
           expect(await clusterOverview.isOnClusterOverview()).to.be(true);
           expect(await clusterOverview.getClusterName()).to.be('production');

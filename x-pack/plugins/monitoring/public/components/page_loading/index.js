@@ -23,6 +23,7 @@ export function PageLoading() {
           verticalPosition="center"
           horizontalPosition="center"
           className="noData__content"
+          dataTestSubj="monitoringPageLoading"
         >
           <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>
