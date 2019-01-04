@@ -30,7 +30,7 @@ module.exports = function (grunt) {
     'run:typeCheck',
     'run:i18nCheck',
     'run:checkFileCasing',
-    'licenses',
+    // 'licenses', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
     'verifyDependencyVersions',
     'run:verifyNotice',
     // 'test:server', DO NOT CHECK IN -- THIS TO ENABLE SECOPS TO BUILD QUICKLY WITHOUT FALSE POSITIVES
