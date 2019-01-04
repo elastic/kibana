@@ -87,9 +87,15 @@ export class MBMapContainer extends React.Component {
     };
 
     this.assignSizeWatch();
-    this._mbMap.on('moveend', () => {
+
+    // moveend callback is debounced to avoid updating map extent state while map extent is still changing
+    // moveend is fired while the map extent is still changing in the following scenarios
+    // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
+    // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
+    this._mbMap.on('moveend', _.debounce(() => {
       this.props.extentChanged(this._getMapState());
-    });
+    }, 100));
+
     const throttledSetMouseCoordinates = _.throttle(e => {
       this.props.setMouseCoordinates({
         lat: _.round(e.lngLat.lat, DECIMAL_DEGREES_PRECISION),
@@ -158,18 +164,16 @@ export class MBMapContainer extends React.Component {
       clearGoto,
     } = this.props;
 
-    if (!isMapReady) {
+    if (!isMapReady || !goto) {
       return;
     }
 
-    if (goto) {
-      clearGoto();
-      this._mbMap.setZoom(goto.zoom);
-      this._mbMap.setCenter({
-        lng: goto.lon,
-        lat: goto.lat
-      });
-    }
+    clearGoto();
+    this._mbMap.setZoom(goto.zoom);
+    this._mbMap.setCenter({
+      lng: goto.lon,
+      lat: goto.lat
+    });
   }
 
   _syncMbMapWithLayerList = () => {
