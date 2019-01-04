@@ -43,7 +43,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         });
     });
 
-    it('Make sure that we the pagination is working in Hosts query', () => {
+    it('Make sure that pagination is working in Hosts query', () => {
       return client
         .query<GetHostsQuery.Query>({
           query: hostsQuery,
