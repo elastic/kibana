@@ -239,7 +239,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       iconType="help"
                       href="https://discuss.elastic.co/c/beats/heartbeat"
                     >
-                      Uptime feedback
+                      Discuss
                     </EuiHeaderLink>
                   </EuiHeaderLinks>
                 </EuiHeaderSection>
