@@ -91,7 +91,7 @@ const buildEffectivePrivileges = (
 describe('EffectivePrivileges', () => {
   // implementation detail: `get*Privileges` uses `explain*Privileges`,
   // so these tests will assert that the results of the two functions are the same. The alternatives are to duplicate all of these tests,
-  // or to create enough abstractions to make the bulk if this re-usable, which isn't very easy to understand.
+  // or to create enough abstractions to make the bulk of this re-usable, which isn't very easy to understand.
 
   describe('#getActualGlobalFeaturePrivilege', () => {
     it(`returns 'none' when no privileges are assigned`, () => {
