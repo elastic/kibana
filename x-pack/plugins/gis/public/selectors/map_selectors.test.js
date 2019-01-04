@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../shared/layers/vector_layer', () => {});
-jest.mock('../shared/layers/sources/ems_file_source', () => {});
-jest.mock('../shared/layers/sources/es_geohashgrid_source', () => {});
-jest.mock('../shared/layers/sources/es_search_source', () => {});
+jest.mock('../shared/layers/sources/all_sources', () => {});
 jest.mock('ui/timefilter', () => ({
   timefilter: {
     getTime: () => {
