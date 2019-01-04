@@ -3,14 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { i18n as I18N } from '@kbn/i18n';
-declare global {
-  const canvas: {
-    i18n: typeof I18N;
-  };
-}
-
 const { i18n } = canvas;
 
 interface ElementStrings {
