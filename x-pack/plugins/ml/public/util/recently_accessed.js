@@ -9,6 +9,7 @@
 // utility functions for managing which links get added to kibana's recently accessed list
 
 import { recentlyAccessed } from 'ui/persisted_log';
+import { i18n } from '@kbn/i18n';
 
 export function addItemToRecentlyAccessed(page, itemId, url) {
   let pageLabel = '';
@@ -16,13 +17,19 @@ export function addItemToRecentlyAccessed(page, itemId, url) {
 
   switch (page) {
     case 'explorer':
-      pageLabel = 'Anomaly Explorer';
+      pageLabel = i18n.translate('xpack.ml.anomalyExplorerPageLabel', {
+        defaultMessage: 'Anomaly Explorer'
+      });
       break;
     case 'timeseriesexplorer':
-      pageLabel = 'Single Metric Viewer';
+      pageLabel = i18n.translate('xpack.ml.singleMetricViewerPageLabel', {
+        defaultMessage: 'Single Metric Viewer'
+      });
       break;
     case 'jobs/new_job/datavisualizer':
-      pageLabel = 'Data Visualizer';
+      pageLabel = i18n.translate('xpack.ml.dataVisualizerPageLabel', {
+        defaultMessage: 'Data Visualizer'
+      });
       id = `ml-datavisualizer-${itemId}`;
       break;
     default:

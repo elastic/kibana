@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -70,9 +70,9 @@ export function FormattedKey({
 }
 
 export function FormattedValue({ value }: { value: any }): JSX.Element {
-  if (_.isObject(value)) {
+  if (isObject(value)) {
     return <pre>{JSON.stringify(value, null, 4)}</pre>;
-  } else if (_.isBoolean(value) || _.isNumber(value)) {
+  } else if (isBoolean(value) || isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
   } else if (!value) {
     return <EmptyValue>N/A</EmptyValue>;
@@ -92,7 +92,7 @@ export function NestedValue({
   parentKey?: string;
   keySorter?: KeySorter;
 }): JSX.Element {
-  if (depth > 0 && _.isObject(value)) {
+  if (depth > 0 && isObject(value)) {
     return (
       <NestedKeyValueTable
         data={value}
