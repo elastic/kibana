@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../shared/layers/vector_layer', () => {});
 jest.mock('../shared/layers/sources/all_sources', () => {});
 jest.mock('ui/timefilter', () => ({
   timefilter: {
