@@ -42,7 +42,7 @@ export class RepositoryObjectClient {
     return await this.getRepositoryObject(repoUri, RepositoryDeleteStatusReservedField);
   }
 
-  public async getRepositoryConfig(repoUri: RepositoryUri): Promise<Repository> {
+  public async getRepositoryConfig(repoUri: RepositoryUri): Promise<RepositoryConfig> {
     return await this.getRepositoryObject(repoUri, RepositoryConfigReservedField);
   }
 

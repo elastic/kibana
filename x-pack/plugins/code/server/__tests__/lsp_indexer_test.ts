@@ -16,6 +16,7 @@ import { AnyObject, EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
+import { RepositoryConfigController } from '../repository_config_controller';
 import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
@@ -187,7 +188,8 @@ describe('lsp_indexer', () => {
       serverOptions,
       esClient as EsClient,
       {} as InstallManager,
-      new ConsoleLoggerFactory()
+      new ConsoleLoggerFactory(),
+      new RepositoryConfigController(esClient as EsClient)
     );
 
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
@@ -238,7 +240,8 @@ describe('lsp_indexer', () => {
       serverOptions,
       esClient as EsClient,
       {} as InstallManager,
-      new ConsoleLoggerFactory()
+      new ConsoleLoggerFactory(),
+      new RepositoryConfigController(esClient as EsClient)
     );
 
     lspservice.sendRequest = setupLsServiceSendRequestSpy();

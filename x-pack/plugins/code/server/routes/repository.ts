@@ -13,6 +13,7 @@ import { RepositoryConfig } from '../../model';
 import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
+import { RepositoryConfigController } from '../repository_config_controller';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
@@ -23,7 +24,8 @@ export function repositoryRoute(
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
   indexWorker: IndexWorker,
-  repoIndexInitializerFactory: RepositoryIndexInitializerFactory
+  repoIndexInitializerFactory: RepositoryIndexInitializerFactory,
+  repoConfigController: RepositoryConfigController
 ) {
   // Clone a git repository
 
@@ -228,6 +230,7 @@ export function repositoryRoute(
       try {
         // Persist to elasticsearch
         await repoObjectClient.setRepositoryConfig(repo.uri, config);
+        repoConfigController.resetConfigCache(repo.uri);
         return {};
       } catch (error) {
         const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
