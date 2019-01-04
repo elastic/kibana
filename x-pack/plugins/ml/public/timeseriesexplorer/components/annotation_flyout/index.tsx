@@ -65,7 +65,7 @@ export const AnnotationFlyout: React.SFC<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <AnnotationDescriptionList annotation={annotation} />
+        <AnnotationDescriptionList annotation={annotation}/>
         <EuiSpacer size="m" />
         <EuiFormRow
           label={

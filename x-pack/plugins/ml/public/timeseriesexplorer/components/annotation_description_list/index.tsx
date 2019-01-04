@@ -22,73 +22,72 @@ interface Props {
   intl: InjectedIntl;
 }
 
-export const AnnotationDescriptionList: React.SFC<Props> = injectI18n(
-  // tslint:disable-next-line:no-shadowed-variable
-  function AnnotationDescriptionList({ annotation, intl }): React.SFC<Props> {
-    const listItems = [
-      {
-        title: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.jobIdTitle',
-          defaultMessage: 'Job ID',
-        }),
-        description: annotation.job_id,
-      },
-      {
-        title: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.startTitle',
-          defaultMessage: 'Start',
-        }),
-        description: formatHumanReadableDateTimeSeconds(annotation.timestamp),
-      },
-    ];
+export const AnnotationDescriptionList: React.ComponentClass<
+  Pick<Props, 'annotation'>
+> = injectI18n(({ annotation, intl }) => {
+  const listItems = [
+    {
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.jobIdTitle',
+        defaultMessage: 'Job ID',
+      }),
+      description: annotation.job_id,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.startTitle',
+        defaultMessage: 'Start',
+      }),
+      description: formatHumanReadableDateTimeSeconds(annotation.timestamp),
+    },
+  ];
 
-    if (annotation.end_timestamp !== undefined) {
-      listItems.push({
-        title: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.endTitle',
-          defaultMessage: 'End',
-        }),
-        description: formatHumanReadableDateTimeSeconds(annotation.end_timestamp),
-      });
-    }
-
-    if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
-      listItems.push({
-        title: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdTitle',
-          defaultMessage: 'Created',
-        }),
-        description: formatHumanReadableDateTimeSeconds(annotation.create_time),
-      });
-      listItems.push({
-        title: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdByTitle',
-          defaultMessage: 'Created by',
-        }),
-        description: annotation.create_username,
-      });
-      listItems.push({
-        title: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.lastModifiedTitle',
-          defaultMessage: 'Last modified',
-        }),
-        description: formatHumanReadableDateTimeSeconds(annotation.modified_time),
-      });
-      listItems.push({
-        title: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.modifiedByTitle',
-          defaultMessage: 'Modified by',
-        }),
-        description: annotation.modified_username,
-      });
-    }
-
-    return (
-      <EuiDescriptionList
-        className="ml-annotation-description-list"
-        type="column"
-        listItems={listItems}
-      />
-    );
+  if (annotation.end_timestamp !== undefined) {
+    listItems.push({
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.endTitle',
+        defaultMessage: 'End',
+      }),
+      description: formatHumanReadableDateTimeSeconds(annotation.end_timestamp),
+    });
   }
-);
+
+  if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
+    listItems.push({
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdTitle',
+        defaultMessage: 'Created',
+      }),
+      description: formatHumanReadableDateTimeSeconds(annotation.create_time),
+    });
+    listItems.push({
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdByTitle',
+        defaultMessage: 'Created by',
+      }),
+      description: annotation.create_username,
+    });
+    listItems.push({
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.lastModifiedTitle',
+        defaultMessage: 'Last modified',
+      }),
+      description: formatHumanReadableDateTimeSeconds(annotation.modified_time),
+    });
+    listItems.push({
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.modifiedByTitle',
+        defaultMessage: 'Modified by',
+      }),
+      description: annotation.modified_username,
+    });
+  }
+
+  return (
+    <EuiDescriptionList
+      className="ml-annotation-description-list"
+      type="column"
+      listItems={listItems}
+    />
+  );
+});
