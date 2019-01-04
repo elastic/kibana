@@ -9,7 +9,7 @@ import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange } from '../../../../common/domain_types';
 import { ErrorListItem } from '../../../../common/graphql/types';
 import { getDateHistogramIntervalMillis } from '../../../util';
-import { DatabaseAdapter } from '../database';
+import { DatabaseAdapter, ElasticsearchQueryParams } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
 // the values for these charts are stored as μs, but should be displayed as ms
@@ -72,35 +72,36 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeStart: number,
     dateRangeEnd: number
   ): Promise<any> {
-    const query = {
-      bool: {
-        must: [{ term: { 'monitor.id': monitorId } }],
-        filter: [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }],
-      },
-    };
-    const aggs = {
-      timeseries: {
-        date_histogram: {
-          field: '@timestamp',
-          interval: getDateHistogramIntervalMillis(dateRangeStart, dateRangeEnd),
+    const params: ElasticsearchQueryParams = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          bool: {
+            must: [{ term: { 'monitor.id': monitorId } }],
+            filter: [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }],
+          },
         },
         aggs: {
-          max_content: { max: { field: 'http.rtt.content.us' } },
-          max_response: { max: { field: 'http.rtt.response_header.us' } },
-          max_validate: { max: { field: 'http.rtt.validate.us' } },
-          max_total: { max: { field: 'http.rtt.total.us' } },
-          max_write_request: { max: { field: 'http.rtt.write_request.us' } },
-          max_tcp_rtt: { max: { field: 'tcp.rtt.connect.us' } },
-          status: { terms: { field: 'monitor.status' } },
-          max_duration: { max: { field: 'monitor.duration.us' } },
-          min_duration: { min: { field: 'monitor.duration.us' } },
-          avg_duration: { avg: { field: 'monitor.duration.us' } },
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              interval: getDateHistogramIntervalMillis(dateRangeStart, dateRangeEnd),
+            },
+            aggs: {
+              max_content: { max: { field: 'http.rtt.content.us' } },
+              max_response: { max: { field: 'http.rtt.response_header.us' } },
+              max_validate: { max: { field: 'http.rtt.validate.us' } },
+              max_total: { max: { field: 'http.rtt.total.us' } },
+              max_write_request: { max: { field: 'http.rtt.write_request.us' } },
+              max_tcp_rtt: { max: { field: 'tcp.rtt.connect.us' } },
+              status: { terms: { field: 'monitor.status' } },
+              max_duration: { max: { field: 'monitor.duration.us' } },
+              min_duration: { min: { field: 'monitor.duration.us' } },
+              avg_duration: { avg: { field: 'monitor.duration.us' } },
+            },
+          },
         },
       },
-    };
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: { query, aggs },
     };
 
     const {
@@ -148,7 +149,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     filters: string = ''
   ): Promise<any> {
     const { dateRangeStart, dateRangeEnd } = range;
-    const params = {
+    const params: ElasticsearchQueryParams = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
@@ -230,7 +231,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: number,
     filters: string
   ): Promise<any> {
-    const params = {
+    const params: ElasticsearchQueryParams = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
@@ -319,7 +320,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeStart: number,
     dateRangeEnd: number
   ): Promise<any> {
-    const params = {
+    const params: ElasticsearchQueryParams = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
@@ -388,7 +389,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       set(query, 'bool.must', [{ ...statusDown }]);
     }
 
-    const params = {
+    const params: ElasticsearchQueryParams = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query,

@@ -9,7 +9,7 @@ import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
 import { getDateHistogramIntervalMillis } from '../../../util';
-import { DatabaseAdapter } from '../database';
+import { DatabaseAdapter, ElasticsearchQueryParams } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
 const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
@@ -92,7 +92,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     if (monitorId) {
       must.push({ term: { 'monitor.id': monitorId } });
     }
-    const params = {
+    const params: ElasticsearchQueryParams = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
@@ -145,7 +145,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     filters?: string
   ): Promise<HistogramSeries[] | null> {
     const { dateRangeStart, dateRangeEnd } = range;
-    const params = {
+    const params: ElasticsearchQueryParams = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
