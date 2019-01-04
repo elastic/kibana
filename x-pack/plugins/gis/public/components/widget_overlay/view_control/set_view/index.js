@@ -6,9 +6,9 @@
 
 import { connect } from 'react-redux';
 import { SetView } from './set_view';
-import { mapExtentChanged } from '../../actions/store_actions';
-import { getMapZoom, getMapCenter } from "../../selectors/map_selectors";
-import { closeSetView } from '../../store/ui';
+import { setGoto } from '../../../../actions/store_actions';
+import { getMapZoom, getMapCenter } from "../../../../selectors/map_selectors";
+import { closeSetView } from '../../../../store/ui';
 
 function mapStateToProps(state = {}) {
   return {
@@ -19,9 +19,9 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    onSubmit: (newMapConstants) => {
+    onSubmit: ({ lat, lon, zoom }) => {
       dispatch(closeSetView());
-      dispatch(mapExtentChanged(newMapConstants));
+      dispatch(setGoto({ lat, lon, zoom }));
     }
   };
 }

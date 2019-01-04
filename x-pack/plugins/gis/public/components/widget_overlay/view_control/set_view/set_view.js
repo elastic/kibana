@@ -50,6 +50,7 @@ export class SetView  extends React.Component {
           label={label}
           isInvalid={isInvalid}
           error={error}
+          compressed
         >
           <EuiFieldNumber
             value={value}
@@ -68,11 +69,7 @@ export class SetView  extends React.Component {
       lon,
       zoom
     } = this.state;
-    const center = {
-      lat,
-      lon
-    };
-    this.props.onSubmit({ center, zoom });
+    this.props.onSubmit({ lat, lon, zoom });
   }
 
   render() {
@@ -114,6 +111,7 @@ export class SetView  extends React.Component {
 
         <EuiFormRow hasEmptyLabelSpace>
           <EuiButton
+            size="s"
             disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
             onClick={this.onSubmit}
             data-test-subj="submitViewButton"

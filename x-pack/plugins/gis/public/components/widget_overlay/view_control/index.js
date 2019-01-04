@@ -5,26 +5,23 @@
  */
 
 import { connect } from 'react-redux';
-import { LayerControl } from './view';
+import { ViewControl } from './view_control';
+import { getMouseCoordinates } from "../../../selectors/map_selectors";
 import {
   getIsSetViewOpen,
   closeSetView,
   openSetView,
-  updateFlyout,
-  FLYOUT_STATE
-} from '../../store/ui';
+} from '../../../store/ui';
 
 function mapStateToProps(state = {}) {
   return {
     isSetViewOpen: getIsSetViewOpen(state),
+    mouseCoordinates: getMouseCoordinates(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    showAddLayerWizard: () => {
-      dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
-    },
     closeSetView: () => {
       dispatch(closeSetView());
     },
@@ -34,5 +31,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
-export { connectedLayerControl as LayerControl };
+const connectedViewControl = connect(mapStateToProps, mapDispatchToProps)(ViewControl);
+export { connectedViewControl as ViewControl };

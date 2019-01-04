@@ -7,8 +7,8 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './toc_entry';
-import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { setSelectedLayer, toggleLayerVisible } from '../../../actions/store_actions';
+import { updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
+import { setSelectedLayer, toggleLayerVisible } from '../../../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
