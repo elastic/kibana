@@ -199,4 +199,5 @@ export const SpaceScenarios: SpaceScenarios[] = [
   MlDisabledSpace,
   MonitoringDisabledSpace,
   TimelionDisabledSpace,
+  VisualizeDisabledSpace,
 ];
