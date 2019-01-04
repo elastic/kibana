@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { elementStringFactory } from '.';
+import { i18nProvider } from './i18n_provider';
+i18nProvider.init();
+
+import { getElementStrings } from '.';
 import { elementSpecs } from '../elements';
 
+beforeAll(() => {
+  i18nProvider.init();
+});
+
 describe('ElementStrings', () => {
-  const elementStrings = elementStringFactory();
+  const elementStrings = getElementStrings();
   const elementNames = elementSpecs.map(spec => spec().name);
   const stringKeys = Object.keys(elementStrings);
 

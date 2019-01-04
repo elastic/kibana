@@ -3,16 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n as i18nCore } from '@kbn/i18n';
 
 import { ElementFactory } from '../elements/types';
-import { elementStringFactory } from './index';
+import { getElementStrings } from './index';
 
-export const applyElementStrings = (
-  elements: ElementFactory[],
-  i18n: typeof i18nCore = i18nCore
-) => {
-  const elementStrings = elementStringFactory(i18n);
+/**
+ * This function takes a set of Canvas Element specification factories, runs them,
+ * replaces relevant strings (if available) and returns a new factory.  We do this
+ * so the specifications themselves have no dependency on i18n, for clarity for both
+ * our and external plugin developers.
+ */
+export const applyElementStrings = (elements: ElementFactory[]) => {
+  const elementStrings = getElementStrings();
 
   return elements.map(spec => {
     const result = spec();
