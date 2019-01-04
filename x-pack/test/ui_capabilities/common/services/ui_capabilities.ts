@@ -45,7 +45,7 @@ export class UICapabilitiesService {
     spaceId?: string
   ): Promise<GetUICapabilitiesResult> {
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
-    this.log.debug('requesting /app/kibana to parse the uiCapabilities');
+    this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
     const requestHeaders = credentials
       ? {
           Authorization: `Basic ${Buffer.from(
@@ -79,11 +79,18 @@ export class UICapabilitiesService {
     }
 
     const dataAttrJson = element.attr('data');
-    const dataAttr = JSON.parse(dataAttrJson);
-    return {
-      success: true,
-      value: dataAttr.vars.uiCapabilities as UICapabilities,
-    };
+
+    try {
+      const dataAttr = JSON.parse(dataAttrJson);
+      return {
+        success: true,
+        value: dataAttr.vars.uiCapabilities as UICapabilities,
+      };
+    } catch (err) {
+      throw new Error(
+        `Unable to parse JSON from the kbn-injected-metadata data attribute: ${dataAttrJson}`
+      );
+    }
   }
 }
 
