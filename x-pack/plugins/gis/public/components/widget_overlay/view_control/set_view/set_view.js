@@ -69,11 +69,7 @@ export class SetView  extends React.Component {
       lon,
       zoom
     } = this.state;
-    const center = {
-      lat,
-      lon
-    };
-    this.props.onSubmit({ center, zoom });
+    this.props.onSubmit({ lat, lon, zoom });
   }
 
   render() {

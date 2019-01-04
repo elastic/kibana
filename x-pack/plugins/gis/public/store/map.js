@@ -32,6 +32,8 @@ import {
   TRIGGER_REFRESH_TIMER,
   SET_MOUSE_COORDINATES,
   CLEAR_MOUSE_COORDINATES,
+  SET_GOTO,
+  CLEAR_GOTO,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -73,6 +75,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
 
 const INITIAL_STATE = {
   ready: false,
+  goto: null,
   mapState: {
     zoom: 4,
     center: {
@@ -112,6 +115,20 @@ export function map(state = INITIAL_STATE, action) {
           ...state.mapState,
           mouseCoordinates: null
         }
+      };
+    case SET_GOTO:
+      return {
+        ...state,
+        goto: {
+          lat: action.lat,
+          lon: action.lon,
+          zoom: action.zoom,
+        }
+      };
+    case CLEAR_GOTO:
+      return {
+        ...state,
+        goto: null,
       };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);

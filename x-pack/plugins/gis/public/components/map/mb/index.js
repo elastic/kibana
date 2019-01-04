@@ -11,15 +11,16 @@ import {
   mapReady,
   mapDestroyed,
   setMouseCoordinates,
-  clearMouseCoordinates
+  clearMouseCoordinates,
+  clearGoto,
 } from '../../../actions/store_actions';
-import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
+import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
 
 function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
-    mapState: getMapState(state),
     layerList: getLayerList(state),
+    goto: getGoto(state),
   };
 }
 
@@ -29,6 +30,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(mapExtentChanged(e));
     },
     onMapReady: (e) => {
+      dispatch(clearGoto());
       dispatch(mapExtentChanged(e));
       dispatch(mapReady());
     },
@@ -40,6 +42,9 @@ function mapDispatchToProps(dispatch) {
     },
     clearMouseCoordinates: () => {
       dispatch(clearMouseCoordinates());
+    },
+    clearGoto: () => {
+      dispatch(clearGoto());
     }
   };
 }

@@ -86,6 +86,7 @@ export const getMapState = ({ map }) => map && map.mapState;
 
 export const getMapReady = ({ map }) => map && map.ready;
 
+export const getGoto = ({ map }) => map && map.goto;
 
 const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;

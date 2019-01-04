@@ -61,9 +61,7 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-    const initialZoom = this.props.mapState.zoom;
-    const initialCenter = this.props.mapState.center;
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, initialZoom, initialCenter);
+    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto);
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -156,25 +154,20 @@ export class MBMapContainer extends React.Component {
   _syncMbMapWithMapState = () => {
     const {
       isMapReady,
-      mapState,
+      goto,
+      clearGoto,
     } = this.props;
 
     if (!isMapReady) {
       return;
     }
 
-    const zoom = _.round(this._mbMap.getZoom(), ZOOM_PRECISION);
-    if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
-      this._mbMap.setZoom(mapState.zoom);
-    }
-
-    const center = this._mbMap.getCenter();
-    if (mapState.center &&
-      (mapState.center.lat !== _.round(center.lat, DECIMAL_DEGREES_PRECISION)
-      || mapState.center.lon !== _.round(center.lng, DECIMAL_DEGREES_PRECISION))) {
+    if (goto) {
+      clearGoto();
+      this._mbMap.setZoom(goto.zoom);
       this._mbMap.setCenter({
-        lng: mapState.center.lon,
-        lat: mapState.center.lat
+        lng: goto.lon,
+        lat: goto.lat
       });
     }
   }
