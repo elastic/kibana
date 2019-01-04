@@ -4,21 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-if (!(global as any).canvas || !(global as any).canvas) {
-  (global as any).canvas = (window as any).canvas = {
-    register: () => {
-      return;
-    },
-    i18n,
-  };
-}
-
-import { elementStrings } from '.';
+import { elementStringFactory } from '.';
 import { elementSpecs } from '../elements';
 
 describe('ElementStrings', () => {
+  const elementStrings = elementStringFactory();
   const elementNames = elementSpecs.map(spec => spec().name);
   const stringKeys = Object.keys(elementStrings);
 

@@ -3,12 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n as i18nCore } from '@kbn/i18n';
 
 import { ElementFactory } from '../elements/types';
-import { elementStrings } from './index';
+import { elementStringFactory } from './index';
 
-export const applyElementStrings = (elements: ElementFactory[]) =>
-  elements.map(spec => {
+export const applyElementStrings = (
+  elements: ElementFactory[],
+  i18n: typeof i18nCore = i18nCore
+) => {
+  const elementStrings = elementStringFactory(i18n);
+
+  return elements.map(spec => {
     const result = spec();
     const { name } = result;
     const strings = elementStrings[name];
@@ -28,3 +34,4 @@ export const applyElementStrings = (elements: ElementFactory[]) =>
 
     return () => result;
   });
+};

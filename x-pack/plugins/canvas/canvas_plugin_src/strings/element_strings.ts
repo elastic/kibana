@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-const { i18n } = canvas;
+
+import { i18n as i18nCore } from '@kbn/i18n';
 
 interface ElementStrings {
   displayName: string;
@@ -14,7 +15,7 @@ interface ElementStringDict {
   [elementName: string]: ElementStrings;
 }
 
-export const elementStrings: ElementStringDict = {
+export const elementStringFactory = (i18n: typeof i18nCore = i18nCore): ElementStringDict => ({
   areaChart: {
     displayName: i18n.translate('xpack.canvas.elements.areaChartDisplayName', {
       defaultMessage: 'Area chart',
@@ -223,4 +224,4 @@ export const elementStrings: ElementStringDict = {
       defaultMessage: 'Displays progress as a portion of a vertical pill',
     }),
   },
-};
+});

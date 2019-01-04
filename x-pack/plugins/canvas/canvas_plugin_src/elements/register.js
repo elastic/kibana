@@ -8,4 +8,6 @@ import 'babel-polyfill';
 import { applyElementStrings } from '../strings';
 import { elementSpecs } from './index';
 
-applyElementStrings(elementSpecs).forEach(canvas.register);
+const { i18n, register } = canvas;
+
+applyElementStrings(elementSpecs, i18n).forEach(register);
