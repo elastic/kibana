@@ -15689,10 +15689,26 @@ strip-outer@^1.0.0:
   dependencies:
     escape-string-regexp "^1.0.2"
 
+<<<<<<< HEAD
 style-it@^1.6.12:
   version "1.6.13"
   resolved "https://registry.yarnpkg.com/style-it/-/style-it-1.6.13.tgz#b57f01e3fd15a6c39b8386793f604471b1b9c90d"
   integrity sha1-tX8B4/0VpsObg4Z5P2BEcbG5yQ0=
+=======
+strong-log-transformer@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/strong-log-transformer/-/strong-log-transformer-2.1.0.tgz#0f5ed78d325e0421ac6f90f7f10e691d6ae3ae10"
+  integrity sha512-B3Hgul+z0L9a236FAUC9iZsL+nVHgoCJnqCbN588DjYxvGXaXaaFbfmQ/JhvKjZwsOukuR72XbHv71Qkug0HxA==
+  dependencies:
+    duplexer "^0.1.1"
+    minimist "^1.2.0"
+    through "^2.3.4"
+
+style-it@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/style-it/-/style-it-2.1.2.tgz#57f557d31d1f65f9b0b699341e197dc72d3d1124"
+  integrity sha512-MFmrF8uxXeHMWvJWxc7byY3wurOb8SrlZUPNMUd3uTXkjy5Of9jQY49E18uVOClihpCm4IiDwcZRApCqhColng==
+>>>>>>> 0a1b86ad3c... Upgrades style-it to 2.1.2 (#27824)
   dependencies:
     react-lib-adler32 "^1.0.0"
 
