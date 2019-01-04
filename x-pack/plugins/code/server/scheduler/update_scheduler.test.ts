@@ -7,7 +7,12 @@
 import moment from 'moment';
 import sinon from 'sinon';
 
-import { CloneProgress, CloneWorkerProgress, Repository } from '../../model';
+import {
+  CloneProgress,
+  CloneWorkerProgress,
+  Repository,
+  WorkerReservedProgress,
+} from '../../model';
 import { RepositoryGitStatusReservedField, RepositoryReservedField } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
 import { Log } from '../log';
@@ -95,7 +100,7 @@ test('Next job should not execute when scheduled update time is not current.', d
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getSpy = createGetSpy(100);
+  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED);
   esClient.get = getSpy;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;
@@ -186,7 +191,7 @@ test('Next job should execute.', done => {
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getSpy = createGetSpy(100);
+  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED);
   esClient.get = getSpy;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;

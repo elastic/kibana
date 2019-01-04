@@ -5,6 +5,8 @@
  */
 
 import sinon from 'sinon';
+
+import { WorkerReservedProgress } from '../../model';
 import { IndexerFactory } from '../indexer';
 import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
@@ -79,8 +81,8 @@ test('Execute index job.', async () => {
   });
 
   expect(broadcastIndexProgressSpy.calledTwice).toBeTruthy();
-  expect(broadcastIndexProgressSpy.getCall(0).args[1]).toEqual(0);
-  expect(broadcastIndexProgressSpy.getCall(1).args[1]).toEqual(100);
+  expect(broadcastIndexProgressSpy.getCall(0).args[1]).toEqual(WorkerReservedProgress.INIT);
+  expect(broadcastIndexProgressSpy.getCall(1).args[1]).toEqual(WorkerReservedProgress.COMPLETED);
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
 
@@ -146,8 +148,8 @@ test('Execute index job and then cancel.', async () => {
   cToken.cancel();
 
   expect(broadcastIndexProgressSpy.calledTwice).toBeTruthy();
-  expect(broadcastIndexProgressSpy.getCall(0).args[1]).toEqual(0);
-  expect(broadcastIndexProgressSpy.getCall(1).args[1]).toEqual(100);
+  expect(broadcastIndexProgressSpy.getCall(0).args[1]).toEqual(WorkerReservedProgress.INIT);
+  expect(broadcastIndexProgressSpy.getCall(1).args[1]).toEqual(WorkerReservedProgress.COMPLETED);
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
 
@@ -212,7 +214,7 @@ test('On index job completed.', async () => {
     },
     {
       uri: 'github.com/elastic/kibana',
-      progress: 100,
+      progress: WorkerReservedProgress.COMPLETED,
       timestamp: new Date(),
     }
   );

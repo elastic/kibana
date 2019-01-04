@@ -6,6 +6,8 @@
 
 import { Action } from 'redux-actions';
 import { put, select, takeEvery } from 'redux-saga/effects';
+
+import { WorkerReservedProgress } from '../../model';
 import { Match, routeChange } from '../actions';
 import { loadStatusSuccess } from '../actions/status';
 import * as ROUTES from '../components/routes';
@@ -14,7 +16,8 @@ import { RootState } from '../reducers';
 const matchSelector = (state: RootState) => state.route.match;
 
 const pattern = (action: Action<any>) =>
-  action.type === String(loadStatusSuccess) && action.payload!.status.progress === 100;
+  action.type === String(loadStatusSuccess) &&
+  action.payload!.status.progress === WorkerReservedProgress.COMPLETED;
 
 function* handleRepoCloneSuccess() {
   const match: Match = yield select(matchSelector);

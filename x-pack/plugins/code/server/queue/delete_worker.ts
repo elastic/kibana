@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 
-import { RepositoryUri } from '../../model';
+import { RepositoryUri, WorkerReservedProgress } from '../../model';
 import { WorkerProgress, WorkerResult } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { EsClient, Esqueue } from '../lib/esqueue';
@@ -40,7 +40,7 @@ export class DeleteWorker extends AbstractWorker {
     const { uri, dataPath } = job.payload;
 
     // 1. Notify repo delete start through websocket.
-    this.socketService.broadcastDeleteProgress(uri, 0);
+    this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.INIT);
 
     // 2. Cancel running workers
     // TODO: Add support for clone/update worker.

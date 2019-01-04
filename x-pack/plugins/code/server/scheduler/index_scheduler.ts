@@ -5,7 +5,7 @@
  */
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { Repository } from '../../model';
+import { Repository, WorkerReservedProgress } from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Log } from '../log';
 import { IndexWorker } from '../queue';
@@ -42,7 +42,7 @@ export class IndexScheduler extends AbstractScheduler {
       const cloneStatus = await this.objectClient.getRepositoryGitStatus(repo.uri);
       if (
         !RepositoryUtils.hasFullyCloned(cloneStatus.cloneProgress) ||
-        cloneStatus.progress !== 100
+        cloneStatus.progress !== WorkerReservedProgress.COMPLETED
       ) {
         this.log.info(`Repo ${repo.uri} has not been fully cloned yet or in update. Skip index.`);
         return;
@@ -55,9 +55,15 @@ export class IndexScheduler extends AbstractScheduler {
       this.log.info(
         `Current repo revision: ${repo.revision}, indexed revision ${repoIndexStatus.revision}.`
       );
-      if (repoIndexStatus.progress >= 0 && repoIndexStatus.progress < 100) {
+      if (
+        repoIndexStatus.progress >= 0 &&
+        repoIndexStatus.progress < WorkerReservedProgress.COMPLETED
+      ) {
         this.log.info(`Repo is still in indexing. Skip index for ${repo.uri}`);
-      } else if (repoIndexStatus.progress === 100 && repoIndexStatus.revision === repo.revision) {
+      } else if (
+        repoIndexStatus.progress === WorkerReservedProgress.COMPLETED &&
+        repoIndexStatus.revision === repo.revision
+      ) {
         this.log.info(`Repo does not change since last index. Skip index for ${repo.uri}.`);
       } else {
         const payload = {

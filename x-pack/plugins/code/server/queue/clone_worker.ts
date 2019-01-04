@@ -5,7 +5,12 @@
  */
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
+import {
+  CloneProgress,
+  CloneWorkerProgress,
+  CloneWorkerResult,
+  WorkerReservedProgress,
+} from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -45,7 +50,11 @@ export class CloneWorker extends AbstractGitWorker {
     this.log.info(`Clone job done for ${res.repo.uri}`);
 
     if (this.socketService) {
-      this.socketService.broadcastCloneProgress(res.repo.uri, 100, undefined);
+      this.socketService.broadcastCloneProgress(
+        res.repo.uri,
+        WorkerReservedProgress.COMPLETED,
+        undefined
+      );
     }
 
     // Throw out a repository index request.
@@ -65,7 +74,7 @@ export class CloneWorker extends AbstractGitWorker {
     const repo = RepositoryUtils.buildRepository(url);
     const progress: CloneWorkerProgress = {
       uri: repo.uri,
-      progress: 0,
+      progress: WorkerReservedProgress.INIT,
       timestamp: new Date(),
     };
     return await this.objectClient.setRepositoryGitStatus(repo.uri, progress);

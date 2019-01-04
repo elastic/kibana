@@ -7,7 +7,13 @@
 import moment from 'moment';
 import sinon from 'sinon';
 
-import { CloneProgress, CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
+import {
+  CloneProgress,
+  CloneWorkerProgress,
+  Repository,
+  WorkerProgress,
+  WorkerReservedProgress,
+} from '../../model';
 import {
   RepositoryGitStatusReservedField,
   RepositoryLspIndexStatusReservedField,
@@ -164,7 +170,7 @@ test('Next job should not execute when repo is still in clone.', done => {
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getStub = createGetStub(50, 100, 'newrevision');
+  const getStub = createGetStub(50, WorkerReservedProgress.COMPLETED, 'newrevision');
   esClient.get = getStub;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;
@@ -210,7 +216,7 @@ test('Next job should not execute when repo is still in the preivous index job.'
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getStub = createGetStub(100, 50, 'newrevision');
+  const getStub = createGetStub(WorkerReservedProgress.COMPLETED, 50, 'newrevision');
   esClient.get = getStub;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;
@@ -257,7 +263,11 @@ test('Next job should not execute when repo revision did not change.', done => {
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getStub = createGetStub(100, 100, 'master');
+  const getStub = createGetStub(
+    WorkerReservedProgress.COMPLETED,
+    WorkerReservedProgress.COMPLETED,
+    'master'
+  );
   esClient.get = getStub;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;
@@ -304,7 +314,11 @@ test('Next job should execute.', done => {
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getStub = createGetStub(100, 100, 'newrevision');
+  const getStub = createGetStub(
+    WorkerReservedProgress.COMPLETED,
+    WorkerReservedProgress.COMPLETED,
+    'newrevision'
+  );
   esClient.get = getStub;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;
