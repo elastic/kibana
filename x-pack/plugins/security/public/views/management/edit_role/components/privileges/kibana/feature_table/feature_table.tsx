@@ -27,6 +27,7 @@ import {
   PRIVILEGE_SOURCE,
 } from '../../../../../../../lib/effective_privileges';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
 
 interface Props {
   role: Role;
@@ -171,23 +172,15 @@ export class FeatureTable extends Component<Props, {}> {
           !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
 
         if (!canChangePrivilege) {
-          return (
-            <EuiText>
-              {_.capitalize(actualPrivilegeValue || 'None')}{' '}
-              {this.props.showLocks && (
-                <sup>
-                  <EuiIconTip
-                    type={'lock'}
-                    content={this.props.intl.formatMessage({
-                      id: 'foo',
-                      defaultMessage: privilegeExplanation.details,
-                    })}
-                    size={'s'}
-                  />
-                </sup>
-              )}
-            </EuiText>
-          );
+          const tipProps: Record<string, string> = {};
+          if (this.props.showLocks) {
+            tipProps.iconType = 'lock';
+            tipProps.tooltipContent = this.props.intl.formatMessage({
+              id: 'foo',
+              defaultMessage: privilegeExplanation.details,
+            });
+          }
+          return <PrivilegeDisplay privilege={actualPrivilegeValue} {...tipProps} />;
         }
 
         const privilegeOptions = featurePrivileges.map(privilege => {
@@ -195,11 +188,9 @@ export class FeatureTable extends Component<Props, {}> {
           return {
             disabled: !isAllowedPrivilege,
             value: privilege,
-            inputDisplay: <EuiText>{_.capitalize(privilege)}</EuiText>,
+            inputDisplay: <PrivilegeDisplay privilege={privilege} styleMissingPrivilege={false} />,
             dropdownDisplay: (
-              <EuiText>
-                <strong>{_.capitalize(privilege)}</strong>
-              </EuiText>
+              <PrivilegeDisplay privilege={privilege} styleMissingPrivilege={false} />
             ),
           };
         });
@@ -212,7 +203,9 @@ export class FeatureTable extends Component<Props, {}> {
               {
                 disabled: !allowsNone,
                 value: NO_PRIVILEGE_VALUE,
-                inputDisplay: <EuiText>None</EuiText>,
+                inputDisplay: (
+                  <PrivilegeDisplay privilege={NO_PRIVILEGE_VALUE} styleMissingPrivilege={false} />
+                ),
                 dropdownDisplay: (
                   <EuiText>
                     <strong>No privileges</strong>

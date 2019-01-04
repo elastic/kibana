@@ -23,6 +23,7 @@ import {
   PRIVILEGE_SOURCE,
 } from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
+import { PrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -140,24 +141,24 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
             case PRIVILEGE_SOURCE.NONE:
             case PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY:
               return (
-                <EuiText>
-                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                </EuiText>
+                <PrivilegeDisplay
+                  privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
+                />
               );
             case PRIVILEGE_SOURCE.EFFECTIVE:
               return (
-                <EuiText>
-                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                </EuiText>
+                <PrivilegeDisplay
+                  privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
+                />
               );
             case PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED:
               return (
-                <EuiText>
-                  {_.capitalize(hasCustomizations ? 'Custom' : actualPrivilege.privilege)}
-                </EuiText>
+                <PrivilegeDisplay
+                  privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
+                />
               );
             default:
-              return <EuiText color="danger">{'**unknown**'}</EuiText>;
+              return <PrivilegeDisplay privilege={'**unknown**'} color="danger" />;
           }
         },
       },

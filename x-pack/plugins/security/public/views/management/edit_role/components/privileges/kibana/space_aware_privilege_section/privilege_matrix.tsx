@@ -28,7 +28,7 @@ import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
-import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { PrivilegeDisplay } from './privilege_display';
 
 interface Props {
   role: Role;
@@ -177,20 +177,14 @@ export class PrivilegeMatrix extends Component<Props, State> {
           render: (feature: Feature & { isBase: boolean }, record: TableRow) => {
             if (item.isGlobal) {
               if (feature.isBase) {
-                return (
-                  <EuiText>
-                    <strong>
-                      {_.capitalize((globalPrivilege.minimum || []).join(',') || 'None')}
-                    </strong>
-                  </EuiText>
-                );
+                return <PrivilegeDisplay privilege={globalPrivilege.minimum} />;
               }
 
               const actualPrivileges = this.props.effectivePrivileges.getActualGlobalFeaturePrivilege(
                 feature.id
               );
 
-              return <EuiText>{_.capitalize(actualPrivileges || NO_PRIVILEGE_VALUE)}</EuiText>;
+              return <PrivilegeDisplay privilege={actualPrivileges} />;
             } else {
               // not global
 
@@ -199,11 +193,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
                   item.spacesIndex
                 );
 
-                return (
-                  <EuiText>
-                    <strong>{_.capitalize(actualBasePrivileges || NO_PRIVILEGE_VALUE)}</strong>
-                  </EuiText>
-                );
+                return <PrivilegeDisplay privilege={actualBasePrivileges} />;
               }
 
               const actualPrivileges = this.props.effectivePrivileges.getActualSpaceFeaturePrivilege(
@@ -211,7 +201,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 item.spacesIndex
               );
 
-              return <EuiText>{_.capitalize(actualPrivileges || NO_PRIVILEGE_VALUE)}</EuiText>;
+              return <PrivilegeDisplay privilege={actualPrivileges} />;
             }
           },
         };
