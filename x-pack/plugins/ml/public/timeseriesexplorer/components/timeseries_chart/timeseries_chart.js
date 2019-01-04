@@ -615,7 +615,8 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
       selectedJob,
       showAnnotations,
       showForecast,
-      showModelBounds
+      showModelBounds,
+      intl
     } = this.props;
 
     if (focusChartData === undefined) {
@@ -857,7 +858,8 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     const {
       autoZoomDuration,
       modelPlotEnabled,
-      timefilter
+      timefilter,
+      intl
     } = this.props;
 
     const setZoomInterval = this.setZoomInterval.bind(this);
@@ -921,8 +923,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
         .text(intl.formatMessage({
           id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelBoundsNotAvailableLabel',
           defaultMessage: 'Model bounds are not available',
-        })
-      );
+        }));
 
       modelPlotLabel.attr('x', (fcsWidth - (modelPlotLabel.node().getBBox().width + 10)));
     }
