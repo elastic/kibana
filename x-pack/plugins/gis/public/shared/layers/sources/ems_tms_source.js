@@ -6,19 +6,50 @@
 import React from 'react';
 import { TMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
-import { EuiText } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSelect,
+  EuiFormRow
+} from '@elastic/eui';
+import _ from 'lodash';
+
 
 export class EMSTMSSource extends TMSSource {
 
   static type = 'EMS_TMS';
 
-  static typeDisplayName = 'TMS';
+  static typeDisplayName = 'Elastic Maps Service Tile Service';
 
   static createDescriptor(serviceId) {
     return {
       type: EMSTMSSource.type,
       id: serviceId
     };
+  }
+
+  static renderEditor({ dataSourcesMeta, onPreviewSource }) {
+
+    const emsTmsOptionsRaw = _.get(dataSourcesMeta, "ems.tms", []);
+    const emsTileOptions = emsTmsOptionsRaw.map((service) => ({
+      value: service.id,
+      text: service.id //due to not having human readable names
+    }));
+
+    const onChange = ({ target }) => {
+      const selectedId = target.options[target.selectedIndex].value;
+      const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
+      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, emsTmsOptionsRaw);
+      onPreviewSource(emsTMSSource);
+    };
+    return (
+      <EuiFormRow label="Tile service">
+        <EuiSelect
+          hasNoInitialSelection
+          options={emsTileOptions}
+          onChange={onChange}
+        />
+      </EuiFormRow>
+    );
   }
 
   constructor(descriptor, emsTileServices) {
