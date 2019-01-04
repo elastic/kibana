@@ -19,9 +19,7 @@ import {
   EuiIcon,
   EuiText,
   EuiFieldText,
-  EuiPage,
   EuiComboBox,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -386,262 +384,260 @@ class EditUserUI extends Component {
     }
 
     return (
-      <EuiPage className="mgtUsersEditPage">
-        <EuiPageBody>
-          <EuiPageContent className="mgtUsersEditPage__content">
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h2>
-                    {isNewUser ?
-                      <FormattedMessage
-                        id="xpack.security.management.users.editUser.newUserTitle"
-                        defaultMessage="New user"
-                      />
-                      :
-                      <FormattedMessage
-                        id="xpack.security.management.users.editUser.editUserTitle"
-                        defaultMessage="Edit {userName} user"
-                        values={{ userName: user.username }}
-                      />
-                    }
-                  </h2>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-              {reserved && (
-                <EuiPageContentHeaderSection>
-                  <EuiIcon type="lock" size="l" color="subdued" />
-                </EuiPageContentHeaderSection>
-              )}
-            </EuiPageContentHeader>
-            <EuiPageContentBody>
-              {reserved && (
-                <EuiText size="s" color="subdued">
-                  <p>
+      <div className="mgtUsersEditPage">
+        <EuiPageContent className="mgtUsersEditPage__content">
+          <EuiPageContentHeader>
+            <EuiPageContentHeaderSection>
+              <EuiTitle>
+                <h2>
+                  {isNewUser ?
                     <FormattedMessage
-                      id="xpack.security.management.users.editUser.modifyingReservedUsersDescription"
-                      defaultMessage="Reserved users are built-in and cannot be removed or modified. Only the password
-                      may be changed."
+                      id="xpack.security.management.users.editUser.newUserTitle"
+                      defaultMessage="New user"
                     />
-                  </p>
-                </EuiText>
-              )}
+                    :
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUser.editUserTitle"
+                      defaultMessage="Edit {userName} user"
+                      values={{ userName: user.username }}
+                    />
+                  }
+                </h2>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+            {reserved && (
+              <EuiPageContentHeaderSection>
+                <EuiIcon type="lock" size="l" color="subdued" />
+              </EuiPageContentHeaderSection>
+            )}
+          </EuiPageContentHeader>
+          <EuiPageContentBody>
+            {reserved && (
+              <EuiText size="s" color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.security.management.users.editUser.modifyingReservedUsersDescription"
+                    defaultMessage="Reserved users are built-in and cannot be removed or modified. Only the password
+                    may be changed."
+                  />
+                </p>
+              </EuiText>
+            )}
 
-              {showDeleteConfirmation ? (
-                <ConfirmDelete
-                  onCancel={this.onCancelDelete}
-                  apiClient={apiClient}
-                  usersToDelete={[user.username]}
-                  callback={this.handleDelete}
-                />
-              ) : null}
+            {showDeleteConfirmation ? (
+              <ConfirmDelete
+                onCancel={this.onCancelDelete}
+                apiClient={apiClient}
+                usersToDelete={[user.username]}
+                callback={this.handleDelete}
+              />
+            ) : null}
 
-              <form
-                onSubmit={event => {
-                  event.preventDefault();
-                }}
-              >
-                <EuiForm>
-                  <EuiFormRow
-                    isInvalid={!!this.usernameError()}
-                    error={this.usernameError()}
-                    helpText={
-                      !isNewUser && !reserved
-                        ? intl.formatMessage({
-                          id: "xpack.security.management.users.editUser.changingUserNameAfterCreationDescription",
-                          defaultMessage: "Username's cannot be changed after creation."
-                        })
-                        : null
+            <form
+              onSubmit={event => {
+                event.preventDefault();
+              }}
+            >
+              <EuiForm>
+                <EuiFormRow
+                  isInvalid={!!this.usernameError()}
+                  error={this.usernameError()}
+                  helpText={
+                    !isNewUser && !reserved
+                      ? intl.formatMessage({
+                        id: "xpack.security.management.users.editUser.changingUserNameAfterCreationDescription",
+                        defaultMessage: "Username's cannot be changed after creation."
+                      })
+                      : null
+                  }
+                  label={intl.formatMessage({
+                    id: "xpack.security.management.users.editUser.usernameFormRowLabel",
+                    defaultMessage: "Username"
+                  })}
+                >
+                  <EuiFieldText
+                    onBlur={event =>
+                      this.setState({
+                        user: {
+                          ...this.state.user,
+                          username: event.target.value || '',
+                        },
+                      })
                     }
-                    label={intl.formatMessage({
-                      id: "xpack.security.management.users.editUser.usernameFormRowLabel",
-                      defaultMessage: "Username"
-                    })}
-                  >
-                    <EuiFieldText
-                      onBlur={event =>
-                        this.setState({
-                          user: {
-                            ...this.state.user,
-                            username: event.target.value || '',
-                          },
-                        })
-                      }
-                      value={user.username || ''}
-                      name="username"
-                      data-test-subj="userFormUserNameInput"
-                      disabled={!isNewUser}
-                      onChange={event => {
-                        this.setState({
-                          user: { ...this.state.user, username: event.target.value },
-                        });
-                      }}
-                    />
-                  </EuiFormRow>
-                  {isNewUser ? this.passwordFields() : null}
-                  {reserved ? null : (
-                    <Fragment>
-                      <EuiFormRow
-                        label={intl.formatMessage({
-                          id: "xpack.security.management.users.editUser.fullNameFormRowLabel",
-                          defaultMessage: "Full name"
-                        })}
-                      >
-                        <EuiFieldText
-                          onBlur={event =>
-                            this.setState({
-                              user: {
-                                ...this.state.user,
-                                full_name: event.target.value || '',
-                              },
-                            })
-                          }
-                          data-test-subj="userFormFullNameInput"
-                          name="full_name"
-                          value={user.full_name || ''}
-                          onChange={event => {
-                            this.setState({
-                              user: {
-                                ...this.state.user,
-                                full_name: event.target.value,
-                              },
-                            });
-                          }}
-                        />
-                      </EuiFormRow>
-                      <EuiFormRow
-                        isInvalid={!!this.emailError()}
-                        error={this.emailError()}
-                        label={intl.formatMessage({
-                          id: "xpack.security.management.users.editUser.emailAddressFormRowLabel",
-                          defaultMessage: "Email address"
-                        })}
-                      >
-                        <EuiFieldText
-                          onBlur={event =>
-                            this.setState({
-                              user: {
-                                ...this.state.user,
-                                email: event.target.value || '',
-                              },
-                            })
-                          }
-                          data-test-subj="userFormEmailInput"
-                          name="email"
-                          value={user.email || ''}
-                          onChange={event => {
-                            this.setState({
-                              user: {
-                                ...this.state.user,
-                                email: event.target.value,
-                              },
-                            });
-                          }}
-                        />
-                      </EuiFormRow>
-                    </Fragment>
-                  )}
-                  <EuiFormRow
-                    label={intl.formatMessage({
-                      id: "xpack.security.management.users.editUser.rolesFormRowLabel",
-                      defaultMessage: "Roles"
-                    })}
-                  >
-                    <EuiComboBox
-                      data-test-subj="userFormRolesDropdown"
-                      placeholder={intl.formatMessage({
-                        id: "xpack.security.management.users.editUser.addRolesPlaceholder",
-                        defaultMessage: "Add roles"
+                    value={user.username || ''}
+                    name="username"
+                    data-test-subj="userFormUserNameInput"
+                    disabled={!isNewUser}
+                    onChange={event => {
+                      this.setState({
+                        user: { ...this.state.user, username: event.target.value },
+                      });
+                    }}
+                  />
+                </EuiFormRow>
+                {isNewUser ? this.passwordFields() : null}
+                {reserved ? null : (
+                  <Fragment>
+                    <EuiFormRow
+                      label={intl.formatMessage({
+                        id: "xpack.security.management.users.editUser.fullNameFormRowLabel",
+                        defaultMessage: "Full name"
                       })}
-                      onChange={this.onRolesChange}
-                      isDisabled={reserved}
-                      name="roles"
-                      options={roles.map(role => {
-                        return { 'data-test-subj': `roleOption-${role.name}`, label: role.name };
-                      })}
-                      selectedOptions={selectedRoles}
-                    />
-                  </EuiFormRow>
-
-                  {isNewUser || showChangePasswordForm ? null : (
-                    <EuiFormRow label="Password">
-                      <EuiLink onClick={this.toggleChangePasswordForm}>
-                        <FormattedMessage
-                          id="xpack.security.management.users.editUser.changePasswordButtonLabel"
-                          defaultMessage="Change password"
-                        />
-                      </EuiLink>
-                    </EuiFormRow>
-                  )}
-                  {this.changePasswordForm()}
-
-                  <EuiHorizontalRule />
-
-                  {reserved && (
-                    <EuiButton onClick={() => changeUrl(USERS_PATH)}>
-                      <FormattedMessage
-                        id="xpack.security.management.users.editUser.returnToUserListButtonLabel"
-                        defaultMessage="Return to user list"
+                    >
+                      <EuiFieldText
+                        onBlur={event =>
+                          this.setState({
+                            user: {
+                              ...this.state.user,
+                              full_name: event.target.value || '',
+                            },
+                          })
+                        }
+                        data-test-subj="userFormFullNameInput"
+                        name="full_name"
+                        value={user.full_name || ''}
+                        onChange={event => {
+                          this.setState({
+                            user: {
+                              ...this.state.user,
+                              full_name: event.target.value,
+                            },
+                          });
+                        }}
                       />
-                    </EuiButton>
-                  )}
-                  {reserved ? null : (
-                    <EuiFlexGroup responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          disabled={this.cannotSaveUser()}
-                          fill
-                          data-test-subj="userFormSaveButton"
-                          onClick={() => this.saveUser()}
-                        >
-                          {isNewUser ?
-                            <FormattedMessage
-                              id="xpack.security.management.users.editUser.createUserButtonLabel"
-                              defaultMessage="Create user"
-                            />
-                            :
-                            <FormattedMessage
-                              id="xpack.security.management.users.editUser.updateUserButtonLabel"
-                              defaultMessage="Update user"
-                            />}
-                        </EuiButton>
-                      </EuiFlexItem>
+                    </EuiFormRow>
+                    <EuiFormRow
+                      isInvalid={!!this.emailError()}
+                      error={this.emailError()}
+                      label={intl.formatMessage({
+                        id: "xpack.security.management.users.editUser.emailAddressFormRowLabel",
+                        defaultMessage: "Email address"
+                      })}
+                    >
+                      <EuiFieldText
+                        onBlur={event =>
+                          this.setState({
+                            user: {
+                              ...this.state.user,
+                              email: event.target.value || '',
+                            },
+                          })
+                        }
+                        data-test-subj="userFormEmailInput"
+                        name="email"
+                        value={user.email || ''}
+                        onChange={event => {
+                          this.setState({
+                            user: {
+                              ...this.state.user,
+                              email: event.target.value,
+                            },
+                          });
+                        }}
+                      />
+                    </EuiFormRow>
+                  </Fragment>
+                )}
+                <EuiFormRow
+                  label={intl.formatMessage({
+                    id: "xpack.security.management.users.editUser.rolesFormRowLabel",
+                    defaultMessage: "Roles"
+                  })}
+                >
+                  <EuiComboBox
+                    data-test-subj="userFormRolesDropdown"
+                    placeholder={intl.formatMessage({
+                      id: "xpack.security.management.users.editUser.addRolesPlaceholder",
+                      defaultMessage: "Add roles"
+                    })}
+                    onChange={this.onRolesChange}
+                    isDisabled={reserved}
+                    name="roles"
+                    options={roles.map(role => {
+                      return { 'data-test-subj': `roleOption-${role.name}`, label: role.name };
+                    })}
+                    selectedOptions={selectedRoles}
+                  />
+                </EuiFormRow>
+
+                {isNewUser || showChangePasswordForm ? null : (
+                  <EuiFormRow label="Password">
+                    <EuiLink onClick={this.toggleChangePasswordForm}>
+                      <FormattedMessage
+                        id="xpack.security.management.users.editUser.changePasswordButtonLabel"
+                        defaultMessage="Change password"
+                      />
+                    </EuiLink>
+                  </EuiFormRow>
+                )}
+                {this.changePasswordForm()}
+
+                <EuiHorizontalRule />
+
+                {reserved && (
+                  <EuiButton onClick={() => changeUrl(USERS_PATH)}>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUser.returnToUserListButtonLabel"
+                      defaultMessage="Return to user list"
+                    />
+                  </EuiButton>
+                )}
+                {reserved ? null : (
+                  <EuiFlexGroup responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        disabled={this.cannotSaveUser()}
+                        fill
+                        data-test-subj="userFormSaveButton"
+                        onClick={() => this.saveUser()}
+                      >
+                        {isNewUser ?
+                          <FormattedMessage
+                            id="xpack.security.management.users.editUser.createUserButtonLabel"
+                            defaultMessage="Create user"
+                          />
+                          :
+                          <FormattedMessage
+                            id="xpack.security.management.users.editUser.updateUserButtonLabel"
+                            defaultMessage="Update user"
+                          />}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        data-test-subj="userFormCancelButton"
+                        onClick={() => changeUrl(USERS_PATH)}
+                      >
+                        <FormattedMessage
+                          id="xpack.security.management.users.editUser.cancelButtonLabel"
+                          defaultMessage="Cancel"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true} />
+                    {isNewUser || reserved ? null : (
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
-                          data-test-subj="userFormCancelButton"
-                          onClick={() => changeUrl(USERS_PATH)}
+                          onClick={() => {
+                            this.setState({ showDeleteConfirmation: true });
+                          }}
+                          data-test-subj="userFormDeleteButton"
+                          color="danger"
                         >
                           <FormattedMessage
-                            id="xpack.security.management.users.editUser.cancelButtonLabel"
-                            defaultMessage="Cancel"
+                            id="xpack.security.management.users.editUser.deleteUserButtonLabel"
+                            defaultMessage="Delete user"
                           />
                         </EuiButtonEmpty>
                       </EuiFlexItem>
-                      <EuiFlexItem grow={true} />
-                      {isNewUser || reserved ? null : (
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            onClick={() => {
-                              this.setState({ showDeleteConfirmation: true });
-                            }}
-                            data-test-subj="userFormDeleteButton"
-                            color="danger"
-                          >
-                            <FormattedMessage
-                              id="xpack.security.management.users.editUser.deleteUserButtonLabel"
-                              defaultMessage="Delete user"
-                            />
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  )}
-                </EuiForm>
-              </form>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+                    )}
+                  </EuiFlexGroup>
+                )}
+              </EuiForm>
+            </form>
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </div>
     );
   }
 }
