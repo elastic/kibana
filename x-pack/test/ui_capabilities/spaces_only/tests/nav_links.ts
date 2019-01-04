@@ -97,7 +97,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'visualize_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('timelion'));
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('visualize'));
             break;
           default:
             throw new UnreachableError(scenario);
