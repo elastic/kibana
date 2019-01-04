@@ -17,34 +17,28 @@
  * under the License.
  */
 
-import { run, combineErrors } from './run';
-import * as Eslint from './eslint';
-import * as Tslint from './tslint';
-import * as Sasslint from './sasslint';
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
+import fs from 'fs';
+import { safeLoad } from 'js-yaml';
+import { makeRe } from 'minimatch';
+import path from 'path';
 
-run(async ({ log }) => {
-  const files = await getFilesForCommit();
-  const errors = [];
+// load the include globs from .sass-lint.yml and convert them to regular expressions for filtering files
+const sassLintPath = path.resolve(__dirname, '..', '..', '..', '.sass-lint.yml');
+const sassLintConfig = safeLoad(fs.readFileSync(sassLintPath));
+const { files: { include: includeGlobs } } = sassLintConfig;
+const includeRegex = includeGlobs.map(glob => makeRe(glob));
 
-  try {
-    await checkFileCasing(log, files);
-  } catch (error) {
-    errors.push(error);
-  }
-
-  for (const Linter of [Eslint, Tslint, Sasslint]) {
-    const filesToLint = Linter.pickFilesToLint(log, files);
-    if (filesToLint.length > 0) {
-      try {
-        await Linter.lintFiles(log, filesToLint);
-      } catch (error) {
-        errors.push(error);
-      }
+function matchesInclude(file) {
+  for (let i = 0; i < includeRegex.length; i++) {
+    if (includeRegex[i].test(file.relativePath)) {
+      return true;
     }
   }
+  return false;
+}
 
-  if (errors.length) {
-    throw combineErrors(errors);
-  }
-});
+export function pickFilesToLint(log, files) {
+  return files
+    .filter(file => file.isSass())
+    .filter(matchesInclude);
+}
