@@ -78,37 +78,15 @@ export class PrivilegeMatrix extends Component<Props, State> {
   private renderTable = () => {
     const { role, features } = this.props;
 
-    const { global, spaces: spacePrivileges = [] } = role.kibana;
+    const { spaces: spacePrivileges = [] } = role.kibana;
+
+    const globalPrivilege = this.locateGlobalPrivilege();
 
     const items: any[] = [];
-    if (global.minimum.length > 0 || Object.keys(global.feature).length > 0) {
-      items.push({
-        isGlobal: true,
-        spaces: [
-          {
-            id: '*',
-            name: 'Global (all spaces)',
-            initials: '*',
-            color: '#afafaf',
-          },
-        ],
-        headerSpaces: [
-          {
-            id: '*',
-            name: 'Global (all spaces)',
-            initials: '*',
-            color: '#afafaf',
-          },
-        ],
-        privileges: {
-          minimum: global.minimum,
-          feature: global.feature,
-        },
-      });
-    }
 
     spacePrivileges.forEach((spacePrivs, spacesIndex) => {
       items.push({
+        isGlobal: spacePrivs.spaces.includes('*'),
         spacesIndex,
         spaces: spacePrivs.spaces.map(spaceId =>
           this.props.spaces.find(space => space.id === spaceId)
@@ -197,13 +175,13 @@ export class PrivilegeMatrix extends Component<Props, State> {
             </EuiFlexGroup>
           ),
           render: (feature: Feature & { isBase: boolean }, record: TableRow) => {
-            const { kibana } = record.role;
-
             if (item.isGlobal) {
               if (feature.isBase) {
                 return (
-                  <EuiText color={kibana.global.minimum ? 'default' : 'subdued'}>
-                    {_.capitalize((kibana.global.minimum || []).join(',') || 'None')}
+                  <EuiText>
+                    <strong>
+                      {_.capitalize((globalPrivilege.minimum || []).join(',') || 'None')}
+                    </strong>
                   </EuiText>
                 );
               }
@@ -212,23 +190,28 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 feature.id
               );
 
-              return (
-                <EuiText color={actualPrivileges ? 'default' : 'subdued'}>
-                  {_.capitalize(actualPrivileges || NO_PRIVILEGE_VALUE)}
-                </EuiText>
-              );
+              return <EuiText>{_.capitalize(actualPrivileges || NO_PRIVILEGE_VALUE)}</EuiText>;
             } else {
               // not global
+
+              if (feature.isBase) {
+                const actualBasePrivileges = this.props.effectivePrivileges.getActualSpaceBasePrivilege(
+                  item.spacesIndex
+                );
+
+                return (
+                  <EuiText>
+                    <strong>{_.capitalize(actualBasePrivileges || NO_PRIVILEGE_VALUE)}</strong>
+                  </EuiText>
+                );
+              }
+
               const actualPrivileges = this.props.effectivePrivileges.getActualSpaceFeaturePrivilege(
                 feature.id,
                 item.spacesIndex
               );
 
-              return (
-                <EuiText color={actualPrivileges ? 'default' : 'subdued'}>
-                  {_.capitalize(actualPrivileges || NO_PRIVILEGE_VALUE)}
-                </EuiText>
-              );
+              return <EuiText>{_.capitalize(actualPrivileges || NO_PRIVILEGE_VALUE)}</EuiText>;
             }
           },
         };
@@ -236,6 +219,16 @@ export class PrivilegeMatrix extends Component<Props, State> {
     ];
 
     return <EuiInMemoryTable columns={columns} items={rows} />;
+  };
+
+  private locateGlobalPrivilege = () => {
+    return (
+      this.props.role.kibana.spaces.find(spacePriv => spacePriv.spaces.includes('*')) || {
+        spaces: ['*'],
+        minimum: [],
+        feature: [],
+      }
+    );
   };
 
   private hideModal = () => {
