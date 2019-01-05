@@ -5,10 +5,12 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   // @ts-ignore
   EuiButtonGroup,
   EuiComboBox,
+  EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -17,72 +19,98 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
+import { EuiIcon } from '@elastic/eui';
+import { unique } from 'lodash';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import styled from 'styled-components';
+import {
+  repositorySearch,
+  saveSearchOptions,
+  SearchOptions as ISearchOptions,
+} from '../../../actions';
+import { RootState } from '../../../reducers';
+
+const SelectedRepo = styled.div`
+  max-width: 60%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+const Icon = styled(EuiIcon)`
+  cursor: pointer;
+`;
+
+enum Scope {
+  Default = 'Default',
+  Symbols = 'Symbols',
+  Repos = 'Repos',
+}
 
 interface State {
   isFlyoutOpen: boolean;
   repoScopes: any[];
+  scope: Scope;
 }
 
 interface Props {
-  scope: string;
-  repoScopesOptions: any[];
-  selectedRepoScopes: any[];
+  repositorySearch: (p: { query: string }) => void;
+  saveSearchOptions: (searchOptions: ISearchOptions) => void;
+  repoSearchResults: any[];
+  searchLoading: boolean;
+  searchOptions: ISearchOptions;
 }
 
-export class Options extends Component<Props, State> {
-  public static defaultProps: Props = {
-    scope: 'default',
-    repoScopesOptions: [
-      {
-        id: `default`,
-        label: 'Default',
-      },
-      {
-        id: `symbol`,
-        label: 'Symbol',
-      },
-      {
-        id: `repository`,
-        label: 'Repository',
-      },
-    ],
-    selectedRepoScopes: [
-      {
-        label: 'Repo 1',
-      },
-      {
-        label: 'Repo 2',
-      },
-      {
-        label: 'Repo 3',
-      },
-    ],
-  };
-
+class Options extends Component<Props, State> {
   public state: State = {
     isFlyoutOpen: false,
-    repoScopes: [
-      {
-        uri: 'Repo 1',
-      },
-      {
-        uri: 'Repo 2',
-      },
-    ],
+    scope: Scope.Default,
+    repoScopes: this.props.searchOptions.repoScopes,
+  };
+
+  public buttonGroupOptions = [
+    {
+      id: Scope.Default,
+      label: Scope.Default,
+    },
+    {
+      id: Scope.Symbols,
+      label: Scope.Symbols,
+    },
+    {
+      id: Scope.Repos,
+      label: Scope.Repos,
+    },
+  ];
+
+  public applyAndClose = () => {
+    this.props.saveSearchOptions({ repoScopes: this.state.repoScopes });
+    this.setState({ isFlyoutOpen: false });
+  };
+
+  public removeRepoScope = (r: string) => () => {
+    this.setState(prevState => ({
+      repoScopes: prevState.repoScopes.filter(rs => rs !== r),
+    }));
   };
 
   public render() {
     let optionsFlyout;
     if (this.state.isFlyoutOpen) {
       const toggleIdToSelectedMap = {
-        [this.props.scope]: true,
+        [this.state.scope]: true,
       };
 
-      const selectedRepos = this.state.repoScopes.map((r: any) => {
+      const selectedRepos = this.state.repoScopes.map((r: string) => {
         return (
-          <div>
-            <EuiPanel paddingSize="s">{r.uri}</EuiPanel>
+          <div key={r}>
+            <EuiPanel paddingSize="s">
+              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                <SelectedRepo>{r}</SelectedRepo>
+                <Icon type="cross" onClick={this.removeRepoScope(r)} />
+              </EuiFlexGroup>
+            </EuiPanel>
             <EuiSpacer size="s" />
           </div>
         );
@@ -96,33 +124,41 @@ export class Options extends Component<Props, State> {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <Fragment>
-              <EuiButtonGroup
-                name="Primary"
-                options={this.props.repoScopesOptions}
-                idToSelectedMap={toggleIdToSelectedMap}
-                onChange={this.onScopeChanged}
-                color="primary"
-              />
-              <EuiSpacer size="m" />
-              <EuiTitle size="xs">
-                <h3>Repo Scope</h3>
-              </EuiTitle>
-              <EuiText size="xs">Add indexed repos to your search scope</EuiText>
-              <EuiSpacer size="m" />
-              <EuiComboBox
-                placeholder="Search to add repos"
-                async={true}
-                options={this.props.selectedRepoScopes}
-                selectedOptions={[]}
-                isLoading={false}
-                onChange={this.onRepoChange}
-                onSearchChange={this.onRepoSearchChange}
-                isClearable={true}
-              />
-              <EuiSpacer size="m" />
-              {selectedRepos}
-            </Fragment>
+            <EuiButtonGroup
+              name="Primary"
+              options={this.buttonGroupOptions}
+              idToSelectedMap={toggleIdToSelectedMap}
+              onChange={this.onScopeChanged}
+              color="primary"
+            />
+            <EuiSpacer size="m" />
+            <EuiTitle size="xs">
+              <h3>Repo Scope</h3>
+            </EuiTitle>
+            <EuiText size="xs">Add indexed repos to your search scope</EuiText>
+            <EuiSpacer size="m" />
+            <EuiComboBox
+              placeholder="Search to add repos"
+              async={true}
+              options={this.props.repoSearchResults.map(repo => ({
+                id: repo.name,
+                label: repo.name,
+                uri: repo.uri,
+              }))}
+              selectedOptions={[]}
+              isLoading={this.props.searchLoading}
+              onChange={this.onRepoChange}
+              onSearchChange={this.onRepoSearchChange}
+              isClearable={true}
+            />
+            <EuiSpacer size="m" />
+            {selectedRepos}
+            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+              <EuiButton onClick={this.applyAndClose} fill={true} iconSide="right">
+                Apply and Close
+              </EuiButton>
+            </EuiFlexGroup>
           </EuiFlyoutBody>
         </EuiFlyout>
       );
@@ -141,15 +177,17 @@ export class Options extends Component<Props, State> {
   }
 
   private onScopeChanged = (scopeId: string) => {
-    // TODO(mengwei): handle scope id changes and apply to the search query.
+    this.setState({ scope: scopeId as Scope });
   };
 
-  private onRepoSearchChange = () => {
-    // TODO(qianliang): implement the data flow.
+  private onRepoSearchChange = (searchValue: string) => {
+    this.props.repositorySearch({ query: searchValue });
   };
 
-  private onRepoChange = () => {
-    // TODO(qianliang): implement the data flow.
+  private onRepoChange = (repos: any) => {
+    this.setState({
+      repoScopes: unique(repos.map((r: any) => r.uri)),
+    });
   };
 
   private toggleOptionsFlyout = () => {
@@ -164,3 +202,21 @@ export class Options extends Component<Props, State> {
     });
   };
 }
+
+const mapStateToProps = (state: RootState) => ({
+  repoSearchResults: state.search.repositorySearchResults
+    ? state.search.repositorySearchResults.repositories
+    : [],
+  searchLoading: state.search.isLoading,
+  searchOptions: state.search.searchOptions || { repoScopes: [] },
+});
+
+const mapDispatchToProps = {
+  repositorySearch,
+  saveSearchOptions,
+};
+
+export const SearchOptions = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Options);

@@ -10,19 +10,13 @@ import React, { Component } from 'react';
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import {
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionGroup,
   SuggestionsProvider,
 } from '../suggestions';
-import { Options } from './options';
+import { SearchOptions } from './options';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -413,7 +407,7 @@ export class QueryBar extends Component<Props, State> {
                       aria-activedescendant={activeDescendant}
                       role="textbox"
                     />
-                    <Options language="nihao" />
+                    <SearchOptions />
                   </div>
                 </div>
               </form>

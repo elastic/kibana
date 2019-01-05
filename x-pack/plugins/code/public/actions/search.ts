@@ -18,6 +18,10 @@ export interface RepositorySearchPayload {
   query: string;
 }
 
+export interface SearchOptions {
+  repoScopes: string[];
+}
+
 // For document search page
 export const documentSearch = createAction<DocumentSearchPayload>('DOCUMENT SEARCH');
 export const documentSearchSuccess = createAction<DocumentSearchResult>('DOCUMENT SEARCH SUCCESS');
@@ -36,3 +40,5 @@ export const repositorySearchQueryChanged = createAction<RepositorySearchPayload
 );
 export const repositoryTypeaheadSearchSuccess = createAction<string>('REPOSITORY SEARCH SUCCESS');
 export const repositoryTypeaheadSearchFailed = createAction<string>('REPOSITORY SEARCH FAILED');
+
+export const saveSearchOptions = createAction<SearchOptions>('SAVE SEARCH OPTIONS');

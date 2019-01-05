@@ -19,6 +19,8 @@ import {
   repositorySearchFailed,
   RepositorySearchPayload,
   repositorySearchSuccess,
+  saveSearchOptions,
+  SearchOptions,
 } from '../actions';
 import { SearchScope } from '../common/types';
 
@@ -32,6 +34,7 @@ export interface SearchState {
   error?: Error;
   documentSearchResults?: DocumentSearchResult;
   repositorySearchResults?: any;
+  searchOptions?: SearchOptions;
 }
 
 const initialState: SearchState = {
@@ -152,6 +155,10 @@ export const search = handleActions<SearchState, any>(
         return state;
       }
     },
+    [String(saveSearchOptions)]: (state: SearchState, action: Action<any>) =>
+      produce<SearchState>(state, draft => {
+        draft.searchOptions = action.payload;
+      }),
   },
   initialState
 );
