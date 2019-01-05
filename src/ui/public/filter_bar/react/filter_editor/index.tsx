@@ -20,10 +20,13 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  // @ts-ignore
+  EuiCodeEditor,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -45,6 +48,7 @@ import {
   getFilterParams,
   getIndexPatternFromFilter,
   getOperatorFromFilter,
+  getQueryDslFromFilter,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
 import { OperatorInput } from './operator_input';
@@ -64,6 +68,8 @@ interface State {
   params: any;
   useCustomLabel: boolean;
   customLabel: string | null;
+  queryDsl: string;
+  isCustomEditorOpen: boolean;
 }
 
 export class FilterEditor extends Component<Props, State> {
@@ -75,32 +81,26 @@ export class FilterEditor extends Component<Props, State> {
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias,
+      queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
+      isCustomEditorOpen: this.isUnknownFilterType(),
     };
   }
 
   public render() {
     return (
       <div>
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ maxWidth: '188px' }}>
-            <FieldInput
-              options={this.getFieldOptions()}
-              value={this.state.selectedField}
-              onChange={this.onFieldChange}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem style={{ maxWidth: '188px' }}>
-            <OperatorInput
-              field={this.state.selectedField}
-              value={this.state.selectedOperator}
-              onChange={this.onOperatorChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiPopoverTitle>
+          <EuiFlexGroup alignItems="baseline">
+            <EuiFlexItem>Edit filter</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
+                Edit as Query DSL
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
 
-        <EuiSpacer size="m" />
-
-        <div>{this.renderParamsEditor()}</div>
+        {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
 
         <EuiSpacer size="m" />
 
@@ -141,6 +141,86 @@ export class FilterEditor extends Component<Props, State> {
     );
   }
 
+  private renderRegularEditor() {
+    return (
+      <div>
+        <EuiFlexGroup>
+          <EuiFlexItem style={{ maxWidth: '188px' }}>
+            <FieldInput
+              options={this.getFieldOptions()}
+              value={this.state.selectedField}
+              onChange={this.onFieldChange}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem style={{ maxWidth: '188px' }}>
+            <OperatorInput
+              field={this.state.selectedField}
+              value={this.state.selectedOperator}
+              onChange={this.onOperatorChange}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        <div>{this.renderParamsEditor()}</div>
+      </div>
+    );
+  }
+
+  private renderCustomEditor() {
+    return (
+      <EuiFormRow label="Value">
+        <EuiCodeEditor
+          value={this.state.queryDsl}
+          onChange={this.onQueryDslChange}
+          mode="json"
+          width="400"
+        />
+      </EuiFormRow>
+    );
+  }
+
+  private renderParamsEditor() {
+    const indexPattern = this.getSelectedIndexPattern();
+    if (!indexPattern || !this.state.selectedOperator) {
+      return '';
+    }
+
+    switch (this.state.selectedOperator.type) {
+      case 'exists':
+        return '';
+      case 'phrase':
+        return (
+          <PhraseValueInput
+            indexPattern={indexPattern}
+            field={this.state.selectedField}
+            value={this.state.params}
+            onChange={this.onParamsChange}
+          />
+        );
+      case 'phrases':
+        return (
+          <PhrasesValuesInput
+            indexPattern={indexPattern}
+            field={this.state.selectedField}
+            values={this.state.params}
+            onChange={this.onParamsChange}
+          />
+        );
+    }
+  }
+
+  private toggleCustomEditor = () => {
+    const isCustomEditorOpen = !this.state.isCustomEditorOpen;
+    this.setState({ isCustomEditorOpen });
+  };
+
+  private isUnknownFilterType() {
+    const { type } = this.props.filter.meta;
+    return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
+  }
+
   private getFieldOptions() {
     return getFilterableFields(this.props.indexPatterns);
   }
@@ -174,28 +254,37 @@ export class FilterEditor extends Component<Props, State> {
   };
 
   private onCustomLabelSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      useCustomLabel: event.target.checked,
-      customLabel: event.target.checked ? '' : null,
-    });
+    const useCustomLabel = event.target.checked;
+    const customLabel = event.target.checked ? '' : null;
+    this.setState({ useCustomLabel, customLabel });
   };
 
   private onCustomLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      customLabel: event.target.value,
-    });
+    const customLabel = event.target.value;
+    this.setState({ customLabel });
   };
 
   private onParamsChange = (params: any) => {
     this.setState({ params });
   };
 
+  private onQueryDslChange = (queryDsl: string) => {
+    this.setState({ queryDsl });
+  };
+
   private onSubmit = () => {
-    const filter: MetaFilter | null = this.buildFilter();
+    const filter: MetaFilter | null = this.state.isCustomEditorOpen
+      ? this.buildCustomFilter()
+      : this.buildFilter();
+
     if (filter === null) {
       throw new Error('Cannot call onSubmit with empty filter');
     }
-    filter.meta.negate = get(this.state.selectedOperator, 'negate') || false;
+
+    if (!this.state.isCustomEditorOpen) {
+      filter.meta.negate = get(this.state.selectedOperator, 'negate') || false;
+    }
+
     filter.meta.alias = this.state.useCustomLabel ? this.state.customLabel : null;
     filter.$state = {
       store: this.props.filter.$state.store,
@@ -226,33 +315,10 @@ export class FilterEditor extends Component<Props, State> {
     }
   }
 
-  private renderParamsEditor() {
-    const indexPattern = this.getSelectedIndexPattern();
-    if (!indexPattern || !this.state.selectedOperator) {
-      return '';
-    }
-
-    switch (this.state.selectedOperator.type) {
-      case 'exists':
-        return '';
-      case 'phrase':
-        return (
-          <PhraseValueInput
-            indexPattern={indexPattern}
-            field={this.state.selectedField}
-            value={this.state.params}
-            onChange={this.onParamsChange}
-          />
-        );
-      case 'phrases':
-        return (
-          <PhrasesValuesInput
-            indexPattern={indexPattern}
-            field={this.state.selectedField}
-            values={this.state.params}
-            onChange={this.onParamsChange}
-          />
-        );
-    }
+  private buildCustomFilter(): MetaFilter {
+    const { negate, index } = this.props.filter.meta;
+    const newIndex = index || this.props.indexPatterns[0].id;
+    const customFilter = JSON.parse(this.state.queryDsl);
+    return { ...customFilter, meta: { negate, index: newIndex } };
   }
 }

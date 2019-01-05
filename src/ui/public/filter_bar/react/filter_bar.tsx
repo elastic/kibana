@@ -125,10 +125,10 @@ export class FilterBar extends Component<Props, State> {
         isOpen={this.state.isAddFilterPopoverOpen}
         closePopover={this.onCloseAddFilterPopover}
         anchorPosition="downCenter"
-        panelPaddingSize="none"
+        withTitle
       >
         <EuiFlexItem grow={false}>
-          <div style={{ padding: 16, width: 400 }}>
+          <div style={{ width: 400 }}>
             <FilterEditor
               filter={newFilter}
               indexPatterns={this.props.indexPatterns}

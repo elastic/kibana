@@ -130,9 +130,8 @@ export class FilterItem extends Component<Props, State> {
       {
         id: 1,
         width: 400,
-        title: 'Edit filter',
         content: (
-          <div style={{ padding: 16 }}>
+          <div>
             <FilterEditor
               filter={filter}
               indexPatterns={this.props.indexPatterns}
@@ -151,7 +150,7 @@ export class FilterItem extends Component<Props, State> {
         closePopover={this.closePopover}
         button={badge}
         anchorPosition="downCenter"
-        panelPaddingSize="none"
+        withTitle={true}
       >
         <EuiContextMenu initialPanelId={0} panels={panelTree} />
       </EuiPopover>
