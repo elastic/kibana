@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('shows save button', async () => {
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.existOrFail('discoverSaveButton');
+        await testSubjects.existOrFail('discoverSaveButton', 10000);
       });
     });
 
@@ -111,7 +111,7 @@ export default function ({ getPageObjects, getService }) {
 
       it(`doesn't show save button`, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.existOrFail('discoverNewButton');
+        await testSubjects.existOrFail('discoverNewButton', 10000);
         await testSubjects.missingOrFail('discoverSaveButton');
       });
     });
@@ -153,7 +153,7 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp');
+        await testSubjects.existOrFail('homeApp', 10000);
       });
     });
   });

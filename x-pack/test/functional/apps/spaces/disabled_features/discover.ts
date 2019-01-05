@@ -48,7 +48,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('discoverSaveButton');
+        await testSubjects.existOrFail('discoverSaveButton', 10000);
       });
     });
 
