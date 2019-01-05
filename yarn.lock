@@ -3397,6 +3397,11 @@ babel-plugin-check-es2015-constants@^6.22.0:
   dependencies:
     babel-runtime "^6.22.0"
 
+babel-plugin-idx@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-idx/-/babel-plugin-idx-2.4.0.tgz#5d144eb337fb22c4bf1ff75cb2e1c051a76a0323"
+  integrity sha512-+rEYZgSCLh0suJDlgZ64isSLhDW7Qxu6AnUMGhl/mW1kyYvfwqLqsDmgj3e5QXH0oX7A4Hq2x0BgqdU8tiuo5A==
+
 babel-plugin-inline-react-svg@^0.5.4:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/babel-plugin-inline-react-svg/-/babel-plugin-inline-react-svg-0.5.4.tgz#bc818f351cd9d78f5b3bfa7cc1da5f83e7b4010a"
@@ -11157,6 +11162,11 @@ icss-utils@^2.1.0:
   integrity sha1-g/Cg7DeL8yRheLbCrZE28TWxyWI=
   dependencies:
     postcss "^6.0.1"
+
+idx@^2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/idx/-/idx-2.5.2.tgz#4b405c2e6d68d04136e0a368a7ab35b9caa0595f"
+  integrity sha512-MLoGF4lQU5q/RqJJjRsuid52emu7tPVtSSZaYXsqRvSjvXdBEmIwk2urvbNvPBRU9Ox9I4WYnxiz2GjhU34Lrw==
 
 ieee754@^1.1.4:
   version "1.1.8"

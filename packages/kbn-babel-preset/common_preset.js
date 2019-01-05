@@ -18,10 +18,9 @@
  */
 
 module.exports = {
-  presets: [
-    require.resolve('babel-preset-react'),
-  ],
+  presets: [require.resolve('babel-preset-react')],
   plugins: [
+    require.resolve('babel-plugin-idx'),
     require.resolve('babel-plugin-add-module-exports'),
     // stage 3
     require.resolve('babel-plugin-transform-async-generator-functions'),
