@@ -275,7 +275,7 @@ export function getUiSettingDefaults() {
       }),
       value: false,
       description: i18n.translate('kbn.advancedSettings.docTableHideTimeColumnText', {
-        defaultMessage: 'Hide \'Time\' column in Discover and Saved Searches Dashboard.',
+        defaultMessage: 'Hide the \'Time\' column in Discover and in all Saved Searches on Dashboards.',
       }),
       category: ['discover'],
     },
