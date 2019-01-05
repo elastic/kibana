@@ -17,3 +17,9 @@ exports.runKibanaScript = function(name, args = []) {
   process.argv.splice(2, 0, ...args);
   require('../../../../scripts/' + name); // eslint-disable-line import/no-dynamic-require
 };
+
+exports.runXPackScript = function(name, args = []) {
+  process.chdir(resolve(__dirname, '../../..'));
+  process.argv.splice(2, 0, ...args);
+  require('../../../scripts/' + name); // eslint-disable-line import/no-dynamic-require
+};
