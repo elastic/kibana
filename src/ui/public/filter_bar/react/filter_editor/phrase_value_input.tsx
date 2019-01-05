@@ -17,31 +17,29 @@
  * under the License.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import React, { Component } from 'react';
+import { ValueInputType } from 'ui/filter_bar/react/filter_editor/value_input_type';
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
 
 interface Props {
   indexPattern?: IndexPattern;
   field?: IndexPatternField;
   value?: string;
-  onChange: (value: string) => void;
+  onChange: (value: string | number | boolean) => void;
 }
 
 export class PhraseValueInput extends Component<Props> {
   public render() {
     return (
       <EuiFormRow label="Value">
-        <EuiFieldText
+        <ValueInputType
           placeholder="The value to match against the selected field"
-          value={this.props.value || ''}
-          onChange={this.onChange}
+          value={this.props.value}
+          onChange={this.props.onChange}
+          type={this.props.field ? this.props.field.type : 'string'}
         />
       </EuiFormRow>
     );
   }
-
-  private onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.props.onChange(e.target.value);
-  };
 }
