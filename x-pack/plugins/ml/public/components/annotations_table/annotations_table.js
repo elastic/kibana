@@ -109,7 +109,10 @@ class AnnotationsTable extends Component {
   }
 
   componentDidMount() {
-    if (this.props.annotations === undefined) {
+    if (
+      this.props.annotations === undefined &&
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0
+    ) {
       this.getAnnotations();
     }
   }
@@ -118,6 +121,7 @@ class AnnotationsTable extends Component {
     if (
       this.props.annotations === undefined &&
       this.state.isLoading === false &&
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
       this.getAnnotations();

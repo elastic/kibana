@@ -62,7 +62,7 @@ timefilter.setTime({
   to: moment(seriesConfig.selectedLatest).toISOString()
 });
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { chartLimits } from '../../util/chart_utils';
@@ -86,7 +86,7 @@ describe('ExplorerChartsContainer', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Minimal Initialization', () => {
-    const wrapper = shallow(<ExplorerChartsContainer
+    const wrapper = shallowWithIntl(<ExplorerChartsContainer
       seriesToPlot={[]}
       chartsPerRow={1}
       tooManyBuckets={false}
@@ -98,7 +98,7 @@ describe('ExplorerChartsContainer', () => {
   });
 
   test('Initialization with chart data', () => {
-    const wrapper = mount(<ExplorerChartsContainer
+    const wrapper = mountWithIntl(<ExplorerChartsContainer
       seriesToPlot={[{
         ...seriesConfig,
         chartData,
@@ -119,7 +119,7 @@ describe('ExplorerChartsContainer', () => {
   });
 
   test('Initialization with rare detector', () => {
-    const wrapper = mount(<ExplorerChartsContainer
+    const wrapper = mountWithIntl(<ExplorerChartsContainer
       seriesToPlot={[{
         ...seriesConfigRare,
         chartData,
