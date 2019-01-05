@@ -44,6 +44,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     }
     uiCapabilities={
       Object {
+        "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
         "spaces": Object {

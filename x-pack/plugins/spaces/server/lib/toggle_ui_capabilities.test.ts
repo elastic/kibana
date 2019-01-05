@@ -21,6 +21,7 @@ const features: Feature[] = [
     navLinkId: 'feature2',
     privileges: {
       all: {
+        catalogue: ['feature2Entry'],
         management: {
           kibana: ['somethingElse'],
         },
@@ -39,6 +40,7 @@ const features: Feature[] = [
     navLinkId: 'feature3',
     privileges: {
       all: {
+        catalogue: ['feature3Entry'],
         management: {
           kibana: ['indices'],
         },
@@ -61,6 +63,10 @@ const buildUiCapabilities = () =>
       feature3: true,
       unknownFeature: true,
     },
+    catalogue: {
+      discover: true,
+      visualize: false,
+    },
     management: {
       kibana: {
         settings: false,
@@ -80,7 +86,7 @@ const buildUiCapabilities = () =>
       foo: true,
       bar: true,
     },
-  });
+  }) as UICapabilities;
 
 describe('toggleUiCapabilities', () => {
   it('does not toggle capabilities when the space has no disabled features', () => {
@@ -107,7 +113,7 @@ describe('toggleUiCapabilities', () => {
     expect(result).toEqual(buildUiCapabilities());
   });
 
-  it('disables the corresponding navLink, management sections, and all capability flags for disabled features', () => {
+  it('disables the corresponding navLink, catalogue, management sections, and all capability flags for disabled features', () => {
     const space: Space = {
       id: 'space',
       name: '',
@@ -120,6 +126,7 @@ describe('toggleUiCapabilities', () => {
     const expectedCapabilities = buildUiCapabilities();
 
     expectedCapabilities.navLinks.feature2 = false;
+    expectedCapabilities.catalogue.feature2Entry = false;
     expectedCapabilities.management.kibana.somethingElse = false;
     expectedCapabilities.feature_2.bar = false;
     expectedCapabilities.feature_2.foo = false;
@@ -143,11 +150,13 @@ describe('toggleUiCapabilities', () => {
     expectedCapabilities.feature_1.foo = false;
 
     expectedCapabilities.navLinks.feature2 = false;
+    expectedCapabilities.catalogue.feature2Entry = false;
     expectedCapabilities.management.kibana.somethingElse = false;
     expectedCapabilities.feature_2.bar = false;
     expectedCapabilities.feature_2.foo = false;
 
     expectedCapabilities.navLinks.feature3 = false;
+    expectedCapabilities.catalogue.feature3Entry = false;
     expectedCapabilities.management.kibana.indices = false;
     expectedCapabilities.feature_3.bar = false;
     expectedCapabilities.feature_3.foo = false;

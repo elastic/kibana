@@ -165,6 +165,15 @@ export default function (kibana) {
             dashboard: {
               showWriteControls: true
             },
+            catalogue: {
+              discover: true,
+              dashboard: true,
+              visualize: true,
+              console: true,
+              advanced_settings: true,
+              saved_objects: true,
+              index_patterns: true,
+            },
             management: {
               /*
                * Management settings correspond to management section/link ids, and should not be changed

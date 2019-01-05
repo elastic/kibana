@@ -67,6 +67,7 @@ export const init = (monitoringPlugin, server) => {
             defaultMessage: 'The monitoring_user role should be assigned to grant access'
           })
         },
+        catalogue: ['monitoring'],
         app: ['monitoring'],
         savedObject: {
           all: [],

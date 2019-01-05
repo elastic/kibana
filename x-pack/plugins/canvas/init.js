@@ -42,6 +42,7 @@ export default async function(server /*options*/) {
     navLinkId: 'canvas',
     privileges: {
       all: {
+        catalogue: ['canvas'],
         app: ['canvas'],
         savedObject: {
           all: ['canvas'],
@@ -50,6 +51,7 @@ export default async function(server /*options*/) {
         ui: [],
       },
       read: {
+        catalogue: ['canvas'],
         app: ['canvas'],
         savedObject: {
           all: [],

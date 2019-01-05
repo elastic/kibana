@@ -124,6 +124,39 @@ describe('#buildFeaturesPrivileges', () => {
     });
   });
 
+  test('includes catalogue actions when specified', () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          bar: {
+            catalogue: ['fooEntry', 'barEntry'],
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.buildFeaturesPrivileges(features);
+    expect(result).toEqual({
+      foo: {
+        bar: [
+          actions.login,
+          actions.version,
+          actions.ui.get('catalogue', 'fooEntry'),
+          actions.ui.get('catalogue', 'barEntry'),
+        ],
+      },
+    });
+  });
+
   test('includes savedObject all actions when specified', () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
@@ -403,6 +436,61 @@ describe('#getManagementReadActions', () => {
       actions.ui.get('management', 'kibana', 'fooManagementLink'),
       actions.ui.get('management', 'es', 'barManagementLink'),
       actions.ui.get('management', 'es', 'bazManagementLink'),
+    ]);
+  });
+});
+
+describe('#getCatalogueReadActions', () => {
+  test(`includes catalogue actions from the read privileges`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // wrong privilege name
+          bar: {
+            catalogue: [],
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no catalogue read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        privileges: {
+          // this catalogue capability should show up in the results
+          read: {
+            app: [],
+            catalogue: ['barCatalogueLink', 'bazCatalogueLink'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getCatalogueReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('catalogue', 'barCatalogueLink'),
+      actions.ui.get('catalogue', 'bazCatalogueLink'),
     ]);
   });
 });

@@ -16,6 +16,7 @@ export interface FeaturePrivilegeDefinition {
   management?: {
     [sectionId: string]: string[];
   };
+  catalogue?: string[];
   api?: string[];
   app: string[];
   savedObject: {
@@ -39,7 +40,7 @@ export interface Feature {
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
-const prohibitedFeatureIds: Array<keyof UICapabilities> = ['management', 'navLinks'];
+const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'management', 'navLinks'];
 
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
@@ -63,6 +64,7 @@ const schema = Joi.object({
           tooltip: Joi.string(),
         }),
         management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
+        catalogue: Joi.array().items(Joi.string()),
         api: Joi.array().items(Joi.string()),
         app: Joi.array()
           .items(Joi.string())

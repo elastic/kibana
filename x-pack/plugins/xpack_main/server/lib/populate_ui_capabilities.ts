@@ -8,6 +8,8 @@ import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../types';
 
+const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'];
+
 interface FeatureCapabilities {
   [featureId: string]: Record<string, boolean>;
 }
@@ -24,29 +26,38 @@ export function populateUICapabilities(
 }
 
 function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
-  const capabilities: FeatureCapabilities = {
+  const UIFeatureCapabilities: FeatureCapabilities = {
+    catalogue: {},
     [feature.id]: {},
   };
 
-  const featureCapabilities: Record<string, boolean> = Object.values(feature.privileges).reduce(
-    (acc, privilege) => {
-      return {
-        ...acc,
-        ...privilege.ui.reduce(
-          (privilegeAcc, capabillity) => ({
+  Object.values(feature.privileges).forEach(privilege => {
+    UIFeatureCapabilities[feature.id] = {
+      ...UIFeatureCapabilities[feature.id],
+      ...privilege.ui.reduce(
+        (privilegeAcc, capability) => ({
+          ...privilegeAcc,
+          [capability]: true,
+        }),
+        {}
+      ),
+    };
+
+    if (privilege.catalogue) {
+      UIFeatureCapabilities.catalogue = {
+        ...UIFeatureCapabilities.catalogue,
+        ...privilege.catalogue.reduce(
+          (privilegeAcc, capability) => ({
             ...privilegeAcc,
-            [capabillity]: true,
+            [capability]: true,
           }),
           {}
         ),
       };
-    },
-    {}
-  );
+    }
+  });
 
-  capabilities[feature.id] = featureCapabilities;
-
-  return capabilities;
+  return UIFeatureCapabilities;
 }
 
 function mergeCapabilities(
@@ -54,9 +65,20 @@ function mergeCapabilities(
   ...allFeatureCapabilities: FeatureCapabilities[]
 ): UICapabilities {
   return allFeatureCapabilities.reduce<UICapabilities>((acc, capabilities) => {
-    return {
-      ...capabilities,
+    const mergableCapabilities: UICapabilities = _.omit(capabilities, ...ELIGIBLE_FLAT_MERGE_KEYS);
+
+    const mergedFeatureCapabilities = {
+      ...mergableCapabilities,
       ...acc,
     };
+
+    ELIGIBLE_FLAT_MERGE_KEYS.forEach(key => {
+      mergedFeatureCapabilities[key] = {
+        ...mergedFeatureCapabilities[key],
+        ...capabilities[key],
+      };
+    });
+
+    return mergedFeatureCapabilities;
   }, originalCapabilities);
 }

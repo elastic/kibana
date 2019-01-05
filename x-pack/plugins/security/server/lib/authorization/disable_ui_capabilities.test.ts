@@ -88,6 +88,7 @@ describe('usingPrivileges', () => {
               indices: true,
             },
           },
+          catalogue: {},
           fooFeature: {
             foo: true,
             bar: true,
@@ -109,6 +110,7 @@ describe('usingPrivileges', () => {
             indices: false,
           },
         },
+        catalogue: {},
         fooFeature: {
           foo: false,
           bar: false,
@@ -169,6 +171,7 @@ describe('usingPrivileges', () => {
               indices: true,
             },
           },
+          catalogue: {},
           fooFeature: {
             foo: true,
             bar: true,
@@ -190,6 +193,7 @@ describe('usingPrivileges', () => {
             indices: false,
           },
         },
+        catalogue: {},
         fooFeature: {
           foo: false,
           bar: false,
@@ -239,6 +243,7 @@ describe('usingPrivileges', () => {
               indices: true,
             },
           },
+          catalogue: {},
         })
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(mockServer.log).not.toHaveBeenCalled();
@@ -291,6 +296,7 @@ describe('usingPrivileges', () => {
             settings: false,
           },
         },
+        catalogue: {},
         fooFeature: {
           foo: true,
           bar: true,
@@ -314,6 +320,7 @@ describe('usingPrivileges', () => {
           settings: false,
         },
       },
+      catalogue: {},
       fooFeature: {
         foo: true,
         bar: false,
@@ -367,6 +374,7 @@ describe('usingPrivileges', () => {
             indices: false,
           },
         },
+        catalogue: {},
         fooFeature: {
           foo: false,
           bar: false,
@@ -388,6 +396,7 @@ describe('usingPrivileges', () => {
           indices: false,
         },
       },
+      catalogue: {},
       fooFeature: {
         foo: false,
         bar: false,
@@ -427,6 +436,7 @@ describe('all', () => {
             indices: true,
           },
         },
+        catalogue: {},
         fooFeature: {
           foo: true,
           bar: true,
@@ -447,6 +457,7 @@ describe('all', () => {
           indices: false,
         },
       },
+      catalogue: {},
       fooFeature: {
         foo: false,
         bar: false,
