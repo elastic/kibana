@@ -39,6 +39,7 @@ const flags = getopts(process.argv.slice(0), {
     'skip-os-packages',
     'rpm',
     'deb',
+    'docker',
     'release',
     'skip-node-download',
     'verbose',
@@ -79,6 +80,7 @@ if (flags.help) {
         --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
+        --docker                {dim Only build the docker package}
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
@@ -102,7 +104,7 @@ function isOsPackageDesired(name) {
   }
 
   // build all if no flags specified
-  if (flags.rpm === undefined && flags.deb === undefined) {
+  if (flags.rpm === undefined && flags.deb === undefined && flags.docker === undefined) {
     return true;
   }
 
