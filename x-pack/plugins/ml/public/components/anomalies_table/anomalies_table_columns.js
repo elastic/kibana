@@ -36,6 +36,11 @@ import { formatValue } from '../../formatters/format_value';
 // Maximum number of influencers to display before a 'show more' link is added.
 export const INFLUENCERS_LIMIT = 5;
 
+export const ANOMALIES_TABLE_TABS = {
+  DETAILS: 0,
+  CATEGORY_EXAMPLES: 1
+};
+
 function renderTime(date, aggregationInterval) {
   if (aggregationInterval === 'hour') {
     return formatHumanReadableDateTime(date);
@@ -206,11 +211,10 @@ export function getColumns(
       truncateText: true,
       render: (item) => {
         const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
-        const categoryTabIndex = 1;
         return (
           <EuiLink
             className="mlAnomalyCategoryExamples__link"
-            onClick={() => toggleRow(item, categoryTabIndex)}
+            onClick={() => toggleRow(item, ANOMALIES_TABLE_TABS.CATEGORY_EXAMPLES)}
           >
             {examples.map((example, i) => {
               return <span key={`example${i}`} className="category-example">{example}</span>;

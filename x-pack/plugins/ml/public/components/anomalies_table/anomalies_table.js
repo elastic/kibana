@@ -23,7 +23,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getColumns, INFLUENCERS_LIMIT } from './anomalies_table_columns';
+import {
+  getColumns,
+  INFLUENCERS_LIMIT,
+  ANOMALIES_TABLE_TABS
+} from './anomalies_table_columns';
 
 import { AnomalyDetails } from './anomaly_details';
 
@@ -67,7 +71,7 @@ class AnomaliesTable extends Component {
     return null;
   }
 
-  toggleRow = (item, tab = 0) => {
+  toggleRow = (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
