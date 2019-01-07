@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { ServiceMetadata } from 'x-pack/plugins/infra/common/graphql/types';
+import { ServiceMetadata } from 'x-pack/plugins/infra/server/graphql/types';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   InfraFrameworkRequest,
