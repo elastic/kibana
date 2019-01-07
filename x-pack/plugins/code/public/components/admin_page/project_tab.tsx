@@ -7,20 +7,28 @@
 // @ts-ignore
 import {
   EuiButton,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
   EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiOverlayMask,
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { Repository } from 'x-pack/plugins/code/model';
+import { importRepo } from '../../actions';
 import { RootState } from '../../reducers';
-import { ImportProject } from './import_project';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
 
@@ -41,10 +49,13 @@ interface Props {
   projects: Repository[];
   status: any;
   isAdmin: boolean;
+  importRepo: (repoUrl: string) => void;
+  importLoading: boolean;
 }
 interface State {
   showImportProjectModal: boolean;
   settingModal: { url?: string; uri?: string; show: boolean };
+  repoURL: string;
 }
 
 class CodeProjectTab extends React.PureComponent<Props, State> {
@@ -53,6 +64,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     this.state = {
       showImportProjectModal: false,
       settingModal: { show: false },
+      repoURL: '',
     };
   }
 
@@ -72,14 +84,56 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     this.setState({ settingModal: { show: false } });
   };
 
+  public onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      repoURL: e.target.value,
+    });
+  };
+
+  public submitImportProject = () => {
+    this.props.importRepo(this.state.repoURL);
+  };
+
+  public renderImportModal = () => {
+    return (
+      <EuiOverlayMask>
+        <EuiModal onClose={this.closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Add New Project</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiTitle size="xs">
+              <h3>Repository URL</h3>
+            </EuiTitle>
+            <EuiForm>
+              <EuiFormRow>
+                <EuiFieldText
+                  value={this.state.repoURL}
+                  onChange={this.onChange}
+                  placeholder="https://github.com/elastic/elasticsearch"
+                  aria-label="input project url"
+                  data-test-subj="importRepositoryUrlInputBox"
+                  isLoading={this.props.importLoading}
+                  fullWidth={true}
+                />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={this.closeModal}>Cancel</EuiButton>
+            <EuiButton fill onClick={this.submitImportProject}>
+              Import Project
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
+    );
+  };
+
   public render() {
     const { projects, isAdmin, status } = this.props;
     const projectsCount = projects.length;
-    const modal = this.state.showImportProjectModal && (
-      <EuiModal onClose={this.closeModal}>
-        <ImportProject />
-      </EuiModal>
-    );
+    const modal = this.state.showImportProjectModal && this.renderImportModal();
 
     const repoList = projects.map((repo: any) => (
       <ProjectItem
@@ -145,9 +199,12 @@ const mapStateToProps = (state: RootState) => ({
   projects: state.repository.repositories,
   status: state.status.status,
   isAdmin: state.userConfig.isAdmin,
+  importLoading: state.repository.importLoading,
 });
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = {
+  importRepo,
+};
 
 export const ProjectTab = connect(
   mapStateToProps,
