@@ -21,7 +21,9 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
       onChange={([index]) => onChange(get(index, 'label', defaultIndex).toLowerCase())}
       onSearchChange={searchValue => {
         // resets input when user starts typing
-        if (searchValue) onChange(defaultIndex);
+        if (searchValue) {
+          onChange(defaultIndex);
+        }
       }}
       onBlur={onBlur}
       onFocus={onFocus}

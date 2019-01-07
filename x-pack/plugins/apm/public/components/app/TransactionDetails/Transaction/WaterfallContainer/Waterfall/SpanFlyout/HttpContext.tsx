@@ -16,7 +16,7 @@ import {
 } from '../../../../../../../style/variables';
 
 import { EuiTitle } from '@elastic/eui';
-import { HttpContext } from '../../../../../../../../typings/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 
 const DatabaseStatement = styled.div`
   margin-top: ${px(unit)};
@@ -28,7 +28,7 @@ const DatabaseStatement = styled.div`
 `;
 
 interface Props {
-  httpContext?: HttpContext;
+  httpContext: Span['context']['http'];
 }
 
 export function HttpContext({ httpContext }: Props) {

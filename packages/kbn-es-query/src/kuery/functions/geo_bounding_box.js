@@ -37,7 +37,7 @@ export function buildNodeParams(fieldName, params) {
 export function toElasticsearchQuery(node, indexPattern) {
   const [ fieldNameArg, ...args ] = node.arguments;
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.find(field => field.name === fieldName);
+  const field = _.get(indexPattern, 'fields', []).find(field => field.name === fieldName);
   const queryParams = args.reduce((acc, arg) => {
     const snakeArgName = _.snakeCase(arg.name);
     return {

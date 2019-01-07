@@ -39,6 +39,7 @@ declare module '@elastic/eui' {
   export type EuiHeaderSectionSide = 'left' | 'right';
   type EuiHeaderSectionProps = CommonProps & {
     side?: EuiHeaderSectionSide;
+    grow?: boolean;
   };
   export const EuiHeaderSection: React.SFC<EuiHeaderSectionProps>;
 
@@ -94,6 +95,8 @@ declare module '@elastic/eui' {
     rel?: string;
     target?: string;
     type?: string;
+    hasActiveFilters?: boolean;
+    numFilters?: number;
   };
   export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
 

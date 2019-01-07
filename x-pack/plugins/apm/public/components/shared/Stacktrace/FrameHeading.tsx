@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { Stackframe } from '../../../../typings/APMDoc';
+import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
 import { colors, fontFamilyCode, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
@@ -24,14 +24,11 @@ const AppFrameFileDetail = styled.span`
 `;
 
 interface Props {
-  stackframe: Stackframe;
-  isLibraryFrame?: boolean;
+  stackframe: IStackframe;
+  isLibraryFrame: boolean;
 }
 
-const FrameHeading: React.SFC<Props> = ({
-  stackframe,
-  isLibraryFrame = false
-}) => {
+const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
   const FileDetail = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;

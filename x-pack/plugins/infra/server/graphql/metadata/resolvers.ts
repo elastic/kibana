@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceResolvers } from '../../../common/graphql/types';
-import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
+import { InfraSourceResolvers } from '../../graphql/types';
 import { InfraMetadataDomain } from '../../lib/domains/metadata_domain';
-import { InfraContext } from '../../lib/infra_types';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type InfraSourceMetadataByNodeResolver = InfraResolverOf<
-  InfraSourceResolvers.MetadataByNodeResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+type InfraSourceMetadataByNodeResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.MetadataByNodeResolver>,
+  QuerySourceResolver
 >;
 
-type InfraSourceServiceMetadataBetweenResolver = InfraResolverOf<
-  InfraSourceResolvers.ServiceMetadataBetweenResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+type InfraSourceServiceMetadataBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.ServiceMetadataBetweenResolver>,
+  QuerySourceResolver
 >;
 
 export const createMetadataResolvers = (libs: {
@@ -33,7 +30,7 @@ export const createMetadataResolvers = (libs: {
 } => ({
   InfraSource: {
     async metadataByNode(source, args, { req }) {
-      const result = await libs.metadata.getMetadata(req, source.id, args.nodeName, args.nodeType);
+      const result = await libs.metadata.getMetadata(req, source.id, args.nodeId, args.nodeType);
       return result;
     },
     async serviceMetadataBetween(source, args, { req }) {

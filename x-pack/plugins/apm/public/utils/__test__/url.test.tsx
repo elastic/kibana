@@ -13,6 +13,7 @@ import url from 'url';
 import { toJson } from '../testHelpers';
 import {
   fromQuery,
+  getKibanaHref,
   RelativeLinkComponent,
   toQuery,
   UnconnectedKibanaLink,
@@ -102,6 +103,35 @@ describe('RelativeLinkComponent', () => {
         search: '?foo=bar&foo2=bar2'
       })
     );
+  });
+});
+
+describe('getKibanaHref', () => {
+  it('should return the correct href', () => {
+    const href = getKibanaHref({
+      location: { search: '' },
+      pathname: '/app/kibana',
+      hash: '/discover',
+      query: {
+        _a: {
+          interval: 'auto',
+          query: {
+            language: 'lucene',
+            query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
+          },
+          sort: { '@timestamp': 'desc' }
+        }
+      }
+    });
+
+    const { _g, _a } = getUrlQuery(href);
+    const { pathname } = url.parse(href);
+
+    expect(pathname).toBe('/app/kibana');
+    expect(_a).toBe(
+      '(interval:auto,query:(language:lucene,query:\'context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"\'),sort:(\'@timestamp\':desc))'
+    );
+    expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
   });
 });
 

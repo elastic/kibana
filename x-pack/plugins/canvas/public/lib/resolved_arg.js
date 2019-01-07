@@ -15,6 +15,8 @@ export function getValue(resolvedArg) {
 }
 
 export function getError(resolvedArg) {
-  if (getState(resolvedArg) !== 'error') return null;
+  if (getState(resolvedArg) !== 'error') {
+    return null;
+  }
   return get(resolvedArg, 'error', null);
 }

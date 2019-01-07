@@ -44,6 +44,7 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
 export function toElasticsearchQuery(node, indexPattern) {
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
 
+  const fieldName = ast.toElasticsearchQuery(fieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
 
@@ -65,7 +66,7 @@ export function toElasticsearchQuery(node, indexPattern) {
     };
   }
 
-  const fields = getFields(fieldNameArg, indexPattern);
+  const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
 
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
@@ -80,7 +81,10 @@ export function toElasticsearchQuery(node, indexPattern) {
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
-  const isMatchAllQuery = isExistsQuery && fields && fields.length === indexPattern.fields.length;
+  const isAllFieldsQuery =
+    (fieldNameArg.type === 'wildcard' && fieldName === '*')
+    || (fields && indexPattern && fields.length === indexPattern.fields.length);
+  const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {
     return { match_all: {} };

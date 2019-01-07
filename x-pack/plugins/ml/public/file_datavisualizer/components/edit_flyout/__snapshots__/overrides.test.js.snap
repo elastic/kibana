@@ -6,9 +6,18 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Data format"
+    label={
+      <FormattedMessage
+        defaultMessage="Data format"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.dataFormatFormRowLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSuperSelect
+      compressed={false}
+      fullWidth={false}
+      hasDividers={false}
       onChange={[Function]}
       options={
         Array [
@@ -44,9 +53,18 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Timestamp format"
+    label={
+      <FormattedMessage
+        defaultMessage="Timestamp format"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSuperSelect
+      compressed={false}
+      fullWidth={false}
+      hasDividers={false}
       onChange={[Function]}
       options={
         Array [
@@ -454,9 +472,18 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Time field"
+    label={
+      <FormattedMessage
+        defaultMessage="Time field"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timeFieldFormRowLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSuperSelect
+      compressed={false}
+      fullWidth={false}
+      hasDividers={false}
       onChange={[Function]}
       options={Array []}
     />

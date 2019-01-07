@@ -1,0 +1,182 @@
+<kbn-management-app section="kibana/indices" omit-breadcrumb-pages="['indices']">
+  <kbn-management-indices>
+    <div
+      ng-controller="managementIndicesEdit"
+      data-test-subj="editIndexPattern"
+      role="region"
+      aria-label="{{::'kbn.management.editIndexPattern.detailsAria' | i18n: { defaultMessage: 'Index pattern details' } }}"
+    >
+      <!-- Header -->
+      <kbn-management-index-header
+        index-pattern="indexPattern"
+        set-default="setDefaultPattern()"
+        refresh-fields="refreshFields()"
+        delete="removePattern()"
+      ></kbn-management-index-header>
+
+      <div class="euiSpacer euiSpacer--s"></div>
+      <p ng-if="::(indexPattern.timeFieldName || (indexPattern.tags && indexPattern.tags.length))">
+        <span ng-if="::indexPattern.timeFieldName">
+          <span class="euiBadge euiBadge--warning">
+            <span class="euiBadge__content">
+              <span class="euiBadge__text">
+                <span
+                  i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
+                  i18n-default-message="Time Filter field name: {timeFieldName}"
+                  i18n-values="{ timeFieldName: indexPattern.timeFieldName }">
+                </span>
+              </span>
+            </span>
+          </span>
+          &nbsp;
+        </span>
+        <span ng-repeat="tag in indexPattern.tags">
+          <span class="euiBadge euiBadge--hollow">
+            <span class="euiBadge__content">
+              <span class="euiBadge__text">
+                  {{tag.name}}
+                </span>
+              </span>
+            </span>
+        </span>
+      </p>
+
+      <div class="euiSpacer euiSpacer--m"></div>
+
+      <div class="euiText">
+        <p>
+          <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+            i18n-default-message="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
+            i18n-values="{ html_indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
+          <a target="_window" class="euiLink euiLink--primary" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
+            <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.mappingAPILink"
+                  i18n-default-message="Mapping API"></span>
+            <i aria-hidden="true" class="fa-link fa"></i>
+          </a>
+        </p>
+      </div>
+
+      <div class="euiSpacer euiSpacer--m"></div>
+
+      <!-- Alerts -->
+      <div
+        ng-if="indexPattern.isUnsupportedTimePattern()"
+        class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
+      >
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+          <span class="kuiInfoPanelHeader__title"
+                i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternHeader"
+                i18n-default-message="Support for repeating index patterns removed">
+          </span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            <span i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternLabel"
+                  i18n-default-message="Support for time-interval based index patterns has been removed! In the next major version of Kibana this index patterns will stop working. Migrate saved objects that use this index pattern to a wildcard pattern and delete this one."></span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        ng-if="conflictFields.length"
+        class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+      >
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+          <span class="kuiInfoPanelHeader__title"
+                i18n-id="kbn.management.editIndexPattern.mappingConflictHeader"
+                i18n-default-message="Mapping conflict"></span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            <span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
+                  i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data."
+                  i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="kuiTabs kuiVerticalRhythm">
+        <button
+          class="kuiTab"
+          ng-repeat="editSection in editSections"
+          ng-class="{ 'kuiTab-isSelected': state.tab === editSection.index }"
+          ng-click="changeTab(editSection)"
+          data-test-subj="tab-{{ editSection.index }}"
+        >
+          {{ editSection.title }}
+          <span
+            data-test-subj="tab-count-{{ editSection.index }}"
+            aria-label="{{:: editSection.count + ' ' + editSection.title}}"
+          >
+            ({{ editSection.count }})
+          </span>
+        </button>
+      </div>
+
+      <!-- Field Filters -->
+      <form role="form" class="kuiFieldGroup kuiVerticalRhythm">
+        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+          <div class="kuiSearchInput">
+            <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+            <input
+              class="kuiSearchInput__input"
+              type="text"
+              aria-label="{{::'kbn.management.editIndexPattern.fields.filterAria' | i18n: {defaultMessage: 'Filter'} }}"
+              ng-model="fieldFilter"
+              placeholder="{{::'kbn.management.editIndexPattern.fields.filterPlaceholder' | i18n: {defaultMessage: 'Filter'} }}"
+              data-test-subj="indexPatternFieldFilter"
+            >
+          </div>
+        </div>
+
+        <div
+          class="kuiFieldGroupSection"
+          ng-if="state.tab == 'indexedFields' && indexedFieldTypes.length > 0"
+        >
+          <select
+            data-test-subj="indexedFieldTypeFilterDropdown"
+            class="kuiSelect"
+            ng-model="indexedFieldTypeFilter"
+            ng-change="changeFilter('indexedFieldTypeFilter', indexedFieldTypeFilter)"
+            ng-options="o for o in indexedFieldTypes"
+          >
+            <option value=""
+                    i18n-id="kbn.management.editIndexPattern.fields.allTypesDropDown"
+                    i18n-default-message="All field types"></option>
+          </select>
+        </div>
+
+        <div
+          class="kuiFieldGroupSection"
+          ng-if="state.tab == 'scriptedFields' && scriptedFieldLanguages.length > 0"
+        >
+          <select
+            data-test-subj="scriptedFieldLanguageFilterDropdown"
+            class="kuiSelect"
+            ng-model="scriptedFieldLanguageFilter"
+            ng-change="changeFilter('scriptedFieldLanguageFilter', scriptedFieldLanguageFilter)"
+            ng-options="o for o in scriptedFieldLanguages"
+          >
+            <option value=""
+                    i18n-id="kbn.management.editIndexPattern.fields.allLangsDropDown"
+                    i18n-default-message="All languages"></option>
+          </select>
+        </div>
+      </form>
+
+      <!-- Tab content -->
+      <div class="kuiVerticalRhythm">
+        <div id="reactIndexedFieldsTable"></div>
+
+        <div id="reactScriptedFieldsTable"></div>
+
+        <div id="reactSourceFiltersTable"></div>
+      </div>
+    </div>
+  </kbn-management-indices>
+</kbn-management-app>

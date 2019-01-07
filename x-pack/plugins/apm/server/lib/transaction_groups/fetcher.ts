@@ -10,7 +10,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
 } from '../../../common/constants';
-import { Transaction } from '../../../typings/Transaction';
+import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';
 
 interface Bucket {

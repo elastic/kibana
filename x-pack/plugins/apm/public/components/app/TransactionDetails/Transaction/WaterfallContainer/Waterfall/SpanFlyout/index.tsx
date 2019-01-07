@@ -14,7 +14,6 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
-  // @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTabbedContent'"
   EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
@@ -25,16 +24,14 @@ import styled from 'styled-components';
 import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
 import { px, unit } from '../../../../../../../style/variables';
 
-// @ts-ignore
-import { Stacktrace } from '../../../../../../shared/Stacktrace';
-
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
 import { DiscoverSpanButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverSpanButton';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { Span } from '../../../../../../../../typings/Span';
+import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktrace';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
@@ -122,10 +119,14 @@ export function SpanFlyout({
                     <EuiBasicTable
                       columns={[
                         {
+                          name: '',
                           field: 'key',
                           render: (key: string) => <TagName>{key}</TagName>
                         },
-                        { field: 'value' }
+                        {
+                          name: '',
+                          field: 'value'
+                        }
                       ]}
                       items={tags}
                     />

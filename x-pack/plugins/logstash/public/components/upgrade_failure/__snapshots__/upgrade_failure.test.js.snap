@@ -4,7 +4,16 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
 <UpgradeFailure
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -36,6 +45,26 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -60,15 +89,6 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -89,304 +109,279 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
   onClose={[MockFunction]}
   onRetry={[MockFunction]}
 >
-  <EuiPage
+  <div
     data-test-subj="pipelineEdit upgradeFailure"
-    restrictWidth={false}
     style={
       Object {
         "minHeight": "100vh",
       }
     }
   >
-    <div
-      className="euiPage"
-      data-test-subj="pipelineEdit upgradeFailure"
-      style={
-        Object {
-          "minHeight": "100vh",
-        }
-      }
+    <EuiPageContent
+      panelPaddingSize="l"
     >
-      <EuiPageContent
-        panelPaddingSize="l"
+      <EuiPanel
+        className="euiPageContent"
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
       >
-        <EuiPanel
-          className="euiPageContent"
-          grow={true}
-          hasShadow={false}
-          paddingSize="l"
+        <div
+          className="euiPanel euiPanel--paddingLarge euiPageContent"
         >
-          <div
-            className="euiPanel euiPanel--paddingLarge euiPageContent"
-          >
-            <EuiEmptyPrompt
-              actions={
-                <UpgradeFailureActions
-                  onClose={[MockFunction]}
-                  onRetry={[MockFunction]}
-                  upgradeButtonText="Try again"
-                />
-              }
-              body={
-                <p
-                  style={
-                    Object {
-                      "textAlign": "left",
-                    }
+          <EuiEmptyPrompt
+            actions={
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              />
+            }
+            body={
+              <p
+                style={
+                  Object {
+                    "textAlign": "left",
                   }
-                >
-                  Before you can add a pipeline, we need to upgrade your configuration.
-                </p>
-              }
-              iconColor="subdued"
-              title={
-                <UpgradeFailureTitle
-                  titleText="Upgrade failed"
-                />
-              }
-            >
-              <div
-                className="euiEmptyPrompt"
+                }
               >
-                <EuiTextColor
-                  color="subdued"
-                  component="span"
+                Before you can add a pipeline, we need to upgrade your configuration.
+              </p>
+            }
+            iconColor="subdued"
+            title={
+              <UpgradeFailureTitle
+                titleText="Upgrade failed"
+              />
+            }
+          >
+            <div
+              className="euiEmptyPrompt"
+            >
+              <EuiTextColor
+                color="subdued"
+                component="span"
+              >
+                <span
+                  className="euiTextColor euiTextColor--subdued"
                 >
-                  <span
-                    className="euiTextColor euiTextColor--subdued"
+                  <EuiTitle
+                    size="m"
+                    textTransform="none"
                   >
-                    <EuiTitle
-                      size="m"
-                      textTransform="none"
+                    <UpgradeFailureTitle
+                      className="euiTitle euiTitle--medium"
+                      titleText="Upgrade failed"
                     >
-                      <UpgradeFailureTitle
-                        className="euiTitle euiTitle--medium"
-                        titleText="Upgrade failed"
+                      <EuiFlexGroup
+                        alignItems="stretch"
+                        component="div"
+                        direction="row"
+                        gutterSize="l"
+                        justifyContent="flexStart"
+                        responsive={true}
+                        wrap={false}
                       >
-                        <EuiFlexGroup
-                          alignItems="stretch"
-                          component="div"
-                          direction="row"
-                          gutterSize="l"
-                          justifyContent="flexStart"
-                          responsive={true}
-                          wrap={false}
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          <EuiFlexItem
+                            component="div"
+                            grow={false}
                           >
-                            <EuiFlexItem
-                              component="div"
-                              grow={false}
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              <EuiIcon
+                                size="xl"
+                                type="alert"
                               >
-                                <EuiIcon
-                                  size="xl"
-                                  type="alert"
+                                <alert
+                                  className="euiIcon euiIcon--xLarge"
+                                  focusable="false"
+                                  height="16"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <alert
+                                  <svg
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
-                                    <svg
-                                      className="euiIcon euiIcon--xLarge"
-                                      focusable="false"
-                                      height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
-                                      viewBox="0 0 16 16"
-                                      width="16"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <g
-                                        fillRule="evenodd"
-                                      >
-                                        <path
-                                          d="M7.5 2.236L1.618 14h11.764L7.5 2.236zm.894-.447l5.882 11.764A1 1 0 0 1 13.382 15H1.618a1 1 0 0 1-.894-1.447L6.606 1.789a1 1 0 0 1 1.788 0z"
-                                        />
-                                        <path
-                                          d="M7 6h1v5H7zM7 12h1v1H7z"
-                                        />
-                                      </g>
-                                    </svg>
-                                  </alert>
-                                </EuiIcon>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              component="div"
-                              grow={false}
+                                    <path
+                                      d="M8.378 1.496l6.695 10.984A1 1 0 0 1 14.22 14H1.667a1 1 0 0 1-.883-1.47L6.642 1.545a1 1 0 0 1 1.736-.05zm-.853.52L1.667 13h12.552L7.525 2.016zM7.14 10.06L6.9 5.18h1.3l-.25 4.878h-.81zm.394 1.901a.61.61 0 0 1-.448-.186.606.606 0 0 1-.186-.444c0-.174.062-.323.186-.446a.614.614 0 0 1 .448-.184c.169 0 .315.06.44.182.124.122.186.27.186.448a.6.6 0 0 1-.189.446.607.607 0 0 1-.437.184z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                </alert>
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            component="div"
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              <EuiTitle
+                                size="m"
+                                textTransform="none"
                               >
-                                <EuiTitle
-                                  size="m"
-                                  textTransform="none"
+                                <h2
+                                  className="euiTitle euiTitle--medium"
                                 >
-                                  <h2
-                                    className="euiTitle euiTitle--medium"
-                                  >
-                                    Upgrade failed
-                                  </h2>
-                                </EuiTitle>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </UpgradeFailureTitle>
-                    </EuiTitle>
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
-                      <div
-                        className="euiText euiText--medium"
-                      >
-                        <p
-                          style={
-                            Object {
-                              "textAlign": "left",
-                            }
-                          }
-                        >
-                          Before you can add a pipeline, we need to upgrade your configuration.
-                        </p>
-                      </div>
-                    </EuiText>
-                  </span>
-                </EuiTextColor>
-                <EuiSpacer
-                  size="l"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <UpgradeFailureActions
-                  onClose={[MockFunction]}
-                  onRetry={[MockFunction]}
-                  upgradeButtonText="Try again"
-                >
-                  <EuiFlexGroup
-                    alignItems="stretch"
-                    component="div"
-                    direction="row"
-                    gutterSize="l"
-                    justifyContent="flexStart"
-                    responsive={true}
-                    wrap={false}
+                                  Upgrade failed
+                                </h2>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </UpgradeFailureTitle>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="m"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    <div
+                      className="euiText euiText--medium"
                     >
-                      <EuiFlexItem
-                        component="div"
-                        grow={false}
+                      <p
+                        style={
+                          Object {
+                            "textAlign": "left",
+                          }
+                        }
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiButton
-                            color="primary"
-                            fill={true}
-                            iconSide="left"
-                            onClick={[MockFunction]}
-                            type="button"
-                          >
-                            <button
-                              className="euiButton euiButton--primary euiButton--fill"
-                              onClick={[MockFunction]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButton__content"
-                              >
-                                <span
-                                  className="euiButton__text"
-                                >
-                                  Try again
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButton>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        component="div"
-                        grow={false}
-                      >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
-                            onClick={[MockFunction]}
-                            type="button"
-                          >
-                            <button
-                              className="euiButtonEmpty euiButtonEmpty--primary"
-                              onClick={[MockFunction]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButtonEmpty__content"
-                              >
-                                <span
-                                  className="euiButtonEmpty__text"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Go back"
-                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Go back
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButtonEmpty>
-                        </div>
-                      </EuiFlexItem>
+                        Before you can add a pipeline, we need to upgrade your configuration.
+                      </p>
                     </div>
-                  </EuiFlexGroup>
-                </UpgradeFailureActions>
-              </div>
-            </EuiEmptyPrompt>
-          </div>
-        </EuiPanel>
-      </EuiPageContent>
-    </div>
-  </EuiPage>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              >
+                <EuiFlexGroup
+                  alignItems="stretch"
+                  component="div"
+                  direction="row"
+                  gutterSize="l"
+                  justifyContent="flexStart"
+                  responsive={true}
+                  wrap={false}
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      component="div"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButton
+                          color="primary"
+                          fill={true}
+                          iconSide="left"
+                          onClick={[MockFunction]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--fill"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Try again
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      component="div"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButtonEmpty
+                          color="primary"
+                          iconSide="left"
+                          onClick={[MockFunction]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
+                                >
+                                  Go back
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButtonEmpty>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </UpgradeFailureActions>
+            </div>
+          </EuiEmptyPrompt>
+        </div>
+      </EuiPanel>
+    </EuiPageContent>
+  </div>
 </UpgradeFailure>
 `;
 
@@ -394,7 +389,16 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
 <UpgradeFailure
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -426,6 +430,26 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -450,15 +474,6 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -479,304 +494,279 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
   onClose={[MockFunction]}
   onRetry={[MockFunction]}
 >
-  <EuiPage
+  <div
     data-test-subj="pipelineEdit upgradeFailure"
-    restrictWidth={false}
     style={
       Object {
         "minHeight": "100vh",
       }
     }
   >
-    <div
-      className="euiPage"
-      data-test-subj="pipelineEdit upgradeFailure"
-      style={
-        Object {
-          "minHeight": "100vh",
-        }
-      }
+    <EuiPageContent
+      panelPaddingSize="l"
     >
-      <EuiPageContent
-        panelPaddingSize="l"
+      <EuiPanel
+        className="euiPageContent"
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
       >
-        <EuiPanel
-          className="euiPageContent"
-          grow={true}
-          hasShadow={false}
-          paddingSize="l"
+        <div
+          className="euiPanel euiPanel--paddingLarge euiPageContent"
         >
-          <div
-            className="euiPanel euiPanel--paddingLarge euiPageContent"
-          >
-            <EuiEmptyPrompt
-              actions={
-                <UpgradeFailureActions
-                  onClose={[MockFunction]}
-                  onRetry={[MockFunction]}
-                  upgradeButtonText="Upgrade"
-                />
-              }
-              body={
-                <p
-                  style={
-                    Object {
-                      "textAlign": "left",
-                    }
+          <EuiEmptyPrompt
+            actions={
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Upgrade"
+              />
+            }
+            body={
+              <p
+                style={
+                  Object {
+                    "textAlign": "left",
                   }
-                >
-                  Before you can add a pipeline, we need to upgrade your configuration.
-                </p>
-              }
-              iconColor="subdued"
-              title={
-                <UpgradeFailureTitle
-                  titleText="Time for an upgrade!"
-                />
-              }
-            >
-              <div
-                className="euiEmptyPrompt"
+                }
               >
-                <EuiTextColor
-                  color="subdued"
-                  component="span"
+                Before you can add a pipeline, we need to upgrade your configuration.
+              </p>
+            }
+            iconColor="subdued"
+            title={
+              <UpgradeFailureTitle
+                titleText="Time for an upgrade!"
+              />
+            }
+          >
+            <div
+              className="euiEmptyPrompt"
+            >
+              <EuiTextColor
+                color="subdued"
+                component="span"
+              >
+                <span
+                  className="euiTextColor euiTextColor--subdued"
                 >
-                  <span
-                    className="euiTextColor euiTextColor--subdued"
+                  <EuiTitle
+                    size="m"
+                    textTransform="none"
                   >
-                    <EuiTitle
-                      size="m"
-                      textTransform="none"
+                    <UpgradeFailureTitle
+                      className="euiTitle euiTitle--medium"
+                      titleText="Time for an upgrade!"
                     >
-                      <UpgradeFailureTitle
-                        className="euiTitle euiTitle--medium"
-                        titleText="Time for an upgrade!"
+                      <EuiFlexGroup
+                        alignItems="stretch"
+                        component="div"
+                        direction="row"
+                        gutterSize="l"
+                        justifyContent="flexStart"
+                        responsive={true}
+                        wrap={false}
                       >
-                        <EuiFlexGroup
-                          alignItems="stretch"
-                          component="div"
-                          direction="row"
-                          gutterSize="l"
-                          justifyContent="flexStart"
-                          responsive={true}
-                          wrap={false}
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          <EuiFlexItem
+                            component="div"
+                            grow={false}
                           >
-                            <EuiFlexItem
-                              component="div"
-                              grow={false}
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              <EuiIcon
+                                size="xl"
+                                type="alert"
                               >
-                                <EuiIcon
-                                  size="xl"
-                                  type="alert"
+                                <alert
+                                  className="euiIcon euiIcon--xLarge"
+                                  focusable="false"
+                                  height="16"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <alert
+                                  <svg
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
-                                    <svg
-                                      className="euiIcon euiIcon--xLarge"
-                                      focusable="false"
-                                      height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
-                                      viewBox="0 0 16 16"
-                                      width="16"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <g
-                                        fillRule="evenodd"
-                                      >
-                                        <path
-                                          d="M7.5 2.236L1.618 14h11.764L7.5 2.236zm.894-.447l5.882 11.764A1 1 0 0 1 13.382 15H1.618a1 1 0 0 1-.894-1.447L6.606 1.789a1 1 0 0 1 1.788 0z"
-                                        />
-                                        <path
-                                          d="M7 6h1v5H7zM7 12h1v1H7z"
-                                        />
-                                      </g>
-                                    </svg>
-                                  </alert>
-                                </EuiIcon>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              component="div"
-                              grow={false}
+                                    <path
+                                      d="M8.378 1.496l6.695 10.984A1 1 0 0 1 14.22 14H1.667a1 1 0 0 1-.883-1.47L6.642 1.545a1 1 0 0 1 1.736-.05zm-.853.52L1.667 13h12.552L7.525 2.016zM7.14 10.06L6.9 5.18h1.3l-.25 4.878h-.81zm.394 1.901a.61.61 0 0 1-.448-.186.606.606 0 0 1-.186-.444c0-.174.062-.323.186-.446a.614.614 0 0 1 .448-.184c.169 0 .315.06.44.182.124.122.186.27.186.448a.6.6 0 0 1-.189.446.607.607 0 0 1-.437.184z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                </alert>
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            component="div"
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              <EuiTitle
+                                size="m"
+                                textTransform="none"
                               >
-                                <EuiTitle
-                                  size="m"
-                                  textTransform="none"
+                                <h2
+                                  className="euiTitle euiTitle--medium"
                                 >
-                                  <h2
-                                    className="euiTitle euiTitle--medium"
-                                  >
-                                    Time for an upgrade!
-                                  </h2>
-                                </EuiTitle>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </UpgradeFailureTitle>
-                    </EuiTitle>
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
-                      <div
-                        className="euiText euiText--medium"
-                      >
-                        <p
-                          style={
-                            Object {
-                              "textAlign": "left",
-                            }
-                          }
-                        >
-                          Before you can add a pipeline, we need to upgrade your configuration.
-                        </p>
-                      </div>
-                    </EuiText>
-                  </span>
-                </EuiTextColor>
-                <EuiSpacer
-                  size="l"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <UpgradeFailureActions
-                  onClose={[MockFunction]}
-                  onRetry={[MockFunction]}
-                  upgradeButtonText="Upgrade"
-                >
-                  <EuiFlexGroup
-                    alignItems="stretch"
-                    component="div"
-                    direction="row"
-                    gutterSize="l"
-                    justifyContent="flexStart"
-                    responsive={true}
-                    wrap={false}
+                                  Time for an upgrade!
+                                </h2>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </UpgradeFailureTitle>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="m"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    <div
+                      className="euiText euiText--medium"
                     >
-                      <EuiFlexItem
-                        component="div"
-                        grow={false}
+                      <p
+                        style={
+                          Object {
+                            "textAlign": "left",
+                          }
+                        }
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiButton
-                            color="primary"
-                            fill={true}
-                            iconSide="left"
-                            onClick={[MockFunction]}
-                            type="button"
-                          >
-                            <button
-                              className="euiButton euiButton--primary euiButton--fill"
-                              onClick={[MockFunction]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButton__content"
-                              >
-                                <span
-                                  className="euiButton__text"
-                                >
-                                  Upgrade
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButton>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        component="div"
-                        grow={false}
-                      >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
-                            onClick={[MockFunction]}
-                            type="button"
-                          >
-                            <button
-                              className="euiButtonEmpty euiButtonEmpty--primary"
-                              onClick={[MockFunction]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButtonEmpty__content"
-                              >
-                                <span
-                                  className="euiButtonEmpty__text"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Go back"
-                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Go back
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButtonEmpty>
-                        </div>
-                      </EuiFlexItem>
+                        Before you can add a pipeline, we need to upgrade your configuration.
+                      </p>
                     </div>
-                  </EuiFlexGroup>
-                </UpgradeFailureActions>
-              </div>
-            </EuiEmptyPrompt>
-          </div>
-        </EuiPanel>
-      </EuiPageContent>
-    </div>
-  </EuiPage>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Upgrade"
+              >
+                <EuiFlexGroup
+                  alignItems="stretch"
+                  component="div"
+                  direction="row"
+                  gutterSize="l"
+                  justifyContent="flexStart"
+                  responsive={true}
+                  wrap={false}
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      component="div"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButton
+                          color="primary"
+                          fill={true}
+                          iconSide="left"
+                          onClick={[MockFunction]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--fill"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Upgrade
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      component="div"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButtonEmpty
+                          color="primary"
+                          iconSide="left"
+                          onClick={[MockFunction]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
+                                >
+                                  Go back
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButtonEmpty>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </UpgradeFailureActions>
+            </div>
+          </EuiEmptyPrompt>
+        </div>
+      </EuiPanel>
+    </EuiPageContent>
+  </div>
 </UpgradeFailure>
 `;
 
@@ -784,7 +774,16 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
 <UpgradeFailure
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -816,6 +815,26 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -840,15 +859,6 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -869,311 +879,285 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
   onClose={[MockFunction]}
   onRetry={[MockFunction]}
 >
-  <EuiPage
+  <div
     data-test-subj="pipelineEdit upgradeFailure"
-    restrictWidth={false}
     style={
       Object {
         "minHeight": "100vh",
       }
     }
   >
-    <div
-      className="euiPage"
-      data-test-subj="pipelineEdit upgradeFailure"
-      style={
-        Object {
-          "minHeight": "100vh",
-        }
-      }
+    <EuiPageContent
+      panelPaddingSize="l"
     >
-      <EuiPageContent
-        panelPaddingSize="l"
+      <EuiPanel
+        className="euiPageContent"
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
       >
-        <EuiPanel
-          className="euiPageContent"
-          grow={true}
-          hasShadow={false}
-          paddingSize="l"
+        <div
+          className="euiPanel euiPanel--paddingLarge euiPageContent"
         >
-          <div
-            className="euiPanel euiPanel--paddingLarge euiPageContent"
-          >
-            <EuiEmptyPrompt
-              actions={
-                <UpgradeFailureActions
-                  onClose={[MockFunction]}
-                  onRetry={[MockFunction]}
-                  upgradeButtonText="Try again"
-                />
-              }
-              body={
-                <p
-                  style={
-                    Object {
-                      "textAlign": "left",
-                    }
+          <EuiEmptyPrompt
+            actions={
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              />
+            }
+            body={
+              <p
+                style={
+                  Object {
+                    "textAlign": "left",
                   }
-                >
-                  Before you can edit this pipeline, we need to upgrade your configuration.
-                </p>
-              }
-              iconColor="subdued"
-              title={
-                <UpgradeFailureTitle
-                  titleText="Upgrade failed"
-                />
-              }
-            >
-              <div
-                className="euiEmptyPrompt"
+                }
               >
-                <EuiTextColor
-                  color="subdued"
-                  component="span"
+                Before you can edit this pipeline, we need to upgrade your configuration.
+              </p>
+            }
+            iconColor="subdued"
+            title={
+              <UpgradeFailureTitle
+                titleText="Upgrade failed"
+              />
+            }
+          >
+            <div
+              className="euiEmptyPrompt"
+            >
+              <EuiTextColor
+                color="subdued"
+                component="span"
+              >
+                <span
+                  className="euiTextColor euiTextColor--subdued"
                 >
-                  <span
-                    className="euiTextColor euiTextColor--subdued"
+                  <EuiTitle
+                    size="m"
+                    textTransform="none"
                   >
-                    <EuiTitle
-                      size="m"
-                      textTransform="none"
+                    <UpgradeFailureTitle
+                      className="euiTitle euiTitle--medium"
+                      titleText="Upgrade failed"
                     >
-                      <UpgradeFailureTitle
-                        className="euiTitle euiTitle--medium"
-                        titleText="Upgrade failed"
+                      <EuiFlexGroup
+                        alignItems="stretch"
+                        component="div"
+                        direction="row"
+                        gutterSize="l"
+                        justifyContent="flexStart"
+                        responsive={true}
+                        wrap={false}
                       >
-                        <EuiFlexGroup
-                          alignItems="stretch"
-                          component="div"
-                          direction="row"
-                          gutterSize="l"
-                          justifyContent="flexStart"
-                          responsive={true}
-                          wrap={false}
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          <EuiFlexItem
+                            component="div"
+                            grow={false}
                           >
-                            <EuiFlexItem
-                              component="div"
-                              grow={false}
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              <EuiIcon
+                                size="xl"
+                                type="alert"
                               >
-                                <EuiIcon
-                                  size="xl"
-                                  type="alert"
+                                <alert
+                                  className="euiIcon euiIcon--xLarge"
+                                  focusable="false"
+                                  height="16"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <alert
+                                  <svg
                                     className="euiIcon euiIcon--xLarge"
                                     focusable="false"
                                     height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
+                                    style={null}
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
-                                    <svg
-                                      className="euiIcon euiIcon--xLarge"
-                                      focusable="false"
-                                      height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
-                                      viewBox="0 0 16 16"
-                                      width="16"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <g
-                                        fillRule="evenodd"
-                                      >
-                                        <path
-                                          d="M7.5 2.236L1.618 14h11.764L7.5 2.236zm.894-.447l5.882 11.764A1 1 0 0 1 13.382 15H1.618a1 1 0 0 1-.894-1.447L6.606 1.789a1 1 0 0 1 1.788 0z"
-                                        />
-                                        <path
-                                          d="M7 6h1v5H7zM7 12h1v1H7z"
-                                        />
-                                      </g>
-                                    </svg>
-                                  </alert>
-                                </EuiIcon>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              component="div"
-                              grow={false}
+                                    <path
+                                      d="M8.378 1.496l6.695 10.984A1 1 0 0 1 14.22 14H1.667a1 1 0 0 1-.883-1.47L6.642 1.545a1 1 0 0 1 1.736-.05zm-.853.52L1.667 13h12.552L7.525 2.016zM7.14 10.06L6.9 5.18h1.3l-.25 4.878h-.81zm.394 1.901a.61.61 0 0 1-.448-.186.606.606 0 0 1-.186-.444c0-.174.062-.323.186-.446a.614.614 0 0 1 .448-.184c.169 0 .315.06.44.182.124.122.186.27.186.448a.6.6 0 0 1-.189.446.607.607 0 0 1-.437.184z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                </alert>
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            component="div"
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              <EuiTitle
+                                size="m"
+                                textTransform="none"
                               >
-                                <EuiTitle
-                                  size="m"
-                                  textTransform="none"
+                                <h2
+                                  className="euiTitle euiTitle--medium"
                                 >
-                                  <h2
-                                    className="euiTitle euiTitle--medium"
-                                  >
-                                    Upgrade failed
-                                  </h2>
-                                </EuiTitle>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </UpgradeFailureTitle>
-                    </EuiTitle>
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
-                      <div
-                        className="euiText euiText--medium"
-                      >
-                        <p
-                          style={
-                            Object {
-                              "textAlign": "left",
-                            }
-                          }
-                        >
-                          Before you can edit this pipeline, we need to upgrade your configuration.
-                        </p>
-                      </div>
-                    </EuiText>
-                  </span>
-                </EuiTextColor>
-                <EuiSpacer
-                  size="l"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <UpgradeFailureActions
-                  onClose={[MockFunction]}
-                  onRetry={[MockFunction]}
-                  upgradeButtonText="Try again"
-                >
-                  <EuiFlexGroup
-                    alignItems="stretch"
-                    component="div"
-                    direction="row"
-                    gutterSize="l"
-                    justifyContent="flexStart"
-                    responsive={true}
-                    wrap={false}
+                                  Upgrade failed
+                                </h2>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </UpgradeFailureTitle>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="m"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText
+                    grow={true}
+                    size="m"
+                  >
+                    <div
+                      className="euiText euiText--medium"
                     >
-                      <EuiFlexItem
-                        component="div"
-                        grow={false}
+                      <p
+                        style={
+                          Object {
+                            "textAlign": "left",
+                          }
+                        }
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiButton
-                            color="primary"
-                            fill={true}
-                            iconSide="left"
-                            onClick={[MockFunction]}
-                            type="button"
-                          >
-                            <button
-                              className="euiButton euiButton--primary euiButton--fill"
-                              onClick={[MockFunction]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButton__content"
-                              >
-                                <span
-                                  className="euiButton__text"
-                                >
-                                  Try again
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButton>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        component="div"
-                        grow={false}
-                      >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
-                            onClick={[MockFunction]}
-                            type="button"
-                          >
-                            <button
-                              className="euiButtonEmpty euiButtonEmpty--primary"
-                              onClick={[MockFunction]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButtonEmpty__content"
-                              >
-                                <span
-                                  className="euiButtonEmpty__text"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Go back"
-                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Go back
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButtonEmpty>
-                        </div>
-                      </EuiFlexItem>
+                        Before you can edit this pipeline, we need to upgrade your configuration.
+                      </p>
                     </div>
-                  </EuiFlexGroup>
-                </UpgradeFailureActions>
-              </div>
-            </EuiEmptyPrompt>
-          </div>
-        </EuiPanel>
-      </EuiPageContent>
-    </div>
-  </EuiPage>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              >
+                <EuiFlexGroup
+                  alignItems="stretch"
+                  component="div"
+                  direction="row"
+                  gutterSize="l"
+                  justifyContent="flexStart"
+                  responsive={true}
+                  wrap={false}
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      component="div"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButton
+                          color="primary"
+                          fill={true}
+                          iconSide="left"
+                          onClick={[MockFunction]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--fill"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Try again
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      component="div"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButtonEmpty
+                          color="primary"
+                          iconSide="left"
+                          onClick={[MockFunction]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
+                                >
+                                  Go back
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButtonEmpty>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </UpgradeFailureActions>
+            </div>
+          </EuiEmptyPrompt>
+        </div>
+      </EuiPanel>
+    </EuiPageContent>
+  </div>
 </UpgradeFailure>
 `;
 
 exports[`UpgradeFailure component renders component as expected 1`] = `
-<EuiPage
+<div
   data-test-subj="pipelineEdit upgradeFailure"
-  restrictWidth={false}
   style={
     Object {
       "minHeight": "100vh",
@@ -1210,5 +1194,5 @@ exports[`UpgradeFailure component renders component as expected 1`] = `
       }
     />
   </EuiPageContent>
-</EuiPage>
+</div>
 `;

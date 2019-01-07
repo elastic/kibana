@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { TransactionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
 import { SpanListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/spans/get_spans';
-import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
 import { addVersion, getEncodedEsQuery } from './apm';
@@ -43,8 +44,8 @@ export async function loadTransaction({
   traceId,
   kuery
 }: IUrlParams) {
-  const result = await callApi<TransactionAPIResponse>(
-    {
+  try {
+    const result = await callApi<TransactionAPIResponse>({
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {
         traceId,
@@ -52,11 +53,17 @@ export async function loadTransaction({
         end,
         esFilterQuery: await getEncodedEsQuery(kuery)
       }
-    },
-    {
-      camelcase: false
-    }
-  );
+    });
+    return addVersion(result);
+  } catch (e) {
+    const err: KFetchError = e;
 
-  return addVersion(result);
+    // swallow 404 errors
+    if (err.res.status === 404) {
+      return;
+    }
+
+    // re-throw all other errors
+    throw err;
+  }
 }

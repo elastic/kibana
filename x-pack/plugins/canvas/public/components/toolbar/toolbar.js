@@ -17,7 +17,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { Navbar } from '../navbar';
-import { WorkpadLoader } from '../workpad_loader';
+import { WorkpadManager } from '../workpad_manager';
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
@@ -32,8 +32,8 @@ export const Toolbar = props => {
     selectedPageNumber,
     workpadName,
     totalPages,
-    showWorkpadLoader,
-    setShowWorkpadLoader,
+    showWorkpadManager,
+    setShowWorkpadManager,
   } = props;
 
   const elementIsSelected = Boolean(selectedElement);
@@ -41,19 +41,21 @@ export const Toolbar = props => {
   const done = () => setTray(null);
 
   const showHideTray = exp => {
-    if (tray && tray === exp) return done();
+    if (tray && tray === exp) {
+      return done();
+    }
     setTray(exp);
   };
 
-  const closeWorkpadLoader = () => setShowWorkpadLoader(false);
-  const openWorkpadLoader = () => setShowWorkpadLoader(true);
+  const closeWorkpadManager = () => setShowWorkpadManager(false);
+  const openWorkpadManager = () => setShowWorkpadManager(true);
 
-  const workpadLoader = (
+  const workpadManager = (
     <EuiOverlayMask>
-      <EuiModal onClose={closeWorkpadLoader} className="canvasModal--fixedSize" maxWidth="1000px">
-        <WorkpadLoader onClose={closeWorkpadLoader} />
+      <EuiModal onClose={closeWorkpadManager} className="canvasModal--fixedSize" maxWidth="1000px">
+        <WorkpadManager onClose={closeWorkpadManager} />
         <EuiModalFooter>
-          <EuiButton size="s" onClick={closeWorkpadLoader}>
+          <EuiButton size="s" onClick={closeWorkpadManager}>
             Dismiss
           </EuiButton>
         </EuiModalFooter>
@@ -72,7 +74,7 @@ export const Toolbar = props => {
       <Navbar>
         <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" iconType="grid" onClick={() => openWorkpadLoader()}>
+            <EuiButtonEmpty color="text" iconType="grid" onClick={() => openWorkpadManager()}>
               {workpadName}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -116,7 +118,7 @@ export const Toolbar = props => {
         </EuiFlexGroup>
       </Navbar>
 
-      {showWorkpadLoader && workpadLoader}
+      {showWorkpadManager && workpadManager}
     </div>
   );
 };
@@ -130,6 +132,6 @@ Toolbar.propTypes = {
   selectedPageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
   selectedElement: PropTypes.object,
-  showWorkpadLoader: PropTypes.bool.isRequired,
-  setShowWorkpadLoader: PropTypes.func.isRequired,
+  showWorkpadManager: PropTypes.bool.isRequired,
+  setShowWorkpadManager: PropTypes.func.isRequired,
 };

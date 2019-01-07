@@ -9,6 +9,12 @@ import gql from 'graphql-tag';
 export const metadataSchema = gql`
   "One metadata entry for a node"
   type InfraNodeMetadata {
+    id: ID!
+    name: String!
+    features: [InfraNodeFeature!]!
+  }
+
+  type InfraNodeFeature {
     name: String!
     source: String!
   }
@@ -25,11 +31,11 @@ export const metadataSchema = gql`
   extend type InfraSource {
     "A hierarchy of metadata entries by node"
     metadataByNode(
-      "The name of the node"
-      nodeName: String!
+      "The id of the node"
+      nodeId: String!
       "The type of the node."
       nodeType: InfraNodeType!
-    ): [InfraNodeMetadata]!
+    ): InfraNodeMetadata!
     serviceMetadataBetween(
       "The millisecond timestamp that corresponds to the start of the interval"
       start: Float!

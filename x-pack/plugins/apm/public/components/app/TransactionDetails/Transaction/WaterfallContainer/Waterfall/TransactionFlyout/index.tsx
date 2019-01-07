@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,10 +19,10 @@ import {
 import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { DiscoverTransactionButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverTransactionButton';
+import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { APM_AGENT_DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/agents';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
@@ -115,11 +114,10 @@ export function TransactionFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverTransactionButton transaction={transactionDoc}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  View transaction in Discover
-                </EuiButtonEmpty>
-              </DiscoverTransactionButton>
+              <TransactionActionMenu
+                transaction={transactionDoc}
+                location={location}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
