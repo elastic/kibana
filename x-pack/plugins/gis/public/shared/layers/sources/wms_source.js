@@ -10,6 +10,7 @@ import {
   EuiFieldText,
   EuiText,
   EuiFormRow,
+  EuiSpacer
 } from '@elastic/eui';
 
 import { TMSSource } from './tms_source';
@@ -37,6 +38,18 @@ export class WMSSource extends TMSSource {
       onPreviewSource(source);
     };
     return (<WMSEditor previewWMS={previewWMS} />);
+  }
+
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{WMSSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">Web Map Service (WMS)</p>
+        </EuiText>
+      </Fragment>
+    );
   }
 
   renderDetails() {

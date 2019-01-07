@@ -143,6 +143,21 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
+      it('should return an ES match query when a concrete fieldName and value are provided without an index pattern', function () {
+        const expected = {
+          bool: {
+            should: [
+              { match: { extension: 'jpg' } },
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+        const result = is.toElasticsearchQuery(node);
+        expect(result).to.eql(expected);
+      });
+
       it('should support creation of phrase queries', function () {
         const expected = {
           bool: {
