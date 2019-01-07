@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
+import { EuiButton, EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 import Markdown from 'react-markdown';
 import { connect } from 'react-redux';
@@ -17,7 +19,6 @@ import { FetchFileResponse } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { treeCommitsSelector } from '../../selectors';
-import { colors } from '../../style/variables';
 import { Editor } from '../editor/editor';
 import { Blame } from './blame';
 import { CommitHistory } from './commit_history';
@@ -26,33 +27,13 @@ import { Directory } from './directory';
 const LARGE_Z_INDEX_NUMBER = 99;
 
 const ButtonsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
   position: absolute;
   right: 1rem;
   z-index: ${LARGE_Z_INDEX_NUMBER};
-`;
-
-const Button = styled.button`
-  width: 96px;
-  height: 24px;
-  outline: none !important;
-  color: ${colors.textBlue};
-  border: 1px solid ${colors.borderGrey};
-  background-color: ${colors.white};
-  box-shadow: none;
-  &:first-child {
-    border-radius: 4px 0 0 4px;
-  }
-  &:last-child {
-    border-radius: 0 4px 4px 0;
-  }
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-  a,
-  a:focus {
-    outline: none;
-    box-shadow: none;
+  & > div:first-child {
+    margin-right: 8px;
   }
 `;
 
@@ -83,13 +64,43 @@ interface Props extends RouteComponentProps<MainRouteParams> {
 }
 
 interface State {
-  showBlame: boolean;
+  selectedButtonId: string;
 }
+
+enum ButtonOption {
+  Code = 'Code',
+  Blame = 'Blame',
+  History = 'History',
+}
+
+const Title = styled.div`
+  color: #1a1a1a;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 4px 0 18px;
+`;
 
 class CodeContent extends React.PureComponent<Props, State> {
   public state = {
-    showBlame: false,
+    selectedButtonId: ButtonOption.Code,
   };
+
+  public buttonOptions = [
+    {
+      id: ButtonOption.Code,
+      label: ButtonOption.Code,
+    },
+    {
+      id: ButtonOption.Blame,
+      label: ButtonOption.Blame,
+    },
+    {
+      id: ButtonOption.History,
+      label: ButtonOption.History,
+    },
+  ];
+
+  public rawButtonOptions = [{ id: 'Raw', label: 'Raw' }];
 
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
     if (!node) {
@@ -126,27 +137,36 @@ class CodeContent extends React.PureComponent<Props, State> {
     });
   };
 
-  public showBlame = () => {
-    this.setState({ showBlame: true });
+  public switchButton = (id: string) => {
+    this.setState({ selectedButtonId: id });
   };
 
-  public hideBlame = () => {
-    this.setState({ showBlame: false });
-  };
-
-  public renderButtons() {
+  public openRawFile = () => {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
+    window.open(`../api/code/repo/${repoUri}/blob/${revision}/${path}`);
+  };
+
+  public renderButtons = () => {
     return (
       <ButtonsContainer>
-        <Button onClick={this.hideBlame}>
-          <a href={`../api/code/repo/${repoUri}/blob/${revision}/${path}`}>Raw File</a>
-        </Button>
-        <Button onClick={this.showBlame}>Blame</Button>
-        <Button onClick={this.hideBlame}>History</Button>
+        <EuiButtonGroup
+          color="primary"
+          options={this.buttonOptions}
+          type="single"
+          idSelected={this.state.selectedButtonId}
+          onChange={this.switchButton}
+        />
+        <EuiButtonGroup
+          color="primary"
+          options={this.rawButtonOptions}
+          type="single"
+          idSelected={''}
+          onChange={this.openRawFile}
+        />
       </ButtonsContainer>
     );
-  }
+  };
 
   public render() {
     const { file, blames, commits, match, tree } = this.props;
@@ -157,10 +177,31 @@ class CodeContent extends React.PureComponent<Props, State> {
       return (
         <DirectoryViewContainer>
           <Directory node={node} />
-          <CommitHistory commits={commits} repoUri={repoUri} />
+          <CommitHistory
+            commits={commits}
+            repoUri={repoUri}
+            header={
+              <React.Fragment>
+                <Title>Recent Commits</Title>
+                <EuiButton>View All</EuiButton>
+              </React.Fragment>
+            }
+          />
         </DirectoryViewContainer>
       );
     } else if (pathType === PathTypes.blob) {
+      if (this.state.selectedButtonId === ButtonOption.History) {
+        return (
+          <React.Fragment>
+            {this.renderButtons()}
+            <CommitHistory
+              commits={commits}
+              repoUri={repoUri}
+              header={<Title>Commit History</Title>}
+            />
+          </React.Fragment>
+        );
+      }
       if (!file) {
         return null;
       }
@@ -180,7 +221,8 @@ class CodeContent extends React.PureComponent<Props, State> {
       }
       const blamesHeight = `calc(100% + ${blames.map(bl => bl.lines).reduce((a, b) => a + 6, 0) *
         18}px)`;
-      const blame = this.state.showBlame && (
+      const showBlame = this.state.selectedButtonId === ButtonOption.Blame;
+      const blame = showBlame && (
         <BlameContainer innerRef={this.scrollBlameInResponseOfScrollingEditor}>
           <div style={{ height: blamesHeight }}>
             <Blame blames={blames} lineHeight={18} />

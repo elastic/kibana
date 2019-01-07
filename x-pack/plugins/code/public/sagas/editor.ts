@@ -151,11 +151,10 @@ function* handleMainRouteChange(action: Action<Match>) {
       if (tab === 'references' && refUrl) {
         yield call(handleReference, decodeURIComponent(refUrl as string));
       }
-    } else if (pathType === PathTypes.tree) {
-      const commits = yield select((state: RootState) => state.file.treeCommits[file]);
-      if (commits === undefined) {
-        yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
-      }
+    }
+    const commits = yield select((state: RootState) => state.file.treeCommits[file]);
+    if (commits === undefined) {
+      yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
     }
   }
   const lastRequestPath = yield select(lastRequestPathSelector);
