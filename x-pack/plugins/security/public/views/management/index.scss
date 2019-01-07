@@ -1,7 +1,6 @@
 // Edit role styles
 @import './edit_role/components/privileges/kibana/impacted_spaces_flyout';
-@import './edit_role/edit_role';
-
+@import './edit_role/components/collapsible_panel';
 
 $securityFormWidth: 460px;
 
@@ -22,11 +21,6 @@ $securityFormWidth: 460px;
   .kuiButton + .kuiButton {
     margin-left: $euiSizeS;
   }
-}
-
-.mgtUsersEditPage,
-.mgtUsersListingPage {
-  min-height: calc(100vh - 70px);
 }
 
 .mgtUsersListingPage__content {
