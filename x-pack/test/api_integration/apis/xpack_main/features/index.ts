@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('xpack_main', () => {
+import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/providers';
+
+// tslint:disable:no-default-export
+export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
+  describe('Features', () => {
     loadTestFile(require.resolve('./features'));
-    loadTestFile(require.resolve('./telemetry'));
-    loadTestFile(require.resolve('./settings'));
   });
 }

@@ -10,7 +10,6 @@ import {
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiLoadingSpinner,
   EuiPageContent,
   EuiPageContentBody,
