@@ -5,6 +5,8 @@
  */
 
 import { EuiEmptyPrompt, EuiLink, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { getDocCountQuery } from './get_doc_count';
@@ -26,10 +28,15 @@ export const EmptyState = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return i18n.translate('xpack.uptime.emptyState.loadingMessage', {
+          defaultMessage: 'Loading...',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.emptyState.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
 
       const {
@@ -41,22 +48,38 @@ export const EmptyState = ({
             <EuiEmptyPrompt
               title={
                 <EuiTitle size="l">
-                  <h3>No Uptime Data</h3>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.uptime.emptyState.title"
+                      defaultMessage="No Uptime Data"
+                    />
+                  </h3>
                 </EuiTitle>
               }
               body={
                 <Fragment>
-                  <p>There is no uptime data available.</p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.uptime.emptyState.bodyMessage"
+                      defaultMessage="There is no uptime data available."
+                    />
+                  </p>
                   <p>
                     {
                       <EuiLink
                         target="_blank"
                         href="https://www.elastic.co/guide/en/beats/heartbeat/6.5/configuring-howto-heartbeat.html"
                       >
-                        Configure Heartbeat
+                        <FormattedMessage
+                          id="xpack.uptime.emptyState.bodyLink"
+                          defaultMessage="Configure Heartbeat"
+                        />
                       </EuiLink>
                     }
-                    &nbsp;to start logging uptime data.
+                    <FormattedMessage
+                      id="xpack.uptime.emptyState.bodyLinkPredicateText"
+                      defaultMessage=" to start logging uptime data"
+                    />
                   </p>
                 </Fragment>
               }

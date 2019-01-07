@@ -17,6 +17,8 @@ import {
   EuiSeriesChartUtils,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
@@ -36,39 +38,59 @@ const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 const monitorListColumns = [
   {
     field: 'ping.monitor.status',
-    name: 'Status',
+    name: i18n.translate('xpack.uptime.monitorList.columns.status.heading', {
+      defaultMessage: 'Status',
+    }),
     render: (status: string) => (
       <EuiHealth color={status === 'up' ? 'success' : 'danger'}>
-        {status === 'up' ? 'Up' : 'Down'}
+        <FormattedMessage
+          id="xpack.uptime.monitorList.columns.status.body"
+          values={{ status: status === 'up' ? 'Up' : 'Down' }}
+          defaultMessage="{status}"
+        />
       </EuiHealth>
     ),
     sortable: true,
   },
   {
     field: 'ping.timestamp',
-    name: 'Last updated',
+    name: i18n.translate('xpack.uptime.monitorList.columns.timestamp.heading', {
+      defaultMessage: 'Last updated',
+    }),
     render: (timestamp: string) => moment(timestamp).fromNow(),
     sortable: true,
   },
   {
     field: 'ping.monitor.host',
-    name: 'Host',
+    name: i18n.translate('xpack.uptime.monitorList.columns.host.heading', {
+      defaultMessage: 'Host',
+    }),
     render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
   },
   {
     field: 'key.port',
-    name: 'Port',
+    name: i18n.translate('xpack.uptime.monitorList.columns.port.heading', {
+      defaultMessage: 'Port',
+    }),
     sortable: true,
   },
   {
     field: 'ping.monitor.type',
-    name: 'Type',
+    name: i18n.translate('xpack.uptime.monitorList.columns.type.heading', {
+      defaultMessage: 'Type',
+    }),
     sortable: true,
   },
-  { field: 'ping.monitor.ip', name: 'IP', sortable: true },
+  {
+    field: 'ping.monitor.ip',
+    name: i18n.translate('xpack.uptime.monitorList.columns.ip.heading', { defaultMessage: 'IP' }),
+    sortable: true,
+  },
   {
     field: 'upSeries',
-    name: 'Monitor History',
+    name: i18n.translate('xpack.uptime.monitorList.columns.monitorHistory.heading', {
+      defaultMessage: 'Monitor History',
+    }),
     // @ts-ignore TODO fix typing
     render: (upSeries, monitor) => {
       const { downSeries } = monitor;
@@ -82,14 +104,18 @@ const monitorListColumns = [
           <EuiLineSeries
             lineSize={2}
             color="green"
-            name="Up"
+            name={i18n.translate('xpack.uptime.monitorList.upLineSeries.name', {
+              defaultMessage: 'Up',
+            })}
             data={upSeries}
             showLineMarks={true}
           />
           <EuiLineSeries
             lineSize={2}
             color="red"
-            name="Down"
+            name={i18n.translate('xpack.uptime.monitorList.downLineSeries.name', {
+              defaultMessage: 'Down',
+            })}
             data={downSeries}
             showLineMarks={true}
           />
@@ -118,10 +144,15 @@ export const MonitorList = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return i18n.translate('xpack.uptime.monitorList.loadingMessage', {
+          defaultMessage: 'Loading...',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.monitorList.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
       const {
         monitorStatus: { monitors },
@@ -129,7 +160,12 @@ export const MonitorList = ({
       return (
         <Fragment>
           <EuiTitle size="xs">
-            <h5>Monitor status</h5>
+            <h5>
+              <FormattedMessage
+                id="xpack.uptime.monitorList.heading"
+                defaultMessage="Monitor status"
+              />
+            </h5>
           </EuiTitle>
           <EuiPanel paddingSize="l">
             <EuiInMemoryTable

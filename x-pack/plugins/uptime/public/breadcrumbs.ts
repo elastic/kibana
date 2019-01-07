@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Breadcrumb } from 'ui/chrome';
 
 export const monitorBreadcrumb: Breadcrumb = {
-  text: 'Monitor',
+  text: i18n.translate('xpack.uptime.breadcrumbs.monitorBreadcrumbText', {
+    defaultMessage: 'Monitor',
+  }),
 };
 
 export const overviewBreadcrumb: Breadcrumb = {
-  text: 'Overview',
+  text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+    defaultMessage: 'Overview',
+  }),
   href: '#/',
 };
 
