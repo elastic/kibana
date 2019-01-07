@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('shows save button', async () => {
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.existOrFail('discoverSaveButton', 10000);
+        await testSubjects.existOrFail('discoverSaveButton', 20000);
       });
     });
 
