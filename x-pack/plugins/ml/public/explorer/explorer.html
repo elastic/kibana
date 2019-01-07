@@ -16,31 +16,6 @@
     <div class="results-container">
 
       <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
-        <div ng-if="viewBySwimlaneOptions.length > 0">
-          <div
-            class="ml-explorer-swimlane euiText"
-            ng-if="showViewBySwimlane"
-            ng-mouseenter="setSwimlaneSelectActive(true)"
-            ng-mouseleave="setSwimlaneSelectActive(false)"
-          >
-            <ml-explorer-swimlane swimlane-type="viewBy" />
-          </div>
-
-          <div ng-if="!showViewBySwimlane" class="text-center visError euiText">
-            <div class="item top"></div>
-            <div class="item">
-              <h4
-                class="euiTitle euiTitle--small"
-                i18n-id="xpack.ml.explorer.noInfluencersFoundTitle"
-                i18n-default-message="No {swimlaneViewByFieldName} influencers found"
-                i18n-values="{ swimlaneViewByFieldName }"
-              ></h4>
-            </div>
-            <div class="item bottom"></div>
-          </div>
-
-        </div>
-
         <div ng-show="annotationsData.length > 0">
           <span
             class="panel-title euiText"

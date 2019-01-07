@@ -5,7 +5,7 @@
  */
 
 /*
- * React component for rendering Explorer dashboard swimlanes.
+ * React component for rendering EuiEmptyPrompt when no jobs were found.
  */
 
 import React from 'react';

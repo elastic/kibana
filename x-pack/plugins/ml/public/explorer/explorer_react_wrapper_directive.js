@@ -56,6 +56,7 @@ module.directive('mlExplorerReactWrapper', function (Private) {
         'noInfluencersConfigured',
         'setSwimlaneSelectActive',
         'setSwimlaneViewBy',
+        'showViewBySwimlane',
         'swimlaneViewByFieldName',
         'viewByLoadedForTimeFormatted',
         'viewBySwimlaneOptions',
