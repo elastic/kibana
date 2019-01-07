@@ -50,6 +50,14 @@ describe('IndexMigrator', () => {
           namespace: { type: 'keyword' },
           type: { type: 'keyword' },
           updated_at: { type: 'date' },
+          references: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              type: { type: 'keyword' },
+              id: { type: 'keyword' },
+            },
+          },
         },
       },
       index: '.kibana_1',
@@ -83,6 +91,14 @@ describe('IndexMigrator', () => {
               namespace: { type: 'keyword' },
               type: { type: 'keyword' },
               updated_at: { type: 'date' },
+              references: {
+                type: 'nested',
+                properties: {
+                  name: { type: 'keyword' },
+                  type: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                },
+              },
             },
           },
         },
@@ -195,6 +211,14 @@ describe('IndexMigrator', () => {
               namespace: { type: 'keyword' },
               type: { type: 'keyword' },
               updated_at: { type: 'date' },
+              references: {
+                type: 'nested',
+                properties: {
+                  name: { type: 'keyword' },
+                  type: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                },
+              },
             },
           },
         },

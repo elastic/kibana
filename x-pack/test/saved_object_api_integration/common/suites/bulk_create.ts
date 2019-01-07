@@ -97,6 +97,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           attributes: {
             title: 'A great new dashboard',
           },
+          references: [],
         },
         {
           type: 'globaltype',
@@ -106,6 +107,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           attributes: {
             name: 'A new globaltype object',
           },
+          references: [],
         },
         {
           type: 'globaltype',

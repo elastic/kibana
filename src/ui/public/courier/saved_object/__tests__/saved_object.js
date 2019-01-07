@@ -285,6 +285,30 @@ describe('Saved Object', function () {
         });
       });
     });
+
+    describe('with extractReferences', () => {
+      it('calls the function', async () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse('id'));
+        let extractReferencesCallCount = 0;
+        const extractReferences = ({ attributes, references }) => {
+          extractReferencesCallCount++;
+          return { attributes, references };
+        };
+        return createInitializedSavedObject({ type: 'dashboard', extractReferences })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                type: 'dashboard', id, version: 2
+              });
+            });
+            return savedObject.save();
+          })
+          .then(() => {
+            expect(extractReferencesCallCount).to.be(1);
+          });
+      });
+    });
   });
 
   describe('applyESResp', function () {
@@ -405,6 +429,25 @@ describe('Saved Object', function () {
         });
     });
 
+    it('injects references when function is provided', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: { dinosaurs: { tRex: 'has big teeth' } }
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('calledOnce', true);
+        });
+    });
   });
 
   describe ('config', function () {

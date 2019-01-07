@@ -261,6 +261,11 @@ describe('SavedObjectsRepository', () => {
       }, {
         id: 'logstash-*',
         namespace: 'foo-namespace',
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '123'
+        }]
       });
 
       expect(response).toEqual({
@@ -270,7 +275,12 @@ describe('SavedObjectsRepository', () => {
         version: 2,
         attributes: {
           title: 'Logstash',
-        }
+        },
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '123',
+        }]
       });
     });
 
@@ -430,8 +440,8 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns({ items: [] });
 
       await savedObjectsRepository.bulkCreate([
-        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+        { type: 'config', id: 'one', attributes: { title: 'Test One' }, references: [{ name: 'ref_0', type: 'test', id: '1' }] },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' }, references: [{ name: 'ref_0', type: 'test', id: '2' }] },
       ]);
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -441,9 +451,14 @@ describe('SavedObjectsRepository', () => {
 
       expect(bulkCalls[0][1].body).toEqual([
         { create: { _type: 'doc', _id: 'config:one' } },
-        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, references: [{ name: 'ref_0', type: 'test', id: '1' }] },
         { create: { _type: 'doc', _id: 'index-pattern:two' } },
-        { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+        {
+          type: 'index-pattern',
+          ...mockTimestampFields,
+          'index-pattern': { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }]
+        }
       ]);
 
       sinon.assert.calledOnce(onBeforeWrite);
@@ -465,9 +480,21 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           { create: { _type: 'doc', _id: 'config:one' } },
-          { type: 'config', ...mockTimestampFields, config: { title: 'Test One!!' }, migrationVersion: { foo: '2.3.4' } },
+          {
+            type: 'config',
+            ...mockTimestampFields,
+            config: { title: 'Test One!!' },
+            migrationVersion: { foo: '2.3.4' },
+            references: []
+          },
           { create: { _type: 'doc', _id: 'index-pattern:two' } },
-          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two!!' }, migrationVersion: { foo: '2.3.4' } }
+          {
+            type: 'index-pattern',
+            ...mockTimestampFields,
+            'index-pattern': { title: 'Test Two!!' },
+            migrationVersion: { foo: '2.3.4' },
+            references: []
+          }
         ]
       }));
     });
@@ -481,7 +508,7 @@ describe('SavedObjectsRepository', () => {
         body: [
           // uses create because overwriting is not allowed
           { create: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', ...mockTimestampFields, 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {}, references: [] },
         ]
       }));
 
@@ -496,7 +523,7 @@ describe('SavedObjectsRepository', () => {
         body: [
           // uses index because overwriting is allowed
           { index: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', ...mockTimestampFields, 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {}, references: [] },
         ]
       }));
 
@@ -540,6 +567,7 @@ describe('SavedObjectsRepository', () => {
             version: 2,
             ...mockTimestampFields,
             attributes: { title: 'Test Two' },
+            references: [],
           }
         ]
       });
@@ -578,12 +606,14 @@ describe('SavedObjectsRepository', () => {
             version: 2,
             ...mockTimestampFields,
             attributes: { title: 'Test One' },
+            references: [],
           }, {
             id: 'two',
             type: 'index-pattern',
             version: 2,
             ...mockTimestampFields,
             attributes: { title: 'Test Two' },
+            references: [],
           }
         ]
       });
@@ -604,9 +634,21 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           { create: { _type: 'doc', _id: 'foo-namespace:config:one' } },
-          { namespace: 'foo-namespace', type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+          {
+            namespace: 'foo-namespace',
+            type: 'config',
+            ...mockTimestampFields,
+            config: { title: 'Test One' },
+            references: []
+          },
           { create: { _type: 'doc', _id: 'foo-namespace:index-pattern:two' } },
-          { namespace: 'foo-namespace', type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+          {
+            namespace: 'foo-namespace',
+            type: 'index-pattern',
+            ...mockTimestampFields,
+            'index-pattern': { title: 'Test Two' },
+            references: []
+          }
         ]
       }));
       sinon.assert.calledOnce(onBeforeWrite);
@@ -622,9 +664,9 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           { create: { _type: 'doc', _id: 'config:one' } },
-          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, references: [] },
           { create: { _type: 'doc', _id: 'index-pattern:two' } },
-          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' }, references: [] }
         ]
       }));
       sinon.assert.calledOnce(onBeforeWrite);
@@ -644,7 +686,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           { create: { _type: 'doc', _id: 'globaltype:one' } },
-          { type: 'globaltype', ...mockTimestampFields, 'globaltype': { title: 'Test One' } },
+          { type: 'globaltype', ...mockTimestampFields, 'globaltype': { title: 'Test One' }, references: [] },
         ]
       }));
       sinon.assert.calledOnce(onBeforeWrite);
@@ -1169,13 +1211,25 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('returns current ES document version', async () => {
-      const response = await savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, { namespace: 'foo-namespace' });
+      const response = await savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, {
+        namespace: 'foo-namespace',
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '1'
+        }]
+      });
       expect(response).toEqual({
         id,
         type,
         ...mockTimestampFields,
         version: newVersion,
-        attributes
+        attributes,
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '1',
+        }]
       });
     });
 
@@ -1198,6 +1252,11 @@ describe('SavedObjectsRepository', () => {
         title: 'Testing',
       }, {
         namespace: 'foo-namespace',
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '1'
+        }]
       });
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -1206,7 +1265,15 @@ describe('SavedObjectsRepository', () => {
         id: 'foo-namespace:index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+          doc: {
+            updated_at: mockTimestamp,
+            'index-pattern': { title: 'Testing' },
+            references: [{
+              name: 'ref_0',
+              type: 'test',
+              id: '1',
+            }]
+          }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -1217,7 +1284,15 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      await savedObjectsRepository.update('index-pattern', 'logstash-*', { title: 'Testing' });
+      await savedObjectsRepository.update('index-pattern', 'logstash-*', {
+        title: 'Testing'
+      }, {
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '1'
+        }]
+      });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
@@ -1225,7 +1300,15 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+          doc: {
+            updated_at: mockTimestamp,
+            'index-pattern': { title: 'Testing' },
+            references: [{
+              name: 'ref_0',
+              type: 'test',
+              id: '1',
+            }]
+          }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -1240,6 +1323,11 @@ describe('SavedObjectsRepository', () => {
         name: 'bar',
       }, {
         namespace: 'foo-namespace',
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '1'
+        }]
       });
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -1248,7 +1336,15 @@ describe('SavedObjectsRepository', () => {
         id: 'globaltype:foo',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, 'globaltype': { name: 'bar' } }
+          doc: {
+            updated_at: mockTimestamp,
+            'globaltype': { name: 'bar' },
+            references: [{
+              name: 'ref_0',
+              type: 'test',
+              id: '1',
+            }]
+          }
         },
         ignore: [404],
         refresh: 'wait_for',

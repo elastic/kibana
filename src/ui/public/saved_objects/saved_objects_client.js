@@ -51,6 +51,7 @@ export class SavedObjectsClient {
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion]
+   * @property {array} [options.references] [{ name, type, id }]
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
   create = (type, attributes = {}, options = {}) => {
@@ -61,7 +62,17 @@ export class SavedObjectsClient {
     const path = this._getPath([type, options.id]);
     const query = _.pick(options, ['overwrite']);
 
-    return this._request({ method: 'POST', path, query, body: { attributes, migrationVersion: options.migrationVersion } })
+    return this
+      ._request({
+        method: 'POST',
+        path,
+        query,
+        body: {
+          attributes,
+          migrationVersion: options.migrationVersion,
+          references: options.references
+        }
+      })
       .catch(error => {
         if (isAutoCreateIndexError(error)) {
           return showAutoCreateIndexErrorPage();
@@ -75,7 +86,7 @@ export class SavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
+   * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
@@ -177,9 +188,10 @@ export class SavedObjectsClient {
    * @param {object} options
    * @prop {integer} options.version - ensures version matches that of persisted object
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
+   * @prop {array} option.references - the references of the saved object
    * @returns {promise}
    */
-  update(type, id, attributes, { version, migrationVersion } = {}) {
+  update(type, id, attributes, { version, migrationVersion, references } = {}) {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
     }
@@ -188,6 +200,7 @@ export class SavedObjectsClient {
     const body = {
       attributes,
       migrationVersion,
+      references,
       version
     };
 

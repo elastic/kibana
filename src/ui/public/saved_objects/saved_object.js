@@ -20,11 +20,12 @@
 import _ from 'lodash';
 
 export class SavedObject {
-  constructor(client, { id, type, version, attributes, error, migrationVersion } = {}) {
+  constructor(client, { id, type, version, attributes, error, migrationVersion, references } = {}) {
     this._client = client;
     this.id = id;
     this.type = type;
     this.attributes = attributes || {};
+    this.references = references || [];
     this._version = version;
     this.migrationVersion = migrationVersion;
     if (error) {
@@ -46,9 +47,17 @@ export class SavedObject {
 
   save() {
     if (this.id) {
-      return this._client.update(this.type, this.id, this.attributes, { migrationVersion: this.migrationVersion });
+      return this._client.update(
+        this.type,
+        this.id,
+        this.attributes,
+        {
+          migrationVersion: this.migrationVersion,
+          references: this.references,
+        },
+      );
     } else {
-      return this._client.create(this.type, this.attributes, { migrationVersion: this.migrationVersion });
+      return this._client.create(this.type, this.attributes, { migrationVersion: this.migrationVersion, references: this.references });
     }
   }
 
