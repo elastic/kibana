@@ -23,8 +23,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
 
   public async getAll(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     monitorId?: string,
     status?: string,
     sort?: UMPingSortDirectionArg,
@@ -45,8 +45,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
   // TODO implement
   public async getLatestMonitorDocs(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     monitorId?: string
   ): Promise<Ping[]> {
     throw new Error('Method not implemented.');

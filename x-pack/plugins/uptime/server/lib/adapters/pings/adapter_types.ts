@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
+import { UMGqlRange } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 
 export interface UMPingsAdapter {
   getAll(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     monitorId?: string,
     status?: string,
-    sort?: UMPingSortDirectionArg,
+    sort?: string,
     size?: number
   ): Promise<PingResults>;
 
   getLatestMonitorDocs(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     monitorId?: string
   ): Promise<Ping[]>;
 

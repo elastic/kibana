@@ -6,12 +6,12 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
+import { UMGqlRange } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
-const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+const getFilteredQuery = (dateRangeStart: string, dateRangeEnd: string, filters?: string) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
@@ -43,11 +43,11 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getAll(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     monitorId?: string,
     status?: string,
-    sort?: UMPingSortDirectionArg,
+    sort?: string,
     size?: number
   ): Promise<PingResults> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
@@ -90,8 +90,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getLatestMonitorDocs(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     monitorId?: string
   ): Promise<Ping[]> {
     const must: any[] = [];

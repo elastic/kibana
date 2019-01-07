@@ -385,61 +385,61 @@ export interface ErrorListItem {
 // ====================================================
 
 export interface AllPingsQueryArgs {
-  sort?: string | null;
+  sort: string;
 
-  size?: number | null;
+  size: number;
 
-  monitorId?: string | null;
+  monitorId: string;
 
-  status?: string | null;
+  status: string;
 
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
-  filters?: string | null;
+  filters: string;
 }
 export interface GetSnapshotQueryArgs {
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: string;
 
-  downCount?: number | null;
+  downCount: number;
 
-  windowSize?: number | null;
+  windowSize: number;
 
-  filters?: string | null;
+  filters: string;
 }
 export interface GetMonitorChartsDataQueryArgs {
-  monitorId?: string | null;
+  monitorId: string;
 
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: string;
 }
 export interface GetLatestMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
-  monitorId?: string | null;
+  monitorId: string;
 }
 export interface GetFilterBarQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetErrorsListQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
-  filters?: string | null;
+  filters: string;
 }
 
 // ====================================================

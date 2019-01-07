@@ -37,7 +37,7 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   };
 };
 
-const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+const getFilteredQuery = (dateRangeStart: string, dateRangeEnd: string, filters?: string) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
@@ -68,8 +68,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   public async getMonitorChartsData(
     request: any,
     monitorId: string,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any> {
     const query = {
       bool: {
@@ -225,8 +225,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getLatestMonitors(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters: string
   ): Promise<any> {
     const params = {
@@ -315,8 +315,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getFilterBar(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -369,8 +369,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getErrorsList(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters?: string | undefined
   ): Promise<ErrorListItem[]> {
     const statusDown = {

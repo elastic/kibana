@@ -15,16 +15,16 @@ export class UMMonitorsDomain {
   public async getMonitorChartsData(
     request: any,
     monitorId: string,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any> {
     return this.adapter.getMonitorChartsData(request, monitorId, dateRangeStart, dateRangeEnd);
   }
 
   public async getMonitors(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters: string
   ): Promise<any> {
     return this.adapter.getLatestMonitors(request, dateRangeStart, dateRangeEnd, filters);
@@ -42,16 +42,16 @@ export class UMMonitorsDomain {
 
   public async getFilterBar(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any> {
     return this.adapter.getFilterBar(request, dateRangeStart, dateRangeEnd);
   }
 
   public async getErrorsList(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters?: string
   ): Promise<any> {
     return this.adapter.getErrorsList(request, dateRangeStart, dateRangeEnd, filters);

@@ -10,13 +10,13 @@ export interface UMMonitorsAdapter {
   getMonitorChartsData(
     request: any,
     monitorId: string,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any>;
   getLatestMonitors(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters: string
   ): Promise<any>;
   getSnapshotCount(
@@ -26,11 +26,11 @@ export interface UMMonitorsAdapter {
     windowSize: number,
     filters?: string
   ): Promise<any>;
-  getFilterBar(request: any, dateRangeStart: number, dateRangeEnd: number): Promise<any>;
+  getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string): Promise<any>;
   getErrorsList(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters?: string
   ): Promise<any>;
 }
