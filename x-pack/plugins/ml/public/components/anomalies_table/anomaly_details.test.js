@@ -66,13 +66,6 @@ const props = {
 
 
 describe('AnomalyDetails', () => {
-  test('Renders correctly', () => {
-    const wrapper = shallow(
-      <AnomalyDetails {...props} />
-    );
-
-    expect(wrapper).toMatchSnapshot();
-  });
 
   test('Renders with anomaly details tab selected by default', () => {
     const wrapper = shallow(
