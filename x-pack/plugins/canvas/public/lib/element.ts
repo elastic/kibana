@@ -25,11 +25,11 @@ export class Element {
   public height?: number;
 
   constructor(config: ElementSpec) {
-    const { name, image, displayName, expression, filter, width, height } = config;
+    const { name, image, displayName, expression, filter, help, width, height } = config;
     this.name = name;
     this.displayName = displayName || name;
     this.image = image || defaultHeader;
-    this.help = config.help || '';
+    this.help = help || '';
 
     if (!config.expression) {
       throw new Error('Element types must have a default expression');

@@ -17,7 +17,7 @@ import {
   setSelectedLayer,
   setTimeFilters,
   setRefreshConfig,
-  mapExtentChanged,
+  setGoto,
   replaceLayerList,
 } from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
@@ -56,9 +56,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       const mapState = JSON.parse(savedMap.mapStateJSON);
       const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
       store.dispatch(setTimeFilters(timeFilters));
-      store.dispatch(mapExtentChanged({
+      store.dispatch(setGoto({
+        lat: mapState.center.lat,
+        lon: mapState.center.lon,
         zoom: mapState.zoom,
-        center: mapState.center,
       }));
       if (mapState.refreshConfig) {
         store.dispatch(setRefreshConfig(mapState.refreshConfig));
