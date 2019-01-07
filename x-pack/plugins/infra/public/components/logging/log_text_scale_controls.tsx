@@ -41,12 +41,12 @@ export class LogTextScaleControls extends React.PureComponent<LogTextScaleContro
             label: (
               <FormattedMessage
                 id="xpack.infra.logs.customizeLogs.textSizeRadioGroup"
-                defaultMessage={`{textScale, select,
+                defaultMessage="{textScale, select,
                   small {Small}
                   medium {Medium}
                   large {Large}
                   other {{textScale}}
-                }`}
+                }"
                 values={{
                   textScale: availableTextScale,
                 }}
