@@ -38,6 +38,8 @@ export interface CallCluster {
   (path: 'indices.putTemplate', opts: PutTemplateOpts): Promise<any>;
   (path: 'indices.refresh', opts: IndexOpts): Promise<any>;
   (path: 'indices.updateAliases', opts: UpdateAliasesOpts): Promise<any>;
+  (path: 'indices.deleteTemplate', opts: { name: string }): Promise<any>;
+  (path: 'cat.templates', opts: { format: 'json'; name: string }): Promise<Array<{ name: string }>>;
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;

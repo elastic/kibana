@@ -120,6 +120,8 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
   const startTime = Date.now();
   const { callCluster, alias, source, dest, log } = context;
 
+  await deleteIndexTemplates(context);
+
   log.info(`Creating index ${dest.indexName}.`);
 
   await Index.createIndex(callCluster, dest.indexName, dest.mappings);
@@ -140,6 +142,31 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
   log.info(`Finished in ${result.elapsedMs}ms.`);
 
   return result;
+}
+
+/**
+ * If the obsoleteIndexTemplatePattern option is specified, this will delete any index templates
+ * that match it.
+ */
+async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePattern }: Context) {
+  if (!obsoleteIndexTemplatePattern) {
+    return;
+  }
+
+  const templates = await callCluster('cat.templates', {
+    format: 'json',
+    name: obsoleteIndexTemplatePattern,
+  });
+
+  if (!templates.length) {
+    return;
+  }
+
+  const templateNames = templates.map(t => t.name);
+
+  log.info(`Removing index templates: ${templateNames}`);
+
+  return Promise.all(templateNames.map(name => callCluster('indices.deleteTemplate', { name })));
 }
 
 /**

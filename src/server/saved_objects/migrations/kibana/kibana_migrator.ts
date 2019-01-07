@@ -100,6 +100,7 @@ export class KibanaMigrator {
       pollInterval: config.get('migrations.pollInterval'),
       scrollDuration: config.get('migrations.scrollDuration'),
       serializer: this.serializer,
+      obsoleteIndexTemplatePattern: 'kibana_index_template*',
     });
 
     return migrator.migrate();
