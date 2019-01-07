@@ -9,7 +9,6 @@ import url from 'url';
 // @ts-ignore
 import wreck from 'wreck';
 import { Logger } from '../log';
-import { ServerOptions } from '../server_options';
 
 export const BASE_PLACEHOLDER = '/{baseUrl}';
 
@@ -26,8 +25,8 @@ export async function mainNodeBaseUrl(redirectUrl: string) {
   }
 }
 
-export function redirectRoute(server: hapi.Server, serverOptions: ServerOptions, log: Logger) {
-  let redirectUrl = serverOptions.redirectToNode;
+export function redirectRoute(server: hapi.Server, redirect: string, log: Logger) {
+  let redirectUrl = redirect;
   const hasBaseUrl = redirectUrl.includes(BASE_PLACEHOLDER);
   const proxyHandler = {
     proxy: {
@@ -37,7 +36,7 @@ export function redirectRoute(server: hapi.Server, serverOptions: ServerOptions,
         if (hasBaseUrl) {
           // send a head request to find main node's base url;
           const baseUrl = await mainNodeBaseUrl(redirectUrl);
-          redirectUrl = serverOptions.redirectToNode.replace(BASE_PLACEHOLDER, baseUrl);
+          redirectUrl = redirect.replace(BASE_PLACEHOLDER, baseUrl);
         }
         uri = `${redirectUrl}${request.path}`;
         if (request.url.search) {

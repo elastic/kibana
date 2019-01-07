@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { RepoConfig, RepoConfigs } from '../model/workspace';
+import { RepoConfig, RepoConfigs } from '../model';
 
 export class ServerOptions {
   public readonly workspacePath = resolve(this.config.get('path.data'), 'code/workspace');
@@ -42,7 +42,7 @@ export class ServerOptions {
     {} as RepoConfigs
   );
 
-  public readonly redirectToNode: string = this.options.redirectToNode;
+  public readonly enabled: boolean = this.options.enabled;
 
   constructor(private options: any, private config: any) {}
 }

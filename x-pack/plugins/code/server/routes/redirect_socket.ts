@@ -10,23 +10,18 @@ import ClientIO from 'socket.io-client';
 
 import { SocketKind } from '../../model';
 import { Logger } from '../log';
-import { ServerOptions } from '../server_options';
 import { BASE_PLACEHOLDER, mainNodeBaseUrl } from './redirect';
 
-export async function redirectSocketRoute(
-  server: Server,
-  serverOptions: ServerOptions,
-  log: Logger
-) {
+export async function redirectSocketRoute(server: Server, redirect: string, log: Logger) {
   const socketIO = SocketIO(server.listener, { path: '/ws' });
-  let redirectUrl = serverOptions.redirectToNode;
+  let redirectUrl = redirect;
   const hasBaseUrl = redirectUrl.includes(BASE_PLACEHOLDER);
 
   async function connectToMainNode() {
     let baseUrl = '';
     if (hasBaseUrl) {
       baseUrl = await mainNodeBaseUrl(redirectUrl);
-      redirectUrl = serverOptions.redirectToNode.replace(BASE_PLACEHOLDER, '');
+      redirectUrl = redirect.replace(BASE_PLACEHOLDER, '');
     }
     const socketUrl = `${redirectUrl}`;
     return ClientIO(socketUrl, { path: `${baseUrl}/ws` });
