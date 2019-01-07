@@ -1163,8 +1163,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async filterLegend(name) {
       await this.toggleLegend();
-      await testSubjects.click(`legend-${name}`);
-      await testSubjects.click(`legend-${name}-filterIn`);
+      await retry.try(async () => {
+        await testSubjects.click(`legend-${name}`);
+        await testSubjects.click(`legend-${name}-filterIn`);
+      });
     }
 
     async doesLegendColorChoiceExist(color) {
