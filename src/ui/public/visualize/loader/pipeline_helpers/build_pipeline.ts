@@ -54,6 +54,9 @@ export const getSchemas = (vis: Vis): Schemas => {
         useGeocentroid: agg.params.useGeocentroid,
       };
     }
+    if (agg.type.name === 'count') {
+      schema.format = { id: 'number' };
+    }
     return schema;
   };
 

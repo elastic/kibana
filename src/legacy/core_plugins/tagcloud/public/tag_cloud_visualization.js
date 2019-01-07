@@ -93,7 +93,7 @@ export class TagCloudVisualization {
     }
 
     this._label.current.setState({
-      label: `${data.columns[0].title} - ${data.columns[1].title}`,
+      label: `${data.columns[0].name} - ${data.columns[1].name}`,
       shouldShowLabel: this._vis.params.showLabel
     });
     this._feedbackMessage.current.setState({
@@ -115,12 +115,12 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucketFormatter = this._vis.params.bucket ? getFieldFormat(this._vis.params.bucket) : null;
+    const bucketFormatter = this._vis.params.bucket ? getFieldFormat(this._vis.params.bucket.format) : null;
     const hasTags = data.columns.length === 2;
     const tagColumn = hasTags ? data.columns[0].id : -1;
     const metricColumn = data.columns[hasTags ? 1 : 0].id;
     const tags = data.rows.map((row, rowIndex) => {
-      const tag = row[tagColumn] || 'all';
+      const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
       const metric = row[metricColumn];
       return {
         displayText: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
