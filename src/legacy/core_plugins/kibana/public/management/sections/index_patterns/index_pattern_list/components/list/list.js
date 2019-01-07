@@ -24,7 +24,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiBadge,
-  EuiCallOut,
+  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -105,17 +105,14 @@ class ListUi extends Component {
     const { defaultIndex } = this.props;
     return !defaultIndex ? (
       <div className="indexPatternList__headerWrapper">
-        <EuiCallOut
-          color="warning"
-          size="s"
-          iconType="alert"
-          title={(
+        <EuiText size="xs" color="subdued">
+          <p>
             <FormattedMessage
               id="kbn.management.indexPatternList.noDefaultIndexPatternTitle"
               defaultMessage="No default index pattern. You must select or create one to continue."
             />
-          )}
-        />
+          </p>
+        </EuiText>
       </div>
     ) : null;
   }

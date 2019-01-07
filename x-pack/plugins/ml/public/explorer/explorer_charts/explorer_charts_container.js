@@ -26,10 +26,16 @@ import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-const textTooManyBuckets = `This selection contains too many buckets to be displayed.
- The dashboard is best viewed over a shorter time range.`;
-const textViewButton = 'Open in Single Metric Viewer';
+const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
+  defaultMessage: 'This selection contains too many buckets to be displayed.' +
+    'The dashboard is best viewed over a shorter time range.'
+});
+const textViewButton = i18n.translate('xpack.ml.explorer.charts.openInSingleMetricViewerButtonLabel', {
+  defaultMessage: 'Open in Single Metric Viewer'
+});
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
@@ -64,7 +70,15 @@ function ExplorerChartContainer({
     if (typeof byField !== 'undefined') {
       DetectorLabel = (
         <React.Fragment>
-          {detectorLabel}<br />y-axis event distribution split by &quot;{byField.fieldName}&quot;
+          <FormattedMessage
+            id="xpack.ml.explorer.charts.detectorLabel"
+            defaultMessage="{detectorLabel}{br}y-axis event distribution split by &quot;{fieldName}&quot;"
+            values={{
+              detectorLabel,
+              br: <br />,
+              fieldName: byField.fieldName
+            }}
+          />
         </React.Fragment>
       );
       wrapLabel = true;
@@ -105,7 +119,10 @@ function ExplorerChartContainer({
                 size="xs"
                 onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
               >
-                View
+                <FormattedMessage
+                  id="xpack.ml.explorer.charts.viewLabel"
+                  defaultMessage="View"
+                />
               </EuiButtonEmpty>
             </EuiToolTip>
           </div>
