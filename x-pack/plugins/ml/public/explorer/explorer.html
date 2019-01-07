@@ -16,48 +16,6 @@
     <div class="results-container">
 
       <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
-        <span
-          class="panel-title euiText"
-          i18n-id="xpack.ml.explorer.anomaliesTitle"
-          i18n-default-message="Anomalies"
-        ></span>
-
-        <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive ml-anomalies-controls">
-          <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
-            <div class="euiFormRow" id="select_severity_control">
-              <label
-                class="euiFormLabel"
-                for="select_severity"
-                i18n-id="xpack.ml.explorer.severityThresholdLabel"
-                i18n-default-message="Severity threshold"
-              ></label>
-              <div class="euiFormControlLayout">
-                <ml-select-severity id="select_severity" />
-              </div>
-            </div>
-          </div>
-          <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
-            <div class="euiFormRow" id="select_interval_control">
-              <label
-                class="euiFormLabel"
-                for="select_interval"
-                i18n-id="xpack.ml.explorer.intervalLabel"
-                i18n-default-message="Interval"
-              ></label>
-              <div class="euiFormControlLayout">
-                <ml-select-interval id="select_interval" />
-              </div>
-            </div>
-          </div>
-          <div class="euiFlexItem euiFlexItem--flexGrowZero" ng-show="anomalyChartRecords.length > 0">
-            <div class="euiFormRow" id="show_charts_checkbox_control">
-              <div class="euiFormControlLayout">
-                <ml-checkbox-show-charts id="show_charts_checkbox" />
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="euiSpacer euiSpacer--m"></div>
 
         <div class="euiText explorer-charts">

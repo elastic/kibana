@@ -91,7 +91,10 @@ module.controller('MlExplorerController', function (
   mlSelectSeverityService,
   i18n) {
 
+  $scope.mlCheckboxShowChartsService = mlCheckboxShowChartsService;
   $scope.mlSelectLimitService = mlSelectLimitService;
+  $scope.mlSelectIntervalService = mlSelectIntervalService;
+  $scope.mlSelectSeverityService = mlSelectSeverityService;
   $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';

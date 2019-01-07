@@ -15,6 +15,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 
 import { AnnotationsTable } from '../components/annotations_table';
+import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
 import {
   ExplorerNoInfluencersFound,
   ExplorerNoJobsFound,
@@ -23,7 +24,9 @@ import {
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { InfluencersList } from '../components/influencers_list';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectLimit } from './select_limit/select_limit';
+import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -36,10 +39,14 @@ export const Explorer = injectI18n(
   class Explorer extends React.Component {
     static propTypes = {
       annotationsData: PropTypes.array,
+      anomalyChartRecords: PropTypes.array,
       hasResults: PropTypes.bool,
       influencers: PropTypes.object,
       jobs: PropTypes.array,
       loading: PropTypes.bool,
+      mlSelectIntervalService: PropTypes.object,
+      mlSelectLimitService: PropTypes.object,
+      mlSelectSeverityService: PropTypes.object,
       noInfluencersConfigured: PropTypes.bool,
       setSwimlaneSelectActive: PropTypes.func,
       setSwimlaneViewBy: PropTypes.func,
@@ -55,12 +62,16 @@ export const Explorer = injectI18n(
     render() {
       const {
         annotationsData,
+        anomalyChartRecords,
         influencers,
         intl,
         hasResults,
         jobs,
         loading,
+        mlCheckboxShowChartsService,
+        mlSelectIntervalService,
         mlSelectLimitService,
+        mlSelectSeverityService,
         noInfluencersConfigured,
         setSwimlaneSelectActive,
         showViewBySwimlane,
@@ -144,7 +155,7 @@ export const Explorer = injectI18n(
                     <EuiFormRow
                       label={intl.formatMessage({
                         id: 'xpack.ml.explorer.viewByLabel',
-                        defaultMessage: 'View by:',
+                        defaultMessage: 'View by',
                       })}
                     >
                       <EuiSelect
@@ -159,7 +170,7 @@ export const Explorer = injectI18n(
                     <EuiFormRow
                       label={intl.formatMessage({
                         id: 'xpack.ml.explorer.limitLabel',
-                        defaultMessage: 'Limit:',
+                        defaultMessage: 'Limit',
                       })}
                     >
                       <SelectLimit mlSelectLimitService={mlSelectLimitService} />
@@ -218,6 +229,43 @@ export const Explorer = injectI18n(
                 <br /><br />
               </React.Fragment>
             )}
+
+            <span className="panel-title euiText">
+              <FormattedMessage
+                id="xpack.ml.explorer.anomaliesTitle"
+                defaultMessage="Anomalies"
+              />
+            </span>
+
+            <EuiFlexGroup direction="row" gutterSize="l" responsive={true} className="ml-anomalies-controls">
+              <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                <EuiFormRow
+                  label={intl.formatMessage({
+                    id: 'xpack.ml.explorer.severityThresholdLabel',
+                    defaultMessage: 'Severity threshold',
+                  })}
+                >
+                  <SelectSeverity mlSelectSeverityService={mlSelectSeverityService} />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                <EuiFormRow
+                  label={intl.formatMessage({
+                    id: 'xpack.ml.explorer.intervalLabel',
+                    defaultMessage: 'Interval',
+                  })}
+                >
+                  <SelectInterval mlSelectIntervalService={mlSelectIntervalService} />
+                </EuiFormRow>
+              </EuiFlexItem>
+              {anomalyChartRecords.length > 0 && (
+                <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                  <EuiFormRow label="&#8203;">
+                    <CheckboxShowCharts mlCheckboxShowChartsService={mlCheckboxShowChartsService} />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </div>
         </div>
       );

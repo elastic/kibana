@@ -49,11 +49,15 @@ module.directive('mlExplorerReactWrapper', function (Private) {
     function render() {
       const props = _.pick(scope, [
         'annotationsData',
+        'anomalyChartRecords',
         'hasResults',
         'influencers',
         'jobs',
         'loading',
+        'mlCheckboxShowChartsService',
+        'mlSelectIntervalService',
         'mlSelectLimitService',
+        'mlSelectSeverityService',
         'noInfluencersConfigured',
         'setSwimlaneSelectActive',
         'setSwimlaneViewBy',
