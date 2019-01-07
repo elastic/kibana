@@ -9,6 +9,7 @@ import { UICapabilities } from 'ui/capabilities';
 let internals: UICapabilities = {
   navLinks: {},
   management: {},
+  catalogue: {},
   spaces: {
     manage: true,
   },

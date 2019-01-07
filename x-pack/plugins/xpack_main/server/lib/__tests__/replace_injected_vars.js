@@ -51,6 +51,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
 
@@ -75,6 +76,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });
@@ -96,6 +98,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });
@@ -117,6 +120,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });
@@ -138,6 +142,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });
@@ -159,6 +164,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });
@@ -176,6 +182,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });
@@ -193,12 +200,13 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });
 
   it('sends the originalInjectedVars (with xpackInitialInfo = undefined) if security is disabled, xpack info is unavailable', async () => {
-    const originalInjectedVars = { a: 1, uiCapabilities: { navLinks: { foo: true }, bar: { baz: true } } };
+    const originalInjectedVars = { a: 1, uiCapabilities: { navLinks: { foo: true }, bar: { baz: true }, catalogue: { cfoo: true } } };
     const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
@@ -215,6 +223,9 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {
+          cfoo: true,
+        }
       },
     });
   });
@@ -232,6 +243,7 @@ describe('replaceInjectedVars uiExport', () => {
         mockFeature: {
           mockFeatureCapability: true,
         },
+        catalogue: {}
       },
     });
   });

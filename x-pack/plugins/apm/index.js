@@ -77,6 +77,7 @@ export function apm(kibana) {
         privileges: {
           all: {
             app: ['apm', 'kibana'],
+            catalogue: ['apm'],
             savedObject: {
               all: [],
               read: ['config']

@@ -32,6 +32,7 @@ function toggleDisabledFeatures(
     .filter(feature => typeof feature !== 'undefined') as Feature[];
 
   const navLinks: Record<string, boolean> = uiCapabilities.navLinks;
+  const catalogueEntries: Record<string, boolean> = uiCapabilities.catalogue;
   const managementItems: Record<string, Record<string, boolean>> = uiCapabilities.management;
 
   for (const feature of disabledFeatures) {
@@ -40,10 +41,15 @@ function toggleDisabledFeatures(
       navLinks[feature.navLinkId] = false;
     }
 
-    // Disable associated management items
     Object.values(feature.privileges).forEach(privilege => {
-      const privilegeManagementSections: Record<string, string[]> = privilege.management || {};
+      // Disable associated catalogue entries
+      const privilegeCatalogueEntries: string[] = privilege.catalogue || [];
+      privilegeCatalogueEntries.forEach(catalogueEntryId => {
+        catalogueEntries[catalogueEntryId] = false;
+      });
 
+      // Disable associated management items
+      const privilegeManagementSections: Record<string, string[]> = privilege.management || {};
       Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
         sectionItems.forEach(item => {
           if (

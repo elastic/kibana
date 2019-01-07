@@ -13,6 +13,7 @@ describe('ManageSpacesButton', () => {
     setMockCapabilities({
       navLinks: {},
       management: {},
+      catalogue: {},
       spaces: {
         manage: true,
       },
@@ -26,6 +27,7 @@ describe('ManageSpacesButton', () => {
     setMockCapabilities({
       navLinks: {},
       management: {},
+      catalogue: {},
       spaces: {
         manage: false,
       },
