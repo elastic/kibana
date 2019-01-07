@@ -12,9 +12,14 @@ import { Logger } from './lib/logger';
 
 type WorkFn = () => Promise<void>;
 
+interface Initable {
+  init(): void;
+}
+
 interface Opts {
   pollInterval: number;
   logger: Logger;
+  store: Initable;
   work: WorkFn;
 }
 
@@ -28,6 +33,7 @@ export class TaskPoller {
   private timeout: any;
   private pollInterval: number;
   private logger: Logger;
+  private store: Initable;
   private work: WorkFn;
 
   /**
@@ -41,6 +47,7 @@ export class TaskPoller {
   constructor(opts: Opts) {
     this.pollInterval = opts.pollInterval;
     this.logger = opts.logger;
+    this.store = opts.store;
     this.work = opts.work;
   }
 
@@ -51,7 +58,9 @@ export class TaskPoller {
     if (this.isStarted) {
       return;
     }
+
     this.isStarted = true;
+    await this.store.init();
 
     const poll = async () => {
       await this.attemptWork();
