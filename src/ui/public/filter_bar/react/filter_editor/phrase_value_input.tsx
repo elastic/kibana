@@ -17,29 +17,71 @@
  * under the License.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import React, { Component } from 'react';
+import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { uniq } from 'lodash';
+import React from 'react';
 import { ValueInputType } from 'ui/filter_bar/react/filter_editor/value_input_type';
-import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
 
-interface Props {
-  indexPattern?: IndexPattern;
-  field?: IndexPatternField;
+interface Props extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
 }
 
-export class PhraseValueInput extends Component<Props> {
+export class PhraseValueInput extends PhraseSuggestor<Props> {
   public render() {
     return (
       <EuiFormRow label="Value">
-        <ValueInputType
-          placeholder="The value to match against the selected field"
-          value={this.props.value}
-          onChange={this.props.onChange}
-          type={this.props.field ? this.props.field.type : 'string'}
-        />
+        {this.isSuggestingValues() ? (
+          this.renderWithSuggestions()
+        ) : (
+          <ValueInputType
+            placeholder="The value to match against the selected field"
+            value={this.props.value}
+            onChange={this.props.onChange}
+            type={this.props.field ? this.props.field.type : 'string'}
+          />
+        )}
       </EuiFormRow>
     );
+  }
+
+  private renderWithSuggestions() {
+    const options = this.getOptions();
+    const selectedOptions = this.getSelectedOptions(options);
+    return (
+      <EuiComboBox
+        placeholder="Select a field"
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={this.onComboBoxChange}
+        onSearchChange={this.onSearchChange}
+        singleSelection={{ asPlainText: true }}
+        onCreateOption={this.props.onChange}
+        isClearable={false}
+      />
+    );
+  }
+
+  private onComboBoxChange = (selectedOptions: EuiComboBoxOptionProps[]): void => {
+    if (selectedOptions.length === 0) {
+      return this.props.onChange('');
+    }
+    const [selectedOption] = selectedOptions;
+    this.props.onChange(selectedOption.label);
+  };
+
+  private getOptions() {
+    const options = [...this.state.suggestions];
+    if (typeof this.props.value !== 'undefined') {
+      options.unshift(this.props.value);
+    }
+    return uniq(options).map(label => ({ label }));
+  }
+
+  private getSelectedOptions(options: EuiComboBoxOptionProps[]): EuiComboBoxOptionProps[] {
+    return options.filter(option => {
+      return typeof this.props.value !== 'undefined' && option.label === this.props.value;
+    });
   }
 }

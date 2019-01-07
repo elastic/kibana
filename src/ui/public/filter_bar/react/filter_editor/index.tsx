@@ -175,7 +175,8 @@ export class FilterEditor extends Component<Props, State> {
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
           mode="json"
-          width="400"
+          width="100%"
+          height="250px"
         />
       </EuiFormRow>
     );

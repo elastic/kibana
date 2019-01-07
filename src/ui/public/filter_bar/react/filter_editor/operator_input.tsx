@@ -64,7 +64,7 @@ export class OperatorInput extends Component<Props> {
 
   private onChange = (selectedOptions: EuiComboBoxOptionProps[]): void => {
     if (selectedOptions.length === 0) {
-      this.props.onChange(undefined);
+      return this.props.onChange(undefined);
     }
     const [selectedOption] = selectedOptions;
     const operator = FILTER_OPERATORS.find(({ label }) => label === selectedOption.label);

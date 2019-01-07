@@ -57,7 +57,7 @@ export class FieldInput extends Component<Props> {
 
   private onChange = (selectedOptions: EuiComboBoxOptionProps[]): void => {
     if (selectedOptions.length === 0) {
-      this.props.onChange(undefined);
+      return this.props.onChange(undefined);
     }
     const [selectedOption] = selectedOptions;
     const field = this.props.options.find(option => option.name === selectedOption.label);

@@ -18,17 +18,16 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
-import React, { Component } from 'react';
-import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { uniq } from 'lodash';
+import React from 'react';
+import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
 
-interface Props {
-  indexPattern?: IndexPattern;
-  field?: IndexPatternField;
+interface Props extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[]) => void;
 }
 
-export class PhrasesValuesInput extends Component<Props> {
+export class PhrasesValuesInput extends PhraseSuggestor<Props> {
   public render() {
     const options = this.getOptions();
     const selectedOptions = this.getSelectedOptions(options);
@@ -47,7 +46,8 @@ export class PhrasesValuesInput extends Component<Props> {
   }
 
   private getOptions(): EuiComboBoxOptionProps[] {
-    return (this.props.values || []).map(label => ({ label }));
+    const options = [...(this.props.values || []), ...this.state.suggestions];
+    return uniq(options).map(label => ({ label }));
   }
 
   private getSelectedOptions(options: EuiComboBoxOptionProps[]): EuiComboBoxOptionProps[] {
