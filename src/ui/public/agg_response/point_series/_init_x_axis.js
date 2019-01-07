@@ -22,7 +22,9 @@ export function initXAxis(chart) {
   const x = chart.aspects.x[0];
   chart.xAxisFormatter = x.fieldFormatter ? x.fieldFormatter : String;
   chart.xAxisLabel = x.title;
-  chart.ordered = {
-    interval: x.params.interval
-  };
+  if (x.params.date) {
+    chart.ordered = {
+      interval: x.params.interval
+    };
+  }
 }

@@ -45,7 +45,7 @@ export function AggResponsePointSeriesProvider(Private) {
     chart.series = getSeries(table, chart);
 
     // todo: fix .. width auto we get interval 0ms ?
-    if (!chart.ordered.interval) {
+    if (chart.ordered && !chart.ordered.interval) {
       chart.ordered.interval = Number.MAX_SAFE_INTEGER;
       chart.series.forEach(series => {
         series.values.forEach((value, index) => {

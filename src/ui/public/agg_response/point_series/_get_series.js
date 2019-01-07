@@ -23,14 +23,14 @@ import { addToSiri } from './_add_to_siri';
 
 export function getSeries(table, chart) {
   const aspects = chart.aspects;
-  const multiY = Array.isArray(aspects.y);
+  const multiY = Array.isArray(aspects.y) && aspects.y.length > 1;
   const yScale = chart.yScale;
   const partGetPoint = _.partial(getPoint, table, aspects.x[0], aspects.series, yScale);
 
   let series = _(table.rows)
     .transform(function (series, row, rowIndex) {
       if (!multiY) {
-        const point = partGetPoint(row, rowIndex, aspects.y, aspects.z);
+        const point = partGetPoint(row, rowIndex, aspects.y[0], aspects.z);
         if (point) addToSiri(series, point, point.series, point.series);
         return;
       }
