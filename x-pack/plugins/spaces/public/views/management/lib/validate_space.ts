@@ -16,11 +16,9 @@ interface SpaceValidatorOptions {
 
 export class SpaceValidator {
   private shouldValidate: boolean;
-  private featureIds: string[];
 
   constructor(options: SpaceValidatorOptions) {
     this.shouldValidate = options.shouldValidate || false;
-    this.featureIds = options.features.map(feature => feature.id);
   }
 
   public enableValidation() {

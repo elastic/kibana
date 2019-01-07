@@ -4,23 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { SpaceValidator } from './validate_space';
 
 let validator: SpaceValidator;
-
-const ALL_FEATURES: Feature[] = [
-  {
-    id: 'foo',
-    name: 'foo',
-    privileges: {},
-  },
-  {
-    id: 'bar',
-    name: 'bar',
-    privileges: {},
-  },
-];
 
 describe('validateSpaceName', () => {
   beforeEach(() => {

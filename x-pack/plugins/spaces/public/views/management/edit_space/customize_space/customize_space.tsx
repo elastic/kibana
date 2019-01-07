@@ -54,6 +54,11 @@ export class CustomizeSpace extends Component<Props, State> {
       defaultMessage: 'Customize your space',
     });
 
+    // TODO: awaiting https://github.com/elastic/eui/pull/1410 to land in next version of EUI for types
+    const extraPopoverProps: any = {
+      initialFocus: 'input[name="spaceInitials"]',
+    };
+
     return (
       <SectionPanel
         collapsible={false}
@@ -104,34 +109,28 @@ export class CustomizeSpace extends Component<Props, State> {
                   defaultMessage: 'Avatar',
                 })}
               >
-                {
-                  // @ts-ignore
-                  <EuiPopover
-                    id="customizeAvatarPopover"
-                    button={
-                      <button
-                        title={intl.formatMessage({
-                          id: 'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
-                          defaultMessage: 'Click to customize this space avatar',
-                        })}
-                        onClick={this.togglePopover}
-                      >
-                        <SpaceAvatar space={this.props.space} size="l" />
-                      </button>
-                    }
-                    initialFocus={'input[name="spaceInitials"]'}
-                    closePopover={this.closePopover}
-                    ownFocus={true}
-                    isOpen={this.state.customizingAvatar}
-                  >
-                    <div style={{ maxWidth: 240 }}>
-                      <CustomizeSpaceAvatar
-                        space={this.props.space}
-                        onChange={this.onAvatarChange}
-                      />
-                    </div>
-                  </EuiPopover>
-                }
+                <EuiPopover
+                  id="customizeAvatarPopover"
+                  button={
+                    <button
+                      title={intl.formatMessage({
+                        id: 'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
+                        defaultMessage: 'Click to customize this space avatar',
+                      })}
+                      onClick={this.togglePopover}
+                    >
+                      <SpaceAvatar space={this.props.space} size="l" />
+                    </button>
+                  }
+                  closePopover={this.closePopover}
+                  {...extraPopoverProps}
+                  ownFocus={true}
+                  isOpen={this.state.customizingAvatar}
+                >
+                  <div style={{ maxWidth: 240 }}>
+                    <CustomizeSpaceAvatar space={this.props.space} onChange={this.onAvatarChange} />
+                  </div>
+                </EuiPopover>
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
