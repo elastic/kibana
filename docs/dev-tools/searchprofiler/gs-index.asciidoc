@@ -1,3 +1,4 @@
+[role="xpack"]
 [[xpack-profiler]]
 = Profiling your Queries and Aggregations
 
