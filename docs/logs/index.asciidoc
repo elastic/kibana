@@ -17,7 +17,7 @@ image::logs/images/logs-console.png[Log Console in Kibana]
 == Add data sources
 
 Kibana provides step-by-step instructions to help you add your data sources.
-The {infra-guide}[Infrastructure Monitoring Guide] is good source for more detailed information and
+The {infra-guide}[Infrastructure Monitoring Guide] is a good source for more detailed information and
 instructions.
 
 [float]
