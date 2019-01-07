@@ -48,6 +48,7 @@ module.directive('mlExplorerReactWrapper', function (Private) {
 
     function render() {
       const props = _.pick(scope, [
+        'annotationsData',
         'hasResults',
         'influencers',
         'jobs',

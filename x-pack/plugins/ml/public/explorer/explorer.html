@@ -16,22 +16,6 @@
     <div class="results-container">
 
       <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
-        <div ng-show="annotationsData.length > 0">
-          <span
-            class="panel-title euiText"
-            i18n-id="xpack.ml.explorer.annotationsTitle"
-            i18n-default-message="Annotations"
-          ></span>
-    
-          <ml-annotation-table
-            annotations="annotationsData"
-            drill-down="true"
-            number-badge="false"
-          />
-  
-          <br /><br />
-        </div>
-  
         <span
           class="panel-title euiText"
           i18n-id="xpack.ml.explorer.anomaliesTitle"

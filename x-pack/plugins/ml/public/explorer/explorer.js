@@ -14,6 +14,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 
+import { AnnotationsTable } from '../components/annotations_table';
 import {
   ExplorerNoInfluencersFound,
   ExplorerNoJobsFound,
@@ -34,6 +35,7 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 export const Explorer = injectI18n(
   class Explorer extends React.Component {
     static propTypes = {
+      annotationsData: PropTypes.array,
       hasResults: PropTypes.bool,
       influencers: PropTypes.object,
       jobs: PropTypes.array,
@@ -52,6 +54,7 @@ export const Explorer = injectI18n(
 
     render() {
       const {
+        annotationsData,
         influencers,
         intl,
         hasResults,
@@ -196,6 +199,23 @@ export const Explorer = injectI18n(
                 {!showViewBySwimlane && (
                   <ExplorerNoInfluencersFound swimlaneViewByFieldName={swimlaneViewByFieldName} />
                 )}
+              </React.Fragment>
+            )}
+
+            {annotationsData.length > 0 && (
+              <React.Fragment>
+                <span className="panel-title euiText">
+                  <FormattedMessage
+                    id="xpack.ml.explorer.annotationsTitle"
+                    defaultMessage="Annotations"
+                  />
+                </span>
+                <AnnotationsTable
+                  annotations={annotationsData}
+                  drillDown={true}
+                  numberBadge={false}
+                />
+                <br /><br />
               </React.Fragment>
             )}
           </div>
