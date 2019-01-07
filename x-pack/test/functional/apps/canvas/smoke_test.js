@@ -30,6 +30,10 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('canvas');
     });
 
+    after(async () => {
+      esArchiver.unload('canvas/default');
+    });
+
     it('loads workpad list', async () => {
       await retry.try(async () => {
         const workpadRows = await testSubjects.findAll(workpadListSelector);
