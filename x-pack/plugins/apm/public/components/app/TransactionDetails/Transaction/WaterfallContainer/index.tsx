@@ -5,12 +5,6 @@
  */
 
 import React from 'react';
-// @ts-ignore
-import {
-  SERVICE_NAME,
-  TRACE_ID,
-  TRANSACTION_ID
-} from '../../../../../../common/constants';
 import { Transaction } from '../../../../../../typings/es_schemas/Transaction';
 
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
