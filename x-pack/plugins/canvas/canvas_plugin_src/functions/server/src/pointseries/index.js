@@ -10,6 +10,7 @@ import { groupBy, zipObject, omit, values } from 'lodash';
 import moment from 'moment';
 import { pivotObjectArray } from '../../../../../common/lib/pivot_object_array';
 import { unquoteString } from '../../../../../common/lib/unquote_string';
+import { getFunctionErrors } from '../../../../errors';
 import { isColumnReference } from './lib/is_column_reference';
 import { getExpressionType } from './lib/get_expression_type';
 
@@ -152,7 +153,8 @@ export const pointseries = () => ({
         try {
           const ev = evaluate(args[measure], subScope);
           if (Array.isArray(ev)) {
-            throw new Error('Expressions must be wrapped in a function such as sum()');
+            const functionErrors = getFunctionErrors();
+            throw functionErrors.pointseries.expressionUnwraped();
           }
 
           return ev;

@@ -6,6 +6,7 @@
 
 import expect from 'expect.js';
 import { demodata } from '../demodata';
+import { getFunctionErrors } from '../../../../errors';
 
 const nullFilter = {
   type: 'filter',
@@ -33,10 +34,11 @@ describe('demodata', () => {
     expect(shirts1.rows[0]).not.to.be.equal(shirts2.rows[0]);
   });
   it('invalid set', () => {
+    const functionErrors = getFunctionErrors();
     expect(fn)
       .withArgs(null, { type: 'foo' })
       .to.throwException(e => {
-        expect(e.message).to.be("Invalid data set: 'foo', use 'ci' or 'shirts'.");
+        expect(e.message).to.be(functionErrors.getDemoRows.dataSetInvalid('foo').message);
       });
   });
 });

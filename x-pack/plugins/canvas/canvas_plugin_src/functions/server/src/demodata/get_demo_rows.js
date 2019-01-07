@@ -5,6 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { getFunctionErrors } from '../../../../errors';
 import ci from './ci.json';
 import shirts from './shirts.json';
 
@@ -15,5 +16,7 @@ export function getDemoRows(arg) {
   if (arg === 'shirts') {
     return cloneDeep(shirts);
   }
-  throw new Error(`Invalid data set: '${arg}', use 'ci' or 'shirts'.`);
+
+  const functionErrors = getFunctionErrors();
+  throw functionErrors.getDemoRows.dataSetInvalid(arg);
 }

@@ -139,6 +139,15 @@ export const getFunctionErrors = (): FunctionErrorDict => {
           })
         ),
     },
+    getDemoRows: {
+      dataSetInvalid: (arg: string) =>
+        new Error(
+          i18n.translate('xpack.canvas.functions.getDemoRows.invalidDataSetErrorMessage', {
+            defaultMessage: "Invalid data set: {arg}, use 'ci' or 'shirts'.",
+            values: { arg },
+          })
+        ),
+    },
     math: {
       expressionEmpty: () =>
         new Error(
@@ -163,6 +172,14 @@ export const getFunctionErrors = (): FunctionErrorDict => {
         new Error(
           i18n.translate('xpack.canvas.functions.math.emptyDatabaseErrorMessage', {
             defaultMessage: 'Empty datatable',
+          })
+        ),
+    },
+    pointseries: {
+      expressionUnwrapped: () =>
+        new Error(
+          i18n.translate('xpack.canvas.functions.pointseries.expressionsIsNotWrappedErrorMessage', {
+            defaultMessage: 'Expressions must be wrapped in a function such as sum()',
           })
         ),
     },
