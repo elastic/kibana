@@ -30,14 +30,20 @@ routes.when('/management/spaces/list', {
     spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
-    $scope.$$postDigest(() => {
+    $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
+      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
+
       render(
         <I18nProvider>
-          <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />
+          <SpacesGridPage
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            features={features}
+          />
         </I18nProvider>,
         domNode
       );

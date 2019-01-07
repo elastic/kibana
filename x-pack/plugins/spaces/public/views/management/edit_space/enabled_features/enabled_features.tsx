@@ -9,6 +9,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';
 import { FeatureTable } from './feature_table';
 
@@ -51,13 +52,11 @@ export class EnabledFeatures extends Component<Props, {}> {
 
   private getPanelTitle = () => {
     const featureCount = this.props.features.length;
-    const disabledCount = this.getKnownDisabledFeatures().length;
-
-    const enabledCount = featureCount - disabledCount;
+    const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
 
     let details: null | ReactNode = null;
 
-    if (disabledCount === 0) {
+    if (enabledCount === featureCount) {
       details = (
         <EuiText size={'s'} style={{ display: 'inline-block' }}>
           <em>
@@ -100,23 +99,15 @@ export class EnabledFeatures extends Component<Props, {}> {
       <span>
         <FormattedMessage
           id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-          defaultMessage="Control feature display"
+          defaultMessage="Customize feature display"
         />{' '}
         {details}
       </span>
     );
   };
 
-  private getKnownDisabledFeatures = () => {
-    return (this.props.space.disabledFeatures || []).filter(id =>
-      this.props.features.find(({ id: featureId }) => featureId === id)
-    );
-  };
-
   private getDescription = () => {
-    const featureCount = this.props.features.length;
-    const disabledCount = this.getKnownDisabledFeatures().length;
-    const enabledCount = featureCount - disabledCount;
+    const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
 
     return (
       <Fragment>
