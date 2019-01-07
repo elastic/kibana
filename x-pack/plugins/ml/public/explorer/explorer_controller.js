@@ -91,6 +91,7 @@ module.controller('MlExplorerController', function (
   mlSelectSeverityService,
   i18n) {
 
+  $scope.mlSelectLimitService = mlSelectLimitService;
   $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';

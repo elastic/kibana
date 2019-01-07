@@ -17,24 +17,6 @@
 
       <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
         <div ng-if="viewBySwimlaneOptions.length > 0">
-          <div class="ml-controls">
-            <ml-select-limit />
-
-            <span
-              ng-if="viewByLoadedForTimeFormatted"
-              class="panel-sub-title"
-              i18n-id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
-              i18n-default-message="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
-              i18n-values="{ viewByLoadedForTimeFormatted }"
-            ></span>
-            <span
-              ng-if="!viewByLoadedForTimeFormatted"
-              class="panel-sub-title"
-              i18n-id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
-              i18n-default-message="(Sorted by max anomaly score)"
-            ></span>
-          </div>
-
           <div
             class="ml-explorer-swimlane euiText"
             ng-if="showViewBySwimlane"

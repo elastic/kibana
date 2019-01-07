@@ -52,10 +52,12 @@ module.directive('mlExplorerReactWrapper', function (Private) {
         'influencers',
         'jobs',
         'loading',
+        'mlSelectLimitService',
         'noInfluencersConfigured',
         'setSwimlaneSelectActive',
         'setSwimlaneViewBy',
         'swimlaneViewByFieldName',
+        'viewByLoadedForTimeFormatted',
         'viewBySwimlaneOptions',
       ]);
 

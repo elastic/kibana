@@ -19,6 +19,7 @@ import { ExplorerNoResultsFound } from './components/explorer_no_results_found';
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { InfluencersList } from '../components/influencers_list';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+import { SelectLimit } from './select_limit/select_limit';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -39,6 +40,7 @@ export const Explorer = injectI18n(
       setSwimlaneViewBy: PropTypes.func,
       swimlaneOverall: PropTypes.object,
       swimlaneViewByFieldName: PropTypes.string,
+      viewByLoadedForTimeFormatted: PropTypes.any,
       viewBySwimlaneOptions: PropTypes.array,
     };
 
@@ -51,10 +53,12 @@ export const Explorer = injectI18n(
         hasResults,
         jobs,
         loading,
+        mlSelectLimitService,
         noInfluencersConfigured,
         setSwimlaneSelectActive,
         swimlaneOverall,
         swimlaneViewByFieldName,
+        viewByLoadedForTimeFormatted,
         viewBySwimlaneOptions,
       } = this.props;
 
@@ -125,8 +129,8 @@ export const Explorer = injectI18n(
             </div>
 
             {viewBySwimlaneOptions.length > 0 && (
-              <EuiFlexGroup direction="row" gutterSize="large" responsive={true}>
-                <EuiFlexItem grow={0} style={{ width: '170px' }}>
+              <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
                   <EuiFormRow
                     label={intl.formatMessage({
                       id: 'xpack.ml.explorer.viewByLabel',
@@ -139,6 +143,35 @@ export const Explorer = injectI18n(
                       value={swimlaneViewByFieldName}
                       onChange={this.viewByChangeHandler}
                     />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={intl.formatMessage({
+                      id: 'xpack.ml.explorer.limitLabel',
+                      defaultMessage: 'Limit:',
+                    })}
+                  >
+                    <SelectLimit mlSelectLimitService={mlSelectLimitService} />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ 'align-self': 'center' }}>
+                  <EuiFormRow label="&#8203;">
+                    <div className="panel-sub-title">
+                      {viewByLoadedForTimeFormatted &&
+                        <FormattedMessage
+                          id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
+                          defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
+                          values={{ viewByLoadedForTimeFormatted }}
+                        />
+                      }
+                      {viewByLoadedForTimeFormatted === undefined &&
+                        <FormattedMessage
+                          id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
+                          defaultMessage="(Sorted by max anomaly score)"
+                        />
+                      }
+                    </div>
                   </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
