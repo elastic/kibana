@@ -12,9 +12,6 @@
     "mappings": {
       "doc": {
         "dynamic": "strict",
-        "_meta": {
-          "logstash-version": "7.0.0-alpha1"
-        },
         "properties": {
           "description": {
             "type": "text"
