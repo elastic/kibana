@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+export const unlinkedDeploymentFilter = {
+  must: [{
+    bool: {
+      should: [
+        {
+          term: {
+            cluster_uuid: {
+              value: ''
+            }
+          }
+        },
+        {
+          bool: {
+            must_not: [
+              {
+                exists: {
+                  field: 'cluster_uuid'
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }]
+};

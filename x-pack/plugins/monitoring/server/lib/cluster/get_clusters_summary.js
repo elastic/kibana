@@ -22,7 +22,7 @@ export function getClustersSummary(clusters, kibanaUuid) {
       apm,
       alerts,
       ccs,
-      cluster_settings: clusterSettings
+      cluster_settings: clusterSettings,
     } = cluster;
 
     const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
@@ -73,11 +73,11 @@ export function getClustersSummary(clusters, kibanaUuid) {
       beats,
       apm,
       alerts,
-      isPrimary: kibana.uuids.includes(kibanaUuid),
+      isPrimary: kibana ? kibana.uuids.includes(kibanaUuid) : false,
       status: calculateOverallStatus([
         status,
         kibana && kibana.status || null
-      ])
+      ]),
     };
   });
 }

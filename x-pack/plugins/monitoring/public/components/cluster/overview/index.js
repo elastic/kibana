@@ -13,23 +13,32 @@ import { BeatsPanel } from './beats_panel';
 
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
+import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../../../common/constants';
 
 export function Overview(props) {
+  const isFromUnlinkedDeployment = props.cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID;
+
   return (
     <EuiPage>
       <EuiPageBody>
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
-        <ElasticsearchPanel
-          {...props.cluster.elasticsearch}
-          version={props.cluster.version}
-          ml={props.cluster.ml}
-          changeUrl={props.changeUrl}
-          license={props.cluster.license}
-          showLicenseExpiration={props.showLicenseExpiration}
-        />
+        { !isFromUnlinkedDeployment ?
+          <ElasticsearchPanel
+            {...props.cluster.elasticsearch}
+            version={props.cluster.version}
+            ml={props.cluster.ml}
+            changeUrl={props.changeUrl}
+            license={props.cluster.license}
+            showLicenseExpiration={props.showLicenseExpiration}
+          />
+          : null
+        }
 
-        <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
+        { !isFromUnlinkedDeployment ?
+          <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
+          : null
+        }
 
         <LogstashPanel {...props.cluster.logstash} changeUrl={props.changeUrl} />
 

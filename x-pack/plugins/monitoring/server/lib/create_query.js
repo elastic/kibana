@@ -7,6 +7,8 @@
 import { defaults, get } from 'lodash';
 import { MissingRequiredError } from './error_missing_required';
 import moment from 'moment';
+import { unlinkedDeploymentFilter } from './unlinked_deployments';
+import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../common/constants';
 
 /*
  * Builds a type filter syntax that supports backwards compatibility to read
@@ -46,13 +48,15 @@ export function createQuery(options) {
   options = defaults(options, { filters: [] });
   const { type, clusterUuid, uuid, start, end, filters } = options;
 
+  const isFromUnlinkedDeployment = clusterUuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID;
+
   let typeFilter;
   if (type) {
     typeFilter = createTypeFilter(type);
   }
 
   let clusterUuidFilter;
-  if (clusterUuid) {
+  if (clusterUuid && !isFromUnlinkedDeployment) {
     clusterUuidFilter = { term: { 'cluster_uuid': clusterUuid } };
   }
 
@@ -89,9 +93,20 @@ export function createQuery(options) {
     combinedFilters.push(timeRangeFilter);
   }
 
-  return {
+  const query = {
     bool: {
       filter: combinedFilters.filter(Boolean)
     }
   };
+
+  if (isFromUnlinkedDeployment) {
+    query.bool.filter = [
+      ...query.bool.filter,
+      { bool: unlinkedDeploymentFilter }
+    ];
+  }
+
+
+
+  return query;
 }

@@ -342,6 +342,10 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   });
 };
 
+const formatClusters = clusters => {
+  return clusters;
+};
+
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringClusterListing', ($injector) => {
   return {
@@ -372,7 +376,7 @@ uiModule.directive('monitoringClusterListing', ($injector) => {
                 <EuiPageContent>
                   <EuiMonitoringTable
                     className="clusterTable"
-                    rows={clusters}
+                    rows={formatClusters(clusters)}
                     columns={getColumns(
                       showLicenseExpiration,
                       _changeCluster,
