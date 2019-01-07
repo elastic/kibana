@@ -48,7 +48,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
 
     async _updateData(table) {
       this._chartData = table;
-      const termColumn = table.columns[this._vis.params.bucket.accessor];
+      const termColumn = this._vis.params.bucket ? table.columns[this._vis.params.bucket.accessor] : null;
       const valueColumn = table.columns[this._vis.params.metric.accessor];
       let results;
       if (!this._hasColumns() || !table.rows.length) {

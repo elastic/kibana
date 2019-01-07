@@ -30,7 +30,7 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
   if (tabifiedResponse && tabifiedResponse.rows) {
 
     const table = tabifiedResponse;
-    const geohashColumn = table.columns[geohash.accessor];
+    const geohashColumn = geohash ? table.columns[geohash.accessor] : null;
 
     if (!geohashColumn) {
       features = [];
