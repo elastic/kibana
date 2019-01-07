@@ -16,9 +16,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { get } from 'lodash';
 import React from 'react';
+import { configBlockSchemas } from '../../../common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { CMBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
@@ -31,6 +34,8 @@ interface PageProps {
 
 interface PageState {
   selectedConfig: ConfigurationBlock | null;
+  tags?: BeatTag[];
+  configuration_blocks?: ConfigurationBlock[];
 }
 
 class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
@@ -52,26 +57,25 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
         />
       );
     }
-    const configurationBlocks = [] as ConfigurationBlock[];
-    // const configurationBlocks = [] flatten(
-    //   beat.full_tags.map((tag: BeatTag) => {
-    //     return tag.configuration_blocks.map(configuration => ({
-    //       // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
-    //       module: configuration.configs[0].module || null,
-    //       tagId: tag.id,
-    //       tagColor: tag.color,
-    //       ...beat,
-    //       ...configuration,
-    //       displayValue: get(
-    //         translateConfigSchema(configBlockSchemas).find(
-    //           config => config.id === configuration.type
-    //         ),
-    //         'text',
-    //         null
-    //       ),
-    //     }));
-    //   })
-    // );
+    const configurationBlocks = !this.state.configuration_blocks
+      ? []
+      : this.state.configuration_blocks.map(configuration => ({
+          // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
+          module: configuration.config.type || null,
+          tagId: configuration.tag,
+          tagColor:
+            ((this.state.tags || []).find(tag => tag.id === configuration.tag) || ({} as BeatTag))
+              .color || 'grey',
+          ...beat,
+          ...configuration,
+          displayValue: get(
+            translateConfigSchema(configBlockSchemas).find(
+              config => config.id === configuration.type
+            ),
+            'text',
+            null
+          ),
+        }));
 
     const columns = [
       {

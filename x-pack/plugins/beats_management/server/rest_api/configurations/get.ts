@@ -5,23 +5,27 @@
  */
 
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
-import { BeatTag } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
-export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
+export const createGetConfigurationBlocksRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
   method: 'GET',
-  path: '/api/beats/tags/{tagIds}',
+  path: '/api/beats/configurations/{tagIds}/{page?}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
   handler: async (request: any) => {
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
-    let tags: BeatTag[];
+    let tags;
     try {
-      tags = await libs.tags.getWithIds(request.user, tagIds);
+      tags = await libs.configurationBlocks.getForTags(
+        request.user,
+        tagIds,
+        request.params.page,
+        25
+      );
     } catch (err) {
       return wrapEsError(err);
     }

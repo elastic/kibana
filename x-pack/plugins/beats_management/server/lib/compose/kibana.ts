@@ -26,10 +26,12 @@ export function compose(server: KibanaLegacyServer): CMServerLibs {
     new KibanaBackendFrameworkAdapter(PLUGIN.ID, server, CONFIG_PREFIX)
   );
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
-  const configurationBlocks = new ConfigurationBlocksLib(
-    new ElasticsearchConfigurationBlockAdapter(database)
-  );
+
   const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
+  const configurationBlocks = new ConfigurationBlocksLib(
+    new ElasticsearchConfigurationBlockAdapter(database),
+    tags
+  );
   const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {
     framework,
   });

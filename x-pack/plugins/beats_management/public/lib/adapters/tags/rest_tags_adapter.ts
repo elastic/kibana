@@ -39,4 +39,15 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
     return response.success ? tag : null;
   }
+
+  public async tagsExcept(tags: BeatTag[], ignoredConfigTypes: string[]) {
+    try {
+      return await this.REST.get<BeatTag[]>(`/api/beats/assignable-tags`, {
+        tags: tags.map(tag => tag.id),
+        ignoredConfigTypes,
+      });
+    } catch (e) {
+      return [];
+    }
+  }
 }

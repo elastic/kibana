@@ -5,31 +5,52 @@
  */
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants/configuration_blocks';
 import { ConfigurationBlock } from '../../common/domain_types';
-import { CMTagsAdapter } from '../../public/lib/adapters/tags/adapter_types';
 import { ConfigurationBlockAdapter } from './adapters/configuration_blocks/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
+import { CMTagsDomain } from './tags';
 
 export class ConfigurationBlocksLib {
   constructor(
     private readonly adapter: ConfigurationBlockAdapter,
-    private readonly tags: CMTagsAdapter
+    private readonly tags: CMTagsDomain
   ) {}
 
-  public async getForTags(user: FrameworkUser, tagIds: string[]): Promise<ConfigurationBlock[]> {
-    const blocks = await this.adapter.getForTags(user, tagIds);
+  public async getForTags(
+    user: FrameworkUser,
+    tagIds: string[],
+    page: number = 0,
+    size: number = 100
+  ) {
+    if ((page + 1) * size > 10000) {
+      throw new Error('System error, too many results. To get all results, request page: -1');
+    }
 
-    return blocks;
+    const result = await this.adapter.getForTags(user, tagIds, page, size);
+
+    return { ...result, error: null };
   }
 
   public async delete(user: FrameworkUser, ids: string[]) {
-    return await this.adapter.delete(user, ids);
+    await this.adapter.delete(user, ids);
+    return true;
   }
 
   public async save(user: FrameworkUser, block: ConfigurationBlock) {
-    const tag = await this.tags.getTagsWithIds([block.tag]);
+    const tags = await this.tags.getWithIds(user, [block.tag]);
+    const tag = tags[0];
+
+    if (!tag) {
+      return {
+        error: 'Invalid tag, tag not found',
+      };
+    }
+
+    if (!tag.hasConfigurationBlocksTypes) {
+      tag.hasConfigurationBlocksTypes = [];
+    }
 
     if (
-      tag[0].hasConfigurationBlocksTypes.some((type: string) =>
+      tag.hasConfigurationBlocksTypes.some((type: string) =>
         UNIQUENESS_ENFORCING_TYPES.includes(type)
       )
     ) {
@@ -40,8 +61,8 @@ export class ConfigurationBlocksLib {
     }
 
     if (UNIQUENESS_ENFORCING_TYPES.includes(block.type)) {
-      tag[0].hasConfigurationBlocksTypes.push(block.type);
-      await this.tags.upsertTag(tag[0]);
+      tag.hasConfigurationBlocksTypes.push(block.type);
+      await this.tags.upsertTag(user, tag);
     }
 
     const id = await this.adapter.create(user, [block]);

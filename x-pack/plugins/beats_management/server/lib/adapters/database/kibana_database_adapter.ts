@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { get } from 'lodash';
 import { FrameworkUser } from '../framework/adapter_types';
 import { internalAuthData } from './../framework/adapter_types';
 import {
@@ -91,6 +92,61 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     const callES = this.getCallType(user);
     const result = await callES('search', params);
     return result;
+  }
+
+  public async searchAll<Source>(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseSearchResponse<Source>> {
+    const callES = this.getCallType(user);
+    const result = await callES('search', {
+      ...params,
+      scroll: '1m',
+      body: {
+        ...params.body,
+        size: 1000,
+      },
+    });
+    return result;
+  }
+
+  private async fetchAllFromScroll<Source>(
+    user: FrameworkUser,
+    response: DatabaseSearchResponse<Source>,
+    hits: DatabaseSearchResponse<Source>['hits']['hits'] = []
+  ): Promise<
+    Array<{
+      _index: string;
+      _type: string;
+      _id: string;
+      _score: number;
+      _source: Source;
+      _version?: number;
+      fields?: any;
+      highlight?: any;
+      inner_hits?: any;
+      sort?: string[];
+    }>
+  > {
+    const callES = this.getCallType(user);
+
+    const newHits = get(response, 'hits.hits', []);
+    const scrollId = get(response, '_scroll_id');
+
+    if (newHits.length > 0) {
+      hits.push(...newHits);
+
+      return callES('scroll', {
+        body: {
+          scroll: '30s',
+          scroll_id: scrollId,
+        },
+      }).then((innerResponse: DatabaseSearchResponse<Source>) => {
+        return this.fetchAllFromScroll(user, innerResponse, hits);
+      });
+    }
+
+    return Promise.resolve(hits);
   }
 
   private getCallType(user: FrameworkUser): any {

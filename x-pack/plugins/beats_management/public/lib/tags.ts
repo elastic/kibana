@@ -26,7 +26,7 @@ export class TagsLib {
     return await this.adapter.upsertTag(tag);
   }
 
-  public async getTagsForBeats(beats: CMBeat[]): Promise<BeatTag[]> {
+  public async getassignableTagsForBeats(beats: CMBeat[]): Promise<BeatTag[]> {
     const existingTags = await this.adapter.getTagsWithIds([
       ...new Set(beats.reduce((ids: string[], beat) => ids.concat([beat.id]), [])),
     ]);
@@ -34,7 +34,7 @@ export class TagsLib {
     const configTypesToBeIgnored = existingTags.reduce(
       (uniquenessEnforcingConfigTypes: string[], tag) => {
         return uniquenessEnforcingConfigTypes.concat(
-          tag.hasConfigurationBlocksTypes.filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type))
+          tag.hasConfigurationBlocksTypes!.filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type))
         );
       },
       []

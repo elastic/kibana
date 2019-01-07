@@ -48,7 +48,7 @@ export class ConfigBlocksLib {
     });
   }
 
-  private jsonConfigToUserYaml(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
+  public jsonConfigToUserYaml(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
     // configuration_blocks yaml, JS cant read YAML so we parse it into JS,
     // because beats flattens all fields, and we need more structure.
     // we take tagConfigs, grab the config that applies here, render what we can into
@@ -95,7 +95,7 @@ export class ConfigBlocksLib {
     });
   }
 
-  private userConfigsToJson(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
+  public userConfigsToJson(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
     // configurations is the JS representation of the config yaml,
     // so here we take that JS and convert it into a YAML string.
     // we do so while also flattening "other" into the flat yaml beats expect

@@ -10,4 +10,5 @@ export interface CMTagsAdapter {
   delete(tagIds: string[]): Promise<boolean>;
   getAll(ESQuery?: string): Promise<BeatTag[]>;
   upsertTag(tag: BeatTag): Promise<BeatTag | null>;
+  tagsExcept(tags: BeatTag[], ignoredConfigTypes: string[]): Promise<BeatTag[]>;
 }

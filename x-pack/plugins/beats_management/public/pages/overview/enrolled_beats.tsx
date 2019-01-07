@@ -168,7 +168,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               }}
               actions={beatsListActions}
               actionData={{
-                tags: this.props.libs.tags.getTagsForBeats(this.getSelectedBeats()),
+                tags: this.props.libs.tags.getassignableTagsForBeats(this.getSelectedBeats()),
               }}
               actionHandler={async (action: AssignmentActionType, payload: any) => {
                 switch (action) {

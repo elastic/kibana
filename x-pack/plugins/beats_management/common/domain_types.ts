@@ -100,7 +100,7 @@ export interface BeatTag
     Exclude<keyof t.TypeOf<typeof RuntimeBeatTag>, 'id'>
   > {
   id: string;
-  hasConfigurationBlocksTypes: string[];
+  hasConfigurationBlocksTypes?: string[];
   // Used by the UI and api when a tag exists but is an invalid option
   disabled?: boolean;
 }

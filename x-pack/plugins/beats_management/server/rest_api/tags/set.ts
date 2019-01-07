@@ -24,21 +24,17 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
       }),
       payload: Joi.object({
         color: Joi.string(),
-        configuration_blocks: Joi.array().items(Joi.object({})),
       }).allow(null),
     },
   },
-  handler: async (request: FrameworkRequest, h: any) => {
-    const defaultConfig = { configuration_blocks: [], color: '#DD0A73' };
+  handler: async (request: FrameworkRequest) => {
+    const defaultConfig = { id: request.params.tag, name: request.params.tag, color: '#DD0A73' };
     const config = get(request, 'payload', defaultConfig) || defaultConfig;
 
     try {
-      const { isValid, result } = await libs.tags.saveTag(request.user, request.params.tag, config);
-      if (!isValid) {
-        return h.response({ result, success: false }).code(400);
-      }
+      const id = await libs.tags.upsertTag(request.user, config);
 
-      return h.response({ success: true }).code(result === 'created' ? 201 : 200);
+      return { success: true, id };
     } catch (err) {
       // TODO move this to kibana route thing in adapter
       return wrapEsError(err);

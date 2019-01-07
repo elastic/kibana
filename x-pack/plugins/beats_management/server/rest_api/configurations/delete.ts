@@ -5,27 +5,25 @@
  */
 
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
-import { BeatTag } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
-import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
-export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
-  method: 'GET',
-  path: '/api/beats/tags/{tagIds}',
+export const createDeleteConfidurationsRoute = (libs: CMServerLibs) => ({
+  method: 'DELETE',
+  path: '/api/beats/configurations/{ids}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
   handler: async (request: any) => {
-    const tagIdString: string = request.params.tagIds;
-    const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
+    const idString: string = request.params.ids;
+    const ids = idString.split(',').filter((id: string) => id.length > 0);
 
-    let tags: BeatTag[];
+    let success: boolean;
     try {
-      tags = await libs.tags.getWithIds(request.user, tagIds);
+      success = await libs.configurationBlocks.delete(request.user, ids);
     } catch (err) {
       return wrapEsError(err);
     }
 
-    return tags;
+    return { success };
   },
 });

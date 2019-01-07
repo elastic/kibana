@@ -40,9 +40,18 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     return configs.map((tag: any) => ({ ...tag._source.tag, config: JSON.parse(tag._source.tag) }));
   }
 
-  public async getForTags(user: FrameworkUser, tagIds: string[]): Promise<ConfigurationBlock[]> {
+  public async getForTags(
+    user: FrameworkUser,
+    tagIds: string[],
+    page: number = 0,
+    size: number = 100
+  ): Promise<{ blocks: ConfigurationBlock[]; page: number; total: number }> {
     if (tagIds.length === 0) {
-      return [];
+      return {
+        page: 0,
+        total: 0,
+        blocks: [] as ConfigurationBlock[],
+      };
     }
 
     const params = {
@@ -51,13 +60,19 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
       index: INDEX_NAMES.BEATS,
       type: '_doc',
       body: {
+        from: page === -1 ? undefined : page,
+        size,
         query: {
           terms: { 'configuration_block.tag': tagIds },
         },
       },
     };
-
-    const response = await this.database.search(user, params);
+    let response;
+    if (page === -1) {
+      response = await this.database.searchAll(user, params);
+    } else {
+      response = await this.database.search(user, params);
+    }
     const configs = get<any>(response, 'hits.hits', []);
 
     return configs.map((tag: any) => ({

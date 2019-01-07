@@ -50,10 +50,12 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       });
 
       if (beat.tags) {
-        configurationBlocks = await libs.configurationBlocks.getForTags(
+        const result = await libs.configurationBlocks.getForTags(
           libs.framework.internalUser,
-          beat.tags
+          beat.tags,
+          -1
         );
+        configurationBlocks = result.blocks;
       } else {
         configurationBlocks = [];
       }

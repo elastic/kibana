@@ -130,7 +130,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       }));
   }
 
-  public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<{}> {
+  public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string> {
     const body = {
       tag,
       type: 'tag',
@@ -145,6 +145,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     };
     const response = await this.database.index(user, params);
 
-    return get(response, 'result');
+    return get<string>(response, 'result');
   }
 }

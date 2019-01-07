@@ -6,14 +6,15 @@
 
 import { uniq } from 'lodash';
 import moment from 'moment';
-import { findNonExistentItems } from '../utils/find_non_existent_items';
-
 import { CMBeat } from '../../common/domain_types';
-import { BeatsTagAssignment, CMBeatsAdapter } from './adapters/beats/adapter_types';
+import { findNonExistentItems } from '../utils/find_non_existent_items';
+import {
+  BeatsRemovalReturn,
+  BeatsTagAssignment,
+  CMAssignmentReturn,
+  CMBeatsAdapter,
+} from './adapters/beats/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
-
-import { CMAssignmentReturn } from './adapters/beats/adapter_types';
-import { BeatsRemovalReturn } from './adapters/beats/adapter_types';
 import { BeatEnrollmentStatus, CMServerLibs, UserOrToken } from './types';
 
 export class CMBeatsDomain {
@@ -133,7 +134,7 @@ export class CMBeatsDomain {
     };
 
     const beats = await this.adapter.getWithIds(user, beatIds);
-    const tags = await this.tags.getTagsWithIds(user, tagIds);
+    const tags = await this.tags.getWithIds(user, tagIds);
 
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
@@ -174,7 +175,7 @@ export class CMBeatsDomain {
       assignments: assignments.map(() => ({ status: null })),
     };
     const beats = await this.adapter.getWithIds(user, beatIds);
-    const tags = await this.tags.getTagsWithIds(user, tagIds);
+    const tags = await this.tags.getWithIds(user, tagIds);
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
     const nonExistentTags = findNonExistentItems(tags, tagIds);

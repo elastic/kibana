@@ -10,5 +10,5 @@ export interface CMTagsAdapter {
   getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]>;
   delete(user: FrameworkUser, tagIds: string[]): Promise<boolean>;
   getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]>;
-  upsertTag(user: FrameworkUser, tag: BeatTag): Promise<{}>;
+  upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string>;
 }

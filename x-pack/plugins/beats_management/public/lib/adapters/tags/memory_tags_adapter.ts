@@ -36,4 +36,8 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     }
     return tag;
   }
+
+  public async tagsExcept(tags: BeatTag[], ignoredConfigTypes: string[]) {
+    return this.tagsDB;
+  }
 }

@@ -29,6 +29,10 @@ export interface DatabaseAdapter {
     params: DatabaseBulkIndexDocumentsParams
   ): Promise<DatabaseBulkResponse>;
   search<T>(user: FrameworkUser, params: DatabaseSearchParams): Promise<DatabaseSearchResponse<T>>;
+  searchAll<T>(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseSearchResponse<T>>;
 }
 
 export interface DatabaseKbnESCluster {
