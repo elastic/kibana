@@ -14,13 +14,15 @@ import {
   EuiTitle,
   IconType,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 
 interface Props {
   iconType?: IconType;
   title: string | ReactNode;
+  description: string;
   collapsible: boolean;
+  intl: InjectedIntl;
   initiallyCollapsed?: boolean;
 }
 
@@ -50,6 +52,26 @@ export class SectionPanel extends Component<Props, State> {
   }
 
   public getTitle = () => {
+    const showLinkText = this.props.intl.formatMessage(
+      {
+        id: 'xpack.spaces.management.collapsiblePanel.showLinkText',
+        defaultMessage: 'show {title}',
+      },
+      {
+        title: this.props.description,
+      }
+    );
+
+    const hideLinkText = this.props.intl.formatMessage(
+      {
+        id: 'xpack.spaces.management.collapsiblePanel.hideLinkText',
+        defaultMessage: 'hide {title}',
+      },
+      {
+        title: this.props.description,
+      }
+    );
+
     return (
       // @ts-ignore
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
@@ -71,7 +93,10 @@ export class SectionPanel extends Component<Props, State> {
         </EuiFlexItem>
         {this.props.collapsible && (
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={this.toggleCollapsed}>
+            <EuiLink
+              onClick={this.toggleCollapsed}
+              aria-label={this.state.collapsed ? showLinkText : hideLinkText}
+            >
               {this.state.collapsed ? (
                 <FormattedMessage
                   id="xpack.spaces.management.collapsiblePanel.showLinkText"

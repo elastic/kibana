@@ -22,8 +22,19 @@ interface Props {
 
 export class EnabledFeatures extends Component<Props, {}> {
   public render() {
+    const description = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.customizeVisibleFeatures',
+      defaultMessage: 'Customize visible features',
+    });
+
     return (
-      <SectionPanel collapsible initiallyCollapsed title={this.getPanelTitle()}>
+      <SectionPanel
+        collapsible
+        initiallyCollapsed
+        title={this.getPanelTitle()}
+        description={description}
+        intl={this.props.intl}
+      >
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -107,8 +118,6 @@ export class EnabledFeatures extends Component<Props, {}> {
   };
 
   private getDescription = () => {
-    const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
-
     return (
       <Fragment>
         <EuiText size="s" color="subdued">
@@ -119,20 +128,6 @@ export class EnabledFeatures extends Component<Props, {}> {
             />
           </p>
         </EuiText>
-        {enabledCount === 0 && (
-          <Fragment>
-            <EuiSpacer />
-            <EuiCallOut
-              color="danger"
-              title={this.props.intl.formatMessage({
-                id: 'xpack.spaces.management.enabledSpaceFeatures.enableAtLeastOneFeatureMessage',
-                defaultMessage: 'At least one feature must be visible',
-              })}
-              iconType="alert"
-              size="s"
-            />
-          </Fragment>
-        )}
       </Fragment>
     );
   };

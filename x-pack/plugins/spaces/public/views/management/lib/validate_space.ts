@@ -104,19 +104,6 @@ export class SpaceValidator {
   }
 
   public validateEnabledFeatures(space: Partial<Space>) {
-    if (!this.shouldValidate) {
-      return valid();
-    }
-
-    const knownDisabledFeatures = (space.disabledFeatures || []).filter(id =>
-      this.featureIds.includes(id)
-    );
-
-    const totalFeatureCount = this.featureIds.length;
-
-    if (knownDisabledFeatures.length === totalFeatureCount) {
-      return invalid(`At least 1 feature must be enabled`);
-    }
     return valid();
   }
 

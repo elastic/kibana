@@ -38,7 +38,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     const { initialsHasFocus, pendingInitials } = this.state;
 
     return (
-      <Fragment>
+      <form onSubmit={() => false}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={intl.formatMessage({
@@ -66,7 +66,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
             <EuiColorPicker color={getSpaceColor(space)} onChange={this.onColorChange} />
           </EuiFormRow>
         </EuiFlexItem>
-      </Fragment>
+      </form>
     );
   }
 

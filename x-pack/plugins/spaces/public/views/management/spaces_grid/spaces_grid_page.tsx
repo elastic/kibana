@@ -304,26 +304,32 @@ class SpacesGridPageUI extends Component<Props, State> {
         render: (disabledFeatures: string[], record: Space) => {
           const enabledFeatureCount = getEnabledFeatures(this.props.features, record).length;
           if (enabledFeatureCount === this.props.features.length) {
-            return intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.allFeaturesEnabled',
-              defaultMessage: 'All features visible',
-            });
+            return (
+              <FormattedMessage
+                id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
+                defaultMessage="All features visible"
+              />
+            );
           }
           if (enabledFeatureCount === 0) {
-            return intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.noFeaturesEnabled',
-              defaultMessage: 'No features visible',
-            });
+            return (
+              <EuiText color={'danger'}>
+                <FormattedMessage
+                  id="xpack.spaces.management.spacesGridPage.noFeaturesEnabled"
+                  defaultMessage="No features visible"
+                />
+              </EuiText>
+            );
           }
-          return intl.formatMessage(
-            {
-              id: 'xpack.spaces.management.spacesGridPage.someFeaturesEnabled',
-              defaultMessage: '{enabledFeatureCount} / {totalFeatureCount} features visible',
-            },
-            {
-              enabledFeatureCount,
-              totalFeatureCount: this.props.features.length,
-            }
+          return (
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.someFeaturesEnabled"
+              defaultMessage="{enabledFeatureCount} / {totalFeatureCount} features visible"
+              values={{
+                enabledFeatureCount,
+                totalFeatureCount: this.props.features.length,
+              }}
+            />
           );
         },
       },
