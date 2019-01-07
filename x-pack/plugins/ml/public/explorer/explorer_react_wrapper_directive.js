@@ -25,8 +25,10 @@ module.directive('mlExplorerReactWrapper', function () {
     function render() {
       const props = _.pick(scope, [
         'hasResults',
+        'influencers',
         'jobs',
-        'loading'
+        'loading',
+        'noInfluencersConfigured',
       ]);
 
       ReactDOM.render(

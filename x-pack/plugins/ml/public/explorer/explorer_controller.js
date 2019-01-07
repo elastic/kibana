@@ -20,7 +20,6 @@ import moment from 'moment-timezone';
 import 'plugins/ml/components/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
-import 'plugins/ml/components/influencers_list';
 import 'plugins/ml/components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';

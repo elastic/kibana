@@ -15,22 +15,6 @@
   <div ng-if="jobs.length > 0 && loading === false && hasResults === true">
     <div class="results-container">
 
-      <div ng-if="noInfluencersConfigured === true" class="no-influencers-warning">
-        <i aria-hidden="true" class="fa fa-info-circle" tooltip-placement="right" tooltip-append-to-body="true"
-          tooltip-html-unsafe="{{ ::'xpack.ml.explorer.noConfiguredInfluencersTooltip' | i18n: {defaultMessage: 'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.'} }}" ></i>
-      </div>
-
-      <div ng-if="noInfluencersConfigured === false" class="column col-xs-2 euiText">
-        <span
-          class="panel-title"
-          i18n-id="xpack.ml.explorer.topInfuencersTitle"
-          i18n-default-message="Top Influencers"
-        ></span>
-        <ml-influencers-list
-          influencers="influencers"
-        />
-      </div>
-
       <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
         <span class="panel-title euiText"
           i18n-id="xpack.ml.explorer.anomalyTimelineTitle"
