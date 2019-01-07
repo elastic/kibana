@@ -42,7 +42,7 @@ let _interpreter;
 let _socket;
 
 
-export const initialize = async () => {
+const initialize = async () => {
   await loadBrowserRegistries(types, basePath);
   _socket = await createSocket(basePath, functionsRegistry);
   return initializeInterpreter(_socket, typesRegistry, functionsRegistry);

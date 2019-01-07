@@ -22,15 +22,9 @@ import io from 'socket.io-client';
 const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
 
 export async function createSocket(basePath, functionsRegistry) {
-  let socket;
 
-  return new Promise((resolve, rej) => {
-    const reject = p => {
-      socket = null; // reset the socket on errors
-      rej(p);
-    };
-
-    socket = io({
+  return new Promise((resolve, reject) => {
+    const socket = io({
       path: `${basePath}/socket.io`,
       transports: ['polling', 'websocket'],
       transportOptions: {

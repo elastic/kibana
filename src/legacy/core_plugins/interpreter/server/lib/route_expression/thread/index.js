@@ -36,7 +36,6 @@ export function getWorker() {
     const { type, value, id } = msg;
     if (type === 'run') {
       const { threadId } = msg;
-      if (!heap[threadId]) return;
       const { ast, context } = value;
       heap[threadId]
         .onFunctionNotFound(ast, context)

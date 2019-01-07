@@ -22,18 +22,16 @@ import uuid from 'uuid/v4';
 export const browser = ({ socket, serialize, deserialize }) => {
   // Note that we need to be careful about how many times routeExpressionProvider is called, because of the socket.once below.
   // It's too bad we can't get a list of browser plugins on the server
-  let getClientFunctions = new Promise(resolve => {
+
+  const getFunctionList = () => new Promise(resolve => {
     socket.emit('getFunctionList');
     socket.once('functionList', resolve);
   });
 
+  let getClientFunctions = getFunctionList();
+
   socket.on('updateFunctionList', () => {
-    getClientFunctions = new Promise(resolve => {
-      socket.emit('getFunctionList');
-      socket.once('functionList', fl => {
-        resolve(fl);
-      });
-    });
+    getClientFunctions = getFunctionList();
   });
 
   return getClientFunctions.then(() => {
