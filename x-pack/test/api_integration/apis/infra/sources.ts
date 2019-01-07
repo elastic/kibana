@@ -33,8 +33,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           // shipped default values
           expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
           expect(sourceConfiguration.logAlias).to.be('filebeat-*');
-          expect(sourceConfiguration.fields.container).to.be('docker.container.id');
-          expect(sourceConfiguration.fields.host).to.be('host.name');
+          expect(sourceConfiguration.fields.container).to.be('container.id');
+          expect(sourceConfiguration.fields.host).to.be('host.hostname');
           expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
 
           // test data in x-pack/test/functional/es_archives/infra/data.json.gz

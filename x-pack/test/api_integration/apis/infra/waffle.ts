@@ -66,7 +66,7 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
               interval: '1m',
             },
             metric: { type: 'cpu' },
-            path: [{ type: 'terms', field: 'meta.cloud.availability_zone' }, { type: 'hosts' }],
+            path: [{ type: 'terms', field: 'cloud.availability_zone' }, { type: 'hosts' }],
           },
         })
         .then(resp => {
@@ -100,8 +100,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
             },
             metric: { type: 'cpu' },
             path: [
-              { type: 'terms', field: 'meta.cloud.provider' },
-              { type: 'terms', field: 'meta.cloud.availability_zone' },
+              { type: 'terms', field: 'cloud.provider' },
+              { type: 'terms', field: 'cloud.availability_zone' },
               { type: 'hosts' },
             ],
           },

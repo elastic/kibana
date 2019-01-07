@@ -42,16 +42,8 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         aggs: {
           metrics: {
             terms: {
-              field: 'metricset.module',
+              field: 'event.dataset',
               size: 1000,
-            },
-            aggs: {
-              names: {
-                terms: {
-                  field: 'metricset.name',
-                  size: 1000,
-                },
-              },
             },
           },
         },
@@ -99,16 +91,8 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         aggs: {
           metrics: {
             terms: {
-              field: 'fileset.module',
+              field: 'event.dataset',
               size: 1000,
-            },
-            aggs: {
-              names: {
-                terms: {
-                  field: 'fileset.name',
-                  size: 1000,
-                },
-              },
             },
           },
         },

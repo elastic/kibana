@@ -49,8 +49,8 @@ export class InfraConfigurationSourcesAdapter implements InfraSourcesAdapter {
 }
 
 const DEFAULT_FIELDS = {
-  container: 'docker.container.id',
-  host: 'host.name',
+  container: 'container.id',
+  host: 'host.hostname',
   message: ['message', '@message'],
   pod: 'kubernetes.pod.uid',
   tiebreaker: '_doc',

@@ -55,7 +55,7 @@ const getOptions = (
             defaultMessage: 'Host',
           }),
           type: InfraPathType.terms,
-          field: 'host.name',
+          field: 'host.hostname',
         },
         {
           text: intl.formatMessage({
@@ -63,7 +63,7 @@ const getOptions = (
             defaultMessage: 'Availability Zone',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.availability_zone',
+          field: 'cloud.availability_zone',
         },
         {
           text: intl.formatMessage({
@@ -71,7 +71,7 @@ const getOptions = (
             defaultMessage: 'Machine Type',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.machine_type',
+          field: 'cloud.machine.type',
         },
         {
           text: intl.formatMessage({
@@ -79,7 +79,7 @@ const getOptions = (
             defaultMessage: 'Project ID',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.project_id',
+          field: 'cloud.project.id',
         },
         {
           text: intl.formatMessage({
@@ -87,7 +87,7 @@ const getOptions = (
             defaultMessage: 'Provider',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.provider',
+          field: 'cloud.provider',
         },
       ],
       [InfraNodeType.host]: [
@@ -97,7 +97,7 @@ const getOptions = (
             defaultMessage: 'Availability Zone',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.availability_zone',
+          field: 'cloud.availability_zone',
         },
         {
           text: intl.formatMessage({
@@ -105,7 +105,7 @@ const getOptions = (
             defaultMessage: 'Machine Type',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.machine_type',
+          field: 'cloud.machine.type',
         },
         {
           text: intl.formatMessage({
@@ -113,7 +113,7 @@ const getOptions = (
             defaultMessage: 'Project ID',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.project_id',
+          field: 'cloud.project.id',
         },
         {
           text: intl.formatMessage({
@@ -121,7 +121,7 @@ const getOptions = (
             defaultMessage: 'Cloud Provider',
           }),
           type: InfraPathType.terms,
-          field: 'meta.cloud.provider',
+          field: 'cloud.provider',
         },
       ],
     };
