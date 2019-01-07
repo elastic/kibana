@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeatureTable can render without spaces 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "field": "feature",
+        "name": "Feature",
+        "render": [Function],
+      },
+      Object {
+        "field": "role",
+        "name": "Privilege",
+        "render": [Function],
+      },
+    ]
+  }
+  items={Array []}
+  pagination={false}
+  responsive={true}
+  sorting={false}
+/>
+`;
