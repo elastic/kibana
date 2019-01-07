@@ -9,18 +9,14 @@
  */
 
 import { Logger } from './lib/logger';
+import { TaskStore } from './task_store';
 
 type WorkFn = () => Promise<void>;
-
-interface Initable {
-  init(): void;
-  isInitialized(): boolean;
-}
 
 interface Opts {
   pollInterval: number;
   logger: Logger;
-  store: Initable;
+  store: TaskStore;
   work: WorkFn;
 }
 
@@ -34,7 +30,7 @@ export class TaskPoller {
   private timeout: any;
   private pollInterval: number;
   private logger: Logger;
-  private store: Initable;
+  private store: TaskStore;
   private work: WorkFn;
 
   /**
