@@ -160,6 +160,14 @@ export class VectorLayer extends ALayer {
     return [...numberFieldOptions, ...joinFields];
   }
 
+  getIndexPatternIds() {
+    const indexPatternIds = this._source.getIndexPatternIds();
+    this.getValidJoins().forEach(join => {
+      indexPatternIds.push(...join.getIndexPatternIds());
+    });
+    return indexPatternIds;
+  }
+
   _findDataRequestForSource(sourceDataId) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }

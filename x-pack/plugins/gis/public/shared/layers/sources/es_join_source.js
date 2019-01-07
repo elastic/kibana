@@ -84,6 +84,10 @@ export class ESJoinSource extends ASource {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
+  }
+
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
 
     if (!this.hasCompleteConfig()) {

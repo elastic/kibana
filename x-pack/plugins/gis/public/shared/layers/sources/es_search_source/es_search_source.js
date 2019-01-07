@@ -105,6 +105,10 @@ export class ESSearchSource extends VectorSource {
     ];
   }
 
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
+  }
+
   renderDetails() {
     return (
       <ESSourceDetails

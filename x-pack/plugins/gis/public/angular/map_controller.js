@@ -21,8 +21,9 @@ import {
   replaceLayerList,
 } from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
+import { getIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
-import { inspectorAdapters } from '../kibana_services';
+import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
@@ -32,7 +33,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
 const app = uiModules.get('app/gis', []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
+app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage) => {
 
   const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
@@ -76,11 +77,39 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       root);
   });
 
+  let prevIndexPatternIds;
+  async function updateIndexPatterns(nextIndexPatternIds) {
+    const indexPatterns = [];
+    const getIndexPatternPromises = nextIndexPatternIds.map(async (indexPatternId) => {
+      try {
+        const indexPattern = await indexPatternService.get(indexPatternId);
+        indexPatterns.push(indexPattern);
+      } catch(err) {
+        // unable to fetch index pattern
+      }
+    });
+
+    await Promise.all(getIndexPatternPromises);
+    // ignore outdated results
+    if (prevIndexPatternIds !== nextIndexPatternIds) {
+      return;
+    }
+    $scope.indexPatterns = indexPatterns;
+  }
+
   function handleStoreChanges(store) {
+    const state = store.getState();
+
     // theme changes must triggered in digest cycle because top nav is still angular
-    if (isDarkTheme !== getIsDarkTheme(store.getState())) {
-      isDarkTheme = getIsDarkTheme(store.getState());
+    if (isDarkTheme !== getIsDarkTheme(state)) {
+      isDarkTheme = getIsDarkTheme(state);
       updateTheme();
+    }
+
+    const nextIndexPatternIds = getIndexPatternIds(state);
+    if (nextIndexPatternIds !== prevIndexPatternIds) {
+      prevIndexPatternIds = nextIndexPatternIds;
+      updateIndexPatterns(nextIndexPatternIds);
     }
   }
 
@@ -135,6 +164,16 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
     }
     return { id };
   }
+
+  $scope.query = {
+    query: '',
+    language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+  };
+  $scope.indexPatterns = [];
+  $scope.updateQueryAndFetch = function (query) {
+    console.log('query', query);
+    $scope.query = query;
+  };
 
   $scope.topNavMenu = [{
     key: 'inspect',

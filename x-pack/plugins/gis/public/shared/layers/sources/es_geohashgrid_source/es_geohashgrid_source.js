@@ -164,6 +164,10 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
+  }
+
   async getNumberFields() {
     return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };

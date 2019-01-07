@@ -35,6 +35,10 @@ export class HeatmapLayer extends ALayer {
     return [HeatmapStyle];
   }
 
+  getIndexPatternIds() {
+    return this._source.getIndexPatternIds();
+  }
+
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());

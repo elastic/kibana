@@ -84,5 +84,9 @@ export class LeftInnerJoin {
     return tooltipProps;
   }
 
+  getIndexPatternIds() {
+    return  this._rightSource.getIndexPatternIds();
+  }
+
 }
 

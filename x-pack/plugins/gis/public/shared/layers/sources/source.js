@@ -62,6 +62,10 @@ export class ASource {
   renderSourceSettingsEditor() {
     return null;
   }
+
+  getIndexPatternIds() {
+    return  [];
+  }
 }
 
 
