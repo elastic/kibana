@@ -15,6 +15,7 @@ export default function ({ getService }) {
   const chance = getService('chance');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
+  const log = getService('log');
 
   const kibanaServerConfig = config.get('servers.kibana');
 
@@ -427,12 +428,14 @@ export default function ({ getService }) {
       let sessionCookie;
 
       beforeEach(async () => {
+        log.info(`getting the handshake response`);
         const handshakeResponse = await supertest.get('/abc/xyz')
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
+        log.info(`authenticating using SAML response`);
         const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
@@ -451,6 +454,7 @@ export default function ({ getService }) {
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
+        log.info(`using the refresh token to get new access/refresh tokens`);
         const apiResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
@@ -469,19 +473,23 @@ export default function ({ getService }) {
 
         // Request with old cookie should fail with `400` since it contains expired access token and
         // already used refresh tokens.
+        log.info(`if we try to use the old access token, we should get a 400`);
         const apiResponseWithExpiredToken = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
         expect(apiResponseWithExpiredToken.headers['set-cookie']).to.be(undefined);
+        log.info('verifying the error body');
         expect(apiResponseWithExpiredToken.body).to.eql({
           error: 'Bad Request',
           message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
+        log.info('verified the error body');
 
         // The new cookie with fresh pair of access and refresh tokens should work.
+        log.info('the new access/refresh tokens should auth us successfully');
         await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
@@ -499,12 +507,14 @@ export default function ({ getService }) {
         // Issue two concurrent requests with the same cookie that contains expired access token.
         // First request that uses refresh token should succeed, the second should fail since refresh
         // token is one-time use only token.
+        log.info(`using the refresh token to get new access/refresh tokens`);
         const apiResponseOnePromise = supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
+        log.info(`using the old refresh token, again`);
         const apiResponseTwoPromise = supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
@@ -524,26 +534,32 @@ export default function ({ getService }) {
 
         const apiResponseTwo = await apiResponseTwoPromise;
         expect(apiResponseTwo.headers['set-cookie']).to.be(undefined);
+        log.info(`verifying the error body`);
         expect(apiResponseTwo.body).to.eql({
           error: 'Bad Request',
           message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
+        log.info(`verified the error body`);
 
         // Request with old cookie should fail with `400` since it contains expired access token and
         // already used refresh tokens.
+        log.info(`using the old refresh token, another time`);
         const apiResponseWithExpiredToken = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
+        log.info(`verifying the error body`);
         expect(apiResponseWithExpiredToken.body).to.eql({
           error: 'Bad Request',
           message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
+        log.info(`verified the error body`);
 
         // The new cookie with fresh pair of access and refresh tokens should work.
+        log.info('the new access/refresh tokens should auth us successfully');
         await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
