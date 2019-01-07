@@ -20,15 +20,11 @@ export interface Role {
         [featureId: string]: string[];
       };
     };
-    spaces: Array<{spaces: string[]; minimum: string[], feature: { [featureId: string]: string[]}};
-    // space: {
-    //   [spaceId: string]: {
-    //     minimum: string[];
-    //     feature: {
-    //       [featureId: string]: string[];
-    //     };
-    //   };
-    // };
+    spaces: Array<{
+      spaces: string[];
+      minimum: string[];
+      feature: { [featureId: string]: string[] };
+    }>;
   };
   metadata?: {
     [anyKey: string]: any;

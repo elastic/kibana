@@ -22,7 +22,7 @@ test('it renders without crashing', () => {
       },
       kibana: {
         global: { minimum: [], feature: {} },
-        space: {},
+        spaces: [],
       },
     },
     editable: true,
@@ -51,7 +51,7 @@ test('it renders ClusterPrivileges', () => {
       },
       kibana: {
         global: { minimum: [], feature: {} },
-        space: {},
+        spaces: [],
       },
     },
     editable: true,
@@ -80,7 +80,7 @@ test('it renders IndexPrivileges', () => {
       },
       kibana: {
         global: { minimum: [], feature: {} },
-        space: {},
+        spaces: [],
       },
     },
     editable: true,

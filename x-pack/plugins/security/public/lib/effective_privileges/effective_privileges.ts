@@ -57,8 +57,6 @@ export class EffectivePrivileges {
   constructor(
     private readonly privilegeDefinition: PrivilegeDefinition,
     private readonly role: Role,
-    private readonly rankedSpaceBasePrivileges: string[],
-    private readonly rankedGlobalBasePrivileges: string[],
     private readonly rankedFeaturePrivileges: FeaturePrivilegeSet
   ) {
     this.globalPrivilege = this.locateGlobalPrivilege(role);

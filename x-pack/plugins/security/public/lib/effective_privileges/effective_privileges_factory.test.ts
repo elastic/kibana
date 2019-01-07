@@ -19,46 +19,6 @@ describe('EffectivePrivilegesFactory', () => {
     );
 
     expect(factory.rankedFeaturePrivileges).toEqual({});
-    expect(factory.rankedGlobalBasePrivileges).toEqual([]);
-    expect(factory.rankedSpaceBasePrivileges).toEqual([]);
-  });
-
-  it('ranks global base privileges correctly', () => {
-    const factory = new EffectivePrivilegesFactory(
-      new PrivilegeDefinition({
-        global: {
-          a: ['foo:/bar'],
-          b: ['foo:/*'],
-          c: ['*'],
-          d: ['foo:/bar', 'foo:/baz'],
-        },
-        features: {},
-        space: {},
-      })
-    );
-
-    expect(factory.rankedFeaturePrivileges).toEqual({});
-    expect(factory.rankedGlobalBasePrivileges).toEqual(['c', 'b', 'd', 'a']);
-    expect(factory.rankedSpaceBasePrivileges).toEqual([]);
-  });
-
-  it('ranks space base privileges correctly', () => {
-    const factory = new EffectivePrivilegesFactory(
-      new PrivilegeDefinition({
-        global: {},
-        features: {},
-        space: {
-          a: ['foo:/bar'],
-          b: ['foo:/*'],
-          c: ['*'],
-          d: ['foo:/bar', 'foo:/baz'],
-        },
-      })
-    );
-
-    expect(factory.rankedFeaturePrivileges).toEqual({});
-    expect(factory.rankedGlobalBasePrivileges).toEqual([]);
-    expect(factory.rankedSpaceBasePrivileges).toEqual(['c', 'b', 'd', 'a']);
   });
 
   it('ranks feature privileges correctly', () => {
@@ -87,8 +47,6 @@ describe('EffectivePrivilegesFactory', () => {
       feature1: ['c', 'b', 'd', 'a'],
       feature2: ['a', 'b', 'c', 'd'],
     });
-    expect(factory.rankedGlobalBasePrivileges).toEqual([]);
-    expect(factory.rankedSpaceBasePrivileges).toEqual([]);
   });
 
   it('creates an EffectivePrivileges instance', () => {

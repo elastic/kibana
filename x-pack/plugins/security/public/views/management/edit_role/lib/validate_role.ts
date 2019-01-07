@@ -32,8 +32,6 @@ export interface RoleValidationResult {
 export class RoleValidator {
   private shouldValidate?: boolean;
 
-  private inProgressSpacePrivileges: any[] = [];
-
   constructor(options: RoleValidatorOptions = {}) {
     this.shouldValidate = options.shouldValidate;
   }
@@ -182,45 +180,17 @@ export class RoleValidator {
     );
   }
 
-  public setInProgressSpacePrivileges(inProgressSpacePrivileges: any[]) {
-    this.inProgressSpacePrivileges = [...inProgressSpacePrivileges];
-  }
-
-  public validateInProgressSpacePrivileges(role: Role): RoleValidationResult {
-    const { global } = role.kibana;
-
-    // A Global privilege of "all" will ignore all in progress privileges,
-    // so the form should not block saving in this scenario.
-    const shouldValidate = this.shouldValidate && !global.minimum.includes('all');
-
-    if (!shouldValidate) {
-      return valid();
-    }
-
-    const allInProgressValid = this.inProgressSpacePrivileges.every(({ spaces, privilege }) => {
-      return (
-        !this.validateSelectedSpaces(spaces, privilege).isInvalid &&
-        !this.validateSelectedPrivilege(spaces, privilege).isInvalid
-      );
-    });
-
-    if (allInProgressValid) {
-      return valid();
-    }
-    return invalid();
-  }
-
   public validateSpacePrivileges(role: Role): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
 
-    const privileges = Object.values(role.kibana.space || {});
+    const privileges = role.kibana.spaces || [];
 
+    // TODO: update validation
     const arePrivilegesValid = privileges.every(assignedPrivilege => !!assignedPrivilege);
-    const areInProgressPrivilegesValid = !this.validateInProgressSpacePrivileges(role).isInvalid;
 
-    if (arePrivilegesValid && areInProgressPrivilegesValid) {
+    if (arePrivilegesValid) {
       return valid();
     }
     return invalid();

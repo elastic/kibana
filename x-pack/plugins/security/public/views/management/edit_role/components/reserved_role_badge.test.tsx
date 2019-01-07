@@ -22,10 +22,23 @@ const reservedRole: Role = {
       minimum: ['all'],
       feature: {},
     },
-    space: {
-      default: { minimum: ['foo'], feature: {} },
-      marketing: { minimum: ['read'], feature: {} },
-    },
+    spaces: [
+      {
+        spaces: ['*'],
+        minimum: ['all'],
+        feature: {},
+      },
+      {
+        spaces: ['default'],
+        minimum: ['foo'],
+        feature: {},
+      },
+      {
+        spaces: ['marketing'],
+        minimum: ['read'],
+        feature: {},
+      },
+    ],
   },
   metadata: {
     _reserved: true,
@@ -44,10 +57,23 @@ const unreservedRole = {
       minimum: ['all'],
       feature: {},
     },
-    space: {
-      default: { minimum: ['foo'], feature: {} },
-      marketing: { minimum: ['read'], feature: {} },
-    },
+    spaces: [
+      {
+        spaces: ['*'],
+        minimum: ['all'],
+        feature: {},
+      },
+      {
+        spaces: ['default'],
+        minimum: ['foo'],
+        feature: {},
+      },
+      {
+        spaces: ['marketing'],
+        minimum: ['read'],
+        feature: {},
+      },
+    ],
   },
 };
 

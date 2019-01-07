@@ -26,7 +26,7 @@ describe('validateRoleName', () => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
@@ -46,7 +46,7 @@ describe('validateRoleName', () => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
@@ -69,7 +69,7 @@ describe('validateRoleName', () => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
@@ -94,7 +94,7 @@ describe('validateRoleName', () => {
             minimum: [],
             feature: {},
           },
-          space: {},
+          spaces: [],
         },
       };
 
@@ -129,7 +129,7 @@ describe('validateIndexPrivileges', () => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
@@ -156,7 +156,7 @@ describe('validateIndexPrivileges', () => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
@@ -178,152 +178,12 @@ describe('validateIndexPrivileges', () => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
     // @ts-ignore
     expect(() => validator.validateIndexPrivileges(role)).toThrowErrorMatchingSnapshot();
-  });
-});
-
-describe('validateInProgressSpacePrivileges', () => {
-  beforeEach(() => {
-    validator = new RoleValidator({ shouldValidate: true });
-  });
-
-  it('should validate when both spaces and privilege is unassigned', () => {
-    const role = {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        space: {},
-      },
-    };
-
-    validator.setInProgressSpacePrivileges([{}, {}]);
-    expect(validator.validateInProgressSpacePrivileges(role)).toEqual({ isInvalid: false });
-  });
-
-  it('should invalidate when spaces are not assigned to a privilege', () => {
-    const role = {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        space: {},
-      },
-    };
-
-    validator.setInProgressSpacePrivileges([
-      {
-        privilege: 'all',
-      },
-    ]);
-
-    expect(validator.validateInProgressSpacePrivileges(role)).toMatchObject({
-      isInvalid: true,
-    });
-  });
-
-  it('should invalidate when a privilege is not assigned to a space', () => {
-    const role = {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        space: {},
-      },
-    };
-
-    validator.setInProgressSpacePrivileges([
-      {
-        spaces: ['marketing'],
-      },
-    ]);
-
-    expect(validator.validateInProgressSpacePrivileges(role)).toMatchObject({
-      isInvalid: true,
-    });
-  });
-
-  it('should validate when a privilege is assigned to a space', () => {
-    const role = {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        space: {},
-      },
-    };
-
-    validator.setInProgressSpacePrivileges([
-      {
-        spaces: ['marketing'],
-        privilege: 'all',
-      },
-    ]);
-
-    expect(validator.validateInProgressSpacePrivileges(role)).toEqual({
-      isInvalid: false,
-    });
-  });
-
-  it('should skip validation if the global privilege is set to "all"', () => {
-    const role = {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: {
-        global: {
-          minimum: ['all'],
-          feature: {},
-        },
-        space: {},
-      },
-    };
-
-    validator.setInProgressSpacePrivileges([
-      {
-        spaces: ['marketing'],
-      },
-    ]);
-
-    expect(validator.validateInProgressSpacePrivileges(role as Role)).toMatchObject({
-      isInvalid: false,
-    });
   });
 });
 
@@ -345,7 +205,7 @@ describe('validateSpacePrivileges', () => {
           minimum: [],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
@@ -365,7 +225,7 @@ describe('validateSpacePrivileges', () => {
           minimum: ['all'],
           feature: {},
         },
-        space: {},
+        spaces: [],
       },
     };
 
@@ -385,9 +245,13 @@ describe('validateSpacePrivileges', () => {
           minimum: [],
           feature: {},
         },
-        space: {
-          marketing: { minimum: ['read'], feature: {} },
-        },
+        spaces: [
+          {
+            spaces: ['marketing'],
+            minimum: ['read'],
+            feature: {},
+          },
+        ],
       },
     };
 
@@ -407,6 +271,23 @@ describe('validateSpacePrivileges', () => {
           minimum: ['all'],
           feature: {},
         },
+        spaces: [
+          {
+            spaces: ['*'],
+            minimum: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['default'],
+            minimum: ['foo'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            minimum: ['read'],
+            feature: {},
+          },
+        ],
         space: {
           default: { minimum: ['foo'], feature: {} },
           marketing: { minimum: ['read'], feature: {} },
@@ -415,34 +296,5 @@ describe('validateSpacePrivileges', () => {
     };
 
     expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: false });
-  });
-
-  it('should invalidate when in-progress space privileges are not valid', () => {
-    const role = {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: {
-        global: {
-          minimum: ['read'],
-          feature: {},
-        },
-        space: {
-          default: { minimum: ['foo'], feature: {} },
-          marketing: { minimum: ['read'], feature: {} },
-        },
-      },
-    };
-
-    validator.setInProgressSpacePrivileges([
-      {
-        spaces: ['marketing'],
-      },
-    ]);
-
-    expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: true });
   });
 });

@@ -19,7 +19,7 @@ test('it renders without crashing', () => {
     },
     kibana: {
       global: { minimum: [], feature: {} },
-      space: {},
+      spaces: [],
     },
   };
 

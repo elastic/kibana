@@ -21,7 +21,7 @@ test('it renders without crashing', () => {
       },
       kibana: {
         global: { minimum: [], feature: {} },
-        space: {},
+        spaces: [],
       },
     },
     httpClient: jest.fn(),
@@ -41,7 +41,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
       name: '',
       kibana: {
         global: { minimum: [], feature: {} },
-        space: {},
+        spaces: [],
       },
       elasticsearch: {
         cluster: [],

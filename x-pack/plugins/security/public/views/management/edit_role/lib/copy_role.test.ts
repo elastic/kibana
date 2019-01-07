@@ -21,10 +21,23 @@ describe('copyRole', () => {
           minimum: ['all'],
           feature: {},
         },
-        space: {
-          default: { minimum: ['foo'], feature: {} },
-          marketing: { minimum: ['read'], feature: {} },
-        },
+        spaces: [
+          {
+            spaces: ['*'],
+            minimum: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['default'],
+            minimum: ['foo'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            minimum: ['read'],
+            feature: {},
+          },
+        ],
       },
     };
 

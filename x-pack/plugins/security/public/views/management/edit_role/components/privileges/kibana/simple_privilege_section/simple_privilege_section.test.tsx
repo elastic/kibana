@@ -7,7 +7,6 @@
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PrivilegeSelector } from './privilege_selector';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 
 const buildProps = (customProps?: any) => {
