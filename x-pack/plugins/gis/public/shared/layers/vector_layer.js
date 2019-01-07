@@ -177,8 +177,9 @@ export class VectorLayer extends ALayer {
     const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
+    const isQueryAware = source.isQueryAware();
 
-    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware) {
+    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware && !isQueryAware) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
@@ -211,10 +212,16 @@ export class VectorLayer extends ALayer {
       updateDueToFields = !_.isEqual(meta.fieldNames, filters.fieldNames);
     }
 
+    let updateDueToQuery = false;
+    if (isQueryAware) {
+      updateDueToQuery = !_.isEqual(meta.query, filters.query);
+    }
+
     return !updateDueToTime
       && !updateDueToRefreshTimer
       && !this.updateDueToExtent(source, meta, filters)
-      && !updateDueToFields;
+      && !updateDueToFields
+      && !updateDueToQuery;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {

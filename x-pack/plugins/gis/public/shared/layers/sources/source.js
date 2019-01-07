@@ -51,6 +51,10 @@ export class ASource {
     return false;
   }
 
+  isQueryAware() {
+    return false;
+  }
+
   getFieldNames() {
     return [];
   }

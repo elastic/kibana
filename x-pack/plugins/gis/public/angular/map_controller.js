@@ -19,6 +19,7 @@ import {
   setRefreshConfig,
   setGoto,
   replaceLayerList,
+  setQuery,
 } from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
 import { getIndexPatternIds } from '../selectors/map_selectors';
@@ -171,8 +172,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   };
   $scope.indexPatterns = [];
   $scope.updateQueryAndFetch = function (query) {
-    console.log('query', query);
     $scope.query = query;
+    getStore().then(store => {
+      // ignore outdated query
+      if ($scope.query !== query) {
+        return;
+      }
+      store.dispatch(setQuery({ query }));
+    });
   };
 
   $scope.topNavMenu = [{

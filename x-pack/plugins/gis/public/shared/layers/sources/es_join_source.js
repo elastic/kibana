@@ -112,6 +112,7 @@ export class ESJoinSource extends ASource {
         }
         return filters;
       });
+      searchSource.setField('query', searchFilters.query);
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
@@ -166,6 +167,10 @@ export class ESJoinSource extends ASource {
   }
 
   isRefreshTimerAware() {
+    return true;
+  }
+
+  isQueryAware() {
     return true;
   }
 

@@ -98,6 +98,10 @@ export class ESSearchSource extends VectorSource {
     return true;
   }
 
+  isQueryAware() {
+    return true;
+  }
+
   getFieldNames() {
     return [
       this._descriptor.geoField,
@@ -163,6 +167,7 @@ export class ESSearchSource extends VectorSource {
         }
         return filters;
       });
+      searchSource.setField('query', searchFilters.query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,

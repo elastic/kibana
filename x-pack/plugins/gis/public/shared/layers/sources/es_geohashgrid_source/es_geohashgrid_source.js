@@ -133,6 +133,7 @@ export class ESGeohashGridSource extends VectorSource {
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
       layerName,
+      query: searchFilters.query,
     });
 
     if (this._descriptor.requestType === RENDER_AS.GRID) {
@@ -158,6 +159,10 @@ export class ESGeohashGridSource extends VectorSource {
     return true;
   }
 
+  isQueryAware() {
+    return true;
+  }
+
   getFieldNames() {
     return this.getMetricFields().map(({ propertyKey }) => {
       return propertyKey;
@@ -174,7 +179,7 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
+  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
     try {
@@ -202,6 +207,7 @@ export class ESGeohashGridSource extends VectorSource {
         filters.push(timeService.createFilter(indexPattern, timeFilters));
         return filters;
       });
+      searchSource.setField('query', query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,
