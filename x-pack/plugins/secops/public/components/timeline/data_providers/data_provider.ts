@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-
 /** Represents the Timeline data providers */
 export interface DataProvider {
   /** Uniquely identifies a data provider */
@@ -18,11 +16,10 @@ export interface DataProvider {
    */
   enabled: boolean;
   /**
-   * Returns a Component query that, when executed, returns the data for this provider
+   * Returns a query properties that, when executed, returns the data for this provider
    */
-  componentQuery: React.ReactNode;
-  componentQueryProps: {};
-  componentResultParam: string;
+  queryMatch: string;
+  queryDate?: string;
   /**
    * When `true`, boolean logic is applied to the data provider to negate it.
    * default: `false`

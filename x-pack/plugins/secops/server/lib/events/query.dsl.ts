@@ -31,22 +31,26 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const buildQuery = (options: EventsRequestOptions) => {
-  const { to, from } = options.timerange;
   const { limit, cursor, tiebreaker } = options.pagination;
   const { sortFieldId, direction } = options.sortField;
   const { fields, filterQuery } = options;
   const esFields = [...reduceFields(fields, eventFieldsMap)];
-  const filter = [
-    ...createQueryFilterClauses(filterQuery as FilterQuery),
-    {
-      range: {
-        [options.sourceConfiguration.fields.timestamp]: {
-          gte: from,
-          lte: to,
+  let filter = [...createQueryFilterClauses(filterQuery as FilterQuery)];
+
+  if (options.timerange) {
+    const { to, from } = options.timerange!;
+    filter = [
+      ...filter,
+      {
+        range: {
+          [options.sourceConfiguration.fields.timestamp]: {
+            gte: from,
+            lte: to,
+          },
         },
       },
-    },
-  ];
+    ];
+  }
 
   const agg = options.fields.includes('kpiEventType')
     ? {
@@ -61,6 +65,10 @@ export const buildQuery = (options: EventsRequestOptions) => {
         },
       }
     : {};
+
+  const queryMust = options.fields.includes('kpiEventType')
+    ? [{ match_all: {} }, { exists: { field: 'event.type' } }]
+    : [{ match_all: {} }];
 
   let sort: SortRequest = [];
   if (sortFieldId) {
@@ -81,16 +89,7 @@ export const buildQuery = (options: EventsRequestOptions) => {
       aggregations: agg,
       query: {
         bool: {
-          must: [
-            {
-              match_all: {},
-            },
-            {
-              exists: {
-                field: 'event.type',
-              },
-            },
-          ],
+          must: queryMust,
           filter,
         },
       },

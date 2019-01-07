@@ -83,10 +83,10 @@ export const eventsSchema = gql`
   extend type Source {
     "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Events(
-      timerange: TimerangeInput!
       pagination: PaginationInput!
       sortField: SortField!
+      timerange: TimerangeInput
       filterQuery: String
-    ): EventsData
+    ): EventsData!
   }
 `;

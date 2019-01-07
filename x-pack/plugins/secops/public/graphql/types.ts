@@ -28,7 +28,7 @@ export interface Source {
   /** The status of the source */
   status: SourceStatus;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events?: EventsData | null;
+  Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -268,15 +268,6 @@ export interface SayMyName {
 // InputTypes
 // ====================================================
 
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: number;
-  /** The beginning of the timerange */
-  from: number;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -292,6 +283,15 @@ export interface SortField {
   direction?: Direction | null;
 }
 
+export interface TimerangeInput {
+  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
+  interval: string;
+  /** The end of the timerange */
+  to: number;
+  /** The beginning of the timerange */
+  from: number;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -301,11 +301,11 @@ export interface SourceQueryArgs {
   id: string;
 }
 export interface EventsSourceArgs {
-  timerange: TimerangeInput;
-
   pagination: PaginationInput;
 
   sortField: SortField;
+
+  timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
 }
@@ -370,7 +370,7 @@ export namespace GetEventsQuery {
 
     id: string;
 
-    Events?: Events | null;
+    Events: Events;
   };
 
   export type Events = {
@@ -411,6 +411,8 @@ export namespace GetEventsQuery {
     __typename?: 'EventItem';
 
     _id?: string | null;
+
+    _index?: string | null;
 
     timestamp?: string | null;
 
@@ -632,6 +634,153 @@ export namespace SourceQuery {
     type: string;
 
     aggregatable: boolean;
+  };
+}
+
+export namespace GetTimelineQuery {
+  export type Variables = {
+    sourceId: string;
+    pagination: PaginationInput;
+    sortField: SortField;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Events: Events;
+  };
+
+  export type Events = {
+    __typename?: 'EventsData';
+
+    totalCount: number;
+
+    pageInfo: PageInfo;
+
+    edges: Edges[];
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+
+    tiebreaker?: string | null;
+  };
+
+  export type Edges = {
+    __typename?: 'EventEdges';
+
+    event: Event;
+  };
+
+  export type Event = {
+    __typename?: 'EventItem';
+
+    _id?: string | null;
+
+    _index?: string | null;
+
+    timestamp?: string | null;
+
+    event?: _Event | null;
+
+    host?: Host | null;
+
+    source?: _Source | null;
+
+    destination?: Destination | null;
+
+    geo?: Geo | null;
+
+    suricata?: Suricata | null;
+  };
+
+  export type _Event = {
+    __typename?: 'EventEcsFields';
+
+    type?: string | null;
+
+    severity?: number | null;
+
+    module?: string | null;
+
+    category?: string | null;
+
+    id?: number | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    name?: string | null;
+
+    ip?: string | null;
+  };
+
+  export type _Source = {
+    __typename?: 'SourceEcsFields';
+
+    ip?: string | null;
+
+    port?: number | null;
+  };
+
+  export type Destination = {
+    __typename?: 'DestinationEcsFields';
+
+    ip?: string | null;
+
+    port?: number | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    region_name?: string | null;
+
+    country_iso_code?: string | null;
+  };
+
+  export type Suricata = {
+    __typename?: 'SuricataEcsFields';
+
+    eve?: Eve | null;
+  };
+
+  export type Eve = {
+    __typename?: 'SuricataEveData';
+
+    proto?: string | null;
+
+    flow_id?: number | null;
+
+    alert?: Alert | null;
+  };
+
+  export type Alert = {
+    __typename?: 'SuricataAlertData';
+
+    signature?: string | null;
+
+    signature_id?: number | null;
   };
 }
 

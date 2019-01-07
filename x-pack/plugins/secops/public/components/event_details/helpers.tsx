@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import uuid from 'uuid';
 
-import { EventsQuery } from '../../containers/events';
-import { EcsField, getMappedEcsValue } from '../../lib/ecs';
+import { EcsField, getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../lib/ecs';
 import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { ECS } from '../timeline/ecs';
 
@@ -99,14 +99,14 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] => {
             data,
             fieldName: field.name,
           })}`,
-          componentResultParam: 'events',
-          componentQuery: EventsQuery,
-          componentQueryProps: {
-            sourceId: 'default',
-            startDate: 1521830963132, // TODO / IMPORTANT / DISCUSS: we need to know the date from the data provider that brought in this data
-            endDate: 1521862432253, // TODO / IMPORTANT / DISCUSS: we need to know the date from the data provider that brought in this data
-            filterQuery: '',
-          },
+          queryMatch: `${getOr(
+            field.name,
+            field.name,
+            mappedEcsSchemaFieldNames
+          )}: ${getMappedEcsValue({
+            data,
+            fieldName: field.name,
+          })}`,
           negated: false,
           and: [],
         }}

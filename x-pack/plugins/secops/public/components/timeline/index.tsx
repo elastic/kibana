@@ -9,6 +9,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
+import { WithSource } from '../../containers/source';
 import { timelineActions } from '../../store';
 import { themeSelector } from '../../store/local/app';
 import { Theme } from '../../store/local/app/model';
@@ -22,7 +23,6 @@ import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
   OnChangeItemsPerPage,
-  OnChangePage,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnRangeSelected,
@@ -101,7 +101,6 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
   public render() {
     const {
-      activePage,
       dataProviders,
       flyoutHeight,
       flyoutHeaderHeight,
@@ -109,7 +108,6 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       id,
       itemsPerPage,
       itemsPerPageOptions,
-      pageCount,
       range,
       removeProvider,
       show,
@@ -119,7 +117,6 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       updateSort,
       updateDataProviderEnabled,
       updateItemsPerPage,
-      updatePageIndex,
     } = this.props;
 
     const onColumnSorted: OnColumnSorted = sorted => updateSort!({ id, sort: sorted });
@@ -136,43 +133,44 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
       updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage });
 
-    const onChangePage: OnChangePage = pageIndex => updatePageIndex!({ id, activePage: pageIndex });
-
     return (
-      <Timeline
-        activePage={activePage!}
-        columnHeaders={headers}
-        columnRenderers={columnRenderers}
-        id={id}
-        dataProviders={dataProviders!}
-        flyoutHeaderHeight={flyoutHeaderHeight}
-        flyoutHeight={flyoutHeight}
-        itemsPerPage={itemsPerPage!}
-        itemsPerPageOptions={itemsPerPageOptions!}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        onChangePage={onChangePage}
-        onColumnSorted={onColumnSorted}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
-        onRangeSelected={onRangeSelected}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        pageCount={pageCount!}
-        range={range!}
-        rowRenderers={rowRenderers}
-        show={show!}
-        sort={sort!}
-        theme={theme!}
-      />
+      <WithSource sourceId="default">
+        {({ indexPattern }) => (
+          <Timeline
+            columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            id={id}
+            dataProviders={dataProviders!}
+            flyoutHeaderHeight={flyoutHeaderHeight}
+            flyoutHeight={flyoutHeight}
+            itemsPerPage={itemsPerPage!}
+            itemsPerPageOptions={itemsPerPageOptions!}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onColumnSorted={onColumnSorted}
+            onDataProviderRemoved={onDataProviderRemoved}
+            onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
+            onRangeSelected={onRangeSelected}
+            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+            range={range!}
+            rowRenderers={rowRenderers}
+            show={show!}
+            sort={sort!}
+            theme={theme!}
+            indexPattern={indexPattern}
+          />
+        )}
+      </WithSource>
     );
   }
 }
 
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const timeline = timelineByIdSelector(state)[id];
-  const { dataProviders, sort, show } = timeline || timelineDefaults;
+  const { dataProviders, sort, show, itemsPerPage, itemsPerPageOptions } =
+    timeline || timelineDefaults;
   const theme = defaultTo('dark', themeSelector(state));
 
-  return { id, dataProviders, sort, show, theme };
+  return { id, dataProviders, sort, show, theme, itemsPerPage, itemsPerPageOptions };
 };
 
 export const StatefulTimeline = connect(
@@ -186,7 +184,6 @@ export const StatefulTimeline = connect(
     updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
     updateItemsPerPage: timelineActions.updateItemsPerPage,
     updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
-    updatePageIndex: timelineActions.updatePageIndex,
     removeProvider: timelineActions.removeProvider,
   }
 )(StatefulTimelineComponent);

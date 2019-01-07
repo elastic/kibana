@@ -7,17 +7,15 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { Direction, EventItem, GetEventsQuery, KpiItem, PageInfo } from '../../graphql/types';
-import { eventsLimitSelector, inputsModel, State } from '../../store';
-import { eventsQuery } from './index.gql_query';
+import { Direction, EventEdges, EventItem, GetTimelineQuery, PageInfo } from '../../graphql/types';
+import { inputsModel } from '../../store';
+import { timelineQuery } from './index.gql_query';
 
-export interface EventsArgs {
+export interface TimelineArgs {
   id: string;
-  events?: EventItem[];
-  kpiEventType?: KpiItem[];
+  events: EventItem[];
   loading: boolean;
   totalCount: number;
   pageInfo: PageInfo;
@@ -27,24 +25,17 @@ export interface EventsArgs {
 
 export interface OwnProps {
   id?: string;
-  children?: (args: EventsArgs) => React.ReactNode;
+  children?: (args: TimelineArgs) => React.ReactNode;
   sourceId: string;
-  startDate: number;
-  endDate: number;
-  filterQuery?: string;
-  poll: number;
-}
-
-export interface EventsComponentReduxProps {
+  filterQuery: string;
+  poll?: number;
   limit: number;
 }
 
-type EventsProps = OwnProps & EventsComponentReduxProps;
-
-const EventsComponentQuery = pure<EventsProps>(
-  ({ id = 'eventsQuery', children, filterQuery, sourceId, startDate, endDate, limit, poll }) => (
-    <Query<GetEventsQuery.Query, GetEventsQuery.Variables>
-      query={eventsQuery}
+export const TimelineQuery = pure<OwnProps>(
+  ({ id = 'timelineQuery', children, filterQuery, sourceId, limit, poll }) => (
+    <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
+      query={timelineQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
       pollInterval={poll}
@@ -60,24 +51,17 @@ const EventsComponentQuery = pure<EventsProps>(
           sortFieldId: 'timestamp',
           direction: 'descending' as Direction,
         },
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {
         const events = getOr([], 'source.Events.edges', data);
-        const kpiEventType = getOr([], 'source.Events.kpiEventType', data);
         return children!({
           id,
           refetch,
           loading,
           totalCount: getOr(0, 'source.Events.totalCount', data),
           pageInfo: getOr({}, 'source.Events.pageInfo', data),
-          events,
-          kpiEventType,
+          events: events.map((i: EventEdges) => i.event),
           loadMore: (newCursor: string) =>
             fetchMore({
               variables: {
@@ -107,7 +91,3 @@ const EventsComponentQuery = pure<EventsProps>(
     </Query>
   )
 );
-
-const mapStateToProps = (state: State) => eventsLimitSelector(state);
-
-export const EventsQuery = connect(mapStateToProps)(EventsComponentQuery);

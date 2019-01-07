@@ -15,7 +15,6 @@ import { eventsQuery } from '../../containers/events/index.gql_query';
 import { mockGlobalState } from '../../mock';
 import { mockECSData } from '../../mock';
 import { createStore, State } from '../../store';
-import { DEFAULT_PAGE_COUNT } from '../../store/local/timeline/model';
 import { flyoutHeaderHeight } from '../flyout';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
@@ -30,6 +29,42 @@ describe('Timeline', () => {
   const sort: Sort = {
     columnId: 'timestamp',
     sortDirection: 'descending',
+  };
+
+  const indexPattern = {
+    fields: [
+      {
+        name: '@timestamp',
+        searchable: true,
+        type: 'date',
+        aggregatable: true,
+      },
+      {
+        name: '@version',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        name: 'agent.ephemeral_id',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        name: 'agent.hostname',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        name: 'agent.id',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+    ],
+    title: 'filebeat-*,auditbeat-*,packetbeat-*',
   };
 
   const mocks = [
@@ -59,7 +94,6 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
-                activePage={0}
                 columnHeaders={headers}
                 columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
@@ -68,18 +102,17 @@ describe('Timeline', () => {
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 onChangeItemsPerPage={noop}
-                onChangePage={noop}
                 onColumnSorted={noop}
                 onDataProviderRemoved={noop}
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
                 theme="dark"
+                indexPattern={indexPattern}
               />
             </MockedProvider>
           </DragDropContext>
@@ -96,7 +129,6 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
-                activePage={0}
                 columnHeaders={headers}
                 columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
@@ -105,18 +137,17 @@ describe('Timeline', () => {
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 onChangeItemsPerPage={noop}
-                onChangePage={noop}
                 onColumnSorted={noop}
                 onDataProviderRemoved={noop}
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={100}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
                 theme="dark"
+                indexPattern={indexPattern}
               />
             </MockedProvider>
           </DragDropContext>
@@ -133,7 +164,6 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
-                activePage={0}
                 columnHeaders={headers}
                 columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
@@ -142,18 +172,17 @@ describe('Timeline', () => {
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 onChangeItemsPerPage={noop}
-                onChangePage={noop}
                 onColumnSorted={noop}
                 onDataProviderRemoved={noop}
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
                 theme="dark"
+                indexPattern={indexPattern}
               />
             </MockedProvider>
           </DragDropContext>
@@ -170,7 +199,6 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
-                activePage={0}
                 columnHeaders={headers}
                 columnRenderers={columnRenderers}
                 dataProviders={[]}
@@ -179,18 +207,17 @@ describe('Timeline', () => {
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 onChangeItemsPerPage={noop}
-                onChangePage={noop}
                 onColumnSorted={noop}
                 onDataProviderRemoved={noop}
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
                 theme="dark"
+                indexPattern={indexPattern}
               />
             </MockedProvider>
           </DragDropContext>
@@ -212,7 +239,6 @@ describe('Timeline', () => {
               <MockedProvider mocks={mocks}>
                 <Timeline
                   id="foo"
-                  activePage={0}
                   columnHeaders={headers}
                   columnRenderers={columnRenderers}
                   dataProviders={mockDataProviders}
@@ -222,17 +248,16 @@ describe('Timeline', () => {
                   itemsPerPageOptions={[5, 10, 20]}
                   onColumnSorted={mockOnColumnSorted}
                   onChangeItemsPerPage={noop}
-                  onChangePage={noop}
                   onDataProviderRemoved={noop}
                   onFilterChange={noop}
                   onRangeSelected={noop}
                   onToggleDataProviderEnabled={noop}
-                  pageCount={DEFAULT_PAGE_COUNT}
                   range={'1 Day'}
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
                   theme="dark"
+                  indexPattern={indexPattern}
                 />
               </MockedProvider>
             </DragDropContext>
@@ -261,7 +286,6 @@ describe('Timeline', () => {
               <MockedProvider mocks={mocks}>
                 <Timeline
                   id="foo"
-                  activePage={0}
                   columnHeaders={headers}
                   columnRenderers={columnRenderers}
                   dataProviders={mockDataProviders}
@@ -270,18 +294,17 @@ describe('Timeline', () => {
                   itemsPerPage={5}
                   itemsPerPageOptions={[5, 10, 20]}
                   onChangeItemsPerPage={noop}
-                  onChangePage={noop}
                   onColumnSorted={noop}
                   onDataProviderRemoved={mockOnDataProviderRemoved}
                   onFilterChange={noop}
                   onRangeSelected={noop}
                   onToggleDataProviderEnabled={noop}
-                  pageCount={DEFAULT_PAGE_COUNT}
                   range={'1 Day'}
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
                   theme="dark"
+                  indexPattern={indexPattern}
                 />
               </MockedProvider>
             </DragDropContext>
@@ -324,7 +347,6 @@ describe('Timeline', () => {
               <MockedProvider mocks={mocks}>
                 <Timeline
                   id="foo"
-                  activePage={0}
                   columnHeaders={allColumnsHaveTextFilters}
                   columnRenderers={columnRenderers}
                   dataProviders={mockDataProviders}
@@ -333,18 +355,17 @@ describe('Timeline', () => {
                   itemsPerPage={5}
                   itemsPerPageOptions={[5, 10, 20]}
                   onChangeItemsPerPage={noop}
-                  onChangePage={noop}
                   onColumnSorted={noop}
                   onDataProviderRemoved={noop}
                   onFilterChange={mockOnFilterChange}
                   onRangeSelected={noop}
                   onToggleDataProviderEnabled={noop}
-                  pageCount={DEFAULT_PAGE_COUNT}
                   range={'1 Day'}
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
                   theme="dark"
+                  indexPattern={indexPattern}
                 />
               </MockedProvider>
             </DragDropContext>
@@ -379,7 +400,6 @@ describe('Timeline', () => {
               <MockedProvider mocks={mocks}>
                 <Timeline
                   id="foo"
-                  activePage={0}
                   columnHeaders={allColumnsHaveTextFilters}
                   columnRenderers={columnRenderers}
                   dataProviders={mockDataProviders}
@@ -388,18 +408,17 @@ describe('Timeline', () => {
                   itemsPerPage={5}
                   itemsPerPageOptions={[5, 10, 20]}
                   onChangeItemsPerPage={noop}
-                  onChangePage={noop}
                   onColumnSorted={noop}
                   onDataProviderRemoved={noop}
                   onFilterChange={noop}
                   onRangeSelected={noop}
                   onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                  pageCount={DEFAULT_PAGE_COUNT}
                   range={'1 Day'}
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
                   theme="dark"
+                  indexPattern={indexPattern}
                 />
               </MockedProvider>
             </DragDropContext>
@@ -437,7 +456,6 @@ describe('Timeline', () => {
               <MockedProvider mocks={mocks}>
                 <Timeline
                   id="foo"
-                  activePage={0}
                   columnHeaders={headers}
                   columnRenderers={columnRenderers}
                   dataProviders={mockDataProviders}
@@ -446,18 +464,17 @@ describe('Timeline', () => {
                   itemsPerPage={5}
                   itemsPerPageOptions={[5, 10, 20]}
                   onChangeItemsPerPage={onChangeItemsPerPage}
-                  onChangePage={noop}
                   onColumnSorted={noop}
                   onDataProviderRemoved={noop}
                   onFilterChange={noop}
                   onRangeSelected={noop}
                   onToggleDataProviderEnabled={noop}
-                  pageCount={DEFAULT_PAGE_COUNT}
                   range={'1 Day'}
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
                   theme="dark"
+                  indexPattern={indexPattern}
                 />
               </MockedProvider>
             </DragDropContext>
@@ -489,7 +506,6 @@ describe('Timeline', () => {
               <MockedProvider mocks={mocks}>
                 <Timeline
                   id="foo"
-                  activePage={0}
                   columnHeaders={headers}
                   columnRenderers={columnRenderers}
                   dataProviders={mockDataProviders}
@@ -498,18 +514,17 @@ describe('Timeline', () => {
                   itemsPerPage={5}
                   itemsPerPageOptions={[5, 10, 20]}
                   onChangeItemsPerPage={noop}
-                  onChangePage={onChangePage}
                   onColumnSorted={noop}
                   onDataProviderRemoved={noop}
                   onFilterChange={noop}
                   onRangeSelected={noop}
                   onToggleDataProviderEnabled={noop}
-                  pageCount={DEFAULT_PAGE_COUNT}
                   range={'1 Day'}
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
                   theme="dark"
+                  indexPattern={indexPattern}
                 />
               </MockedProvider>
             </DragDropContext>

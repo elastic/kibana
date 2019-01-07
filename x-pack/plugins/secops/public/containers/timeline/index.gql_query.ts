@@ -6,22 +6,16 @@
 
 import gql from 'graphql-tag';
 
-export const eventsQuery = gql`
-  query GetEventsQuery(
+export const timelineQuery = gql`
+  query GetTimelineQuery(
     $sourceId: ID!
-    $timerange: TimerangeInput!
     $pagination: PaginationInput!
     $sortField: SortField!
     $filterQuery: String
   ) {
     source(id: $sourceId) {
       id
-      Events(
-        timerange: $timerange
-        pagination: $pagination
-        sortField: $sortField
-        filterQuery: $filterQuery
-      ) {
+      Events(pagination: $pagination, sortField: $sortField, filterQuery: $filterQuery) {
         totalCount
         pageInfo {
           endCursor {
@@ -69,10 +63,6 @@ export const eventsQuery = gql`
               }
             }
           }
-        }
-        kpiEventType {
-          value
-          count
         }
       }
     }

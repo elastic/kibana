@@ -57,7 +57,7 @@ export interface Source {
   /** The status of the source */
   status: SourceStatus;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events?: EventsData | null;
+  Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -297,15 +297,6 @@ export interface SayMyName {
 // InputTypes
 // ====================================================
 
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: number;
-  /** The beginning of the timerange */
-  from: number;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -321,6 +312,15 @@ export interface SortField {
   direction?: Direction | null;
 }
 
+export interface TimerangeInput {
+  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
+  interval: string;
+  /** The end of the timerange */
+  to: number;
+  /** The beginning of the timerange */
+  from: number;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -330,11 +330,11 @@ export interface SourceQueryArgs {
   id: string;
 }
 export interface EventsSourceArgs {
-  timerange: TimerangeInput;
-
   pagination: PaginationInput;
 
   sortField: SortField;
+
+  timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
 }
@@ -414,7 +414,7 @@ export namespace SourceResolvers {
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, Context>;
     /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-    Events?: EventsResolver<EventsData | null, TypeParent, Context>;
+    Events?: EventsResolver<EventsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
     /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -438,17 +438,18 @@ export namespace SourceResolvers {
     Parent,
     Context
   >;
-  export type EventsResolver<
-    R = EventsData | null,
-    Parent = Source,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context, EventsArgs>;
+  export type EventsResolver<R = EventsData, Parent = Source, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    EventsArgs
+  >;
   export interface EventsArgs {
-    timerange: TimerangeInput;
-
     pagination: PaginationInput;
 
     sortField: SortField;
+
+    timerange?: TimerangeInput | null;
 
     filterQuery?: string | null;
   }

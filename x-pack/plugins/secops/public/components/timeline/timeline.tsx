@@ -7,9 +7,10 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { ECS } from './ecs';
 
-import { EventsQuery } from '../../containers/events';
+import { TimelineQuery } from '../../containers/timeline';
 import { Theme } from '../../store/local/app/model';
 import { AutoSizer } from '../auto_sizer';
 import { Body } from './body';
@@ -21,7 +22,6 @@ import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
   OnChangeItemsPerPage,
-  OnChangePage,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnFilterChange,
@@ -30,10 +30,9 @@ import {
 } from './events';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header/timeline_header';
-import { calculateBodyHeight, combineQueries, getIsLoading } from './helpers';
+import { calculateBodyHeight, combineQueries } from './helpers';
 
 interface Props {
-  activePage: number;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   dataProviders: DataProvider[];
@@ -43,26 +42,26 @@ interface Props {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
-  onChangePage: OnChangePage;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  pageCount: number;
   range: Range;
   rowRenderers: RowRenderer[];
   show: boolean;
   sort: Sort;
   theme: Theme;
+  indexPattern: StaticIndexPattern;
 }
 
-const WrappedByAutoSizer = styled.div``; // required by AutoSizer
+const WrappedByAutoSizer = styled.div`
+  width: auto;
+`; // required by AutoSizer
 
 /** The parent Timeline component */
 export const Timeline = pure<Props>(
   ({
-    activePage,
     columnHeaders,
     columnRenderers,
     dataProviders,
@@ -72,21 +71,19 @@ export const Timeline = pure<Props>(
     itemsPerPage,
     itemsPerPageOptions,
     onChangeItemsPerPage,
-    onChangePage,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
     onRangeSelected,
     onToggleDataProviderEnabled,
-    pageCount,
     range,
     rowRenderers,
     show,
     sort,
     theme,
+    indexPattern,
   }) => {
-    const combinedQueries = combineQueries(dataProviders);
-
+    const combinedQueries = combineQueries(dataProviders, indexPattern);
     return (
       <>
         <AutoSizer detectAnyWindowResize={true} content>
@@ -111,19 +108,18 @@ export const Timeline = pure<Props>(
 
               <div data-test-subj="timeline">
                 {combinedQueries != null ? (
-                  <EventsQuery
+                  <TimelineQuery
                     sourceId="default"
-                    startDate={combinedQueries.queryProps.startDate}
-                    endDate={combinedQueries.queryProps.endDate}
-                    filterQuery={combinedQueries.queryProps.filterQuery}
+                    limit={itemsPerPage}
+                    filterQuery={combinedQueries.filterQuery}
                   >
-                    {(resData: {}) => (
+                    {({ events, loading, totalCount, pageInfo, loadMore }) => (
                       <>
                         <Body
                           id={id}
                           columnHeaders={columnHeaders}
                           columnRenderers={columnRenderers}
-                          data={getOr([], combinedQueries.resParm, resData) as ECS[]}
+                          data={events as ECS[]}
                           height={calculateBodyHeight({
                             flyoutHeight,
                             flyoutHeaderHeight,
@@ -134,20 +130,20 @@ export const Timeline = pure<Props>(
                           theme={theme}
                         />
                         <Footer
-                          activePage={activePage}
                           dataProviders={dataProviders}
-                          serverSideEventCount={Infinity} // TODO: replace sentinel value with value from response
+                          serverSideEventCount={totalCount}
                           height={footerHeight}
-                          isLoading={getIsLoading(resData)}
+                          isLoading={loading}
                           itemsPerPage={itemsPerPage}
                           itemsPerPageOptions={itemsPerPageOptions}
-                          pageCount={pageCount}
                           onChangeItemsPerPage={onChangeItemsPerPage}
-                          onChangePage={onChangePage}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          onLoadMore={loadMore}
                         />
                       </>
                     )}
-                  </EventsQuery>
+                  </TimelineQuery>
                 ) : null}
               </div>
             </>

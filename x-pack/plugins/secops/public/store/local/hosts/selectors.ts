@@ -7,19 +7,21 @@
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
-import { BasicQuery, InMemoryPaginationQuery } from './model';
+import { HostsModel } from './model';
 
-const hostsQueryLimit = (state: State): BasicQuery => state.local.hosts.query.hosts;
-
-const uncommonProcessesQueryLimit = (state: State): InMemoryPaginationQuery =>
-  state.local.hosts.query.uncommonProcesses;
+const hostsQuery = (state: State): HostsModel => state.local.hosts;
 
 export const hostsLimitSelector = createSelector(
-  hostsQueryLimit,
-  limit => limit
+  hostsQuery,
+  hosts => hosts.query.hosts
+);
+
+export const eventsLimitSelector = createSelector(
+  hostsQuery,
+  hosts => hosts.query.events
 );
 
 export const uncommonProcessesLimitSelector = createSelector(
-  uncommonProcessesQueryLimit,
-  objLimit => objLimit
+  hostsQuery,
+  hosts => hosts.query.uncommonProcesses
 );

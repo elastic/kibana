@@ -34,7 +34,7 @@ export const createEventsResolvers = (
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
       const options: EventsRequestOptions = {
         sourceConfiguration: source.configuration,
-        timerange: args.timerange,
+        timerange: args.timerange!,
         pagination: args.pagination,
         sortField: args.sortField,
         filterQuery: parseFilterQuery(args.filterQuery || ''),

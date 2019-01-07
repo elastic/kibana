@@ -38,7 +38,7 @@ export const Hosts = pure(() => (
         <GlobalTime>
           {({ poll, to, from, setQuery }) => (
             <>
-              <EventsQuery sourceId="default" startDate={from} endDate={to}>
+              <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
                 {({ kpiEventType, loading }) => (
                   <TypesBar
                     loading={loading}
@@ -77,6 +77,7 @@ export const Hosts = pure(() => (
                     refetch={refetch}
                     setQuery={setQuery}
                     loading={loading}
+                    startDate={from}
                     data={uncommonProcesses}
                     totalCount={totalCount}
                     nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
@@ -85,8 +86,8 @@ export const Hosts = pure(() => (
                   />
                 )}
               </UncommonProcessesQuery>
-              <EventsQuery sourceId="default" startDate={from} endDate={to}>
-                {({ events, loading, id, refetch }) => (
+              <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
                   <EventsTableManage
                     id={id}
                     refetch={refetch}
@@ -94,7 +95,10 @@ export const Hosts = pure(() => (
                     data={events!}
                     loading={loading}
                     startDate={from}
-                    endDate={to}
+                    totalCount={totalCount}
+                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                    loadMore={loadMore}
                   />
                 )}
               </EventsQuery>

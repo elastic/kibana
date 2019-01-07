@@ -7,6 +7,7 @@
 export {
   dataProvidersSelector,
   hostsLimitSelector,
+  eventsLimitSelector,
   uncommonProcessesLimitSelector,
   timelineByIdSelector,
   globalTimeRangeSelector,

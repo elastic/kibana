@@ -55,12 +55,8 @@ export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEve
     name,
     componentResultParam: 'events',
     componentQuery: EventsQuery,
-    componentQueryProps: {
-      sourceId: 'default',
-      startDate: 1521830963132,
-      endDate: 1521862432253,
-      filterQuery: '',
-    },
+    queryMatch: 'host.name: "testHostName"',
+    queryDate: '@timestamp >= 1521830963132 and @timestamp <= 1521862432253',
     negated: false,
     render: () => (
       <div data-test-subj="mockDataProvider">

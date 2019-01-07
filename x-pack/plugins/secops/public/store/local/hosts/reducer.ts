@@ -7,6 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
+  updateEventsLimit,
   updateHostsLimit,
   updateUncommonProcessesLimit,
   updateUncommonProcessesUpperLimit,
@@ -19,6 +20,9 @@ export const initialHostsState: HostsState = {
   query: {
     hosts: {
       limit: 2,
+    },
+    events: {
+      limit: 10,
     },
     uncommonProcesses: {
       limit: 10,
@@ -33,6 +37,15 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
     query: {
       ...state.query,
       hosts: {
+        limit,
+      },
+    },
+  }))
+  .case(updateEventsLimit, (state, { limit }) => ({
+    ...state,
+    query: {
+      ...state.query,
+      events: {
         limit,
       },
     },

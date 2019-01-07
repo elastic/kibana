@@ -3,26 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { EuiTablePagination, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { DataProvider } from '../data_providers/data_provider';
-import { OnChangeItemsPerPage, OnChangePage } from '../events';
+import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 
 interface FooterProps {
-  activePage: number;
   dataProviders: DataProvider[];
   height: number;
   isLoading: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
-  pageCount: number;
   serverSideEventCount: number;
-  onChangePage: OnChangePage;
+  nextCursor: string;
+  hasNextPage: boolean;
+  onLoadMore: OnLoadMore;
 }
 
 /** The height of the footer, exported for use in height calculations */
@@ -47,7 +47,9 @@ export const LoadingSpinner = pure<{ show: boolean }>(({ show }) => (
 export const ServerSideEventCount = pure<{ serverSideEventCount: number }>(
   ({ serverSideEventCount }) => (
     <EuiToolTip content="The total count of events matching the search criteria">
-      <span>{serverSideEventCount !== Infinity ? `${serverSideEventCount}` : '\u221e'} Events</span>
+      <h5>
+        Events <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge>
+      </h5>
     </EuiToolTip>
   )
 );
@@ -55,13 +57,10 @@ export const ServerSideEventCount = pure<{ serverSideEventCount: number }>(
 const SpinnerAndEventCount = styled.div`
   display: flex;
   flex-direction: row;
-  height: 300px;
   align-items: center;
 `;
 
 const FooterContainer = styled.div<{ height: number }>`
-  display: flex;
-  flex-direction: column;
   height: ${({ height }) => height}px;
   max-height: ${({ height }) => height}px;
   user-select: none;
@@ -70,30 +69,18 @@ const FooterContainer = styled.div<{ height: number }>`
 /** Renders a loading indicator and paging controls */
 export const Footer = pure<FooterProps>(
   ({
-    activePage,
     dataProviders,
     height,
     isLoading,
     itemsPerPage,
     itemsPerPageOptions,
     onChangeItemsPerPage,
-    pageCount,
     serverSideEventCount = Infinity, // TODO: pass the real server side page count
-    onChangePage,
+    onLoadMore,
   }) => (
     <>
       {dataProviders.length !== 0 && (
         <FooterContainer height={height} data-test-subj="timeline-footer">
-          <div data-test-subj="table-pagination">
-            <EuiTablePagination
-              activePage={activePage}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              pageCount={pageCount}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              onChangePage={onChangePage}
-            />
-          </div>
           <SpinnerAndEventCount data-test-subj="spinner-and-event-count">
             <LoadingSpinner show={isLoading} />
             <ServerSideEventCount serverSideEventCount={serverSideEventCount} />

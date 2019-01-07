@@ -22,8 +22,8 @@ export interface EventsRequestOptions {
   sourceConfiguration: SourceConfiguration;
   pagination: PaginationInput;
   sortField: SortField;
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | undefined;
+  timerange?: TimerangeInput;
+  filterQuery?: ESQuery;
   fields: string[];
 }
 
@@ -36,5 +36,14 @@ export interface EventHit extends SearchHit {
   aggregations: {
     // tslint:disable-next-line:no-any
     [agg: string]: any;
+  };
+}
+
+export interface TimerangeFilter {
+  range: {
+    [timestamp: string]: {
+      gte: number;
+      lte: number;
+    };
   };
 }

@@ -5,13 +5,17 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo } from 'lodash/fp';
+import { defaultTo, noop } from 'lodash/fp';
+import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+
 import { HostItem, HostsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsLimitSelector, State } from '../../../../store';
+import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Provider } from '../../../timeline/data_providers/provider';
 
 interface OwnProps {
   data: HostsEdges[];
@@ -98,10 +102,42 @@ export const HostsTable = connect(
 
 const getHostsColumns = () => [
   {
-    name: 'Host',
+    name: 'Name',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.name)}</>,
+    render: ({ host }: { host: HostItem }) => {
+      const hostName = defaultTo('--', host.name);
+      return (
+        <>
+          <DraggableWrapper
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id: `${host._id}`,
+              name: hostName,
+              negated: false,
+              queryMatch: `host.name: ${hostName}`,
+              queryDate: `@timestamp >= ${
+                moment(host.firstSeen!).valueOf
+              } and @timestamp <= ${moment().valueOf()}`,
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider
+                    dataProvider={dataProvider}
+                    onDataProviderRemoved={noop}
+                    onToggleDataProviderEnabled={noop}
+                  />
+                </DragEffects>
+              ) : (
+                hostName
+              )
+            }
+          />
+        </>
+      );
+    },
   },
   {
     name: 'First seen',
