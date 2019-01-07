@@ -123,11 +123,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async clickRolesSection() {
-      await PageObjects.settings.clickLinkText('Roles');
+      await testSubjects.click('roles');
     }
 
     async clickUsersSection() {
-      await PageObjects.settings.clickLinkText('Users');
+      await testSubjects.click('users');
     }
 
     async clickCreateNewUser() {
@@ -196,12 +196,12 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async clickElasticsearchUsers() {
       await this.navigateTo();
-      await find.clickByDisplayedLinkText('Users');
+      await this.clickUsersSection();
     }
 
     async clickElasticsearchRoles() {
       await this.navigateTo();
-      await find.clickByDisplayedLinkText('Roles');
+      await this.clickRolesSection();
     }
 
 

@@ -37,7 +37,7 @@ export function buildNodeParams(fieldName, params) {
 
 export function toElasticsearchQuery(node, indexPattern) {
   const [ fieldNameArg, ...args ] = node.arguments;
-  const fields = getFields(fieldNameArg, indexPattern);
+  const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);
   const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
 

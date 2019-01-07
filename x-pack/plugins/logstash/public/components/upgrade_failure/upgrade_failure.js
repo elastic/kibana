@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPage, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 import { UpgradeFailureTitle } from './upgrade_failure_title';
 import { UpgradeFailureActions } from './upgrade_failure_actions';
 import { UPGRADE_FAILURE } from './constants';
@@ -24,7 +24,7 @@ export function UpgradeFailure({ isNewPipeline, isManualUpgrade, onClose, onRetr
     : UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.NOT_MANUAL_UPGRADE;
 
   return (
-    <EuiPage data-test-subj="pipelineEdit upgradeFailure" style={{ minHeight: '100vh' }}>
+    <div data-test-subj="pipelineEdit upgradeFailure" style={{ minHeight: '100vh' }}>
       <EuiPageContent>
         <EuiEmptyPrompt
           actions={
@@ -38,6 +38,6 @@ export function UpgradeFailure({ isNewPipeline, isManualUpgrade, onClose, onRetr
           body={<p style={{ textAlign: 'left' }}>{messageText}</p>}
         />
       </EuiPageContent>
-    </EuiPage>
+    </div>
   );
 }
