@@ -25,25 +25,24 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetMonitorChartsQuery } from './get_monitor_charts';
 
 interface MonitorChartsProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   monitorId: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
 }
+
+type Props = MonitorChartsProps & UptimeCommonProps;
 
 export const MonitorCharts = ({
   dateRangeStart,
   dateRangeEnd,
   monitorId,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   autorefreshInterval,
-}: MonitorChartsProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={createGetMonitorChartsQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >

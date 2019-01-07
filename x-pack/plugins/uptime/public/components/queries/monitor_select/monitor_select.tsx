@@ -10,27 +10,26 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { Monitor } from '../../../../common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetLatestMonitorsQuery } from './get_latest_monitors';
 
 interface MonitorSelectProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   valueOfSelectedMonitor?: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
   onChange: (path: string, state: object) => void;
 }
+
+type Props = MonitorSelectProps & UptimeCommonProps;
 
 export const MonitorSelect = ({
   dateRangeStart,
   dateRangeEnd,
   valueOfSelectedMonitor,
   autorefreshInterval,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   onChange,
-}: MonitorSelectProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={createGetLatestMonitorsQuery}
     variables={{ dateRangeStart, dateRangeEnd }}
   >
