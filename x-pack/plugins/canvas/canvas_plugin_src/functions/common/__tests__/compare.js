@@ -28,6 +28,11 @@ describe('compare', () => {
             `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
           );
         });
+        expect(() => fn(1, { op: 'boo' })).to.throwException(e => {
+          expect(e.message).to.be(
+            `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
+          );
+        });
       });
     });
 
