@@ -108,7 +108,7 @@ class ListingUI extends PureComponent {
                 ...sorting,
                 sort: {
                   ...sorting.sort,
-                  field: 'logstash.name'
+                  field: 'name'
                 }
               }}
               pagination={pagination}
