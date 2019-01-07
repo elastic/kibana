@@ -38,38 +38,25 @@ export class LogTextScaleControls extends React.PureComponent<LogTextScaleContro
         <EuiRadioGroup
           options={availableTextScales.map((availableTextScale: TextScale) => ({
             id: availableTextScale.toString(),
-            label: getLabelOfTextScale(availableTextScale),
+            label: (
+              <FormattedMessage
+                id="xpack.infra.logs.customizeLogs.textSizeRadioGroup"
+                defaultMessage={`{textScale, select,
+                  small {Small}
+                  medium {Medium}
+                  large {Large}
+                  other {{textScale}}
+                }`}
+                values={{
+                  textScale: availableTextScale,
+                }}
+              />
+            ),
           }))}
           idSelected={textScale}
           onChange={this.setTextScale}
         />
       </EuiFormRow>
     );
-  }
-}
-
-function getLabelOfTextScale(textScale: TextScale) {
-  switch (textScale) {
-    case 'small':
-      return (
-        <FormattedMessage
-          id="xpack.infra.logs.customizeLogs.testSizeSmall"
-          defaultMessage="Small"
-        />
-      );
-    case 'medium':
-      return (
-        <FormattedMessage
-          id="xpack.infra.logs.customizeLogs.testSizeMedium"
-          defaultMessage="Medium"
-        />
-      );
-    case 'large':
-      return (
-        <FormattedMessage
-          id="xpack.infra.logs.customizeLogs.testSizeLarge"
-          defaultMessage="Large"
-        />
-      );
   }
 }
