@@ -14,6 +14,7 @@ type WorkFn = () => Promise<void>;
 
 interface Initable {
   init(): void;
+  isInitialized(): boolean;
 }
 
 interface Opts {
@@ -59,8 +60,11 @@ export class TaskPoller {
       return;
     }
 
+    if (!this.store.isInitialized) {
+      await this.store.init();
+    }
+
     this.isStarted = true;
-    await this.store.init();
 
     const poll = async () => {
       await this.attemptWork();
