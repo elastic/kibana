@@ -119,6 +119,7 @@ buildDistributables({
   createArchives: !Boolean(flags['skip-archives']),
   createRpmPackage: isOsPackageDesired('rpm'),
   createDebPackage: isOsPackageDesired('deb'),
+  createDockerPackage: isOsPackageDesired('docker'),
   targetAllPlatforms: Boolean(flags['all-platforms']),
 }).catch(error => {
   if (!isErrorLogged(error)) {
