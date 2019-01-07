@@ -42,11 +42,6 @@ export interface ExplanationResult {
 
 /**
  * Encapsulates logic for determining which privileges are assigned at a base and feature level, for both global and space-specific privileges.
- *
- * Terminology:
- *   - Global: denotes privileges that are assigned to the "*" resource, which cascades to all current and future spaces.
- *   - Base Privilege: The privilege assigned either globally or at the space level, which cascades to all features.
- *   - Feature Privilege: The privilege assigned either globally or at the space level for a specific feature.
  */
 export class EffectivePrivileges {
   // reference to the global privilege definition

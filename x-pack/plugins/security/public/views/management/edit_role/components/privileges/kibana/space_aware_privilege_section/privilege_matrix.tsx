@@ -70,9 +70,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiButton onClick={this.showModal} fill>
-          Show privilege matrix
-        </EuiButton>
+        <EuiButton onClick={this.showModal}>Show privilege matrix</EuiButton>
         {modal}
       </Fragment>
     );
