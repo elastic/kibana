@@ -46,7 +46,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.None);
   });
 
   test('requires no action if mappings differ only by dynamic properties', () => {
@@ -69,7 +69,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.None);
   });
 
   test('requires no action if mappings differ only by equivalent coerced properties', () => {
@@ -92,7 +92,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.None);
   });
 
   test('requires no action if a root property has been disabled', () => {
@@ -114,7 +114,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.None);
   });
 
   test('requires migration if a sub-property differs', () => {
@@ -130,12 +130,19 @@ describe('determineMigrationAction', () => {
       doc: {
         dynamic: 'strict',
         properties: {
-          world: { type: 'keword' },
+          world: { type: 'keyword' },
         },
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
+    const { action, changedProp } = determineMigrationAction(actual, expected);
+
+    expect(action).toEqual(MigrationAction.Migrate);
+    expect(changedProp).toEqual({
+      propName: 'properties.world.type',
+      actual: 'text',
+      expected: 'keyword',
+    });
   });
 
   test('requires migration if a type changes', () => {
@@ -156,7 +163,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.Migrate);
   });
 
   test('requires migration if doc dynamic value differs', () => {
@@ -177,7 +184,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.Migrate);
   });
 
   test('requires patching if we added a root property', () => {
@@ -196,7 +203,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Patch);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.Patch);
   });
 
   test('requires patching if we added a sub-property', () => {
@@ -226,7 +233,7 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Patch);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.Patch);
   });
 
   test('requires migration if a sub property has been removed', () => {
@@ -256,6 +263,6 @@ describe('determineMigrationAction', () => {
       },
     };
 
-    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
+    expect(determineMigrationAction(actual, expected).action).toEqual(MigrationAction.Migrate);
   });
 });

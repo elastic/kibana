@@ -26,6 +26,17 @@ export enum MigrationAction {
   Migrate = 2,
 }
 
+export interface ChangedProp {
+  propName: string;
+  expected: any;
+  actual: any;
+}
+
+export interface DiffResult {
+  action: MigrationAction;
+  changedProp?: ChangedProp;
+}
+
 /**
  * Provides logic that diffs the actual index mappings with the expected
  * mappings. It ignores differences in dynamic mappings.
@@ -34,12 +45,16 @@ export enum MigrationAction {
  * differ in a way that requires migration, the result is 'migrate', and if
  * the mappings are equivalent, the result is 'none'.
  */
-export function determineMigrationAction(
-  actual: IndexMapping,
-  expected: IndexMapping
-): MigrationAction {
+export function determineMigrationAction(actual: IndexMapping, expected: IndexMapping): DiffResult {
   if (actual.doc.dynamic !== expected.doc.dynamic) {
-    return MigrationAction.Migrate;
+    return {
+      action: MigrationAction.Migrate,
+      changedProp: {
+        propName: 'dynamic',
+        actual: actual.doc.dynamic,
+        expected: expected.doc.dynamic,
+      },
+    };
   }
 
   const actualProps = actual.doc.properties;
@@ -47,28 +62,33 @@ export function determineMigrationAction(
 
   // There's a special case for root-level properties: if a root property is in actual,
   // but not in expected, it is treated like a disabled plugin and requires no action.
-  return Object.keys(expectedProps).reduce((acc: number, key: string) => {
-    return Math.max(acc, diffSubProperty(actualProps[key], expectedProps[key]));
-  }, MigrationAction.None);
+  const diffableProps = Object.keys(expectedProps);
+  return diffSubProperty(
+    _.pick(actualProps, diffableProps),
+    _.pick(expectedProps, diffableProps),
+    'properties'
+  );
 }
 
-function diffSubProperty(actual: any, expected: any): MigrationAction {
+function diffSubProperty(actual: any, expected: any, propName: string): DiffResult {
+  const changedProp = { propName, expected, actual };
+
   // We've added a sub-property
   if (actual === undefined && expected !== undefined) {
-    return MigrationAction.Patch;
+    return { action: MigrationAction.Patch, changedProp };
   }
 
   // We've removed a sub property
   if (actual !== undefined && expected === undefined) {
-    return MigrationAction.Migrate;
+    return { action: MigrationAction.Migrate, changedProp };
   }
 
   // If a property has changed to/from dynamic, we need to migrate,
   // otherwise, we ignore dynamic properties, as they can differ
   if (isDynamic(actual) || isDynamic(expected)) {
     return isDynamic(actual) !== isDynamic(expected)
-      ? MigrationAction.Migrate
-      : MigrationAction.None;
+      ? { action: MigrationAction.Migrate, changedProp }
+      : { action: MigrationAction.None };
   }
 
   // We have a leaf property, so we do a comparison. A change (e.g. 'text' -> 'keyword')
@@ -78,16 +98,23 @@ function diffSubProperty(actual: any, expected: any): MigrationAction {
     // to string (such as dynamic: true and dynamic: 'true'), so we report a mapping
     // equivalency if the string comparison checks out. This does mean that {} === '[object Object]'
     // by this logic, but that is an edge case which should not occur in mapping definitions.
-    return `${actual}` === `${expected}` ? MigrationAction.None : MigrationAction.Migrate;
+    return `${actual}` === `${expected}`
+      ? { action: MigrationAction.None }
+      : { action: MigrationAction.Migrate, changedProp };
   }
 
   // Recursively compare the sub properties
   const keys = _.uniq(Object.keys(actual).concat(Object.keys(expected)));
-  return keys.reduce((acc: number, key: string) => {
-    return acc === MigrationAction.Migrate
-      ? acc
-      : Math.max(acc, diffSubProperty(actual[key], expected[key]));
-  }, MigrationAction.None);
+  return keys.reduce(
+    (acc: DiffResult, key: string) => {
+      if (acc.action === MigrationAction.Migrate) {
+        return acc;
+      }
+      const result = diffSubProperty(actual[key], expected[key], `${propName}.${key}`);
+      return result.action > acc.action ? result : acc;
+    },
+    { action: MigrationAction.None }
+  );
 }
 
 function isDynamic(prop: any) {

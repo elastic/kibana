@@ -78,7 +78,7 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiredAction(context: Context): Promise<MigrationAction> {
-  const { callCluster, alias, documentMigrator, dest } = context;
+  const { callCluster, alias, documentMigrator, dest, log } = context;
 
   const hasMigrations = await Index.migrationsUpToDate(
     callCluster,
@@ -96,7 +96,14 @@ async function requiredAction(context: Context): Promise<MigrationAction> {
     return MigrationAction.Migrate;
   }
 
-  return determineMigrationAction(refreshedSource.mappings, dest.mappings);
+  const { action, changedProp } = determineMigrationAction(refreshedSource.mappings, dest.mappings);
+
+  if (changedProp && action !== MigrationAction.None) {
+    const { propName, actual, expected } = changedProp;
+    log.info(`Mapping "${propName}" changed from "${actual}" to "${expected}"`);
+  }
+
+  return action;
 }
 
 /**
