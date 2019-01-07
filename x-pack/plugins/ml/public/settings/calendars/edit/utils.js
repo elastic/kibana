@@ -8,6 +8,7 @@
 
 import { ml } from '../../../services/ml_api_service';
 import { isJobIdValid } from '../../../../common/util/job_utils';
+import { i18n } from '@kbn/i18n';
 
 
 function getJobIds() {
@@ -17,7 +18,10 @@ function getJobIds() {
         resolve(resp.map((job) => job.id));
       })
       .catch((err) => {
-        const errorMessage = `Error fetching job summaries: ${err}`;
+        const errorMessage = i18n.translate('xpack.ml.calendarsEdit.errorWithFetchingJobSummariesErrorMessage', {
+          defaultMessage: 'Error fetching job summaries: {err}',
+          values: { err }
+        });
         console.log(errorMessage);
         reject(errorMessage);
       });
@@ -31,7 +35,10 @@ function getGroupIds() {
         resolve(resp.map((group) => group.id));
       })
       .catch((err) => {
-        const errorMessage = `Error loading groups: ${err}`;
+        const errorMessage = i18n.translate('xpack.ml.calendarsEdit.errorWithLoadingGroupsErrorMessage', {
+          defaultMessage: 'Error loading groups: {err}',
+          values: { err }
+        });
         console.log(errorMessage);
         reject(errorMessage);
       });
@@ -45,7 +52,10 @@ function getCalendars() {
         resolve(resp);
       })
       .catch((err) => {
-        const errorMessage = `Error loading calendars: ${err}`;
+        const errorMessage = i18n.translate('xpack.ml.calendarsEdit.errorWithLoadingCalendarsErrorMessage', {
+          defaultMessage: 'Error loading calendars: {err}',
+          values: { err }
+        });
         console.log(errorMessage);
         reject(errorMessage);
       });

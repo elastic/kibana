@@ -109,7 +109,10 @@ class AnnotationsTable extends Component {
   }
 
   componentDidMount() {
-    if (this.props.annotations === undefined) {
+    if (
+      this.props.annotations === undefined &&
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0
+    ) {
       this.getAnnotations();
     }
   }
@@ -118,6 +121,7 @@ class AnnotationsTable extends Component {
     if (
       this.props.annotations === undefined &&
       this.state.isLoading === false &&
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
       this.getAnnotations();
@@ -311,8 +315,9 @@ class AnnotationsTable extends Component {
     if (isNumberBadgeVisible) {
       columns.unshift({
         field: 'key',
-        name: '',
-        width: '50px',
+        name: 'Label',
+        sortable: true,
+        width: '60px',
         render: (key) => {
           return (
             <EuiBadge color="default">
@@ -367,7 +372,11 @@ class AnnotationsTable extends Component {
         pagination={{
           pageSizeOptions: [5, 10, 25]
         }}
-        sorting={true}
+        sorting={{
+          sort: {
+            field: 'timestamp', direction: 'asc'
+          }
+        }}
         rowProps={getRowProps}
       />
     );

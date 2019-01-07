@@ -35,6 +35,7 @@ module.directive('globalNavLink', chrome => {
       url: '=',
       kbnRoute: '=',
       icon: '=',
+      euiIconType: '=',
       label: '=',
     },
     template: globalNavLinkTemplate,

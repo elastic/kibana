@@ -31,6 +31,6 @@ export async function getAgentStatus({ setup }) {
   const resp = await client('search', params);
 
   return {
-    data_found: resp.hits.total >= 1
+    dataFound: resp.hits.total >= 1
   };
 }

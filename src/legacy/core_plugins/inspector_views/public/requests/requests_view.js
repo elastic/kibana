@@ -68,6 +68,7 @@ class RequestsViewComponent extends Component {
     return (
       <InspectorView useFlex={true}>
         <EuiEmptyPrompt
+          data-test-subj="inspectorNoRequestsMessage"
           title={<h2>No requests logged</h2>}
           body={
             <React.Fragment>

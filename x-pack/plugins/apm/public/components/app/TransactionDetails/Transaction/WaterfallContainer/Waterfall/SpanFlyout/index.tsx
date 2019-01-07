@@ -14,7 +14,6 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
-  // @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTabbedContent'"
   EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
@@ -120,10 +119,14 @@ export function SpanFlyout({
                     <EuiBasicTable
                       columns={[
                         {
+                          name: '',
                           field: 'key',
                           render: (key: string) => <TagName>{key}</TagName>
                         },
-                        { field: 'value' }
+                        {
+                          name: '',
+                          field: 'value'
+                        }
                       ]}
                       items={tags}
                     />
