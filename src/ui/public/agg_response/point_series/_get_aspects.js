@@ -41,7 +41,6 @@ export function getAspects(table, dimensions) {
         title: column.name,
         fieldFormatter: val => formatter.convert(val, 'text'),
         params: d.params,
-        //aggConfig: column.aggConfig,
       });
     });
   });

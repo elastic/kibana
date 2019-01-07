@@ -26,6 +26,7 @@ export function addToSiri(series, point, id, label) {
   }
 
   series.set(id, {
+    id: id.split('-').pop(),
     label: label == null ? id : label,
     count: 0,
     values: [point]

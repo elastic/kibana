@@ -23,17 +23,12 @@ import { buildRangeFilter } from '@kbn/es-query';
 import { timefilter } from 'ui/timefilter';
 
 export function onBrushEvent(event, $state) {
-  if (!event.data.xAxisField) {
-    return;
-  }
+  const isNumber = event.data.ordered;
+  const isDate = isNumber && event.data.ordered.date;
 
-  const isDate = event.data.xAxisField.type === 'date';
-  const isNumber = event.data.xAxisField.type === 'number';
-
-  if (isDate &&
-    event.data.xAxisField.name === event.data.indexPattern.timeFieldName) {
+  if (isDate) {
     setTimefilter();
-  } else if (isDate || isNumber) {
+  } else if (isNumber) {
     setRange();
   }
 

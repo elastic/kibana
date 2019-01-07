@@ -60,6 +60,7 @@ export function VislibLibDataProvider(Private) {
           } else {
             newData[key] = data[key].map(seri => {
               return {
+                id: seri.id,
                 label: seri.label,
                 values: seri.values.map(val => {
                   const newVal = _.clone(val);

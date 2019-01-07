@@ -52,9 +52,9 @@ export function AggResponsePointSeriesProvider(Private) {
           if (index === series.values.length - 1) {
             return;
           }
-          const interval = series.values[index + 1] - value;
+          const interval = series.values[index + 1].x - value.x;
           if (interval < chart.ordered.interval) {
-            chart.ordered.itnerval = interval;
+            chart.ordered.interval = interval;
           }
         });
       });
