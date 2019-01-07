@@ -28,20 +28,27 @@ export const Explorer = injectI18n(
 
     render() {
       const { intl, hasResults, jobs, loading } = this.props;
-      return (
-        <div>
-          {loading && (
-            <LoadingIndicator
-              label={intl.formatMessage({
-                id: 'xpack.ml.explorer.loadingLabel',
-                defaultMessage: 'Loading',
-              })}
-            />
-          )}
-          {jobs.length === 0 && loading === false && <ExplorerNoJobsFound />}
-          {jobs.length > 0 && loading === false && hasResults === false && <ExplorerNoResultsFound />}
-        </div>
-      );
+
+      if (loading === true) {
+        return (
+          <LoadingIndicator
+            label={intl.formatMessage({
+              id: 'xpack.ml.explorer.loadingLabel',
+              defaultMessage: 'Loading',
+            })}
+          />
+        );
+      }
+
+      if (jobs.length === 0) {
+        return <ExplorerNoJobsFound />;
+      }
+
+      if (jobs.length > 0 && hasResults === false) {
+        return <ExplorerNoResultsFound />;
+      }
+
+      return null;
     }
   }
 );
