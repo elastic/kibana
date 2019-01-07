@@ -79,14 +79,10 @@ describe('brushEvent', () => {
   describe('handles an event when the x-axis field is a date field', () => {
     describe('date field is index pattern timefield', () => {
       let dateEvent;
-      const dateField = {
-        name: 'time',
-        type: 'date'
-      };
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.xAxisField = dateField;
+        dateEvent.data.ordered = { date: true };
       });
 
       test('by ignoring the event when range spans zero time', () => {
@@ -112,14 +108,10 @@ describe('brushEvent', () => {
 
     describe('date field is not index pattern timefield', () => {
       let dateEvent;
-      const dateField = {
-        name: 'anotherTimeField',
-        type: 'date'
-      };
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.xAxisField = dateField;
+        dateEvent.data.ordered = { date: false };
       });
 
       test('creates a new range filter', () => {
@@ -167,14 +159,10 @@ describe('brushEvent', () => {
 
   describe('handles an event when the x-axis field is a number', () => {
     let numberEvent;
-    const numberField = {
-      name: 'numberField',
-      type: 'number'
-    };
 
     beforeEach(() => {
       numberEvent = _.cloneDeep(baseEvent);
-      numberEvent.data.xAxisField = numberField;
+      numberEvent.data.ordered = { date: false };
     });
 
     test('by ignoring the event when range does not span at least 2 values', () => {

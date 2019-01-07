@@ -234,7 +234,9 @@ export class EmbeddedVisualizeHandler {
         throw new Error(pipelineResponse.error);
       }
       visData = pipelineResponse.value.visData || pipelineResponse.value;
-      this.vis.params = pipelineResponse.value.visConfig.params;
+      if (pipelineResponse.value.visConfig) {
+        this.vis.params = pipelineResponse.value.visConfig.params;
+      }
     }
     return visualizationLoader
       .render(this.element, this.vis, visData, this.uiState, {

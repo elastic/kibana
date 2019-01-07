@@ -181,6 +181,30 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
 };
 
+export const buildVislibDimensions = (vis: any) => {
+  const schemas = getSchemas(vis);
+  const dimensions = {
+    x: schemas.segment ? schemas.segment[0] : null,
+    y: schemas.metric,
+    z: schemas.radius,
+    width: schemas.width,
+    series: schemas.group,
+    splitRow: schemas.split_row,
+    splitColumn: schemas.split_column,
+  };
+  if (schemas.segment) {
+    const xAgg = vis.aggs.getResponseAggs()[dimensions.x.accessor];
+    if (xAgg.type.name === 'date_histogram') {
+      dimensions.x.params.date = true;
+      dimensions.x.params.interval = xAgg.buckets.getInterval().asMilliseconds();
+      dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
+      dimensions.x.params.bounds = xAgg.buckets.getBounds();
+    }
+  }
+
+  return dimensions;
+};
+
 export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
@@ -215,24 +239,8 @@ export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) 
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
-    visConfig.dimensions = {
-      y: schemas.metric,
-      z: schemas.radius,
-      width: schemas.width,
-      series: schemas.group,
-      splitRow: schemas.split_row,
-      splitColumn: schemas.split_column,
-    };
-    if (schemas.segment) {
-      visConfig.dimensions.x = schemas.segment[0];
-      const xAgg = vis.aggs.getResponseAggs()[visConfig.dimensions.x.accessor];
-      if (xAgg.type.name === 'date_histogram') {
-        visConfig.dimensions.x.params.date = true;
-        visConfig.dimensions.x.params.interval = xAgg.buckets.getInterval().asMilliseconds();
-        visConfig.dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
-        visConfig.dimensions.x.params.bounds = xAgg.buckets.getBounds();
-      }
-    }
+    visConfig.dimensions = buildVislibDimensions(vis);
+
     pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
   } else {
     pipeline += `visualization type='${vis.type.name}'

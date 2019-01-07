@@ -33,6 +33,7 @@ export function getAspects(table, dimensions) {
   Object.keys(dimensions).forEach(name => {
     const dimension = Array.isArray(dimensions[name]) ? dimensions[name] : [dimensions[name]];
     dimension.forEach(d => {
+      if (!d) return;
       const column = table.columns[d.accessor];
       const formatter = getFieldFormat(d.format);
       if (!aspects[name]) aspects[name] = [];
