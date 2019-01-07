@@ -17,6 +17,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./uptime'));
   });
 }
