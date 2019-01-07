@@ -17,37 +17,37 @@ export const filebeatNginxRules = [
         constant: ' ',
       },
       {
-        field: 'nginx.access.remote_ip',
+        field: 'source.ip',
       },
       {
         constant: ' ',
       },
       {
-        field: 'nginx.access.user_name',
+        field: 'user.name',
       },
       {
         constant: ' "',
       },
       {
-        field: 'nginx.access.method',
+        field: 'http.request.method',
       },
       {
         constant: ' ',
       },
       {
-        field: 'nginx.access.url',
+        field: 'url.original',
       },
       {
         constant: ' HTTP/',
       },
       {
-        field: 'nginx.access.http_version',
+        field: 'http.version',
       },
       {
         constant: '" ',
       },
       {
-        field: 'nginx.access.response_code',
+        field: 'http.response.status_code',
       },
       {
         constant: ' ',

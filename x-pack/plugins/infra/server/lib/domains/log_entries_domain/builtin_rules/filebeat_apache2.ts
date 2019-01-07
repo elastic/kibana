@@ -17,37 +17,37 @@ export const filebeatApache2Rules = [
         constant: ' ',
       },
       {
-        field: 'apache2.access.remote_ip',
+        field: 'source.ip',
       },
       {
         constant: ' ',
       },
       {
-        field: 'apache2.access.user_name',
+        field: 'user.name',
       },
       {
         constant: ' "',
       },
       {
-        field: 'apache2.access.method',
+        field: 'http.request.method',
       },
       {
         constant: ' ',
       },
       {
-        field: 'apache2.access.url',
+        field: 'url.original',
       },
       {
         constant: ' HTTP/',
       },
       {
-        field: 'apache2.access.http_version',
+        field: 'http.version',
       },
       {
         constant: '" ',
       },
       {
-        field: 'apache2.access.response_code',
+        field: 'http.response.status_code',
       },
       {
         constant: ' ',
