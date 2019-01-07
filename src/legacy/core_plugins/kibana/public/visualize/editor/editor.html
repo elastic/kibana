@@ -36,14 +36,18 @@
           </a>
         </div>
 
-        <div ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar" class="fullWidth">
-          <query-bar
+        <div class="fullWidth">
+          <search-bar
             query="state.query"
+            on-query-submit="updateQueryAndFetch"
             app-name="'visualize'"
-            on-submit="updateQueryAndFetch"
-            disable-auto-focus="true"
             index-patterns="[indexPattern]"
-          ></query-bar>
+            filters="filters"
+            on-filters-updated="onFiltersUpdated"
+            show-query-bar="vis.type.requiresSearch && vis.type.options.showQueryBar"
+            show-filter-bar="vis.type.requiresSearch && vis.type.options.showFilterBar"
+            watch-depth="reference"
+          ></search-bar>
         </div>
       </div>
     </div>

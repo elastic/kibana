@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchBar } from 'ui/search_bar/components/search_bar';
+export { SearchBar } from './search_bar';

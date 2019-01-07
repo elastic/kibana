@@ -41,6 +41,8 @@ interface Props {
   store: Storage;
   filters: MetaFilter[];
   onFiltersUpdated: (filters: MetaFilter[]) => void;
+  showQueryBar: boolean;
+  showFilterBar: boolean;
 }
 
 interface State {
@@ -48,6 +50,11 @@ interface State {
 }
 
 export class SearchBar extends Component<Props, State> {
+  public static defaultProps = {
+    showQueryBar: true,
+    showFilterBar: true,
+  };
+
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -115,35 +122,43 @@ export class SearchBar extends Component<Props, State> {
 
     return (
       <div>
-        <QueryBar
-          query={this.props.query}
-          onSubmit={this.props.onQuerySubmit}
-          appName={this.props.appName}
-          indexPatterns={this.props.indexPatterns}
-          store={this.props.store}
-          prepend={filterTriggerButton}
-        />
+        {this.props.showQueryBar ? (
+          <QueryBar
+            query={this.props.query}
+            onSubmit={this.props.onQuerySubmit}
+            appName={this.props.appName}
+            indexPatterns={this.props.indexPatterns}
+            store={this.props.store}
+            prepend={filterTriggerButton}
+          />
+        ) : (
+          ''
+        )}
 
-        <div
-          id="GlobalFilterGroup"
-          ref={node => {
-            this.filterBarWrapperRef = node;
-          }}
-          className={classes}
-        >
+        {this.props.showFilterBar ? (
           <div
+            id="GlobalFilterGroup"
             ref={node => {
-              this.filterBarRef = node;
+              this.filterBarWrapperRef = node;
             }}
+            className={classes}
           >
-            <FilterBar
-              className="globalFilterGroup__filterBar"
-              filters={this.props.filters}
-              onFiltersUpdated={this.props.onFiltersUpdated}
-              indexPatterns={this.props.indexPatterns}
-            />
+            <div
+              ref={node => {
+                this.filterBarRef = node;
+              }}
+            >
+              <FilterBar
+                className="globalFilterGroup__filterBar"
+                filters={this.props.filters}
+                onFiltersUpdated={this.props.onFiltersUpdated}
+                indexPatterns={this.props.indexPatterns}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          ''
+        )}
       </div>
     );
   }
