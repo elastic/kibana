@@ -16,37 +16,8 @@
     <div class="results-container">
 
       <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
-        <span class="panel-title euiText"
-          i18n-id="xpack.ml.explorer.anomalyTimelineTitle"
-          i18n-default-message="Anomaly timeline"
-        ></span>
-        <div
-          class="ml-explorer-swimlane euiText"
-          ng-mouseenter="setSwimlaneSelectActive(true)"
-          ng-mouseleave="setSwimlaneSelectActive(false)"
-        >
-          <ml-explorer-swimlane swimlane-type="overall" />
-        </div>
-
         <div ng-if="viewBySwimlaneOptions.length > 0">
           <div class="ml-controls">
-            <label
-              for="selectViewBy"
-              class="kuiLabel"
-              i18n-id="xpack.ml.explorer.viewByLabel"
-              i18n-default-message="View by:"
-            ></label>
-            <div class="kuiButtonGroup" dropdown>
-              <button id="selectViewBy" type="button" class="form-control dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-                <span>{{swimlaneViewByFieldName}}</span> <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu" role="menu">
-                <li ng-repeat="swimlaneOption in viewBySwimlaneOptions">
-                  <a href="" ng-click="setSwimlaneViewBy(swimlaneOption)">{{swimlaneOption}}</a>
-                </li>
-              </ul>
-            </div>
-
             <ml-select-limit />
 
             <span

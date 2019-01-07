@@ -12,12 +12,20 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-import { EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 
 import { ExplorerNoJobsFound } from './components/explorer_no_jobs_found';
 import { ExplorerNoResultsFound } from './components/explorer_no_results_found';
+import { ExplorerSwimlane } from './explorer_swimlane';
 import { InfluencersList } from '../components/influencers_list';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+
+function mapSwimlaneOptionsToEuiOptions(options) {
+  return options.map(option => ({
+    value: option,
+    text: option,
+  }));
+}
 
 export const Explorer = injectI18n(
   class Explorer extends React.Component {
@@ -27,12 +35,28 @@ export const Explorer = injectI18n(
       jobs: PropTypes.array,
       loading: PropTypes.bool,
       noInfluencersConfigured: PropTypes.bool,
+      setSwimlaneSelectActive: PropTypes.func,
+      setSwimlaneViewBy: PropTypes.func,
+      swimlaneOverall: PropTypes.object,
+      swimlaneViewByFieldName: PropTypes.string,
+      viewBySwimlaneOptions: PropTypes.array,
     };
 
-    dummyMethod = () => {};
+    viewByChangeHandler = e => this.props.setSwimlaneViewBy(e.target.value);
 
     render() {
-      const { influencers, intl, hasResults, jobs, loading, noInfluencersConfigured } = this.props;
+      const {
+        influencers,
+        intl,
+        hasResults,
+        jobs,
+        loading,
+        noInfluencersConfigured,
+        setSwimlaneSelectActive,
+        swimlaneOverall,
+        swimlaneViewByFieldName,
+        viewBySwimlaneOptions,
+      } = this.props;
 
       if (loading === true) {
         return (
@@ -52,6 +76,9 @@ export const Explorer = injectI18n(
       if (jobs.length > 0 && hasResults === false) {
         return <ExplorerNoResultsFound />;
       }
+
+      const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
+      const mainColumnClasses = `column ${mainColumnWidthClassName}`;
 
       return (
         <div className="results-container">
@@ -80,6 +107,43 @@ export const Explorer = injectI18n(
               </span>
             </div>
           )}
+
+          <div className={mainColumnClasses}>
+            <span className="panel-title euiText">
+              <FormattedMessage
+                id="xpack.ml.explorer.anomalyTimelineTitle"
+                defaultMessage="Anomaly timeline"
+              />
+            </span>
+
+            <div
+              className="ml-explorer-swimlane euiText"
+              onMouseEnter={() => setSwimlaneSelectActive(true)}
+              onMouseLeave={() => setSwimlaneSelectActive(false)}
+            >
+              <ExplorerSwimlane {...swimlaneOverall} />
+            </div>
+
+            {viewBySwimlaneOptions.length > 0 && (
+              <EuiFlexGroup direction="row" gutterSize="large" responsive={true}>
+                <EuiFlexItem grow={0} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={intl.formatMessage({
+                      id: 'xpack.ml.explorer.viewByLabel',
+                      defaultMessage: 'View by:',
+                    })}
+                  >
+                    <EuiSelect
+                      id="selectViewBy"
+                      options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
+                      value={swimlaneViewByFieldName}
+                      onChange={this.viewByChangeHandler}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </div>
         </div>
       );
     }
