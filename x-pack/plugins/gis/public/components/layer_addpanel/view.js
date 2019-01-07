@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
-import { WMSSource } from '../../shared/layers/sources/wms_source';
-import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
-import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
-import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
-import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
-
+import React from 'react';
+import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
 import {
-  EuiText,
   EuiSpacer,
   EuiButton,
   EuiHorizontalRule,
@@ -26,6 +19,7 @@ import {
   EuiSuperSelect,
   EuiPanel,
 } from '@elastic/eui';
+
 export class AddLayerPanel extends React.Component {
 
   constructor() {
@@ -94,93 +88,16 @@ export class AddLayerPanel extends React.Component {
   }
 
   _renderSourceSelect() {
-    const sourceOptions = [
-      {
-        value: ESSearchSource.type,
-        inputDisplay: ESSearchSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{ESSearchSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Display documents from an elasticsearch index.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: ESGeohashGridSource.type,
-        inputDisplay: ESGeohashGridSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{ESGeohashGridSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Group documents into grid cells and display metrics for each cell.
-                Great for displaying large datasets.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: EMSFileSource.type,
-        inputDisplay: EMSFileSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{EMSFileSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">Political boundry vectors hosted by EMS.</p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: KibanaRegionmapSource.type,
-        inputDisplay: KibanaRegionmapSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Region map boundary layers configured in your config/kibana.yml file.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: XYZTMSSource.type,
-        inputDisplay: XYZTMSSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{XYZTMSSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">Tile Map Service with XYZ url.</p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: WMSSource.type,
-        inputDisplay: WMSSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{WMSSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">Web Map Service (WMS)</p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-    ];
+
+
+    const sourceOptions = ALL_SOURCES.map(Source => {
+      return {
+        value: Source.type,
+        inputDisplay: Source.typeDisplayName,
+        dropdownDisplay: Source.renderDropdownDisplayOption()
+      };
+    });
+
 
     return (
       <EuiFormRow label="Data source">
@@ -206,22 +123,14 @@ export class AddLayerPanel extends React.Component {
       dataSourcesMeta: this.props.dataSourcesMeta
     };
 
-    switch(this.state.sourceType) {
-      case EMSFileSource.type:
-        return EMSFileSource.renderEditor(editorProperties);
-      case XYZTMSSource.type:
-        return XYZTMSSource.renderEditor(editorProperties);
-      case ESGeohashGridSource.type:
-        return ESGeohashGridSource.renderEditor(editorProperties);
-      case ESSearchSource.type:
-        return ESSearchSource.renderEditor(editorProperties);
-      case KibanaRegionmapSource.type:
-        return KibanaRegionmapSource.renderEditor(editorProperties);
-      case WMSSource.type:
-        return WMSSource.renderEditor(editorProperties);
-      default:
-        throw new Error(`Unexepected source type: ${this.state.sourceType}`);
+    const Source = ALL_SOURCES.find((Source) => {
+      return Source.type === this.state.sourceType;
+    });
+    if (!Source) {
+      throw new Error(`Unexepected source type: ${this.state.sourceType}`);
     }
+
+    return Source.renderEditor(editorProperties);
   }
 
   _renderAddLayerForm() {
