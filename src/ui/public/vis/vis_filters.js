@@ -85,7 +85,7 @@ const VisFiltersProvider = (Private, getAppState) => {
     const data = event.datum;
     const filters = [];
 
-    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw'].forEach(val => {
+    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData'].forEach(val => {
       if (!data[val]) return;
       const { table, column, row, value } = data[val];
       const columnIndex = table.columns.findIndex(c => c.id === column);

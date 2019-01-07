@@ -36,7 +36,8 @@ uiModules
         sort: '=?',
         exportTitle: '=?',
         showTotal: '=',
-        totalFunc: '='
+        totalFunc: '=',
+        filter: '=',
       },
       compile: function ($el) {
       // Use the compile function from the RecursionHelper,

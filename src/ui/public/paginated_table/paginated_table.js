@@ -32,6 +32,7 @@ uiModules
       template: paginatedTableTemplate,
       transclude: true,
       scope: {
+        table: '=',
         rows: '=',
         columns: '=',
         linkToTop: '=',
@@ -41,7 +42,8 @@ uiModules
         sort: '=?',
         showSelector: '=?',
         showTotal: '=',
-        totalFunc: '='
+        totalFunc: '=',
+        filter: '=',
       },
       controllerAs: 'paginatedTable',
       controller: function ($scope) {

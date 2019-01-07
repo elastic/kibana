@@ -19,25 +19,21 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import AggConfigResult from '../vis/agg_config_result';
 import { uiModules } from '../modules';
-import tableCellFilterHtml from './partials/table_cell_filter.html';
-import { isNumeric } from '../utils/numeric';
-import { VisFiltersProvider } from '../vis/vis_filters';
+import tableCellFilterHtml from '../directives/partials/table_cell_filter.html';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnRows', function ($compile, Private) {
+module.directive('kbnRows', function ($compile) {
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {
-      const visFilter = Private(VisFiltersProvider);
-      function addCell($tr, contents) {
+      function addCell($tr, contents, column, row) {
         function createCell() {
           return $(document.createElement('td'));
         }
 
-        function createFilterableCell(aggConfigResult) {
+        function createFilterableCell(value) {
           const $template = $(tableCellFilterHtml);
           $template.addClass('kbnTableCellFilter__hover');
 
@@ -49,7 +45,12 @@ module.directive('kbnRows', function ($compile, Private) {
               return;
             }
 
-            visFilter.filter({ datum: { aggConfigResult: aggConfigResult }, negate });
+            $scope.filter({ datum: { rawData: {
+              table: $scope.table,
+              row: $scope.rows.findIndex(r => r === row),
+              column: column.id,
+              value
+            } }, negate });
           };
 
           return $compile($template)(scope);
@@ -58,31 +59,16 @@ module.directive('kbnRows', function ($compile, Private) {
         let $cell;
         let $cellContent;
 
-        if (contents instanceof AggConfigResult) {
-          const field = contents.aggConfig.getField();
-          const isCellContentFilterable =
-            contents.aggConfig.isFilterable()
-            && (!field || field.filterable);
-
-          if (isCellContentFilterable) {
-            $cell = createFilterableCell(contents);
-            $cellContent = $cell.find('[data-cell-content]');
-          } else {
-            $cell = $cellContent = createCell();
-          }
-
-          // An AggConfigResult can "enrich" cell contents by applying a field formatter,
-          // which we want to do if possible.
-          contents = contents.toString('html');
+        if (column.filterable) {
+          $cell = createFilterableCell(contents);
+          $cellContent = $cell.find('[data-cell-content]');
         } else {
           $cell = $cellContent = createCell();
-
-          // TODO: It would be better to actually check the type of the field, but we don't have
-          // access to it here. This may become a problem with the switch to BigNumber
-          if (isNumeric(contents)) {
-            $cell.addClass('numeric-value');
-          }
         }
+
+        // An AggConfigResult can "enrich" cell contents by applying a field formatter,
+        // which we want to do if possible.
+        contents = column.formatter.convert(contents, 'html');
 
         if (_.isObject(contents)) {
           if (contents.attr) {
@@ -137,7 +123,7 @@ module.directive('kbnRows', function ($compile, Private) {
           const $tr = $(document.createElement('tr')).appendTo($el);
           $scope.columns.forEach(column => {
             const value = row[column.id] || '';
-            addCell($tr, value);
+            addCell($tr, value, column, row);
           });
         });
       });

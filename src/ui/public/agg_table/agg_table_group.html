@@ -12,6 +12,7 @@
         <kbn-agg-table-group
           ng-if="table.tables"
           group="table"
+          filter="filter"
           dimensions="dimensions"
           per-page="perPage"
           sort="sort"
@@ -19,6 +20,7 @@
           total-func="totalFunc"></kbn-agg-table-group>
         <kbn-agg-table
           ng-if="table.rows"
+          filter="filter"
           table="table"
           dimensions="dimensions"
           export-title="exportTitle"
@@ -45,6 +47,7 @@
       <td ng-repeat="table in columns">
         <kbn-agg-table-group
           ng-if="table.tables"
+          filter="filter"
           group="table"
           dimensions="dimensions"
           per-page="perPage"
@@ -53,6 +56,7 @@
           total-func="totalFunc"></kbn-agg-table-group>
         <kbn-agg-table
           ng-if="table.rows"
+          filter="filter"
           table="table"
           dimensions="dimensions"
           export-title="exportTitle"

@@ -25,7 +25,7 @@ import { fieldFormats } from '../../../registry/field_formats';
 const config = chrome.getUiSettingsClient();
 
 const defaultFormat = { convert: identity };
-const getConfig = (...args) => config.get(...args);
+const getConfig = (...args: any[]): any => (config.get as any)(...args);
 
 export const getFieldFormat = (mapping: any) => {
   if (!mapping) {

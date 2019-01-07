@@ -39,7 +39,8 @@ uiModules
         sort: '=?',
         exportTitle: '=?',
         showTotal: '=',
-        totalFunc: '='
+        totalFunc: '=',
+        filter: '=',
       },
       controllerAs: 'aggTable',
       compile: function ($el) {
@@ -107,10 +108,13 @@ uiModules
             const dimension = isBucket ? isBucket : $scope.dimensions.metrics.find(metric => metric.accessor === i);
             if (!dimension) return;
 
+            const formatter = getFieldFormat(dimension.format);
+
             const formattedColumn = {
               id: col.id,
               title: col.name,
-              filterable: isBucket
+              formatter: formatter,
+              filterable: !!isBucket
             };
 
             const last = i === (table.columns.length - 1);
@@ -121,29 +125,6 @@ uiModules
 
             const isNumeric = dimension.params.isNumeric;
             const isDate = dimension.params.isDate;
-            // const aggType = agg.type;
-            // if (aggType && aggType.type === 'metrics') {
-            //   if (aggType.name === 'top_hits') {
-            //     if (agg._opts.params.aggregate !== 'concat') {
-            //     // all other aggregate types for top_hits output numbers
-            //     // so treat this field as numeric
-            //       isFieldNumeric = true;
-            //     }
-            //   } else if(aggType.name === 'cardinality') {
-            //     // Unique count aggregations always produce a numeric value
-            //     isFieldNumeric = true;
-            //   } else if (field) {
-            //   // if the metric has a field, check if it is either number or date
-            //     isFieldNumeric = field.type === 'number';
-            //     isFieldDate = field.type === 'date';
-            //   } else {
-            //   // if there is no field, then it is count or similar so just say number
-            //     isFieldNumeric = true;
-            //   }
-            // } else if (field) {
-            //   isFieldNumeric = field.type === 'number';
-            //   isFieldDate = field.type === 'date';
-            // }
 
             if (isNumeric || isDate || $scope.totalFunc === 'count') {
               const sum = tableRows => {
@@ -154,7 +135,6 @@ uiModules
                   return prev + curr[i].value;
                 }, 0);
               };
-              const formatter = getFieldFormat(dimension.format);
 
               switch ($scope.totalFunc) {
                 case 'sum':
