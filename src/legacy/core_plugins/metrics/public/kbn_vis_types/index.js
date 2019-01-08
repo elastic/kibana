@@ -77,7 +77,7 @@ export default function MetricsVisProvider(Private, i18n) {
       component: require('../components/vis_editor')
     },
     options: {
-      showQueryBar: false,
+      showQueryBar: true,
       showFilterBar: false,
       showIndexSelection: false
     },
