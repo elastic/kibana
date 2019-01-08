@@ -11,8 +11,10 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPage,
   EuiPageContent,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { InfoAlerts } from './info_alerts';
@@ -267,8 +269,20 @@ class PipelineListUi extends React.Component {
     const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
-      <EuiPage data-test-subj="pipelineList">
+      <div data-test-subj="pipelineList">
         <EuiPageContent horizontalPosition="center">
+          <EuiTitle size="m">
+            <h1><FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" /></h1>
+          </EuiTitle>
+          <EuiText color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.logstash.pipelineList.subhead"
+                defaultMessage="Manage logstash event processing and see the result visually"
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer />
           {this.renderNoPermissionCallOut()}
           <PipelinesTable
             clonePipeline={clonePipeline}
@@ -293,7 +307,7 @@ class PipelineListUi extends React.Component {
           showAddRoleAlert={this.state.showAddRoleAlert}
           showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
         />
-      </EuiPage>
+      </div>
     );
   }
 }

@@ -14,6 +14,7 @@ import { Setup } from '../../helpers/setup_request';
 
 export type SpanListAPIResponse = Span[];
 
+// Deprecated and will be removed in 7.0. Only needed for backwards compatability pre 6.5 (introducition of v2 API and distributed tracing)
 export async function getSpans(
   transactionId: string,
   setup: Setup

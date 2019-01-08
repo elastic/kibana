@@ -7,7 +7,6 @@
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-// @ts-ignore
 import { KibanaLink } from '../../utils/url';
 
 export function SetupInstructionsLink({
