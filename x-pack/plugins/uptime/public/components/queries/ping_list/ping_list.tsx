@@ -181,6 +181,8 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                     <EuiFormRow label="Max Search Size">
                       <EuiFieldNumber
                         defaultValue={this.state.maxSearchSize.toString()}
+                        min={0}
+                        max={10000} // 10k is the max default size in ES, and a good max sane size for this page
                         onBlur={e => {
                           const sanitizedValue = parseInt(e.target.value, 10);
                           if (!isNaN(sanitizedValue)) {
