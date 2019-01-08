@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReindexFlyout renders 1`] = `
+<EuiPortal>
+  <EuiFlyout
+    aria-labelledby="Reindex"
+    closeButtonAriaLabel="Closes this dialog"
+    hideCloseButton={false}
+    maxWidth={false}
+    onClose={[MockFunction]}
+    ownFocus={true}
+    size="m"
+  >
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <h2>
+        Reindex 
+        myIndex
+      </h2>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiText
+        grow={true}
+        size="m"
+      >
+        <p>
+          This tool can be used to reindex old indices.
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        size="m"
+        title="This may cause problems"
+      >
+        During a reindex, the index will not be able to ingest new documents, update documents, or delete documents. Depending on how this index is being used in your system, this may cause problems and you may need to use a different strategy to reindex this index.
+      </EuiCallOut>
+      <EuiSpacer
+        size="xl"
+      />
+      <Component
+        errorMessage={null}
+        reindexStatus={0}
+        reindexTaskPercComplete={null}
+      />
+      <EuiButton
+        color="warning"
+        disabled={true}
+        fill={false}
+        iconSide="left"
+        isLoading={true}
+        onClick={[MockFunction]}
+        type="button"
+      >
+        Reindexing…
+      </EuiButton>
+    </EuiFlyoutBody>
+  </EuiFlyout>
+</EuiPortal>
+`;
