@@ -156,6 +156,7 @@ export default function (kibana) {
           kbnBaseUrl,
           uiCapabilities: {
             discover: {
+              show: true,
               showWriteControls: true
             },
             visualize: {

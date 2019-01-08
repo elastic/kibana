@@ -20,7 +20,7 @@ const kibanaFeatures: Feature[] = [
           all: ['search'],
           read: ['config', 'index-pattern'],
         },
-        ui: [],
+        ui: ['show', 'showWriteControls'],
       },
       read: {
         catalogue: ['discover'],
@@ -29,7 +29,7 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   },
@@ -160,7 +160,7 @@ const timelionFeatures: Feature[] = [
     privileges: {
       all: {
         catalogue: ['timelion'],
-        app: ['timelion'],
+        app: ['timelion', 'kibana'],
         savedObject: {
           all: ['timelion'],
           read: ['config', 'index-pattern'],
@@ -169,7 +169,7 @@ const timelionFeatures: Feature[] = [
       },
       read: {
         catalogue: ['timelion'],
-        app: ['timelion'],
+        app: ['timelion', 'kibana'],
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'timelion'],

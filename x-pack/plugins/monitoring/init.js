@@ -68,7 +68,7 @@ export const init = (monitoringPlugin, server) => {
           })
         },
         catalogue: ['monitoring'],
-        app: ['monitoring'],
+        app: ['monitoring', 'kibana'],
         savedObject: {
           all: [],
           read: ['config'],
