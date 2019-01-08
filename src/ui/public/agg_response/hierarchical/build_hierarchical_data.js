@@ -19,7 +19,7 @@
 
 import { toArray } from 'lodash';
 import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
-import { getFieldFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 export function BuildHierarchicalDataProvider(Private) {
   const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
@@ -28,7 +28,7 @@ export function BuildHierarchicalDataProvider(Private) {
     let slices;
     const names = {};
     const metricColumn = table.columns[metric.accessor];
-    const metricFieldFormatter = getFieldFormat(metric.format);
+    const metricFieldFormatter = getFormat(metric.format);
     if (!buckets.length) {
       slices = [{ name: metricColumn.name, size: table.rows[0][metricColumn.id].value, aggConfig: metricColumn.aggConfig }];
       names[metricColumn.name] = metricColumn.name;
@@ -40,7 +40,7 @@ export function BuildHierarchicalDataProvider(Private) {
         buckets.forEach(bucket => {
           const bucketColumn = table.columns[bucket.accessor];
           const bucketValueColumn = table.columns[bucket.accessor + 1];
-          const bucketFormatter = getFieldFormat(bucket.format);
+          const bucketFormatter = getFormat(bucket.format);
           const name = bucketFormatter.convert(row[bucketColumn.id]);
           const size = row[bucketValueColumn.id];
 

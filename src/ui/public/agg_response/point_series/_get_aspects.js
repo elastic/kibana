@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getFieldFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { makeFakeXAspect } from './_fake_x_aspect';
 
 /**
@@ -35,7 +35,7 @@ export function getAspects(table, dimensions) {
     dimension.forEach(d => {
       if (!d) return;
       const column = table.columns[d.accessor];
-      const formatter = getFieldFormat(d.format);
+      const formatter = getFormat(d.format);
       if (!aspects[name]) aspects[name] = [];
       aspects[name].push({
         accessor: column.id,

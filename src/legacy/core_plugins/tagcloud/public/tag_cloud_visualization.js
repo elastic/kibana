@@ -22,7 +22,7 @@ import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import { getFieldFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { Label } from './label';
@@ -115,7 +115,7 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucketFormatter = this._vis.params.bucket ? getFieldFormat(this._vis.params.bucket.format) : null;
+    const bucketFormatter = this._vis.params.bucket ? getFormat(this._vis.params.bucket.format) : null;
     const hasTags = data.columns.length === 2;
     const tagColumn = hasTags ? data.columns[0].id : -1;
     const metricColumn = data.columns[hasTags ? 1 : 0].id;

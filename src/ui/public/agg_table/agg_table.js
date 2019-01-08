@@ -23,7 +23,7 @@ import '../paginated_table';
 import _ from 'lodash';
 import { uiModules } from '../modules';
 import aggTableTemplate from './agg_table.html';
-import { getFieldFormat } from '../visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from '../visualize/loader/pipeline_helpers/utilities';
 
 uiModules
   .get('kibana', ['RecursionHelper'])
@@ -108,7 +108,7 @@ uiModules
             const dimension = isBucket ? isBucket : $scope.dimensions.metrics.find(metric => metric.accessor === i);
             if (!dimension) return;
 
-            const formatter = getFieldFormat(dimension.format);
+            const formatter = getFormat(dimension.format);
 
             const formattedColumn = {
               id: col.id,

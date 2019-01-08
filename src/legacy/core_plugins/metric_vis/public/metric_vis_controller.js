@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
-import { getFieldFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { isColorDark } from '@elastic/eui';
 
 import { MetricVisValue } from './components/metric_vis_value';
@@ -104,13 +104,13 @@ export class MetricVisComponent extends Component {
 
     if (config.bucket) {
       bucketColumnId = table.columns[config.bucket.accessor].id;
-      bucketFormatter = getFieldFormat(config.bucket.format);
+      bucketFormatter = getFormat(config.bucket.format);
     }
 
     config.metrics.forEach(metric => {
       const columnIndex = metric.accessor;
       const column = table.columns[columnIndex];
-      const formatter = getFieldFormat(metric.format);
+      const formatter = getFormat(metric.format);
       table.rows.forEach((row, rowIndex) => {
 
         let title = column.name;

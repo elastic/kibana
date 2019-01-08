@@ -17,7 +17,10 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
+// @ts-ignore
+import { FieldFormat } from '../../../../field_formats/field_format';
 import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
@@ -27,14 +30,73 @@ const config = chrome.getUiSettingsClient();
 const defaultFormat = { convert: identity };
 const getConfig = (...args: any[]): any => (config.get as any)(...args);
 
-export const getFieldFormat = (mapping: any) => {
+const getFieldFormat = (id: any, params: any) => {
+  const Format = fieldFormats.byId[id];
+  if (Format) {
+    return new Format(params, getConfig);
+  } else {
+    return defaultFormat;
+  }
+};
+
+export const getFormat = (mapping: any) => {
   if (!mapping) {
     return defaultFormat;
   }
-  const FieldFormat = fieldFormats.byId[mapping.id];
-  if (FieldFormat) {
-    return new FieldFormat(mapping.params, getConfig);
+  let { id } = mapping;
+  if (id === 'range') {
+    id = mapping.params.id;
+    delete mapping.params.id;
+
+    const RangeFormat = FieldFormat.from((range: any) => {
+      const format = getFieldFormat(id, mapping.params).convert;
+      return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
+        defaultMessage: '{from} to {to}',
+        values: {
+          from: format(range.gte),
+          to: format(range.lt),
+        },
+      });
+    });
+    return new RangeFormat();
+  } else if (id === 'terms') {
+    id = mapping.params.id;
+    delete mapping.params.id;
+    return {
+      getConverterFor: (type: string) => {
+        const format = getFieldFormat(id, mapping.params).convert;
+        return (val: string) => {
+          if (val === '__other__') {
+            return mapping.params.otherBucketLabel;
+          }
+          if (val === '__missing__') {
+            return mapping.params.missingBucketLabel;
+          }
+          const parsedUrl = {
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            basePath: chrome.getBasePath(),
+          };
+          return format(val, undefined, undefined, parsedUrl);
+        };
+      },
+      convert: (val: string, type: string) => {
+        const format = getFieldFormat(id, mapping.params);
+        if (val === '__other__') {
+          return mapping.params.otherBucketLabel;
+        }
+        if (val === '__missing__') {
+          return mapping.params.missingBucketLabel;
+        }
+        const parsedUrl = {
+          origin: window.location.origin,
+          pathname: window.location.pathname,
+          basePath: chrome.getBasePath(),
+        };
+        return format.convert(val, type, undefined, parsedUrl);
+      },
+    };
   } else {
-    return defaultFormat;
+    return getFieldFormat(id, mapping.params);
   }
 };

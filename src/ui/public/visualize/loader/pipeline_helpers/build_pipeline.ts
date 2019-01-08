@@ -42,21 +42,69 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis): Schemas => {
-  const createSchemaConfig = (accessor: number, format: any, agg: AggConfig) => {
+  const createFormat = (agg: AggConfig) => {
+    let format: any = agg.params.field ? agg.params.field.format.toJSON() : {};
+    if (agg.type.name === 'date_range') {
+      format = { id: 'string' };
+    } else if (agg.type.name === 'percentile_ranks') {
+      format = { id: 'percent' };
+    } else if (['count', 'cardinality'].includes(agg.type.name)) {
+      format = { id: 'number' };
+    } else if (agg.type.name === 'date_histogram') {
+      format = {
+        id: 'date',
+        params: {
+          pattern: agg.type.getScaledDateFormat(),
+        },
+      };
+    } else if (agg.type.name === 'terms') {
+      format.params = {
+        id: format.id,
+        otherBucketLabel: agg.params.otherBucketLabel,
+        missingBucketLabel: agg.params.missingBucketLabel,
+        ...format.params,
+      };
+      format.id = 'terms';
+    } else if (agg.type.name === 'range') {
+      format.params = { id: format.id, ...format.params };
+      format.id = 'range';
+    }
+
+    return format;
+  };
+
+  const createSchemaConfig = (accessor: number, agg: AggConfig) => {
     const schema = {
       accessor,
-      format,
+      format: {},
       params: {},
+      aggType: agg.type.name,
     };
+
+    if (
+      [
+        'derivative',
+        'moving_avg',
+        'serial_diff',
+        'cumulative_sum',
+        'bucket_sum',
+        'bucket_avg',
+        'bucket_min',
+        'bucket_max',
+      ].includes(agg.type.name)
+    ) {
+      const subAgg = agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg];
+      schema.format = createFormat(subAgg);
+    } else {
+      schema.format = createFormat(agg);
+    }
     if (agg.type.name === 'geohash_grid') {
       schema.params = {
         precision: agg.params.precision,
         useGeocentroid: agg.params.useGeocentroid,
       };
     }
-    if (agg.type.name === 'count') {
-      schema.format = { id: 'number' };
-    }
+
     return schema;
   };
 
@@ -68,7 +116,6 @@ export const getSchemas = (vis: Vis): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
-    const format = agg.params.field ? agg.params.field.format : null;
     if (!agg.enabled) {
       cnt++;
       return;
@@ -92,12 +139,11 @@ export const getSchemas = (vis: Vis): Schemas => {
       schemas[schemaName] = [];
     }
     if (!isHierarchical || agg.type.type !== 'metrics') {
-      schemas[schemaName].push(createSchemaConfig(cnt++, format, agg));
+      schemas[schemaName].push(createSchemaConfig(cnt++, agg));
     }
     if (isHierarchical && agg.type.type !== 'metrics') {
       metrics.forEach((metric: any) => {
-        const metricFormat = metric.params.field ? metric.params.field.format : null;
-        schemas.metric.push(createSchemaConfig(cnt++, metricFormat, metric));
+        schemas.metric.push(createSchemaConfig(cnt++, metric));
       });
     }
   });

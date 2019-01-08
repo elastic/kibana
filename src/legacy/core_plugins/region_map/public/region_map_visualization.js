@@ -21,7 +21,7 @@ import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
-import { getFieldFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { TileMapTooltipFormatter } from './tooltip_formatter';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
@@ -76,7 +76,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         results
       );
 
-      const metricFieldFormatter = getFieldFormat(this._vis.params.metric.format);
+      const metricFieldFormatter = getFormat(this._vis.params.metric.format);
 
       this._choroplethLayer.setMetrics(results, metricFieldFormatter);
       this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricFieldFormatter, termColumn.name, valueColumn.name);
@@ -103,7 +103,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         this._vis.params.showAllShapes
       );
 
-      const metricFieldFormatter = getFieldFormat(this._vis.params.metric.format);
+      const metricFieldFormatter = getFormat(this._vis.params.metric.format);
 
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
