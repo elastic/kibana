@@ -25,9 +25,7 @@ const createMockAuthorization = () => {
   const mockAuthorization = {
     actions: {
       login: 'action:login',
-      space: {
-        manage: 'space:manage',
-      },
+      manageSpaces: 'action:manageSpaces',
     },
     checkPrivilegesWithRequest: jest.fn(() => ({
       atSpaces: mockCheckPrivilegesAtSpaces,
@@ -369,7 +367,7 @@ describe('#canEnumerateSpaces', () => {
 
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
 
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
@@ -403,7 +401,7 @@ describe('#canEnumerateSpaces', () => {
 
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
 
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
@@ -419,6 +417,7 @@ describe('#get', () => {
       name: 'foo-name',
       description: 'foo-description',
       bar: 'foo-bar',
+      disabledFeatures: ['foo-feature'],
     },
   };
 
@@ -427,6 +426,7 @@ describe('#get', () => {
     name: 'foo-name',
     description: 'foo-description',
     bar: 'foo-bar',
+    disabledFeatures: ['foo-feature'],
   };
 
   describe(`authorization is null`, () => {
@@ -572,14 +572,14 @@ describe('#create', () => {
     description: 'foo-description',
     bar: 'foo-bar',
     _reserved: true,
-    disabledFeatures: [],
+    disabledFeatures: ['foo-feature'],
   };
 
   const attributes = {
     name: 'foo-name',
     description: 'foo-description',
     bar: 'foo-bar',
-    disabledFeatures: [],
+    disabledFeatures: ['foo-feature'],
   };
 
   const savedObject = {
@@ -588,7 +588,7 @@ describe('#create', () => {
       name: 'foo-name',
       description: 'foo-description',
       bar: 'foo-bar',
-      disabledFeatures: [],
+      disabledFeatures: ['foo-feature'],
     },
   };
 
@@ -597,7 +597,7 @@ describe('#create', () => {
     name: 'foo-name',
     description: 'foo-description',
     bar: 'foo-bar',
-    disabledFeatures: [],
+    disabledFeatures: ['foo-feature'],
   };
 
   describe(`authorization is null`, () => {
@@ -794,7 +794,7 @@ describe('#create', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'create');
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
@@ -846,7 +846,7 @@ describe('#create', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'create');
@@ -895,7 +895,7 @@ describe('#create', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'create');
@@ -910,14 +910,14 @@ describe('#update', () => {
     description: 'foo-description',
     bar: 'foo-bar',
     _reserved: false,
-    disabledFeatures: [],
+    disabledFeatures: ['foo-feature'],
   };
 
   const attributes = {
     name: 'foo-name',
     description: 'foo-description',
     bar: 'foo-bar',
-    disabledFeatures: [],
+    disabledFeatures: ['foo-feature'],
   };
 
   const savedObject = {
@@ -927,7 +927,7 @@ describe('#update', () => {
       description: 'foo-description',
       bar: 'foo-bar',
       _reserved: true,
-      disabledFeatures: [],
+      disabledFeatures: ['foo-feature'],
     },
   };
 
@@ -937,7 +937,7 @@ describe('#update', () => {
     description: 'foo-description',
     bar: 'foo-bar',
     _reserved: true,
-    disabledFeatures: [],
+    disabledFeatures: ['foo-feature'],
   };
 
   describe(`authorization is null`, () => {
@@ -1031,7 +1031,7 @@ describe('#update', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'update');
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
@@ -1069,7 +1069,7 @@ describe('#update', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockInternalRepository.update).toHaveBeenCalledWith('space', id, attributes);
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
@@ -1250,7 +1250,7 @@ describe('#delete', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'delete');
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
@@ -1285,7 +1285,7 @@ describe('#delete', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
@@ -1324,7 +1324,7 @@ describe('#delete', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
+        mockAuthorization.actions.manageSpaces
       );
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockInternalRepository.delete).toHaveBeenCalledWith('space', id);
