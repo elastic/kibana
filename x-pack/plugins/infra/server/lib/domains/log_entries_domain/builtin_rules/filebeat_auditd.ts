@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export const filebeatAuditdRules = [
-  // IPSEC_EVENT
+  // IPSEC_EVENT Rule
   {
     when: {
-      exists: [
-        'auditd.log.record_type',
-        'auditd.log.auid',
-        'auditd.log.src',
-        'auditd.log.dst',
-        'auditd.log.op',
-      ],
+      exists: ['auditd.log.record_type', 'auditd.log.src', 'auditd.log.dst', 'auditd.log.op'],
       values: {
         'auditd.log.record_type': 'MAC_IPSEC_EVENT',
       },
@@ -21,8 +15,6 @@ export const filebeatAuditdRules = [
     format: [
       { constant: '[AuditD] ' },
       { field: 'auditd.log.record_type' },
-      { constant: ' auid:' },
-      { field: 'auditd.log.auid' },
       { constant: ' src:' },
       { field: 'auditd.log.src' },
       { constant: ' dst:' },
@@ -31,12 +23,11 @@ export const filebeatAuditdRules = [
       { field: 'auditd.log.op' },
     ],
   },
-  // SYSCALL
+  // SYSCALL Rule
   {
     when: {
       exists: [
         'auditd.log.record_type',
-        'auditd.log.auid',
         'auditd.log.exe',
         'auditd.log.gid',
         'auditd.log.uid',
@@ -51,8 +42,6 @@ export const filebeatAuditdRules = [
     format: [
       { constant: '[AuditD] ' },
       { field: 'auditd.log.record_type' },
-      { constant: ' auid:' },
-      { field: 'auditd.log.auid' },
       { constant: ' exe:' },
       { field: 'auditd.log.exe' },
       { constant: ' gid:' },
@@ -65,6 +54,18 @@ export const filebeatAuditdRules = [
       { field: 'auditd.log.pid' },
       { constant: ' ppid:' },
       { field: 'auditd.log.ppid' },
+    ],
+  },
+  // CATCHALL Rule
+  {
+    when: {
+      exists: ['auditd.log.record_type', 'auditd.log.msg'],
+    },
+    format: [
+      { constant: '[AuditD] ' },
+      { field: 'auditd.log.record_type' },
+      { constant: ' msg:' },
+      { field: 'auditd.log.msg' },
     ],
   },
 ];

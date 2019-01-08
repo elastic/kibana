@@ -10,7 +10,7 @@ import { filebeatAuditdRules } from './filebeat_auditd';
 const { format } = compileFormattingRules(filebeatAuditdRules);
 
 describe('Filebeat Rules', () => {
-  test('auditd IPSEC event', () => {
+  test('auditd IPSEC rule', () => {
     const event = {
       '@timestamp': '2017-01-31T20:17:14.891Z',
       'auditd.log.auid': '4294967295',
@@ -34,8 +34,6 @@ describe('Filebeat Rules', () => {
     expect(message).toEqual([
       { constant: '[AuditD] ' },
       { field: 'auditd.log.record_type', highlights: [], value: 'MAC_IPSEC_EVENT' },
-      { constant: ' auid:' },
-      { field: 'auditd.log.auid', highlights: [], value: '4294967295' },
       { constant: ' src:' },
       { field: 'auditd.log.src', highlights: [], value: '192.168.2.0' },
       { constant: ' dst:' },
@@ -45,7 +43,7 @@ describe('Filebeat Rules', () => {
     ]);
   });
 
-  test('AuditD SYSCALL event', () => {
+  test('AuditD SYSCALL rule', () => {
     const event = {
       '@timestamp': '2017-01-31T20:17:14.891Z',
       'auditd.log.a0': '9',
@@ -85,8 +83,6 @@ describe('Filebeat Rules', () => {
     expect(message).toEqual([
       { constant: '[AuditD] ' },
       { field: 'auditd.log.record_type', highlights: [], value: 'SYSCALL' },
-      { constant: ' auid:' },
-      { field: 'auditd.log.auid', highlights: [], value: '4294967295' },
       { constant: ' exe:' },
       {
         field: 'auditd.log.exe',
@@ -103,6 +99,32 @@ describe('Filebeat Rules', () => {
       { field: 'auditd.log.pid', highlights: [], value: '1281' },
       { constant: ' ppid:' },
       { field: 'auditd.log.ppid', highlights: [], value: '1240' },
+    ]);
+  });
+
+  test('AuditD catchall rule', () => {
+    const event = {
+      '@timestamp': '2017-01-31T20:17:14.891Z',
+      'auditd.log.auid': '4294967295',
+      'auditd.log.record_type': 'EXAMPLE',
+      'auditd.log.msg': 'some kind of message',
+      'ecs.version': '1.0.0-beta2',
+      'event.dataset': 'auditd.log',
+      'event.module': 'auditd',
+      'fileset.name': 'log',
+      'input.type': 'log',
+      'log.offset': 174,
+    };
+    const message = format(event);
+    expect(message).toEqual([
+      { constant: '[AuditD] ' },
+      { field: 'auditd.log.record_type', highlights: [], value: 'EXAMPLE' },
+      { constant: ' msg:' },
+      {
+        field: 'auditd.log.msg',
+        highlights: [],
+        value: 'some kind of message',
+      },
     ]);
   });
 });
