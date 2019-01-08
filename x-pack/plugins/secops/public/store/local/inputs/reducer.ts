@@ -25,7 +25,7 @@ export const initialInputsState: InputsState = {
     timerange: {
       kind: 'absolute',
       from: moment()
-        .subtract(1, 'hour')
+        .subtract(1, 'day') // subtracts 24 hours from 'now'
         .valueOf(),
       to: moment().valueOf(),
     },
