@@ -114,7 +114,7 @@ export function updateSidebar(
       <SidebarNav
         sections={items}
         selectedId={id}
-        style={{ width: 192 }}
+        className="mgtSideNav"
       />
     </I18nProvider>,
     node,

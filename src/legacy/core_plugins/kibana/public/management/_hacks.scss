@@ -46,6 +46,6 @@ kbn-management-objects-view {
 }
 
 // Hack ecause the management wrapper is flat HTML and needs a class
-.mgtPage--restrictWidth {
+.mgtPage__body {
   max-width: map-get($euiBreakpoints, 'xl');
 }
