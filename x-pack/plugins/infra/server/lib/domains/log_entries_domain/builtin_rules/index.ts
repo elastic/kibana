@@ -5,9 +5,11 @@
  */
 
 import { filebeatApache2Rules } from './filebeat_apache2';
+import { mysqlRules } from './filebeat_mysql';
 import { filebeatNginxRules } from './filebeat_nginx';
 import { filebeatRedisRules } from './filebeat_redis';
 import { filebeatSystemRules } from './filebeat_system';
+
 import { genericRules } from './generic';
 
 export const builtinRules = [
@@ -15,6 +17,7 @@ export const builtinRules = [
   ...filebeatNginxRules,
   ...filebeatRedisRules,
   ...filebeatSystemRules,
+  ...mysqlRules,
   ...genericRules,
   {
     when: {
