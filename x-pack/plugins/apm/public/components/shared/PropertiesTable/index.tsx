@@ -5,10 +5,9 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import _ from 'lodash';
+import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-
 import { StringMap } from '../../../../typings/common';
 import {
   colors,
@@ -19,12 +18,9 @@ import {
   units
 } from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-// @ts-ignore
 import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
-import PROPERTY_CONFIG from './propertyConfig.json';
-
-const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
+import { PROPERTY_CONFIG } from './propertyConfig';
 
 const TableContainer = styled.div`
   padding-bottom: ${px(units.double)};
@@ -89,12 +85,13 @@ export function AgentFeatureTipMessage({
 }
 
 export const sortKeysByConfig: KeySorter = (object, currentKey) => {
-  const presorted = _.get(
+  const indexedPropertyConfig = indexBy(PROPERTY_CONFIG, 'key');
+  const presorted = get(
     indexedPropertyConfig,
     `${currentKey}.presortedKeys`,
     []
   );
-  return _.uniq([...presorted, ...Object.keys(object).sort()]);
+  return uniq([...presorted, ...Object.keys(object).sort()]);
 };
 
 export function PropertiesTable({
@@ -102,15 +99,13 @@ export function PropertiesTable({
   propKey,
   agentName
 }: {
-  propData: StringMap<any>;
+  propData?: StringMap<any>;
   propKey: string;
   agentName?: string;
 }) {
-  const hasPropData = !_.isEmpty(propData);
-
   return (
     <TableContainer>
-      {hasPropData ? (
+      {propData ? (
         <NestedKeyValueTable
           data={propData}
           parentKey={propKey}

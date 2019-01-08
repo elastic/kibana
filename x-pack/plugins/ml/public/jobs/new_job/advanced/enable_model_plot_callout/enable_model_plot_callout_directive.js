@@ -12,11 +12,14 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { EnableModelPlotCallout } from './enable_model_plot_callout_view.js';
+import { injectI18nProvider } from '@kbn/i18n/react';
 
 module.directive('mlEnableModelPlotCallout', function (reactDirective) {
   return reactDirective(
-    EnableModelPlotCallout,
-    undefined,
-    { restrict: 'E' }
+    injectI18nProvider(
+      EnableModelPlotCallout,
+      undefined,
+      { restrict: 'E' }
+    )
   );
 });

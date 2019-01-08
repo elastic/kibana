@@ -19,9 +19,16 @@ import {
 } from '@elastic/eui';
 
 import { deleteJobs } from '../utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export class DeleteJobModal extends Component {
+export const DeleteJobModal = injectI18n(class extends Component {
+  static displayName = 'DeleteJobModal';
+  static propTypes = {
+    setShowFunction: PropTypes.func.isRequired,
+    unsetShowFunction: PropTypes.func.isRequired,
+    refreshJobs: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
@@ -73,6 +80,7 @@ export class DeleteJobModal extends Component {
   }
 
   render() {
+    const { intl } = this.props;
     let modal;
 
     if (this.state.isModalVisible) {
@@ -80,10 +88,10 @@ export class DeleteJobModal extends Component {
       if (this.el && this.state.deleting === true) {
         // work around to disable the modal's buttons if the jobs are being deleted
         this.el.confirmButton.style.display = 'none';
-        this.el.cancelButton.textContent = (<FormattedMessage
-          id="xpack.ml.jobsList.deleteJobModal.closeButtonLabel"
-          defaultMessage="Close"
-        />);
+        this.el.cancelButton.textContent = intl.formatMessage({
+          id: 'xpack.ml.jobsList.deleteJobModal.closeButtonLabel',
+          defaultMessage: 'Close'
+        });
       }
 
       const title = (
@@ -161,10 +169,4 @@ export class DeleteJobModal extends Component {
       </div>
     );
   }
-}
-
-DeleteJobModal.propTypes = {
-  setShowFunction: PropTypes.func.isRequired,
-  unsetShowFunction: PropTypes.func.isRequired,
-  refreshJobs: PropTypes.func.isRequired,
-};
+});

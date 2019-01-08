@@ -25,6 +25,7 @@ import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 
 export async function getSeriesData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
   const esQueryConfig = await getEsQueryConfig(req);
 
   try {
@@ -32,6 +33,7 @@ export async function getSeriesData(req, panel) {
     const bodies = await Promise.all(bodiesPromises);
     const params = {
       rest_total_hits_as_int: true,
+      ignore_throttled: !includeFrozen,
       body: bodies.reduce((acc, items) => acc.concat(items), [])
     };
     return callWithRequest(req, 'msearch', params)

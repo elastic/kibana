@@ -83,6 +83,26 @@ export const formats: Formats = {
       timeZoneName: 'short',
     },
   },
+  relative: {
+    years: {
+      units: 'year',
+    },
+    months: {
+      units: 'month',
+    },
+    days: {
+      units: 'day',
+    },
+    hours: {
+      units: 'hour',
+    },
+    minutes: {
+      units: 'minute',
+    },
+    seconds: {
+      units: 'second',
+    },
+  },
 };
 
 interface NumberFormatOptions<TStyle extends string> extends Intl.NumberFormatOptions {
@@ -110,6 +130,12 @@ export interface Formats {
     medium: DateTimeFormatOptions;
     long: DateTimeFormatOptions;
     full: DateTimeFormatOptions;
+  }>;
+  relative?: Partial<{
+    [key: string]: {
+      style?: 'numeric' | 'best fit';
+      units: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second';
+    };
   }>;
 }
 

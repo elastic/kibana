@@ -24,11 +24,10 @@ import { SearchEmbeddable } from './search_embeddable';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory {
   constructor($compile, $rootScope, searchLoader) {
-    super();
+    super({ name: 'search' });
     this.$compile = $compile;
     this.searchLoader = searchLoader;
     this.$rootScope = $rootScope;
-    this.name = 'search';
   }
 
   getEditPath(panelId) {
