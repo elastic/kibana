@@ -1,7 +1,7 @@
 [[upgrade-assistant]]
 == Upgrade Assistant
 
-The Upgrade Assistant helps you prepare for your upgrade to {es} 7.0. 
+The Upgrade Assistant helps you prepare for your upgrade from {es} 6.x to {es} 7.0. 
 To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
 
 The assistant identifies the deprecated settings in your cluster and indices 
