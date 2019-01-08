@@ -50,7 +50,7 @@ export const AnnotationFlyout: React.SFC<Props> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="mlAnnotationFlyoutTitle">
-            {!isExistingAnnotation ? (
+            {isExistingAnnotation ? (
               <FormattedMessage
                 id="xpack.ml.timeSeriesExplorer.annotationFlyout.editAnnotationTitle"
                 defaultMessage="Edit annotation"
