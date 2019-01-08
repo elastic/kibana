@@ -15,6 +15,7 @@ import { translateConfigSchema } from 'x-pack/plugins/beats_management/common/co
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
+import { RestConfigBlocksAdapter } from '../adapters/configuration_blocks/rest_config_blocks_adapter';
 import { RestElasticsearchAdapter } from '../adapters/elasticsearch/rest';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AxiosRestAPIAdapter } from '../adapters/rest_api/axios_rest_api_adapter';
@@ -35,7 +36,10 @@ export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
 
-  const configBlocks = new ConfigBlocksLib(translateConfigSchema(configBlockSchemas));
+  const configBlocks = new ConfigBlocksLib(
+    new RestConfigBlocksAdapter(api),
+    translateConfigSchema(configBlockSchemas)
+  );
   const tags = new TagsLib(new RestTagsAdapter(api));
   const tokens = new RestTokensAdapter(api);
   const beats = new BeatsLib(new RestBeatsAdapter(api));

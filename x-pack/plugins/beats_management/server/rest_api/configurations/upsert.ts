@@ -27,9 +27,6 @@ export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
   requiredRoles: ['beats_admin'],
   config: {
     validate: {
-      params: Joi.object({
-        tag: Joi.string(),
-      }),
       payload: Joi.array().items(Joi.object({})),
     },
   },

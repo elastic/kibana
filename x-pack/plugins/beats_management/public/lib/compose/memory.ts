@@ -39,7 +39,7 @@ export function compose(
     mockKueryToEsQuery,
     suggestions
   );
-  const configBlocks = new ConfigBlocksLib(translateConfigSchema(configBlockSchemas));
+  const configBlocks = new ConfigBlocksLib({} as any, translateConfigSchema(configBlockSchemas));
   const tags = new TagsLib(new MemoryTagsAdapter([]));
   const tokens = new MemoryTokensAdapter();
   const beats = new BeatsLib(new MemoryBeatsAdapter([]));

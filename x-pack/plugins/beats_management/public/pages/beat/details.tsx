@@ -34,8 +34,8 @@ interface PageProps {
 
 interface PageState {
   selectedConfig: ConfigurationBlock | null;
-  tags?: BeatTag[];
-  configuration_blocks?: ConfigurationBlock[];
+  tags: BeatTag[];
+  configuration_blocks: ConfigurationBlock[];
 }
 
 class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
@@ -44,6 +44,8 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
 
     this.state = {
       selectedConfig: null,
+      tags: [],
+      configuration_blocks: [],
     };
   }
   public render() {
