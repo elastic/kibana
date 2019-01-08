@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ES_INDEX_NAME = '.management-beats-1';
+export const ES_INDEX_NAME = '.management-beats';
 export const ES_TYPE_NAME = '_doc';

@@ -1,5 +1,5 @@
 {
-  "index_patterns": [".management-beats-1"],
+  "index_patterns": [".management-beats"],
   "version": 66000,
   "settings": {
     "index": {

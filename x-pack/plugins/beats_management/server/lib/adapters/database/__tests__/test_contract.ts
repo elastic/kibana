@@ -32,7 +32,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         await database.putTemplate(
           { kind: 'internal' },
           {
-            name: '.management-beats-1',
+            name: '.management-beats',
             body: beatsIndexTemplate,
           }
         );
@@ -45,7 +45,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       const params = {
         id: `beat:foo`,
         ignore: [404],
-        index: '.management-beats-1',
+        index: '.management-beats',
         type: '_doc',
       };
       let ranWithoutError = false;
@@ -62,7 +62,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       const params = {
         id: `beat:foo`,
         ignore: [404],
-        index: '.management-beats-1',
+        index: '.management-beats',
         type: '_doc',
       };
       const response = await database.get({ kind: 'internal' }, params);
