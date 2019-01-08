@@ -49,6 +49,9 @@
             "id": {
               "type": "keyword"
             },
+            "name": {
+              "type": "keyword"
+            },
             "color": {
               "type": "keyword"
             }

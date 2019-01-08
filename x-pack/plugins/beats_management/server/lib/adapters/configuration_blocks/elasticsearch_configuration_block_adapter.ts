@@ -75,10 +75,14 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     }
     const configs = get<any>(response, 'hits.hits', []);
 
-    return configs.map((tag: any) => ({
-      ...tag._source.tag,
-      config: JSON.parse(tag._source.tag.config || '{}'),
-    }));
+    return {
+      blocks: configs.map((block: any) => ({
+        ...block._source.configuration_block,
+        config: JSON.parse(block._source.configuration_block.config || '{}'),
+      })),
+      page: 0,
+      total: 0,
+    };
   }
 
   public async delete(user: FrameworkUser, ids: string[]): Promise<void> {

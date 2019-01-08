@@ -71,14 +71,12 @@ export default function ({ getService }) {
       expect(configurationBlocks.length).to.be(3);
 
       expect(configurationBlocks[1].type).to.be('metricbeat.modules');
-      expect(configurationBlocks[1].config).not.to.be.an('array');
       expect(configurationBlocks[1].config).to.eql({
         module: 'memcached',
         hosts: ['localhost:11211'],
       });
 
       expect(configurationBlocks[2].type).to.be('metricbeat.modules');
-      expect(configurationBlocks[2].config).not.to.be.an('array');
       expect(configurationBlocks[2].config).to.eql({
         module: 'memcached',
         hosts: ['localhost:4949'],

@@ -55,6 +55,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
           beat.tags,
           -1
         );
+
         configurationBlocks = result.blocks;
       } else {
         configurationBlocks = [];
