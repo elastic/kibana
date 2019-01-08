@@ -22,7 +22,11 @@ import { getRootType, getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
+import { getRelationshipsQuery } from './relationship_query_builder';
 import * as errors from './errors';
+import {
+  findRelationships as legacyFindRelationships
+} from '../../../../legacy/core_plugins/kibana/server/lib/management/saved_objects/relationships';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -588,6 +592,84 @@ export class SavedObjectsRepository {
     };
 
 
+  }
+
+  /**
+   * Finds other saved objects that have a relationship with a given saved object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} [options={}]
+   * @property {number} [options.size=10000]
+   * @property {string} [options.namespace]
+   * @property {array} [options.filterTypes]
+   */
+  async findRelationships(type, id, options = {}) {
+    const {
+      size = 10000,
+      namespace,
+      filterTypes,
+    } = options;
+
+    if (!id || typeof id !== 'string') {
+      throw new TypeError('id must be a string');
+    }
+
+    if (!type || typeof type !== 'string') {
+      throw new TypeError('type must be a string');
+    }
+
+    const sourceObject = await this.get(type, id, { namespace });
+
+    // This code will be removed as these types migrate to use "references"
+    let legacyFindRelationshipsCall;
+    if (['dashboard', 'visualization', 'search', 'index-pattern'].includes(type)) {
+      legacyFindRelationshipsCall = legacyFindRelationships(type, id, size, this);
+    }
+    const bulkGetOpts = (sourceObject.references || []).map(ref => ({ id: ref.id, type: ref.type }));
+    const searchTypes = Array.isArray(filterTypes)
+      ? filterTypes
+      : Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const [{ saved_objects: referencedObjects }, referencedResponse, legacyResponse] = await Promise.all([
+      this.bulkGet(bulkGetOpts),
+      this._callCluster('search', {
+        index: this._index,
+        size,
+        from: 0,
+        _source: [
+          'type',
+          'namespace',
+          ...(searchTypes.map(type => `${type}.title`)),
+        ],
+        ignore: [404],
+        rest_total_hits_as_int: true,
+        body: {
+          version: true,
+          query: getRelationshipsQuery({ type, id, namespace, searchTypes })
+        }
+      }),
+      legacyFindRelationshipsCall,
+    ]);
+
+    const relationshipObjects = [].concat(
+      referencedObjects.map(obj => ({ id: obj.id, type: obj.type, ...obj.attributes })),
+      legacyResponse || [],
+      referencedResponse.hits.hits
+        .map(hit => this._rawToSavedObject(hit))
+        .map(obj => ({ id: obj.id, type: obj.type, ...obj.attributes }))
+    );
+
+    return relationshipObjects.reduce((result, relationshipObject) => {
+      const objectsForType = (result[relationshipObject.type] || []);
+      // Since we're supporting the legacy method until all saved objects use "references",
+      // remove duplicates until then.
+      if (objectsForType.find(obj => obj.id === relationshipObject.id)) return result;
+      const type = relationshipObject.type;
+      delete relationshipObject.type;
+      result[type] = objectsForType.concat(relationshipObject);
+      return result;
+    }, {});
   }
 
   async _writeToCluster(method, params) {

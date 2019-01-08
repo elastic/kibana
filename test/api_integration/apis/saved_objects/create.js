@@ -51,7 +51,8 @@ export default function ({ getService }) {
               version: 1,
               attributes: {
                 title: 'My favorite vis'
-              }
+              },
+              references: [],
             });
           });
       });
@@ -89,7 +90,8 @@ export default function ({ getService }) {
               version: 1,
               attributes: {
                 title: 'My favorite vis'
-              }
+              },
+              references: [],
             });
           });
 

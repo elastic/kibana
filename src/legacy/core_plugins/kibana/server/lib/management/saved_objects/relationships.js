@@ -37,6 +37,7 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
         if (!object.error) {
           accum.push({
             id: object.id,
+            type: 'visualization',
             title: object.attributes.title,
           });
         }
@@ -45,7 +46,7 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
     );
   }
 
-  return { visualizations };
+  return visualizations;
 }
 
 async function findVisualizationRelationships(id, size, savedObjectsClient) {
@@ -66,6 +67,7 @@ async function findVisualizationRelationships(id, size, savedObjectsClient) {
         if (panel.type === 'visualization' && panel.id === id) {
           dashboards.push({
             id: dashboard.id,
+            type: 'dashboard',
             title: dashboard.attributes.title,
           });
         }
@@ -76,7 +78,7 @@ async function findVisualizationRelationships(id, size, savedObjectsClient) {
       break;
     }
   }
-  return { dashboards };
+  return dashboards;
 }
 
 async function findSavedSearchRelationships(id, size, savedObjectsClient) {
@@ -87,7 +89,7 @@ async function findSavedSearchRelationships(id, size, savedObjectsClient) {
   const indexPatterns = [];
   try {
     const indexPattern = await savedObjectsClient.get('index-pattern', searchSourceJSON.index);
-    indexPatterns.push({ id: indexPattern.id, title: indexPattern.attributes.title });
+    indexPatterns.push({ id: indexPattern.id, type: 'index-pattern', title: indexPattern.attributes.title });
   } catch (err) {
     // Do nothing
   }
@@ -103,13 +105,14 @@ async function findSavedSearchRelationships(id, size, savedObjectsClient) {
     if (!object.error) {
       accum.push({
         id: object.id,
+        type: 'visualization',
         title: object.attributes.title,
       });
     }
     return accum;
   }, []);
 
-  return { visualizations, indexPatterns };
+  return visualizations.concat(indexPatterns);
 }
 
 async function findIndexPatternRelationships(id, size, savedObjectsClient) {
@@ -138,6 +141,7 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
     if (searchSourceJSON && searchSourceJSON.index === id) {
       visualizations.push({
         id: visualization.id,
+        type: 'visualization',
         title: visualization.attributes.title,
       });
     }
@@ -156,6 +160,7 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
     if (searchSourceJSON && searchSourceJSON.index === id) {
       searches.push({
         id: search.id,
+        type: 'search',
         title: search.attributes.title,
       });
     }
@@ -164,7 +169,7 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
       break;
     }
   }
-  return { visualizations, searches };
+  return visualizations.concat(searches);
 }
 
 export async function findRelationships(type, id, size, savedObjectsClient) {
@@ -178,5 +183,5 @@ export async function findRelationships(type, id, size, savedObjectsClient) {
     case 'index-pattern':
       return await findIndexPatternRelationships(id, size, savedObjectsClient);
   }
-  return {};
+  return [];
 }

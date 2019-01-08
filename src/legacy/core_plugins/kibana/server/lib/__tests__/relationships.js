@@ -62,13 +62,11 @@ describe('findRelationships', () => {
       size,
       savedObjectsClient
     );
-    expect(result).to.eql({
-      visualizations: [
-        { id: '1', title: 'Foo' },
-        { id: '2', title: 'Bar' },
-        { id: '3', title: 'FooBar' },
-      ],
-    });
+    expect(result).to.eql([
+      { id: '1', title: 'Foo', type: 'visualization' },
+      { id: '2', title: 'Bar', type: 'visualization' },
+      { id: '3', title: 'FooBar', type: 'visualization' },
+    ]);
   });
 
   it('should find relationships for visualizations', async () => {
@@ -122,12 +120,10 @@ describe('findRelationships', () => {
       size,
       savedObjectsClient
     );
-    expect(result).to.eql({
-      dashboards: [
-        { id: '1', title: 'My Dashboard' },
-        { id: '2', title: 'Your Dashboard' },
-      ],
-    });
+    expect(result).to.eql([
+      { id: '1', title: 'My Dashboard', type: 'dashboard' },
+      { id: '2', title: 'Your Dashboard', type: 'dashboard' },
+    ]);
   });
 
   it('should find relationships for saved searches', async () => {
@@ -187,14 +183,12 @@ describe('findRelationships', () => {
       size,
       savedObjectsClient
     );
-    expect(result).to.eql({
-      visualizations: [
-        { id: '1', title: 'Foo' },
-        { id: '2', title: 'Bar' },
-        { id: '3', title: 'FooBar' },
-      ],
-      indexPatterns: [{ id: 'index-pattern:1', title: 'My Index Pattern' }],
-    });
+    expect(result).to.eql([
+      { id: '1', title: 'Foo', type: 'visualization' },
+      { id: '2', title: 'Bar', type: 'visualization' },
+      { id: '3', title: 'FooBar', type: 'visualization' },
+      { id: 'index-pattern:1', type: 'index-pattern', title: 'My Index Pattern' }
+    ]);
   });
 
   it('should find relationships for index patterns', async () => {
@@ -294,10 +288,12 @@ describe('findRelationships', () => {
       size,
       savedObjectsClient
     );
-    expect(result).to.eql({
-      visualizations: [{ id: '1', title: 'Foo' }, { id: '2', title: 'Bar' }],
-      searches: [{ id: '1', title: 'Foo' }, { id: '2', title: 'Bar' }],
-    });
+    expect(result).to.eql([
+      { id: '1', type: 'visualization', title: 'Foo' },
+      { id: '2', type: 'visualization', title: 'Bar' },
+      { id: '1', type: 'search', title: 'Foo' },
+      { id: '2', type: 'search', title: 'Bar' }
+    ]);
   });
 
   it('should return an empty object for invalid types', async () => {

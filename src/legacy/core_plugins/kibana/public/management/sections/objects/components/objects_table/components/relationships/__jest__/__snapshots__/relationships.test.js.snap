@@ -41,7 +41,7 @@ exports[`Relationships should render dashboards normally 1`] = `
       type="row"
     >
       <React.Fragment
-        key="visualizations"
+        key="visualization"
       >
         <EuiDescriptionListTitle
           style={
@@ -248,7 +248,7 @@ exports[`Relationships should render searches normally 1`] = `
       type="row"
     >
       <React.Fragment
-        key="indexPatterns"
+        key="index-pattern"
       >
         <EuiDescriptionListTitle
           style={
@@ -315,7 +315,7 @@ exports[`Relationships should render searches normally 1`] = `
         />
       </React.Fragment>
       <React.Fragment
-        key="visualizations"
+        key="visualization"
       >
         <EuiDescriptionListTitle
           style={
@@ -427,7 +427,7 @@ exports[`Relationships should render visualizations normally 1`] = `
       type="row"
     >
       <React.Fragment
-        key="dashboards"
+        key="dashboard"
       >
         <EuiDescriptionListTitle
           style={

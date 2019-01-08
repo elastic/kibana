@@ -83,12 +83,12 @@ describe('Relationships', () => {
   it('should render searches normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
-        indexPatterns: [
+        'index-pattern': [
           {
             id: '1',
           }
         ],
-        visualizations: [
+        visualization: [
           {
             id: '2',
           }
@@ -123,7 +123,7 @@ describe('Relationships', () => {
   it('should render visualizations normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
-        dashboards: [
+        dashboard: [
           {
             id: '1',
           },
@@ -161,7 +161,7 @@ describe('Relationships', () => {
   it('should render dashboards normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
-        visualizations: [
+        visualization: [
           {
             id: '1',
           },

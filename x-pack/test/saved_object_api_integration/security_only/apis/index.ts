@@ -23,6 +23,7 @@ export default function({ getService, loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./find_relationships'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));

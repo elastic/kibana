@@ -51,7 +51,8 @@ export default function ({ getService }) {
               version: 2,
               attributes: {
                 title: 'My second favorite vis'
-              }
+              },
+              references: [],
             });
           });
       });

@@ -101,6 +101,25 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
+  async findRelationships(type, id, options = {}) {
+    await this._ensureAuthorized(
+      type,
+      'find_relationships',
+      { type, id, options },
+    );
+    let { filterTypes } = options;
+    const authorizedTypes = await this._getAuthorizedTypes(this._savedObjectTypes, 'find_relationships');
+    // Go through filterTypes array and ensure each value is in authorizedTypes.
+    // Or else we'll filter on what they're authorized to see.
+    filterTypes = filterTypes
+      ? authorizedTypes.filter(type => filterTypes.includes(type))
+      : authorizedTypes;
+    return await this._baseClient.findRelationships(type, id, {
+      ...options,
+      filterTypes,
+    });
+  }
+
   async _checkSavedObjectPrivileges(actions) {
     try {
       if (this._spaces) {
@@ -114,6 +133,23 @@ export class SecureSavedObjectsClientWrapper {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
     }
+  }
+
+  async _getAuthorizedTypes(typeOrTypes, action) {
+    const actionMap = {};
+    const types = [].concat(typeOrTypes);
+    types.forEach((type) => {
+      const typeAction = this._actions.getSavedObjectAction(type, action);
+      actionMap[typeAction] = type;
+    });
+    const { privileges } = await this._checkSavedObjectPrivileges(Object.keys(actionMap));
+    const authorizedTypes = Object.keys(privileges)
+      .map(privilege => {
+        const authorized = privileges[privilege];
+        if (authorized) return actionMap[privilege];
+      })
+      .filter(value => !!value);
+    return authorizedTypes;
   }
 
   async _ensureAuthorized(typeOrTypes, action, args) {
