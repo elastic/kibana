@@ -5,11 +5,12 @@
  */
 
 import { VectorSource } from './vector_source';
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiText,
   EuiSelect,
-  EuiFormRow
+  EuiFormRow,
+  EuiSpacer
 } from '@elastic/eui';
 
 export class KibanaRegionmapSource extends VectorSource {
@@ -17,9 +18,9 @@ export class KibanaRegionmapSource extends VectorSource {
   static type = 'REGIONMAP_FILE';
   static typeDisplayName = 'Custom region boundaries';
 
-  constructor(descriptor, regionList) {
+  constructor(descriptor, { ymlFileLayers }) {
     super(descriptor);
-    this._regionList = regionList;
+    this._regionList = ymlFileLayers;
   }
 
   static createDescriptor(name) {
@@ -53,6 +54,20 @@ export class KibanaRegionmapSource extends VectorSource {
       </EuiFormRow>
     );
   };
+
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            Region map boundary layers configured in your config/kibana.yml file.
+          </p>
+        </EuiText>
+      </Fragment>
+    );
+  }
 
   renderDetails() {
     return (
