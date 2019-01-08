@@ -64,6 +64,15 @@ export class ALayer {
     return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
   }
 
+  /**
+   * return attribution for this layer as array of objects with url and label property.
+   * e.g. [{ url: 'example.com', label: 'foobar' }]
+   * @return {Promise<null>}
+   */
+  async getAttributions() {
+    return [{ url: 'example.com', label: 'foobar' }];
+  }
+
   getLabel() {
     return this._descriptor.label ? this._descriptor.label : '';
   }

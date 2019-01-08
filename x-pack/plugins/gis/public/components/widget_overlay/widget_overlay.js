@@ -11,6 +11,7 @@ import {
 } from '@elastic/eui';
 import { LayerControl } from './layer_control';
 import { ViewControl } from './view_control';
+import { AttributionControl } from './attribution_control';
 
 export function WidgetOverlay() {
   return (
@@ -21,6 +22,9 @@ export function WidgetOverlay() {
     >
       <EuiFlexItem>
         <LayerControl/>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AttributionControl/>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ViewControl/>
