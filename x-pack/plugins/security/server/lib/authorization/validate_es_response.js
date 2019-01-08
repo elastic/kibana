@@ -5,47 +5,40 @@
  */
 
 import Joi from 'joi';
-import { HasPrivilegesResponse } from './types';
 
-export function validateEsPrivilegeResponse(
-  response: HasPrivilegesResponse,
-  application: string,
-  actions: string[],
-  resources: string[]
-) {
+export function validateEsPrivilegeResponse(response, application, actions, resources) {
   const schema = buildValidationSchema(application, actions, resources);
   const { error, value } = schema.validate(response);
 
   if (error) {
-    throw new Error(
-      `Invalid response received from Elasticsearch has_privilege endpoint. ${error}`
-    );
+    throw new Error(`Invalid response received from Elasticsearch has_privilege endpoint. ${error}`);
   }
 
   return value;
 }
 
-function buildActionsValidationSchema(actions: string[]) {
+function buildActionsValidationSchema(actions) {
   return Joi.object({
-    ...actions.reduce<Record<string, any>>((acc, action) => {
+    ...actions.reduce((acc, action) => {
       return {
         ...acc,
-        [action]: Joi.bool().required(),
+        [action]: Joi.bool().required()
       };
-    }, {}),
+    }, {})
   }).required();
 }
 
-function buildValidationSchema(application: string, actions: string[], resources: string[]) {
+function buildValidationSchema(application, actions, resources) {
+
   const actionValidationSchema = buildActionsValidationSchema(actions);
 
   const resourceValidationSchema = Joi.object({
     ...resources.reduce((acc, resource) => {
       return {
         ...acc,
-        [resource]: actionValidationSchema,
+        [resource]: actionValidationSchema
       };
-    }, {}),
+    }, {})
   }).required();
 
   return Joi.object({

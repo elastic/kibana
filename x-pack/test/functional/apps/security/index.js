@@ -8,7 +8,6 @@ export default function ({ loadTestFile }) {
   describe('security app', function () {
     this.tags('ciGroup4');
 
-    loadTestFile(require.resolve('./feature_privileges'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./doc_level_security_roles'));
     loadTestFile(require.resolve('./management'));

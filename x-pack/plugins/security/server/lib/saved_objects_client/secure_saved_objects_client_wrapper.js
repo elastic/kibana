@@ -12,19 +12,21 @@ export class SecureSavedObjectsClientWrapper {
       actions,
       auditLogger,
       baseClient,
-      checkPrivilegesDynamicallyWithRequest,
+      checkPrivilegesWithRequest,
       errors,
       request,
       savedObjectTypes,
+      spaces,
     } = options;
 
     this.errors = errors;
     this._actions = actions;
     this._auditLogger = auditLogger;
     this._baseClient = baseClient;
-    this._checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
+    this._checkPrivileges = checkPrivilegesWithRequest(request);
     this._request = request;
     this._savedObjectTypes = savedObjectTypes;
+    this._spaces = spaces;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -101,7 +103,13 @@ export class SecureSavedObjectsClientWrapper {
 
   async _checkSavedObjectPrivileges(actions) {
     try {
-      return await this._checkPrivileges(actions);
+      if (this._spaces) {
+        const spaceId = this._spaces.getSpaceId(this._request);
+        return await this._checkPrivileges.atSpace(spaceId, actions);
+      }
+      else {
+        return await this._checkPrivileges.globally(actions);
+      }
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
@@ -110,7 +118,7 @@ export class SecureSavedObjectsClientWrapper {
 
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actions = types.map(type => this._actions.savedObject.get(type, action));
+    const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
     const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions);
 
     if (hasAllRequested) {

@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`#deserializeSpaceResource throws error if resource doesn't start with space: 1`] = `"Resource should have started with space:"`;

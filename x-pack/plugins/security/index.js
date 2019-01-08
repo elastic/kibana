@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
@@ -20,11 +19,10 @@ import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
-import { createAuthorizationService, disableUICapabilitesFactory, registerPrivilegesWithCluster } from './server/lib/authorization';
+import { createAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
-import { createOptionalPlugin } from './server/lib/optional_plugin';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -89,28 +87,6 @@ export const security = (kibana) => new kibana.Plugin({
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
       };
-    },
-    replaceInjectedVars: async function (originalInjectedVars, request, server) {
-      // if we have a license which doesn't enable security, or we're a legacy user
-      // we shouldn't disable any ui capabilities
-      const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbacForRequest(request)) {
-        return originalInjectedVars;
-      }
-
-      const disableUICapabilites = disableUICapabilitesFactory(server, request);
-      // if we're an anonymous route, we disable all ui capabilities
-      if (request.route.settings.auth === false) {
-        return {
-          ...originalInjectedVars,
-          uiCapabilities: disableUICapabilites.all(originalInjectedVars.uiCapabilities)
-        };
-      }
-
-      return {
-        ...originalInjectedVars,
-        uiCapabilities: await disableUICapabilites.usingPrivileges(originalInjectedVars.uiCapabilities)
-      };
     }
   },
 
@@ -138,12 +114,8 @@ export const security = (kibana) => new kibana.Plugin({
     // automatically assigned to all routes that don't contain an auth config.
     server.auth.default('session');
 
-    const { savedObjects } = server;
-
-    const spaces = createOptionalPlugin(config, 'xpack.spaces', server.plugins, 'spaces');
-
     // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin, spaces);
+    const authorization = createAuthorizationService(server, xpackInfoFeature);
     server.expose('authorization', deepFreeze(authorization));
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
@@ -154,6 +126,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
+    const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
     }) => {
@@ -172,15 +145,17 @@ export const security = (kibana) => new kibana.Plugin({
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
+        const { spaces } = server.plugins;
 
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
           baseClient: client,
-          checkPrivilegesDynamicallyWithRequest: authorization.checkPrivilegesDynamicallyWithRequest,
+          checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
           errors: savedObjects.SavedObjectsClient.errors,
           request,
           savedObjectTypes: savedObjects.types,
+          spaces,
         });
       }
 
@@ -210,50 +185,6 @@ export const security = (kibana) => new kibana.Plugin({
           layout,
         }
       };
-    });
-
-
-    server.ext('onPostAuth', async function (req, h) {
-      const path = req.path;
-
-      const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
-
-      // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbacForRequest(req)) {
-        return h.continue;
-      }
-
-      const checkPrivileges = checkPrivilegesDynamicallyWithRequest(req);
-
-      // Enforce app restrictions
-      if (path.startsWith('/app/')) {
-        const appId = path.split('/', 3)[2];
-        const appAction = actions.app.get(appId);
-
-        const checkPrivilegesResponse = await checkPrivileges(appAction);
-        if (!checkPrivilegesResponse.hasAllRequested) {
-          return Boom.notFound();
-        }
-      }
-
-      // Enforce API restrictions for associated applications
-      if (path.startsWith('/api/')) {
-        const { tags = [] } = req.route.settings;
-
-        const actionTags = tags.filter(tag => tag.startsWith('access:'));
-
-        if (actionTags.length > 0) {
-          const feature = path.split('/', 3)[2];
-          const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
-
-          const checkPrivilegesResponse = await checkPrivileges(apiActions);
-          if (!checkPrivilegesResponse.hasAllRequested) {
-            return Boom.notFound();
-          }
-        }
-      }
-
-      return h.continue;
     });
   }
 });
