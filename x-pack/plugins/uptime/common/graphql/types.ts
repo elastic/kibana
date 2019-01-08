@@ -385,13 +385,13 @@ export interface ErrorListItem {
 // ====================================================
 
 export interface AllPingsQueryArgs {
-  sort: string;
+  sort?: string | null;
 
-  size: number;
+  size?: number | null;
 
-  monitorId: string;
+  monitorId?: string | null;
 
-  status: string;
+  status?: string | null;
 
   dateRangeStart: string;
 
@@ -402,7 +402,7 @@ export interface GetMonitorsQueryArgs {
 
   dateRangeEnd: string;
 
-  filters: string;
+  filters?: string | null;
 }
 export interface GetSnapshotQueryArgs {
   dateRangeStart: string;
@@ -413,7 +413,7 @@ export interface GetSnapshotQueryArgs {
 
   windowSize: number;
 
-  filters: string;
+  filters?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
   monitorId: string;
@@ -427,7 +427,7 @@ export interface GetLatestMonitorsQueryArgs {
 
   dateRangeEnd: string;
 
-  monitorId: string;
+  monitorId?: string | null;
 }
 export interface GetFilterBarQueryArgs {
   dateRangeStart: string;
@@ -439,7 +439,7 @@ export interface GetErrorsListQueryArgs {
 
   dateRangeEnd: string;
 
-  filters: string;
+  filters?: string | null;
 }
 
 // ====================================================

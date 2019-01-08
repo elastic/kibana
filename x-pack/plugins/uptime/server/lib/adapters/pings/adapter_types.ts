@@ -22,13 +22,13 @@ export interface UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string
+    monitorId?: string | null
   ): Promise<Ping[]>;
 
   getPingHistogram(
     request: any,
     range: UMGqlRange,
-    filters?: string
+    filters?: string | null
   ): Promise<HistogramSeries[] | null>;
 
   getDocCount(request: any): Promise<DocCount>;

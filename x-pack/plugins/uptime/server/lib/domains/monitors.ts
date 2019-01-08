@@ -25,7 +25,7 @@ export class UMMonitorsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters: string
+    filters?: string | null
   ): Promise<any> {
     return this.adapter.getLatestMonitors(request, dateRangeStart, dateRangeEnd, filters);
   }
@@ -35,7 +35,7 @@ export class UMMonitorsDomain {
     range: UMGqlRange,
     downCount: number,
     windowSize: number,
-    filters?: string
+    filters?: string | null
   ): Promise<any> {
     return this.adapter.getSnapshotCount(request, range, downCount, windowSize, filters);
   }
@@ -52,7 +52,7 @@ export class UMMonitorsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string
+    filters?: string | null
   ): Promise<any> {
     return this.adapter.getErrorsList(request, dateRangeStart, dateRangeEnd, filters);
   }

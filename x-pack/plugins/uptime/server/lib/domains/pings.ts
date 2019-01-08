@@ -37,15 +37,15 @@ export class UMPingsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string
+    monitorId?: string | null
   ): Promise<Ping[]> {
     return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd, monitorId);
   }
 
-  public async getHist(
+  public async getPingHistogram(
     request: any,
     range: UMGqlRange,
-    filters?: string
+    filters?: string | null
   ): Promise<HistogramSeries[] | null> {
     return this.adapter.getPingHistogram(request, range, filters);
   }

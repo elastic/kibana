@@ -11,7 +11,11 @@ import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
-const getFilteredQuery = (dateRangeStart: string, dateRangeEnd: string, filters?: string) => {
+const getFilteredQuery = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: string | null
+) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
@@ -92,7 +96,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string
+    monitorId?: string | null
   ): Promise<Ping[]> {
     const must: any[] = [];
     if (monitorId) {
@@ -148,7 +152,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   public async getPingHistogram(
     request: any,
     range: UMGqlRange,
-    filters?: string
+    filters?: string | null
   ): Promise<HistogramSeries[] | null> {
     const { dateRangeStart, dateRangeEnd } = range;
     const params = {

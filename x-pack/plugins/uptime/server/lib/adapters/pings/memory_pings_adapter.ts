@@ -5,7 +5,7 @@
  */
 
 import { take } from 'lodash';
-import { UMPingSortDirectionArg } from '../../../../common/domain_types';
+import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -42,21 +42,27 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     };
   }
 
-  // TODO implement
-  public async getLatestMonitorDocs(
+  // TODO: implement
+  public getLatestMonitorDocs(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string
+    monitorId?: string | null
   ): Promise<Ping[]> {
     throw new Error('Method not implemented.');
   }
-  // TODO implement
-  public async getPingHistogram(request: any): Promise<HistogramSeries[] | null> {
+
+  // TODO: implement
+  public getPingHistogram(
+    request: any,
+    range: UMGqlRange,
+    filters?: string | null | undefined
+  ): Promise<HistogramSeries[] | null> {
     throw new Error('Method not implemented.');
   }
 
-  public async getDocCount(request: any): Promise<DocCount> {
+  // TODO: implement
+  public getDocCount(request: any): Promise<DocCount> {
     throw new Error('Method not implemented.');
   }
 }

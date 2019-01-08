@@ -118,7 +118,16 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     };
     try {
       if (uptimeConfigurationData) {
-        return JSON.parse(uptimeConfigurationData) || {};
+        const parsed = JSON.parse(uptimeConfigurationData) || {};
+        const { dateRangeStart, dateRangeEnd } = parsed;
+        if (
+          (dateRangeEnd && typeof dateRangeEnd === 'number') ||
+          (dateRangeStart && typeof dateRangeStart === 'number')
+        ) {
+          this.updatePersistedState(defaultState);
+          return defaultState;
+        }
+        return parsed;
       }
     } catch (e) {
       // TODO: this should result in a redirect to error page

@@ -16,41 +16,25 @@
               {
                 "name": "sort",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "size",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "monitorId",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "status",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
@@ -121,11 +105,7 @@
               {
                 "name": "filters",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -180,11 +160,7 @@
               {
                 "name": "filters",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -262,11 +238,7 @@
               {
                 "name": "monitorId",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -342,11 +314,7 @@
               {
                 "name": "filters",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],

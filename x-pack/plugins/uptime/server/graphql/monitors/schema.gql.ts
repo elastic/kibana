@@ -94,7 +94,7 @@ export const monitorsSchema = gql`
     getMonitors(
       dateRangeStart: String!
       dateRangeEnd: String!
-      filters: String!
+      filters: String
     ): LatestMonitorsResult
 
     getSnapshot(
@@ -102,7 +102,7 @@ export const monitorsSchema = gql`
       dateRangeEnd: String!
       downCount: Int!
       windowSize: Int!
-      filters: String!
+      filters: String
     ): Snapshot
 
     getMonitorChartsData(
@@ -111,10 +111,10 @@ export const monitorsSchema = gql`
       dateRangeEnd: String!
     ): [MonitorChartEntry]
 
-    getLatestMonitors(dateRangeStart: String!, dateRangeEnd: String!, monitorId: String!): [Ping!]!
+    getLatestMonitors(dateRangeStart: String!, dateRangeEnd: String!, monitorId: String): [Ping!]!
 
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 
-    getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String!): [ErrorListItem]
+    getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem]
   }
 `;

@@ -72,6 +72,7 @@ export const MonitorCharts = ({
       const downSeries: any[] = [];
       const upSeries: any[] = [];
       const checksSeries: any[] = [];
+      const maxRtt: any[] = [];
       monitorChartsData.forEach(
         ({
           maxWriteRequest,
@@ -84,6 +85,10 @@ export const MonitorCharts = ({
           minDuration,
           status,
         }: any) => {
+          maxRtt.push({
+            x: maxWriteRequest.x,
+            y: maxWriteRequest.y + maxValidate.y + maxContent.y + maxResponse.y + maxTcpRtt.y,
+          });
           rttWriteRequestSeries.push(maxWriteRequest);
           rttValidateSeries.push(maxValidate);
           rttContentSeries.push(maxContent);
@@ -96,6 +101,14 @@ export const MonitorCharts = ({
           checksSeries.push({ x: status.x, y: status.total });
         }
       );
+
+      const checksDomain = upSeries.concat(downSeries).map(({ y }) => y);
+      const domainLimits = [Math.min(...checksDomain), Math.max(...checksDomain)];
+      const durationDomain = avgDurationSeries.concat(areaRttSeries);
+      const durationLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
+
+      const rttDomain = maxRtt.map(({ y }) => y);
+      const rttLimits = [0, Math.max(...rttDomain)];
 
       return (
         <Fragment>
@@ -117,6 +130,7 @@ export const MonitorCharts = ({
                   xType={EuiSeriesChartUtils.SCALE.TIME}
                   width={500}
                   height={200}
+                  yDomain={rttLimits}
                 >
                   <EuiAreaSeries
                     name={i18n.translate(
@@ -175,6 +189,7 @@ export const MonitorCharts = ({
                   width={500}
                   height={200}
                   xType={EuiSeriesChartUtils.SCALE.TIME}
+                  yDomain={durationLimits}
                 >
                   <EuiAreaSeries
                     name={i18n.translate(
@@ -215,6 +230,7 @@ export const MonitorCharts = ({
               height={200}
               xType={EuiSeriesChartUtils.SCALE.TIME}
               stackBy="y"
+              yDomain={domainLimits}
             >
               <EuiAreaSeries
                 name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {

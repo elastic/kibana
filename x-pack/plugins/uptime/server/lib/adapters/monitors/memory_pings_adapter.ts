@@ -20,7 +20,7 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters: string
+    filters?: string | null
   ): Promise<any> {
     return this.monitorsDB.filter(ping => {
       // const timestamp = moment(ping.timestamp).valueOf();
@@ -41,7 +41,8 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     range: UMGqlRange,
     downCount: number,
-    windowSize: number
+    windowSize: number,
+    filters?: string | null
   ): Promise<any> {
     throw new Error('Method not implemented.');
   }
@@ -53,7 +54,7 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | undefined
+    filters?: string | null
   ): Promise<any> {
     throw new Error('Method not implemented.');
   }
