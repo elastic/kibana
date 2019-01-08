@@ -26,8 +26,9 @@ import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
+import { AppPageProps } from '../../frontend_types';
 
-interface PageProps {
+interface PageProps extends AppPageProps {
   beat: CMBeat;
   intl: InjectedIntl;
 }
@@ -36,6 +37,7 @@ interface PageState {
   selectedConfig: ConfigurationBlock | null;
   tags: BeatTag[];
   configuration_blocks: ConfigurationBlock[];
+  configurationBlocksPage: number;
 }
 
 class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
@@ -46,7 +48,21 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
       selectedConfig: null,
       tags: [],
       configuration_blocks: [],
+      configurationBlocksPage: 0,
     };
+  }
+
+  public async componentWillMount() {
+    const tags = await this.props.libs.tags.getTagsWithIds(this.props.beat.tags);
+    const blocksResult = await this.props.libs.configBlocks.getForTags(
+      this.props.beat.tags,
+      this.state.configurationBlocksPage
+    );
+
+    this.setState({
+      configuration_blocks: blocksResult.blocks,
+      tags,
+    });
   }
   public render() {
     const props = this.props;

@@ -11,7 +11,7 @@ import { FrontendConfigBlocksAdapter } from './adapters/configuration_blocks/ada
 
 export class ConfigBlocksLib {
   public upsert = this.adapter.upsert.bind(this.adapter);
-  public getForTag = this.adapter.getForTag.bind(this.adapter);
+  public getForTags = this.adapter.getForTags.bind(this.adapter);
   public delete = this.adapter.delete.bind(this.adapter);
 
   constructor(

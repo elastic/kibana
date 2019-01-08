@@ -17,8 +17,8 @@ export class RestConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
     >(`/api/beats/configurations`, [block]);
     return result[0];
   }
-  public async getForTag(
-    tagId: string,
+  public async getForTags(
+    tagIds: string[],
     page: number
   ): Promise<{
     error?: string;
@@ -31,7 +31,7 @@ export class RestConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
       blocks: ConfigurationBlock[];
       page: number;
       total: number;
-    }>(`/api/beats/configurations/${tagId}/${page}`);
+    }>(`/api/beats/configurations/${tagIds.join(',')}/${page}`);
   }
   public async delete(id: string): Promise<boolean> {
     return (await this.REST.delete<{ success: boolean }>(`/api/beats/configurations/${id}`))

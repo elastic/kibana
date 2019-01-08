@@ -9,8 +9,8 @@ export interface FrontendConfigBlocksAdapter {
   upsert(
     block: ConfigurationBlock
   ): Promise<{ success?: boolean; blockID?: string; error?: string }>;
-  getForTag(
-    tagId: string,
+  getForTags(
+    tagIds: string[],
     page: number
   ): Promise<{
     error?: string;

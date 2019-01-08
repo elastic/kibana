@@ -19,8 +19,8 @@ export class MemoryConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
         .substring(7),
     };
   }
-  public async getForTag(
-    tagId: string
+  public async getForTags(
+    tagIds: string[]
   ): Promise<{
     error?: string;
     blocks: ConfigurationBlock[];
@@ -28,9 +28,9 @@ export class MemoryConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
     total: number;
   }> {
     return {
-      blocks: this.db.filter(block => block.tag === tagId),
+      blocks: this.db.filter(block => tagIds.includes(block.tag)),
       page: 0,
-      total: this.db.filter(block => block.tag === tagId).length,
+      total: this.db.filter(block => tagIds.includes(block.tag)).length,
     };
   }
   public async delete(id: string): Promise<boolean> {
