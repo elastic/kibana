@@ -4,23 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { SpaceValidator } from './validate_space';
 
 let validator: SpaceValidator;
-
-const ALL_FEATURES: Feature[] = [
-  {
-    id: 'foo',
-    name: 'foo',
-    privileges: {},
-  },
-  {
-    id: 'bar',
-    name: 'bar',
-    privileges: {},
-  },
-];
 
 describe('validateSpaceName', () => {
   beforeEach(() => {
@@ -167,7 +153,7 @@ describe('validateSpaceFeatures', () => {
     expect(validator.validateEnabledFeatures(space)).toEqual({ isInvalid: false });
   });
 
-  it('does not allow all features to be disabled', () => {
+  it('allows all features to be disabled', () => {
     const space = {
       id: '',
       name: '',
@@ -175,24 +161,7 @@ describe('validateSpaceFeatures', () => {
     };
 
     expect(validator.validateEnabledFeatures(space)).toEqual({
-      isInvalid: true,
-      error: `At least 1 feature must be enabled`,
+      isInvalid: false,
     });
-  });
-
-  it('ignores unknown features', () => {
-    // builds a list of unknown features, of the same length of known features.
-    // this enables us to verify that we don't get the "at least 1 feature must be enabled"
-    // message when specifying the unknown features
-
-    const unknownFeatureIds = ALL_FEATURES.map(feature => `${feature.id}-unknown`);
-
-    const space = {
-      id: '',
-      name: '',
-      disabledFeatures: unknownFeatureIds,
-    };
-
-    expect(validator.validateEnabledFeatures(space)).toEqual({ isInvalid: false });
   });
 });

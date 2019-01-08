@@ -41,6 +41,7 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiLink
+        aria-label="hide desc"
         color="primary"
         onClick={[Function]}
         type="button"

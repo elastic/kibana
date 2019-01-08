@@ -6,7 +6,7 @@
 // @ts-ignore
 import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import { MAX_SPACE_INITIALS } from '../../../../../common/constants';
 import { Space } from '../../../../../common/model/space';
 import { getSpaceColor, getSpaceInitials } from '../../../../../common/space_attributes';
@@ -38,7 +38,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     const { initialsHasFocus, pendingInitials } = this.state;
 
     return (
-      <Fragment>
+      <form onSubmit={() => false}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={intl.formatMessage({
@@ -66,7 +66,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
             <EuiColorPicker color={getSpaceColor(space)} onChange={this.onColorChange} />
           </EuiFormRow>
         </EuiFlexItem>
-      </Fragment>
+      </form>
     );
   }
 

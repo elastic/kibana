@@ -23,6 +23,8 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { uiCapabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
+import { DEFAULT_SPACE_ID } from 'x-pack/plugins/spaces/common/constants';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
@@ -32,10 +34,12 @@ import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
+import { getEnabledFeatures } from '../lib/feature_utils';
 
 interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
+  features: Feature[];
   intl: InjectedIntl;
 }
 
@@ -285,20 +289,65 @@ class SpacesGridPageUI extends Component<Props, State> {
         },
       },
       {
-        field: 'id',
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
-          defaultMessage: 'Identifier',
-        }),
-        sortable: true,
-      },
-      {
         field: 'description',
         name: intl.formatMessage({
           id: 'xpack.spaces.management.spacesGridPage.descriptionColumnName',
           defaultMessage: 'Description',
         }),
         sortable: true,
+      },
+      {
+        field: 'disabledFeatures',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.management.spacesGridPage.featuresColumnName',
+          defaultMessage: 'Features',
+        }),
+        sortable: true,
+        render: (disabledFeatures: string[], record: Space) => {
+          const enabledFeatureCount = getEnabledFeatures(this.props.features, record).length;
+          if (enabledFeatureCount === this.props.features.length) {
+            return (
+              <FormattedMessage
+                id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
+                defaultMessage="All features visible"
+              />
+            );
+          }
+          if (enabledFeatureCount === 0) {
+            return (
+              <EuiText color={'danger'}>
+                <FormattedMessage
+                  id="xpack.spaces.management.spacesGridPage.noFeaturesEnabled"
+                  defaultMessage="No features visible"
+                />
+              </EuiText>
+            );
+          }
+          return (
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.someFeaturesEnabled"
+              defaultMessage="{enabledFeatureCount} / {totalFeatureCount} features visible"
+              values={{
+                enabledFeatureCount,
+                totalFeatureCount: this.props.features.length,
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: 'id',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
+          defaultMessage: 'Identifier',
+        }),
+        sortable: true,
+        render(id: string) {
+          if (id === DEFAULT_SPACE_ID) {
+            return '';
+          }
+          return id;
+        },
       },
       {
         name: intl.formatMessage({

@@ -56,6 +56,7 @@ describe('SpacesGridPage', () => {
         <SpacesGridPage.WrappedComponent
           spacesManager={spacesManager}
           spacesNavState={spacesNavState}
+          features={[]}
           intl={null as any}
         />
       )
@@ -67,6 +68,7 @@ describe('SpacesGridPage', () => {
       <SpacesGridPage.WrappedComponent
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        features={[]}
         intl={null as any}
       />
     );

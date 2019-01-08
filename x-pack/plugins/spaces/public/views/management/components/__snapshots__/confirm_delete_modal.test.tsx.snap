@@ -4,6 +4,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
 <EuiOverlayMask>
   <EuiModal
     className="spcConfirmDeleteModal"
+    initialFocus="input[name=\\"confirmDeleteSpaceInput\\"]"
     maxWidth={true}
     onClose={[MockFunction]}
   >
@@ -51,13 +52,14 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           fullWidth={false}
           hasEmptyLabelSpace={false}
           isInvalid={false}
-          label="Confirm space name"
+          label="Confirm space name to delete"
         >
           <EuiFieldText
             compressed={false}
             disabled={false}
             fullWidth={false}
             isLoading={false}
+            name="confirmDeleteSpaceInput"
             onChange={[Function]}
             value=""
           />

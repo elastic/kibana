@@ -9,6 +9,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';
 import { FeatureTable } from './feature_table';
 
@@ -21,8 +22,19 @@ interface Props {
 
 export class EnabledFeatures extends Component<Props, {}> {
   public render() {
+    const description = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.customizeVisibleFeatures',
+      defaultMessage: 'Customize visible features',
+    });
+
     return (
-      <SectionPanel collapsible initiallyCollapsed title={this.getPanelTitle()}>
+      <SectionPanel
+        collapsible
+        initiallyCollapsed
+        title={this.getPanelTitle()}
+        description={description}
+        intl={this.props.intl}
+      >
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -51,13 +63,11 @@ export class EnabledFeatures extends Component<Props, {}> {
 
   private getPanelTitle = () => {
     const featureCount = this.props.features.length;
-    const disabledCount = this.getKnownDisabledFeatures().length;
-
-    const enabledCount = featureCount - disabledCount;
+    const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
 
     let details: null | ReactNode = null;
 
-    if (disabledCount === 0) {
+    if (enabledCount === featureCount) {
       details = (
         <EuiText size={'s'} style={{ display: 'inline-block' }}>
           <em>
@@ -100,24 +110,14 @@ export class EnabledFeatures extends Component<Props, {}> {
       <span>
         <FormattedMessage
           id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-          defaultMessage="Control feature display"
+          defaultMessage="Customize feature display"
         />{' '}
         {details}
       </span>
     );
   };
 
-  private getKnownDisabledFeatures = () => {
-    return (this.props.space.disabledFeatures || []).filter(id =>
-      this.props.features.find(({ id: featureId }) => featureId === id)
-    );
-  };
-
   private getDescription = () => {
-    const featureCount = this.props.features.length;
-    const disabledCount = this.getKnownDisabledFeatures().length;
-    const enabledCount = featureCount - disabledCount;
-
     return (
       <Fragment>
         <EuiText size="s" color="subdued">
@@ -128,20 +128,6 @@ export class EnabledFeatures extends Component<Props, {}> {
             />
           </p>
         </EuiText>
-        {enabledCount === 0 && (
-          <Fragment>
-            <EuiSpacer />
-            <EuiCallOut
-              color="danger"
-              title={this.props.intl.formatMessage({
-                id: 'xpack.spaces.management.enabledSpaceFeatures.enableAtLeastOneFeatureMessage',
-                defaultMessage: 'At least one feature must be visible',
-              })}
-              iconType="alert"
-              size="s"
-            />
-          </Fragment>
-        )}
       </Fragment>
     );
   };

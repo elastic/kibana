@@ -49,13 +49,22 @@ export class CustomizeSpace extends Component<Props, State> {
   public render() {
     const { validator, editingExistingSpace, intl } = this.props;
     const { name = '', description = '' } = this.props.space;
+    const panelTitle = intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.customizeSpaceTitle',
+      defaultMessage: 'Customize your space',
+    });
+
+    // TODO: awaiting https://github.com/elastic/eui/pull/1410 to land in next version of EUI for types
+    const extraPopoverProps: any = {
+      initialFocus: 'input[name="spaceInitials"]',
+    };
+
     return (
       <SectionPanel
         collapsible={false}
-        title={intl.formatMessage({
-          id: 'xpack.spaces.management.manageSpacePage.customizeSpaceTitle',
-          defaultMessage: 'Customize your space',
-        })}
+        title={panelTitle}
+        description={panelTitle}
+        intl={this.props.intl}
       >
         <EuiDescribedFormGroup
           title={
@@ -106,7 +115,7 @@ export class CustomizeSpace extends Component<Props, State> {
                     <button
                       title={intl.formatMessage({
                         id: 'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
-                        defaultMessage: 'Click to Customize',
+                        defaultMessage: 'Click to customize this space avatar',
                       })}
                       onClick={this.togglePopover}
                     >
@@ -114,6 +123,8 @@ export class CustomizeSpace extends Component<Props, State> {
                     </button>
                   }
                   closePopover={this.closePopover}
+                  {...extraPopoverProps}
+                  ownFocus={true}
                   isOpen={this.state.customizingAvatar}
                 >
                   <div style={{ maxWidth: 240 }}>

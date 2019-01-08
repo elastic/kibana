@@ -6,11 +6,8 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiLoadingSpinner,
   EuiPageContent,
   EuiPageContentBody,
@@ -205,7 +202,22 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   public getFormButtons = () => {
-    const saveText = this.editingExistingSpace() ? 'Update space' : 'Create space';
+    const createSpaceText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.createSpaceButton',
+      defaultMessage: 'Create space',
+    });
+
+    const updateSpaceText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.updateSpaceButton',
+      defaultMessage: 'Update space',
+    });
+
+    const cancelButtonText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.cancelSpaceButton',
+      defaultMessage: 'Cancel',
+    });
+
+    const saveText = this.editingExistingSpace() ? updateSpaceText : createSpaceText;
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
@@ -215,7 +227,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
-            Cancel
+            {cancelButtonText}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />

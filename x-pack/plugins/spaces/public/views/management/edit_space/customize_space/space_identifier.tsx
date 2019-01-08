@@ -88,13 +88,26 @@ class SpaceIdentifierUI extends Component<Props, State> {
         defaultMessage="[customize]"
       />
     );
+
+    const editLinkLabel = this.state.editing
+      ? this.props.intl.formatMessage({
+          id: 'xpack.spaces.management.spaceIdentifier.resetSpaceNameLinkLabel',
+          defaultMessage: 'Reset the URL identifier',
+        })
+      : this.props.intl.formatMessage({
+          id: 'xpack.spaces.management.spaceIdentifier.customizeSpaceNameLinkLabel',
+          defaultMessage: 'Customize the URL identifier',
+        });
+
     return (
       <p>
         <FormattedMessage
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           defaultMessage="URL identifier "
         />
-        <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink>
+        <EuiLink onClick={this.onEditClick} aria-label={editLinkLabel}>
+          {editLinkText}
+        </EuiLink>
       </p>
     );
   };
