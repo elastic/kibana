@@ -6,41 +6,43 @@
 
 import { getOr } from 'lodash/fp';
 import { SourceResolvers } from '../../graphql/types';
+import { Authorizations } from '../../lib/authorization';
+import { AuthorizationsRequestOptions } from '../../lib/authorization/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { UncommonProcesses } from '../../lib/uncommon_processes';
-import { UncommonProcessesRequestOptions } from '../../lib/uncommon_processes/types';
 import { getFields } from '../../utils/build_query/fields';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type QueryUncommonProcessesResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.UncommonProcessesResolver>,
+type QueryAuthorizationResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.AuthorizationResolver>,
   QuerySourceResolver
 >;
 
-export interface UncommonProcessesResolversDeps {
-  uncommonProcesses: UncommonProcesses;
+export interface AuthorizationResolversDeps {
+  authorizations: Authorizations;
 }
 
-export const createUncommonProcessesResolvers = (
-  libs: UncommonProcessesResolversDeps
+export const createAuthorizationResolvers = (
+  libs: AuthorizationResolversDeps
 ): {
   Source: {
-    UncommonProcesses: QueryUncommonProcessesResolver;
+    Authorization: QueryAuthorizationResolver;
   };
 } => ({
   Source: {
-    async UncommonProcesses(source, args, { req }, info) {
-      // console.log('----> Uncommon process resolver');
+    async Authorization(source, args, { req }, info) {
+      // console.log('---> Authorization Resolver');
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
-      const options: UncommonProcessesRequestOptions = {
+      const options: AuthorizationsRequestOptions = {
         sourceConfiguration: source.configuration,
         timerange: args.timerange,
         pagination: args.pagination,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(field => field.replace('edges.uncommonProcess.', '')),
+        fields: fields.map(field => field.replace('edges.authorization.', '')),
       };
-      return libs.uncommonProcesses.getUncommonProcesses(req, options);
+      const x = libs.authorizations.getAuthorizations(req, options);
+      // console.log('---> Authorization Resolver returning', x);
+      return x;
     },
   },
 });

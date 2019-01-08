@@ -56,6 +56,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
+  /** Gets Authorization success and failures based on a timerange */
+  Authorization: AuthorizationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -126,6 +128,52 @@ export interface IndexField {
   aggregatable: boolean;
 }
 
+export interface AuthorizationsData {
+  edges: AuthorizationsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface AuthorizationsEdges {
+  authorization: AuthorizationItem;
+
+  cursor: CursorType;
+}
+
+export interface AuthorizationItem {
+  _id: string;
+
+  name: string;
+
+  title?: string | null;
+
+  instances: number;
+
+  hosts: HostEcsFields[];
+}
+
+export interface HostEcsFields {
+  id?: string | null;
+
+  ip?: string | null;
+
+  name?: string | null;
+}
+
+export interface CursorType {
+  value: string;
+
+  tiebreaker?: string | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
+}
+
 export interface EventsData {
   kpiEventType?: KpiItem[] | null;
 
@@ -194,14 +242,6 @@ export interface GeoEcsFields {
   region_name?: string | null;
 }
 
-export interface HostEcsFields {
-  id?: string | null;
-
-  ip?: string | null;
-
-  name?: string | null;
-}
-
 export interface SourceEcsFields {
   ip?: string | null;
 
@@ -230,18 +270,6 @@ export interface UserEcsFields {
   id?: number | null;
 
   name?: string | null;
-}
-
-export interface CursorType {
-  value: string;
-
-  tiebreaker?: string | null;
-}
-
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
 }
 
 export interface HostsData {
@@ -307,6 +335,15 @@ export interface SayMyName {
 // InputTypes
 // ====================================================
 
+export interface TimerangeInput {
+  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
+  interval: string;
+  /** The end of the timerange */
+  to: number;
+  /** The beginning of the timerange */
+  from: number;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -322,15 +359,6 @@ export interface SortField {
   direction?: Direction | null;
 }
 
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: number;
-  /** The beginning of the timerange */
-  from: number;
-}
-
 // ====================================================
 // Arguments
 // ====================================================
@@ -338,6 +366,13 @@ export interface TimerangeInput {
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
+}
+export interface AuthorizationSourceArgs {
+  timerange: TimerangeInput;
+
+  pagination: PaginationInput;
+
+  filterQuery?: string | null;
 }
 export interface EventsSourceArgs {
   pagination: PaginationInput;
@@ -423,6 +458,8 @@ export namespace SourceResolvers {
     configuration?: ConfigurationResolver<SourceConfiguration, TypeParent, Context>;
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, Context>;
+    /** Gets Authorization success and failures based on a timerange */
+    Authorization?: AuthorizationResolver<AuthorizationsData, TypeParent, Context>;
     /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Events?: EventsResolver<EventsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -448,6 +485,19 @@ export namespace SourceResolvers {
     Parent,
     Context
   >;
+  export type AuthorizationResolver<
+    R = AuthorizationsData,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, AuthorizationArgs>;
+  export interface AuthorizationArgs {
+    timerange: TimerangeInput;
+
+    pagination: PaginationInput;
+
+    filterQuery?: string | null;
+  }
+
   export type EventsResolver<R = EventsData, Parent = Source, Context = SecOpsContext> = Resolver<
     R,
     Parent,
@@ -693,6 +743,155 @@ export namespace IndexFieldResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace AuthorizationsDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationsData> {
+    edges?: EdgesResolver<AuthorizationsEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<
+    R = AuthorizationsEdges[],
+    Parent = AuthorizationsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = AuthorizationsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
+    Parent = AuthorizationsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuthorizationsEdgesResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationsEdges> {
+    authorization?: AuthorizationResolver<AuthorizationItem, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type AuthorizationResolver<
+    R = AuthorizationItem,
+    Parent = AuthorizationsEdges,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = AuthorizationsEdges,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuthorizationItemResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationItem> {
+    _id?: IdResolver<string, TypeParent, Context>;
+
+    name?: NameResolver<string, TypeParent, Context>;
+
+    title?: TitleResolver<string | null, TypeParent, Context>;
+
+    instances?: InstancesResolver<number, TypeParent, Context>;
+
+    hosts?: HostsResolver<HostEcsFields[], TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string,
+    Parent = AuthorizationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string,
+    Parent = AuthorizationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TitleResolver<
+    R = string | null,
+    Parent = AuthorizationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type InstancesResolver<
+    R = number,
+    Parent = AuthorizationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HostsResolver<
+    R = HostEcsFields[],
+    Parent = AuthorizationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HostEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type IpResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CursorTypeResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = CursorType> {
+    value?: ValueResolver<string, TypeParent, Context>;
+
+    tiebreaker?: TiebreakerResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ValueResolver<R = string, Parent = CursorType, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TiebreakerResolver<
+    R = string | null,
+    Parent = CursorType,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PageInfoResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = PageInfo> {
+    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+
+    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+  }
+
+  export type EndCursorResolver<
+    R = CursorType | null,
+    Parent = PageInfo,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HasNextPageResolver<
+    R = boolean | null,
+    Parent = PageInfo,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace EventsDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = EventsData> {
     kpiEventType?: KpiEventTypeResolver<KpiItem[] | null, TypeParent, Context>;
@@ -917,32 +1116,6 @@ export namespace GeoEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace HostEcsFieldsResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
-    id?: IdResolver<string | null, TypeParent, Context>;
-
-    ip?: IpResolver<string | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = string | null,
-    Parent = HostEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type IpResolver<
-    R = string | null,
-    Parent = HostEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = HostEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace SourceEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = SourceEcsFields> {
     ip?: IpResolver<string | null, TypeParent, Context>;
@@ -1034,44 +1207,6 @@ export namespace UserEcsFieldsResolvers {
   export type NameResolver<
     R = string | null,
     Parent = UserEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace CursorTypeResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = CursorType> {
-    value?: ValueResolver<string, TypeParent, Context>;
-
-    tiebreaker?: TiebreakerResolver<string | null, TypeParent, Context>;
-  }
-
-  export type ValueResolver<R = string, Parent = CursorType, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TiebreakerResolver<
-    R = string | null,
-    Parent = CursorType,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace PageInfoResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = PageInfo> {
-    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
-
-    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
-  }
-
-  export type EndCursorResolver<
-    R = CursorType | null,
-    Parent = PageInfo,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type HasNextPageResolver<
-    R = boolean | null,
-    Parent = PageInfo,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

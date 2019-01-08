@@ -7,6 +7,7 @@
 import { addMockFunctionsToSchema, IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { createMocks, schemas } from './graphql';
+import { createAuthorizationResolvers } from './graphql/authorization';
 import { createEventsResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
 import { createSourceStatusResolvers } from './graphql/source_status';
@@ -28,6 +29,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createUncommonProcessesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
+      createAuthorizationResolvers(libs) as IResolvers,
       createEventsResolvers(libs) as IResolvers,
       createHostsResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
