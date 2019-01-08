@@ -47,7 +47,6 @@ export function KuiListingTable({
   toolBarActions,
   onFilter,
   onItemSelectionChanged,
-  enableSelection,
   selectedRowIds,
   filter,
   prompt,
@@ -77,12 +76,11 @@ export function KuiListingTable({
     }
   }
 
-  function renderTableRows(enableSelection) {
+  function renderTableRows() {
     return rows.map((row, rowIndex) => {
       return (
         <KuiListingTableRow
           key={rowIndex}
-          enableSelection={enableSelection}
           isSelected={selectedRowIds.indexOf(row.id) >= 0}
           onSelectionChanged={toggleRow}
           row={row}
@@ -113,17 +111,15 @@ export function KuiListingTable({
     return (
       <KuiTable>
         <KuiTableHeader>
-          {enableSelection &&
-            <KuiTableHeaderCheckBoxCell
-              isChecked={areAllRowsSelected()}
-              onChange={toggleAll}
-            />
-          }
+          <KuiTableHeaderCheckBoxCell
+            isChecked={areAllRowsSelected()}
+            onChange={toggleAll}
+          />
           {renderHeader()}
         </KuiTableHeader>
 
         <KuiTableBody>
-          {renderTableRows(enableSelection)}
+          {renderTableRows()}
         </KuiTableBody>
       </KuiTable>
     );
@@ -175,7 +171,6 @@ KuiListingTable.propTypes = {
   })),
   pager: PropTypes.node,
   onItemSelectionChanged: PropTypes.func.isRequired,
-  enableSelection: PropTypes.bool,
   selectedRowIds: PropTypes.array,
   prompt: PropTypes.node, // If given, will be shown instead of a table with rows.
   onFilter: PropTypes.func,
@@ -186,5 +181,4 @@ KuiListingTable.propTypes = {
 KuiListingTable.defaultProps = {
   rows: [],
   selectedRowIds: [],
-  enableSelection: true,
 };

@@ -57,15 +57,13 @@ export class KuiListingTableRow extends React.PureComponent {
   }
 
   render() {
-    const { enableSelection, isSelected } = this.props;
+    const { isSelected } = this.props;
     return (
       <KuiTableRow>
-        {enableSelection &&
-          <KuiTableRowCheckBoxCell
-            isChecked={isSelected}
-            onChange={this.onSelectionChanged}
-          />
-        }
+        <KuiTableRowCheckBoxCell
+          isChecked={isSelected}
+          onChange={this.onSelectionChanged}
+        />
         {this.renderCells()}
       </KuiTableRow>
     );
@@ -85,11 +83,6 @@ KuiListingTableRow.propTypes = {
       ],
       )),
   }).isRequired,
-  enableSelection: PropTypes.bool,
   onSelectionChanged: PropTypes.func.isRequired,
   isSelected: PropTypes.bool,
-};
-
-KuiListingTableRow.defaultProps = {
-  enableSelection: true,
 };
