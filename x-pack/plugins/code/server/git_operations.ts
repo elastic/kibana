@@ -54,6 +54,13 @@ function entry2Tree(entry: TreeEntry): FileTree {
 }
 
 export class GitOperations {
+  public static sortFileTreeChildren(a: FileTree, b: FileTree) {
+    if (a.type !== b.type) {
+      return b.type - a.type;
+    } else {
+      return a.name.localeCompare(b.name);
+    }
+  }
   private repoRoot: string;
 
   constructor(repoRoot: string) {
@@ -329,6 +336,7 @@ export class GitOperations {
           }
         }
       }
+      fileTree.children.sort(GitOperations.sortFileTreeChildren);
     }
     if (path) {
       const entry = await checkExists(
