@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { getWorkpad, getWorkpadPersisted } from '../selectors/workpad';
 import { getAssetIds } from '../selectors/assets';
 import { setWorkpad } from '../actions/workpad';
@@ -55,7 +55,7 @@ export const esPersistMiddleware = ({ getState }) => {
     if (workpadChanged(curState, newState) || assetsChanged(curState, newState)) {
       const persistedWorkpad = getWorkpadPersisted(getState());
       return update(persistedWorkpad.id, persistedWorkpad).catch(err => {
-        const statusCode = get(err, 'response.status');
+        const statusCode = err.response && err.response.status;
         switch (statusCode) {
           case 400:
             return notify.error(err.response, {
