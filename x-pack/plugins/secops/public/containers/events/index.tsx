@@ -10,14 +10,13 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { Direction, EventItem, GetEventsQuery, KpiItem, PageInfo } from '../../graphql/types';
+import { Direction, EventItem, GetEventsQuery, PageInfo } from '../../graphql/types';
 import { eventsLimitSelector, inputsModel, State } from '../../store';
 import { eventsQuery } from './index.gql_query';
 
 export interface EventsArgs {
   id: string;
-  events?: EventItem[];
-  kpiEventType?: KpiItem[];
+  events: EventItem[];
   loading: boolean;
   totalCount: number;
   pageInfo: PageInfo;
@@ -69,7 +68,6 @@ const EventsComponentQuery = pure<EventsProps>(
     >
       {({ data, loading, fetchMore, refetch }) => {
         const events = getOr([], 'source.Events.edges', data);
-        const kpiEventType = getOr([], 'source.Events.kpiEventType', data);
         return children!({
           id,
           refetch,
@@ -77,7 +75,6 @@ const EventsComponentQuery = pure<EventsProps>(
           totalCount: getOr(0, 'source.Events.totalCount', data),
           pageInfo: getOr({}, 'source.Events.pageInfo', data),
           events,
-          kpiEventType,
           loadMore: (newCursor: string) =>
             fetchMore({
               variables: {

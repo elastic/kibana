@@ -40,8 +40,8 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const events = resp.data.source.Events;
           expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(24);
-          expect(events.pageInfo.endCursor!.value).to.equal('1546483081730');
+          expect(events.totalCount).to.be(494);
+          expect(events.pageInfo.endCursor!.value).to.equal('1546483081822');
         });
     });
 
@@ -55,8 +55,8 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
               '{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1483306065535}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1546554465535}}}],"minimum_should_match":1}}]}}]}}',
             pagination: {
               limit: 2,
-              cursor: '1546483081730',
-              tiebreaker: '192',
+              cursor: '1546483081822',
+              tiebreaker: '191',
             },
             sortField: {
               sortFieldId: 'timestamp',
@@ -68,7 +68,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
           const events = resp.data.source.Events;
 
           expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(24);
+          expect(events.totalCount).to.be(494);
           expect(events.edges[0]!.event.host!.name).to.be('siem-kibana');
         });
     });

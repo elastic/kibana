@@ -381,8 +381,6 @@ export namespace GetEventsQuery {
     pageInfo: PageInfo;
 
     edges: Edges[];
-
-    kpiEventType: KpiEventType[];
   };
 
   export type PageInfo = {
@@ -498,14 +496,6 @@ export namespace GetEventsQuery {
 
     signature_id?: number | null;
   };
-
-  export type KpiEventType = {
-    __typename?: 'KpiItem';
-
-    value: string;
-
-    count: number;
-  };
 }
 
 export namespace GetHostsQuery {
@@ -583,6 +573,44 @@ export namespace GetHostsQuery {
   };
 }
 
+export namespace GetKpiEventsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+    pagination: PaginationInput;
+    sortField: SortField;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Events: Events;
+  };
+
+  export type Events = {
+    __typename?: 'EventsData';
+
+    kpiEventType: KpiEventType[];
+  };
+
+  export type KpiEventType = {
+    __typename?: 'KpiItem';
+
+    value: string;
+
+    count: number;
+  };
+}
+
 export namespace SourceQuery {
   export type Variables = {
     sourceId?: string | null;
@@ -610,6 +638,8 @@ export namespace SourceQuery {
     auditbeatAlias: string;
 
     logAlias: string;
+
+    packetbeatAlias: string;
   };
 
   export type Status = {

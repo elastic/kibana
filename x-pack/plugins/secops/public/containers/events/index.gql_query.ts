@@ -70,10 +70,6 @@ export const eventsQuery = gql`
             }
           }
         }
-        kpiEventType {
-          value
-          count
-        }
       }
     }
   }

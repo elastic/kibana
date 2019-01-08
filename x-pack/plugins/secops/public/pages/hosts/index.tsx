@@ -22,6 +22,7 @@ import { manageQuery } from '../../components/page/manage_query';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
+import { KpiEventsQuery } from '../../containers/kpi_events';
 import { WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 
@@ -30,6 +31,7 @@ const basePath = chrome.getBasePath();
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
+const TypesBarManage = manageQuery(TypesBar);
 
 export const Hosts = pure(() => (
   <WithSource sourceId="default">
@@ -38,9 +40,12 @@ export const Hosts = pure(() => (
         <GlobalTime>
           {({ poll, to, from, setQuery }) => (
             <>
-              <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
-                {({ kpiEventType, loading }) => (
-                  <TypesBar
+              <KpiEventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                {({ kpiEventType, loading, id, refetch }) => (
+                  <TypesBarManage
+                    id={id}
+                    refetch={refetch}
+                    setQuery={setQuery}
                     loading={loading}
                     data={kpiEventType!.map((i: KpiItem) => ({
                       x: i.count,
@@ -48,7 +53,7 @@ export const Hosts = pure(() => (
                     }))}
                   />
                 )}
-              </EventsQuery>
+              </KpiEventsQuery>
               <HostsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
                 {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
                   <HostsTableManage

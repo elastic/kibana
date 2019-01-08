@@ -43,8 +43,8 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const events = resp.data.source.Events;
           expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(24);
-          expect(events.pageInfo.endCursor!.value).to.equal('1546483081730');
+          expect(events.totalCount).to.be(586);
+          expect(events.pageInfo.endCursor!.value).to.equal('1546510126039');
         });
     });
 
@@ -61,8 +61,8 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             },
             pagination: {
               limit: 2,
-              cursor: '1546483081730',
-              tiebreaker: '192',
+              cursor: '1546510126039',
+              tiebreaker: '193',
             },
             sortField: {
               sortFieldId: 'timestamp',
@@ -74,7 +74,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
           const events = resp.data.source.Events;
 
           expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(24);
+          expect(events.totalCount).to.be(586);
           expect(events.edges[0]!.event.host!.name).to.be('siem-kibana');
         });
     });
