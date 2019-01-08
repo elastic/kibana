@@ -33,6 +33,7 @@ import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import routing from '../services/routing';
 import { API_STATUS } from '../constants';
 import { SectionError } from './section_error';
+import { AdvancedSettingsForm } from './advanced_settings_form';
 import { validateFollowerIndex } from '../services/follower_index_validators';
 import { loadIndices } from '../services/api';
 
@@ -72,6 +73,61 @@ export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
     ...errors,
   }
 });
+
+/* eslint-disable */
+const schemaAdvancedFields = {
+  maxReadRequestOperationCount: {
+    label: 'Max read request operation count',
+    description: 'The maximum number of operations to pull per read from the remote cluster.',
+    validate: {}
+  },
+  maxOutstandingReadRequests: {
+    label: 'Max outstanding read requests',
+    description: 'The maximum number of outstanding reads requests from the remote cluster.',
+    validate: {}
+  },
+  maxReadRequestSize: {
+    label: 'Max read request size',
+    description: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster (bye value).',
+    validate: {}
+  },
+  maxWriteRequestOperationCount: {
+    label: 'Max write request operation count',
+    description: 'The maximum number of operations per bulk write request executed on the follower.',
+    validate: {}
+  },
+  maxWriteRequestSize: {
+    label: 'Max write request size',
+    description: 'The maximum total bytes of operations per bulk write request executed on the follower.',
+    validate: {}
+  },
+  maxOutstandingWriteRequests: {
+    label: 'Max outstanding write requests',
+    description: 'The maximum number of outstanding write requests on the follower.',
+    validate: {}
+  },
+  maxWriteBufferCount: {
+    label: 'Max write buffer count',
+    description: 'The maximum number of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the number of queued operations goes below the limit.',
+    validate: {}
+  },
+  maxWriteBufferSize: {
+    label: 'Max write buffer size',
+    description: 'The maximum total bytes of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the total bytes of queued operations goes below the limit.',
+    validate: {}
+  },
+  maxRetryDelay: {
+    label: 'Max retry delay',
+    description: 'The maximum time to wait before retrying an operation that failed exceptionally; an exponential backoff strategy is employed when retrying.',
+    validate: {}
+  },
+  readPollTimeout: {
+    label: 'Read poll timeout',
+    description: 'The maximum time to wait for new operations on the remote cluster when the follower index is synchronized with the leader index; when the timeout has elapsed, the poll for operations will return to the follower so that it can update some statistics, and then the follower will immediately attempt to read from the leader again.',
+    validate: {}
+  },
+};
+/* eslint-enable */
 
 export const FollowerIndexForm = injectI18n(
   class extends PureComponent {
@@ -485,6 +541,12 @@ export const FollowerIndexForm = injectI18n(
             {renderRemoteClusterField()}
             {renderLeaderIndex()}
           </EuiForm>
+          <EuiSpacer size="l" />
+          <AdvancedSettingsForm
+            areErrorsVisible={areErrorsVisible}
+            schema={schemaAdvancedFields}
+          />
+          <EuiSpacer size="l" />
           {renderFormErrorWarning()}
           <EuiSpacer size="l" />
           {renderActions()}
