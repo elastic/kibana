@@ -27,7 +27,7 @@ export default function query(req, panel, series, esQueryConfig, indexPattern) {
     const { from, to } = offsetTime(req, series.offset_time);
 
     doc.size = 0;
-    const queries = req.payload.query ? [req.payload.query] : [];
+    const queries = req.payload.query || [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
     doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
