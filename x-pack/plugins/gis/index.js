@@ -50,6 +50,31 @@ export function gis(kibana) {
           .feature(thisPlugin.id)
           .registerLicenseCheckResultsGenerator(checkLicense);
 
+        xpackMainPlugin.registerFeature({
+          id: 'gis',
+          name: 'Maps',
+          icon: 'gisApp',
+          navLinkId: 'gis',
+          privileges: {
+            all: {
+              app: ['gis', 'kibana'],
+              savedObject: {
+                all: ['gis-map'],
+                read: ['config']
+              },
+              ui: [],
+            },
+            read: {
+              app: ['gis', 'kibana'],
+              savedObject: {
+                all: [],
+                read: ['gis-map', 'config']
+              },
+              ui: [],
+            },
+          }
+        });
+
         server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
         server.injectUiAppVars('gis', async () => {
           return await server.getInjectedUiAppVars('kibana');

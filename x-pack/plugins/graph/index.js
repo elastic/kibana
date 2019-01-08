@@ -58,7 +58,7 @@ export function graph(kibana) {
         privileges: {
           all: {
             catalogue: ['graph'],
-            app: ['graph'],
+            app: ['graph', 'kibana'],
             savedObject: {
               all: ['graph-workspace'],
               read: ['config', 'index-pattern'],
@@ -67,7 +67,7 @@ export function graph(kibana) {
           },
           read: {
             catalogue: ['graph'],
-            app: ['graph'],
+            app: ['graph', 'kibana'],
             savedObject: {
               all: [],
               read: ['config', 'index-pattern', 'graph-workspace'],

@@ -53,6 +53,11 @@ import {
   GrokDebuggerProvider,
 } from './services';
 
+import {
+  SecurityServiceProvider,
+  SpacesServiceProvider,
+} from '../common/services';
+
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
@@ -116,6 +121,8 @@ export default async function ({ readConfigFile }) {
       random: RandomProvider,
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
+      security: SecurityServiceProvider,
+      spaces: SpacesServiceProvider,
     },
 
     // just like services, PageObjects are defined as a map of

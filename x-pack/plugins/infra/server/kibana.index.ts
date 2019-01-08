@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { PluginProperties, Server } from 'hapi';
 import JoiNamespace from 'joi';
 import { Feature } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
@@ -32,16 +33,17 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
     id: 'infrastructure',
-    name: 'Infrastructure',
-    icon: 'infraApp',
+    name: i18n.translate('xpack.infra.linkInfrastructureTitle', {
+      defaultMessage: 'Infrastructure',
+    }),
     navLinkId: 'infra:home',
     privileges: {
       all: {
         catalogue: ['infraops'],
-        app: ['infra'],
+        app: ['infra', 'kibana'],
         savedObject: {
           all: [],
-          read: [],
+          read: ['config'],
         },
         ui: [],
       },
@@ -49,17 +51,18 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   });
 
   xpackMainPlugin.registerFeature({
-    id: 'logging',
-    name: 'Logs',
-    icon: 'loggingApp',
+    id: 'logs',
+    name: i18n.translate('xpack.infra.linkLogsTitle', {
+      defaultMessage: 'Logs',
+    }),
     navLinkId: 'infra:logs',
     privileges: {
       all: {
         catalogue: ['infralogging'],
-        app: ['infra'],
+        app: ['infra', 'kibana'],
         savedObject: {
           all: [],
-          read: [],
+          read: ['config'],
         },
         ui: [],
       },

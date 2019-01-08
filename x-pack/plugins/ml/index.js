@@ -83,7 +83,7 @@ export const ml = (kibana) => {
               })
             },
             catalogue: ['ml'],
-            app: ['ml'],
+            app: ['ml', 'kibana'],
             savedObject: {
               all: [],
               read: ['config']
