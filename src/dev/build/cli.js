@@ -97,7 +97,7 @@ const log = new ToolingLog({
 });
 
 function isOsPackageDesired(name) {
-  if (flags['skip-os-packages'] || !flags['all-platforms']) {
+  if (flags['skip-os-packages'] || !flags['all-platforms'] || !flags[name]) {
     return false;
   }
 
