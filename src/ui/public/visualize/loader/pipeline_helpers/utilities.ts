@@ -46,7 +46,6 @@ export const getFormat = (mapping: any) => {
   let { id } = mapping;
   if (id === 'range') {
     id = mapping.params.id;
-    delete mapping.params.id;
 
     const RangeFormat = FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params).convert;
@@ -61,7 +60,6 @@ export const getFormat = (mapping: any) => {
     return new RangeFormat();
   } else if (id === 'terms') {
     id = mapping.params.id;
-    delete mapping.params.id;
     return {
       getConverterFor: (type: string) => {
         const format = getFieldFormat(id, mapping.params).convert;

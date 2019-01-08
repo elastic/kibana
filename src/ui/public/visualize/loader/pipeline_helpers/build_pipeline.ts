@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore
+import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisState } from 'ui/vis';
 
@@ -41,7 +43,7 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-export const getSchemas = (vis: Vis): Schemas => {
+export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const createFormat = (agg: AggConfig) => {
     let format: any = agg.params.field ? agg.params.field.format.toJSON() : {};
     if (agg.type.name === 'date_range') {
@@ -81,6 +83,17 @@ export const getSchemas = (vis: Vis): Schemas => {
       aggType: agg.type.name,
     };
 
+    if (agg.type.name === 'date_histogram') {
+      agg.params.timeRange = timeRange;
+      setBounds(agg, true);
+    }
+    if (agg.type.name === 'geohash_grid') {
+      schema.params = {
+        precision: agg.params.precision,
+        useGeocentroid: agg.params.useGeocentroid,
+      };
+    }
+
     if (
       [
         'derivative',
@@ -97,12 +110,6 @@ export const getSchemas = (vis: Vis): Schemas => {
       schema.format = createFormat(subAgg);
     } else {
       schema.format = createFormat(agg);
-    }
-    if (agg.type.name === 'geohash_grid') {
-      schema.params = {
-        precision: agg.params.precision,
-        useGeocentroid: agg.params.useGeocentroid,
-      };
     }
 
     return schema;
@@ -230,8 +237,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
 };
 
-export const buildVislibDimensions = (vis: any) => {
-  const schemas = getSchemas(vis);
+export const buildVislibDimensions = (vis: any, timeRange?: any) => {
+  const schemas = getSchemas(vis, timeRange);
   const dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -254,7 +261,10 @@ export const buildVislibDimensions = (vis: any) => {
   return dimensions;
 };
 
-export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) => {
+export const buildPipeline = (
+  vis: Vis,
+  params: { searchSource: SearchSource; timeRange?: any }
+) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
   const query = searchSource.getField('query');
@@ -283,12 +293,12 @@ export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) 
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
 
-  const schemas = getSchemas(vis);
+  const schemas = getSchemas(vis, params.timeRange);
   if (buildPipelineVisFunction[vis.type.name]) {
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
-    visConfig.dimensions = buildVislibDimensions(vis);
+    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
 
     pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
   } else {

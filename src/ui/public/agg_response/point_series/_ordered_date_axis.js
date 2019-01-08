@@ -31,8 +31,8 @@ export function orderedDateAxis(chart) {
   chart.ordered.date = true;
 
   if (bounds) {
-    chart.ordered.min = bounds.min;
-    chart.ordered.max = bounds.max;
+    chart.ordered.min = isNaN(bounds.min) ? Date.parse(bounds.min) : bounds.min;
+    chart.ordered.max = isNaN(bounds.max) ? Date.parse(bounds.max) : bounds.max;
   } else {
     chart.ordered.endzones = false;
   }
