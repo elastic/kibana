@@ -134,21 +134,13 @@ exports[`FormattedValue component should render an object 1`] = `
 
 exports[`FormattedValue component should render null 1`] = `
 <styled.span>
-  <FormattedMessage
-    defaultMessage="N/A"
-    id="xpack.apm.propertiesTable.notAvailableLabel"
-    values={Object {}}
-  />
+  N/A
 </styled.span>
 `;
 
 exports[`FormattedValue component should render undefined 1`] = `
 <styled.span>
-  <FormattedMessage
-    defaultMessage="N/A"
-    id="xpack.apm.propertiesTable.notAvailableLabel"
-    values={Object {}}
-  />
+  N/A
 </styled.span>
 `;
 

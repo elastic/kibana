@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -55,59 +55,60 @@ export function getPropertyTabNames(selected: string[]): Tab[] {
   ).map(({ key, label }) => ({ key, label }));
 }
 
-function getAgentFeatureText(featureName: string, intl: InjectedIntl) {
+function getAgentFeatureText(featureName: string) {
   switch (featureName) {
     case 'user':
-      return intl.formatMessage({
-        id: 'xpack.apm.propertiesTable.userTab.agentFeatureText',
-        defaultMessage:
-          'You can configure your agent to add contextual information about your users.'
-      });
+      return i18n.translate(
+        'xpack.apm.propertiesTable.userTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add contextual information about your users.'
+        }
+      );
     case 'tags':
-      return intl.formatMessage({
-        id: 'xpack.apm.propertiesTable.tagsTab.agentFeatureText',
-        defaultMessage:
-          'You can configure your agent to add filterable tags on transactions.'
-      });
+      return i18n.translate(
+        'xpack.apm.propertiesTable.tagsTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add filterable tags on transactions.'
+        }
+      );
     case 'custom':
-      return intl.formatMessage({
-        id: 'xpack.apm.propertiesTable.customTab.agentFeatureText',
-        defaultMessage:
-          'You can configure your agent to add custom contextual information on transactions.'
-      });
+      return i18n.translate(
+        'xpack.apm.propertiesTable.customTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add custom contextual information on transactions.'
+        }
+      );
   }
 }
 
-export const AgentFeatureTipMessage = injectI18n(
-  // tslint:disable-next-line:no-shadowed-variable
-  function AgentFeatureTipMessage({
-    featureName,
-    agentName,
-    intl
-  }: {
-    featureName: string;
-    agentName?: string;
-    intl: InjectedIntl;
-  }) {
-    const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
-    if (!docsUrl) {
-      return null;
-    }
-
-    return (
-      <TableInfo>
-        <EuiIconWithSpace type="iInCircle" />
-        {getAgentFeatureText(featureName, intl)}{' '}
-        <ExternalLink href={docsUrl}>
-          <FormattedMessage
-            id="xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel"
-            defaultMessage="Learn more in the documentation."
-          />
-        </ExternalLink>
-      </TableInfo>
-    );
+export function AgentFeatureTipMessage({
+  featureName,
+  agentName
+}: {
+  featureName: string;
+  agentName?: string;
+}) {
+  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
+  if (!docsUrl) {
+    return null;
   }
-);
+
+  return (
+    <TableInfo>
+      <EuiIconWithSpace type="iInCircle" />
+      {getAgentFeatureText(featureName)}{' '}
+      <ExternalLink href={docsUrl}>
+        {i18n.translate(
+          'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
+          { defaultMessage: 'Learn more in the documentation.' }
+        )}
+      </ExternalLink>
+    </TableInfo>
+  );
+}
 
 export const sortKeysByConfig: KeySorter = (object, currentKey) => {
   const indexedPropertyConfig = indexBy(PROPERTY_CONFIG, 'key');
@@ -139,10 +140,10 @@ export function PropertiesTable({
         />
       ) : (
         <TableInfoHeader>
-          <FormattedMessage
-            id="xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel"
-            defaultMessage="No data available"
-          />
+          {i18n.translate(
+            'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
+            { defaultMessage: 'No data available' }
+          )}
         </TableInfoHeader>
       )}
       <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />

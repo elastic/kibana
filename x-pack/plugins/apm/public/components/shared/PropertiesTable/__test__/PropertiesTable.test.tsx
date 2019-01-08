@@ -6,7 +6,6 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import {
   AgentFeatureTipMessage,
   getPropertyTabNames,
@@ -115,11 +114,10 @@ describe('PropertiesTable', () => {
         .mockImplementation(() => 'mock-url');
 
       expect(
-        shallowWithIntl(
-          <AgentFeatureTipMessage.WrappedComponent
+        shallow(
+          <AgentFeatureTipMessage
             featureName={featureName}
             agentName={agentName}
-            intl={null as any}
           />
         )
       ).toMatchSnapshot();
@@ -135,11 +133,10 @@ describe('PropertiesTable', () => {
         .mockImplementation(() => null);
 
       expect(
-        shallowWithIntl(
-          <AgentFeatureTipMessage.WrappedComponent
+        shallow(
+          <AgentFeatureTipMessage
             featureName={featureName}
             agentName={agentName}
-            intl={null as any}
           />
         )
       ).toMatchSnapshot();

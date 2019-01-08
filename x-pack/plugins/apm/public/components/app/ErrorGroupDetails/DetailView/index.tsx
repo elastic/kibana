@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { first, get } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';
@@ -257,9 +257,8 @@ export function TabContent({
 
 // Ensure the selected tab exists or use the first
 export function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
-  const firstTab = tabs[0] || {};
   const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
-  return selectedTab ? selectedTab : firstTab;
+  return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 export function getTabs(error: APMError) {

@@ -12,11 +12,7 @@ exports[`PropertiesTable AgentFeatureTipMessage component should render when doc
   <ExternalLink
     href="mock-url"
   >
-    <FormattedMessage
-      defaultMessage="Learn more in the documentation."
-      id="xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel"
-      values={Object {}}
-    />
+    Learn more in the documentation.
   </ExternalLink>
 </styled.div>
 `;
@@ -24,13 +20,9 @@ exports[`PropertiesTable AgentFeatureTipMessage component should render when doc
 exports[`PropertiesTable PropertiesTable component should render empty when data isn't present 1`] = `
 <styled.div>
   <Styled(styled.div)>
-    <FormattedMessage
-      defaultMessage="No data available"
-      id="xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel"
-      values={Object {}}
-    />
+    No data available
   </Styled(styled.div)>
-  <InjectIntl(AgentFeatureTipMessage)
+  <AgentFeatureTipMessage
     agentName="testAgentName"
     featureName="testPropKey"
   />
@@ -50,7 +42,7 @@ exports[`PropertiesTable PropertiesTable component should render with data 1`] =
     keySorter={[Function]}
     parentKey="testPropKey"
   />
-  <InjectIntl(AgentFeatureTipMessage)
+  <AgentFeatureTipMessage
     agentName="testAgentName"
     featureName="testPropKey"
   />
@@ -65,7 +57,7 @@ exports[`PropertiesTable PropertiesTable component should still render NestedKey
     keySorter={[Function]}
     parentKey="testPropKey"
   />
-  <InjectIntl(AgentFeatureTipMessage)
+  <AgentFeatureTipMessage
     agentName="testAgentName"
     featureName="testPropKey"
   />
