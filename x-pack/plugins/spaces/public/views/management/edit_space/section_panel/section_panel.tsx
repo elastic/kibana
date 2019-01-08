@@ -97,17 +97,7 @@ export class SectionPanel extends Component<Props, State> {
               onClick={this.toggleCollapsed}
               aria-label={this.state.collapsed ? showLinkText : hideLinkText}
             >
-              {this.state.collapsed ? (
-                <FormattedMessage
-                  id="xpack.spaces.management.collapsiblePanel.showLinkText"
-                  defaultMessage="show"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.spaces.management.collapsiblePanel.hideLinkText"
-                  defaultMessage="hide"
-                />
-              )}
+              {this.state.collapsed ? showLinkText : hideLinkText}
             </EuiLink>
           </EuiFlexItem>
         )}
