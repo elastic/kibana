@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable */
+
 const noopI18N = {
-  translate: (content: string) => {
+  translate: content => {
     /* tslint:disable */
     console.error(
       'Canvas was started without an i18n configuration from Kibana.  This string is not translated and will simply be returned: ' +

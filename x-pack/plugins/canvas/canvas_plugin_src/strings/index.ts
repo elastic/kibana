@@ -6,5 +6,6 @@
 
 export * from './apply_strings';
 export * from './element_strings';
+// @ts-ignore
 export * from './i18n';
 export * from './function_help';
