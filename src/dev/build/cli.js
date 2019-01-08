@@ -99,6 +99,7 @@ const log = new ToolingLog({
 });
 
 function isOsPackageDesired(name) {
+  // Skip every os package if this flag is set
   if (flags['skip-os-packages']) {
     return false;
   }
@@ -108,6 +109,7 @@ function isOsPackageDesired(name) {
     return true;
   }
 
+  // Finally try to build if a specific flag is set
   return Boolean(flags[name]);
 }
 
