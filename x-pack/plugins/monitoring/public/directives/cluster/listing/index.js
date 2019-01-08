@@ -195,6 +195,17 @@ const getColumns = (
       sortable: true,
       render: (licenseType, cluster) => {
         const license = cluster.license;
+
+        if (!licenseType) {
+          return (
+            <div>
+              <div className="monTableCell__clusterCellLiscense">
+                N/A
+              </div>
+            </div>
+          );
+        }
+
         if (license) {
           const licenseExpiry = () => {
             if (license.expiry_date_in_millis < moment().valueOf()) {
