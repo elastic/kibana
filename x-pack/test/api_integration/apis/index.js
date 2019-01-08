@@ -18,7 +18,8 @@ export default function ({ loadTestFile }) {
     // loadTestFile(require.resolve('./infra'));
     //Only running our secops test for now since we are working in our own branch
     loadTestFile(require.resolve('./secops'));
-    // loadTestFile(require.resolve('./management'));
     // loadTestFile(require.resolve('./beats'));
+    // loadTestFile(require.resolve('./management'));
+    // loadTestFile(require.resolve('./uptime'));
   });
 }

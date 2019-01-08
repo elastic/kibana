@@ -44,19 +44,14 @@ export async function loadErrorGroupDetails({
   kuery,
   errorGroupId
 }: IUrlParams) {
-  return callApi<ErrorGroupAPIResponse>(
-    {
-      pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
-      query: {
-        start,
-        end,
-        esFilterQuery: await getEncodedEsQuery(kuery)
-      }
-    },
-    {
-      camelcase: false
+  return callApi<ErrorGroupAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
+    query: {
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
-  );
+  });
 }
 
 export async function loadErrorDistribution({

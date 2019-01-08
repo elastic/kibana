@@ -13,7 +13,13 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
-import { setSelectedLayer, setTimeFilters, mapExtentChanged, replaceLayerList } from '../actions/store_actions';
+import {
+  setSelectedLayer,
+  setTimeFilters,
+  setRefreshConfig,
+  setGoto,
+  replaceLayerList,
+} from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from '../kibana_services';
@@ -21,7 +27,6 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
-import { getMapReady, getTimeFilters } from "../selectors/map_selectors";
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
@@ -29,7 +34,6 @@ const app = uiModules.get('app/gis', []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
 
-  let isLayersListInitializedFromSavedObject = false;
   const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
   let unsubscribe;
@@ -48,16 +52,21 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
     });
 
     // sync store with savedMap mapState
-    // layerList is synced after map has initialized and extent is known.
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
       const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
       store.dispatch(setTimeFilters(timeFilters));
-      store.dispatch(mapExtentChanged({
+      store.dispatch(setGoto({
+        lat: mapState.center.lat,
+        lon: mapState.center.lon,
         zoom: mapState.zoom,
-        center: mapState.center,
       }));
+      if (mapState.refreshConfig) {
+        store.dispatch(setRefreshConfig(mapState.refreshConfig));
+      }
     }
+    const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
+    store.dispatch(replaceLayerList(layerList));
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
@@ -68,33 +77,17 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
   });
 
   function handleStoreChanges(store) {
+    // theme changes must triggered in digest cycle because top nav is still angular
     if (isDarkTheme !== getIsDarkTheme(store.getState())) {
       isDarkTheme = getIsDarkTheme(store.getState());
       updateTheme();
     }
-
-    const storeTime = getTimeFilters(store.getState());
-    const kbnTime = timefilter.getTime();
-    if (storeTime && (storeTime.to !== kbnTime.to || storeTime.from !== kbnTime.from)) {
-      timefilter.setTime(storeTime);
-    }
-
-    // Part of initial syncing of store from saved object
-    // Delayed until after map is ready so map extent is known
-    if (!isLayersListInitializedFromSavedObject && getMapReady(store.getState())) {
-      isLayersListInitializedFromSavedObject = true;
-      const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
-      store.dispatch(replaceLayerList(layerList));
-    }
   }
-
-  timefilter.on('timeUpdate', dispatchTimeUpdate);
 
   $scope.$on('$destroy', () => {
     if (unsubscribe) {
       unsubscribe();
     }
-    timefilter.off('timeUpdate', dispatchTimeUpdate);
     const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     if (node) {
       unmountComponentAtNode(node);
@@ -135,7 +128,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       });
 
       if (savedMap.id !== $route.current.params.id) {
-        kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        $scope.$evalAsync(() => {
+          kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        });
       }
     }
     return { id };
@@ -191,12 +186,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
   }];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
-
-  async function dispatchTimeUpdate() {
-    const timeFilters = timefilter.getTime();
-    const store = await getStore();
-    store.dispatch(setTimeFilters(timeFilters));
-  }
 
   function updateTheme() {
     $scope.$evalAsync(() => {

@@ -101,10 +101,6 @@ export const addLifecyclePolicyActionExtension = (indices, reloadIndices) => {
   };
 };
 
-addActionExtension(retryLifecycleActionExtension);
-addActionExtension(removeLifecyclePolicyActionExtension);
-addActionExtension(addLifecyclePolicyActionExtension);
-
 export const ilmBannerExtension = indices => {
   const { Query } = EuiSearchBar;
   if (!indices.length) {
@@ -132,13 +128,9 @@ export const ilmBannerExtension = indices => {
   };
 };
 
-addBannerExtension(ilmBannerExtension);
-
 export const ilmSummaryExtension = index => {
   return <IndexLifecycleSummary index={index} />;
 };
-
-addSummaryExtension(ilmSummaryExtension);
 
 export const ilmFilterExtension = indices => {
   const hasIlm = any(indices, index => index.ilm && index.ilm.managed);
@@ -206,4 +198,12 @@ export const ilmFilterExtension = indices => {
   }
 };
 
-addFilterExtension(ilmFilterExtension);
+export const addAllExtensions = () => {
+  addActionExtension(retryLifecycleActionExtension);
+  addActionExtension(removeLifecyclePolicyActionExtension);
+  addActionExtension(addLifecyclePolicyActionExtension);
+
+  addBannerExtension(ilmBannerExtension);
+  addSummaryExtension(ilmSummaryExtension);
+  addFilterExtension(ilmFilterExtension);
+};

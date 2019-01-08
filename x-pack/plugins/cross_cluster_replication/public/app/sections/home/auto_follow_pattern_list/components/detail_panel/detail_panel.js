@@ -181,7 +181,50 @@ export class DetailPanelUi extends Component {
               />
             </EuiLink>
           </EuiDescriptionList>
+          <EuiSpacer size="l" />
+          {this.renderAutoFollowPatternErrors()}
         </EuiFlyoutBody>
+      </Fragment>
+    );
+  }
+
+  renderAutoFollowPatternErrors() {
+    const { autoFollowPattern } = this.props;
+
+    if (!autoFollowPattern.errors.length) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiFlexGroup
+          justifyContent="flexStart"
+          alignItems="center"
+          gutterSize="s"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="alert" color="danger" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.recentErrorsTitle"
+                  defaultMessage="Recent errors"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <ul>
+            {autoFollowPattern.errors.map((error, i) => (
+              <li key={i}>{error.autoFollowException.reason}</li>
+            ))}
+          </ul>
+        </EuiText>
       </Fragment>
     );
   }
