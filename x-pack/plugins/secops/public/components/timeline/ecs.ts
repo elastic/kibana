@@ -15,7 +15,7 @@ export interface ECS {
   _id: string;
   timestamp: string;
   host: {
-    hostname?: string;
+    name?: string;
     ip?: string;
   };
   event: {

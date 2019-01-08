@@ -180,12 +180,12 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                       />
                     </SpinnerAndEventCount>
                   </EuiFlexItem>
-                  {hasNextPage && (
+                  {itemsPerPage > itemsCount && (
                     <EuiFlexItem>
                       <PopoverRowItems
                         className="footer-popover"
                         id="customizablePagination"
-                        data-test-subj="loadingMoreSizeRowPopover"
+                        data-test-subj="timelineSizeRowPopover"
                         button={button}
                         isOpen={this.state.isPopoverOpen}
                         closePopover={this.closePopover}
@@ -193,7 +193,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                       >
                         <EuiContextMenuPanel
                           items={rowItems}
-                          data-test-subj="loadingMorePickSizeRow"
+                          data-test-subj="timelinePickSizeRow"
                         />
                       </PopoverRowItems>
                     </EuiFlexItem>
@@ -210,7 +210,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                   >
                     <EuiFlexItem grow={false}>
                       <EuiButton
-                        data-test-subj="loadingMoreButton"
+                        data-test-subj="TimelineMoreButton"
                         isLoading={isLoading}
                         onClick={this.loadMore}
                       >

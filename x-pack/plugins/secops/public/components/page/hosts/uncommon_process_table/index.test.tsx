@@ -7,7 +7,6 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import moment from 'moment';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -37,7 +36,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={moment().valueOf()}
+            startDate={1546965070707}
           />
         </ReduxStoreProvider>
       );

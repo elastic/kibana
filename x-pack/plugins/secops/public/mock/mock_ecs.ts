@@ -11,7 +11,7 @@ export const mockECSData: ECS[] = [
     _id: '1',
     timestamp: '2018-11-05T19:03:25.937Z',
     host: {
-      hostname: 'apache',
+      name: 'apache',
       ip: '192.168.0.1',
     },
     event: {
@@ -42,7 +42,7 @@ export const mockECSData: ECS[] = [
     _id: '3',
     timestamp: '2018-11-07T19:03:25.937Z',
     host: {
-      hostname: 'nginx',
+      name: 'nginx',
       ip: '192.168.0.1',
     },
     event: {
@@ -73,7 +73,7 @@ export const mockECSData: ECS[] = [
     _id: '4',
     timestamp: '2018-11-08T19:03:25.937Z',
     host: {
-      hostname: 'suricata',
+      name: 'suricata',
       ip: '192.168.0.1',
     },
     event: {
@@ -114,7 +114,7 @@ export const mockECSData: ECS[] = [
     _id: '5',
     timestamp: '2018-11-09T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -145,7 +145,7 @@ export const mockECSData: ECS[] = [
     _id: '6',
     timestamp: '2018-11-10T19:03:25.937Z',
     host: {
-      hostname: 'braden.davis',
+      name: 'braden.davis',
       ip: '192.168.0.1',
     },
     event: {
@@ -172,7 +172,7 @@ export const mockECSData: ECS[] = [
     _id: '8',
     timestamp: '2018-11-12T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -213,7 +213,7 @@ export const mockECSData: ECS[] = [
     _id: '7',
     timestamp: '2018-11-11T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -244,7 +244,7 @@ export const mockECSData: ECS[] = [
     _id: '9',
     timestamp: '2018-11-13T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -275,7 +275,7 @@ export const mockECSData: ECS[] = [
     _id: '10',
     timestamp: '2018-11-14T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -306,7 +306,7 @@ export const mockECSData: ECS[] = [
     _id: '11',
     timestamp: '2018-11-15T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -337,7 +337,7 @@ export const mockECSData: ECS[] = [
     _id: '12',
     timestamp: '2018-11-16T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -368,7 +368,7 @@ export const mockECSData: ECS[] = [
     _id: '2',
     timestamp: '2018-11-06T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
@@ -399,7 +399,7 @@ export const mockECSData: ECS[] = [
     _id: '13',
     timestamp: '2018-13-12T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
