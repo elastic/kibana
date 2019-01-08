@@ -31,7 +31,6 @@ export const createHandlers = (request, server) => {
       config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
         ? `${server.info.uri}${config.get('server.basePath')}`
         : server.info.uri,
-    httpHeaders: request.headers,
     elasticsearchClient: async (...args) => {
       // check if the session is valid because continuing to use it
       if (isSecurityEnabled(server)) {

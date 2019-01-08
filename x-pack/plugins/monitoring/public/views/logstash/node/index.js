@@ -94,6 +94,7 @@ uiRoutes.when('/logstash/node/:uuid', {
                       <EuiFlexItem key={index} style={{ width: '50%' }}>
                         <MonitoringTimeseriesContainer
                           series={metric}
+                          onBrush={this.onBrush}
                           {...data}
                         />
                         <EuiSpacer size="m"/>
