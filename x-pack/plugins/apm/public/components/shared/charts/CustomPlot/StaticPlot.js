@@ -19,6 +19,7 @@ import { rgba } from 'polished';
 
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';
+import { i18n } from '@kbn/i18n';
 
 const X_TICK_TOTAL = 7;
 class StaticPlot extends PureComponent {
@@ -100,7 +101,12 @@ class StaticPlot extends PureComponent {
         />
 
         {noHits ? (
-          <StatusText marginLeft={30} text="No data within this time range." />
+          <StatusText
+            marginLeft={30}
+            text={i18n.translate('xpack.apm.metrics.plot.noDataLabel', {
+              defaultMessage: 'No data within this time range.'
+            })}
+          />
         ) : (
           this.getVisSeries(series, plotValues)
         )}
