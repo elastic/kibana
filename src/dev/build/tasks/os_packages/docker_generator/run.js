@@ -17,6 +17,69 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+import del from 'del';
+import { mkdirp, write, copyAll, exec } from '../../../lib';
+import { buildDockerSHTemplate, dockerfileTemplate, kibanaYMLTemplate } from './templates';
+
 export async function runDockerGenerator(config, log, build) {
-  log.info(`REACH DOCKER GENERATOR RUN ${build}`);
+  const urlRoot = 'http://localhost:8000';
+  const kibanaVersion = config.getBuildVersion();
+  const imageFlavor = build.isOss() ? '-oss' : '';
+  const tarball = `kibana${imageFlavor || ''}-${kibanaVersion}-linux-x86_64.tar.gz`;
+  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
+  const httpD = 'kibana-docker-artifact-server';
+  const imageTag = 'docker.elastic.co/kibana/kibana';
+  const dockerTargetDir = config.resolveFromTarget(
+    `docker`
+  );
+  const dockerBuildDir = resolve(dockerTargetDir, 'build');
+  const artifactsDir = config.resolveFromTarget('.');
+  const dockerOutput = resolve(
+    dockerTargetDir,
+    `kibana${imageFlavor || ''}-${kibanaVersion}-docker.tar`
+  );
+
+  // Create Docker Target Folder
+  await mkdirp(dockerTargetDir);
+
+  // Create Docker Target Temp Build Folder
+  await mkdirp(dockerBuildDir);
+
+  // Write Templates
+  const scope = {
+    urlRoot,
+    tarball,
+    imageFlavor,
+    versionTag: kibanaVersion,
+    elasticVersion: kibanaVersion,
+    license,
+    artifactsDir,
+    httpD,
+    imageTag,
+    dockerOutput
+  };
+
+  await write(resolve(dockerBuildDir, 'build_docker.sh'), buildDockerSHTemplate(scope));
+  await write(resolve(dockerBuildDir, 'Dockerfile'), dockerfileTemplate(scope));
+  await write(resolve(dockerBuildDir, 'config/kibana.yml'), kibanaYMLTemplate(scope));
+
+  // Copy Resources
+  await copyAll(
+    config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources'),
+    dockerBuildDir,
+  );
+
+  // Build Docker Image
+  const args = [
+    `${resolve(dockerBuildDir, 'build_docker.sh')}`
+  ];
+
+  await exec(log, `sh`, args, {
+    cwd: dockerBuildDir,
+    level: 'info',
+  });
+
+  // Cleanup Docker Target Folder Temp Build Folder
+  await del(dockerBuildDir);
 }
