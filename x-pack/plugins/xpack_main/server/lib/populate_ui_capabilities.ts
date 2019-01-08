@@ -28,7 +28,6 @@ export function populateUICapabilities(
 function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
   const UIFeatureCapabilities: FeatureCapabilities = {
     catalogue: {},
-    [feature.id]: {},
   };
 
   if (feature.catalogue) {

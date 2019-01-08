@@ -48,10 +48,7 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
 
@@ -73,10 +70,7 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -95,10 +89,7 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -117,10 +108,7 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -139,10 +127,7 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -161,10 +146,7 @@ describe('replaceInjectedVars uiExport', () => {
         b: 1
       },
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -179,10 +161,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       ...originalInjectedVars,
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -197,10 +176,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       ...originalInjectedVars,
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -220,11 +196,9 @@ describe('replaceInjectedVars uiExport', () => {
       uiCapabilities: {
         navLinks: { foo: true },
         bar: { baz: true },
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
         catalogue: {
           cfoo: true,
+          myCatalogueEntry: true,
         }
       },
     });
@@ -240,10 +214,7 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       ...originalInjectedVars,
       uiCapabilities: {
-        mockFeature: {
-          mockFeatureCapability: true,
-        },
-        catalogue: {}
+        catalogue: { myCatalogueEntry: true }
       },
     });
   });
@@ -262,16 +233,7 @@ function mockServer() {
         getFeatures: () => [{
           id: 'mockFeature',
           name: 'Mock Feature',
-          privileges: {
-            all: {
-              app: [],
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: ['mockFeatureCapability']
-            }
-          }
+          catalogue: ['myCatalogueEntry']
         }],
         info: {
           isAvailable: sinon.stub().returns(true),
