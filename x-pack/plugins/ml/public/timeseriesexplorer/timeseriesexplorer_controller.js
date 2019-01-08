@@ -571,7 +571,6 @@ module.controller('MlTimeSeriesExplorerController', function (
 
       // Ensure the forecast data will be shown if hidden previously.
       $scope.showForecast = true;
-      $scope.$applyAsync();
 
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
