@@ -6,10 +6,8 @@ Migrations are the mechanism by which saved object indices are kept up to date w
 
 When Kibana boots, prior to serving any requests, it performs a check to see if the kibana index needs to be migrated.
 
-* It searches the index for documents that are out of date, and it diffs the persisted index mappings with the mappings defined by the current system.
-* If the Kibana index does not exist, it is created.
-* If there are out of date docs, or breaking mapping changes, or the current index is not aliased, the index is migrated.
-* If there are minor mapping changes, such as adding a new property, the new mappings are applied to the current index.
+- If there are out of date docs, or mapping changes, or the current index is not aliased, the index is migrated.
+- If the Kibana index does not exist, it is created.
 
 All of this happens prior to Kibana serving any http requests.
 

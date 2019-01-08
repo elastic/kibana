@@ -25,38 +25,6 @@ import { CallCluster } from './call_cluster';
 import { IndexMigrator } from './index_migrator';
 
 describe('IndexMigrator', () => {
-  test('patches the index mappings if the index is already migrated', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    opts.mappingProperties = { foo: { type: 'text' } };
-
-    withIndex(callCluster);
-
-    const result = await new IndexMigrator(opts).migrate();
-
-    expect(ranMigration(opts)).toBeFalsy();
-    expect(result.status).toEqual('patched');
-    sinon.assert.calledWith(callCluster, 'indices.putMapping', {
-      body: {
-        dynamic: 'strict',
-        properties: {
-          config: {
-            dynamic: 'true',
-            properties: { buildNum: { type: 'keyword' } },
-          },
-          foo: { type: 'text' },
-          migrationVersion: { dynamic: 'true', type: 'object' },
-          namespace: { type: 'keyword' },
-          type: { type: 'keyword' },
-          updated_at: { type: 'date' },
-        },
-      },
-      index: '.kibana_1',
-      type: ROOT_TYPE,
-    });
-  });
-
   test('creates the index if it does not exist', async () => {
     const opts = defaultOpts();
     const callCluster = clusterStub(opts);
@@ -73,6 +41,16 @@ describe('IndexMigrator', () => {
         mappings: {
           doc: {
             dynamic: 'strict',
+            _meta: {
+              migrationMappingHash: {
+                config: '73cde85b5dab11cb777920da77f7c854',
+                foo: '99e19abc6d1180ecbf132d8a5eaa60ea',
+                migrationVersion: 'f34c5b14d1b6e49dbb0dd2e3c97cb02c',
+                namespace: '52431400f7dca8fce271660a55aa04c9',
+                type: '52431400f7dca8fce271660a55aa04c9',
+                updated_at: '6952c7bde132cc86c181e2be99366b37',
+              },
+            },
             properties: {
               config: {
                 dynamic: 'true',
@@ -184,6 +162,16 @@ describe('IndexMigrator', () => {
         mappings: {
           doc: {
             dynamic: 'strict',
+            _meta: {
+              migrationMappingHash: {
+                config: '73cde85b5dab11cb777920da77f7c854',
+                foo: '048823ffe9b30007442525d6207e6771',
+                migrationVersion: 'f34c5b14d1b6e49dbb0dd2e3c97cb02c',
+                namespace: '52431400f7dca8fce271660a55aa04c9',
+                type: '52431400f7dca8fce271660a55aa04c9',
+                updated_at: '6952c7bde132cc86c181e2be99366b37',
+              },
+            },
             properties: {
               author: { type: 'text' },
               config: {

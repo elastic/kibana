@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { buildActiveMappings } from './build_active_mappings';
+import { buildActiveMappings, diffMappings } from './build_active_mappings';
+import { IndexMapping } from './call_cluster';
 
 describe('buildActiveMappings', () => {
   test('combines all mappings and includes core mappings', () => {
@@ -43,5 +44,167 @@ describe('buildActiveMappings', () => {
     expect(() => buildActiveMappings({ properties })).toThrow(
       /Invalid mapping \"_hm\"\. Mappings cannot start with _/
     );
+  });
+});
+
+describe('diffMappings', () => {
+  test('is different if expected contains extra hashes', () => {
+    const actual: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+    const expected: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar', baz: 'qux' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc.properties.baz');
+  });
+
+  test('does nothing if actual contains extra hashes', () => {
+    const actual: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar', baz: 'qux' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+    const expected: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+
+    expect(diffMappings(actual, expected)).toBeUndefined();
+  });
+
+  test('does nothing if actual hashes are identical to expected, but properties differ', () => {
+    const actual: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {
+          foo: 'bar',
+        },
+      },
+    };
+    const expected: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {
+          foo: 'baz',
+        },
+      },
+    };
+
+    expect(diffMappings(actual, expected)).toBeUndefined();
+  });
+
+  test('is different if meta hashes change', () => {
+    const actual: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+    const expected: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'baz' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc.properties.foo');
+  });
+
+  test('is different if dynamic is different', () => {
+    const actual: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+    const expected: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'abcde',
+        properties: {},
+      },
+    };
+
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc.dynamic');
+  });
+
+  test('is different if migrationMappingHash is missing from actual', () => {
+    const actual: IndexMapping = {
+      doc: {
+        _meta: {},
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+    const expected: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc._meta');
+  });
+
+  test('is different if _meta is missing from actual', () => {
+    const actual: IndexMapping = {
+      doc: {
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+    const expected: IndexMapping = {
+      doc: {
+        _meta: {
+          migrationMappingHash: { foo: 'bar' },
+        },
+        dynamic: 'strict',
+        properties: {},
+      },
+    };
+
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc._meta');
   });
 });

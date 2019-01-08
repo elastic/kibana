@@ -210,17 +210,6 @@ export async function migrationsUpToDate(
   }
 }
 
-/**
- * Applies the specified mappings to the index.
- *
- * @param {CallCluster} callCluster
- * @param {string} index
- * @param {IndexMapping} mappings
- */
-export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', { body: mappings.doc, index, type: ROOT_TYPE });
-}
-
 export async function createIndex(
   callCluster: CallCluster,
   index: string,

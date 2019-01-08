@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { determineMigrationAction, MigrationAction } from './determine_migration_action';
+import { diffMappings } from './build_active_mappings';
 import * as Index from './elastic_index';
 import { migrateRawDocs } from './migrate_raw_docs';
 import { Context, migrationContext, MigrationOpts } from './migration_context';
@@ -53,22 +53,15 @@ export class IndexMigrator {
       pollInterval: context.pollInterval,
 
       async isMigrated() {
-        const action = await requiredAction(context);
-        return action === MigrationAction.None;
+        return requiresMigration(context);
       },
 
       async runMigration() {
-        const action = await requiredAction(context);
-
-        if (action === MigrationAction.None) {
-          return { status: 'skipped' };
+        if (await requiresMigration(context)) {
+          return migrateIndex(context);
         }
 
-        if (action === MigrationAction.Patch) {
-          return patchSourceMappings(context);
-        }
-
-        return migrateIndex(context);
+        return { status: 'skipped' };
       },
     });
   }
@@ -77,9 +70,10 @@ export class IndexMigrator {
 /**
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
-async function requiredAction(context: Context): Promise<MigrationAction> {
-  const { callCluster, alias, documentMigrator, dest } = context;
+async function requiresMigration(context: Context): Promise<boolean> {
+  const { callCluster, alias, documentMigrator, dest, log } = context;
 
+  // Have all of our known migrations been run against the index?
   const hasMigrations = await Index.migrationsUpToDate(
     callCluster,
     alias,
@@ -87,29 +81,26 @@ async function requiredAction(context: Context): Promise<MigrationAction> {
   );
 
   if (!hasMigrations) {
-    return MigrationAction.Migrate;
+    return true;
   }
 
+  // Is our index aliased?
   const refreshedSource = await Index.fetchInfo(callCluster, alias);
 
   if (!refreshedSource.aliases[alias]) {
-    return MigrationAction.Migrate;
+    return true;
   }
 
-  return determineMigrationAction(refreshedSource.mappings, dest.mappings);
-}
+  // Do the actual index mappings match our expectations?
+  const diffResult = diffMappings(refreshedSource.mappings, dest.mappings);
 
-/**
- * Applies the latest mappings to the index.
- */
-async function patchSourceMappings(context: Context): Promise<MigrationResult> {
-  const { callCluster, log, source, dest } = context;
+  if (diffResult) {
+    log.info(`Detected mapping change in "${diffResult.changedProp}"`);
 
-  log.info(`Patching ${source.indexName} mappings`);
+    return true;
+  }
 
-  await Index.putMappings(callCluster, source.indexName, dest.mappings);
-
-  return { status: 'patched' };
+  return false;
 }
 
 /**
