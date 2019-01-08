@@ -43,15 +43,7 @@ export default function (kibana) {
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-      injectDefaultVars() {
-        return {
-          uiCapabilities: {
-            timelion: {
-              showWriteControls: true,
-            }
-          }
-        };
-      },
+
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: 'Show tutorial',
