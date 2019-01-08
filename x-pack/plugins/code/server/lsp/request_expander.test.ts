@@ -8,6 +8,7 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
+import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { ServerOptions } from '../server_options';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
@@ -18,6 +19,7 @@ const options: ServerOptions = {
 };
 
 beforeEach(async () => {
+  sinon.reset();
   if (!fs.existsSync(options.workspacePath)) {
     mkdirp.sync(options.workspacePath);
   }
@@ -56,6 +58,52 @@ test('requests should be sequential', async () => {
   const response2 = await response2Promise;
   // response2 should not be started before response1 ends.
   expect(response1.result.end).toBeLessThanOrEqual(response2.result.start);
+});
+
+test('requests should throw error after lsp init timeout', async () => {
+  // @ts-ignore
+  const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
+    handleRequest: sinon.stub().callsFake(() => Promise.resolve('ok')),
+    initialize: sinon.stub().callsFake(
+      () =>
+        new Promise(resolve => {
+          setTimeout(() => {
+            resolve();
+          }, 200);
+        })
+    ),
+  });
+  const expander = new RequestExpander(proxyStub, false, 1, options);
+  const request1 = {
+    method: 'request1',
+    params: [],
+    workspacePath: '/tmp/test/workspace/1',
+    timeoutForInitializeMs: 100,
+  };
+  mkdirp.sync(request1.workspacePath);
+  const request2 = {
+    method: 'request1',
+    params: [],
+    workspacePath: '/tmp/test/workspace/1',
+    timeoutForInitializeMs: 100,
+  };
+  mkdirp.sync(request1.workspacePath);
+  const response1Promise = expander.handleRequest(request1);
+  const response2Promise = expander.handleRequest(request2);
+  await expect(response1Promise).rejects.toEqual({
+    id: -1,
+    error: {
+      code: ServerNotInitialized,
+      message: 'Server is initializing',
+    },
+  });
+  await expect(response2Promise).rejects.toEqual({
+    id: -1,
+    error: {
+      code: ServerNotInitialized,
+      message: 'Server is initializing',
+    },
+  });
 });
 
 test('be able to open multiple workspace', async () => {

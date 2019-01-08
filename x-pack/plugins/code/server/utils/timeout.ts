@@ -6,18 +6,23 @@
 import Boom from 'boom';
 
 export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
-  // Create a promise that rejects in <ms> milliseconds
-  const timeout = new Promise<T>((resolve, reject) => {
-    const id = setTimeout(() => {
-      clearTimeout(id);
-      const boom = Boom.gatewayTimeout('Timed out in ' + ms + 'ms.');
-      // @ts-ignore
-      boom.isTimeout = true;
-      reject(boom);
-    }, ms);
-  });
-
-  // Returns a race between our timeout and the passed in promise
+  const boom = Boom.gatewayTimeout('Timed out in ' + ms + 'ms.');
   // @ts-ignore
-  return Promise.race([promise, timeout]);
+  boom.isTimeout = true;
+
+  if (ms > 0) {
+    // Create a promise that rejects in <ms> milliseconds
+    const timeout = new Promise<T>((resolve, reject) => {
+      const id = setTimeout(() => {
+        clearTimeout(id);
+        reject(boom);
+      }, ms);
+    });
+
+    // Returns a race between our timeout and the passed in promise
+    // @ts-ignore
+    return Promise.race([promise, timeout]);
+  } else {
+    return Promise.reject(boom);
+  }
 }
