@@ -97,16 +97,11 @@ const log = new ToolingLog({
 });
 
 function isOsPackageDesired(name) {
-  if (flags['skip-os-packages'] || !flags['all-platforms'] || !flags[name]) {
+  if (flags['skip-os-packages']) {
     return false;
   }
 
-  // build all if no flags specified
-  if (flags.rpm === undefined && flags.deb === undefined) {
-    return true;
-  }
-
-  return Boolean(flags[name]);
+  return flags['all-platforms'] ? true : Boolean(flags[name]);
 }
 
 buildDistributables({
