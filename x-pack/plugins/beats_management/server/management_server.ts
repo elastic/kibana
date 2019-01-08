@@ -13,6 +13,9 @@ import { createListAgentsRoute } from './rest_api/beats/list';
 import { createTagAssignmentsRoute } from './rest_api/beats/tag_assignment';
 import { createTagRemovalsRoute } from './rest_api/beats/tag_removal';
 import { createBeatUpdateRoute } from './rest_api/beats/update';
+import { createDeleteConfidurationsRoute } from './rest_api/configurations/delete';
+import { createGetConfigurationBlocksRoute } from './rest_api/configurations/get';
+import { upsertConfigurationRoute } from './rest_api/configurations/upsert';
 import { createDeleteTagsWithIdsRoute } from './rest_api/tags/delete';
 import { createGetTagsWithIdsRoute } from './rest_api/tags/get';
 import { createListTagsRoute } from './rest_api/tags/list';
@@ -40,4 +43,8 @@ export const initManagementServer = async (libs: CMServerLibs) => {
   libs.framework.registerRoute(createSetTagRoute(libs));
   libs.framework.registerRoute(createTokensRoute(libs));
   libs.framework.registerRoute(createBeatUpdateRoute(libs));
+
+  libs.framework.registerRoute(createDeleteConfidurationsRoute(libs));
+  libs.framework.registerRoute(createGetConfigurationBlocksRoute(libs));
+  libs.framework.registerRoute(upsertConfigurationRoute(libs));
 };
