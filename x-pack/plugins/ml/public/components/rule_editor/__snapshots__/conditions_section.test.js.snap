@@ -15,7 +15,11 @@ exports[`ConditionsSectionExpression renders when enabled with empty conditions 
     onClick={[Function]}
     type="button"
   >
-    Add new condition
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
   </EuiButtonEmpty>
 </React.Fragment>
 `;
@@ -31,14 +35,18 @@ exports[`ConditionsSectionExpression renders when enabled with no conditions sup
     onClick={[Function]}
     type="button"
   >
-    Add new condition
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
   </EuiButtonEmpty>
 </React.Fragment>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with one condition 1`] = `
 <React.Fragment>
-  <ConditionExpression
+  <InjectIntl(ConditionExpression)
     appliesTo="actual"
     deleteCondition={[MockFunction]}
     index={0}
@@ -56,14 +64,18 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
     onClick={[Function]}
     type="button"
   >
-    Add new condition
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
   </EuiButtonEmpty>
 </React.Fragment>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with two conditions 1`] = `
 <React.Fragment>
-  <ConditionExpression
+  <InjectIntl(ConditionExpression)
     appliesTo="actual"
     deleteCondition={[MockFunction]}
     index={0}
@@ -72,7 +84,7 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
     updateCondition={[MockFunction]}
     value={1}
   />
-  <ConditionExpression
+  <InjectIntl(ConditionExpression)
     appliesTo="typical"
     deleteCondition={[MockFunction]}
     index={1}
@@ -90,7 +102,11 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
     onClick={[Function]}
     type="button"
   >
-    Add new condition
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
   </EuiButtonEmpty>
 </React.Fragment>
 `;

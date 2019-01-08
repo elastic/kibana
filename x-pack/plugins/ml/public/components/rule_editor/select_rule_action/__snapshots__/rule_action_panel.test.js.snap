@@ -14,10 +14,14 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
       Array [
         Object {
           "description": "skip result when actual is less than 1",
-          "title": "rule",
+          "title": <FormattedMessage
+            defaultMessage="rule"
+            id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
+            values={Object {}}
+          />,
         },
         Object {
-          "description": <EditConditionLink
+          "description": <InjectIntl(EditConditionLink)
             anomaly={
               Object {
                 "actual": Array [
@@ -48,7 +52,11 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Edit rule
+            <FormattedMessage
+              defaultMessage="Edit rule"
+              id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
+              values={Object {}}
+            />
           </EuiLink>,
           "title": "",
         },
@@ -81,7 +89,11 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
       Array [
         Object {
           "description": "skip model update when airline is not in eu-airlines",
-          "title": "rule",
+          "title": <FormattedMessage
+            defaultMessage="rule"
+            id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
+            values={Object {}}
+          />,
         },
         Object {
           "description": <AddToFilterListLink
@@ -97,7 +109,11 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
             onClick={[Function]}
             type="button"
           >
-            Edit rule
+            <FormattedMessage
+              defaultMessage="Edit rule"
+              id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
+              values={Object {}}
+            />
           </EuiLink>,
           "title": "",
         },
@@ -130,7 +146,11 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
       Array [
         Object {
           "description": "skip model update when airline is not in eu-airlines",
-          "title": "rule",
+          "title": <FormattedMessage
+            defaultMessage="rule"
+            id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
+            values={Object {}}
+          />,
         },
         Object {
           "description": <EuiLink
@@ -138,7 +158,11 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
             onClick={[Function]}
             type="button"
           >
-            Edit rule
+            <FormattedMessage
+              defaultMessage="Edit rule"
+              id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
+              values={Object {}}
+            />
           </EuiLink>,
           "title": "actions",
         },

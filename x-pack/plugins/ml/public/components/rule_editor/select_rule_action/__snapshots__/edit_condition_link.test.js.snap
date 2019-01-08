@@ -18,9 +18,15 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
       grow={true}
       size="m"
     >
-      Update rule condition from 
-      5
-       to
+      <FormattedMessage
+        defaultMessage="Update rule condition from {conditionValue} to"
+        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
+        values={
+          Object {
+            "conditionValue": 5,
+          }
+        }
+      />
     </EuiText>
   </EuiFlexItem>
   <EuiFlexItem
@@ -48,7 +54,11 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
       size="s"
       type="button"
     >
-      Update
+      <FormattedMessage
+        defaultMessage="Update"
+        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
+        values={Object {}}
+      />
     </EuiLink>
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -72,9 +82,15 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
       grow={true}
       size="m"
     >
-      Update rule condition from 
-      5
-       to
+      <FormattedMessage
+        defaultMessage="Update rule condition from {conditionValue} to"
+        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
+        values={
+          Object {
+            "conditionValue": 5,
+          }
+        }
+      />
     </EuiText>
   </EuiFlexItem>
   <EuiFlexItem
@@ -102,7 +118,11 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
       size="s"
       type="button"
     >
-      Update
+      <FormattedMessage
+        defaultMessage="Update"
+        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
+        values={Object {}}
+      />
     </EuiLink>
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -126,9 +146,15 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
       grow={true}
       size="m"
     >
-      Update rule condition from 
-      5
-       to
+      <FormattedMessage
+        defaultMessage="Update rule condition from {conditionValue} to"
+        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
+        values={
+          Object {
+            "conditionValue": 5,
+          }
+        }
+      />
     </EuiText>
   </EuiFlexItem>
   <EuiFlexItem
@@ -156,7 +182,11 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
       size="s"
       type="button"
     >
-      Update
+      <FormattedMessage
+        defaultMessage="Update"
+        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
+        values={Object {}}
+      />
     </EuiLink>
   </EuiFlexItem>
 </EuiFlexGroup>

@@ -9,7 +9,11 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
     textTransform="none"
   >
     <h2>
-      Scope
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -21,7 +25,13 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
     disabled={false}
     id="enable_scope_checkbox"
     indeterminate={false}
-    label="Add a filter list to limit where the rule applies."
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
     onChange={[MockFunction]}
   />
   <EuiSpacer
@@ -43,7 +53,11 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
     textTransform="none"
   >
     <h2>
-      Scope
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -55,7 +69,13 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
     disabled={false}
     id="enable_scope_checkbox"
     indeterminate={false}
-    label="Add a filter list to limit where the rule applies."
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
     onChange={[MockFunction]}
   />
   <EuiSpacer
@@ -91,7 +111,11 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
     textTransform="none"
   >
     <h2>
-      Scope
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -103,7 +127,13 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
     disabled={false}
     id="enable_scope_checkbox"
     indeterminate={false}
-    label="Add a filter list to limit where the rule applies."
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
     onChange={[MockFunction]}
   />
   <EuiSpacer
@@ -139,7 +169,11 @@ exports[`ScopeSection renders when not enabled 1`] = `
     textTransform="none"
   >
     <h2>
-      Scope
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -151,7 +185,13 @@ exports[`ScopeSection renders when not enabled 1`] = `
     disabled={false}
     id="enable_scope_checkbox"
     indeterminate={false}
-    label="Add a filter list to limit where the rule applies."
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
     onChange={[MockFunction]}
   />
   <EuiSpacer
@@ -170,7 +210,11 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
     textTransform="none"
   >
     <h2>
-      Scope
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -182,7 +226,13 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
     disabled={false}
     id="enable_scope_checkbox"
     indeterminate={false}
-    label="Add a filter list to limit where the rule applies."
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
     onChange={[MockFunction]}
   />
   <EuiSpacer
