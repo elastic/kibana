@@ -50,7 +50,6 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
@@ -69,7 +68,6 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
     }
   });
 
@@ -195,6 +193,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           $scope.loading = false;
         }
 
+        $scope.$applyAsync();
       }).catch((resp) => {
         console.log('Time series explorer - error getting job info from elasticsearch:', resp);
       });
@@ -247,6 +246,10 @@ module.controller('MlTimeSeriesExplorerController', function (
           $timeout(() => {
             $scope.$broadcast('render');
           }, 0);
+        } else {
+          // Call $applyAsync() if for any reason the upper condition doesn't trigger the $timeout.
+          // We still want to trigger a scope update about the changes above the condition.
+          $scope.$applyAsync();
         }
 
       }
@@ -568,6 +571,7 @@ module.controller('MlTimeSeriesExplorerController', function (
 
       // Ensure the forecast data will be shown if hidden previously.
       $scope.showForecast = true;
+      $scope.$applyAsync();
 
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
@@ -845,6 +849,7 @@ module.controller('MlTimeSeriesExplorerController', function (
               entity.fieldValues = _.chain(resp.records).pluck('by_field_value').uniq().value();
             }
           });
+          $scope.$applyAsync();
         }
 
       });
