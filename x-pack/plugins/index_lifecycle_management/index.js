@@ -53,6 +53,7 @@ export function indexLifecycleManagement(kibana) {
       registerLifecycleRoutes(server);
       registerIndexRoutes(server);
       if (
+        server.config().get('xpack.ilm.ui.enabled') &&
         server.plugins.index_management &&
         server.plugins.index_management.addIndexManagementDataEnricher
       ) {

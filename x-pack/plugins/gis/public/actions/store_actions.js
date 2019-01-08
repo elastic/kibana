@@ -44,6 +44,10 @@ export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_LAYER_ALPHA_VALUE = 'UPDATE_LAYER_ALPHA_VALUE';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
+export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
+export const CLEAR_MOUSE_COORDINATES = 'CLEAR_MOUSE_COORDINATES';
+export const SET_GOTO = 'SET_GOTO';
+export const CLEAR_GOTO = 'CLEAR_GOTO';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -224,6 +228,31 @@ export function mapExtentChanged(newMapConstants) {
     const newDataFilters =  { ...dataFilters, ...newMapConstants };
     await syncDataForAllLayers(getState, dispatch, newDataFilters);
   };
+}
+
+export function setMouseCoordinates({ lat, lon }) {
+  return {
+    type: SET_MOUSE_COORDINATES,
+    lat,
+    lon,
+  };
+}
+
+export function clearMouseCoordinates() {
+  return { type: CLEAR_MOUSE_COORDINATES };
+}
+
+export function setGoto({ lat, lon, zoom }) {
+  return {
+    type: SET_GOTO,
+    lat,
+    lon,
+    zoom,
+  };
+}
+
+export function clearGoto() {
+  return { type: CLEAR_GOTO };
 }
 
 export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
