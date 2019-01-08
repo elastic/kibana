@@ -19,14 +19,17 @@ import { InfraLogEntriesDomain } from '../domains/log_entries_domain';
 import { InfraMetadataDomain } from '../domains/metadata_domain';
 import { InfraMetricsDomain } from '../domains/metrics_domain';
 import { InfraNodesDomain } from '../domains/nodes_domain';
-import { InfraBackendLibs, InfraConfiguration, InfraDomainLibs } from '../infra_types';
+import { InfraBackendLibs, InfraDomainLibs } from '../infra_types';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
 
 export function compose(server: Server): InfraBackendLibs {
-  const configuration = new InfraKibanaConfigurationAdapter<InfraConfiguration>(server);
+  const configuration = new InfraKibanaConfigurationAdapter(server);
   const framework = new InfraKibanaBackendFrameworkAdapter(server);
-  const sources = new InfraSources(configuration);
+  const sources = new InfraSources({
+    configuration,
+    savedObjects: framework.getSavedObjectsService(),
+  });
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,
   });

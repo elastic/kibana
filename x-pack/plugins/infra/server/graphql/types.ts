@@ -46,6 +46,10 @@ export interface Query {
 export interface InfraSource {
   /** The id of the source */
   id: string;
+  /** The version number the source configuration was last persisted with */
+  version?: number | null;
+  /** The timestamp the source configuration was last persisted at */
+  updatedAt?: number | null;
   /** The raw configuration of the source */
   configuration: InfraSourceConfiguration;
   /** The status of the source */
@@ -65,6 +69,10 @@ export interface InfraSource {
 }
 /** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description: string;
   /** The alias to read metric data from */
   metricAlias: string;
   /** The alias to read log data from */
@@ -78,8 +86,6 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
-  /** The fields that may contain the log event message. The first field found win. */
-  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -239,6 +245,26 @@ export interface InfraDataPoint {
   value?: number | null;
 }
 
+export interface Mutation {
+  createSource: CreateSourceResult;
+
+  updateSource: UpdateSourceResult;
+
+  deleteSource: DeleteSourceResult;
+}
+
+export interface CreateSourceResult {
+  source: InfraSource;
+}
+
+export interface UpdateSourceResult {
+  source: InfraSource;
+}
+
+export interface DeleteSourceResult {
+  id: string;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -279,6 +305,68 @@ export interface InfraPathFilterInput {
 export interface InfraMetricInput {
   /** The type of metric */
   type: InfraMetricType;
+}
+
+export interface CreateSourceInput {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description?: string | null;
+  /** The alias to read metric data from */
+  metricAlias?: string | null;
+  /** The alias to read log data from */
+  logAlias?: string | null;
+  /** The field mapping to use for this source */
+  fields?: CreateSourceFieldsInput | null;
+}
+
+export interface CreateSourceFieldsInput {
+  /** The field to identify a container by */
+  container?: string | null;
+  /** The fields to identify a host by */
+  host?: string | null;
+  /** The field to identify a pod by */
+  pod?: string | null;
+  /** The field to use as a tiebreaker for log events that have identical timestamps */
+  tiebreaker?: string | null;
+  /** The field to use as a timestamp for metrics and logs */
+  timestamp?: string | null;
+}
+
+export interface UpdateSourceInput {
+  setName?: UpdateSourceNameInput | null;
+
+  setDescription?: UpdateSourceDescriptionInput | null;
+
+  setAliases?: UpdateSourceAliasInput | null;
+
+  setFields?: UpdateSourceFieldsInput | null;
+}
+
+export interface UpdateSourceNameInput {
+  name: string;
+}
+
+export interface UpdateSourceDescriptionInput {
+  description: string;
+}
+
+export interface UpdateSourceAliasInput {
+  logAlias?: string | null;
+
+  metricAlias?: string | null;
+}
+
+export interface UpdateSourceFieldsInput {
+  container?: string | null;
+
+  host?: string | null;
+
+  pod?: string | null;
+
+  tiebreaker?: string | null;
+
+  timestamp?: string | null;
 }
 
 // ====================================================
@@ -347,6 +435,19 @@ export interface NodesInfraResponseArgs {
   path: InfraPathInput[];
 
   metric: InfraMetricInput;
+}
+export interface CreateSourceMutationArgs {
+  id: string;
+
+  source: CreateSourceInput;
+}
+export interface UpdateSourceMutationArgs {
+  id: string;
+
+  changes: UpdateSourceInput[];
+}
+export interface DeleteSourceMutationArgs {
+  id: string;
 }
 
 // ====================================================
@@ -466,6 +567,10 @@ export namespace InfraSourceResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraSource> {
     /** The id of the source */
     id?: IdResolver<string, TypeParent, Context>;
+    /** The version number the source configuration was last persisted with */
+    version?: VersionResolver<number | null, TypeParent, Context>;
+    /** The timestamp the source configuration was last persisted at */
+    updatedAt?: UpdatedAtResolver<number | null, TypeParent, Context>;
     /** The raw configuration of the source */
     configuration?: ConfigurationResolver<InfraSourceConfiguration, TypeParent, Context>;
     /** The status of the source */
@@ -489,6 +594,16 @@ export namespace InfraSourceResolvers {
     Parent,
     Context
   >;
+  export type VersionResolver<
+    R = number | null,
+    Parent = InfraSource,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedAtResolver<
+    R = number | null,
+    Parent = InfraSource,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type ConfigurationResolver<
     R = InfraSourceConfiguration,
     Parent = InfraSource,
@@ -589,6 +704,10 @@ export namespace InfraSourceResolvers {
 /** A set of configuration options for an infrastructure data source */
 export namespace InfraSourceConfigurationResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraSourceConfiguration> {
+    /** The name of the data source */
+    name?: NameResolver<string, TypeParent, Context>;
+    /** A description of the data source */
+    description?: DescriptionResolver<string, TypeParent, Context>;
     /** The alias to read metric data from */
     metricAlias?: MetricAliasResolver<string, TypeParent, Context>;
     /** The alias to read log data from */
@@ -597,6 +716,16 @@ export namespace InfraSourceConfigurationResolvers {
     fields?: FieldsResolver<InfraSourceFields, TypeParent, Context>;
   }
 
+  export type NameResolver<
+    R = string,
+    Parent = InfraSourceConfiguration,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type DescriptionResolver<
+    R = string,
+    Parent = InfraSourceConfiguration,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type MetricAliasResolver<
     R = string,
     Parent = InfraSourceConfiguration,
@@ -620,8 +749,6 @@ export namespace InfraSourceFieldsResolvers {
     container?: ContainerResolver<string, TypeParent, Context>;
     /** The fields to identify a host by */
     host?: HostResolver<string, TypeParent, Context>;
-    /** The fields that may contain the log event message. The first field found win. */
-    message?: MessageResolver<string[], TypeParent, Context>;
     /** The field to identify a pod by */
     pod?: PodResolver<string, TypeParent, Context>;
     /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -637,11 +764,6 @@ export namespace InfraSourceFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = string,
-    Parent = InfraSourceFields,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type MessageResolver<
-    R = string[],
     Parent = InfraSourceFields,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
@@ -1049,7 +1171,7 @@ export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
 
-    label?: DisplayNameResolver<string, TypeParent, Context>;
+    label?: LabelResolver<string, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
@@ -1057,11 +1179,11 @@ export namespace InfraNodePathResolvers {
     Parent,
     Context
   >;
-  export type DisplayNameResolver<
-    R = string,
-    Parent = InfraNodePath,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
+  export type LabelResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace InfraNodeMetricResolvers {
@@ -1136,6 +1258,83 @@ export namespace InfraDataPointResolvers {
   export type ValueResolver<
     R = number | null,
     Parent = InfraDataPoint,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace MutationResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = never> {
+    createSource?: CreateSourceResolver<CreateSourceResult, TypeParent, Context>;
+
+    updateSource?: UpdateSourceResolver<UpdateSourceResult, TypeParent, Context>;
+
+    deleteSource?: DeleteSourceResolver<DeleteSourceResult, TypeParent, Context>;
+  }
+
+  export type CreateSourceResolver<
+    R = CreateSourceResult,
+    Parent = never,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, CreateSourceArgs>;
+  export interface CreateSourceArgs {
+    id: string;
+
+    source: CreateSourceInput;
+  }
+
+  export type UpdateSourceResolver<
+    R = UpdateSourceResult,
+    Parent = never,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, UpdateSourceArgs>;
+  export interface UpdateSourceArgs {
+    id: string;
+
+    changes: UpdateSourceInput[];
+  }
+
+  export type DeleteSourceResolver<
+    R = DeleteSourceResult,
+    Parent = never,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, DeleteSourceArgs>;
+  export interface DeleteSourceArgs {
+    id: string;
+  }
+}
+
+export namespace CreateSourceResultResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = CreateSourceResult> {
+    source?: SourceResolver<InfraSource, TypeParent, Context>;
+  }
+
+  export type SourceResolver<
+    R = InfraSource,
+    Parent = CreateSourceResult,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UpdateSourceResultResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = UpdateSourceResult> {
+    source?: SourceResolver<InfraSource, TypeParent, Context>;
+  }
+
+  export type SourceResolver<
+    R = InfraSource,
+    Parent = UpdateSourceResult,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DeleteSourceResultResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = DeleteSourceResult> {
+    id?: IdResolver<string, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string,
+    Parent = DeleteSourceResult,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

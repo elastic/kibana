@@ -111,8 +111,8 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     });
   }
 
-  public getSavedObjectsClient(request: InfraFrameworkRequest) {
-    return this.server.savedObjects.getScopedSavedObjectsClient(request);
+  public getSavedObjectsService() {
+    return this.server.savedObjects;
   }
 
   public async makeTSVBRequest(

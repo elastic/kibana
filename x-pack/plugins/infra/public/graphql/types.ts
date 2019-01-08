@@ -18,6 +18,10 @@ export interface Query {
 export interface InfraSource {
   /** The id of the source */
   id: string;
+  /** The version number the source configuration was last persisted with */
+  version?: number | null;
+  /** The timestamp the source configuration was last persisted at */
+  updatedAt?: number | null;
   /** The raw configuration of the source */
   configuration: InfraSourceConfiguration;
   /** The status of the source */
@@ -37,6 +41,10 @@ export interface InfraSource {
 }
 /** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description: string;
   /** The alias to read metric data from */
   metricAlias: string;
   /** The alias to read log data from */
@@ -50,8 +58,6 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
-  /** The fields that may contain the log event message. The first field found win. */
-  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -211,6 +217,26 @@ export interface InfraDataPoint {
   value?: number | null;
 }
 
+export interface Mutation {
+  createSource: CreateSourceResult;
+
+  updateSource: UpdateSourceResult;
+
+  deleteSource: DeleteSourceResult;
+}
+
+export interface CreateSourceResult {
+  source: InfraSource;
+}
+
+export interface UpdateSourceResult {
+  source: InfraSource;
+}
+
+export interface DeleteSourceResult {
+  id: string;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -251,6 +277,68 @@ export interface InfraPathFilterInput {
 export interface InfraMetricInput {
   /** The type of metric */
   type: InfraMetricType;
+}
+
+export interface CreateSourceInput {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description?: string | null;
+  /** The alias to read metric data from */
+  metricAlias?: string | null;
+  /** The alias to read log data from */
+  logAlias?: string | null;
+  /** The field mapping to use for this source */
+  fields?: CreateSourceFieldsInput | null;
+}
+
+export interface CreateSourceFieldsInput {
+  /** The field to identify a container by */
+  container?: string | null;
+  /** The fields to identify a host by */
+  host?: string | null;
+  /** The field to identify a pod by */
+  pod?: string | null;
+  /** The field to use as a tiebreaker for log events that have identical timestamps */
+  tiebreaker?: string | null;
+  /** The field to use as a timestamp for metrics and logs */
+  timestamp?: string | null;
+}
+
+export interface UpdateSourceInput {
+  setName?: UpdateSourceNameInput | null;
+
+  setDescription?: UpdateSourceDescriptionInput | null;
+
+  setAliases?: UpdateSourceAliasInput | null;
+
+  setFields?: UpdateSourceFieldsInput | null;
+}
+
+export interface UpdateSourceNameInput {
+  name: string;
+}
+
+export interface UpdateSourceDescriptionInput {
+  description: string;
+}
+
+export interface UpdateSourceAliasInput {
+  logAlias?: string | null;
+
+  metricAlias?: string | null;
+}
+
+export interface UpdateSourceFieldsInput {
+  container?: string | null;
+
+  host?: string | null;
+
+  pod?: string | null;
+
+  tiebreaker?: string | null;
+
+  timestamp?: string | null;
 }
 
 // ====================================================
@@ -319,6 +407,19 @@ export interface NodesInfraResponseArgs {
   path: InfraPathInput[];
 
   metric: InfraMetricInput;
+}
+export interface CreateSourceMutationArgs {
+  id: string;
+
+  source: CreateSourceInput;
+}
+export interface UpdateSourceMutationArgs {
+  id: string;
+
+  changes: UpdateSourceInput[];
+}
+export interface DeleteSourceMutationArgs {
+  id: string;
 }
 
 // ====================================================

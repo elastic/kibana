@@ -52,7 +52,7 @@ export interface InfraBackendFrameworkAdapter {
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
-  getSavedObjectsClient(req: InfraFrameworkRequest<any>): Legacy.SavedObjectsClient;
+  getSavedObjectsService(): Legacy.SavedObjectsService;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,

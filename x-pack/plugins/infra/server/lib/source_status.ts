@@ -18,7 +18,10 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const indexNames = await this.adapter.getIndexNames(request, sourceConfiguration.logAlias);
+    const indexNames = await this.adapter.getIndexNames(
+      request,
+      sourceConfiguration.configuration.logAlias
+    );
     return indexNames;
   }
   public async getMetricIndexNames(
@@ -26,22 +29,34 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const indexNames = await this.adapter.getIndexNames(request, sourceConfiguration.metricAlias);
+    const indexNames = await this.adapter.getIndexNames(
+      request,
+      sourceConfiguration.configuration.metricAlias
+    );
     return indexNames;
   }
   public async hasLogAlias(request: InfraFrameworkRequest, sourceId: string): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasAlias = await this.adapter.hasAlias(request, sourceConfiguration.logAlias);
+    const hasAlias = await this.adapter.hasAlias(
+      request,
+      sourceConfiguration.configuration.logAlias
+    );
     return hasAlias;
   }
   public async hasMetricAlias(request: InfraFrameworkRequest, sourceId: string): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasAlias = await this.adapter.hasAlias(request, sourceConfiguration.metricAlias);
+    const hasAlias = await this.adapter.hasAlias(
+      request,
+      sourceConfiguration.configuration.metricAlias
+    );
     return hasAlias;
   }
   public async hasLogIndices(request: InfraFrameworkRequest, sourceId: string): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasIndices = await this.adapter.hasIndices(request, sourceConfiguration.logAlias);
+    const hasIndices = await this.adapter.hasIndices(
+      request,
+      sourceConfiguration.configuration.logAlias
+    );
     return hasIndices;
   }
   public async hasMetricIndices(
@@ -49,7 +64,10 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasIndices = await this.adapter.hasIndices(request, sourceConfiguration.metricAlias);
+    const hasIndices = await this.adapter.hasIndices(
+      request,
+      sourceConfiguration.configuration.metricAlias
+    );
     return hasIndices;
   }
 }
