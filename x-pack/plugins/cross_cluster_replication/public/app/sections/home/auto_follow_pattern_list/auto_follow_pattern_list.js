@@ -21,6 +21,7 @@ export const AutoFollowPatternList = injectI18n(
   class extends PureComponent {
     static propTypes = {
       loadAutoFollowPatterns: PropTypes.func,
+      loadAutoFollowStats: PropTypes.func,
       autoFollowPatterns: PropTypes.array,
       apiStatus: PropTypes.string,
       apiError: PropTypes.object,
@@ -31,6 +32,7 @@ export const AutoFollowPatternList = injectI18n(
 
     componentDidMount() {
       this.props.loadAutoFollowPatterns();
+      this.props.loadAutoFollowStats();
 
       // Interval to load auto-follow patterns in the background passing "true" to the fetch method
       this.interval = setInterval(() => this.props.loadAutoFollowPatterns(true), REFRESH_RATE_MS);

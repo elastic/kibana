@@ -28,8 +28,9 @@ const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
 
 export class Build {
-  constructor(source) {
+  constructor(source, log) {
     this.source = source;
+    this.log = log;
     this.includedFiles = [source];
   }
 
@@ -61,6 +62,7 @@ export class Build {
 
   async build() {
     const outFile = this.outputPath();
+
     const rendered = await renderSass({
       file: this.source,
       outFile,
@@ -71,7 +73,6 @@ export class Build {
         path.resolve(__dirname, '../../../node_modules')
       ]
     });
-
 
     const prefixed = postcss([ autoprefixer ]).process(rendered.css);
 

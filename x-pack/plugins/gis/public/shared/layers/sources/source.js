@@ -16,11 +16,15 @@ export class ASource {
     throw new Error('Must implement Source.createDescriptor');
   }
 
+  static renderDropdownDisplayOption() {
+    throw new Error('Must implement Source.renderDropdownDisplayOption');
+  }
+
   constructor(descriptor) {
     this._descriptor = descriptor;
   }
 
-  destory() {}
+  destroy() {}
 
   renderDetails() {
     return (<div>{`Here be details for source`}</div>);
@@ -40,6 +44,10 @@ export class ASource {
   }
 
   isFieldAware() {
+    return false;
+  }
+
+  isRefreshTimerAware() {
     return false;
   }
 

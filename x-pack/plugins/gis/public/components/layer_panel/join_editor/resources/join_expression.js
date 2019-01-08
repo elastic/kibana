@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import {
   EuiPopover,
   EuiPopoverTitle,
-  EuiExpressionButton,
+  EuiExpression,
   EuiFormRow,
 } from '@elastic/eui';
 
@@ -65,10 +65,10 @@ export class JoinExpression extends Component {
         initialFocus="body" /* avoid initialFocus on Combobox */
         withTitle
         button={
-          <EuiExpressionButton
+          <EuiExpression
             onClick={this._togglePopover}
             description="JOIN"
-            buttonValue={rightSourceName ? `${rightSourceName} right` : '-- select --'}
+            value={rightSourceName ? `${rightSourceName} right` : '-- select --'}
           />
         }
       >

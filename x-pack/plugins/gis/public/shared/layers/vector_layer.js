@@ -166,10 +166,11 @@ export class VectorLayer extends ALayer {
 
   async _canSkipSourceUpdate(source, sourceDataId, filters) {
     const timeAware = await source.isTimeAware();
+    const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
 
-    if (!timeAware && !extentAware && !isFieldAware) {
+    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
@@ -192,13 +193,20 @@ export class VectorLayer extends ALayer {
       updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
     }
 
+    let updateDueToRefreshTimer = false;
+    if (refreshTimerAware && filters.refreshTimerLastTriggeredAt) {
+      updateDueToRefreshTimer = !_.isEqual(meta.refreshTimerLastTriggeredAt, filters.refreshTimerLastTriggeredAt);
+    }
+
     let updateDueToFields = false;
     if (isFieldAware) {
       updateDueToFields = !_.isEqual(meta.fieldNames, filters.fieldNames);
     }
 
-    return !updateDueToTime && !this.updateDueToExtent(source, meta, filters) && !updateDueToFields;
-
+    return !updateDueToTime
+      && !updateDueToRefreshTimer
+      && !this.updateDueToExtent(source, meta, filters)
+      && !updateDueToFields;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
