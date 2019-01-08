@@ -23,7 +23,6 @@ function mlExplorerDashboardServiceFactory() {
   const swimlaneCellClick = service.swimlaneCellClick = listenerFactory();
   const swimlaneDataChange = service.swimlaneDataChange = listenerFactory();
   const swimlaneRenderDone = service.swimlaneRenderDone = listenerFactory();
-  const chartsInitDone = service.chartsInitDone = listenerFactory();
   service.anomalyDataChange = listenerFactory();
 
   service.init = function () {
@@ -32,7 +31,6 @@ function mlExplorerDashboardServiceFactory() {
     swimlaneCellClick.unwatchAll();
     swimlaneDataChange.unwatchAll();
     swimlaneRenderDone.unwatchAll();
-    chartsInitDone.unwatchAll();
   };
 
   return service;

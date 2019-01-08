@@ -78,7 +78,6 @@ function getDefaultViewBySwimlaneData() {
   };
 }
 
-
 module.controller('MlExplorerController', function (
   $scope,
   $timeout,
@@ -167,16 +166,6 @@ module.controller('MlExplorerController', function (
   $scope.viewBySwimlaneOptions = [];
   $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
 
-
-  let isChartsContainerInitialized = false;
-  let chartsCallback = () => {};
-  function initializeAfterChartsContainerDone() {
-    if (isChartsContainerInitialized === false) {
-      chartsCallback();
-    }
-    isChartsContainerInitialized = true;
-  }
-
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store filters.
     const stateDefaults = {
@@ -205,7 +194,6 @@ module.controller('MlExplorerController', function (
     });
 
     mlExplorerDashboardService.init();
-    mlExplorerDashboardService.chartsInitDone.watch(initializeAfterChartsContainerDone);
   };
 
   // create new job objects based on standard job config objects
@@ -548,7 +536,6 @@ module.controller('MlExplorerController', function (
     mlSelectIntervalService.state.unwatch(tableControlsListener);
     mlSelectSeverityService.state.unwatch(tableControlsListener);
     mlSelectLimitService.state.unwatch(swimlaneLimitListener);
-    mlExplorerDashboardService.chartsInitDone.unwatch(initializeAfterChartsContainerDone);
     delete $scope.cellData;
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
@@ -1094,11 +1081,7 @@ module.controller('MlExplorerController', function (
       }, 0);
     }
 
-    if (isChartsContainerInitialized) {
-      finish();
-    } else {
-      chartsCallback = finish;
-    }
+    finish();
   }
 
   function clearSelectedAnomalies() {

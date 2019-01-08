@@ -13,6 +13,7 @@
  * and manages the layout of the charts in the containing div.
  */
 
+import $ from 'jquery';
 import _ from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
@@ -28,13 +29,12 @@ import { CHART_TYPE } from '../explorer_constants';
 
 export function explorerChartsContainerServiceFactory(
   mlSelectSeverityService,
-  callback,
-  $chartContainer
+  callback
 ) {
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;
-  const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
+  const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
   const MAX_CHARTS_PER_ROW = 4;
@@ -63,6 +63,7 @@ export function explorerChartsContainerServiceFactory(
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
+    const $chartContainer = $('.explorer-charts');
     const chartsContainerWidth = Math.floor($chartContainer.width());
     let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
     if (allSeriesRecords.length === 1) {

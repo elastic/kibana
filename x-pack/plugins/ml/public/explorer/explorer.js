@@ -12,7 +12,14 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { AnnotationsTable } from '../components/annotations_table';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
@@ -27,6 +34,13 @@ import { LoadingIndicator } from '../components/loading_indicator/loading_indica
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectLimit } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+
+// Explorer Charts
+import $ from 'jquery';
+import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
+import { explorerChartsContainerServiceFactory } from './explorer_charts/explorer_charts_container_service';
+import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -56,6 +70,42 @@ export const Explorer = injectI18n(
       viewByLoadedForTimeFormatted: PropTypes.any,
       viewBySwimlaneOptions: PropTypes.array,
     };
+
+    componentDidMount() {
+      const that = this;
+      const { mlSelectSeverityService } = this.props;
+
+      const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
+        mlSelectSeverityService,
+        updateExplorerCharts,
+      );
+
+      mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);
+
+      // Create a div for the tooltip.
+      $('.ml-explorer-charts-tooltip').remove();
+      $('body').append('<div class="ml-explorer-tooltip ml-explorer-charts-tooltip" style="opacity:0; display: none;">');
+
+      function updateExplorerCharts(data) {
+        const explorerChartsContainerData = {
+          chartsPerRow: data.chartsPerRow,
+          seriesToPlot: data.seriesToPlot,
+          // convert truthy/falsy value to Boolean
+          tooManyBuckets: !!data.tooManyBuckets,
+          mlSelectSeverityService,
+          mlChartTooltipService
+        };
+
+        that.setState({
+          explorerChartsContainerData
+        });
+      }
+    }
+
+    componentWillUnmount() {
+      // Remove div for the tooltip.
+      $('.ml-explorer-charts-tooltip').remove();
+    }
 
     viewByChangeHandler = e => this.props.setSwimlaneViewBy(e.target.value);
 
@@ -226,18 +276,21 @@ export const Explorer = injectI18n(
                   drillDown={true}
                   numberBadge={false}
                 />
-                <br /><br />
+                <br />
+                <br />
               </React.Fragment>
             )}
 
             <span className="panel-title euiText">
-              <FormattedMessage
-                id="xpack.ml.explorer.anomaliesTitle"
-                defaultMessage="Anomalies"
-              />
+              <FormattedMessage id="xpack.ml.explorer.anomaliesTitle" defaultMessage="Anomalies" />
             </span>
 
-            <EuiFlexGroup direction="row" gutterSize="l" responsive={true} className="ml-anomalies-controls">
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="l"
+              responsive={true}
+              className="ml-anomalies-controls"
+            >
               <EuiFlexItem grow={false} style={{ width: '170px' }}>
                 <EuiFormRow
                   label={intl.formatMessage({
@@ -266,6 +319,14 @@ export const Explorer = injectI18n(
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            <div className="euiText explorer-charts">
+              {this.state.explorerChartsContainerData !== undefined && (
+                <ExplorerChartsContainer {...this.state.explorerChartsContainerData} />
+              )}
+            </div>
           </div>
         </div>
       );
