@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
   const expectAllDataRenders = async () => {
@@ -114,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization('Filter Bytes Test: vega');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender(27);
+      await PageObjects.dashboard.waitForRenderComplete();
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(27);
     });
@@ -123,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addEverySavedSearch('"Rendering Test"');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender(28);
+      await PageObjects.dashboard.waitForRenderComplete();
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(28);
 
@@ -132,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('initial render test', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender(28);
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -142,8 +141,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2018-05-11 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender(28);
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -151,7 +149,7 @@ export default function ({ getService, getPageObjects }) {
       const currentUrl = await browser.getCurrentUrl();
       await browser.get(currentUrl, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender(28);
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -160,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2018-05-12 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender(28);
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectNoDataRenders();
     });
 
@@ -169,7 +167,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender(28);
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
   });
