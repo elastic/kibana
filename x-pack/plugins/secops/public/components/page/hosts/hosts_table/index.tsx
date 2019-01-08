@@ -101,7 +101,7 @@ const getHostsColumns = () => [
     name: 'Host',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.name)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.name)}</>, // Host Details Link
   },
   {
     name: 'First seen',

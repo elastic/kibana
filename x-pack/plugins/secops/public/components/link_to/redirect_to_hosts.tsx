@@ -5,12 +5,21 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-export const RedirectToHostsPage = () => {
-  return <Redirect to={'/hosts'} />;
+type RedirectToHostDetailsProps = RouteComponentProps<{
+  hostName?: string;
+}>;
+
+export const RedirectToHostsPage = ({
+  match: {
+    params: { hostName },
+  },
+  location,
+}: RedirectToHostDetailsProps) => {
+  return <Redirect to={`/hosts/${hostName}`} />;
 };
 
-export const getHostsUrl = () => {
-  return '#/link-to/hosts';
+export const getHostsUrl = (matches?: { hostName?: string }) => {
+  return `#/link-to/hosts`;
 };
