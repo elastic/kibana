@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, Server } from 'hapi';
+import { PluginProperties, Request, Server } from 'hapi';
+import { Feature } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
+import { PLUGIN } from '../common/constants';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 
@@ -16,11 +18,35 @@ export interface KibanaRouteOptions {
   options: any;
 }
 
-export interface KibanaServer {
-  route: (options: KibanaRouteOptions) => void;
+interface KibanaPluginProperties extends PluginProperties {
+  xpack_main: {
+    registerFeature: (feature: Feature) => void;
+  };
 }
 
-export const initServerWithKibana = (server: Server) => {
+export interface KibanaServer extends Server {
+  route: (options: KibanaRouteOptions) => void;
+  plugins: KibanaPluginProperties;
+}
+
+export const initServerWithKibana = (server: KibanaServer) => {
   const libs = compose(server);
   initUptimeServer(libs);
+
+  const xpackMainPlugin = server.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: PLUGIN.ID,
+    name: 'Uptime',
+    navLinkId: PLUGIN.ID,
+    privileges: {
+      all: {
+        app: ['uptime', 'kibana'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: [],
+      },
+    },
+  });
 };
