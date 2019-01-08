@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
@@ -63,10 +63,10 @@ export class Variables extends React.Component<Props> {
             horizontal={this.state.isVisible}
             style={{ marginRight: units.half }}
           />{' '}
-          <FormattedMessage
-            id="xpack.apm.stacktraceTab.localVariablesToogleButtonLabel"
-            defaultMessage="Local variables"
-          />
+          {i18n.translate(
+            'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
+            { defaultMessage: 'Local variables' }
+          )}
         </VariablesToggle>
         {this.state.isVisible && (
           <VariablesTableContainer>
