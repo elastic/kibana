@@ -42,6 +42,10 @@ import { explorerChartsContainerServiceFactory } from './explorer_charts/explore
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
 
+// Anomalies Table
+import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
+import { timefilter } from 'ui/timefilter';
+
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
     value: option,
@@ -67,6 +71,7 @@ export const Explorer = injectI18n(
       showViewBySwimlane: PropTypes.bool,
       swimlaneOverall: PropTypes.object,
       swimlaneViewByFieldName: PropTypes.string,
+      tableData: PropTypes.object,
       viewByLoadedForTimeFormatted: PropTypes.any,
       viewBySwimlaneOptions: PropTypes.array,
     };
@@ -128,6 +133,7 @@ export const Explorer = injectI18n(
         swimlaneOverall,
         swimlaneViewBy,
         swimlaneViewByFieldName,
+        tableData,
         viewByLoadedForTimeFormatted,
         viewBySwimlaneOptions,
       } = this.props;
@@ -327,6 +333,8 @@ export const Explorer = injectI18n(
                 <ExplorerChartsContainer {...this.state.explorerChartsContainerData} />
               )}
             </div>
+
+            <AnomaliesTable tableData={tableData} timefilter={timefilter} />
           </div>
         </div>
       );

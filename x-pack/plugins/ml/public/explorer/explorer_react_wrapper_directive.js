@@ -63,6 +63,7 @@ module.directive('mlExplorerReactWrapper', function (Private) {
         'setSwimlaneViewBy',
         'showViewBySwimlane',
         'swimlaneViewByFieldName',
+        'tableData',
         'viewByLoadedForTimeFormatted',
         'viewBySwimlaneOptions',
       ]);

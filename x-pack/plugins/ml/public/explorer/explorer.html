@@ -11,19 +11,4 @@
   </filter-bar>
 
   <ml-explorer-react-wrapper />
-
-  <div ng-if="jobs.length > 0 && loading === false && hasResults === true">
-    <div class="results-container">
-
-      <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
-
-        <ml-anomalies-table
-          table-data="tableData"
-        />
-
-      </div>
-
-    </div>
-  </div>
-
 </div>
