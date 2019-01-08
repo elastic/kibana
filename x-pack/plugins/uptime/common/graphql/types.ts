@@ -16,7 +16,7 @@ export type UnsignedInteger = any;
 
 export interface Query {
   /** Get a list of all recorded pings for all monitors */
-  allPings: Ping[];
+  allPings: PingResults;
   /** Gets the number of documents in the target index */
   getDocCount: DocCount;
 
@@ -32,6 +32,12 @@ export interface Query {
 
   getErrorsList?: (ErrorListItem | null)[] | null;
 }
+
+export interface PingResults {
+  Total: number;
+  Pings: Ping[];
+}
+
 /** A request sent from a monitor to a host */
 export interface Ping {
   /** The timestamp of the ping's creation */
