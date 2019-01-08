@@ -28,7 +28,6 @@ import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
-import { KuiCodeEditor } from '@kbn/ui-framework/components';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -43,6 +42,7 @@ import {
   EuiFieldText,
   EuiTitle,
   EuiHorizontalRule,
+  EuiCodeEditor,
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -244,7 +244,7 @@ class MarkdownPanelConfigUi extends Component {
               </span>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <KuiCodeEditor
+            <EuiCodeEditor
               mode="less"
               theme="github"
               width="100%"
@@ -264,10 +264,7 @@ class MarkdownPanelConfigUi extends Component {
             isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}
           >
-            <FormattedMessage
-              id="tsvb.markdown.markdownTab.markdownButtonLabel"
-              defaultMessage="Markdown"
-            />
+            Markdown
           </EuiTab>
           <EuiTab
             data-test-subj="markdownDataBtn"

@@ -51,7 +51,6 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.visualize.selectOrderBy('_key');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
 

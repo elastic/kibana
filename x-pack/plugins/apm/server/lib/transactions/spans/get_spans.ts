@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import {
   PROCESSOR_EVENT,
   SPAN_START,
@@ -14,6 +14,7 @@ import { Setup } from '../../helpers/setup_request';
 
 export type SpanListAPIResponse = Span[];
 
+// Deprecated and will be removed in 7.0. Only needed for backwards compatability pre 6.5 (introducition of v2 API and distributed tracing)
 export async function getSpans(
   transactionId: string,
   setup: Setup

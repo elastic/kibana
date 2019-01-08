@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { FilterListsHeader } from './header';
@@ -24,7 +24,7 @@ describe('Filter Lists Header', () => {
       ...requiredProps,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <FilterListsHeader {...props} />
     );
 

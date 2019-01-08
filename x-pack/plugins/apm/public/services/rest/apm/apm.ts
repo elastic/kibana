@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Span } from 'x-pack/plugins/apm/typings/Span';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { convertKueryToEsQuery, getAPMIndexPatternForKuery } from '../../kuery';
 
 export async function getEncodedEsQuery(kuery?: string) {

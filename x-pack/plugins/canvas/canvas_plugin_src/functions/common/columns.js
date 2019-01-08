@@ -46,7 +46,9 @@ export const columns = () => ({
       const columns = [];
       fields.forEach(field => {
         const column = find(result.columns, { name: field });
-        if (column) columns.push(column);
+        if (column) {
+          columns.push(column);
+        }
       });
       const rows = columns.length > 0 ? result.rows.map(row => pick(row, fields)) : [];
       result = { ...result, rows, columns };

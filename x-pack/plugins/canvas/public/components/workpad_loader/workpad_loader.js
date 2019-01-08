@@ -62,7 +62,9 @@ export class WorkpadLoader extends React.PureComponent {
   componentWillReceiveProps(newProps) {
     // the workpadId prop will change when a is created or loaded, close the toolbar when it does
     const { workpadId, onClose } = this.props;
-    if (workpadId !== newProps.workpadId) onClose();
+    if (workpadId !== newProps.workpadId) {
+      onClose();
+    }
   }
 
   componentWillUnmount() {
@@ -371,8 +373,9 @@ export class WorkpadLoader extends React.PureComponent {
 
             {createPending && <div style={{ width: '100%' }}>Creating Workpad...</div>}
 
-            {!createPending &&
-              isLoading && <div style={{ width: '100%' }}>Fetching Workpads...</div>}
+            {!createPending && isLoading && (
+              <div style={{ width: '100%' }}>Fetching Workpads...</div>
+            )}
 
             {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
 

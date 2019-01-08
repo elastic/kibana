@@ -138,6 +138,10 @@ exports[`it renders without crashing 1`] = `
                       "isGroupLabelOption": false,
                       "label": "manage_follow_index",
                     },
+                    Object {
+                      "isGroupLabelOption": false,
+                      "label": "manage_ilm",
+                    },
                   ]
                 }
                 selectedOptions={Array []}
@@ -203,6 +207,7 @@ exports[`it renders without crashing 1`] = `
             grow={true}
           >
             <EuiSwitch
+              checked={false}
               compressed={true}
               data-test-subj="restrictDocumentsQuery0"
               label={
@@ -213,7 +218,6 @@ exports[`it renders without crashing 1`] = `
                 />
               }
               onChange={[Function]}
-              value={false}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

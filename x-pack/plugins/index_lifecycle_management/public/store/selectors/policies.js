@@ -245,8 +245,6 @@ export const phaseToES = (state, phase) => {
   if (phase[PHASE_NODE_ATTRS]) {
     const [ name, value, ] = phase[PHASE_NODE_ATTRS].split(':');
     esPhase.actions.allocate = {
-      include: {},
-      exclude: {},
       require: {
         [name]: value
       }
@@ -268,6 +266,5 @@ export const phaseToES = (state, phase) => {
       number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
     };
   }
-  console.log("PHASE", phase);
   return esPhase;
 };

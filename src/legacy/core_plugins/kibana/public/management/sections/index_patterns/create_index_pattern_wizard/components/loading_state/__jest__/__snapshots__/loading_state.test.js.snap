@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingState should render normally 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  component="div"
+  direction="column"
+  gutterSize="s"
+  justifyContent="center"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiTitle
+      size="s"
+      textTransform="none"
+    >
+      <h2
+        style={
+          Object {
+            "textAlign": "center",
+          }
+        }
+      >
+        <FormattedMessage
+          defaultMessage="Checking for Elasticsearch data"
+          id="kbn.management.createIndexPattern.loadingState.checkingLabel"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="l"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

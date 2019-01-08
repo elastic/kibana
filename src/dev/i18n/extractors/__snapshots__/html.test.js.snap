@@ -38,14 +38,40 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extractors/html throws on empty i18n-id 1`] = `"Empty \\"i18n-id\\" value in angular directive is not allowed."`;
-
-exports[`dev/i18n/extractors/html throws on i18n filter usage in angular directive argument 1`] = `
-"I18n filter can be used only in interpolation expressions:
-<div
-[37m[41m [49m[39m ng-options=\\"mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode\\"
-></div>
-"
+exports[`dev/i18n/extractors/html extracts message from i18n filter in interpolating directive 1`] = `
+Array [
+  Array [
+    "namespace.messageId",
+    Object {
+      "description": undefined,
+      "message": "Message",
+    },
+  ],
+]
 `;
 
-exports[`dev/i18n/extractors/html throws on missing i18n-default-message attribute 1`] = `"Empty defaultMessage in angular directive is not allowed (\\"message-id\\")."`;
+exports[`dev/i18n/extractors/html throws on empty i18n-id 1`] = `
+Array [
+  Array [
+    [Error: Empty "i18n-id" value in angular directive is not allowed.],
+  ],
+]
+`;
+
+exports[`dev/i18n/extractors/html throws on i18n filter usage in complex angular expression 1`] = `
+Array [
+  Array [
+    [Error: Couldn't parse angular i18n expression:
+Unexpected token, expected ";" (1:6):
+ mode [37m[41ma[49m[39ms ('metricVis.colorModes.' + mode],
+  ],
+]
+`;
+
+exports[`dev/i18n/extractors/html throws on missing i18n-default-message attribute 1`] = `
+Array [
+  Array [
+    [Error: Empty defaultMessage in angular directive is not allowed ("message-id").],
+  ],
+]
+`;

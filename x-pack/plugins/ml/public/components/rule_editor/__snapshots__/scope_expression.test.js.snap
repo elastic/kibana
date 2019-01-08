@@ -28,12 +28,14 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
     component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
+      color="secondary"
       description="when"
       isActive={false}
       onClick={[Function]}
+      uppercase={true}
+      value="domain"
     />
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -67,12 +69,14 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
     component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
+      color="secondary"
       description="when"
       isActive={false}
       onClick={[Function]}
+      uppercase={true}
+      value="domain"
     />
   </EuiFlexItem>
   <EuiFlexItem
@@ -82,11 +86,13 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue="safe_domains"
+        <EuiExpression
+          color="secondary"
           description="is in"
           isActive={false}
           onClick={[Function]}
+          uppercase={true}
+          value="safe_domains"
         />
       }
       closePopover={[Function]}
@@ -107,7 +113,9 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
         <EuiPopoverTitle>
           Is
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
             alignItems="stretch"
             component="div"
@@ -187,7 +195,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>
@@ -222,12 +230,14 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
     component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
+      color="secondary"
       description="when"
       isActive={false}
       onClick={[Function]}
+      uppercase={true}
+      value="domain"
     />
   </EuiFlexItem>
   <EuiFlexItem
@@ -237,11 +247,13 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue="safe_domains"
+        <EuiExpression
+          color="secondary"
           description="is in"
           isActive={false}
           onClick={[Function]}
+          uppercase={true}
+          value="safe_domains"
         />
       }
       closePopover={[Function]}
@@ -262,7 +274,9 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
         <EuiPopoverTitle>
           Is
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
             alignItems="stretch"
             component="div"
@@ -342,7 +356,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>
@@ -377,12 +391,14 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
     component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
+      color="secondary"
       description="when"
       isActive={false}
       onClick={[Function]}
+      uppercase={true}
+      value="domain"
     />
   </EuiFlexItem>
   <EuiFlexItem
@@ -392,11 +408,13 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue=""
+        <EuiExpression
+          color="secondary"
           description="is "
           isActive={false}
           onClick={[Function]}
+          uppercase={true}
+          value=""
         />
       }
       closePopover={[Function]}
@@ -417,7 +435,9 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
         <EuiPopoverTitle>
           Is
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
             alignItems="stretch"
             component="div"
@@ -495,7 +515,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>

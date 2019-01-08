@@ -17,6 +17,7 @@ import $ from 'jquery';
 import DragSelect from 'dragselect';
 import moment from 'moment-timezone';
 
+import 'plugins/ml/components/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 import 'plugins/ml/components/influencers_list';
@@ -42,11 +43,20 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { timefilter } from 'ui/timefilter';
+import { formatHumanReadableDateTime } from '../util/date_utils';
 import {
   DRAG_SELECT_ACTION,
   SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE
 } from './explorer_constants';
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
+
+// TODO Fully support Annotations in Anomaly Explorer
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/explorer/?', {
@@ -82,8 +92,10 @@ module.controller('MlExplorerController', function (
   mlCheckboxShowChartsService,
   mlSelectLimitService,
   mlSelectIntervalService,
-  mlSelectSeverityService) {
+  mlSelectSeverityService,
+  i18n) {
 
+  $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
   $scope.loading = true;
@@ -103,7 +115,7 @@ module.controller('MlExplorerController', function (
   const $mlExplorer = $('.ml-explorer');
   const MAX_INFLUENCER_FIELD_VALUES = 10;
   const MAX_CATEGORY_EXAMPLES = 10;
-  const VIEW_BY_JOB_LABEL = 'job ID';
+  const VIEW_BY_JOB_LABEL = i18n('xpack.ml.explorer.jobIdLabel', { defaultMessage: 'job ID' });
 
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -940,6 +952,43 @@ module.controller('MlExplorerController', function (
     }
   }
 
+  async function loadAnnotationsTableData() {
+    $scope.annotationsData = [];
+
+    const cellData = $scope.cellData;
+    const jobIds = ($scope.cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ?
+      cellData.lanes : $scope.getSelectedJobIds();
+    const timeRange = getSelectionTimeRange(cellData);
+
+    if (mlAnnotationsEnabled) {
+      const resp = await ml.annotations.getAnnotations({
+        jobIds,
+        earliestMs: timeRange.earliestMs,
+        latestMs: timeRange.latestMs,
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
+      });
+
+      $scope.$evalAsync(() => {
+        const annotationsData = [];
+        jobIds.forEach((jobId) => {
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
+          }
+        });
+
+        $scope.annotationsData = annotationsData
+          .sort((a, b) => {
+            return a.timestamp - b.timestamp;
+          })
+          .map((d, i) => {
+            d.key = String.fromCharCode(65 + i);
+            return d;
+          });
+      });
+    }
+  }
+
   function loadAnomaliesTableData() {
     const cellData = $scope.cellData;
     const jobIds = ($scope.cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ?
@@ -956,7 +1005,7 @@ module.controller('MlExplorerController', function (
       timeRange.earliestMs,
       timeRange.latestMs,
       dateFormatTz,
-      500,
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
       MAX_CATEGORY_EXAMPLES
     ).then((resp) => {
       const anomalies = resp.anomalies;
@@ -1009,8 +1058,10 @@ module.controller('MlExplorerController', function (
     // The following is to avoid running into a race condition where loading a swimlane selection from URL/AppState
     // would fail because the Explorer Charts Container's directive wasn't linked yet and not being subscribed
     // to the anomalyDataChange listener used in loadDataForCharts().
-    function finish() {
+    async function finish() {
       setShowViewBySwimlane();
+
+      await loadAnnotationsTableData();
 
       $timeout(() => {
         if ($scope.overallSwimlaneData !== undefined) {
@@ -1025,7 +1076,7 @@ module.controller('MlExplorerController', function (
           // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
           // to show the top 'view by' values for the selected time.
           loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
-          $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
+          $scope.viewByLoadedForTimeFormatted = formatHumanReadableDateTime(timerange.earliestMs);
         }
 
         if (influencers.length === 0) {
@@ -1100,8 +1151,9 @@ module.controller('MlExplorerController', function (
   }
 
   function processOverallResults(scoresByTime, searchBounds) {
+    const overallLabel = i18n('xpack.ml.explorer.overallLabel', { defaultMessage: 'Overall' });
     const dataset = {
-      laneLabels: ['Overall'],
+      laneLabels: [overallLabel],
       points: [],
       interval: $scope.swimlaneBucketInterval.asSeconds(),
       earliest: searchBounds.min.valueOf() / 1000,
@@ -1114,7 +1166,7 @@ module.controller('MlExplorerController', function (
       _.each(scoresByTime, (score, timeMs) => {
         const time = timeMs / 1000;
         dataset.points.push({
-          laneLabel: 'Overall',
+          laneLabel: overallLabel,
           time,
           value: score
         });

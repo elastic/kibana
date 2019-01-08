@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Dashboard viewer', () => {
       before('Create logstash data role', async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickLinkText('Roles');
+        await testSubjects.click('roles');
         await PageObjects.security.clickCreateNewRole();
 
         await testSubjects.setValue('roleFormNameInput', 'logstash-data');
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
         const collapseLinkExists = await find.existsByLinkText('Collapse');
         expect(collapseLinkExists).to.be(true);
 
-        const navLinks = await find.allByCssSelector('.global-nav-link');
+        const navLinks = await find.allByCssSelector('.kbnGlobalNavLink');
         expect(navLinks.length).to.equal(5);
       });
 
