@@ -23,7 +23,7 @@ Copy and paste the *Stack trace* from the build here, it can be found by clickin
 
 ### Standard output
 
-Please also include the standard output!  This is way more helpful in debugging test issues than just the stack trace as it lets us see what was happening *before* the test failed.  It also includes browser console output at the end, which may include relevant errors.
+Please also include the standard output of at least the failing test. Doesn't have to be the entire, usually very large, output, but try to include a good chunk up to the failure. You can look the for last `pass` and start copying from there. This is way more helpful in debugging test issues than just the stack trace as it lets us see what was happening *before* the test failed.  It also includes browser console output at the end, which may include relevant errors.
 
 ### Screenshots and attachments
 
