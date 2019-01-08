@@ -31,15 +31,10 @@ import { checkPermission } from '../../privilege/check_privilege';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { getSeverityColor, isRuleSupported } from '../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
-
-
-// Maximum number of influencers to display before a 'show more' link is added.
-export const INFLUENCERS_LIMIT = 5;
-
-export const ANOMALIES_TABLE_TABS = {
-  DETAILS: 0,
-  CATEGORY_EXAMPLES: 1
-};
+import {
+  INFLUENCERS_LIMIT,
+  ANOMALIES_TABLE_TABS
+} from './anomalies_table_constants';
 
 function renderTime(date, aggregationInterval) {
   if (aggregationInterval === 'hour') {
