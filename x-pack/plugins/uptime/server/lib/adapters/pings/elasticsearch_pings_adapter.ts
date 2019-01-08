@@ -75,19 +75,17 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       hits: { hits, total },
     } = await this.database.search(request, params);
 
-
     const pings: Ping[] = hits.map(({ _source }: any) => {
       const timestamp = _source['@timestamp'];
       return { timestamp, ..._source };
     });
 
-
     const results: PingResults = {
-        Total: total.value,
-        Pings: pings
-    }
+      Total: total.value,
+      Pings: pings,
+    };
 
-    return results
+    return results;
   }
 
   public async getLatestMonitorDocs(
