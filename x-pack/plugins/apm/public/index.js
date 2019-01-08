@@ -27,8 +27,6 @@ import LicenseChecker from './components/app/Main/LicenseChecker';
 
 import { history } from './utils/url';
 
-import { I18nProvider } from '@kbn/i18n/react';
-
 chrome.setRootTemplate(template);
 const store = configureStore();
 
@@ -45,17 +43,15 @@ initTimepicker(history, store.dispatch).then(() => {
   );
 
   ReactDOM.render(
-    <I18nProvider>
-      <Provider store={store}>
-        <Fragment>
-          <GlobalProgress />
-          <LicenseChecker />
-          <Router history={history}>
-            <Main />
-          </Router>
-        </Fragment>
-      </Provider>
-    </I18nProvider>,
+    <Provider store={store}>
+      <Fragment>
+        <GlobalProgress />
+        <LicenseChecker />
+        <Router history={history}>
+          <Main />
+        </Router>
+      </Fragment>
+    </Provider>,
     document.getElementById('react-apm-root')
   );
 });
