@@ -49,8 +49,8 @@ export class HeadlessChromiumDriverFactory {
         },
       })
       .catch((error) => {
-        log(`Issues testing chromium launch, you may have troubles generating reports: ` + error);
-        log(`See chromium's log output in ${getChromeLogLocation(this.binaryPath)}`);
+        log(`The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: ${error}`);
+        log(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
         return null;
       });
   }
