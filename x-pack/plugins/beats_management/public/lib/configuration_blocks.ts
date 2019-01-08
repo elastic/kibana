@@ -7,13 +7,17 @@
 import yaml from 'js-yaml';
 import { get, has, omit, set } from 'lodash';
 import { ConfigBlockSchema, ConfigurationBlock } from '../../common/domain_types';
+import { FrontendConfigBlocksAdapter } from './adapters/configuration_blocks/adapter_types';
 
 export class ConfigBlocksLib {
   public upsert = this.adapter.upsert.bind(this.adapter);
   public getForTag = this.adapter.getForTag.bind(this.adapter);
   public delete = this.adapter.delete.bind(this.adapter);
 
-  constructor(private readonly adapter: any, private readonly configSchemas: ConfigBlockSchema[]) {}
+  constructor(
+    private readonly adapter: FrontendConfigBlocksAdapter,
+    private readonly configSchemas: ConfigBlockSchema[]
+  ) {}
 
   public jsonConfigToUserYaml(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
     // configuration_blocks yaml, JS cant read YAML so we parse it into JS,

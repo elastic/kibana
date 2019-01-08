@@ -4,20 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BeatTag, ConfigurationBlock } from '../../../../common/domain_types';
+import { ConfigurationBlock } from '../../../../common/domain_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { FrontendConfigBlocksAdapter } from './adapter_types';
 
 export class RestConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
-
-  public async getTagsWithIds(tagIds: string[]): Promise<BeatTag[]> {
-    try {
-      return await this.REST.get<BeatTag[]>(`/api/beats/tags/${tagIds.join(',')}`);
-    } catch (e) {
-      return [];
-    }
-  }
 
   public async upsert(block: ConfigurationBlock) {
     const result = await this.REST.put<

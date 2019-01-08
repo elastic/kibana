@@ -7,12 +7,16 @@
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { ConfigBlocksLib } from '../configuration_blocks';
+import { MemoryConfigBlocksAdapter } from './../adapters/configuration_blocks/memory_config_blocks_adapter';
 
 describe('Tags Client Domain Lib', () => {
   let lib: ConfigBlocksLib;
 
   beforeEach(async () => {
-    lib = new ConfigBlocksLib({}, translateConfigSchema(configBlockSchemas));
+    lib = new ConfigBlocksLib(
+      new MemoryConfigBlocksAdapter([]),
+      translateConfigSchema(configBlockSchemas)
+    );
   });
 
   it('should use helper function to convert users yaml in tag to config object', async () => {
