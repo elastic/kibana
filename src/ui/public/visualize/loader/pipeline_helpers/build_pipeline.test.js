@@ -119,7 +119,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     describe('handles metric function', () => {
-      const params = { foo: 'bar' };
+      const params = { metric: {} };
       it('without buckets', () => {
         const schemas = { metric: [0, 1] };
         const actual = buildPipelineVisFunction.metric({ params }, schemas);
@@ -129,7 +129,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       it('with buckets', () => {
         const schemas = {
           metric: [0, 1],
-          bucket: [2]
+          group: [2]
         };
         const actual = buildPipelineVisFunction.metric({ params }, schemas);
         expect(actual).toMatchSnapshot();
@@ -137,8 +137,14 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     describe('handles tagcloud function', () => {
-      const params = { foo: 'bar' };
-      it('with metrics and buckets', () => {
+      const params = { metrics: {} };
+      it('without buckets', () => {
+        const schemas = { metric: [0] };
+        const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
+        expect(actual).toMatchSnapshot();
+      });
+
+      it('with buckets', () => {
         const schemas = {
           metric: [0],
           segment: [1, 2]
@@ -146,18 +152,17 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
-
-      it('throws without bucket', () => {
-        const schemas = { metric: [0] };
-        expect(() => {
-          buildPipelineVisFunction.tagcloud({ params }, schemas);
-        }).toThrow(TypeError);
-      });
     });
 
     describe('handles region_map function', () => {
-      const params = { foo: 'bar' };
-      it('with metrics and buckets', () => {
+      const params = { metric: {} };
+      it('without buckets', () => {
+        const schemas = { metric: [0] };
+        const actual = buildPipelineVisFunction.region_map({ params }, schemas);
+        expect(actual).toMatchSnapshot();
+      });
+
+      it('with buckets', () => {
         const schemas = {
           metric: [0],
           segment: [1, 2]
@@ -165,36 +170,25 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const actual = buildPipelineVisFunction.region_map({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
-
-      it('throws without bucket', () => {
-        const schemas = { metric: [0] };
-        expect(() => {
-          buildPipelineVisFunction.region_map({ params }, schemas);
-        }).toThrow(TypeError);
-      });
     });
 
-    describe('handles tile_map function', () => {
-      const params = { foo: 'bar' };
-      it('with metrics and buckets', () => {
-        const schemas = {
-          metric: [0],
-          segment: [1, 2]
-        };
-        const actual = buildPipelineVisFunction.tile_map({ params }, schemas);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('without buckets', () => {
-        const schemas = { metric: [0] };
-        const actual = buildPipelineVisFunction.tile_map({ params }, schemas);
-        expect(actual).toMatchSnapshot();
-      });
+    it('handles tile_map function', () => {
+      const params = { metric: {} };
+      const schemas = {
+        metric: [0],
+        segment: [1, 2],
+        geo_centroid: [3, 4]
+      };
+      const actual = buildPipelineVisFunction.tile_map({ params }, schemas);
+      expect(actual).toMatchSnapshot();
     });
 
     it('handles pie function', () => {
-      const params = { foo: 'bar' };
-      const schemas = { baz: 'qux' };
+      const params = { metric: {}, buckets: [] };
+      const schemas = {
+        metric: [0],
+        segment: [1, 2]
+      };
       const actual = buildPipelineVisFunction.pie({ params }, schemas);
       expect(actual).toMatchSnapshot();
     });

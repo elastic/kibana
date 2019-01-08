@@ -22,9 +22,31 @@ import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisState } from 'ui/vis';
 
+interface SchemaFormat {
+  id: string;
+  params?: any;
+}
+
+interface SchemaConfig {
+  accessor: number;
+  format: SchemaFormat | {};
+  params: any;
+  aggType: string;
+}
+
 interface Schemas {
-  metric: any[];
-  [key: string]: any[];
+  metric: SchemaConfig[];
+  bucket?: any[];
+  geo_centroid?: any[];
+  group?: any[];
+  params?: any[];
+  radius?: any[];
+  segment?: any[];
+  split_column?: any[];
+  split_row?: any[];
+  width?: any[];
+  // catch all for schema name
+  [key: string]: any[] | undefined;
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
@@ -44,7 +66,7 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
-  const createFormat = (agg: AggConfig) => {
+  const createFormat = (agg: AggConfig): SchemaFormat => {
     let format: any = agg.params.field ? agg.params.field.format.toJSON() : {};
     if (agg.type.name === 'date_range') {
       format = { id: 'string' };
@@ -75,7 +97,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     return format;
   };
 
-  const createSchemaConfig = (accessor: number, agg: AggConfig) => {
+  const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
     const schema = {
       accessor,
       format: {},
@@ -146,7 +168,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       schemas[schemaName] = [];
     }
     if (!isHierarchical || agg.type.type !== 'metrics') {
-      schemas[schemaName].push(createSchemaConfig(cnt++, agg));
+      schemas[schemaName]!.push(createSchemaConfig(cnt++, agg));
     }
     if (isHierarchical && agg.type.type !== 'metrics') {
       metrics.forEach((metric: any) => {
@@ -195,7 +217,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       splitRow: schemas.split_row,
       splitColumn: schemas.split_column,
     };
-    return `kibana_table ${prepareJson('visConfig', visState.params)}`;
+    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   metric: (visState, schemas) => {
     const visConfig = visState.params;
@@ -203,7 +225,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (schemas.group) {
       visConfig.metric.bucket = schemas.group[0];
     }
-
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
@@ -212,7 +233,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
-    return `tagcloud ${prepareJson('visConfig', visState.params)}`;
+    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
   },
   region_map: (visState, schemas) => {
     const visConfig = visState.params;
@@ -220,14 +241,14 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
-    return `regionmap ${prepareJson('visConfig', visState.params)}`;
+    return `regionmap ${prepareJson('visConfig', visConfig)}`;
   },
   tile_map: (visState, schemas) => {
     const visConfig = visState.params;
     visConfig.metric = schemas.metric[0];
     visConfig.geohash = schemas.segment ? schemas.segment[0] : null;
     visConfig.geocentroid = schemas.geo_centroid ? schemas.geo_centroid[0] : null;
-    return `tilemap ${prepareJson('visConfig', visState.params)}`;
+    return `tilemap ${prepareJson('visConfig', visConfig)}`;
   },
   pie: (visState, schemas) => {
     const visConfig = visState.params;
