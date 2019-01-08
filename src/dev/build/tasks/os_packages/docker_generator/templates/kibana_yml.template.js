@@ -21,17 +21,16 @@ import dedent from 'dedent';
 
 function generator({ imageFlavor }) {
   return dedent(`
-  ---
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
   #
-  ---
-  # Default Kibana configuration from kibana-docker.
-  
+  #
+  # Default Kibana configuration for docker target
+  #
   server.name: kibana
   server.host: "0"
   elasticsearch.url: http://elasticsearch:9200
-  ${ imageFlavor ? 'xpack.monitoring.ui.container.elasticsearch.enabled: true' : '' }
+  ${ !imageFlavor ? 'xpack.monitoring.ui.container.elasticsearch.enabled: true' : '' }
   `);
 }
 

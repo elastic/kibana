@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export * from './build_docker_sh.template';
-export * from './dockerfile.template';
-export * from './kibana_yml.template';
+export { buildDockerSHTemplate } from './build_docker_sh.template';
+export { dockerfileTemplate } from './dockerfile.template';
+export { kibanaYMLTemplate } from './kibana_yml.template';
