@@ -83,6 +83,14 @@ describe('kuery functions', function () {
         expect(result.geo_bounding_box.geo).to.have.property('bottom_right', '50.73, -135.35');
       });
 
+      it('should return an ES geo_bounding_box query without an index pattern', function () {
+        const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
+        const result = geoBoundingBox.toElasticsearchQuery(node);
+        expect(result).to.have.property('geo_bounding_box');
+        expect(result.geo_bounding_box.geo).to.have.property('top_left', '73.12, -174.37');
+        expect(result.geo_bounding_box.geo).to.have.property('bottom_right', '50.73, -135.35');
+      });
+
       it('should use the ignore_unmapped parameter', function () {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
         const result = geoBoundingBox.toElasticsearchQuery(node, indexPattern);

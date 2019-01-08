@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import uuid from 'uuid/v4';
 
 import { VectorSource } from '../vector_source';
@@ -20,6 +20,10 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import { ESSourceDetails } from '../../../components/es_source_details';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
+import {
+  EuiText,
+  EuiSpacer
+} from '@elastic/eui';
 
 const DEFAULT_LIMIT = 2048;
 
@@ -37,6 +41,19 @@ export class ESSearchSource extends VectorSource {
       onPreviewSource(layerSource);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
+  }
+
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{ESSearchSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+          Display documents from an elasticsearch index.
+          </p>
+        </EuiText>
+      </Fragment>);
   }
 
   constructor(descriptor) {
