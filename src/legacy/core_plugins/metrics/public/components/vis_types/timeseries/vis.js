@@ -84,7 +84,7 @@ class TimeseriesVisualization extends Component {
     const series = _.get(visData, `${model.id}.series`, []);
     let annotations;
 
-    this.showToastNotification = false;
+    this.showToastNotification = null;
 
     if (model.annotations && Array.isArray(model.annotations)) {
       annotations = model.annotations.map(annotation => {
