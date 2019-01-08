@@ -14,7 +14,7 @@ import {
   EuiLink,
   EuiPopover
 } from '@elastic/eui';
-import { get } from 'lodash';
+import idx from 'idx';
 import React from 'react';
 import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
@@ -65,9 +65,9 @@ export class TransactionActionMenu extends React.Component<Props, State> {
   };
 
   public getInfraActions(transaction: Transaction) {
-    const hostName = get(transaction, 'context.system.hostname');
-    const podId = get(transaction, 'kubernetes.pod.uid');
-    const containerId = get(transaction, 'docker.container.id');
+    const hostName = idx(transaction, _ => _.context.system.hostname);
+    const podId = idx(transaction, _ => _.kubernetes.pod.uid);
+    const containerId = idx(transaction, _ => _.docker.container.id);
     const pathname = '/app/infra';
     const time = new Date(transaction['@timestamp']).getTime();
     const infraMetricsQuery = getInfraMetricsQuery(transaction);
