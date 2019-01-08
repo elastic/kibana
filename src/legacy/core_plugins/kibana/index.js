@@ -155,16 +155,6 @@ export default function (kibana) {
           kbnIndex: options.index,
           kbnBaseUrl,
           uiCapabilities: {
-            discover: {
-              show: true,
-              showWriteControls: true
-            },
-            visualize: {
-              showWriteControls: true
-            },
-            dashboard: {
-              showWriteControls: true
-            },
             catalogue: {
               discover: true,
               dashboard: true,
