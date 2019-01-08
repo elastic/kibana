@@ -25,10 +25,7 @@ export class CMTagsDomain {
   }
 
   public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string> {
-    const tagId = await this.adapter.upsertTag(user, {
-      ...tag,
-      name: tag.id,
-    });
+    const tagId = await this.adapter.upsertTag(user, tag);
 
     return tagId;
   }

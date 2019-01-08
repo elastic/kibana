@@ -12,28 +12,6 @@ export default function ({ getService }) {
   const es = getService('es');
 
   describe('set_tag', () => {
-    it('should create an empty tag', async () => {
-      const tagId = 'production';
-      await supertest
-        .put(`/api/beats/tag/${tagId}`)
-        .set('kbn-xsrf', 'xxx')
-        .send()
-        .expect(200);
-
-      const esResponse = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `tag:${tagId}`,
-      });
-
-      const tagInEs = esResponse._source;
-
-      expect(tagInEs.type).to.be('tag');
-      expect(tagInEs.tag.id).to.be(tagId);
-      expect(tagInEs.tag.configuration_blocks).to.be.an(Array);
-      expect(tagInEs.tag.configuration_blocks.length).to.be(0);
-    });
-
     it('should create a tag', async () => {
       const tagId = 'production';
       await supertest

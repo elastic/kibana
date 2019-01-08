@@ -29,7 +29,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
   },
   handler: async (request: FrameworkRequest) => {
     const defaultConfig = { id: request.params.tag, name: request.params.tag, color: '#DD0A73' };
-    const config = get(request, 'payload', defaultConfig) || defaultConfig;
+    const config = { ...defaultConfig, ...get(request, 'payload', {}) };
 
     try {
       const id = await libs.tags.upsertTag(request.user, config);
