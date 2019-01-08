@@ -75,7 +75,7 @@ export class AdvancedSettingsForm extends PureComponent {
   };
 
   toggle = () => {
-    this.setState(({ isOpened }) => ({ isOpened: !isOpened }));
+    this.setState(({ isOpened }) => ({ isOpened: !isOpened, previewSettingActive: null }));
   }
 
   selectSetting = (setting) => {
@@ -163,7 +163,6 @@ export class AdvancedSettingsForm extends PureComponent {
                 .filter(this.getSettingSelection(false))
                 .map((field, i, arr) => {
                   const fieldSchema = schema[field];
-                  // const isSelected = this.isSettingSelected(field);
 
                   return (
                     <Fragment key={field}>
@@ -175,12 +174,6 @@ export class AdvancedSettingsForm extends PureComponent {
                             iconType="plusInCircle"
                             aria-label="Add setting"
                           />
-                          {/* <EuiButtonIcon
-                            color={isSelected ? 'danger' : 'success'}
-                            onClick={() => isSelected ? this.unSelectSetting(field) : this.selectSetting(field)}
-                            iconType={isSelected ? 'minusInCircle' : 'plusInCircle'}
-                            aria-label={isSelected ? 'Remove setting' : 'Add setting'}
-                          /> */}
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiLink
