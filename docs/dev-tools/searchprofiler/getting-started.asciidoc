@@ -9,7 +9,7 @@ ifdef::gs-mini[]
 == Getting Started
 endif::gs-mini[]
 
-The Search Profiler is automatically enabled in {kib}.  It is located under the
+The {searchprofiler} is automatically enabled in {kib}.  It is located under the
 *Dev Tools* tab in {kib}. 
 
 [[first-profile]]
