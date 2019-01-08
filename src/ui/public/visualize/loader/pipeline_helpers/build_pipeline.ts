@@ -54,7 +54,7 @@ export const getSchemas = (vis: Vis): Schemas => {
       format = {
         id: 'date',
         params: {
-          pattern: agg.type.getScaledDateFormat(),
+          pattern: agg.buckets.getScaledDateFormat(),
         },
       };
     } else if (agg.type.name === 'terms') {

@@ -33,9 +33,10 @@ export function BuildHierarchicalDataProvider(Private) {
       slices = [{ name: metricColumn.name, size: table.rows[0][metricColumn.id].value, aggConfig: metricColumn.aggConfig }];
       names[metricColumn.name] = metricColumn.name;
     } else {
-      let parent;
+
       slices = [];
       table.rows.forEach((row, rowIndex) => {
+        let parent;
         let dataLevel = slices;
         buckets.forEach(bucket => {
           const bucketColumn = table.columns[bucket.accessor];

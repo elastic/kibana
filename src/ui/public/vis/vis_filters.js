@@ -110,7 +110,7 @@ const VisFiltersProvider = (Private, getAppState) => {
   const pieFilter = event => {
     let data = event.datum;
     const filters = [];
-    while (data.rawData) {
+    while (data && data.rawData) {
       const { table, column, row, value } = data.rawData;
       const filter = createFilter(table, column, row, value);
       if (event.negate) {
