@@ -40,26 +40,7 @@ export default async function(server /*options*/) {
     name: 'Canvas',
     icon: 'canvasApp',
     navLinkId: 'canvas',
-    privileges: {
-      all: {
-        catalogue: ['canvas'],
-        app: ['canvas', 'kibana'],
-        savedObject: {
-          all: ['canvas'],
-          read: ['config', 'index-pattern'],
-        },
-        ui: [],
-      },
-      read: {
-        catalogue: ['canvas'],
-        app: ['canvas', 'kibana'],
-        savedObject: {
-          all: [],
-          read: ['config', 'index-pattern', 'canvas'],
-        },
-        ui: [],
-      },
-    },
+    catalogue: ['canvas'],
   });
 
   // There are some common functions that use private APIs, load them here

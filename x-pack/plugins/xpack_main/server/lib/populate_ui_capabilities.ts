@@ -31,10 +31,10 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
     [feature.id]: {},
   };
 
-  Object.values(feature.privileges).forEach(privilege => {
-    UIFeatureCapabilities[feature.id] = {
-      ...UIFeatureCapabilities[feature.id],
-      ...privilege.ui.reduce(
+  if (feature.catalogue) {
+    UIFeatureCapabilities.catalogue = {
+      ...UIFeatureCapabilities.catalogue,
+      ...feature.catalogue.reduce(
         (privilegeAcc, capability) => ({
           ...privilegeAcc,
           [capability]: true,
@@ -42,20 +42,7 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
         {}
       ),
     };
-
-    if (privilege.catalogue) {
-      UIFeatureCapabilities.catalogue = {
-        ...UIFeatureCapabilities.catalogue,
-        ...privilege.catalogue.reduce(
-          (privilegeAcc, capability) => ({
-            ...privilegeAcc,
-            [capability]: true,
-          }),
-          {}
-        ),
-      };
-    }
-  });
+  }
 
   return UIFeatureCapabilities;
 }

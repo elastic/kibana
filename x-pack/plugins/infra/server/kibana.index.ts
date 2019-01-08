@@ -37,17 +37,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
       defaultMessage: 'Infrastructure',
     }),
     navLinkId: 'infra:home',
-    privileges: {
-      all: {
-        catalogue: ['infraops'],
-        app: ['infra', 'kibana'],
-        savedObject: {
-          all: [],
-          read: ['config'],
-        },
-        ui: [],
-      },
-    },
+    catalogue: ['infraops'],
   });
 
   xpackMainPlugin.registerFeature({
@@ -56,17 +46,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
       defaultMessage: 'Logs',
     }),
     navLinkId: 'infra:logs',
-    privileges: {
-      all: {
-        catalogue: ['infralogging'],
-        app: ['infra', 'kibana'],
-        savedObject: {
-          all: [],
-          read: ['config'],
-        },
-        ui: [],
-      },
-    },
+    catalogue: ['infralogging'],
   });
 };
 

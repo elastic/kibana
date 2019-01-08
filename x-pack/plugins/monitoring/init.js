@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from './common/constants';
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
@@ -60,22 +59,7 @@ export const init = (monitoringPlugin, server) => {
     name: 'Monitoring',
     icon: 'monitoringApp',
     navLinkId: 'monitoring',
-    privileges: {
-      all: {
-        metadata: {
-          tooltip: i18n.translate('xpack.monitoring.privileges.tooltip', {
-            defaultMessage: 'The monitoring_user role should be assigned to grant access'
-          })
-        },
-        catalogue: ['monitoring'],
-        app: ['monitoring', 'kibana'],
-        savedObject: {
-          all: [],
-          read: ['config'],
-        },
-        ui: [],
-      },
-    }
+    catalogue: ['monitoring'],
   });
 
   const bulkUploader = initBulkUploader(kbnServer, server);

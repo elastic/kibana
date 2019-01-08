@@ -5,7 +5,6 @@ Array [
   Object {
     "id": "feature_1",
     "name": "Feature 1",
-    "privileges": Object {},
   },
 ]
 `;
@@ -15,12 +14,10 @@ Array [
   Object {
     "id": "feature_1",
     "name": "Feature 1",
-    "privileges": Object {},
   },
   Object {
     "id": "licensed_feature",
     "name": "Licensed Feature",
-    "privileges": Object {},
     "validLicenses": Array [
       "gold",
     ],

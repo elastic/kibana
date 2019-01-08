@@ -55,26 +55,7 @@ export function graph(kibana) {
         name: 'Graph',
         icon: 'graphApp',
         navLinkId: 'graph',
-        privileges: {
-          all: {
-            catalogue: ['graph'],
-            app: ['graph', 'kibana'],
-            savedObject: {
-              all: ['graph-workspace'],
-              read: ['config', 'index-pattern'],
-            },
-            ui: [],
-          },
-          read: {
-            catalogue: ['graph'],
-            app: ['graph', 'kibana'],
-            savedObject: {
-              all: [],
-              read: ['config', 'index-pattern', 'graph-workspace'],
-            },
-            ui: [],
-          }
-        }
+        catalogue: ['graph'],
       });
 
       initServer(server);

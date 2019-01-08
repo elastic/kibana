@@ -9,23 +9,6 @@ import Joi from 'joi';
 import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
-export interface FeaturePrivilegeDefinition {
-  metadata?: {
-    tooltip?: string;
-  };
-  management?: {
-    [sectionId: string]: string[];
-  };
-  catalogue?: string[];
-  api?: string[];
-  app: string[];
-  savedObject: {
-    all: string[];
-    read: string[];
-  };
-  ui: string[];
-}
-
 export interface Feature {
   id: string;
   name: string;
@@ -33,9 +16,11 @@ export interface Feature {
   icon?: IconType;
   description?: string;
   navLinkId?: string;
-  privileges: {
-    [key: string]: FeaturePrivilegeDefinition;
+  ui?: string[];
+  management?: {
+    [sectionId: string]: string[];
   };
+  catalogue?: string[];
 }
 
 // Each feature gets its own property on the UICapabilities object,
@@ -56,33 +41,8 @@ const schema = Joi.object({
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string(),
-  privileges: Joi.object()
-    .pattern(
-      featurePrivilegePartRegex,
-      Joi.object({
-        metadata: Joi.object({
-          tooltip: Joi.string(),
-        }),
-        management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
-        catalogue: Joi.array().items(Joi.string()),
-        api: Joi.array().items(Joi.string()),
-        app: Joi.array()
-          .items(Joi.string())
-          .required(),
-        savedObject: Joi.object({
-          all: Joi.array()
-            .items(Joi.string())
-            .required(),
-          read: Joi.array()
-            .items(Joi.string())
-            .required(),
-        }).required(),
-        ui: Joi.array()
-          .items(Joi.string().regex(uiCapabilitiesRegex))
-          .required(),
-      })
-    )
-    .required(),
+  management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
+  catalogue: Joi.array().items(Joi.string()),
 });
 
 const features: Record<string, Feature> = {};

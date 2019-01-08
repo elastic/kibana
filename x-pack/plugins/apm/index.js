@@ -74,17 +74,7 @@ export function apm(kibana) {
         name: 'APM',
         icon: 'apmApp',
         navLinkId: 'apm',
-        privileges: {
-          all: {
-            app: ['apm', 'kibana'],
-            catalogue: ['apm'],
-            savedObject: {
-              all: [],
-              read: ['config']
-            },
-            ui: []
-          }
-        }
+        catalogue: ['apm']
       });
 
       initTransactionsApi(server);

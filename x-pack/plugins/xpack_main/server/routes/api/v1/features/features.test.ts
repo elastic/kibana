@@ -45,14 +45,12 @@ describe('GET /api/features/v1', () => {
     registerFeature({
       id: 'feature_1',
       name: 'Feature 1',
-      privileges: {},
     });
 
     registerFeature({
       id: 'licensed_feature',
       name: 'Licensed Feature',
       validLicenses: ['gold'],
-      privileges: {},
     });
   });
 

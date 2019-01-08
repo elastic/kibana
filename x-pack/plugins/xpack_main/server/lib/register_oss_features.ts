@@ -12,141 +12,45 @@ const kibanaFeatures: Feature[] = [
     name: 'Discover',
     icon: 'discoverApp',
     navLinkId: 'kibana:discover',
-    privileges: {
-      all: {
-        catalogue: ['discover'],
-        app: ['kibana'],
-        savedObject: {
-          all: ['search'],
-          read: ['config', 'index-pattern'],
-        },
-        ui: ['show', 'showWriteControls'],
-      },
-      read: {
-        catalogue: ['discover'],
-        app: ['kibana'],
-        savedObject: {
-          all: [],
-          read: ['config', 'index-pattern', 'search'],
-        },
-        ui: ['show'],
-      },
-    },
+    catalogue: ['discover'],
   },
   {
     id: 'visualize',
     name: 'Visualize',
     icon: 'visualizeApp',
     navLinkId: 'kibana:visualize',
-    privileges: {
-      all: {
-        catalogue: ['visualize'],
-        app: ['kibana'],
-        savedObject: {
-          all: ['visualization'],
-          read: ['config', 'index-pattern', 'search'],
-        },
-        ui: [],
-      },
-      read: {
-        catalogue: ['visualize'],
-        app: ['kibana'],
-        savedObject: {
-          all: [],
-          read: ['config', 'index-pattern', 'search', 'visualization'],
-        },
-        ui: [],
-      },
-    },
+    catalogue: ['visualize'],
   },
   {
     id: 'dashboard',
     name: 'Dashboard',
     icon: 'dashboardApp',
     navLinkId: 'kibana:dashboard',
-    privileges: {
-      all: {
-        catalogue: ['dashboard'],
-        app: ['kibana'],
-        savedObject: {
-          all: ['dashboard'],
-          read: ['config', 'index-pattern', 'search', 'visualization', 'timelion', 'canvas'],
-        },
-        ui: [],
-      },
-      read: {
-        catalogue: ['dashboard'],
-        app: ['kibana'],
-        savedObject: {
-          all: [],
-          read: [
-            'config',
-            'index-pattern',
-            'search',
-            'visualization',
-            'timelion',
-            'canvas',
-            'dashboard',
-          ],
-        },
-        ui: [],
-      },
-    },
+    catalogue: ['dashboard'],
   },
   {
     id: 'dev_tools',
     name: 'Dev Tools',
     icon: 'devToolsApp',
     navLinkId: 'kibana:dev_tools',
-    privileges: {
-      all: {
-        catalogue: ['console', 'searchprofiler', 'grokdebugger'],
-        api: ['console/execute'],
-        app: ['kibana'],
-        savedObject: {
-          all: [],
-          read: ['config'],
-        },
-        ui: [],
-      },
-    },
+    catalogue: ['console', 'searchprofiler', 'grokdebugger'],
   },
   {
     id: 'advancedSettings',
     name: 'Advanced Settings',
     icon: 'advancedSettingsApp',
-    privileges: {
-      all: {
-        catalogue: ['advanced_settings'],
-        management: {
-          kibana: ['settings'],
-        },
-        app: ['kibana'],
-        savedObject: {
-          all: ['config'],
-          read: [],
-        },
-        ui: [],
-      },
+    catalogue: ['advanced_settings'],
+    management: {
+      kibana: ['settings'],
     },
   },
   {
     id: 'indexPatterns',
     name: 'Index Pattern Management',
     icon: 'indexPatternApp',
-    privileges: {
-      all: {
-        catalogue: ['index_patterns'],
-        management: {
-          kibana: ['indices'],
-        },
-        app: ['kibana'],
-        savedObject: {
-          all: ['index-pattern'],
-          read: ['config'],
-        },
-        ui: [],
-      },
+    catalogue: ['index_patterns'],
+    management: {
+      kibana: ['indices'],
     },
   },
 ];
@@ -157,26 +61,7 @@ const timelionFeatures: Feature[] = [
     name: 'Timelion',
     icon: 'timelionApp',
     navLinkId: 'timelion',
-    privileges: {
-      all: {
-        catalogue: ['timelion'],
-        app: ['timelion', 'kibana'],
-        savedObject: {
-          all: ['timelion'],
-          read: ['config', 'index-pattern'],
-        },
-        ui: [],
-      },
-      read: {
-        catalogue: ['timelion'],
-        app: ['timelion', 'kibana'],
-        savedObject: {
-          all: [],
-          read: ['config', 'index-pattern', 'timelion'],
-        },
-        ui: [],
-      },
-    },
+    catalogue: ['timelion'],
   },
 ];
 

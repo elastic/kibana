@@ -75,22 +75,7 @@ export const ml = (kibana) => {
         name: 'Machine Learning',
         icon: 'machineLearningApp',
         navLinkId: 'ml',
-        privileges: {
-          all: {
-            metadata: {
-              tooltip: i18n.translate('xpack.ml.privileges.tooltip', {
-                defaultMessage: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
-              })
-            },
-            catalogue: ['ml'],
-            app: ['ml', 'kibana'],
-            savedObject: {
-              all: [],
-              read: ['config']
-            },
-            ui: [],
-          },
-        }
+        catalogue: ['ml'],
       });
 
       // Add server routes and initialize the plugin here

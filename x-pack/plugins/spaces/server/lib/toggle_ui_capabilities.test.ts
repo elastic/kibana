@@ -13,44 +13,23 @@ const features: Feature[] = [
   {
     id: 'feature_1',
     name: 'Feature 1',
-    privileges: {},
   },
   {
     id: 'feature_2',
     name: 'Feature 2',
     navLinkId: 'feature2',
-    privileges: {
-      all: {
-        catalogue: ['feature2Entry'],
-        management: {
-          kibana: ['somethingElse'],
-        },
-        app: [],
-        ui: [],
-        savedObject: {
-          all: [],
-          read: [],
-        },
-      },
+    catalogue: ['feature2Entry'],
+    management: {
+      kibana: ['somethingElse'],
     },
   },
   {
     id: 'feature_3',
     name: 'Feature 3',
     navLinkId: 'feature3',
-    privileges: {
-      all: {
-        catalogue: ['feature3Entry'],
-        management: {
-          kibana: ['indices'],
-        },
-        app: [],
-        ui: [],
-        savedObject: {
-          all: [],
-          read: [],
-        },
-      },
+    catalogue: ['feature3Entry'],
+    management: {
+      kibana: ['indices'],
     },
   },
 ];

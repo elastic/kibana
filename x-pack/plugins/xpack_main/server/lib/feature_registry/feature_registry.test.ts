@@ -17,7 +17,6 @@ describe('registerFeature', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
-      privileges: {},
     };
 
     registerFeature(feature);
@@ -37,20 +36,6 @@ describe('registerFeature', () => {
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
       validLicenses: ['standard', 'basic', 'gold', 'platinum'],
-      privileges: {
-        all: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
-          },
-          app: ['app1', 'app2'],
-          savedObject: {
-            all: ['config', 'space', 'etc'],
-            read: ['canvas'],
-          },
-          api: ['someApiEndpointTag', 'anotherEndpointTag'],
-          ui: ['allowsFoo', 'showBar', 'showBaz'],
-        },
-      },
     };
 
     registerFeature(feature);
@@ -66,13 +51,11 @@ describe('registerFeature', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
-      privileges: {},
     };
 
     const duplicateFeature: Feature = {
       id: 'test-feature',
       name: 'Duplicate Test Feature',
-      privileges: {},
     };
 
     registerFeature(feature);
@@ -88,34 +71,8 @@ describe('registerFeature', () => {
         registerFeature({
           id: prohibitedId,
           name: 'some feature',
-          privileges: {},
         })
       ).toThrowErrorMatchingSnapshot();
     });
-  });
-
-  it('prevents features from being registered with invalid privileges', () => {
-    const feature: Feature = {
-      id: 'test-feature',
-      name: 'Test Feature',
-      privileges: {
-        ['some invalid key']: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
-          },
-          app: ['app1', 'app2'],
-          savedObject: {
-            all: ['config', 'space', 'etc'],
-            read: ['canvas'],
-          },
-          api: ['someApiEndpointTag', 'anotherEndpointTag'],
-          ui: ['allowsFoo', 'showBar', 'showBaz'],
-        },
-      },
-    };
-
-    expect(() => registerFeature(feature)).toThrowErrorMatchingInlineSnapshot(
-      `"child \\"privileges\\" fails because [\\"some invalid key\\" is not allowed]"`
-    );
   });
 });
