@@ -16,7 +16,13 @@ export function checkLicense(xPackInfo) {
     };
   }
 
-  const isAnyXpackLicense = xPackInfo.license.isOneOf(['basic', 'platinum', 'trial']);
+  const isAnyXpackLicense = xPackInfo.license.isOneOf([
+    'basic',
+    'standard',
+    'gold',
+    'platinum',
+    'trial',
+  ]);
 
   if (!isAnyXpackLicense) {
     return {

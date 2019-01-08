@@ -67,7 +67,8 @@ module
     $scope,
     $timeout,
     Private,
-    AppState) {
+    AppState,
+    i18n) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
@@ -121,7 +122,21 @@ module
     timeBasedIndexCheck(indexPattern, true);
 
     const pageTitle = (savedSearch.id !== undefined) ?
-      `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
+      i18n('xpack.ml.newJob.simple.population.savedSearchPageTitle', {
+        defaultMessage: 'saved search {savedSearchTitle}',
+        values: { savedSearchTitle: savedSearch.title }
+      }) :
+      i18n('xpack.ml.newJob.simple.population.indexPatternPageTitle', {
+        defaultMessage: 'index pattern {indexPatternTitle}',
+        values: { indexPatternTitle: indexPattern.title }
+      });
+
+    $scope.analysisStoppingLabel = i18n('xpack.ml.newJob.simple.population.analysisStoppingLabel', {
+      defaultMessage: 'Analysis stopping'
+    });
+    $scope.stopAnalysisLabel = i18n('xpack.ml.newJob.simple.population.stopAnalysisLabel', {
+      defaultMessage: 'Stop analysis'
+    });
 
     $scope.ui = {
       indexPattern,
@@ -140,34 +155,54 @@ module
       timeFields: [],
       splitText: '',
       intervals: [{
-        title: 'Auto',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.autoTitle', {
+          defaultMessage: 'Auto'
+        }),
         value: 'auto',
       }, {
-        title: 'Millisecond',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.millisecondTitle', {
+          defaultMessage: 'Millisecond'
+        }),
         value: 'ms'
       }, {
-        title: 'Second',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.secondTitle', {
+          defaultMessage: 'Second'
+        }),
         value: 's'
       }, {
-        title: 'Minute',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.minuteTitle', {
+          defaultMessage: 'Minute'
+        }),
         value: 'm'
       }, {
-        title: 'Hourly',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.hourlyTitle', {
+          defaultMessage: 'Hourly'
+        }),
         value: 'h'
       }, {
-        title: 'Daily',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.dailyTitle', {
+          defaultMessage: 'Daily'
+        }),
         value: 'd'
       }, {
-        title: 'Weekly',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.weeklyTitle', {
+          defaultMessage: 'Weekly'
+        }),
         value: 'w'
       }, {
-        title: 'Monthly',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.monthlyTitle', {
+          defaultMessage: 'Monthly'
+        }),
         value: 'M'
       }, {
-        title: 'Yearly',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.yearlyTitle', {
+          defaultMessage: 'Yearly'
+        }),
         value: 'y'
       }, {
-        title: 'Custom',
+        title: i18n('xpack.ml.newJob.simple.population.intervals.customTitle', {
+          defaultMessage: 'Custom'
+        }),
         value: 'custom'
       }],
       eventRateChartHeight: 100,
@@ -292,7 +327,7 @@ module
 
     function initAgg() {
       _.each($scope.ui.aggTypeOptions, (agg) => {
-        if (agg.title === 'Mean') {
+        if (agg.mlName === 'mean') {
           $scope.formConfig.agg.type = agg;
         }
       });
@@ -481,8 +516,17 @@ module
                 saveNewDatafeed(job, true);
               })
               .catch((resp) => {
-                msgs.error('Could not open job: ', resp);
-                msgs.error('Job created, creating datafeed anyway');
+                msgs.error(
+                  i18n('xpack.ml.newJob.simple.population.couldNotOpenJobErrorMessage', {
+                    defaultMessage: 'Could not open job:',
+                  }),
+                  resp
+                );
+                msgs.error(
+                  i18n('xpack.ml.newJob.simple.population.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
+                    defaultMessage: 'Job created, creating datafeed anyway'
+                  })
+                );
                 // if open failed, still attempt to create the datafeed
                 // as it may have failed because we've hit the limit of open jobs
                 saveNewDatafeed(job, false);
@@ -491,7 +535,12 @@ module
           })
           .catch((resp) => {
             // save failed
-            msgs.error('Save failed: ', resp.resp);
+            msgs.error(
+              i18n('xpack.ml.newJob.simple.population.saveFailedErrorMessage', {
+                defaultMessage: 'Save failed:',
+              }),
+              resp.resp
+            );
           });
       } else {
         // show the advanced section as the model memory limit is invalid
@@ -534,12 +583,22 @@ module
                 })
                 .catch((resp) => {
                   // datafeed failed
-                  msgs.error('Could not start datafeed: ', resp);
+                  msgs.error(
+                    i18n('xpack.ml.newJob.simple.population.couldNotStartDatafeedErrorMessage', {
+                      defaultMessage: 'Could not start datafeed:'
+                    }),
+                    resp
+                  );
                 });
             }
           })
           .catch((resp) => {
-            msgs.error('Save datafeed failed: ', resp);
+            msgs.error(
+              i18n('xpack.ml.newJob.simple.population.saveDatafeedFailedErrorMessage', {
+                defaultMessage: 'Save datafeed failed:',
+              }),
+              resp
+            );
           });
       }
     };

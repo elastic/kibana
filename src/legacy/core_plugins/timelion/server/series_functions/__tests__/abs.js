@@ -17,15 +17,14 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../abs`);
 
 import _ from 'lodash';
 const expect = require('chai').expect;
 const seriesList = require('./fixtures/seriesList.js')();
 import invoke from './helpers/invoke_series_fn.js';
 
-describe(filename, function () {
+describe('abs.js', function () {
   it('should return the positive value of every value', function () {
 
     return invoke(fn, [seriesList]).then(function (result) {

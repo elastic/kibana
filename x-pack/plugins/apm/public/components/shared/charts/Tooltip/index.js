@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { Hint } from 'react-vis';
 import moment from 'moment';
 import styled from 'styled-components';
@@ -76,7 +76,7 @@ export default function Tooltip({
   y,
   ...props
 }) {
-  if (_.isEmpty(tooltipPoints)) {
+  if (isEmpty(tooltipPoints)) {
     return null;
   }
 
