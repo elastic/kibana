@@ -4,7 +4,7 @@
 
 [partintro]
 --
-{xpack} enables you to generate reports that contain {kib} dashboards,
+You can generate reports that contain {kib} dashboards,
 visualizations, and saved searches. Dashboards and visualizations are
 exported as PDF documents, while saved searches in Discover
 are exported to CSV.
