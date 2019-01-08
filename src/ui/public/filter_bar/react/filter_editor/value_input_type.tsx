@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -51,11 +52,13 @@ export class ValueInputType extends Component<Props> {
         );
         break;
       case 'date':
+        const moment = typeof value === 'string' ? dateMath.parse(value) : null;
         inputElement = (
           <EuiFieldText
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
+            isInvalid={typeof value === 'string' && (!moment || !moment.isValid())}
           />
         );
         break;
