@@ -17,25 +17,4 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
-import {
-    EuiEmptyPrompt,
-    EuiButton
-} from '@elastic/eui';
-
-export function RenderCreateIndexPatternPrompt() {
-    // return (<div>Index Pattern Prompt Graphics TBD</div>);
-    return (<EuiEmptyPrompt
-        iconType="editorStrike"
-        title={<Fragment><h2>Create your first index pattern</h2> <h3>hi hi hi</h3></Fragment>}
-        body={
-            <Fragment>
-                <p>
-                    Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in Kibana.
-              </p>
-                <p>You&rsquo;ll need spice to rule Arrakis, young Atreides.</p>
-            </Fragment>
-        }
-        actions={<EuiButton color="primary" fill>Harvest spice</EuiButton>}
-    />);
-}
+export { IndexPatternTable } from './index_pattern_table';

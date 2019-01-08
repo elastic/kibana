@@ -22,6 +22,7 @@ import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
+
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
@@ -32,7 +33,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { IndexPatternList } from './index_pattern_list';
+//import { IndexPatternList } from './index_pattern_list';
+import { App } from './app';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
@@ -49,7 +51,7 @@ export function updateIndexPatternList(
 
   render(
     <I18nProvider>
-      <IndexPatternList
+      <App
         indexPatternCreationOptions={indexPatternCreationOptions}
         defaultIndex={defaultIndex}
         indexPatterns={indexPatterns}

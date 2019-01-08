@@ -20,6 +20,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IndexPatternList } from './index_pattern_list';
+import { RenderCreateIndexPatternPrompt } from './create_index_pattern_prompt';
 
 export class App extends React.Component {
   constructor(props) {
@@ -40,7 +41,7 @@ export class App extends React.Component {
               indexPatternCreationOptions={this.props.indexPatternCreationOptions}
               defaultIndex={this.props.defaultIndex}
               indexPatterns={this.props.indexPatterns}
-            />) : (<a onClick={() => this.setState({ 'dismissIntro': true })} >no items</a>)}
+            />) : (<RenderCreateIndexPatternPrompt onCreateIndexPattern={() => this.setState({ 'dismissIntro': true })} />)}
         </div>
       </I18nProvider>
     );
