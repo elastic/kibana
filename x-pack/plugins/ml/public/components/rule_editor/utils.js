@@ -254,7 +254,7 @@ export function appliesToText(appliesTo) {
 export function operatorToText(operator) {
   return i18n.translate('xpack.ml.ruleEditor.operatorTypeLabel', {
     defaultMessage:
-      '{operator, select, lt {less then} lte {less than or equal to} gt {greater then} gte {greater than or equal to} other {} }',
+      '{operator, select, lt {less than} lte {less than or equal to} gt {greater than} gte {greater than or equal to} other {} }',
     values: { operator }
   });
 }
