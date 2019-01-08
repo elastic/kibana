@@ -243,6 +243,7 @@ export class SAMLAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    console.log(`Authenticating using access token: ${accessToken}`);
     request.headers.authorization = `Bearer ${accessToken}`;
 
     try {
