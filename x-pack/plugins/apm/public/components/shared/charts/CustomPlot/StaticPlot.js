@@ -86,7 +86,7 @@ class StaticPlot extends PureComponent {
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
-            size={1}
+            size={0.5}
           />
         );
       default:
