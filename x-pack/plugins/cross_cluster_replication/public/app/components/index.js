@@ -15,3 +15,4 @@ export { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_p
 export { FollowerIndexDeleteProvider } from './follower_index_delete_provider';
 export { FollowerIndexForm } from './follower_index_form';
 export { FollowerIndexPageTitle } from './follower_index_page_title';
+export { AdvancedSettingsForm } from './advanced_settings_form';
