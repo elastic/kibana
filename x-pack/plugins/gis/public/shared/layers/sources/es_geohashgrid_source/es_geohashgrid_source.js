@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import uuid from 'uuid/v4';
 
 import { VectorSource } from '../vector_source';
@@ -29,6 +29,10 @@ import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
+import {
+  EuiText,
+  EuiSpacer
+} from '@elastic/eui';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -78,6 +82,21 @@ export class ESGeohashGridSource extends VectorSource {
     };
 
     return (<CreateSourceEditor onSelect={onSelect}/>);
+  }
+
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{ESGeohashGridSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            Group documents into grid cells and display metrics for each cell.
+            Great for displaying large datasets.
+          </p>
+        </EuiText>
+      </Fragment>
+    );
   }
 
   renderSourceSettingsEditor({ onChange }) {

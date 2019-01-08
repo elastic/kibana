@@ -6,7 +6,17 @@
 
 import _ from 'lodash';
 
-export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
+/**
+ * Converts Elasticsearch search results into GeoJson FeatureCollection
+ *
+ * @param {array} hits Elasticsearch search response hits array
+ * @param {function} flattenHit Method to flatten hits._source and hits.fields into properties object.
+ *   Should just be IndexPattern.flattenHit but wanted to avoid coupling this method to IndexPattern.
+ * @param {string} geoFieldName Geometry field name
+ * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
+ * @returns {number}
+ */
+export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
   const features = [];
   hits.forEach(hit => {
     const value = _.get(hit, `_source[${geoFieldName}]`);
@@ -19,22 +29,9 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
       throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
     }
 
-    const properties = {};
-    for (const fieldName in hit._source) {
-      if (hit._source.hasOwnProperty(fieldName)) {
-        if (fieldName !== geoFieldName) {
-          properties[fieldName] = hit._source[fieldName];
-        }
-      }
-    }
-
-    // hit.fields contains calculated values from docvalue_fields and script_fields
-    for (const fieldName in hit.fields) {
-      if (hit.fields.hasOwnProperty(fieldName)) {
-        const val = hit.fields[fieldName];
-        properties[fieldName] = Array.isArray(val) && val.length === 1 ? val[0] : val;
-      }
-    }
+    const properties = flattenHit(hit);
+    // don't include geometry field value in properties
+    delete properties[geoFieldName];
 
     return geometries.map(geometry => {
       features.push({

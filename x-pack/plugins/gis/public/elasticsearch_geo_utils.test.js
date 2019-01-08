@@ -20,6 +20,18 @@ const mapExtent = {
   minLon: -89,
 };
 
+const flattenHitMock = hit => {
+  const properties = {};
+  for (const fieldName in hit._source) {
+    if (hit._source.hasOwnProperty(fieldName)) {
+      if (fieldName !== geoFieldName) {
+        properties[fieldName] = hit._source[fieldName];
+      }
+    }
+  }
+  return properties;
+};
+
 describe('hitsToGeoJson', () => {
   it('Should convert elasitcsearch hits to geojson', () => {
     const hits = [
@@ -34,7 +46,7 @@ describe('hitsToGeoJson', () => {
         }
       },
     ];
-    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(2);
     expect(geojson.features[0]).toEqual({
@@ -58,12 +70,12 @@ describe('hitsToGeoJson', () => {
         _source: {}
       },
     ];
-    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(1);
   });
 
-  it('Should populate properties from _source and fields', () => {
+  it('Should populate properties from hit', () => {
     const hits = [
       {
         _source: {
@@ -75,28 +87,10 @@ describe('hitsToGeoJson', () => {
         }
       }
     ];
-    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
     expect(geojson.features.length).toBe(1);
     const feature = geojson.features[0];
     expect(feature.properties.myField).toBe(8);
-    expect(feature.properties.myScriptedField).toBe(10);
-  });
-
-  it('Should unwrap computed fields', () => {
-    const hits = [
-      {
-        _source: {
-          [geoFieldName]: { lat: 20, lon: 100 },
-        },
-        fields: {
-          myScriptedField: [ 10 ] // script_fields are returned in an array
-        }
-      }
-    ];
-    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
-    expect(geojson.features.length).toBe(1);
-    const feature = geojson.features[0];
-    expect(feature.properties.myScriptedField).toBe(10);
   });
 
   it('Should create feature per item when geometry value is an array', () => {
@@ -111,7 +105,7 @@ describe('hitsToGeoJson', () => {
         }
       },
     ];
-    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(2);
     expect(geojson.features[0]).toEqual({
