@@ -13,7 +13,7 @@ import { mockMoment } from '../../../utils/testHelpers';
 describe('StickyProperties', () => {
   beforeEach(mockMoment);
 
-  it('should render', () => {
+  it('should render entire component', () => {
     const stickyProperties = [
       {
         label: 'Timestamp',
@@ -34,7 +34,7 @@ describe('StickyProperties', () => {
       {
         label: 'Handled',
         fieldName: 'error.exception.handled',
-        val: 'true'
+        val: String(true)
       },
       {
         label: 'User ID',
@@ -48,5 +48,79 @@ describe('StickyProperties', () => {
     );
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  describe('values', () => {
+    it('should render timestamp when fieldName is `@timestamp`', () => {
+      const stickyProperties = [
+        {
+          label: 'My Timestamp',
+          fieldName: '@timestamp',
+          val: 1536405447640
+        }
+      ];
+
+      const wrapper = shallow(
+        <StickyProperties stickyProperties={stickyProperties} />
+      ).find('TimestampValue');
+
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    it('should render numbers', () => {
+      const stickyProperties = [
+        {
+          label: 'My Number',
+          fieldName: 'myNumber',
+          val: 1337
+        }
+      ];
+
+      const wrapper = shallow(
+        <StickyProperties stickyProperties={stickyProperties} />
+      )
+        .find('PropertyValue')
+        .dive()
+        .text();
+
+      expect(wrapper).toEqual('1337');
+    });
+
+    it('should not stringify booleans', () => {
+      const stickyProperties = [
+        {
+          label: 'My boolean',
+          fieldName: 'myBoolean',
+          val: true
+        }
+      ];
+
+      const wrapper = shallow(
+        <StickyProperties stickyProperties={stickyProperties} />
+      )
+        .find('PropertyValue')
+        .dive()
+        .text();
+
+      expect(wrapper).toEqual('');
+    });
+
+    it('should render nested components', () => {
+      const stickyProperties = [
+        {
+          label: 'My Component',
+          fieldName: 'myComponent',
+          val: <h1>My header</h1>
+        }
+      ];
+
+      const wrapper = shallow(
+        <StickyProperties stickyProperties={stickyProperties} />
+      )
+        .find('PropertyValue')
+        .html();
+
+      expect(wrapper).toContain(`<h1>My header</h1>`);
+    });
   });
 });
