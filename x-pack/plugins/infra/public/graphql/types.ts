@@ -199,7 +199,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  label?: string | null;
+  label: string;
 }
 
 export interface InfraNodeMetric {
@@ -560,7 +560,7 @@ export namespace WaffleNodesQuery {
 
     value: string;
 
-    label?: string | null;
+    label: string;
   };
 
   export type Metric = {
