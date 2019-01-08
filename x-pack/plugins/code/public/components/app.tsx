@@ -8,6 +8,7 @@ import React from 'react';
 import { HashRouter as Router, Redirect, Switch } from 'react-router-dom';
 
 import { Admin } from './admin_page/admin';
+import { SetupGuide } from './admin_page/setup_guide';
 import { Diff } from './diff_page/diff';
 import { Main } from './main/main';
 import { NotFound } from './main/not_found';
@@ -29,6 +30,7 @@ export const App = () => {
         <Route path={ROUTES.ADMIN} component={Admin} />
         <Route path={ROUTES.SEARCH} component={Search} />
         <Route path={ROUTES.REPO} render={Empty} exact={true} />
+        <Route path="/setup-guide" render={SetupGuide} exact={true} />
         <Route path="*" component={NotFound} />
       </Switch>
     </Router>
