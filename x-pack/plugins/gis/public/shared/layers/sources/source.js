@@ -16,6 +16,10 @@ export class ASource {
     throw new Error('Must implement Source.createDescriptor');
   }
 
+  static renderDropdownDisplayOption() {
+    throw new Error('Must implement Source.renderDropdownDisplayOption');
+  }
+
   constructor(descriptor) {
     this._descriptor = descriptor;
   }

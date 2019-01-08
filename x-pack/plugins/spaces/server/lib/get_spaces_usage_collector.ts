@@ -70,9 +70,7 @@ export function getSpacesUsageCollector(server: any) {
         type: KIBANA_STATS_TYPE_MONITORING,
         payload: {
           usage: {
-            xpack: {
-              spaces: result,
-            },
+            spaces: result,
           },
         },
       };
