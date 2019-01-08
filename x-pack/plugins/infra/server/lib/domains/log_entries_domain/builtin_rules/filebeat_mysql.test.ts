@@ -5,9 +5,9 @@
  */
 
 import { compileFormattingRules } from '../message';
-import { mysqlRules } from './filebeat_mysql';
+import { filebeatMySQLRules } from './filebeat_mysql';
 
-const { format } = compileFormattingRules(mysqlRules);
+const { format } = compileFormattingRules(filebeatMySQLRules);
 
 describe('Filebeat Rules', () => {
   test('mysql error log', () => {

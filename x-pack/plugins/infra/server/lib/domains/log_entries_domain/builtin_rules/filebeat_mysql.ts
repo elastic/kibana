@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const mysqlRules = [
+export const filebeatMySQLRules = [
   {
     when: {
       exists: ['mysql.error.message'],

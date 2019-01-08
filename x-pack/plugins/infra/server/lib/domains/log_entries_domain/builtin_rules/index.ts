@@ -5,7 +5,7 @@
  */
 
 import { filebeatApache2Rules } from './filebeat_apache2';
-import { mysqlRules } from './filebeat_mysql';
+import { filebeatMySQLRules } from './filebeat_mysql';
 import { filebeatNginxRules } from './filebeat_nginx';
 import { filebeatRedisRules } from './filebeat_redis';
 import { filebeatSystemRules } from './filebeat_system';
@@ -17,7 +17,7 @@ export const builtinRules = [
   ...filebeatNginxRules,
   ...filebeatRedisRules,
   ...filebeatSystemRules,
-  ...mysqlRules,
+  ...filebeatMySQLRules,
   ...genericRules,
   {
     when: {
