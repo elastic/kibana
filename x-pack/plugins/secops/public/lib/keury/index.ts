@@ -19,3 +19,6 @@ export const convertKueryToElasticSearchQuery = (
     return '';
   }
 };
+
+export const escapeQueryValue = (val: string | undefined) =>
+  val && val.replace ? val.replace(/"/g, '\\"') : '';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, sortBy } from 'lodash/fp';
+import { get, getOr, has, sortBy } from 'lodash/fp';
 
 import { ECS } from '../../components/timeline/ecs';
 import { EcsField } from './ecs_field';
@@ -40,10 +40,12 @@ export const getMappedEcsValue = ({
 }: {
   data: ECS;
   fieldName: string;
-}): string | object | undefined => {
+}): string | undefined => {
   const path = getOr(fieldName, fieldName, mappedEcsSchemaFieldNames); // defaults to the fieldName if there is no override
-
-  return get(path, data);
+  if (has(path, data)) {
+    return get(path, data) as string;
+  }
+  return undefined;
 };
 
 /**

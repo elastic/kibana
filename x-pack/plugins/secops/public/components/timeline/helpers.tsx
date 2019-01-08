@@ -19,14 +19,19 @@ export const combineQueries = (
     return null;
   }
   const globalQuery = dataProviders.reduce((query, dataProvider) => {
-    if (query !== '') {
-      query += ' or ';
+    if (dataProvider.enabled) {
+      if (query !== '') {
+        query += ' or ';
+      }
+      query += `(${dataProvider.queryMatch}${
+        dataProvider.queryDate ? ` and ${dataProvider.queryDate})` : ')'
+      }`;
     }
-    query = `(${dataProvider.queryMatch}${
-      dataProvider.queryDate ? ` and ${dataProvider.queryDate})` : ')'
-    }`;
     return query;
   }, '');
+  if (isEmpty(globalQuery)) {
+    return null;
+  }
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
   };

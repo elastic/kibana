@@ -9,6 +9,7 @@ import * as React from 'react';
 import uuid from 'uuid';
 
 import { EcsField, getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../lib/ecs';
+import { escapeQueryValue } from '../../lib/keury';
 import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { ECS } from '../timeline/ecs';
 
@@ -103,10 +104,12 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] => {
             field.name,
             field.name,
             mappedEcsSchemaFieldNames
-          )}: ${getMappedEcsValue({
-            data,
-            fieldName: field.name,
-          })}`,
+          )}: "${escapeQueryValue(
+            getMappedEcsValue({
+              data,
+              fieldName: field.name,
+            })
+          )}"`,
           negated: false,
           and: [],
         }}

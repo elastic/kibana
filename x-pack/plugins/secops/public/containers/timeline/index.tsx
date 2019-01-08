@@ -5,11 +5,12 @@
  */
 
 import { getOr } from 'lodash/fp';
+import moment from 'moment';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { Direction, EventEdges, EventItem, GetTimelineQuery, PageInfo } from '../../graphql/types';
+import { EventEdges, EventItem, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { timelineQuery } from './index.gql_query';
 
@@ -17,10 +18,11 @@ export interface TimelineArgs {
   id: string;
   events: EventItem[];
   loading: boolean;
-  totalCount: number;
+  loadMore: (cursor: string, tieBreaker: string) => void;
   pageInfo: PageInfo;
-  loadMore: (cursor: string) => void;
   refetch: inputsModel.Refetch;
+  totalCount: number;
+  updatedAt: number;
 }
 
 export interface OwnProps {
@@ -28,12 +30,13 @@ export interface OwnProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   sourceId: string;
   filterQuery: string;
+  sortField: SortField;
   poll?: number;
   limit: number;
 }
 
 export const TimelineQuery = pure<OwnProps>(
-  ({ id = 'timelineQuery', children, filterQuery, sourceId, limit, poll }) => (
+  ({ id = 'timelineQuery', children, filterQuery, sourceId, limit, poll, sortField }) => (
     <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
       query={timelineQuery}
       fetchPolicy="cache-and-network"
@@ -47,10 +50,7 @@ export const TimelineQuery = pure<OwnProps>(
           cursor: null,
           tiebreaker: null,
         },
-        sortField: {
-          sortFieldId: 'timestamp',
-          direction: 'descending' as Direction,
-        },
+        sortField,
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {
@@ -62,11 +62,12 @@ export const TimelineQuery = pure<OwnProps>(
           totalCount: getOr(0, 'source.Events.totalCount', data),
           pageInfo: getOr({}, 'source.Events.pageInfo', data),
           events: events.map((i: EventEdges) => i.event),
-          loadMore: (newCursor: string) =>
+          loadMore: (newCursor: string, tiebreaker: string) =>
             fetchMore({
               variables: {
                 pagination: {
                   cursor: newCursor,
+                  tiebreaker,
                   limit,
                 },
               },
@@ -86,6 +87,7 @@ export const TimelineQuery = pure<OwnProps>(
                 };
               },
             }),
+          updatedAt: moment().valueOf(),
         });
       }}
     </Query>

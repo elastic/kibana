@@ -16,6 +16,7 @@ import {
   UncommonProcessesEdges,
   UncommonProcessItem,
 } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
@@ -124,7 +125,7 @@ const getUncommonColumns = (startDate: number) => [
               id: `${uncommonProcess._id}`,
               name: processName,
               negated: false,
-              queryMatch: `process.name: ${processName}`,
+              queryMatch: `process.name: "${escapeQueryValue(processName)}"`,
               queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>

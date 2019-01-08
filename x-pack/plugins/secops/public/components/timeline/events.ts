@@ -51,4 +51,4 @@ export type OnColumnSorted = (
 export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
 
 /** Invoked when a user clicks to load more item */
-export type OnLoadMore = (cursor: string) => void;
+export type OnLoadMore = (cursor: string, tieBreaker: string) => void;

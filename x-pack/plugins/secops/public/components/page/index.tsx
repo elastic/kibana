@@ -63,6 +63,9 @@ export const FooterContainer = styled.div`
 export const PaneScrollContainer = styled.div`
   height: 100%;
   overflow-y: scroll;
+  > div:last-child {
+    margin-bottom: 3rem;
+  }
 `;
 
 export const Pane = styled.div`

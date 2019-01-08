@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { EventItem } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { eventsLimitSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
@@ -115,7 +116,7 @@ const getEventsColumns = (startDate: number) => [
               id: `${event._id}`,
               name: hostName,
               negated: false,
-              queryMatch: `host.name: ${hostName}`,
+              queryMatch: `host.name: "${escapeQueryValue(hostName)}"`,
               queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>

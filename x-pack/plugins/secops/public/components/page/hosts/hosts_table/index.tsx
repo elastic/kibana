@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { HostItem, HostsEdges } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, hostsLimitSelector, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
@@ -116,7 +117,7 @@ const getHostsColumns = () => [
               id: `${host._id}`,
               name: hostName,
               negated: false,
-              queryMatch: `host.name: ${hostName}`,
+              queryMatch: `host.name: "${escapeQueryValue(hostName)}"`,
               queryDate: `@timestamp >= ${
                 moment(host.firstSeen!).valueOf
               } and @timestamp <= ${moment().valueOf()}`,

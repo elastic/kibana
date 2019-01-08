@@ -11,13 +11,14 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { ECS } from './ecs';
 
 import { TimelineQuery } from '../../containers/timeline';
+import { Direction } from '../../graphql/types';
 import { Theme } from '../../store/local/app/model';
 import { AutoSizer } from '../auto_sizer';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Range } from './body/column_headers/range_picker/ranges';
-import { ColumnRenderer } from './body/renderers';
 import { RowRenderer } from './body/renderers';
+import { ColumnRenderer } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
@@ -112,8 +113,12 @@ export const Timeline = pure<Props>(
                     sourceId="default"
                     limit={itemsPerPage}
                     filterQuery={combinedQueries.filterQuery}
+                    sortField={{
+                      sortFieldId: sort.columnId,
+                      direction: sort.sortDirection as Direction,
+                    }}
                   >
-                    {({ events, loading, totalCount, pageInfo, loadMore }) => (
+                    {({ events, loading, totalCount, pageInfo, loadMore, updatedAt }) => (
                       <>
                         <Body
                           id={id}
@@ -134,12 +139,15 @@ export const Timeline = pure<Props>(
                           serverSideEventCount={totalCount}
                           height={footerHeight}
                           isLoading={loading}
+                          itemsCount={events.length}
                           itemsPerPage={itemsPerPage}
                           itemsPerPageOptions={itemsPerPageOptions}
                           onChangeItemsPerPage={onChangeItemsPerPage}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           onLoadMore={loadMore}
+                          updatedAt={updatedAt}
                         />
                       </>
                     )}
