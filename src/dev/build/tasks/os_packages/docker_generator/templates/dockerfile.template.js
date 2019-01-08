@@ -19,7 +19,7 @@
 
 import dedent from 'dedent';
 
-export function dockerfileTemplate({ urlRoot, tarball, elasticVersion, license  }) {
+export function dockerfileTemplate({ urlRoot, tarball, versionTag, license  }) {
   return dedent(`
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
@@ -69,7 +69,7 @@ export function dockerfileTemplate({ urlRoot, tarball, elasticVersion, license  
   LABEL org.label-schema.schema-version="1.0" \\
     org.label-schema.vendor="Elastic" \\
     org.label-schema.name="kibana" \\
-    org.label-schema.version="${ elasticVersion }" \\
+    org.label-schema.version="${ versionTag }" \\
     org.label-schema.url="https://www.elastic.co/products/kibana" \\
     org.label-schema.vcs-url="https://github.com/elastic/kibana-docker" \\
     license="${ license }"

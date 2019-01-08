@@ -23,21 +23,21 @@ import { mkdirp, write, copyAll, exec } from '../../../lib';
 import { buildDockerSHTemplate, dockerfileTemplate, kibanaYMLTemplate } from './templates';
 
 export async function runDockerGenerator(config, log, build) {
-  const urlRoot = 'http://localhost:8000';
-  const kibanaVersion = config.getBuildVersion();
   const imageFlavor = build.isOss() ? '-oss' : '';
-  const tarball = `kibana${imageFlavor || ''}-${kibanaVersion}-linux-x86_64.tar.gz`;
+  const imageTag = 'docker.elastic.co/kibana/kibana';
+  const versionTag = config.getBuildVersion();
+  const urlRoot = 'http://localhost:8000';
+  const tarball = `kibana${ imageFlavor }-${ versionTag }-linux-x86_64.tar.gz`;
+  const artifactsDir = config.resolveFromTarget('.');
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const httpD = 'kibana-docker-artifact-server';
-  const imageTag = 'docker.elastic.co/kibana/kibana';
   const dockerTargetDir = config.resolveFromTarget(
     `docker`
   );
   const dockerBuildDir = resolve(dockerTargetDir, 'build');
-  const artifactsDir = config.resolveFromTarget('.');
   const dockerOutput = resolve(
     dockerTargetDir,
-    `kibana${imageFlavor || ''}-${kibanaVersion}-docker.tar`
+    `kibana${ imageFlavor }-${ versionTag }-docker.tar`
   );
 
   // Create Docker Target Folder
@@ -51,8 +51,7 @@ export async function runDockerGenerator(config, log, build) {
     urlRoot,
     tarball,
     imageFlavor,
-    versionTag: kibanaVersion,
-    elasticVersion: kibanaVersion,
+    versionTag,
     license,
     artifactsDir,
     httpD,

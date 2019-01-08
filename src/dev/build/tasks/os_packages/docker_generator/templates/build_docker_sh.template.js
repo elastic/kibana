@@ -30,22 +30,22 @@ export function buildDockerSHTemplate({ httpD, artifactsDir, imageTag, imageFlav
   
   clean_docker() {
     (docker kill ${ httpD } 2>&1) >/dev/null
-    docker rmi ${ imageTag }${ imageFlavor || '' }:${ versionTag }
+    docker rmi ${ imageTag }${ imageFlavor }:${ versionTag }
   }
   
   trap clean_docker EXIT
   
   docker pull centos:7
   
-  docker run --rm -d --name=${ httpD } \
-	           --network=host -v ${ artifactsDir }:/mnt \
-	           python:3 bash -c 'cd /mnt && python3 -m http.server' \
+  docker run --rm -d --name=${ httpD } \\
+	           --network=host -v ${ artifactsDir }:/mnt \\
+	           python:3 bash -c 'cd /mnt && python3 -m http.server' \\
 	           timeout 120 bash -c 'until curl -s localhost:8000 > /dev/null; do sleep 1; done'
   
-  echo "Building: kibana${imageFlavor || ''}-docker"; \
-  docker build --network=host -t ${ imageTag }${ imageFlavor || '' }:${ versionTag } -f Dockerfile . || exit 1;
+  echo "Building: kibana${ imageFlavor }-docker"; \\
+  docker build --network=host -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
 
-  docker save -o ${ dockerOutput } ${ imageTag }${ imageFlavor || '' }:${ versionTag }
+  docker save -o ${ dockerOutput } ${ imageTag }${ imageFlavor }:${ versionTag }
   
   exit 0
   `);
