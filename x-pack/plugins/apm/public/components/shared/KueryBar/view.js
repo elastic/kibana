@@ -26,6 +26,7 @@ import styled from 'styled-components';
 
 import { getBoolFilter } from './get_bool_filter';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -124,10 +125,10 @@ class KueryBarView extends Component {
                         pathname={'/app/kibana'}
                         hash={`/home/tutorial/apm`}
                       >
-                        <FormattedMessage
-                          id="xpack.apm.kueryBar.setupInstructionsLinkLabel"
-                          defaultMessage="Setup Instructions"
-                        />
+                        {i18n.translate(
+                          'xpack.apm.kueryBar.setupInstructionsLinkLabel',
+                          { defaultMessage: 'Setup Instructions' }
+                        )}
                       </KibanaLink>
                     )
                   }}
