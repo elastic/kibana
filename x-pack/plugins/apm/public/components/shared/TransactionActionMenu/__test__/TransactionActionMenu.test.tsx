@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import transactionActionMenuProps from './transactionActionMenuProps.json';
@@ -17,12 +17,8 @@ describe('TransactionActionMenu component', () => {
     const location: Location = transactionActionMenuProps.location;
 
     expect(
-      shallowWithIntl(
-        <TransactionActionMenu.WrappedComponent
-          transaction={transaction}
-          location={location}
-          intl={null as any}
-        />
+      shallow(
+        <TransactionActionMenu transaction={transaction} location={location} />
       ).shallow()
     ).toMatchSnapshot();
   });

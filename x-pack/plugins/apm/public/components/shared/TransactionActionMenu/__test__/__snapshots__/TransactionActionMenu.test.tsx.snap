@@ -264,11 +264,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
                 color="primary"
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="View sample document"
-                  id="xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel"
-                  values={Object {}}
-                />
+                View sample document
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem

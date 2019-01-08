@@ -5,7 +5,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { KibanaLink } from '../../utils/url';
 
@@ -17,10 +17,9 @@ export function SetupInstructionsLink({
   return (
     <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
       <EuiButton size="s" color="primary" fill={buttonFill}>
-        <FormattedMessage
-          id="xpack.apm.setupInstructionsButtonLabel"
-          defaultMessage="Setup Instructions"
-        />
+        {i18n.translate('xpack.apm.setupInstructionsButtonLabel', {
+          defaultMessage: 'Setup Instructions'
+        })}
       </EuiButton>
     </KibanaLink>
   );
