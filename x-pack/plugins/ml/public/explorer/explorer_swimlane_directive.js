@@ -19,6 +19,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
+import { I18nProvider } from '@kbn/i18n/react';
 
 module.directive('mlExplorerSwimlane', function () {
 
@@ -34,7 +35,9 @@ module.directive('mlExplorerSwimlane', function () {
       }
 
       ReactDOM.render(
-        React.createElement(ExplorerSwimlane, props),
+        <I18nProvider>
+          {React.createElement(ExplorerSwimlane, props)}
+        </I18nProvider>,
         element[0]
       );
     }

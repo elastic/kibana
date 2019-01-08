@@ -85,8 +85,7 @@ export default function ({ getService, getPageObjects }) {
       describe.skip('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
-          // report than phantom.
+          // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
 
           await PageObjects.dashboard.switchToEditMode();
@@ -125,8 +124,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('matches same baseline report with margins turned on', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
-          // report than phantom.
+          // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
 
           await PageObjects.dashboard.switchToEditMode();
@@ -156,12 +154,13 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      // TODO Re-enable the tests after removing Phantom:
+      // https://github.com/elastic/kibana/issues/21485
       describe.skip('Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
-          // report than phantom.
+          // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
 
           await PageObjects.reporting.openPdfReportingPanel();
@@ -185,9 +184,6 @@ export default function ({ getService, getPageObjects }) {
             config.get('screenshots.directory'),
             log
           );
-          // After expected OS differences, the diff count came to be around 350k. Due to
-          // https://github.com/elastic/kibana/issues/21485 this jumped up to something like 368 when
-          // comparing the same baseline for chromium and phantom.
           expect(percentSimilar).to.be.lessThan(0.05);
 
         });
@@ -208,12 +204,13 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      // TODO Re-enable the tests after removing Phantom:
+      // https://github.com/elastic/kibana/issues/21485
       describe.skip('Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
-          // report than phantom.
+          // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
 
           await PageObjects.dashboard.switchToEditMode();
@@ -249,9 +246,6 @@ export default function ({ getService, getPageObjects }) {
             config.get('screenshots.directory'),
             log
           );
-          // After expected OS differences, the diff count came to be around 350k. Due to
-          // https://github.com/elastic/kibana/issues/21485 this jumped up to something like 368 when
-          // comparing the same baseline for chromium and phantom.
           expect(percentSimilar).to.be.lessThan(0.05);
 
         });
@@ -310,6 +304,8 @@ export default function ({ getService, getPageObjects }) {
           await expectEnabledGenerateReportButton();
         });
 
+        // TODO Re-enable the tests after removing Phantom:
+        // https://github.com/elastic/kibana/issues/21485
         it.skip('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
@@ -332,11 +328,6 @@ export default function ({ getService, getPageObjects }) {
             config.get('screenshots.directory'),
             log
           );
-          // After expected OS and browser differences, the diff count came up to max 800564 that I saw.
-          // This is pretty bad. https://github.com/elastic/kibana/issues/21486 is filed to lower this
-          // which will be much easier when we only support one browser type (chromium instead of phantom).
-          // The reason this is so high currently is because of a phantom bug:
-          // https://github.com/elastic/kibana/issues/21485
           expect(percentSimilar).to.be.lessThan(0.05);
         });
       });

@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import _ from 'lodash';
+import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { StringMap } from '../../../../typings/common';
@@ -85,13 +85,13 @@ export function AgentFeatureTipMessage({
 }
 
 export const sortKeysByConfig: KeySorter = (object, currentKey) => {
-  const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
-  const presorted = _.get(
+  const indexedPropertyConfig = indexBy(PROPERTY_CONFIG, 'key');
+  const presorted = get(
     indexedPropertyConfig,
     `${currentKey}.presortedKeys`,
     []
   );
-  return _.uniq([...presorted, ...Object.keys(object).sort()]);
+  return uniq([...presorted, ...Object.keys(object).sort()]);
 };
 
 export function PropertiesTable({

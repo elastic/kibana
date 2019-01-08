@@ -14,7 +14,7 @@ export const timeFilter = () => ({
   name: 'time_filter',
   displayName: 'Time filter',
   help: 'Set a time window',
-  reuseDomNode: true,
+  reuseDomNode: false,
   render(domNode, config, handlers) {
     const ast = fromExpression(handlers.getFilter());
 
