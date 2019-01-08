@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { getWorkpad, getWorkpadPersisted } from '../selectors/workpad';
 import { getAssetIds } from '../selectors/assets';
 import { setWorkpad } from '../actions/workpad';
@@ -55,26 +55,26 @@ export const esPersistMiddleware = ({ getState }) => {
     if (workpadChanged(curState, newState) || assetsChanged(curState, newState)) {
       const persistedWorkpad = getWorkpadPersisted(getState());
       return update(persistedWorkpad.id, persistedWorkpad).catch(err => {
-        if (err.response.status === 400) {
-          return notify.error(err.response, {
-            title: `Couldn't save your changes to Elasticsearch`,
-          });
-        }
-
-        if (err.response.status === 413) {
-          return notify.error(
-            `The server gave a response that the workpad data was too large. This
-            usually means uploaded image assets that are too large for Kibana or
-            a proxy. Try removing some assets in the asset manager.`,
-            {
+        const statusCode = get(err, 'response.status');
+        switch (statusCode) {
+          case 400:
+            return notify.error(err.response, {
               title: `Couldn't save your changes to Elasticsearch`,
-            }
-          );
+            });
+          case 413:
+            return notify.error(
+              `The server gave a response that the workpad data was too large. This
+              usually means uploaded image assets that are too large for Kibana or
+              a proxy. Try removing some assets in the asset manager.`,
+              {
+                title: `Couldn't save your changes to Elasticsearch`,
+              }
+            );
+          default:
+            return notify.error(err, {
+              title: `Couldn't update workpad`,
+            });
         }
-
-        return notify.error(err.response, {
-          title: `Couldn't update workpad`,
-        });
       });
     }
   };

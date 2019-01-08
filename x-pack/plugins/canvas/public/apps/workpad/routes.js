@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
@@ -33,7 +34,7 @@ export const routes = [
             notify.error(err, { title: `Couldn't create workpad` });
             // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
             // https://github.com/elastic/kibana/issues/20277
-            if (err.response.status === 403) {
+            if (get(err, 'response.status') === 403) {
               dispatch(setCanUserWrite(false));
             }
             router.redirectTo('home');
@@ -61,7 +62,7 @@ export const routes = [
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
               workpadService.update(params.id, fetchedWorkpad).catch(err => {
-                if (err.response.status === 403) {
+                if (get(err, 'response.status') === 403) {
                   dispatch(setCanUserWrite(false));
                 }
               });

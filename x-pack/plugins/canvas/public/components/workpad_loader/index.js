@@ -7,6 +7,7 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withState, getContext, withHandlers } from 'recompose';
+import { get } from 'lodash';
 import fileSaver from 'file-saver';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
@@ -46,7 +47,7 @@ export const WorkpadLoader = compose(
           notify.error(err, { title: `Couldn't upload workpad` });
           // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
           // https://github.com/elastic/kibana/issues/20277
-          if (err.response.status === 403) {
+          if (get(err, 'response.status') === 403) {
             props.setCanUserWrite(false);
           }
         }
@@ -89,7 +90,7 @@ export const WorkpadLoader = compose(
         notify.error(err, { title: `Couldn't clone workpad` });
         // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
         // https://github.com/elastic/kibana/issues/20277
-        if (err.response.status === 403) {
+        if (get(err, 'response.status') === 403) {
           props.setCanUserWrite(false);
         }
       }
@@ -122,7 +123,7 @@ export const WorkpadLoader = compose(
               errors.push(result.id);
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
-              if (result.err.response.status === 403) {
+              if (get(result, 'err.response.status') === 403) {
                 props.setCanUserWrite(false);
               }
             } else {
