@@ -18,7 +18,7 @@ type QueryEventsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-interface EventsResolversDeps {
+export interface EventsResolversDeps {
   events: Events;
 }
 
