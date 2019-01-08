@@ -9,8 +9,8 @@ import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
-import { reindexServiceFactory, ReindexStatus } from '../lib/reindex_service';
-import { ReindexWorker } from '../lib/reindex_worker';
+import { ReindexStatus } from '../../common/types';
+import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 
 export function registerReindexIndicesRoutes(server: Server) {
   const BASE_PATH = '/api/upgrade_assistant/reindex';

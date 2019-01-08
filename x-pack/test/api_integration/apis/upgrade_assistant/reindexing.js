@@ -7,7 +7,7 @@
 
 import expect from 'expect.js';
 
-import { ReindexStatus, REINDEX_OP_TYPE } from '../../../../plugins/upgrade_assistant/server/lib/reindex_service.ts';
+import { ReindexStatus, REINDEX_OP_TYPE } from '../../../../plugins/upgrade_assistant/common/types';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -63,7 +63,7 @@ export default function ({ getService }) {
     // Wait for completion and cleanup data so tests don't collide.
     afterEach(cleanup);
 
-    it('should create a new index with the same documents and mappings', async () => {
+    it('should create a new index with the same documents', async () => {
       // const originalMappings = await es.client.indices.getMapping({ index: indexName });
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/${indexName}`)
@@ -90,5 +90,8 @@ export default function ({ getService }) {
         (await es.count({ index: lastState.newIndexName })).count
       ).to.be(3);
     });
+
+    it('handles indices with auto-fixable deprecated settings');
+    it('rejects indices using unfixable deprecated settings');
   });
 }

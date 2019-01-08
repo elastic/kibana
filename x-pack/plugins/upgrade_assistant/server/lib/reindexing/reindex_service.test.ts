@@ -7,14 +7,16 @@
 import moment = require('moment');
 import { SavedObjectsClient } from 'src/server/saved_objects';
 import {
-  findBooleanFields,
-  LOCK_WINDOW,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
-  ReindexService,
-  reindexServiceFactory,
   ReindexStatus,
   ReindexStep,
+} from '../../../common/types';
+import {
+  findBooleanFields,
+  LOCK_WINDOW,
+  ReindexService,
+  reindexServiceFactory,
 } from './reindex_service';
 
 describe('reindexService', () => {

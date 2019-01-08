@@ -20,11 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import {
-  ReindexOperation,
-  ReindexStatus,
-  ReindexStep,
-} from 'x-pack/plugins/upgrade_assistant/server/lib/reindex_service';
+import { ReindexOperation, ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 
 const POLL_INTERVAL = 1000;
@@ -78,6 +74,28 @@ const ReindexProgress: React.StatelessComponent<{
       <EuiProgress size="s" value={reindexTaskPercComplete || 0} max={1} />
     );
 
+  const reindexingDocsStep = { title: 'Reindexing documents' } as any;
+
+  if (reindexStatus === undefined) {
+    reindexingDocsStep.status = 'incomplete';
+    reindexingDocsStep.children = null;
+  } else if (
+    reindexStatus === ReindexStatus.failed &&
+    (step === ReindexStep.newIndexCreated || step === ReindexStep.reindexStarted)
+  ) {
+    reindexingDocsStep.status = 'danger';
+    reindexingDocsStep.children = (
+      <EuiCallOut color="danger" title="There was an error">
+        <EuiText>
+          <p>{errorMessage}</p>
+        </EuiText>
+      </EuiCallOut>
+    );
+  } else {
+    reindexingDocsStep.status = step >= ReindexStep.reindexCompleted ? 'complete' : 'incomplete';
+    reindexingDocsStep.children = reindexProgressBar;
+  }
+
   return (
     <EuiSteps
       steps={[
@@ -89,10 +107,7 @@ const ReindexProgress: React.StatelessComponent<{
           title: 'Creating new index',
           ...details(ReindexStep.newIndexCreated),
         },
-        {
-          title: 'Reindexing documents',
-          ...details(ReindexStep.reindexCompleted, reindexProgressBar),
-        },
+        reindexingDocsStep,
         {
           title: 'Creating alias',
           ...details(ReindexStep.aliasCreated),
@@ -179,7 +194,11 @@ class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutSta
 
     try {
       // Optimistically assume it will start.
-      this.setState({ reindexStatus: ReindexStatus.inProgress });
+      this.setState({
+        reindexStatus: ReindexStatus.inProgress,
+        reindexTaskPercComplete: null,
+        step: undefined,
+      });
       const request = APIClient.post<ReindexOperation>(
         chrome.addBasePath(`/api/upgrade_assistant/reindex/${indexName}`)
       );

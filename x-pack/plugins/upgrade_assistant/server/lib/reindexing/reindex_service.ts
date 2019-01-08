@@ -5,47 +5,23 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
 import moment from 'moment';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   FindResponse,
-  SavedObject,
-  SavedObjectAttributes,
   SavedObjectsClient,
 } from 'src/server/saved_objects/service/saved_objects_client';
+import {
+  REINDEX_OP_TYPE,
+  ReindexOperation,
+  ReindexSavedObject,
+  ReindexStatus,
+  ReindexStep,
+} from '../../../common/types';
+import { getIndexSettings } from './index_settings';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
-
-export enum ReindexStep {
-  created,
-  readonly,
-  newIndexCreated,
-  reindexStarted,
-  reindexCompleted,
-  aliasCreated,
-}
-
-export enum ReindexStatus {
-  inProgress,
-  completed,
-  failed,
-}
-
-export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
-export interface ReindexOperation extends SavedObjectAttributes {
-  indexName: string;
-  newIndexName: string;
-  status: ReindexStatus;
-  lastCompletedStep: ReindexStep;
-  locked: string | null;
-  reindexTaskId: string | null;
-  reindexTaskPercComplete: number | null;
-  errorMessage: string | null;
-}
-
-export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 export interface ReindexService {
   createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
@@ -395,7 +371,7 @@ export const reindexServiceFactory = (
         // Trap the exception and add the message to the object so the UI can display it.
         reindexOp = await updateReindexOp(reindexOp, {
           status: ReindexStatus.failed,
-          errorMessage: e instanceof Error ? e.message : e.toString(),
+          errorMessage: e instanceof Error ? e.stack : e.toString(),
         });
       } finally {
         // Always make sure we return the most recent version of the saved object.
@@ -406,44 +382,6 @@ export const reindexServiceFactory = (
     },
   };
 };
-
-const getIndexSettings = async (callCluster: CallCluster, indexName: string) => {
-  const indexInfo = await callCluster('transport.request', {
-    path: `/${encodeURIComponent(indexName)}?flat_settings`,
-  });
-
-  if (!indexInfo[indexName]) {
-    throw Boom.notFound(`Index ${indexName} does not exist.`);
-  }
-
-  const settings = removeUnsettableSettings(indexInfo[indexName].settings);
-  const mappings = indexInfo[indexName].mappings;
-  const mappingTypes = Object.keys(mappings);
-
-  if (mappingTypes.length > 1) {
-    throw new Error(`Cannot reindex indices with more than one mapping type.`);
-  }
-
-  // _all field not supported.
-  if (mappings[mappingTypes[0]]._all) {
-    throw new Error(`Cannot reindex indices with _all field.`);
-  }
-
-  return { settings, mappings };
-};
-
-const removeUnsettableSettings = (settings: object) =>
-  omit(settings, [
-    'index.uuid',
-    'index.blocks.write',
-    'index.creation_date',
-    'index.routing.allocation.initial_recovery._id',
-    'index.version.created',
-    'index.version.upgraded',
-    'index.provided_name',
-    'index.blocks',
-    'index.legacy',
-  ]);
 
 /**
  * Returns an array of field paths for all boolean fields, where each field path is an array of strings.
@@ -472,7 +410,8 @@ const getBooleanFieldPaths = async (callCluster: CallCluster, indexName: string)
   }
 
   const mapping = allMappings[mappingTypes[0]];
-  return findBooleanFields(mapping.properties);
+  // It's possible an index doesn't have mapping yet.
+  return mapping ? findBooleanFields(mapping.properties) : [];
 };
 
 interface MappingProperties {

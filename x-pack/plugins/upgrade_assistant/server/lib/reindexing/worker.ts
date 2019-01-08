@@ -7,7 +7,8 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { Server } from 'src/server/kbn_server';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 
-import { ReindexSavedObject, ReindexService, reindexServiceFactory } from './reindex_service';
+import { ReindexSavedObject } from '../../../common/types';
+import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 const POLL_INTERVAL = 30000;
 
