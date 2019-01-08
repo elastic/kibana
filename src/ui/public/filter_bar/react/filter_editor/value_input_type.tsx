@@ -29,13 +29,14 @@ interface Props {
 
 export class ValueInputType extends Component<Props> {
   public render() {
+    const value = this.props.value;
     let inputElement: React.ReactNode;
     switch (this.props.type) {
       case 'string':
         inputElement = (
           <EuiFieldText
             placeholder={this.props.placeholder}
-            value={this.props.value}
+            value={value}
             onChange={this.onChange}
           />
         );
@@ -44,7 +45,7 @@ export class ValueInputType extends Component<Props> {
         inputElement = (
           <EuiFieldNumber
             placeholder={this.props.placeholder}
-            value={this.props.value}
+            value={typeof value === 'string' ? parseFloat(value) : value}
             onChange={this.onChange}
           />
         );
@@ -53,7 +54,7 @@ export class ValueInputType extends Component<Props> {
         inputElement = (
           <EuiFieldText
             placeholder={this.props.placeholder}
-            value={this.props.value}
+            value={value}
             onChange={this.onChange}
           />
         );
@@ -62,7 +63,7 @@ export class ValueInputType extends Component<Props> {
         inputElement = (
           <EuiFieldText
             placeholder={this.props.placeholder}
-            value={this.props.value}
+            value={value}
             onChange={this.onChange}
           />
         );
@@ -71,7 +72,7 @@ export class ValueInputType extends Component<Props> {
         inputElement = (
           <EuiSelect
             options={[{ value: 'true', text: 'true' }, { value: 'false', text: 'false' }]}
-            value={this.props.value}
+            value={value}
             onChange={this.onBoolChange}
           />
         );
