@@ -122,7 +122,7 @@ describe('ManagementSection', () => {
 
       section.addListener(listenerFn);
       section.register('about');
-      expect(listerCalled).to.be(true);
+      expect(listerCalled).toBe(true);
     });
   });
 
@@ -151,7 +151,7 @@ describe('ManagementSection', () => {
 
       section.addListener(listenerFn);
       section.deregister('about');
-      expect(listerCalled).to.be(true);
+      expect(listerCalled).toBe(true);
     });
   });
 
