@@ -19,7 +19,7 @@
 
 import dedent from 'dedent';
 
-export function dockerfileTemplate({ urlRoot, tarball, versionTag, license  }) {
+function generator({ artifactsUrlRoot, artifactTarball, versionTag, license  }) {
   return dedent(`
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
@@ -36,7 +36,7 @@ export function dockerfileTemplate({ urlRoot, tarball, versionTag, license  }) {
   # This is needed, for example, for Openshift Open:
   # https://docs.openshift.org/latest/creating_images/guidelines.html
   # and allows Kibana to run with an uid
-  RUN curl -Ls ${ urlRoot }/${ tarball } | tar --strip-components=1 -zxf - && \\
+  RUN curl -Ls ${ artifactsUrlRoot }/${ artifactTarball } | tar --strip-components=1 -zxf - && \\
       ln -s /usr/share/kibana /opt/kibana && \\
       chown -R 1000:0 . && \\
       chmod -R g=u /usr/share/kibana && \\
@@ -77,3 +77,8 @@ export function dockerfileTemplate({ urlRoot, tarball, versionTag, license  }) {
   CMD ["/usr/local/bin/kibana-docker"]
   `);
 }
+
+export const dockerfileTemplate = {
+  name: 'Dockerfile',
+  generator,
+};

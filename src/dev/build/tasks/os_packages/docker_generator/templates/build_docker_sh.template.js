@@ -19,7 +19,7 @@
 
 import dedent from 'dedent';
 
-export function buildDockerSHTemplate({ httpD, artifactsDir, imageTag, imageFlavor, versionTag, dockerOutput }) {
+function generator({ artifactsServerContainer, artifactsDir, imageTag, imageFlavor, versionTag, dockerOutputDir }) {
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -29,7 +29,7 @@ export function buildDockerSHTemplate({ httpD, artifactsDir, imageTag, imageFlav
   set -euo pipefail
   
   clean_docker() {
-    (docker kill ${ httpD } 2>&1) >/dev/null
+    (docker kill ${ artifactsServerContainer } 2>&1) >/dev/null
     docker rmi ${ imageTag }${ imageFlavor }:${ versionTag }
   }
   
@@ -37,7 +37,7 @@ export function buildDockerSHTemplate({ httpD, artifactsDir, imageTag, imageFlav
   
   docker pull centos:7
   
-  docker run --rm -d --name=${ httpD } \\
+  docker run --rm -d --name=${ artifactsServerContainer } \\
 	           --network=host -v ${ artifactsDir }:/mnt \\
 	           python:3 bash -c 'cd /mnt && python3 -m http.server' \\
 	           timeout 120 bash -c 'until curl -s localhost:8000 > /dev/null; do sleep 1; done'
@@ -45,8 +45,13 @@ export function buildDockerSHTemplate({ httpD, artifactsDir, imageTag, imageFlav
   echo "Building: kibana${ imageFlavor }-docker"; \\
   docker build --network=host -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
 
-  docker save -o ${ dockerOutput } ${ imageTag }${ imageFlavor }:${ versionTag }
+  docker save -o ${ dockerOutputDir } ${ imageTag }${ imageFlavor }:${ versionTag }
   
   exit 0
   `);
 }
+
+export const buildDockerSHTemplate = {
+  name: 'build_docker.sh',
+  generator,
+};

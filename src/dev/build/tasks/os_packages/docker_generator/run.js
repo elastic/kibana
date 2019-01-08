@@ -18,58 +18,51 @@
  */
 
 import { resolve } from 'path';
-import del from 'del';
-import { mkdirp, write, copyAll, exec } from '../../../lib';
-import { buildDockerSHTemplate, dockerfileTemplate, kibanaYMLTemplate } from './templates';
+import { write, copyAll, exec } from '../../../lib';
+import * as dockerTemplates from './templates';
 
 export async function runDockerGenerator(config, log, build) {
+  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const versionTag = config.getBuildVersion();
-  const urlRoot = 'http://localhost:8000';
-  const tarball = `kibana${ imageFlavor }-${ versionTag }-linux-x86_64.tar.gz`;
+  const artifactsServerContainer = 'kibana-docker-artifacts-server';
+  const artifactsUrlRoot = 'http://localhost:8000';
+  const artifactTarball = `kibana${ imageFlavor }-${ versionTag }-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
-  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
-  const httpD = 'kibana-docker-artifact-server';
-  const dockerTargetDir = config.resolveFromTarget(
-    `docker`
-  );
-  const dockerBuildDir = resolve(dockerTargetDir, 'build');
-  const dockerOutput = resolve(
-    dockerTargetDir,
-    `kibana${ imageFlavor }-${ versionTag }-docker.tar`
-  );
+  const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker');
+  const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }-${ versionTag }-docker.tar`);
 
-  // Create Docker Target Folder
-  await mkdirp(dockerTargetDir);
-
-  // Create Docker Target Temp Build Folder
-  await mkdirp(dockerBuildDir);
-
-  // Write Templates
+  // Write all the needed docker config files
+  // into kibana-docker folder
   const scope = {
-    urlRoot,
-    tarball,
+    artifactsUrlRoot,
+    artifactTarball,
     imageFlavor,
     versionTag,
     license,
     artifactsDir,
-    httpD,
+    artifactsServerContainer,
     imageTag,
-    dockerOutput
+    dockerOutputDir
   };
 
-  await write(resolve(dockerBuildDir, 'build_docker.sh'), buildDockerSHTemplate(scope));
-  await write(resolve(dockerBuildDir, 'Dockerfile'), dockerfileTemplate(scope));
-  await write(resolve(dockerBuildDir, 'config/kibana.yml'), kibanaYMLTemplate(scope));
+  for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
+    await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+  }
 
-  // Copy Resources
+  // Copy all the needed resources into kibana-docker folder
+  // in order to build the docker image accordingly the dockerfile defined
+  // under templates/kibana_yml.template/js
   await copyAll(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources'),
     dockerBuildDir,
   );
 
-  // Build Docker Image
+  // Build docker image into the target folder
+  // In order to do this we just call the file we
+  // created from the templates/build_docker_sh.template.js
+  // and we just run that bash script
   const args = [
     `${resolve(dockerBuildDir, 'build_docker.sh')}`
   ];
@@ -78,7 +71,4 @@ export async function runDockerGenerator(config, log, build) {
     cwd: dockerBuildDir,
     level: 'info',
   });
-
-  // Cleanup Docker Target Folder Temp Build Folder
-  await del(dockerBuildDir);
 }

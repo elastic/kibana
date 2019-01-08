@@ -19,7 +19,7 @@
 
 import dedent from 'dedent';
 
-export function kibanaYMLTemplate({ imageFlavor }) {
+function generator({ imageFlavor }) {
   return dedent(`
   ---
   #
@@ -34,3 +34,8 @@ export function kibanaYMLTemplate({ imageFlavor }) {
   ${ imageFlavor ? 'xpack.monitoring.ui.container.elasticsearch.enabled: true' : '' }
   `);
 }
+
+export const kibanaYMLTemplate = {
+  name: 'config/kibana.yml',
+  generator,
+};
