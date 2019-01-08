@@ -36,11 +36,7 @@ import { SelectLimit } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 
 // Explorer Charts
-import $ from 'jquery';
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
-import { explorerChartsContainerServiceFactory } from './explorer_charts/explorer_charts_container_service';
-import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
-import { mlExplorerDashboardService } from './explorer_dashboard_service';
 
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
@@ -75,42 +71,6 @@ export const Explorer = injectI18n(
       viewByLoadedForTimeFormatted: PropTypes.any,
       viewBySwimlaneOptions: PropTypes.array,
     };
-
-    componentDidMount() {
-      const that = this;
-      const { mlSelectSeverityService } = this.props;
-
-      const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
-        mlSelectSeverityService,
-        updateExplorerCharts,
-      );
-
-      mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);
-
-      // Create a div for the tooltip.
-      $('.ml-explorer-charts-tooltip').remove();
-      $('body').append('<div class="ml-explorer-tooltip ml-explorer-charts-tooltip" style="opacity:0; display: none;">');
-
-      function updateExplorerCharts(data) {
-        const explorerChartsContainerData = {
-          chartsPerRow: data.chartsPerRow,
-          seriesToPlot: data.seriesToPlot,
-          // convert truthy/falsy value to Boolean
-          tooManyBuckets: !!data.tooManyBuckets,
-          mlSelectSeverityService,
-          mlChartTooltipService
-        };
-
-        that.setState({
-          explorerChartsContainerData
-        });
-      }
-    }
-
-    componentWillUnmount() {
-      // Remove div for the tooltip.
-      $('.ml-explorer-charts-tooltip').remove();
-    }
 
     viewByChangeHandler = e => this.props.setSwimlaneViewBy(e.target.value);
 
@@ -329,9 +289,7 @@ export const Explorer = injectI18n(
             <EuiSpacer size="m" />
 
             <div className="euiText explorer-charts">
-              {this.state.explorerChartsContainerData !== undefined && (
-                <ExplorerChartsContainer {...this.state.explorerChartsContainerData} />
-              )}
+              <ExplorerChartsContainer mlSelectSeverityService={mlSelectSeverityService} />
             </div>
 
             <AnomaliesTable tableData={tableData} timefilter={timefilter} />
