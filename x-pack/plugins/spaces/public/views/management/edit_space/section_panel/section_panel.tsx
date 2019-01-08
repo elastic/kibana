@@ -14,7 +14,7 @@ import {
   EuiTitle,
   IconType,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 
 interface Props {
