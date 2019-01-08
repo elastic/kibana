@@ -43,7 +43,6 @@ export const initManagementServer = async (libs: CMServerLibs) => {
   libs.framework.registerRoute(createSetTagRoute(libs));
   libs.framework.registerRoute(createTokensRoute(libs));
   libs.framework.registerRoute(createBeatUpdateRoute(libs));
-
   libs.framework.registerRoute(createDeleteConfidurationsRoute(libs));
   libs.framework.registerRoute(createGetConfigurationBlocksRoute(libs));
   libs.framework.registerRoute(upsertConfigurationRoute(libs));
