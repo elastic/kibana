@@ -67,7 +67,8 @@ export function VislibLibDataProvider(Private) {
                   newVal.extraMetrics = val.extraMetrics;
                   newVal.series = val.series || seri.label;
                   return newVal;
-                })
+                }),
+                yAxisFormatter: seri.yAxisFormatter,
               };
             });
           }

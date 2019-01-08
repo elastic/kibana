@@ -112,7 +112,7 @@ export const getSchemas = (vis: Vis): Schemas => {
   const schemas: Schemas = {
     metric: [],
   };
-  const responseAggs = vis.aggs.getResponseAggs();
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: any) => agg.enabled);
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {

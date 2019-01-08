@@ -174,7 +174,6 @@ export function MeterGaugeProvider() {
       const minAngle = this.gaugeConfig.minAngle;
       const angleFactor = this.gaugeConfig.gaugeType === 'Arc' ? 0.75 : 1;
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
-      const formatter = this.gaugeChart.chartData.yAxisFormatter;
 
       const extendRange = this.gaugeConfig.extendRange;
       const maxY = _.max(data.values, 'y').y;
@@ -283,7 +282,7 @@ export function MeterGaugeProvider() {
             const percentage = Math.round(100 * (d.y - min) / (max - min));
             return `${percentage}%`;
           }
-          return formatter(d.y);
+          return data.yAxisFormatter(d.y);
         })
         .attr('style', 'dominant-baseline: central;')
         .style('text-anchor', 'middle')
