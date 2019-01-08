@@ -27,6 +27,7 @@ import { DeleteRuleModal } from './delete_rule_modal';
 import { EditConditionLink } from './edit_condition_link';
 import { buildRuleDescription } from '../utils';
 import { ml } from '../../../services/ml_api_service';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 export class RuleActionPanel extends Component {
@@ -86,7 +87,10 @@ export class RuleActionPanel extends Component {
       <EuiLink
         onClick={() => setEditRuleIndex(ruleIndex)}
       >
-        Edit rule
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
+          defaultMessage="Edit rule"
+        />
       </EuiLink>
     );
   }
@@ -168,7 +172,7 @@ export class RuleActionPanel extends Component {
     // Add items for the standard Edit and Delete links.
     const descriptionListItems = [
       {
-        title: 'rule',
+        title: (<FormattedMessage id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle" defaultMessage="rule" />),
         description: buildRuleDescription(this.rule, this.props.anomaly),
       },
       {

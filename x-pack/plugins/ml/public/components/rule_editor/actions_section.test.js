@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ActionsSection } from './actions_section';
@@ -27,7 +27,7 @@ describe('ActionsSection', () => {
       actions: [],
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ActionsSection {...props} />
     );
 
@@ -41,7 +41,7 @@ describe('ActionsSection', () => {
       actions: [ACTION.SKIP_RESULT],
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ActionsSection {...props} />
     );
 
@@ -52,7 +52,7 @@ describe('ActionsSection', () => {
 
   test('renders with skip_result and skip_model_update selected', () => {
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ActionsSection
         actions={[ACTION.SKIP_RESULT, ACTION.SKIP_MODEL_UPDATE]}
         onSkipResultChange={() => {}}

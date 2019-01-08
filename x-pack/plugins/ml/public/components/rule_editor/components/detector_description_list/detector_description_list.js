@@ -19,6 +19,8 @@ import {
 
 import { formatValue } from '../../../../formatters/format_value';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export function DetectorDescriptionList({
   job,
   detector,
@@ -26,11 +28,21 @@ export function DetectorDescriptionList({
 
   const listItems = [
     {
-      title: 'Job ID',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.detectorDescriptionList.jobIdTitle"
+          defaultMessage="Job ID"
+        />
+      ),
       description: job.job_id,
     },
     {
-      title: 'Detector',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.detectorDescriptionList.detectorTitle"
+          defaultMessage="Detector"
+        />
+      ),
       description: detector.detector_description,
     }
   ];
@@ -44,8 +56,19 @@ export function DetectorDescriptionList({
 
     listItems.push(
       {
-        title: 'Selected anomaly',
-        description: `actual ${actual}, typical ${typical}`,
+        title: (
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyTitle"
+            defaultMessage="Selected anomaly"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
+            defaultMessage="actual {actual}, typical {typical}"
+            values={{ actual, typical }}
+          />
+        ),
       }
     );
   }

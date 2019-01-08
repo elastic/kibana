@@ -6,7 +6,7 @@
 
 jest.mock('../../../services/job_service.js', () => 'mlJobService');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditConditionLink } from './edit_condition_link';
@@ -32,8 +32,8 @@ function prepareTest(updateConditionValueFn, appliesTo) {
     updateConditionValue: updateConditionValueFn,
   };
 
-  const wrapper = shallow(
-    <EditConditionLink {...props} />
+  const wrapper = shallowWithIntl(
+    <EditConditionLink.WrappedComponent {...props} />
   );
 
   return wrapper;

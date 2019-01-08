@@ -12,12 +12,13 @@ import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { AnomaliesTable } from './anomalies_table';
+import { injectI18nProvider } from '@kbn/i18n/react';
 
 module.directive('mlAnomaliesTable', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
 
   return reactDirective(
-    AnomaliesTable,
+    injectI18nProvider(AnomaliesTable),
     [
       ['filter', { watchDepth: 'reference' }],
       ['tableData', { watchDepth: 'reference' }]

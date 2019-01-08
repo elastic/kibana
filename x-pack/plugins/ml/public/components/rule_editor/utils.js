@@ -14,6 +14,7 @@ import {
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
+import { i18n } from '@kbn/i18n';
 
 export function getNewConditionDefaults() {
   return {
@@ -111,7 +112,14 @@ export function deleteJobRule(job, detectorIndex, ruleIndex) {
     return updateJobRules(job, detectorIndex, customRules);
   } else {
     return Promise.reject(new Error(
-      `Rule no longer exists for detector index ${detectorIndex} in job ${job.job_id}`));
+      i18n.translate('xpack.ml.ruleEditor.deleteJobRule.ruleNoLongerExistsErrorMessage', {
+        defaultMessage: 'Rule no longer exists for detector index {detectorIndex} in job {jobId}',
+        values: {
+          detectorIndex,
+          jobId: job.job_id
+        }
+      })
+    ));
   }
 }
 
@@ -179,29 +187,32 @@ export function addItemToFilter(item, filterId) {
 
 export function buildRuleDescription(rule) {
   const { actions, conditions, scope } = rule;
-  let description = 'skip ';
+  let description = i18n.translate('xpack.ml.ruleEditor.ruleDescription.skipText', {
+    defaultMessage: 'skip ',
+  });
   actions.forEach((action, i) => {
     if (i > 0) {
       description += ' AND ';
     }
-    switch (action) {
-      case ACTION.SKIP_RESULT:
-        description += 'result';
-        break;
-      case ACTION.SKIP_MODEL_UPDATE:
-        description += 'model update';
-        break;
-    }
+    description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.actionTypeText', {
+      defaultMessage: '{action, select, skip_result {result} skip_model_update {model update} other {} }',
+      values: { action }
+    });
   });
 
-  description += ' when ';
+  description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.whenText', {
+    defaultMessage: ' when ',
+  });
   if (conditions !== undefined) {
     conditions.forEach((condition, i) => {
       if (i > 0) {
         description += ' AND ';
       }
 
-      description += `${appliesToText(condition.applies_to)} is ${operatorToText(condition.operator)} ${condition.value}`;
+      description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.appliesToTypeText', {
+        defaultMessage: '{appliesTo} is {operator} {value}',
+        values: { appliesTo: appliesToText(condition.applies_to), operator: operatorToText(condition.operator), value: condition.value }
+      });
     });
   }
 
@@ -216,7 +227,10 @@ export function buildRuleDescription(rule) {
       }
 
       const filter = scope[fieldName];
-      description += `${fieldName} is ${filterTypeToText(filter.filter_type)} ${filter.filter_id}`;
+      description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.filterTypeText', {
+        defaultMessage: '{fieldName} is {filterType} {filterId}',
+        values: { fieldName, filterType: filterTypeToText(filter.filter_type), filterId: filter.filter_id }
+      });
     });
   }
 
@@ -224,51 +238,25 @@ export function buildRuleDescription(rule) {
 }
 
 export function filterTypeToText(filterType) {
-  switch (filterType) {
-    case FILTER_TYPE.INCLUDE:
-      return 'in';
-
-    case FILTER_TYPE.EXCLUDE:
-      return 'not in';
-
-    default:
-      return (filterType !== undefined) ? filterType : '';
-  }
+  return i18n.translate('xpack.ml.ruleEditor.filterTypeLabel', {
+    defaultMessage: '{filterType, select, include {in} exclude {not in} other {} }',
+    values: { filterType }
+  });
 }
 
 export function appliesToText(appliesTo) {
-  switch (appliesTo) {
-    case APPLIES_TO.ACTUAL:
-      return 'actual';
-
-    case APPLIES_TO.TYPICAL:
-      return 'typical';
-
-    case APPLIES_TO.DIFF_FROM_TYPICAL:
-      return 'diff from typical';
-
-    default:
-      return (appliesTo !== undefined) ? appliesTo : '';
-  }
+  return i18n.translate('xpack.ml.ruleEditor.appliesTypeLabel', {
+    defaultMessage: '{appliesTo, select, actual {actual} typical {typical} diff_from_typical {diff from typical} other {} }',
+    values: { appliesTo }
+  });
 }
 
 export function operatorToText(operator) {
-  switch (operator) {
-    case OPERATOR.LESS_THAN:
-      return 'less than';
-
-    case OPERATOR.LESS_THAN_OR_EQUAL:
-      return 'less than or equal to';
-
-    case OPERATOR.GREATER_THAN:
-      return 'greater than';
-
-    case OPERATOR.GREATER_THAN_OR_EQUAL:
-      return 'greater than or equal to';
-
-    default:
-      return (operator !== undefined) ? operator : '';
-  }
+  return i18n.translate('xpack.ml.ruleEditor.operatorTypeLabel', {
+    defaultMessage:
+      '{operator, select, lt {less then} lte {less than or equal to} gt {greater then} gte {greater than or equal to} other {} }',
+    values: { operator }
+  });
 }
 
 // Returns the value of the selected 'applies_to' field from the

@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { DetectorDescriptionList } from './detector_description_list';
@@ -28,7 +28,7 @@ describe('DetectorDescriptionList', () => {
       },
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <DetectorDescriptionList {...props} />
     );
 
@@ -60,7 +60,7 @@ describe('DetectorDescriptionList', () => {
       },
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <DetectorDescriptionList {...props} />
     );
 

@@ -16,7 +16,7 @@ jest.mock('../../privilege/check_privilege', () => ({
   checkPermission: (privilege) => mockCheckPermission(privilege)
 }));
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ScopeSection } from './scope_section';
@@ -55,7 +55,7 @@ describe('ScopeSection', () => {
       isEnabled: false,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeSection {...props} />
     );
 
@@ -69,7 +69,7 @@ describe('ScopeSection', () => {
       isEnabled: false,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeSection {...props} />
     );
 
@@ -84,7 +84,7 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeSection {...props} />
     );
 
@@ -98,7 +98,7 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeSection {...props} />
     );
 
@@ -113,7 +113,7 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeSection {...props} />
     );
 
@@ -150,7 +150,7 @@ describe('ScopeSection false canGetFilters privilege', () => {
       isEnabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeSection {...props} />
     );
 
