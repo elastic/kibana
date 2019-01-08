@@ -249,8 +249,7 @@ describe('when response has data', () => {
 
     it('should call onSelectionEnd', () => {
       expect(onSelectionEnd).toHaveBeenCalledWith({
-        start: 1502283360000,
-        //start: 1502283420000,
+        start: 1502283420000,
         end: 1502284020000
       });
     });
@@ -272,8 +271,7 @@ describe('when response has data', () => {
 
     it('should call onSelectionEnd', () => {
       expect(onSelectionEnd).toHaveBeenCalledWith({
-        start: 1502283360000,
-        //start: 1502283420000,
+        start: 1502283420000,
         end: 1502284020000
       });
     });

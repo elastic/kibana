@@ -459,7 +459,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -476,7 +476,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -493,7 +493,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -510,7 +510,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -527,7 +527,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -544,7 +544,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -561,7 +561,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -578,7 +578,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -595,7 +595,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -612,7 +612,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -629,7 +629,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -646,7 +646,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -663,7 +663,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -680,7 +680,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -697,7 +697,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -714,7 +714,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -731,7 +731,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -748,7 +748,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -765,7 +765,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -782,7 +782,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -799,7 +799,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -816,7 +816,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -833,7 +833,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -850,7 +850,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -867,7 +867,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -884,7 +884,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -901,7 +901,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -918,7 +918,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -935,7 +935,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -952,7 +952,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -969,7 +969,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -1012,7 +1012,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1029,7 +1029,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1046,7 +1046,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1063,7 +1063,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1080,7 +1080,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1097,7 +1097,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1114,7 +1114,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1131,7 +1131,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1148,7 +1148,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1165,7 +1165,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1182,7 +1182,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1199,7 +1199,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1216,7 +1216,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1233,7 +1233,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1250,7 +1250,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1267,7 +1267,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1284,7 +1284,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1301,7 +1301,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1318,7 +1318,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1335,7 +1335,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1352,7 +1352,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1369,7 +1369,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1386,7 +1386,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1403,7 +1403,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1420,7 +1420,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1437,7 +1437,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1454,7 +1454,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1471,7 +1471,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1488,7 +1488,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1505,7 +1505,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1522,7 +1522,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -1539,7 +1539,7 @@ Array [
           >
             <path
               className="rv-xy-plot__series rv-xy-plot__series--line "
-              d="M360,189.74989696Z"
+              d="M0,208C8,198.0144506122449,16,188.0289012244898,24,188.0289012244898C32,188.0289012244898,40,190.93245866666666,48,190.93245866666666C56,190.93245866666666,64,190.28154649962812,72,189.81180675918367C80,189.34206701873921,88,188.114020224,96,188.114020224C104,188.114020224,112,188.75217580408165,120,188.75217580408165C128,188.75217580408165,136,187.7737856411058,144,186.9231112C152,186.07243675889418,160,183.64812915744682,168,183.64812915744682C176,183.64812915744682,184,187.40215166647673,192,188.65222657560975C200,189.90230148474276,208,191.1485786122449,216,191.1485786122449C224,191.1485786122449,232,187.9993893818182,240,187.9993893818182C248,187.9993893818182,256,192.51163795348836,264,192.51163795348836C272,192.51163795348836,280,186.9925278577778,288,186.9925278577778C296,186.9925278577778,304,191.5321727255814,312,191.5321727255814C320,191.5321727255814,328,188.75657926666668,336,188.75657926666668C344,188.75657926666668,352,189.74989696,360,189.74989696C368,189.74989696,376,189.71163744,384,189.6351184C392,189.55859936000002,400,184.25858141935484,408,184.25858141935484C416,184.25858141935484,424,190.2827607652174,432,190.2827607652174C440,190.2827607652174,448,189.76271776603772,456,189.76271776603772C464,189.76271776603772,472,191.83746261333334,480,191.83746261333334C488,191.83746261333334,495.99999999999994,187.9456040347826,503.99999999999994,187.9456040347826C511.99999999999994,187.9456040347826,520,188.09594339288537,528,188.3966221090909C536,188.69730082529645,544,191.762533248,552,191.762533248C560,191.762533248,568,191.6625795195817,576,191.4626720627451C584,191.2627646059085,592,189.4011021381818,600,189.4011021381818C608,189.4011021381818,616,189.79567013943304,624,190.58480614193547C632,191.3739421444379,640,208,648,208C656,208,664,194.91739193977511,672,189.69166496603773C680,184.46593799230035,688,176.64563815757575,696,176.64563815757575C704,176.64563815757575,712,192.32281907878786,720,208"
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -1559,13 +1559,523 @@ Array [
               transform="translate(80,16)"
             >
               <circle
+                cx={0}
+                cy={208}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={24}
+                cy={188.0289012244898}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={48}
+                cy={190.93245866666666}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={72}
+                cy={189.81180675918367}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={96}
+                cy={188.114020224}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={120}
+                cy={188.75217580408165}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={144}
+                cy={186.9231112}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={168}
+                cy={183.64812915744682}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={192}
+                cy={188.65222657560975}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={216}
+                cy={191.1485786122449}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={240}
+                cy={187.9993893818182}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={264}
+                cy={192.51163795348836}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={288}
+                cy={186.9925278577778}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={312}
+                cy={191.5321727255814}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={336}
+                cy={188.75657926666668}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
                 cx={360}
                 cy={189.74989696}
                 onClick={[Function]}
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={384}
+                cy={189.6351184}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={408}
+                cy={184.25858141935484}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={432}
+                cy={190.2827607652174}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={456}
+                cy={189.76271776603772}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={480}
+                cy={191.83746261333334}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={503.99999999999994}
+                cy={187.9456040347826}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={528}
+                cy={188.3966221090909}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={552}
+                cy={191.762533248}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={576}
+                cy={191.4626720627451}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={600}
+                cy={189.4011021381818}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={624}
+                cy={190.58480614193547}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={648}
+                cy={208}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={672}
+                cy={189.69166496603773}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={696}
+                cy={176.64563815757575}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={720}
+                cy={208}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
                 style={
                   Object {
                     "fill": "#3185fc",
@@ -1645,21 +2155,6 @@ Array [
           <g
             className=" rv-voronoi"
           >
-            <path
-              className="rv-voronoi__cell "
-              d="M428,16L428,256L452,256L452,16Z"
-              fill="none"
-              onClick={[Function]}
-              onMouseDown={[Function]}
-              onMouseOut={[Function]}
-              onMouseOver={[Function]}
-              onMouseUp={[Function]}
-              style={
-                Object {
-                  "pointerEvents": "all",
-                }
-              }
-            />
             <path
               className="rv-voronoi__cell "
               d="M92,256L92,16L80,16L80,256Z"
@@ -1873,6 +2368,21 @@ Array [
             <path
               className="rv-voronoi__cell "
               d="M404,16L404,256L428,256L428,16Z"
+              fill="none"
+              onClick={[Function]}
+              onMouseDown={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+              onMouseUp={[Function]}
+              style={
+                Object {
+                  "pointerEvents": "all",
+                }
+              }
+            />
+            <path
+              className="rv-voronoi__cell "
+              d="M428,16L428,256L452,256L452,16Z"
               fill="none"
               onClick={[Function]}
               onMouseDown={[Function]}
@@ -2278,8 +2788,8 @@ exports[`when response has data when dragging without releasing should display S
   fillOpacity="0.1"
   height={208}
   pointerEvents="none"
-  width={264}
-  x={296}
+  width={240}
+  x={320}
   y={16}
 />
 `;
@@ -2832,7 +3342,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2849,7 +3359,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2866,7 +3376,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2883,7 +3393,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2900,7 +3410,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2917,7 +3427,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2934,7 +3444,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2951,7 +3461,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2968,7 +3478,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -2985,7 +3495,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3002,7 +3512,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3019,7 +3529,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3036,7 +3546,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3053,7 +3563,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3070,7 +3580,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3087,7 +3597,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3104,7 +3614,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3121,7 +3631,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3138,7 +3648,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3155,7 +3665,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3172,7 +3682,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3189,7 +3699,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3206,7 +3716,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3223,7 +3733,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3240,7 +3750,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3257,7 +3767,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3274,7 +3784,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3291,7 +3801,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3308,7 +3818,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3325,7 +3835,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3342,7 +3852,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#f98510",
@@ -3385,7 +3895,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3402,7 +3912,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3419,7 +3929,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3436,7 +3946,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3453,7 +3963,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3470,7 +3980,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3487,7 +3997,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3504,7 +4014,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3521,7 +4031,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3538,7 +4048,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3555,7 +4065,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3572,7 +4082,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3589,7 +4099,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3606,7 +4116,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3623,7 +4133,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3640,7 +4150,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3657,7 +4167,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3674,7 +4184,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3691,7 +4201,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3708,7 +4218,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3725,7 +4235,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3742,7 +4252,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3759,7 +4269,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3776,7 +4286,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3793,7 +4303,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3810,7 +4320,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3827,7 +4337,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3844,7 +4354,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3861,7 +4371,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3878,7 +4388,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3895,7 +4405,7 @@ Array [
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
                 style={
                   Object {
                     "fill": "#ecae23",
@@ -3912,7 +4422,7 @@ Array [
           >
             <path
               className="rv-xy-plot__series rv-xy-plot__series--line "
-              d="M360,189.74989696Z"
+              d="M0,208C8,198.0144506122449,16,188.0289012244898,24,188.0289012244898C32,188.0289012244898,40,190.93245866666666,48,190.93245866666666C56,190.93245866666666,64,190.28154649962812,72,189.81180675918367C80,189.34206701873921,88,188.114020224,96,188.114020224C104,188.114020224,112,188.75217580408165,120,188.75217580408165C128,188.75217580408165,136,187.7737856411058,144,186.9231112C152,186.07243675889418,160,183.64812915744682,168,183.64812915744682C176,183.64812915744682,184,187.40215166647673,192,188.65222657560975C200,189.90230148474276,208,191.1485786122449,216,191.1485786122449C224,191.1485786122449,232,187.9993893818182,240,187.9993893818182C248,187.9993893818182,256,192.51163795348836,264,192.51163795348836C272,192.51163795348836,280,186.9925278577778,288,186.9925278577778C296,186.9925278577778,304,191.5321727255814,312,191.5321727255814C320,191.5321727255814,328,188.75657926666668,336,188.75657926666668C344,188.75657926666668,352,189.74989696,360,189.74989696C368,189.74989696,376,189.71163744,384,189.6351184C392,189.55859936000002,400,184.25858141935484,408,184.25858141935484C416,184.25858141935484,424,190.2827607652174,432,190.2827607652174C440,190.2827607652174,448,189.76271776603772,456,189.76271776603772C464,189.76271776603772,472,191.83746261333334,480,191.83746261333334C488,191.83746261333334,495.99999999999994,187.9456040347826,503.99999999999994,187.9456040347826C511.99999999999994,187.9456040347826,520,188.09594339288537,528,188.3966221090909C536,188.69730082529645,544,191.762533248,552,191.762533248C560,191.762533248,568,191.6625795195817,576,191.4626720627451C584,191.2627646059085,592,189.4011021381818,600,189.4011021381818C608,189.4011021381818,616,189.79567013943304,624,190.58480614193547C632,191.3739421444379,640,208,648,208C656,208,664,194.91739193977511,672,189.69166496603773C680,184.46593799230035,688,176.64563815757575,696,176.64563815757575C704,176.64563815757575,712,192.32281907878786,720,208"
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -3932,13 +4442,523 @@ Array [
               transform="translate(80,16)"
             >
               <circle
+                cx={0}
+                cy={208}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={24}
+                cy={188.0289012244898}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={48}
+                cy={190.93245866666666}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={72}
+                cy={189.81180675918367}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={96}
+                cy={188.114020224}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={120}
+                cy={188.75217580408165}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={144}
+                cy={186.9231112}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={168}
+                cy={183.64812915744682}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={192}
+                cy={188.65222657560975}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={216}
+                cy={191.1485786122449}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={240}
+                cy={187.9993893818182}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={264}
+                cy={192.51163795348836}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={288}
+                cy={186.9925278577778}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={312}
+                cy={191.5321727255814}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={336}
+                cy={188.75657926666668}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
                 cx={360}
                 cy={189.74989696}
                 onClick={[Function]}
                 onContextMenu={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
-                r={0.5}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={384}
+                cy={189.6351184}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={408}
+                cy={184.25858141935484}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={432}
+                cy={190.2827607652174}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={456}
+                cy={189.76271776603772}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={480}
+                cy={191.83746261333334}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={503.99999999999994}
+                cy={187.9456040347826}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={528}
+                cy={188.3966221090909}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={552}
+                cy={191.762533248}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={576}
+                cy={191.4626720627451}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={600}
+                cy={189.4011021381818}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={624}
+                cy={190.58480614193547}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={648}
+                cy={208}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={672}
+                cy={189.69166496603773}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={696}
+                cy={176.64563815757575}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
+                style={
+                  Object {
+                    "fill": "#3185fc",
+                    "opacity": 1,
+                    "stroke": "#3185fc",
+                    "strokeWidth": 1,
+                  }
+                }
+              />
+              <circle
+                cx={720}
+                cy={208}
+                onClick={[Function]}
+                onContextMenu={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+                r={1}
                 style={
                   Object {
                     "fill": "#3185fc",
@@ -4180,21 +5200,6 @@ Array [
           >
             <path
               className="rv-voronoi__cell "
-              d="M428,16L428,256L452,256L452,16Z"
-              fill="none"
-              onClick={[Function]}
-              onMouseDown={[Function]}
-              onMouseOut={[Function]}
-              onMouseOver={[Function]}
-              onMouseUp={[Function]}
-              style={
-                Object {
-                  "pointerEvents": "all",
-                }
-              }
-            />
-            <path
-              className="rv-voronoi__cell "
               d="M92,256L92,16L80,16L80,256Z"
               fill="none"
               onClick={[Function]}
@@ -4406,6 +5411,21 @@ Array [
             <path
               className="rv-voronoi__cell "
               d="M404,16L404,256L428,256L428,16Z"
+              fill="none"
+              onClick={[Function]}
+              onMouseDown={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+              onMouseUp={[Function]}
+              style={
+                Object {
+                  "pointerEvents": "all",
+                }
+              }
+            />
+            <path
+              className="rv-voronoi__cell "
+              d="M428,16L428,256L452,256L452,16Z"
               fill="none"
               onClick={[Function]}
               onMouseDown={[Function]}
@@ -4891,7 +5911,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(1.304298225926252, 0)"
+                transform="translate(0, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -4908,13 +5928,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  -1262275200000
+                  1451606400000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(3.4779756686411663, 0)"
+                transform="translate(1.6666666666666665, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -4931,13 +5951,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  -946742400000
+                  1451606700000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(5.6522483132845345, 0)"
+                transform="translate(3.333333333333333, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -4954,13 +5974,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  -631123200000
+                  1451607000000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(7.8259257559994495, 0)"
+                transform="translate(5, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -4977,13 +5997,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  -315590400000
+                  1451607300000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(10.00019840064282, 0)"
+                transform="translate(6.666666666666666, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5000,13 +6020,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  28800000
+                  1451607600000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(12.173875843357733, 0)"
+                transform="translate(8.333333333333334, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5023,13 +6043,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  315561600000
+                  1451607900000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(14.348148488001101, 0)"
+                transform="translate(10, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5046,13 +6066,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  631180800000
+                  1451608200000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(16.521825930716016, 0)"
+                transform="translate(11.666666666666668, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5069,13 +6089,13 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  946713600000
+                  1451608500000
                 </text>
               </g>
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(18.696098575359382, 0)"
+                transform="translate(13.333333333333332, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5092,7 +6112,99 @@ Array [
                   textAnchor="middle"
                   transform="translate(0, 8)"
                 >
-                  1262332800000
+                  1451608800000
+                </text>
+              </g>
+              <g
+                className="rv-xy-plot__axis__tick"
+                style={Object {}}
+                transform="translate(15, 0)"
+              >
+                <line
+                  className="rv-xy-plot__axis__tick__line"
+                  style={Object {}}
+                  x1={0}
+                  x2={0}
+                  y1={-0}
+                  y2={0}
+                />
+                <text
+                  className="rv-xy-plot__axis__tick__text"
+                  dy="0.72em"
+                  style={Object {}}
+                  textAnchor="middle"
+                  transform="translate(0, 8)"
+                >
+                  1451609100000
+                </text>
+              </g>
+              <g
+                className="rv-xy-plot__axis__tick"
+                style={Object {}}
+                transform="translate(16.666666666666668, 0)"
+              >
+                <line
+                  className="rv-xy-plot__axis__tick__line"
+                  style={Object {}}
+                  x1={0}
+                  x2={0}
+                  y1={-0}
+                  y2={0}
+                />
+                <text
+                  className="rv-xy-plot__axis__tick__text"
+                  dy="0.72em"
+                  style={Object {}}
+                  textAnchor="middle"
+                  transform="translate(0, 8)"
+                >
+                  1451609400000
+                </text>
+              </g>
+              <g
+                className="rv-xy-plot__axis__tick"
+                style={Object {}}
+                transform="translate(18.333333333333332, 0)"
+              >
+                <line
+                  className="rv-xy-plot__axis__tick__line"
+                  style={Object {}}
+                  x1={0}
+                  x2={0}
+                  y1={-0}
+                  y2={0}
+                />
+                <text
+                  className="rv-xy-plot__axis__tick__text"
+                  dy="0.72em"
+                  style={Object {}}
+                  textAnchor="middle"
+                  transform="translate(0, 8)"
+                >
+                  1451609700000
+                </text>
+              </g>
+              <g
+                className="rv-xy-plot__axis__tick"
+                style={Object {}}
+                transform="translate(20, 0)"
+              >
+                <line
+                  className="rv-xy-plot__axis__tick__line"
+                  style={Object {}}
+                  x1={0}
+                  x2={0}
+                  y1={-0}
+                  y2={0}
+                />
+                <text
+                  className="rv-xy-plot__axis__tick__text"
+                  dy="0.72em"
+                  style={Object {}}
+                  textAnchor="middle"
+                  transform="translate(0, 8)"
+                >
+                  1451610000000
                 </text>
               </g>
             </g>
