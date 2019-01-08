@@ -14,6 +14,7 @@ import {
   getLayerListRaw,
   getMapExtent,
   getRefreshConfig,
+  getQuery,
 } from '../../selectors/map_selectors';
 import { getIsDarkTheme } from '../../store/ui';
 import { TileStyle } from '../../shared/layers/styles/tile_style';
@@ -97,6 +98,7 @@ module.factory('SavedGisMap', function (Private) {
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
       refreshConfig: getRefreshConfig(state),
+      query: getQuery(state),
     });
 
     this.uiStateJSON = JSON.stringify({

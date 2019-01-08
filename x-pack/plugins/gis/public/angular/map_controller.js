@@ -34,16 +34,43 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
 const app = uiModules.get('app/gis', []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage) => {
+app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState) => {
 
+  const EMPTY_QUERY = {
+    query: '',
+    language: localStorage.get('kibana.userQueryLanguage') || 'kuery'
+  };
   const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
   let unsubscribe;
 
   inspectorAdapters.requests.reset();
 
-  getStore().then(store => {
+  const $state = new AppState();
+  $scope.$listen($state, 'fetch_with_changes', function (diff) {
+    if (diff.includes('query')) {
+      $scope.updateQueryAndDispatch($state.query);
+    }
+  });
+  $scope.query = EMPTY_QUERY;
+  $scope.indexPatterns = [];
+  $scope.updateQueryAndDispatch = function (newQuery) {
+    $scope.query = newQuery;
+    getStore().then(store => {
+      // ignore outdated query
+      if ($scope.query !== newQuery) {
+        return;
+      }
 
+      store.dispatch(setQuery({ query: $scope.query }));
+
+      // update appState
+      $state.query = $scope.query;
+      $state.save();
+    });
+  };
+
+  getStore().then(store => {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -54,8 +81,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     });
 
     // sync store with savedMap mapState
+    let queryFromSavedObject;
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
+      queryFromSavedObject = mapState.query;
       const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
       store.dispatch(setTimeFilters(timeFilters));
       store.dispatch(setGoto({
@@ -69,6 +98,15 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
     const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
     store.dispatch(replaceLayerList(layerList));
+
+    // Initialize query, syncing appState and store
+    if ($state.query) {
+      $scope.updateQueryAndDispatch($state.query);
+    } else if (queryFromSavedObject) {
+      $scope.updateQueryAndDispatch(queryFromSavedObject);
+    } else {
+      $scope.updateQueryAndDispatch(EMPTY_QUERY);
+    }
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
@@ -165,22 +203,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
     return { id };
   }
-
-  $scope.query = {
-    query: '',
-    language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
-  };
-  $scope.indexPatterns = [];
-  $scope.updateQueryAndFetch = function (query) {
-    $scope.query = query;
-    getStore().then(store => {
-      // ignore outdated query
-      if ($scope.query !== query) {
-        return;
-      }
-      store.dispatch(setQuery({ query }));
-    });
-  };
 
   $scope.topNavMenu = [{
     key: 'inspect',
