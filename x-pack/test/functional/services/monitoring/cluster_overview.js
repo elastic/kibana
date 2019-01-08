@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from 'expect.js';
+
 export function MonitoringClusterOverviewProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -53,11 +55,12 @@ export function MonitoringClusterOverviewProvider({ getService }) {
 
   return new class ClusterOverview {
 
-    async isOnClusterOverview() {
-      const pageId = await retry.try(() => testSubjects.find(SUBJ_CLUSTER_OVERVIEW));
-      return pageId !== null;
-    }
-    getClusterName() {
+    async getClusterName() {
+      let clusterHeading;
+      await retry.try(async () =>  {
+        clusterHeading  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+        expect(clusterHeading).not.to.be.empty();
+      });
       return testSubjects.getVisibleText(SUBJ_CLUSTER_NAME);
     }
 

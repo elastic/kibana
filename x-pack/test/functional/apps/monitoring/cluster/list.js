@@ -122,9 +122,7 @@ export default function ({ getService, getPageObjects }) {
           const primaryBasicClusterLink = await clusterList.getClusterLink(SUPPORTED_CLUSTER_UUID);
           await primaryBasicClusterLink.click();
 
-          expect(await clusterOverview.isOnClusterOverview()).to.be(true);
           expect(await clusterOverview.getClusterName()).to.be('production');
-
           await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters'); // reset for next test
         });
 
