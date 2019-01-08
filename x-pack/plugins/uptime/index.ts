@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { initServerWithKibana } from './server';
+import { initServerWithKibana, KibanaServer } from './server';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
@@ -26,7 +25,7 @@ export const uptime = (kibana: any) =>
       },
       home: ['plugins/uptime/register_feature'],
     },
-    init(server: Server) {
+    init(server: KibanaServer) {
       initServerWithKibana(server);
     },
   });

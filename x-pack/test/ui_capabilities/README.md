@@ -89,4 +89,5 @@ logs disabled
 ml disabled
 monitoring disabled
 timelion disabled
+uptime disabled
 visualize disabled

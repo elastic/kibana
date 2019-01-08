@@ -94,6 +94,11 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('timelion'));
             break;
+          case 'uptime_disabled_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('uptime'));
+            break;
           case 'visualize_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
