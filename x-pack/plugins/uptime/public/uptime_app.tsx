@@ -67,7 +67,7 @@ interface SuperDateRangePickerRangeChangedEvent {
 
 interface SuperDateRangePickerRefreshChangedEvent {
   isPaused: boolean;
-  refreshInterval: number;
+  refreshInterval?: number;
 }
 
 class Application extends React.Component<UptimeAppProps, UptimeAppState> {
@@ -155,20 +155,26 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       }}
                     >
                       <EuiSuperDatePicker
+                        start={this.state.dateRangeStart}
+                        end={this.state.dateRangeEnd}
+                        isPaused={this.state.autorefreshIsPaused}
+                        refreshInterval={this.state.autorefreshInterval}
                         onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
                           this.setState(
                             { dateRangeStart: start, dateRangeEnd: end },
                             this.persistState
                           );
                         }}
-                        start={this.state.dateRangeStart}
-                        end={this.state.dateRangeEnd}
                         onRefreshChange={({
                           isPaused,
                           refreshInterval,
                         }: SuperDateRangePickerRefreshChangedEvent) => {
+                          const autorefreshInterval =
+                            refreshInterval === undefined
+                              ? this.state.autorefreshInterval
+                              : refreshInterval;
                           this.setState(
-                            { autorefreshIsPaused: isPaused, autorefreshInterval: refreshInterval },
+                            { autorefreshIsPaused: isPaused, autorefreshInterval },
                             this.persistState
                           );
                         }}
@@ -231,14 +237,12 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
   private persistState = (): void => {
     const { autorefreshIsPaused, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.state;
-    if (dateRangeEnd > dateRangeStart) {
-      this.props.persistState({
-        autorefreshIsPaused,
-        autorefreshInterval,
-        dateRangeStart,
-        dateRangeEnd,
-      });
-    }
+    this.props.persistState({
+      autorefreshIsPaused,
+      autorefreshInterval,
+      dateRangeStart,
+      dateRangeEnd,
+    });
   };
 }
 
