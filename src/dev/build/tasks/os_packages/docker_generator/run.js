@@ -30,7 +30,7 @@ export async function runDockerGenerator(config, log, build) {
   const artifactsUrlRoot = 'http://localhost:8000';
   const artifactTarball = `kibana${ imageFlavor }-${ versionTag }-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
-  const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker');
+  const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', build.isOss() ? 'oss' : 'default');
   const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }-${ versionTag }-docker.tar`);
 
   // Write all the needed docker config files

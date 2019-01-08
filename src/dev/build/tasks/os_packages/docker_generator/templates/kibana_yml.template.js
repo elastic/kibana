@@ -24,9 +24,8 @@ function generator({ imageFlavor }) {
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
   #
-  #
+  
   # Default Kibana configuration for docker target
-  #
   server.name: kibana
   server.host: "0"
   elasticsearch.url: http://elasticsearch:9200

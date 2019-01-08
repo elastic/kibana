@@ -24,7 +24,6 @@ function generator({ artifactsServerContainer, artifactsDir, imageTag, imageFlav
   #!/usr/bin/env bash
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
-  # ** PLEASE DO NOT CHANGE IT MANUALLY **
   #
   set -euo pipefail
   
