@@ -393,7 +393,7 @@ export class PolicyTableUi extends Component {
         tableContent = <EuiLoadingSpinner size="m" />;
       } else if (totalNumberOfPolicies > 0) {
         tableContent = (
-          <EuiTable>
+          <EuiTable className="policyTable__horizontalScroll">
             <EuiTableHeader>{this.buildHeader()}</EuiTableHeader>
             <EuiTableBody>{this.buildRows()}</EuiTableBody>
           </EuiTable>
@@ -441,10 +441,10 @@ export class PolicyTableUi extends Component {
     }
 
     return (
-      <EuiPage>
+      <EuiPage restrictWidth={1200}>
         <EuiPageBody>
-          <EuiPageContent>
-            <div className="policyTable__horizontalScroll">
+          <EuiPageContent verticalPosition="center" horizontalPosition="center">
+            <div>
               {this.renderConfirmModal()}
               {totalNumberOfPolicies || !policyListLoaded ? (
                 <Fragment>

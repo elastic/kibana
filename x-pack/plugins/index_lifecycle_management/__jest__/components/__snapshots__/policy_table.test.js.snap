@@ -47,17 +47,16 @@ Array [
 
 exports[`policy table should show empty state when there are not any policies 1`] = `
 <div
-  class="euiPage"
+  class="euiPage euiPage--restrictWidth-custom"
+  style="max-width: 1200px;"
 >
   <div
     class="euiPageBody"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent"
+      class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
     >
-      <div
-        class="policyTable__horizontalScroll"
-      >
+      <div>
         <div
           class="euiSpacer euiSpacer--l"
         />

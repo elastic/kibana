@@ -124,7 +124,9 @@ export const CrossClusterReplicationHome = injectI18n(
       return (
         <EuiPage>
           <EuiPageBody>
-            <EuiPageContent>
+            <EuiPageContent
+              horizontalPosition="center"
+            >
               {this.getHeaderSection()}
               {this.getUnauthorizedSection()}
               <Switch>

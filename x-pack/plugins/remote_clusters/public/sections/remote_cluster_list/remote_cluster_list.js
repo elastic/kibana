@@ -290,7 +290,9 @@ export const RemoteClusterList = injectI18n(
       return (
         <EuiPage>
           <EuiPageBody>
-            <EuiPageContent>
+            <EuiPageContent
+              horizontalPosition="center"
+            >
               {content}
 
               {this.renderBlockingAction()}
