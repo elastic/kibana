@@ -67,7 +67,7 @@ describe('TaskManager', () => {
       beforeRun: async (runOpts: any) => runOpts,
     };
 
-    $test.afterPluginsInit();
+    await $test.afterPluginsInit();
 
     expect(() => client.addMiddleware(middleware)).toThrow(
       /Cannot add middleware after the task manager is initialized/i
