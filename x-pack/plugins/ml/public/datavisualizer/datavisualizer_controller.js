@@ -30,7 +30,6 @@ import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './datavisualizer.html';
 
 uiRoutes
@@ -41,8 +40,7 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
-      checkMlNodesAvailable,
-      initPromise: initPromise(true)
+      checkMlNodesAvailable
     }
   });
 
@@ -499,6 +497,9 @@ module
             notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}`,
               { lifetime: 30000 });
           }
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
 
     }
@@ -550,6 +551,9 @@ module
               notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
                 { lifetime: 30000 });
             }
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       } else {
         $scope.fieldFilterIcon = 0;
@@ -600,6 +604,9 @@ module
             notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
               { lifetime: 30000 });
           }
+
+          $scope.$applyAsync();
+
         });
 
     }
