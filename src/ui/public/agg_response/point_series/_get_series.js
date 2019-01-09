@@ -31,7 +31,8 @@ export function getSeries(table, chart) {
     .transform(function (series, row, rowIndex) {
       if (!multiY) {
         const point = partGetPoint(row, rowIndex, aspects.y[0], aspects.z);
-        if (point) addToSiri(series, point, point.series, point.series, aspects.y[0].fieldFormatter);
+        const id = `${point.series}-${aspects.y[0].accessor}`;
+        if (point) addToSiri(series, point, id, point.series, aspects.y[0].fieldFormatter);
         return;
       }
 
