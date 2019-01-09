@@ -58,9 +58,7 @@ export default function ({ getService, getPageObjects }) {
       expect(pageTitle).to.contain(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
-      // sleep a bit before trying to get the pie chart data below
-      await PageObjects.common.sleep(2000);
+      await PageObjects.visualize.waitForRenderingCount();
     });
 
     it('should have inspector enabled', async function () {
@@ -119,31 +117,22 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.filterPieSlice('Other');
-        await PageObjects.visualize.waitForVisualization();
-        await retry.try(async () => {
-          const pieData = await PageObjects.visualize.getPieChartLabels();
-          log.debug(`pieData.length = ${pieData.length}`);
-          expect(pieData).to.eql(expectedTableData);
-        });
-
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug(`pieData.length = ${pieData.length}`);
+        expect(pieData).to.eql(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.waitForVisualizationRenderingCompleted();
       });
 
       it('should apply correct filter on other bucket by clicking on a legend', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
-        await PageObjects.visualize.waitForVisualization();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.filterLegend('Other');
-        await PageObjects.visualize.waitForVisualization();
-        await retry.try(async () => {
-          const pieData = await PageObjects.visualize.getPieChartLabels();
-          log.debug(`pieData.length = ${pieData.length}`);
-          expect(pieData).to.eql(expectedTableData);
-        });
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug(`pieData.length = ${pieData.length}`);
+        expect(pieData).to.eql(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.waitForVisualizationRenderingCompleted();
       });
 
       it('should show two levels of other buckets', async () => {
@@ -173,9 +162,7 @@ export default function ({ getService, getPageObjects }) {
     describe('disabled aggs', () => {
       before(async () => {
         await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.visualize.waitForVisualization();
-        // sleep a bit before trying to get the pie chart data below
-        await PageObjects.common.sleep(2000);
+        await PageObjects.visualize.waitForRenderingCount();
       });
 
       it('should show correct result with one agg disabled', async () => {
@@ -200,7 +187,7 @@ export default function ({ getService, getPageObjects }) {
         expect(pageTitle).to.contain(vizName1);
         await PageObjects.visualize.waitForVisualizationSavedToastGone();
         await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.waitForRenderingCount();
 
         const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
         const pieData = await PageObjects.visualize.getPieChartLabels();
@@ -247,7 +234,7 @@ export default function ({ getService, getPageObjects }) {
         const emptyToTime = '2016-09-23 18:31:44.000';
         log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
         await PageObjects.header.setAbsoluteRange(emptyFromTime, emptyToTime);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.waitForVisualizationRenderingCompleted();
         await PageObjects.visualize.expectPieChartError();
       });
     });
@@ -301,7 +288,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');
         await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.waitForVisualization();
       });
 
       it ('shows correct split chart', async () => {

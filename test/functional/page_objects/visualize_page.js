@@ -594,11 +594,35 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickGo() {
+      const prevRenderingCount = await this.getVisualizationRenderingCount();
+      log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
-      const countOfDataCompleteFlags = 2;
-      await renderable.waitForRender(countOfDataCompleteFlags);
+      await this.waitForRenderingCount(prevRenderingCount);
+    }
+
+    async getVisualizationRenderingCount() {
+      const visualizationLoader = await testSubjects.find('visualizationLoader');
+      const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
+      return Number(renderingCount);
+    }
+
+    async waitForRenderingCount(previousCount = 0, increment = 1) {
+      await retry.try(async () => {
+        const currentRenderingCount = await this.getVisualizationRenderingCount();
+        log.debug(`Readed rendering count ${previousCount} ${currentRenderingCount}`);
+        expect(currentRenderingCount).to.be(previousCount + increment);
+      });
+    }
+
+    async waitForVisualizationRenderingCompleted() {
+      //assuming rendering is done when data-rendering-count is constant within 500 ms
+      await retry.try(async () => {
+        const previousCount = await this.getVisualizationRenderingCount();
+        await PageObjects.common.sleep(500);
+        const currentCount = await this.getVisualizationRenderingCount();
+        log.debug(`Readed rendering count ${previousCount} ${currentCount}`);
+        expect(currentCount).to.be(previousCount);
+      });
     }
 
     async clickReset() {
@@ -1163,10 +1187,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async filterLegend(name) {
       await this.toggleLegend();
-      await retry.try(async () => {
-        await testSubjects.click(`legend-${name}`);
-        await testSubjects.click(`legend-${name}-filterIn`);
-      });
+      await testSubjects.click(`legend-${name}`);
+      await testSubjects.click(`legend-${name}-filterIn`);
+      await this.waitForVisualizationRenderingCompleted();
     }
 
     async doesLegendColorChoiceExist(color) {
@@ -1192,8 +1215,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async filterPieSlice(name) {
+      const prevRenderingCount = await this.getVisualizationRenderingCount();
       const slice = await this.getPieSlice(name);
       await slice.click();
+      await this.waitForRenderingCount(prevRenderingCount, 3);
     }
 
     async getPieSlice(name) {
