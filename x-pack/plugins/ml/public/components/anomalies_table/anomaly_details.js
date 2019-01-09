@@ -229,8 +229,8 @@ export class AnomalyDetails extends Component {
         gutterSize="m"
         className="mlAnomalyCategoryExamples"
       >
-        {definition !== undefined &&
-        <React.Fragment>
+        {(definition !== undefined && definition.terms) &&
+        <Fragment>
           <EuiFlexItem key={`example-terms`}>
             <EuiText size="xs">
               <h4 className="mlAnomalyCategoryExamples__terms">Terms</h4>&nbsp;
@@ -248,16 +248,19 @@ export class AnomalyDetails extends Component {
             </EuiText>
           </EuiFlexItem>
           <EuiSpacer size="m" />
-          <EuiFlexItem key={`example-regex`}>
-            <EuiText size="xs">
-              <h4>Regex</h4>
-            </EuiText>
-            <EuiText size="xs">
-              {definition.regex}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiSpacer size="l" />
-        </React.Fragment>}
+        </Fragment> }
+        {(definition !== undefined && definition.regex) &&
+          <Fragment>
+            <EuiFlexItem key={`example-regex`}>
+              <EuiText size="xs">
+                <h4>Regex</h4>
+              </EuiText>
+              <EuiText size="xs">
+                {definition.regex}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+          </Fragment>}
 
         {examples.map((example, i) => {
           return (
