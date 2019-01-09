@@ -12,12 +12,8 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import {
-  findBooleanFields,
-  LOCK_WINDOW,
-  ReindexService,
-  reindexServiceFactory,
-} from './reindex_service';
+import { LOCK_WINDOW, ReindexService, reindexServiceFactory } from './reindex_service';
+import { ReindexWarning } from './types';
 
 describe('reindexService', () => {
   let savedObjectClient: jest.Mocked<SavedObjectsClient>;
@@ -40,6 +36,27 @@ describe('reindexService', () => {
     };
     callCluster = jest.fn();
     service = reindexServiceFactory(savedObjectClient, callCluster);
+  });
+
+  describe('detectReindexWarnings', () => {
+    it('fetches reindex warnings from flat settings', async () => {
+      const mappingsWithWarnings = {
+        settings: {},
+        mappings: {
+          _doc: {
+            properties: { https: { type: 'boolean' } },
+            _all: { enabled: true },
+          },
+        },
+      };
+      callCluster.mockResolvedValueOnce({ myIndex: mappingsWithWarnings });
+
+      const reindexWarnings = await service.detectReindexWarnings('myIndex');
+      expect(reindexWarnings).toEqual([ReindexWarning.allField, ReindexWarning.booleanFields]);
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: `/myIndex?flat_settings`,
+      });
+    });
   });
 
   describe('createReindexOperation', () => {
@@ -385,35 +402,6 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
-      });
-    });
-  });
-
-  describe('utilities', () => {
-    describe('findBooleanFields', () => {
-      it('returns nested fields', () => {
-        const mappingProperties = {
-          region: {
-            type: 'boolean',
-          },
-          manager: {
-            properties: {
-              age: { type: 'boolean' },
-              name: {
-                properties: {
-                  first: { type: 'text' },
-                  last: { type: 'boolean' },
-                },
-              },
-            },
-          },
-        };
-
-        expect(findBooleanFields(mappingProperties)).toEqual([
-          ['region'],
-          ['manager', 'age'],
-          ['manager', 'name', 'last'],
-        ]);
       });
     });
   });

@@ -18,12 +18,14 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { getIndexSettings } from './index_settings';
+import { findBooleanFields, getReindexWarnings, transformFlatSettings } from './index_settings';
+import { FlatSettings, ReindexWarning } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
 
 export interface ReindexService {
+  detectReindexWarnings(indexName: string): Promise<ReindexWarning[]>;
   createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
   findAllInProgressOperations(): Promise<FindResponse<ReindexOperation>>;
   findReindexOperation(indexName: string): Promise<ReindexSavedObject>;
@@ -97,6 +99,40 @@ export const reindexServiceFactory = (
     });
   };
 
+  /**
+   * Returns array of field paths to boolean fields in the index's mapping.
+   * @param indexName
+   */
+  const getBooleanFieldPaths = async (indexName: string) => {
+    const results = await callCluster('indices.getMapping', { index: indexName });
+    const allMappings = results[indexName].mappings;
+    const mappingTypes = Object.keys(allMappings);
+
+    if (mappingTypes.length > 1) {
+      throw new Error(`Cannot reindex indices with more than one mapping type.`);
+    }
+
+    const mapping = allMappings[mappingTypes[0]];
+    // It's possible an index doesn't have a mapping.
+    return mapping ? findBooleanFields(mapping.properties) : [];
+  };
+
+  /**
+   * Retrieve index settings (in flat, dot-notation style) and mappings.
+   * @param indexName
+   */
+  const getFlatSettings = async (indexName: string) => {
+    const flatSettings = (await callCluster('transport.request', {
+      path: `/${encodeURIComponent(indexName)}?flat_settings`,
+    })) as { [indexName: string]: FlatSettings };
+
+    if (!flatSettings[indexName]) {
+      throw Boom.notFound(`Index ${indexName} does not exist.`);
+    }
+
+    return flatSettings[indexName];
+  };
+
   // ------ Functions used to process the state machine
 
   /**
@@ -124,7 +160,8 @@ export const reindexServiceFactory = (
    */
   const createNewIndex = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName } = reindexOp.attributes;
-    const { settings, mappings } = await getIndexSettings(callCluster, indexName);
+    const flatSettings = await getFlatSettings(indexName);
+    const { settings, mappings } = transformFlatSettings(flatSettings);
 
     const createIndex = await callCluster('indices.create', {
       index: newIndexName,
@@ -152,7 +189,7 @@ export const reindexServiceFactory = (
       dest: { index: reindexOp.attributes.newIndexName },
     } as any;
 
-    const booleanFieldPaths = await getBooleanFieldPaths(callCluster, indexName);
+    const booleanFieldPaths = await getBooleanFieldPaths(indexName);
     if (booleanFieldPaths.length) {
       reindexBody.script = {
         lang: 'painless',
@@ -290,6 +327,11 @@ export const reindexServiceFactory = (
   // ------ The service itself
 
   return {
+    async detectReindexWarnings(indexName: string) {
+      const flatSettings = await getFlatSettings(indexName);
+      return getReindexWarnings(flatSettings);
+    },
+
     async createReindexOperation(indexName: string) {
       const indexExists = callCluster('indices.exists', { index: indexName });
       if (!indexExists) {
@@ -382,56 +424,3 @@ export const reindexServiceFactory = (
     },
   };
 };
-
-/**
- * Returns an array of field paths for all boolean fields, where each field path is an array of strings.
- * Example:
- *    For the mapping type:
- *    ```
- *      {
- *        "field1": { "type": "boolean" },
- *        "nested": {
- *          "field2": { "type": "boolean" }
- *        }
- *      }
- *    ```
- *    The fieldPaths would be: `[['field1'], ['nested', 'field2']]`
- *
- * @param callCluster
- * @param indexName
- */
-const getBooleanFieldPaths = async (callCluster: CallCluster, indexName: string) => {
-  const results = await callCluster('indices.getMapping', { index: indexName });
-  const allMappings = results[indexName].mappings;
-  const mappingTypes = Object.keys(allMappings);
-
-  if (mappingTypes.length > 1) {
-    throw new Error(`Cannot reindex indices with more than one mapping type.`);
-  }
-
-  const mapping = allMappings[mappingTypes[0]];
-  // It's possible an index doesn't have mapping yet.
-  return mapping ? findBooleanFields(mapping.properties) : [];
-};
-
-interface MappingProperties {
-  [key: string]: { type?: string; properties?: MappingProperties };
-}
-
-// Exported only for testing
-export const findBooleanFields = (properties: MappingProperties): string[][] =>
-  Object.keys(properties).reduce(
-    (res, propertyName) => {
-      if (properties[propertyName].type === 'boolean') {
-        // If this field is a boolean, add it
-        res.push([propertyName]);
-      } else if (properties[propertyName].properties) {
-        // If this is a nested object/array get the nested fields and prepend the field path with the current field.
-        const nested = findBooleanFields(properties[propertyName].properties!);
-        res = [...res, ...nested.map(n => [propertyName, ...n])];
-      }
-
-      return res;
-    },
-    [] as string[][]
-  );
