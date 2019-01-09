@@ -491,6 +491,25 @@ const TimelionRead: TimelionRead = {
   },
 };
 
+interface UptimeAll extends User {
+  username: 'uptime_all';
+}
+const UptimeAll: UptimeAll = {
+  username: 'uptime_all',
+  fullName: 'uptime_all',
+  password: 'uptime_all-password',
+  role: {
+    name: 'uptime_all_role',
+    kibana: {
+      global: {
+        feature: {
+          uptime: ['all'],
+        },
+      },
+    },
+  },
+};
+
 interface VisualizeAll extends User {
   username: 'visualize_all';
 }
@@ -555,6 +574,7 @@ export type UserScenarios =
   | MlAll
   | TimelionAll
   | TimelionRead
+  | UptimeAll
   | VisualizeAll
   | VisualizeRead;
 export const UserScenarios: UserScenarios[] = [
@@ -583,6 +603,7 @@ export const UserScenarios: UserScenarios[] = [
   MlAll,
   TimelionAll,
   TimelionRead,
+  UptimeAll,
   VisualizeAll,
   VisualizeRead,
 ];
