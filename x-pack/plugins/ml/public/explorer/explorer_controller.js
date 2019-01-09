@@ -90,9 +90,6 @@ module.controller('MlExplorerController', function (
   mlSelectSeverityService,
   i18n) {
 
-  $scope.mlCheckboxShowChartsService = mlCheckboxShowChartsService;
-  $scope.mlSelectLimitService = mlSelectLimitService;
-  $scope.mlSelectIntervalService = mlSelectIntervalService;
   $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
@@ -355,31 +352,9 @@ module.controller('MlExplorerController', function (
     $scope.appState.save();
   }
 
-  function getSwimlaneData(swimlaneType) {
-    switch (swimlaneType) {
-      case SWIMLANE_TYPE.OVERALL:
-        return $scope.overallSwimlaneData;
-      case SWIMLANE_TYPE.VIEW_BY:
-        return $scope.viewBySwimlaneData;
-    }
-  }
-
-  function mapScopeToSwimlaneProps(swimlaneType) {
-    return {
-      chartWidth: $scope.swimlaneWidth,
-      MlTimeBuckets: TimeBuckets,
-      swimlaneData: getSwimlaneData(swimlaneType),
-      swimlaneType,
-      selection: $scope.appState.mlExplorerSwimlane
-    };
-  }
-
   function redrawOnResize() {
     $scope.swimlaneWidth = getSwimlaneContainerWidth();
     $scope.$apply();
-
-    mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
-    mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
 
     if (
       mlCheckboxShowChartsService.state.get('showCharts') &&
@@ -407,6 +382,7 @@ module.controller('MlExplorerController', function (
       $scope.viewBySwimlaneData.laneLabels &&
       $scope.viewBySwimlaneData.laneLabels.length > 0
     );
+    $scope.$applyAsync();
   }
 
   function getSelectionTimeRange(cellData) {
@@ -795,7 +771,6 @@ module.controller('MlExplorerController', function (
       // Tell the result components directives to render.
       // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
       $timeout(() => {
-        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
         loadViewBySwimlane([]);
       }, 0);
     });
@@ -856,12 +831,8 @@ module.controller('MlExplorerController', function (
         swimlaneCellClickListener(cellData);
         return;
       }
-      // Fire event to indicate swimlane data has changed.
-      // Need to use $timeout to ensure this happens after the child scope is updated with the new data.
+
       setShowViewBySwimlane();
-      $timeout(() => {
-        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
-      }, 0);
     }
 
     if (
@@ -1055,12 +1026,6 @@ module.controller('MlExplorerController', function (
       await loadAnnotationsTableData();
 
       $timeout(() => {
-        if ($scope.overallSwimlaneData !== undefined) {
-          mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
-        }
-        if ($scope.viewBySwimlaneData !== undefined) {
-          mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
-        }
         mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords || [], timerange.earliestMs, timerange.latestMs);
 
         if (cellData !== undefined && cellData.fieldName === undefined) {

@@ -21,7 +21,6 @@ function mlExplorerDashboardServiceFactory() {
   const listenerFactory = listenerFactoryProvider();
   const dragSelect = service.dragSelect = listenerFactory();
   const swimlaneCellClick = service.swimlaneCellClick = listenerFactory();
-  const swimlaneDataChange = service.swimlaneDataChange = listenerFactory();
   const swimlaneRenderDone = service.swimlaneRenderDone = listenerFactory();
   service.anomalyDataChange = listenerFactory();
 
@@ -29,7 +28,6 @@ function mlExplorerDashboardServiceFactory() {
     // Clear out any old listeners.
     dragSelect.unwatchAll();
     swimlaneCellClick.unwatchAll();
-    swimlaneDataChange.unwatchAll();
     swimlaneRenderDone.unwatchAll();
   };
 
