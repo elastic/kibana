@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
@@ -24,7 +23,7 @@ export class MBMapContainer extends React.Component {
     if (this._isMounted) {
       this._syncMbMapWithLayerList();
       this._syncMbMapWithInspector();
-      this._syncMbMapWithAttribution();
+      // this._syncMbMapWithAttribution();
     }
   }, 256);
 
@@ -64,12 +63,6 @@ export class MBMapContainer extends React.Component {
 
   async _initializeMap() {
     this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto);
-    this._mbAttributionControl =  new mapboxgl.AttributionControl({
-      customAttribution: 'fossfj sdfgjs dlfgkjsl dfgjs ldgj sldfjg sldfjg sldfjg sldfjg slfjg sldfjg sldjfg sldjfg sljdfg lsgobar'
-    });
-    this._mbMap.addControl(this._mbAttributionControl, 'top-left');
-    window._mbMap = this._mbMap;
-    window._mbAtt = this._mbAttributionControl;
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -218,26 +211,26 @@ export class MBMapContainer extends React.Component {
     });
   };
 
-  async _syncMbMapWithAttribution() {
-    console.log('must sync attribution...');
-    const attributionPromises = this.props.layerList.map(layer => {
-      return layer.getAttributions();
-    });
-    const attributions = await Promise.all(attributionPromises);
-    const uniqueAttributions = [];
-    for (let i = 0; i < attributions.length; i++) {
-      for (let j = 0; j < attributions[i].length; j++) {
-        const testAttr = attributions[i][j];
-        const attr = uniqueAttributions.find((added) => {
-          return (added.url === testAttr.url && added.label === testAttr.label);
-        });
-        if (!attr) {
-          uniqueAttributions.push(testAttr);
-        }
-      }
-    }
-    console.log(uniqueAttributions);
-  }
+  // async _syncMbMapWithAttribution() {
+  //   console.log('must sync attribution...');
+  //   const attributionPromises = this.props.layerList.map(layer => {
+  //     return layer.getAttributions();
+  //   });
+  //   const attributions = await Promise.all(attributionPromises);
+  //   const uniqueAttributions = [];
+  //   for (let i = 0; i < attributions.length; i++) {
+  //     for (let j = 0; j < attributions[i].length; j++) {
+  //       const testAttr = attributions[i][j];
+  //       const attr = uniqueAttributions.find((added) => {
+  //         return (added.url === testAttr.url && added.label === testAttr.label);
+  //       });
+  //       if (!attr) {
+  //         uniqueAttributions.push(testAttr);
+  //       }
+  //     }
+  //   }
+  //   console.log(uniqueAttributions);
+  // }
 
   render() {
     // do not debounce syncing zoom and center
