@@ -18,4 +18,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/saved_object_api_integration/security_and_spaces/config'),
   require.resolve('../test/saved_object_api_integration/security_only/config'),
   require.resolve('../test/saved_object_api_integration/spaces_only/config'),
+  require.resolve('../test/ui_capabilities/security_and_spaces/config'),
+  require.resolve('../test/ui_capabilities/security_only/config'),
+  require.resolve('../test/ui_capabilities/spaces_only/config'),
 ]);

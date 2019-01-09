@@ -122,6 +122,13 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('timelion', 'management')
             );
             break;
+          case 'uptime_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('uptime', 'management')
+            );
+            break;
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);

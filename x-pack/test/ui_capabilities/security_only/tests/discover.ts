@@ -63,6 +63,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
+          case 'uptime_all':
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);
