@@ -744,6 +744,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.saveVisualization(vizName, { saveAsNew });
       const successToast = await testSubjects.exists('saveVisualizationSuccess', defaultFindTimeout);
       expect(successToast).to.be(true);
+      await this.waitForVisualizationRenderingCompleted();
     }
 
     async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
