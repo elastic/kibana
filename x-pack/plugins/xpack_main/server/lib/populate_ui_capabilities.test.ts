@@ -169,15 +169,12 @@ describe('populateUICapabilities', () => {
         anotherFooEntry: true,
         barEntry: true,
         anotherBarEntry: true,
-        aBazEntry: true,
-        anotherBazEntry: true,
       },
       newFeature: {
         capability1: true,
         capability2: true,
         capability3: true,
         capability4: true,
-        capability5: true,
       },
       otherFeature: {},
     });

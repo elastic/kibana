@@ -35,9 +35,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           'monitoring',
           'ml',
           'apm',
+          'gis',
           'canvas',
           'infrastructure',
-          'logging',
+          'logs',
         ]);
       });
     });
