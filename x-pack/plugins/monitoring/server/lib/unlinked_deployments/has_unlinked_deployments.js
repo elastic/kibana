@@ -41,6 +41,7 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
     });
     msearch.push({
       size: 0,
+      terminate_after: 1,
       query: {
         bool: {
           filter: filters,
