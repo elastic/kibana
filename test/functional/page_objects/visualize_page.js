@@ -618,7 +618,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       //assuming rendering is done when data-rendering-count is constant within 500 ms
       await retry.try(async () => {
         const previousCount = await this.getVisualizationRenderingCount();
-        await PageObjects.common.sleep(500);
+        await PageObjects.common.sleep(1000);
         const currentCount = await this.getVisualizationRenderingCount();
         log.debug(`Readed rendering count ${previousCount} ${currentCount}`);
         expect(currentCount).to.be(previousCount);
@@ -1187,8 +1187,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async filterLegend(name) {
       await this.toggleLegend();
-      await testSubjects.click(`legend-${name}`);
-      await testSubjects.click(`legend-${name}-filterIn`);
+      await retry.try(async () => {
+        await testSubjects.click(`legend-${name}`);
+        await testSubjects.click(`legend-${name}-filterIn`);
+      });
       await this.waitForVisualizationRenderingCompleted();
     }
 
@@ -1215,10 +1217,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async filterPieSlice(name) {
-      const prevRenderingCount = await this.getVisualizationRenderingCount();
       const slice = await this.getPieSlice(name);
       await slice.click();
-      await this.waitForRenderingCount(prevRenderingCount, 3);
+      await this.waitForVisualizationRenderingCompleted();
     }
 
     async getPieSlice(name) {
