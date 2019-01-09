@@ -74,6 +74,11 @@ const createFilter = (table, columnIndex, rowIndex, cellValue) => {
   } else {
     filter = aggConfig.createFilter(value);
   }
+
+  if (!Array.isArray(filter)) {
+    filter = [filter];
+  }
+
   return filter;
 };
 
@@ -81,31 +86,32 @@ const VisFiltersProvider = (Private, getAppState) => {
   const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
+  const pushFilters = (filters, simulate) => {
+    const appState = getAppState();
+    if (filters.length && !simulate) {
+      const flatFilters = _.flatten(filters);
+      filterBarPushFilters(appState)(flatFilters.filter((v, i) => i === flatFilters.findIndex(f => _.isEqual(v, f))));
+    }
+  };
+
   const filter = (event, { simulate = false } = {}) => {
     const data = event.datum;
     const filters = [];
 
-    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData'].forEach(val => {
+    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
       if (!data[val]) return;
       const { table, column, row, value } = data[val];
       const columnIndex = table.columns.findIndex(c => c.id === column);
       const filter = createFilter(table, columnIndex, row, value);
       if (filter) {
         if (event.negate) {
-          if (Array.isArray(filter)) {
-            filter.forEach(f => f.meta.negate = !f.meta.negate);
-          } else {
-            filter.meta.negate = !filter.meta.negate;
-          }
+          filter.forEach(f => f.meta.negate = !f.meta.negate);
         }
-        filters.push(filter);
+        filter.forEach(f => filters.push(f));
       }
     });
 
-    const appState = getAppState();
-    if (filters.length && !simulate) {
-      filterBarPushFilters(appState)(_.flatten(filters));
-    }
+    pushFilters(filters, simulate);
     return filters;
   };
 
@@ -116,17 +122,22 @@ const VisFiltersProvider = (Private, getAppState) => {
       const { table, column, row, value } = data.rawData;
       const filter = createFilter(table, column, row, value);
       if (event.negate) {
-        if (Array.isArray(filter)) {
-          filter.forEach(f => f.meta.negate = !f.meta.negate);
-        } else {
-          filter.meta.negate = !filter.meta.negate;
-        }
+        filter.forEach(f => f.meta.negate = !f.meta.negate);
       }
-      filters.push(filter);
+      filter.forEach(f => filters.push(f));
       data = data.parent;
     }
-    const appState = getAppState();
-    filterBarPushFilters(appState)(_.flatten(filters));
+
+    if (event.datum.rawData.table.$parent && event.data) {
+      const { table, column, row, key } = event.datum.rawData.table.$parent;
+      const filter = createFilter(table, column, row, key);
+      if (event.negate) {
+        filter.forEach(f => f.meta.negate = !f.meta.negate);
+      }
+      filter.forEach(f => filters.push(f));
+    }
+
+    pushFilters(filters, false);
     return filters;
   };
 

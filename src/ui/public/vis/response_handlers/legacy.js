@@ -35,7 +35,7 @@ const LegacyResponseHandlerProvider = function () {
           const splitMap = {};
           let splitIndex = 0;
 
-          table.rows.forEach((row) => {
+          table.rows.forEach((row, rowIndex) => {
             const splitValue = row[splitColumn.id];
 
             if (!splitMap.hasOwnProperty(splitValue)) {
@@ -44,7 +44,9 @@ const LegacyResponseHandlerProvider = function () {
                 $parent: converted,
                 title: `${splitValue}: ${splitColumn.name}`,
                 key: splitValue,
-                row: dimensions.splitRow,
+                column: splitColumnIndex,
+                row: rowIndex,
+                table: table,
                 tables: []
               };
               tableGroup.tables.push({

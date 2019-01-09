@@ -54,6 +54,12 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
       row: rowIndex,
       value: zRow,
     },
+    tableRaw: table.$parent && {
+      table: table.$parent.table,
+      column: table.$parent.table.columns[table.$parent.column].id,
+      row: table.$parent.row,
+      value: table.$parent.key,
+    },
     parent: series,
   };
 
