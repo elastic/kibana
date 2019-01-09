@@ -23,22 +23,26 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(body).to.be.an(Array);
 
         const featureIds = body.map((b: Feature) => b.id);
-        expect(featureIds).to.eql([
-          'discover',
-          'visualize',
-          'dashboard',
-          'dev_tools',
-          'advancedSettings',
-          'indexPatterns',
-          'timelion',
-          'graph',
-          'monitoring',
-          'ml',
-          'apm',
-          'canvas',
-          'infrastructure',
-          'logging',
-        ]);
+        expect(featureIds.sort()).to.eql(
+          [
+            'discover',
+            'visualize',
+            'dashboard',
+            'dev_tools',
+            'advancedSettings',
+            'indexPatterns',
+            'timelion',
+            'graph',
+            'monitoring',
+            'ml',
+            'apm',
+            'canvas',
+            'infrastructure',
+            'logs',
+            'gis',
+            'uptime',
+          ].sort()
+        );
       });
     });
   });
