@@ -13,13 +13,11 @@ export interface Role {
     indices: IndexPrivilege[];
     run_as: string[];
   };
-  kibana: {
-    spaces: Array<{
-      spaces: string[];
-      minimum: string[];
-      feature: { [featureId: string]: string[] };
-    }>;
-  };
+  kibana: Array<{
+    spaces: string[];
+    base: string[];
+    feature: { [featureId: string]: string[] };
+  }>;
   metadata?: {
     [anyKey: string]: any;
   };

@@ -17,25 +17,23 @@ const reservedRole: Role = {
     indices: [],
     run_as: [],
   },
-  kibana: {
-    spaces: [
-      {
-        spaces: ['*'],
-        minimum: ['all'],
-        feature: {},
-      },
-      {
-        spaces: ['default'],
-        minimum: ['foo'],
-        feature: {},
-      },
-      {
-        spaces: ['marketing'],
-        minimum: ['read'],
-        feature: {},
-      },
-    ],
-  },
+  kibana: [
+    {
+      spaces: ['*'],
+      base: ['all'],
+      feature: {},
+    },
+    {
+      spaces: ['default'],
+      base: ['foo'],
+      feature: {},
+    },
+    {
+      spaces: ['marketing'],
+      base: ['read'],
+      feature: {},
+    },
+  ],
   metadata: {
     _reserved: true,
   },
@@ -48,29 +46,23 @@ const unreservedRole = {
     indices: [],
     run_as: [],
   },
-  kibana: {
-    global: {
-      minimum: ['all'],
+  kibana: [
+    {
+      spaces: ['*'],
+      base: ['all'],
       feature: {},
     },
-    spaces: [
-      {
-        spaces: ['*'],
-        minimum: ['all'],
-        feature: {},
-      },
-      {
-        spaces: ['default'],
-        minimum: ['foo'],
-        feature: {},
-      },
-      {
-        spaces: ['marketing'],
-        minimum: ['read'],
-        feature: {},
-      },
-    ],
-  },
+    {
+      spaces: ['default'],
+      base: ['foo'],
+      feature: {},
+    },
+    {
+      spaces: ['marketing'],
+      base: ['read'],
+      feature: {},
+    },
+  ],
 };
 
 test('it renders without crashing', () => {

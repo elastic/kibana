@@ -17,9 +17,7 @@ test('it renders without crashing', () => {
       indices: [],
       run_as: [],
     },
-    kibana: {
-      spaces: [],
-    },
+    kibana: [],
   };
 
   const wrapper = shallow(<ClusterPrivileges role={role} onChange={jest.fn()} />);

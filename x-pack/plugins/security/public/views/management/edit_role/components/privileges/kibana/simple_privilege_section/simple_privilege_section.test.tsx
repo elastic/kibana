@@ -18,11 +18,7 @@ const buildProps = (customProps?: any) => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: { minimum: [], feature: {} },
-        spaces: [],
-        space: {},
-      },
+      kibana: [],
     },
     editable: true,
     kibanaAppPrivileges: ['all', 'read'],
@@ -49,16 +45,13 @@ describe('<SimplePrivilegeForm>', () => {
     const props = buildProps({
       role: {
         elasticsearch: {},
-        kibana: {
-          // global: ['read'],
-          spaces: [
-            {
-              spaces: ['*'],
-              minimum: ['read'],
-              feature: {},
-            },
-          ],
-        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['read'],
+            feature: {},
+          },
+        ],
       },
     });
     const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
@@ -81,14 +74,7 @@ describe('<SimplePrivilegeForm>', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          feature: {},
-          minimum: [],
-        },
-        space: {},
-        spaces: [{ feature: {}, minimum: ['all'], spaces: ['*'] }],
-      },
+      kibana: [{ feature: {}, base: ['all'], spaces: ['*'] }],
     });
   });
 });

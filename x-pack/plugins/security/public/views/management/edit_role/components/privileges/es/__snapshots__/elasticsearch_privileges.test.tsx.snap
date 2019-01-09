@@ -57,13 +57,7 @@ exports[`it renders without crashing 1`] = `
                   "indices": Array [],
                   "run_as": Array [],
                 },
-                "kibana": Object {
-                  "global": Object {
-                    "feature": Object {},
-                    "minimum": Array [],
-                  },
-                  "space": Object {},
-                },
+                "kibana": Array [],
                 "name": "",
               }
             }
@@ -184,19 +178,12 @@ exports[`it renders without crashing 1`] = `
               "indices": Array [],
               "run_as": Array [],
             },
-            "kibana": Object {
-              "global": Object {
-                "feature": Object {},
-                "minimum": Array [],
-              },
-              "space": Object {},
-            },
+            "kibana": Array [],
             "name": "",
           }
         }
         validator={
           RoleValidator {
-            "inProgressSpacePrivileges": Array [],
             "shouldValidate": undefined,
           }
         }

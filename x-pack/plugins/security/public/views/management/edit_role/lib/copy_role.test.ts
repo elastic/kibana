@@ -16,25 +16,23 @@ describe('copyRole', () => {
         indices: [{ names: ['index*'], privileges: ['all'] }],
         run_as: ['user'],
       },
-      kibana: {
-        spaces: [
-          {
-            spaces: ['*'],
-            minimum: ['all'],
-            feature: {},
-          },
-          {
-            spaces: ['default'],
-            minimum: ['foo'],
-            feature: {},
-          },
-          {
-            spaces: ['marketing'],
-            minimum: ['read'],
-            feature: {},
-          },
-        ],
-      },
+      kibana: [
+        {
+          spaces: ['*'],
+          base: ['all'],
+          feature: {},
+        },
+        {
+          spaces: ['default'],
+          base: ['foo'],
+          feature: {},
+        },
+        {
+          spaces: ['marketing'],
+          base: ['read'],
+          feature: {},
+        },
+      ],
     };
 
     const result = copyRole(role);

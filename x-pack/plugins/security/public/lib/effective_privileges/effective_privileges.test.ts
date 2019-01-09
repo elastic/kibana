@@ -40,12 +40,12 @@ const defaultPrivilegeDefinition = new PrivilegeDefinition({
 
 interface BuildRoleOpts {
   globalPrivilege?: {
-    minimum: string[];
+    base: string[];
     feature: FeaturePrivilegeSet;
   };
   spacesPrivileges?: Array<{
     spaces: string[];
-    minimum: string[];
+    base: string[];
     feature: FeaturePrivilegeSet;
   }>;
 }
@@ -57,20 +57,18 @@ const buildRole = (options: BuildRoleOpts = {}) => {
       cluster: [],
       run_as: [],
     },
-    kibana: {
-      spaces: [],
-    },
+    kibana: [],
   };
 
   if (options.globalPrivilege) {
-    role.kibana.spaces.push({
+    role.kibana.push({
       spaces: ['*'],
       ...options.globalPrivilege,
     });
   }
 
   if (options.spacesPrivileges) {
-    role.kibana.spaces.push(...options.spacesPrivileges);
+    role.kibana.push(...options.spacesPrivileges);
   }
 
   return role;
@@ -95,7 +93,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -112,7 +110,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: [],
+            base: [],
             feature: {
               feature1: ['read'],
             },
@@ -129,7 +127,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {},
           },
         ],
@@ -144,7 +142,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {
               feature1: ['all'],
             },
@@ -163,7 +161,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -183,7 +181,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {},
           },
         ],
@@ -203,12 +201,12 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {},
           },
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -228,12 +226,12 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: ['all'],
+            base: ['all'],
             feature: {},
           },
           {
             spaces: ['marketing'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {},
           },
         ],
@@ -257,7 +255,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -279,7 +277,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {
               feature1: ['read'],
             },
@@ -301,7 +299,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {},
           },
         ],
@@ -319,13 +317,13 @@ describe('EffectivePrivileges', () => {
     it(`returns 'read' when assigned effectively via global base privilege`, () => {
       const role = buildRole({
         globalPrivilege: {
-          minimum: ['read'],
+          base: ['read'],
           feature: {},
         },
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -343,7 +341,7 @@ describe('EffectivePrivileges', () => {
     it(`returns 'read' when assigned effectively via global feature privilege`, () => {
       const role = buildRole({
         globalPrivilege: {
-          minimum: [],
+          base: [],
           feature: {
             feature1: ['read'],
           },
@@ -351,7 +349,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -369,7 +367,7 @@ describe('EffectivePrivileges', () => {
     it(`returns 'all' when assigned effectively via global base privilege overriding global feature privilege`, () => {
       const role = buildRole({
         globalPrivilege: {
-          minimum: ['all'],
+          base: ['all'],
           feature: {
             feature1: ['read'],
           },
@@ -377,7 +375,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -395,7 +393,7 @@ describe('EffectivePrivileges', () => {
     it(`returns 'all' when assigned effectively via global feature privilege overriding global base privilege`, () => {
       const role = buildRole({
         globalPrivilege: {
-          minimum: ['read'],
+          base: ['read'],
           feature: {
             feature1: ['all'],
           },
@@ -403,7 +401,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -421,13 +419,13 @@ describe('EffectivePrivileges', () => {
     it(`returns 'all' when assigned effectively via global base privilege overriding directly assigned feature privilege`, () => {
       const role = buildRole({
         globalPrivilege: {
-          minimum: ['all'],
+          base: ['all'],
           feature: {},
         },
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {
               feature1: ['read'],
             },
@@ -449,7 +447,7 @@ describe('EffectivePrivileges', () => {
     it(`returns 'all' when assigned effectively via global feature privilege overriding directly assigned feature privilege`, () => {
       const role = buildRole({
         globalPrivilege: {
-          minimum: ['read'],
+          base: ['read'],
           feature: {
             feature1: ['all'],
           },
@@ -457,7 +455,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {
               feature1: ['read'],
             },
@@ -483,7 +481,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -500,12 +498,12 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: ['all'],
+            base: ['all'],
             feature: {},
           },
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -522,7 +520,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: ['all'],
+            base: ['all'],
             feature: {},
           },
         ],
@@ -539,7 +537,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {},
           },
         ],
@@ -556,12 +554,12 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['*'],
-            minimum: ['read'],
+            base: ['read'],
             feature: {},
           },
           {
             spaces: ['marketing'],
-            minimum: [],
+            base: [],
             feature: {},
           },
         ],
@@ -578,7 +576,7 @@ describe('EffectivePrivileges', () => {
         spacesPrivileges: [
           {
             spaces: ['marketing'],
-            minimum: ['all'],
+            base: ['all'],
             feature: {
               feature1: ['read'],
             },

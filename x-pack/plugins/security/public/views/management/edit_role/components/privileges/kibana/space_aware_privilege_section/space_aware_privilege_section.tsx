@@ -114,7 +114,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     if (this.state.showSpacePrivilegeEditor) {
       availableSpaces = [...this.getAvailableSpaces()];
       if (this.state.editingIndex >= 0) {
-        const form = this.props.role.kibana.spaces[this.state.editingIndex];
+        const form = this.props.role.kibana[this.state.editingIndex];
 
         const displaySpaces = this.getDisplaySpaces();
         const selectedSpaces = form.spaces
@@ -148,9 +148,9 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   private renderKibanaPrivileges = () => {
     const { role } = this.props;
 
-    const { spaces } = role.kibana;
+    const spacePrivileges = role.kibana;
 
-    const hasAnyPrivileges = spaces.length > 0;
+    const hasAnyPrivileges = spacePrivileges.length > 0;
     if (hasAnyPrivileges) {
       const table = (
         <PrivilegeSpaceTable
@@ -260,7 +260,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   };
 
   private getAvailableSpaces = () => {
-    const { spaces: spacePrivileges } = this.props.role.kibana;
+    const spacePrivileges = this.props.role.kibana;
 
     const displaySpaces = this.getDisplaySpaces();
 

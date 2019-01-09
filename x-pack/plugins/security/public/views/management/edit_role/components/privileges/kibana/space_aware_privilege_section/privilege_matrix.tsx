@@ -79,7 +79,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
   private renderTable = () => {
     const { role, features } = this.props;
 
-    const { spaces: spacePrivileges = [] } = role.kibana;
+    const spacePrivileges = role.kibana;
 
     const globalPrivilege = this.locateGlobalPrivilege();
 
@@ -96,7 +96,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
           .filter((s, index, arr) => arr.length < 5 || index < 3)
           .map(spaceId => this.props.spaces.find(space => space.id === spaceId)),
         privileges: {
-          minimum: spacePrivs.minimum,
+          base: spacePrivs.base,
           feature: spacePrivs.feature,
         },
       });
@@ -178,7 +178,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
           render: (feature: Feature & { isBase: boolean }, record: TableRow) => {
             if (item.isGlobal) {
               if (feature.isBase) {
-                return <PrivilegeDisplay privilege={globalPrivilege.minimum} />;
+                return <PrivilegeDisplay privilege={globalPrivilege.base} />;
               }
 
               const actualPrivileges = this.props.effectivePrivileges.getActualGlobalFeaturePrivilege(
@@ -234,9 +234,9 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
   private locateGlobalPrivilege = () => {
     return (
-      this.props.role.kibana.spaces.find(spacePriv => spacePriv.spaces.includes('*')) || {
+      this.props.role.kibana.find(spacePriv => spacePriv.spaces.includes('*')) || {
         spaces: ['*'],
-        minimum: [],
+        base: [],
         feature: [],
       }
     );

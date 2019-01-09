@@ -17,8 +17,6 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
           },
         },
         "rankedFeaturePrivileges": Object {},
-        "rankedGlobalBasePrivileges": Array [],
-        "rankedSpaceBasePrivileges": Array [],
       }
     }
     features={Array []}
@@ -39,19 +37,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
           "indices": Array [],
           "run_as": Array [],
         },
-        "kibana": Object {
-          "global": Object {
-            "feature": Object {},
-            "minimum": Array [],
-          },
-          "space": Object {
-            "someSpace": Object {
-              "feature": Object {},
-              "minimum": Array [],
-            },
-          },
-          "spaces": Array [],
-        },
+        "kibana": Array [],
         "name": "",
       }
     }
@@ -82,7 +68,6 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     }
     validator={
       RoleValidator {
-        "inProgressSpacePrivileges": Array [],
         "shouldValidate": undefined,
       }
     }

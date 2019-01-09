@@ -21,9 +21,7 @@ describe('validateRoleName', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        spaces: [],
-      },
+      kibana: [],
     };
 
     expect(validator.validateRoleName(role)).toEqual({ isInvalid: false });
@@ -37,13 +35,7 @@ describe('validateRoleName', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        spaces: [],
-      },
+      kibana: [],
     };
 
     expect(validator.validateRoleName(role)).toEqual({
@@ -60,13 +52,7 @@ describe('validateRoleName', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        spaces: [],
-      },
+      kibana: [],
     };
 
     expect(validator.validateRoleName(role)).toEqual({
@@ -85,13 +71,7 @@ describe('validateRoleName', () => {
           indices: [],
           run_as: [],
         },
-        kibana: {
-          global: {
-            minimum: [],
-            feature: {},
-          },
-          spaces: [],
-        },
+        kibana: [],
       };
 
       expect(validator.validateRoleName(role)).toEqual({
@@ -120,13 +100,7 @@ describe('validateIndexPrivileges', () => {
         cluster: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        spaces: [],
-      },
+      kibana: [],
     };
 
     expect(validator.validateIndexPrivileges(role)).toEqual({
@@ -147,13 +121,7 @@ describe('validateIndexPrivileges', () => {
         ],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        spaces: [],
-      },
+      kibana: [],
     };
 
     expect(validator.validateIndexPrivileges(role)).toEqual({
@@ -169,13 +137,7 @@ describe('validateIndexPrivileges', () => {
         indices: 'asdf',
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        spaces: [],
-      },
+      kibana: [],
     };
 
     // @ts-ignore
@@ -196,13 +158,7 @@ describe('validateSpacePrivileges', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        spaces: [],
-      },
+      kibana: [],
     };
 
     expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
@@ -216,13 +172,13 @@ describe('validateSpacePrivileges', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: ['all'],
+      kibana: [
+        {
+          spaces: ['*'],
+          base: ['all'],
           feature: {},
         },
-        spaces: [],
-      },
+      ],
     };
 
     expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: false });
@@ -236,19 +192,13 @@ describe('validateSpacePrivileges', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
+      kibana: [
+        {
+          spaces: ['marketing'],
+          base: ['read'],
           feature: {},
         },
-        spaces: [
-          {
-            spaces: ['marketing'],
-            minimum: ['read'],
-            feature: {},
-          },
-        ],
-      },
+      ],
     };
 
     expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: false });
@@ -262,33 +212,23 @@ describe('validateSpacePrivileges', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: ['all'],
+      kibana: [
+        {
+          spaces: ['*'],
+          base: ['all'],
           feature: {},
         },
-        spaces: [
-          {
-            spaces: ['*'],
-            minimum: ['all'],
-            feature: {},
-          },
-          {
-            spaces: ['default'],
-            minimum: ['foo'],
-            feature: {},
-          },
-          {
-            spaces: ['marketing'],
-            minimum: ['read'],
-            feature: {},
-          },
-        ],
-        space: {
-          default: { minimum: ['foo'], feature: {} },
-          marketing: { minimum: ['read'], feature: {} },
+        {
+          spaces: ['default'],
+          base: ['foo'],
+          feature: {},
         },
-      },
+        {
+          spaces: ['marketing'],
+          base: ['read'],
+          feature: {},
+        },
+      ],
     };
 
     expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: false });

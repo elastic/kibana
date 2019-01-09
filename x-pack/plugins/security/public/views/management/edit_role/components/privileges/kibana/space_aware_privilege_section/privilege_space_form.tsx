@@ -48,7 +48,7 @@ interface Props {
 interface State {
   editingIndex: number;
   selectedSpaceIds: string[];
-  selectedMinimumPrivilege: string[];
+  selectedBasePrivilege: string[];
   role: Role;
 }
 
@@ -66,9 +66,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     if (editingIndex < 0) {
       // create new form
       editingIndex =
-        role.kibana.spaces.push({
+        role.kibana.push({
           spaces: [],
-          minimum: [],
+          base: [],
           feature: {},
         }) - 1;
     }
@@ -76,8 +76,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     this.state = {
       role,
       editingIndex,
-      selectedSpaceIds: [...role.kibana.spaces[editingIndex].spaces],
-      selectedMinimumPrivilege: [...role.kibana.spaces[editingIndex].minimum],
+      selectedSpaceIds: [...role.kibana[editingIndex].spaces],
+      selectedBasePrivilege: [...(role.kibana[editingIndex].base || [])],
     };
   }
 
@@ -135,7 +135,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           })}
         >
           <EuiSuperSelect
-            onChange={this.onSpaceMinimumPrivilegeChange}
+            onChange={this.onSpaceBasePrivilegeChange}
             options={[
               {
                 value: 'custom',
@@ -171,13 +171,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
             ]}
             hasDividers
-            valueOfSelected={this.getDisplayedMinimumPrivilege()}
+            valueOfSelected={this.getDisplayedBasePrivilege()}
           />
         </EuiFormRow>
 
-        <EuiFormRow
-          label={this.getFeatureListLabel(this.state.selectedMinimumPrivilege.length > 0)}
-        >
+        <EuiFormRow label={this.getFeatureListLabel(this.state.selectedBasePrivilege.length > 0)}>
           <FeatureTable
             role={this.state.role}
             features={this.props.features}
@@ -186,8 +184,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             onChange={this.onFeaturePrivilegesChange}
             privilegeDefinition={this.props.privilegeDefinition}
             spacesIndex={this.state.editingIndex}
-            showLocks={this.state.selectedMinimumPrivilege.length === 0}
-            disabled={this.state.selectedMinimumPrivilege.length > 0}
+            showLocks={this.state.selectedBasePrivilege.length === 0}
+            disabled={this.state.selectedBasePrivilege.length > 0}
           />
         </EuiFormRow>
       </EuiForm>
@@ -235,7 +233,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   private onSelectedSpacesChange = (selectedSpaceIds: string[]) => {
     const role = copyRole(this.state.role);
 
-    const form = role.kibana.spaces[this.state.editingIndex];
+    const form = role.kibana[this.state.editingIndex];
     form.spaces = [...selectedSpaceIds];
 
     this.setState({
@@ -244,30 +242,30 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     });
   };
 
-  private onSpaceMinimumPrivilegeChange = (minimumPrivilege: string) => {
+  private onSpaceBasePrivilegeChange = (basePrivilege: string) => {
     const role = copyRole(this.state.role);
-    const form = role.kibana.spaces[this.state.editingIndex];
+    const form = role.kibana[this.state.editingIndex];
 
-    if (minimumPrivilege === 'custom') {
-      form.minimum = [];
+    if (basePrivilege === 'custom') {
+      form.base = [];
     } else {
-      form.minimum = [minimumPrivilege];
+      form.base = [basePrivilege];
     }
 
     this.setState({
-      selectedMinimumPrivilege: minimumPrivilege === 'custom' ? [] : [minimumPrivilege],
+      selectedBasePrivilege: basePrivilege === 'custom' ? [] : [basePrivilege],
       role,
     });
   };
 
-  private getDisplayedMinimumPrivilege = () => {
-    const form = this.state.role.kibana.spaces[this.state.editingIndex];
-    return form.minimum[0] || 'custom';
+  private getDisplayedBasePrivilege = () => {
+    const form = this.state.role.kibana[this.state.editingIndex];
+    return form.base[0] || 'custom';
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
     const role = copyRole(this.state.role);
-    const form = role.kibana.spaces[this.state.editingIndex];
+    const form = role.kibana[this.state.editingIndex];
 
     if (privileges.length === 0) {
       delete form.feature[featureId];
@@ -285,8 +283,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       return false;
     }
 
-    const form = this.state.role.kibana.spaces[this.state.editingIndex];
-    if (form.minimum.length === 0 && Object.keys(form.feature).length === 0) {
+    const form = this.state.role.kibana[this.state.editingIndex];
+    if (form.base.length === 0 && Object.keys(form.feature).length === 0) {
       return false;
     }
 

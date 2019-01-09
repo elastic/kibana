@@ -21,19 +21,7 @@ const buildProps = (customProps = {}) => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [] as string[],
-          feature: {},
-        },
-        spaces: [],
-        space: {
-          someSpace: {
-            minimum: [] as string[],
-            feature: {},
-          },
-        },
-      },
+      kibana: [],
     },
     spacesEnabled: true,
     spaces: [

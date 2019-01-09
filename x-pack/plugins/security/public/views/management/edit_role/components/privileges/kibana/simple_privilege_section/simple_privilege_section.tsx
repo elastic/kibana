@@ -38,7 +38,7 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
 
     const form = this.locateGlobalPrivilege(role);
 
-    const kibanaPrivilege = form.minimum.length > 0 ? form.minimum[0] : NO_PRIVILEGE_VALUE;
+    const kibanaPrivilege = form.base.length > 0 ? form.base[0] : NO_PRIVILEGE_VALUE;
 
     const description = (
       <p>
@@ -136,10 +136,10 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
     const form = this.locateGlobalPrivilege(role, true);
 
     // Remove base privilege value
-    form.minimum = [];
+    form.base = [];
 
     if (privilege !== NO_PRIVILEGE_VALUE) {
-      form.minimum = [privilege];
+      form.base = [privilege];
     }
 
     this.props.onChange(role);
@@ -157,7 +157,7 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
   };
 
   private locateGlobalPrivilege = (role: Role, createIfMissing = false) => {
-    const { spaces: spacePrivileges } = role.kibana;
+    const spacePrivileges = role.kibana;
     const existing = spacePrivileges.find(privileges => privileges.spaces.includes('*'));
     if (existing) {
       return existing;
@@ -165,7 +165,7 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
 
     const newEntry = {
       spaces: ['*'],
-      minimum: [],
+      base: [],
       feature: {},
     };
 

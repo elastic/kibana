@@ -149,8 +149,8 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
               EffectivePrivileges {
                 "assignedGlobalBaseActions": Array [],
                 "globalPrivilege": Object {
+                  "base": Array [],
                   "feature": Object {},
-                  "minimum": Array [],
                   "spaces": Array [],
                 },
                 "privilegeDefinition": PrivilegeDefinition {
@@ -161,8 +161,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   },
                 },
                 "rankedFeaturePrivileges": Object {},
-                "rankedGlobalBasePrivileges": Array [],
-                "rankedSpaceBasePrivileges": Array [],
                 "role": Object {
                   "elasticsearch": Object {
                     "cluster": Array [
@@ -171,19 +169,13 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     "indices": Array [],
                     "run_as": Array [],
                   },
-                  "kibana": Object {
-                    "global": Object {
+                  "kibana": Array [
+                    Object {
+                      "base": Array [],
                       "feature": Object {},
-                      "minimum": Array [],
+                      "spaces": Array [],
                     },
-                    "spaces": Array [
-                      Object {
-                        "feature": Object {},
-                        "minimum": Array [],
-                        "spaces": Array [],
-                      },
-                    ],
-                  },
+                  ],
                   "name": "test role",
                 },
               }
@@ -310,19 +302,13 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   "indices": Array [],
                   "run_as": Array [],
                 },
-                "kibana": Object {
-                  "global": Object {
+                "kibana": Array [
+                  Object {
+                    "base": Array [],
                     "feature": Object {},
-                    "minimum": Array [],
+                    "spaces": Array [],
                   },
-                  "spaces": Array [
-                    Object {
-                      "feature": Object {},
-                      "minimum": Array [],
-                      "spaces": Array [],
-                    },
-                  ],
-                },
+                ],
                 "name": "test role",
               }
             }

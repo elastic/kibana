@@ -47,11 +47,11 @@ export class EffectivePrivileges {
   // reference to the global privilege definition
   private globalPrivilege: {
     spaces?: string[];
-    minimum: string[];
+    base: string[];
     feature: FeaturePrivilegeSet;
   };
 
-  // list of privilege actions that comprise the global minimum (base) privilege
+  // list of privilege actions that comprise the global base privilege
   private assignedGlobalBaseActions: string[];
 
   constructor(
@@ -60,8 +60,8 @@ export class EffectivePrivileges {
     private readonly rankedFeaturePrivileges: FeaturePrivilegeSet
   ) {
     this.globalPrivilege = this.locateGlobalPrivilege(role);
-    this.assignedGlobalBaseActions = this.globalPrivilege.minimum[0]
-      ? privilegeDefinition.getGlobalPrivileges().getActions(this.globalPrivilege.minimum[0])
+    this.assignedGlobalBaseActions = this.globalPrivilege.base[0]
+      ? privilegeDefinition.getGlobalPrivileges().getActions(this.globalPrivilege.base[0])
       : [];
   }
 
@@ -116,12 +116,12 @@ export class EffectivePrivileges {
     featureId: string,
     spacesIndex: number
   ): ExplanationResult {
-    const { feature = {} as FeaturePrivilegeSet } = this.role.kibana.spaces[spacesIndex] || {};
+    const { feature = {} as FeaturePrivilegeSet } = this.role.kibana[spacesIndex] || {};
     const assignedFeaturePrivilege = feature[featureId]
       ? feature[featureId][0] || NO_PRIVILEGE_VALUE
       : NO_PRIVILEGE_VALUE;
 
-    const { minimum = [], spaces = [] } = this.role.kibana.spaces[spacesIndex] || {};
+    const { base = [], spaces = [] } = this.role.kibana[spacesIndex] || {};
     const globalFeaturePrivileges = this.globalPrivilege.feature[featureId] || [];
 
     const scenarios: ActionSet[] = [
@@ -131,7 +131,7 @@ export class EffectivePrivileges {
       },
       {
         name: 'space base privilege',
-        actions: this.privilegeDefinition.getSpacesPrivileges().getActions(minimum[0]),
+        actions: this.privilegeDefinition.getSpacesPrivileges().getActions(base[0]),
       },
     ];
 
@@ -211,10 +211,10 @@ export class EffectivePrivileges {
    * @param spacesIndex
    */
   public explainActualSpaceBasePrivilege(spacesIndex: number): ExplanationResult {
-    const { minimum = [] as string[] } = this.role.kibana.spaces[spacesIndex] || {};
-    const globalBasePrivilege = this.globalPrivilege.minimum;
+    const { base = [] as string[] } = this.role.kibana[spacesIndex] || {};
+    const globalBasePrivilege = this.globalPrivilege.base;
 
-    if (minimum.length === 0) {
+    if (base.length === 0) {
       const isSet = globalBasePrivilege.length > 0;
 
       return {
@@ -223,10 +223,10 @@ export class EffectivePrivileges {
         details: isSet ? `Granted via global base privilege` : `Not assigned`,
       };
     }
-    const allowsAssigned = this.validateSpaceBasePrivilege(minimum[0]);
+    const allowsAssigned = this.validateSpaceBasePrivilege(base[0]);
     if (allowsAssigned.allowed) {
       return {
-        privilege: minimum[0],
+        privilege: base[0],
         source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
         details: `Assigned directly`,
       };
@@ -234,7 +234,7 @@ export class EffectivePrivileges {
 
     return {
       privilege: globalBasePrivilege[0],
-      supercededPrivilege: minimum[0],
+      supercededPrivilege: base[0],
       overrideSource: 'global base privilege',
       source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
       details: allowsAssigned.details,
@@ -277,12 +277,12 @@ export class EffectivePrivileges {
       .getFeaturePrivileges()
       .getActions(featureId, privilege);
 
-    const { minimum = [], spaces = [] } = this.role.kibana.spaces[spacesIndex] || {};
+    const { base = [], spaces = [] } = this.role.kibana[spacesIndex] || {};
     const globalFeaturePrivileges = this.globalPrivilege.feature[featureId] || [];
 
     const baseActions = [
       ...this.assignedGlobalBaseActions,
-      ...this.privilegeDefinition.getSpacesPrivileges().getActions(minimum[0]),
+      ...this.privilegeDefinition.getSpacesPrivileges().getActions(base[0]),
     ];
 
     // TODO: temp hack-in
@@ -298,7 +298,7 @@ export class EffectivePrivileges {
   }
 
   private validateSpaceBasePrivilege(basePrivilege: string): PrivilegeValidationResponse {
-    const globalBase = this.globalPrivilege.minimum[0] || NO_PRIVILEGE_VALUE;
+    const globalBase = this.globalPrivilege.base[0] || NO_PRIVILEGE_VALUE;
     if (globalBase === NO_PRIVILEGE_VALUE) {
       // nothing to do
       return {
@@ -333,7 +333,7 @@ export class EffectivePrivileges {
   }
 
   private getHighestGrantedGlobalFeaturePrivilege(featureId: string) {
-    const { minimum = [] } = this.globalPrivilege || {};
+    const { base: minimum = [] } = this.globalPrivilege || {};
     const baseActions = [
       ...this.assignedGlobalBaseActions,
       ...this.privilegeDefinition.getGlobalPrivileges().getActions(minimum[0]),
@@ -381,11 +381,11 @@ export class EffectivePrivileges {
   }
 
   private locateGlobalPrivilege(role: Role) {
-    const { spaces: spacePrivileges } = role.kibana;
+    const spacePrivileges = role.kibana;
     return (
       spacePrivileges.find(privileges => privileges.spaces.includes('*')) || {
         spaces: [] as string[],
-        minimum: [] as string[],
+        base: [] as string[],
         feature: {},
       }
     );

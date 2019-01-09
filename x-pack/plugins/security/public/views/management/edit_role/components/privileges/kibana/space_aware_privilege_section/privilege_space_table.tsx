@@ -44,7 +44,7 @@ interface TableRow {
   spaces: TableSpace[];
   spacesIndex: number;
   privileges: {
-    minimum: string[];
+    base: string[];
     feature: {
       [featureId: string]: string[];
     };
@@ -78,8 +78,8 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
         spaces,
         spacesIndex,
         privileges: {
-          minimum: spacePrivs.minimum,
-          feature: spacePrivs.feature,
+          base: spacePrivs.base || [],
+          feature: spacePrivs.feature || {},
         },
       };
     });
@@ -180,7 +180,7 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
             color: 'danger',
             onClick: (item: TableRow) => {
               const roleCopy = copyRole(this.props.role);
-              roleCopy.kibana.spaces.splice(item.spacesIndex, 1);
+              roleCopy.kibana.splice(item.spacesIndex, 1);
               this.props.onChange(roleCopy);
             },
           },
@@ -192,7 +192,7 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
   };
 
   private getSortedPrivileges = () => {
-    const { spaces: spacePrivileges } = this.props.role.kibana;
+    const spacePrivileges = this.props.role.kibana;
     return spacePrivileges.sort((priv1, priv2) => {
       return priv1.spaces.includes('*') ? -1 : priv1.spaces.includes('*') ? 1 : 0;
     });

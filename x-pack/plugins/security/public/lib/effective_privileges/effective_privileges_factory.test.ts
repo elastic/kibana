@@ -78,13 +78,7 @@ describe('EffectivePrivilegesFactory', () => {
         cluster: [],
         run_as: [],
       },
-      kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
-        spaces: [],
-      },
+      kibana: [],
     };
 
     const instance = factory.getInstance(role);

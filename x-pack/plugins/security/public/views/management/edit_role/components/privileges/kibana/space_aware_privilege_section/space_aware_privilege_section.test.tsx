@@ -22,11 +22,7 @@ const buildProps = (customProps: any = {}) => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: { minimum: [], feature: {} },
-        spaces: [],
-        space: {},
-      },
+      kibana: [],
     },
     spaces: [
       {
@@ -68,16 +64,13 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         elasticsearch: {
           cluster: ['manage'],
         },
-        kibana: {
-          global: ['read'],
-          spaces: [
-            {
-              spaces: ['default'],
-              minimum: ['all'],
-              feature: {},
-            },
-          ],
-        },
+        kibana: [
+          {
+            spaces: ['default'],
+            base: ['all'],
+            feature: {},
+          },
+        ],
       },
     });
 
@@ -102,16 +95,13 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         elasticsearch: {
           cluster: ['manage'],
         },
-        kibana: {
-          global: ['read'],
-          spaces: [
-            {
-              spaces: ['default'],
-              minimum: ['all'],
-              feature: {},
-            },
-          ],
-        },
+        kibana: [
+          {
+            spaces: ['default'],
+            base: ['all'],
+            feature: {},
+          },
+        ],
       },
     });
 
@@ -123,23 +113,20 @@ describe('<SpaceAwarePrivilegeForm>', () => {
     expect(wrapper.find(PrivilegeSpaceForm)).toHaveLength(1);
   });
 
-  describe('with minimum privilege set to "read"', () => {
+  describe('with base privilege set to "read"', () => {
     it('allows space privileges to be customized', () => {
       const props = buildProps({
         role: {
           elasticsearch: {
             cluster: ['manage'],
           },
-          kibana: {
-            global: ['read'],
-            spaces: [
-              {
-                spaces: ['default'],
-                minimum: ['all'],
-                feature: {},
-              },
-            ],
-          },
+          kibana: [
+            {
+              spaces: ['default'],
+              base: ['all'],
+              feature: {},
+            },
+          ],
         },
       });
 
@@ -153,23 +140,20 @@ describe('<SpaceAwarePrivilegeForm>', () => {
     });
   });
 
-  describe('with minimum privilege set to "none"', () => {
+  describe('with base privilege set to "none"', () => {
     it('allows space privileges to be customized', () => {
       const props = buildProps({
         role: {
           elasticsearch: {
             cluster: ['manage'],
           },
-          kibana: {
-            global: [],
-            spaces: [
-              {
-                spaces: ['default'],
-                minimum: ['all'],
-                feature: {},
-              },
-            ],
-          },
+          kibana: [
+            {
+              spaces: ['default'],
+              base: ['all'],
+              feature: {},
+            },
+          ],
         },
       });
 

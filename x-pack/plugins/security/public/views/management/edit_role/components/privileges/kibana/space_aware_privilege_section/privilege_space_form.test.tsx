@@ -49,19 +49,13 @@ const buildProps = (customProps = {}) => {
         indices: [] as any[],
         run_as: [] as string[],
       },
-      kibana: {
-        global: {
-          minimum: [],
+      kibana: [
+        {
+          spaces: [],
+          base: [],
           feature: {},
         },
-        spaces: [
-          {
-            spaces: [],
-            minimum: [],
-            feature: {},
-          },
-        ],
-      },
+      ],
     },
     onChange: jest.fn(),
     onCancel: jest.fn(),

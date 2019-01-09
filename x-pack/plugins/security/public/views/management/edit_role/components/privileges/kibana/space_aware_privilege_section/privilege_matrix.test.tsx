@@ -47,33 +47,31 @@ describe('PrivilegeMatrix', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        spaces: [
-          {
-            spaces: ['*'],
-            minimum: ['read'],
-            feature: {
-              feature1: ['all'],
-            },
+      kibana: [
+        {
+          spaces: ['*'],
+          base: ['read'],
+          feature: {
+            feature1: ['all'],
           },
-          {
-            spaces: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
-            minimum: [],
-            feature: {
-              feature2: ['read'],
-              feature3: ['all'],
-            },
+        },
+        {
+          spaces: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
+          base: [],
+          feature: {
+            feature2: ['read'],
+            feature3: ['all'],
           },
-          {
-            spaces: ['k'],
-            minimum: ['all'],
-            feature: {
-              feature2: ['read'],
-              feature3: ['read'],
-            },
+        },
+        {
+          spaces: ['k'],
+          base: ['all'],
+          feature: {
+            feature2: ['read'],
+            feature3: ['read'],
           },
-        ],
-      },
+        },
+      ],
     };
 
     const effectivePrivileges = new EffectivePrivilegesFactory(

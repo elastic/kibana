@@ -42,12 +42,12 @@ const defaultPrivilegeDefinition = new PrivilegeDefinition({
 
 interface BuildRoleOpts {
   globalPrivilege?: {
-    minimum: string[];
+    base: string[];
     feature: FeaturePrivilegeSet;
   };
   spacesPrivileges?: Array<{
     spaces: string[];
-    minimum: string[];
+    base: string[];
     feature: FeaturePrivilegeSet;
   }>;
 }
@@ -59,20 +59,18 @@ const buildRole = (options: BuildRoleOpts = {}) => {
       cluster: [],
       run_as: [],
     },
-    kibana: {
-      spaces: [],
-    },
+    kibana: [],
   };
 
   if (options.globalPrivilege) {
-    role.kibana.spaces.push({
+    role.kibana.push({
       spaces: ['*'],
       ...options.globalPrivilege,
     });
   }
 
   if (options.spacesPrivileges) {
-    role.kibana.spaces.push(...options.spacesPrivileges);
+    role.kibana.push(...options.spacesPrivileges);
   }
 
   return role;
@@ -88,7 +86,7 @@ describe('FeatureTable', () => {
       spacesPrivileges: [
         {
           spaces: ['marketing', 'default'],
-          minimum: ['read'],
+          base: ['read'],
           feature: {
             feature1: ['all'],
           },
