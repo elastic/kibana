@@ -111,6 +111,7 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'advancedSettings',
     name: 'Advanced Settings',
+    icon: 'advancedSettingsApp',
     catalogue: ['advanced_settings'],
     management: {
       kibana: ['settings'],
