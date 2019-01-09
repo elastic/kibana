@@ -9,7 +9,7 @@ ifdef::gs-mini[]
 == Getting Started
 endif::gs-mini[]
 
-The Search Profiler is automatically enabled in {kib}.  It is located under the
+The {searchprofiler} is automatically enabled in {kib}.  It is located under the
 *Dev Tools* tab in {kib}. 
 
 [[first-profile]]
@@ -18,24 +18,24 @@ To start profiling queries:
 . Open Kibana in your web browser and log in. If you are running Kibana
 locally, go to `http://localhost:5601/`.
 
-. Click **DevTools** in the side navigation to open the Search Profiler.
+. Click **DevTools** in the side navigation to open the {searchprofiler}.
 Console is the default tool to open when first accessing DevTools.
 +
 image::dev-tools/searchprofiler/images/gs1.png["Opening DevTools"]
 +
 On the top navigation bar, click the second item: *Search Profiler*
 +
-image::dev-tools/searchprofiler/images/gs2.png["Opening the Search Profiler"]
+image::dev-tools/searchprofiler/images/gs2.png["Opening the {searchprofiler}"]
 
-. This opens the Search Profiler interface.
+. This opens the {searchprofiler} interface.
 +
-image::dev-tools/searchprofiler/images/gs3.png["Search Profiler Interface"]
+image::dev-tools/searchprofiler/images/gs3.png["{searchprofiler} Interface"]
 
 . Replace the default `match_all` query with the query you want to profile and click *Profile*.
 +
 image::dev-tools/searchprofiler/images/gs4.png["Profiling the match_all query"]
 +
-Search Profiler displays the names of the indices searched, the shards in each index,
+{searchprofiler} displays the names of the indices searched, the shards in each index,
 and how long the query took.  The following example shows the results of profiling
 the match_all query. Three indices were searched: `.monitoring-kibana-2-2016.11.30`,
 `.monitoring-data-2` and `test`.
@@ -64,9 +64,9 @@ This displays details about the query component(s) that ran on the shard.
 +
 In this example, there is a single `"MatchAllDocsQuery"` that ran on the shard.
 Since it was the only query run, it took 100% of the time.  When you mouse over
-a row, the Search Profiler displays additional information about the query component."
+a row, the {searchprofiler} displays additional information about the query component."
 +
 image::dev-tools/searchprofiler/images/gs6.png["Profile details for the first shard"]
 +
 This panel shows the timing breakdown of low-level Lucene methods.  For more information,
-see the reference docs for {ref}/_profiling_queries.html#_timing_breakdown[Timing Breakdown].
+see the reference docs for timing breakdowns in {ref}/search-profile-queries.html[Profiling queries].

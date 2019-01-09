@@ -25,7 +25,6 @@ import 'plugins/ml/components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
@@ -66,7 +65,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
-      initPromise: initPromise(true)
     }
   });
 
@@ -92,7 +90,8 @@ module.controller('MlExplorerController', function (
   mlCheckboxShowChartsService,
   mlSelectLimitService,
   mlSelectIntervalService,
-  mlSelectSeverityService) {
+  mlSelectSeverityService,
+  i18n) {
 
   $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
@@ -114,7 +113,7 @@ module.controller('MlExplorerController', function (
   const $mlExplorer = $('.ml-explorer');
   const MAX_INFLUENCER_FIELD_VALUES = 10;
   const MAX_CATEGORY_EXAMPLES = 10;
-  const VIEW_BY_JOB_LABEL = 'job ID';
+  const VIEW_BY_JOB_LABEL = i18n('xpack.ml.explorer.jobIdLabel', { defaultMessage: 'job ID' });
 
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -198,6 +197,7 @@ module.controller('MlExplorerController', function (
         $scope.loading = false;
       }
 
+      $scope.$applyAsync();
     }).catch((resp) => {
       console.log('Explorer - error getting job info from elasticsearch:', resp);
     });
@@ -293,6 +293,7 @@ module.controller('MlExplorerController', function (
           restoreCellDataFromAppState();
           updateExplorer();
         }
+        $scope.$applyAsync();
       });
   };
 
@@ -649,6 +650,7 @@ module.controller('MlExplorerController', function (
 
           loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
         }
+        $scope.$applyAsync();
       });
   }
 
@@ -823,10 +825,12 @@ module.controller('MlExplorerController', function (
       ).then((resp) => {
         // TODO - sort the influencers keys so that the partition field(s) are first.
         $scope.influencers = resp.influencers;
+        $scope.$applyAsync();
         console.log('Explorer top influencers data set:', $scope.influencers);
       });
     } else {
       $scope.influencers = {};
+      $scope.$applyAsync();
     }
   }
 
@@ -1038,7 +1042,8 @@ module.controller('MlExplorerController', function (
           anomalies,
           interval: resp.interval,
           examplesByJobId: resp.examplesByJobId,
-          showViewSeriesLink: true
+          showViewSeriesLink: true,
+          jobIds
         };
       });
 
@@ -1150,8 +1155,9 @@ module.controller('MlExplorerController', function (
   }
 
   function processOverallResults(scoresByTime, searchBounds) {
+    const overallLabel = i18n('xpack.ml.explorer.overallLabel', { defaultMessage: 'Overall' });
     const dataset = {
-      laneLabels: ['Overall'],
+      laneLabels: [overallLabel],
       points: [],
       interval: $scope.swimlaneBucketInterval.asSeconds(),
       earliest: searchBounds.min.valueOf() / 1000,
@@ -1164,7 +1170,7 @@ module.controller('MlExplorerController', function (
       _.each(scoresByTime, (score, timeMs) => {
         const time = timeMs / 1000;
         dataset.points.push({
-          laneLabel: 'Overall',
+          laneLabel: overallLabel,
           time,
           value: score
         });

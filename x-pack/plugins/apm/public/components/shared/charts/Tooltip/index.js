@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { Hint } from 'react-vis';
 import moment from 'moment';
 import styled from 'styled-components';
@@ -60,6 +60,7 @@ const LegendContainer = styled.div`
 
 const LegendGray = styled(Legend)`
   color: ${colors.gray3};
+  padding-bottom: 0;
 `;
 
 const Value = styled.div`
@@ -75,7 +76,7 @@ export default function Tooltip({
   y,
   ...props
 }) {
-  if (_.isEmpty(tooltipPoints)) {
+  if (isEmpty(tooltipPoints)) {
     return null;
   }
 

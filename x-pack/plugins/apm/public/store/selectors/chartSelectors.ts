@@ -9,6 +9,7 @@ import d3 from 'd3';
 import { difference, memoize, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
+import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_all_metrics_chart_data';
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { AnomalyTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_anomaly_data/transform';
 import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
@@ -18,7 +19,13 @@ import {
   RectCoordinate
 } from 'x-pack/plugins/apm/typings/timeseries';
 import { colors } from '../../style/variables';
-import { asDecimal, asMillis, tpmUnit } from '../../utils/formatters';
+import {
+  asDecimal,
+  asGB,
+  asMillis,
+  asPercent,
+  tpmUnit
+} from '../../utils/formatters';
 import { IUrlParams } from '../urlParams';
 
 export const getEmptySerie = memoize(
@@ -40,7 +47,25 @@ export const getEmptySerie = memoize(
   (start: number, end: number) => [start, end].join('_')
 );
 
-export function getCharts(
+interface IEmptySeries {
+  data: Coordinate[];
+}
+
+export interface ITpmBucket {
+  title: string;
+  data: Coordinate[];
+  legendValue: string;
+  type: string;
+  color: string;
+}
+
+export interface ITransactionChartData {
+  noHits: boolean;
+  tpmSeries: ITpmBucket[] | IEmptySeries[];
+  responseTimeSeries: TimeSerie[] | IEmptySeries[];
+}
+
+export function getTransactionCharts(
   urlParams: IUrlParams,
   timeseriesResponse: TimeSeriesAPIResponse
 ) {
@@ -55,11 +80,104 @@ export function getCharts(
     ? getEmptySerie(start, end)
     : getResponseTimeSeries(apmTimeseries, anomalyTimeseries);
 
-  return {
+  const chartsResult: ITransactionChartData = {
     noHits,
     tpmSeries,
     responseTimeSeries
   };
+
+  return chartsResult;
+}
+
+export interface IMemoryChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[] | IEmptySeries[];
+}
+
+export function getMemorySeries(
+  urlParams: IUrlParams,
+  memoryChartResponse: MetricsChartAPIResponse['memory']
+) {
+  const { start, end } = urlParams;
+  const { series, overallValues, totalHits } = memoryChartResponse;
+  const seriesList: IMemoryChartData['series'] =
+    totalHits === 0
+      ? getEmptySerie(start, end)
+      : [
+          {
+            title: 'System total mem.',
+            data: series.totalMemory,
+            type: 'area',
+            color: colors.apmPink,
+            legendValue: asGB(overallValues.totalMemory)
+          },
+          {
+            title: 'System avail. mem.',
+            data: series.freeMemory,
+            type: 'area',
+            color: colors.apmPurple,
+            legendValue: asGB(overallValues.freeMemory)
+          },
+          {
+            title: 'Process RSS',
+            data: series.processMemoryRss,
+            type: 'area',
+            color: colors.apmGreen,
+            legendValue: asGB(overallValues.processMemoryRss)
+          },
+          {
+            title: 'Process mem. size',
+            data: series.processMemorySize,
+            type: 'area',
+            color: colors.apmBlue,
+            legendValue: asGB(overallValues.freeMemory)
+          }
+        ];
+
+  return {
+    ...memoryChartResponse,
+    series: seriesList
+  };
+}
+
+export interface ICPUChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[];
+}
+
+export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
+  const { series, overallValues } = CPUChartResponse;
+
+  const seriesList: TimeSerie[] = [
+    {
+      title: 'Process average',
+      data: series.processCPUAverage,
+      type: 'linemark',
+      color: colors.apmPink,
+      legendValue: asPercent(overallValues.processCPUAverage || 0)
+    },
+    {
+      title: 'Process max',
+      data: series.processCPUMax,
+      type: 'linemark',
+      color: colors.apmPurple,
+      legendValue: asPercent(overallValues.processCPUMax || 0)
+    },
+    {
+      title: 'System average',
+      data: series.systemCPUAverage,
+      type: 'linemark',
+      color: colors.apmGreen,
+      legendValue: asPercent(overallValues.systemCPUAverage || 0)
+    },
+    {
+      title: 'System max',
+      data: series.systemCPUMax,
+      type: 'linemark',
+      color: colors.apmBlue,
+      legendValue: asPercent(overallValues.systemCPUMax || 0)
+    }
+  ];
+
+  return { ...CPUChartResponse, series: seriesList };
 }
 
 interface TimeSerie {
@@ -88,7 +206,7 @@ export function getResponseTimeSeries(
       }),
       data: avg,
       legendValue: asMillis(overallAvgDuration),
-      type: 'line',
+      type: 'linemark',
       color: colors.apmBlue
     },
     {
@@ -100,7 +218,7 @@ export function getResponseTimeSeries(
       ),
       titleShort: '95th',
       data: p95,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmYellow
     },
     {
@@ -112,7 +230,7 @@ export function getResponseTimeSeries(
       ),
       titleShort: '99th',
       data: p99,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmOrange
     }
   ];
@@ -183,7 +301,7 @@ export function getTpmSeries(
       title: getTpmLegendTitle(bucket.key),
       data: bucket.dataPoints,
       legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
-      type: 'line',
+      type: 'linemark',
       color: getColor(bucket.key)
     };
   });

@@ -13,6 +13,7 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
   const handleChange = () => onValueChange(!argValue);
   if (typeof argValue !== 'boolean') {
     renderError();
+    return null;
   }
   return <EuiSwitch id={argId} checked={argValue} onChange={handleChange} />;
 };

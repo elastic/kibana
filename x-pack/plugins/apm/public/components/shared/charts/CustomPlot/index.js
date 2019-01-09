@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { makeWidthFlexible } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent, Fragment } from 'react';
@@ -37,10 +37,17 @@ export class InnerCustomPlot extends PureComponent {
       visibleSeries.filter((serie, i) => !seriesEnabledState[i])
   );
 
+  getOptions = createSelector(
+    state => state.width,
+    state => state.yMin,
+    state => state.yMax,
+    (width, yMin, yMax) => ({ width, yMin, yMax })
+  );
+
   getPlotValues = createSelector(
     state => state.visibleSeries,
     state => state.enabledSeries,
-    state => state.width,
+    state => state.options,
     getPlotValues
   );
 
@@ -103,7 +110,7 @@ export class InnerCustomPlot extends PureComponent {
   render() {
     const { series, truncateLegends, noHits, width } = this.props;
 
-    if (_.isEmpty(series) || !width) {
+    if (isEmpty(series) || !width) {
       return null;
     }
 
@@ -116,27 +123,20 @@ export class InnerCustomPlot extends PureComponent {
       visibleSeries,
       seriesEnabledState: this.state.seriesEnabledState
     });
+    const options = this.getOptions(this.props);
 
     const plotValues = this.getPlotValues({
       visibleSeries,
       enabledSeries,
-      width
+      options
     });
-    if (_.isEmpty(plotValues)) {
+
+    if (isEmpty(plotValues)) {
       return null;
     }
 
     return (
       <Fragment>
-        <Legends
-          noHits={noHits}
-          truncateLegends={truncateLegends}
-          series={visibleSeries}
-          hiddenSeriesCount={hiddenSeriesCount}
-          clickLegend={this.clickLegend}
-          seriesEnabledState={this.state.seriesEnabledState}
-        />
-
         <div style={{ position: 'relative', height: plotValues.XY_HEIGHT }}>
           <StaticPlot
             noHits={noHits}
@@ -166,6 +166,14 @@ export class InnerCustomPlot extends PureComponent {
             onMouseUp={this.onMouseUp}
           />
         </div>
+        <Legends
+          noHits={noHits}
+          truncateLegends={truncateLegends}
+          series={visibleSeries}
+          hiddenSeriesCount={hiddenSeriesCount}
+          clickLegend={this.clickLegend}
+          seriesEnabledState={this.state.seriesEnabledState}
+        />
       </Fragment>
     );
   }
