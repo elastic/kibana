@@ -40,6 +40,7 @@ module.directive('mlExplorerReactWrapper', function (Private) {
       return {
         chartWidth: scope.swimlaneWidth,
         MlTimeBuckets: TimeBuckets,
+        swimlaneCellClick: scope.swimlaneCellClick,
         swimlaneData: getSwimlaneData(swimlaneType),
         swimlaneType,
         selection: scope.appState.mlExplorerSwimlane,

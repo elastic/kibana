@@ -442,12 +442,12 @@ module.controller('MlExplorerController', function (
   // an update of the viewby swimlanes. If we'd just ignored click events
   // during the loading, we could miss programmatically triggered events like
   // those coming via AppState when a selection is part of the URL.
-  const swimlaneCellClickListenerQueue = [];
+  const swimlaneCellClickQueue = [];
 
   // Listener for click events in the swimlane to load corresponding anomaly data.
-  const swimlaneCellClickListener = function (cellData) {
+  $scope.swimlaneCellClick = function (cellData) {
     if (skipCellClicks === true) {
-      swimlaneCellClickListenerQueue.push(cellData);
+      swimlaneCellClickQueue.push(cellData);
       return;
     }
 
@@ -469,7 +469,6 @@ module.controller('MlExplorerController', function (
       updateExplorer();
     }
   };
-  mlExplorerDashboardService.swimlaneCellClick.watch(swimlaneCellClickListener);
 
   const checkboxShowChartsListener = function () {
     const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
@@ -517,7 +516,6 @@ module.controller('MlExplorerController', function (
   $scope.$on('$destroy', () => {
     dragSelect.stop();
     mlCheckboxShowChartsService.state.unwatch(checkboxShowChartsListener);
-    mlExplorerDashboardService.swimlaneCellClick.unwatch(swimlaneCellClickListener);
     mlExplorerDashboardService.swimlaneRenderDone.unwatch(swimlaneRenderDoneListener);
     mlSelectSeverityService.state.unwatch(anomalyChartsSeverityListener);
     mlSelectIntervalService.state.unwatch(tableControlsListener);
@@ -837,10 +835,10 @@ module.controller('MlExplorerController', function (
 
       skipCellClicks = false;
       console.log('Explorer view by swimlane data set:', $scope.viewBySwimlaneData);
-      if (swimlaneCellClickListenerQueue.length > 0) {
-        const cellData = swimlaneCellClickListenerQueue.pop();
-        swimlaneCellClickListenerQueue.length = 0;
-        swimlaneCellClickListener(cellData);
+      if (swimlaneCellClickQueue.length > 0) {
+        const cellData = swimlaneCellClickQueue.pop();
+        swimlaneCellClickQueue.length = 0;
+        $scope.swimlaneCellClick(cellData);
         return;
       }
 
