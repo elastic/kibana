@@ -267,7 +267,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
                   linkToSingleMetricView: (
                     <EuiLink onClick={() => this.openSingleMetricView()}>
                       <FormattedMessage
-                        id="xpack.ml.annotationsTable.howToCreateAnnotationDescription.singleMetricViewLinkText"
+                        id="xpack.ml.annotationsTable.howToCreateAnnotationDescription.singleMetricViewerLinkText"
                         defaultMessage="Single Metric Viewer"
                       />
                     </EuiLink>
@@ -397,7 +397,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
             />
           ) : (
             <FormattedMessage
-              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedSingleMetricViewerTooltip"
+              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
               defaultMessage="Job configuration not supported in Single Metric Viewer"
             />
           );
@@ -408,7 +408,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
             />
           ) : (
             <FormattedMessage
-              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedSingleMetricViewerAriaLabel"
+              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel"
               defaultMessage="Job configuration not supported in Single Metric Viewer"
             />
           );
