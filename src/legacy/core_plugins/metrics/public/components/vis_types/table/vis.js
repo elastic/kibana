@@ -231,7 +231,8 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  reversed: PropTypes.bool
+  reversed: PropTypes.bool,
+  getConfig: PropTypes.func
 };
 
 export default TableVis;

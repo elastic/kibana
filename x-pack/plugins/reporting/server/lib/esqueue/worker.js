@@ -49,6 +49,8 @@ export class Worker extends events.EventEmitter {
     super();
 
     this.id = puid.generate();
+    this.kibanaId = opts.kibanaId;
+    this.kibanaName = opts.kibanaName;
     this.queue = queue;
     this.client = opts.client || this.queue.client;
     this.jobtype = type;
@@ -120,6 +122,8 @@ export class Worker extends events.EventEmitter {
       started_at: startTime,
       process_expiration: expirationTime,
       status: constants.JOB_STATUS_PROCESSING,
+      kibana_id: this.kibanaId,
+      kibana_name: this.kibanaName,
     };
 
     return this.client.update({
