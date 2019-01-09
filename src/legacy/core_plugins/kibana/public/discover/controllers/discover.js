@@ -761,7 +761,7 @@ function discoverController(
         const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
         $scope.searchSource.rawResponse = merged;
         Promise
-          .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis)))
+          .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
           .then(resp => {
             visualizeHandler.render({ value: resp });
           });
