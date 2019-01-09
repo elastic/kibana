@@ -25,7 +25,6 @@ import 'plugins/ml/components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
@@ -64,7 +63,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
-      initPromise: initPromise(true)
     }
   });
 
@@ -197,6 +195,7 @@ module.controller('MlExplorerController', function (
         $scope.loading = false;
       }
 
+      $scope.$applyAsync();
     }).catch((resp) => {
       console.log('Explorer - error getting job info from elasticsearch:', resp);
     });
@@ -292,6 +291,7 @@ module.controller('MlExplorerController', function (
           restoreCellDataFromAppState();
           updateExplorer();
         }
+        $scope.$applyAsync();
       });
   };
 
@@ -648,6 +648,7 @@ module.controller('MlExplorerController', function (
 
           loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
         }
+        $scope.$applyAsync();
       });
   }
 
@@ -822,10 +823,12 @@ module.controller('MlExplorerController', function (
       ).then((resp) => {
         // TODO - sort the influencers keys so that the partition field(s) are first.
         $scope.influencers = resp.influencers;
+        $scope.$applyAsync();
         console.log('Explorer top influencers data set:', $scope.influencers);
       });
     } else {
       $scope.influencers = {};
+      $scope.$applyAsync();
     }
   }
 
