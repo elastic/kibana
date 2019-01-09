@@ -25,7 +25,7 @@ import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colorma
 import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
-import { ORIGIN } from '../../../../core_plugins/ems_util/common/origin';
+import { ORIGIN } from '../../ems_util/common/origin';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config, i18n) {
 
