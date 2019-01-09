@@ -56,7 +56,12 @@ export const eventsSchema = gql`
     eve: SuricataEveData
   }
 
-  type EventItem {
+  type UserEcsFields {
+    id: Float
+    name: String
+  }
+
+  type ECS {
     _id: String
     _index: String
     destination: DestinationEcsFields
@@ -66,16 +71,17 @@ export const eventsSchema = gql`
     source: SourceEcsFields
     suricata: SuricataEcsFields
     timestamp: String
+    user: UserEcsFields
   }
 
-  type EventEdges {
-    event: EventItem!
+  type EcsEdges {
+    event: ECS!
     cursor: CursorType!
   }
 
   type EventsData {
     kpiEventType: [KpiItem!]
-    edges: [EventEdges!]!
+    edges: [EcsEdges!]!
     totalCount: Int!
     pageInfo: PageInfo!
   }

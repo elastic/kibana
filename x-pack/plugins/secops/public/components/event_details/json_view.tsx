@@ -12,10 +12,10 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { ECS } from '../timeline/ecs';
+import { Ecs } from '../../graphql/types';
 
 interface Props {
-  data: ECS;
+  data: Ecs;
 }
 
 const JsonEditor = styled.div`

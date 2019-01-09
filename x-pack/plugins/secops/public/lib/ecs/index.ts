@@ -6,7 +6,7 @@
 
 import { get, getOr, has, sortBy } from 'lodash/fp';
 
-import { ECS } from '../../components/timeline/ecs';
+import { Ecs } from '../../graphql/types';
 import { EcsField } from './ecs_field';
 import { EcsSchema } from './ecs_schema';
 
@@ -38,7 +38,7 @@ export const getMappedEcsValue = ({
   data,
   fieldName,
 }: {
-  data: ECS;
+  data: Ecs;
   fieldName: string;
 }): string | undefined => {
   const path = getOr(fieldName, fieldName, mappedEcsSchemaFieldNames); // defaults to the fieldName if there is no override
@@ -67,7 +67,7 @@ export const getPopulatedMappedFields = ({
   data,
   schema,
 }: {
-  data: ECS;
+  data: Ecs;
   schema: EcsSchema;
 }): EcsField[] =>
   sortBy(

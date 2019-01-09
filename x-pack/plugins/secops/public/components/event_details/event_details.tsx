@@ -9,14 +9,14 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import { ECS } from '../timeline/ecs';
+import { Ecs } from '../../graphql/types';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 
 export type View = 'table-view' | 'json-view';
 
 interface Props {
-  data: ECS;
+  data: Ecs;
   view: View;
   onViewSelected: (selected: View) => void;
 }

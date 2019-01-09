@@ -10,7 +10,7 @@ import * as React from 'react';
 
 import moment = require('moment');
 import { Body } from '.';
-import { mockECSData } from '../../../mock';
+import { mockEcsData } from '../../../mock';
 import { headers } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
 
@@ -26,7 +26,7 @@ describe('ColumnHeaders', () => {
           id={'timeline-test'}
           columnHeaders={headersSansTimestamp}
           columnRenderers={columnRenderers}
-          data={mockECSData}
+          data={mockEcsData}
           rowRenderers={rowRenderers}
           height={testBodyHeight}
           theme="dark"
@@ -39,7 +39,7 @@ describe('ColumnHeaders', () => {
             .find('[data-test-subj="dataDrivenColumns"]')
             .first()
             .text()
-        ).toContain(get(h.id, mockECSData[0]));
+        ).toContain(get(h.id, mockEcsData[0]));
       });
     });
 
@@ -51,7 +51,7 @@ describe('ColumnHeaders', () => {
           id={'timeline-test'}
           columnHeaders={headersJustTimestamp}
           columnRenderers={columnRenderers}
-          data={mockECSData}
+          data={mockEcsData}
           rowRenderers={rowRenderers}
           height={testBodyHeight}
           theme="dark"
@@ -64,7 +64,7 @@ describe('ColumnHeaders', () => {
             .find('[data-test-subj="dataDrivenColumns"]')
             .first()
             .text()
-        ).toContain(moment(get(h.id, mockECSData[0])).format());
+        ).toContain(moment(get(h.id, mockEcsData[0])).format());
       });
     });
   });

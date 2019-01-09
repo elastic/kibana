@@ -5,7 +5,7 @@
  */
 
 import { get, getOr } from 'lodash/fp';
-import { EventEdges, EventsData, KpiItem } from '../../graphql/types';
+import { EcsEdges, EventsData, KpiItem } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
@@ -35,7 +35,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
-    const eventsEdges: EventEdges[] = hits.map(hit =>
+    const eventsEdges: EcsEdges[] = hits.map(hit =>
       formatEventsData(options.fields, hit, eventFieldsMap)
     );
     const hasNextPage = eventsEdges.length === limit + 1;
@@ -66,7 +66,7 @@ export const formatEventsData = (
         flattenedFields.cursor.value = hit.sort[0];
         flattenedFields.cursor.tiebreaker = hit.sort[1];
       }
-      return mergeFieldsWithHit(fieldName, 'event', flattenedFields, fieldMap, hit) as EventEdges;
+      return mergeFieldsWithHit(fieldName, 'event', flattenedFields, fieldMap, hit) as EcsEdges;
     },
     {
       event: {},
@@ -74,5 +74,5 @@ export const formatEventsData = (
         value: '',
         tiebreaker: null,
       },
-    } as EventEdges
+    } as EcsEdges
   );

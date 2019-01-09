@@ -13,7 +13,7 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { eventsQuery } from '../../containers/events/index.gql_query';
 import { mockGlobalState } from '../../mock';
-import { mockECSData } from '../../mock';
+import { mockEcsData } from '../../mock';
 import { createStore, State } from '../../store';
 import { flyoutHeaderHeight } from '../flyout';
 import { ColumnHeaderType } from './body/column_headers/column_header';
@@ -72,7 +72,7 @@ describe('Timeline', () => {
       request: { query: eventsQuery },
       result: {
         data: {
-          events: mockECSData,
+          events: mockEcsData,
         },
       },
     },

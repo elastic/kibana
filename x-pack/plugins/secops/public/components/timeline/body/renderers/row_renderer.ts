@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 export interface RowRenderer {
-  isInstance: (data: ECS) => boolean;
-  renderRow: (data: ECS, children: React.ReactNode) => React.ReactNode;
+  isInstance: (data: Ecs) => boolean;
+  renderRow: (data: Ecs, children: React.ReactNode) => React.ReactNode;
 }

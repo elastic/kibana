@@ -10,12 +10,12 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { EventEdges, EventItem, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
+import { Ecs, EcsEdges, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {
-  events: EventItem[];
+  events: Ecs[];
   id: string;
   loading: boolean;
   loadMore: (cursor: string, tieBreaker: string) => void;
@@ -61,7 +61,7 @@ export const TimelineQuery = pure<OwnProps>(
           loading,
           totalCount: getOr(0, 'source.Events.totalCount', data),
           pageInfo: getOr({}, 'source.Events.pageInfo', data),
-          events: events.map((i: EventEdges) => i.event),
+          events: events.map((i: EcsEdges) => i.event),
           loadMore: (newCursor: string, tiebreaker: string) =>
             fetchMore({
               variables: {

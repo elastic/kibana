@@ -8,10 +8,10 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import uuid from 'uuid';
 
+import { Ecs } from '../../graphql/types';
 import { EcsField, getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../lib/ecs';
 import { escapeQueryValue } from '../../lib/keury';
 import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { ECS } from '../timeline/ecs';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -70,7 +70,7 @@ export const getIconFromType = (type: string) => {
 
 interface GetItemsParams {
   /** the runtime representation of an event */
-  data: ECS;
+  data: Ecs;
   /** all the fields that are populated in `data` */
   populatedFields: EcsField[];
 }

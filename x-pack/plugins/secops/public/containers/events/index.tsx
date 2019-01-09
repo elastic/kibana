@@ -10,13 +10,13 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { Direction, EventItem, GetEventsQuery, PageInfo } from '../../graphql/types';
+import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
 import { eventsLimitSelector, inputsModel, State } from '../../store';
 import { eventsQuery } from './index.gql_query';
 
 export interface EventsArgs {
   id: string;
-  events: EventItem[];
+  events: Ecs[];
   loading: boolean;
   loadMore: (cursor: string) => void;
   pageInfo: PageInfo;

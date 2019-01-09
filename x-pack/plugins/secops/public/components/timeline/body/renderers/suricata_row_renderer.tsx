@@ -10,7 +10,7 @@ import React from 'react';
 import styled, { keyframes } from 'styled-components';
 
 import { createLinkWithSignature, RowRenderer } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 export const dropInEffect = keyframes`
   0% {
@@ -93,13 +93,13 @@ const LabelValuePair = ({ label, ariaLabel, value }: LabelValuePairParams) => (
 );
 
 export const suricataRowRenderer: RowRenderer = {
-  isInstance: (ecs: ECS) => {
+  isInstance: (ecs: Ecs) => {
     if (ecs && ecs.event && ecs.event.module && ecs.event.module.toLowerCase() === 'suricata') {
       return true;
     }
     return false;
   },
-  renderRow: (data: ECS, children: React.ReactNode) => {
+  renderRow: (data: Ecs, children: React.ReactNode) => {
     const signature = get('suricata.eve.alert.signature', data) as string;
     return (
       <SuricataRow>
@@ -114,12 +114,12 @@ export const suricataRowRenderer: RowRenderer = {
               <LabelValuePair
                 label="Source"
                 ariaLabel="Source"
-                value={`${data.source.ip}:${data.source.port}`}
+                value={`${data.source!.ip}:${data.source!.port}`}
               />
               <LabelValuePair
                 label="Destination"
                 ariaLabel="Destination"
-                value={`${data.destination.ip}:${data.destination.port}`}
+                value={`${data.destination!.ip}:${data.destination!.port}`}
               />
             </Details>
           </SuricataSignature>

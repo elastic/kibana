@@ -6,11 +6,11 @@
 
 import * as React from 'react';
 
-import { ECS } from '../timeline/ecs';
+import { Ecs } from '../../graphql/types';
 import { EventDetails, View } from './event_details';
 
 interface Props {
-  data: ECS;
+  data: Ecs;
 }
 
 interface State {

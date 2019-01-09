@@ -11,7 +11,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { EventItem } from '../../../../graphql/types';
+import { Ecs } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { eventsLimitSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -19,7 +19,7 @@ import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 interface OwnProps {
-  data: EventItem[];
+  data: Ecs[];
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
@@ -105,7 +105,7 @@ const getEventsColumns = (startDate: number) => [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ event }: { event: EventItem }) => {
+    render: ({ event }: { event: Ecs }) => {
       const hostName = getOr('--', 'host.name', event);
       return (
         <>
@@ -142,12 +142,12 @@ const getEventsColumns = (startDate: number) => [
     sortable: true,
     truncateText: true,
     hideForMobile: true,
-    render: ({ event }: { event: EventItem }) => <>{getOr('--', 'event.type', event)}</>,
+    render: ({ event }: { event: Ecs }) => <>{getOr('--', 'event.type', event)}</>,
   },
   {
     name: 'Source',
     truncateText: true,
-    render: ({ event }: { event: EventItem }) => (
+    render: ({ event }: { event: Ecs }) => (
       <>
         {has('source.ip', event) ? getOr('--', 'source.ip', event).slice(0, 12) : '--'} :{' '}
         {getOr('--', 'source.port', event)}
@@ -158,7 +158,7 @@ const getEventsColumns = (startDate: number) => [
     name: 'Destination',
     sortable: true,
     truncateText: true,
-    render: ({ event }: { event: EventItem }) => (
+    render: ({ event }: { event: Ecs }) => (
       <>
         {has('destination.ip', event) ? getOr('--', 'destination.ip', event).slice(0, 12) : '--'} :{' '}
         {getOr('--', 'destination.port', event)}
@@ -169,7 +169,7 @@ const getEventsColumns = (startDate: number) => [
     name: 'Location',
     sortable: true,
     truncateText: true,
-    render: ({ event }: { event: EventItem }) => (
+    render: ({ event }: { event: Ecs }) => (
       <>
         {getOr('--', 'geo.region_name', event)} : {getOr('--', 'geo.country_iso_code', event)}
       </>

@@ -129,7 +129,7 @@ export interface IndexField {
 export interface EventsData {
   kpiEventType?: KpiItem[] | null;
 
-  edges: EventEdges[];
+  edges: EcsEdges[];
 
   totalCount: number;
 
@@ -142,13 +142,13 @@ export interface KpiItem {
   count: number;
 }
 
-export interface EventEdges {
-  event: EventItem;
+export interface EcsEdges {
+  event: Ecs;
 
   cursor: CursorType;
 }
 
-export interface EventItem {
+export interface Ecs {
   _id?: string | null;
 
   _index?: string | null;
@@ -166,6 +166,8 @@ export interface EventItem {
   suricata?: SuricataEcsFields | null;
 
   timestamp?: string | null;
+
+  user?: UserEcsFields | null;
 }
 
 export interface DestinationEcsFields {
@@ -222,6 +224,12 @@ export interface SuricataAlertData {
   signature?: string | null;
 
   signature_id?: number | null;
+}
+
+export interface UserEcsFields {
+  id?: number | null;
+
+  name?: string | null;
 }
 
 export interface CursorType {
@@ -687,7 +695,7 @@ export namespace EventsDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = EventsData> {
     kpiEventType?: KpiEventTypeResolver<KpiItem[] | null, TypeParent, Context>;
 
-    edges?: EdgesResolver<EventEdges[], TypeParent, Context>;
+    edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
@@ -700,7 +708,7 @@ export namespace EventsDataResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type EdgesResolver<
-    R = EventEdges[],
+    R = EcsEdges[],
     Parent = EventsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -735,27 +743,27 @@ export namespace KpiItemResolvers {
   >;
 }
 
-export namespace EventEdgesResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = EventEdges> {
-    event?: EventResolver<EventItem, TypeParent, Context>;
+export namespace EcsEdgesResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = EcsEdges> {
+    event?: EventResolver<Ecs, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
-  export type EventResolver<R = EventItem, Parent = EventEdges, Context = SecOpsContext> = Resolver<
+  export type EventResolver<R = Ecs, Parent = EcsEdges, Context = SecOpsContext> = Resolver<
     R,
     Parent,
     Context
   >;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = EventEdges,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<R = CursorType, Parent = EcsEdges, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
-export namespace EventItemResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = EventItem> {
+export namespace EcsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = Ecs> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
     _index?: IndexResolver<string | null, TypeParent, Context>;
@@ -773,51 +781,58 @@ export namespace EventItemResolvers {
     suricata?: SuricataResolver<SuricataEcsFields | null, TypeParent, Context>;
 
     timestamp?: TimestampResolver<string | null, TypeParent, Context>;
+
+    user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
   }
 
-  export type IdResolver<R = string | null, Parent = EventItem, Context = SecOpsContext> = Resolver<
+  export type IdResolver<R = string | null, Parent = Ecs, Context = SecOpsContext> = Resolver<
     R,
     Parent,
     Context
   >;
-  export type IndexResolver<
-    R = string | null,
-    Parent = EventItem,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
+  export type IndexResolver<R = string | null, Parent = Ecs, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type DestinationResolver<
     R = DestinationEcsFields | null,
-    Parent = EventItem,
+    Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type EventResolver<
     R = EventEcsFields | null,
-    Parent = EventItem,
+    Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type GeoResolver<
     R = GeoEcsFields | null,
-    Parent = EventItem,
+    Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = HostEcsFields | null,
-    Parent = EventItem,
+    Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
     R = SourceEcsFields | null,
-    Parent = EventItem,
+    Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type SuricataResolver<
     R = SuricataEcsFields | null,
-    Parent = EventItem,
+    Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type TimestampResolver<
     R = string | null,
-    Parent = EventItem,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UserResolver<
+    R = UserEcsFields | null,
+    Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -998,6 +1013,25 @@ export namespace SuricataAlertDataResolvers {
   export type SignatureIdResolver<
     R = number | null,
     Parent = SuricataAlertData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UserEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = UserEcsFields> {
+    id?: IdResolver<number | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = number | null,
+    Parent = UserEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = UserEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

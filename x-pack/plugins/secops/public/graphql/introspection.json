@@ -838,7 +838,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "EventEdges", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "EcsEdges", "ofType": null }
                 }
               }
             },
@@ -912,7 +912,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "EventEdges",
+        "name": "EcsEdges",
         "description": "",
         "fields": [
           {
@@ -922,7 +922,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "EventItem", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "ECS", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -947,7 +947,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "EventItem",
+        "name": "ECS",
         "description": "",
         "fields": [
           {
@@ -1019,6 +1019,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "UserEcsFields", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1267,6 +1275,33 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserEcsFields",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

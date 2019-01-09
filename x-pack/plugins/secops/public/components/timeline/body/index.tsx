@@ -9,17 +9,17 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { Ecs } from '../../../graphql/types';
 import { Theme } from '../../../store/local/app/model';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
-import { ECS } from '../ecs';
 import { ColumnHeader } from './column_headers/column_header';
 import { ColumnRenderer, getColumnRenderer, getRowRenderer, RowRenderer } from './renderers';
 
 interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  data: ECS[];
+  data: Ecs[];
   height: number;
   id: string;
   rowRenderers: RowRenderer[];
@@ -102,7 +102,7 @@ export const Body = pure<Props>(
   ({ columnHeaders, columnRenderers, data, height, id, rowRenderers, theme }) => (
     <ScrollableArea height={height} data-test-subj="scrollableArea">
       {data.map(ecs => (
-        <Row key={ecs._id}>
+        <Row key={ecs._id!}>
           <TimeGutter themeName={theme} />
           {getRowRenderer(ecs, rowRenderers).renderRow(
             ecs,

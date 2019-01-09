@@ -8,10 +8,9 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { ECS } from './ecs';
 
 import { TimelineQuery } from '../../containers/timeline';
-import { Direction } from '../../graphql/types';
+import { Direction, Ecs } from '../../graphql/types';
 import { Theme } from '../../store/local/app/model';
 import { AutoSizer } from '../auto_sizer';
 import { Body } from './body';
@@ -124,7 +123,7 @@ export const Timeline = pure<Props>(
                           id={id}
                           columnHeaders={columnHeaders}
                           columnRenderers={columnRenderers}
-                          data={events as ECS[]}
+                          data={events as Ecs[]}
                           height={calculateBodyHeight({
                             flyoutHeight,
                             flyoutHeaderHeight,

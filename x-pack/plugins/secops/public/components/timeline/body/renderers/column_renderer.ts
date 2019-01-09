@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 export interface ColumnRenderer {
-  isInstance: (columnName: string, data: ECS) => boolean;
-  renderColumn: (columnName: string, data: ECS) => React.ReactNode;
+  isInstance: (columnName: string, data: Ecs) => boolean;
+  renderColumn: (columnName: string, data: Ecs) => React.ReactNode;
 }

@@ -100,7 +100,7 @@ export interface IndexField {
 export interface EventsData {
   kpiEventType?: KpiItem[] | null;
 
-  edges: EventEdges[];
+  edges: EcsEdges[];
 
   totalCount: number;
 
@@ -113,13 +113,13 @@ export interface KpiItem {
   count: number;
 }
 
-export interface EventEdges {
-  event: EventItem;
+export interface EcsEdges {
+  event: Ecs;
 
   cursor: CursorType;
 }
 
-export interface EventItem {
+export interface Ecs {
   _id?: string | null;
 
   _index?: string | null;
@@ -137,6 +137,8 @@ export interface EventItem {
   suricata?: SuricataEcsFields | null;
 
   timestamp?: string | null;
+
+  user?: UserEcsFields | null;
 }
 
 export interface DestinationEcsFields {
@@ -193,6 +195,12 @@ export interface SuricataAlertData {
   signature?: string | null;
 
   signature_id?: number | null;
+}
+
+export interface UserEcsFields {
+  id?: number | null;
+
+  name?: string | null;
 }
 
 export interface CursorType {
@@ -400,13 +408,13 @@ export namespace GetEventsQuery {
   };
 
   export type Edges = {
-    __typename?: 'EventEdges';
+    __typename?: 'EcsEdges';
 
     event: Event;
   };
 
   export type Event = {
-    __typename?: 'EventItem';
+    __typename?: 'ECS';
 
     _id?: string | null;
 
@@ -716,13 +724,13 @@ export namespace GetTimelineQuery {
   };
 
   export type Edges = {
-    __typename?: 'EventEdges';
+    __typename?: 'EcsEdges';
 
     event: Event;
   };
 
   export type Event = {
-    __typename?: 'EventItem';
+    __typename?: 'ECS';
 
     _id?: string | null;
 
