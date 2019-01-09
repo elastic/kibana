@@ -11,7 +11,7 @@ export const filebeatNginxRules = [
     },
     format: [
       {
-        constant: '[Nginx] ',
+        constant: '[Nginx][access] ',
       },
       {
         field: 'nginx.access.remote_ip',
@@ -60,7 +60,16 @@ export const filebeatNginxRules = [
     },
     format: [
       {
-        constant: '[Nginx Error] ',
+        constant: '[Nginx]',
+      },
+      {
+        constant: '[',
+      },
+      {
+        field: 'nginx.error.level',
+      },
+      {
+        constant: '] ',
       },
       {
         field: 'nginx.error.message',

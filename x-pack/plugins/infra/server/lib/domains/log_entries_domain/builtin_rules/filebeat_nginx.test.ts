@@ -23,7 +23,7 @@ describe('Filebeat Rules', () => {
     const message = format(event);
     expect(message).toEqual([
       {
-        constant: '[Nginx] ',
+        constant: '[Nginx][access] ',
       },
       {
         field: 'nginx.access.remote_ip',
@@ -84,11 +84,23 @@ describe('Filebeat Rules', () => {
     const event = {
       'nginx.error.message':
         'connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /php-status?json= HTTP/1.1", upstream: "fastcgi://[::1]:9000", host: "localhost"',
+      'nginx.error.level': 'error',
     };
     const message = format(event);
     expect(message).toEqual([
       {
-        constant: '[Nginx Error] ',
+        constant: '[Nginx]',
+      },
+      {
+        constant: '[',
+      },
+      {
+        field: 'nginx.error.level',
+        highlights: [],
+        value: 'error',
+      },
+      {
+        constant: '] ',
       },
       {
         field: 'nginx.error.message',
