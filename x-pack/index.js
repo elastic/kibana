@@ -5,6 +5,7 @@
  */
 
 import { xpackMain } from './plugins/xpack_main';
+import { coreTelemetry } from './plugins/core_telemetry';
 import { graph } from './plugins/graph';
 import { monitoring } from './plugins/monitoring';
 import { reporting } from './plugins/reporting';
@@ -39,6 +40,7 @@ import { uptime } from './plugins/uptime';
 module.exports = function (kibana) {
   return [
     xpackMain(kibana),
+    coreTelemetry(kibana),
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
