@@ -148,6 +148,10 @@ export class AdvancedSettingsForm extends PureComponent {
     return (
       <Fragment>
         <EuiPanel paddingSize="m">
+          <EuiTitle size="s">
+            <h4>Advanced settings</h4>
+          </EuiTitle>
+          <EuiSpacer />
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               { Object.keys(schema)
@@ -190,6 +194,7 @@ export class AdvancedSettingsForm extends PureComponent {
                   <EuiTitle size="xs">
                     <h4>{schema[previewSettingActive].label}</h4>
                   </EuiTitle>
+                  <EuiSpacer size="s" />
                   <EuiText>
                     {schema[previewSettingActive].description}
                   </EuiText>
