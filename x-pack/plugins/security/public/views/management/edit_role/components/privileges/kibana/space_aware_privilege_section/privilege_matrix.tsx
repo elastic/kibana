@@ -5,9 +5,9 @@
  */
 import {
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiButtonEmpty,
   EuiIcon,
+  EuiIconTip,
   // @ts-ignore
   EuiInMemoryTable,
   EuiModal,
@@ -55,7 +55,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
         <EuiOverlayMask>
           <EuiModal onClose={this.hideModal}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Privilege matrix</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>Privilege summary matrix</EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>{this.renderTable()}</EuiModalBody>
             <EuiModalFooter>
@@ -70,7 +70,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiButton onClick={this.showModal}>Show privilege matrix</EuiButton>
+        <EuiButtonEmpty onClick={this.showModal}>Show privilege summary</EuiButtonEmpty>
         {modal}
       </Fragment>
     );
@@ -132,15 +132,26 @@ export class PrivilegeMatrix extends Component<Props, State> {
         field: 'feature',
         name: 'Feature',
         render: (feature: Feature & { isBase: boolean }) => {
-          return (
-            <EuiText
-              style={{
-                fontWeight: feature.isBase ? 'bold' : 'normal',
-              }}
-            >
-              {feature.icon && <EuiIcon type={feature.icon} style={{ marginRight: '10px' }} />}{' '}
+          return feature.isBase ? (
+            <Fragment>
+              <strong>{feature.name}</strong>
+              <EuiIconTip
+                // TODO: Waiting on update from EUI
+                // iconProps={{
+                //   className: 'eui-alignTop',
+                // }}
+                type="questionInCircle"
+                content="Lowest level privilege allowed"
+                color="subdued"
+              />
+            </Fragment>
+          ) : (
+            <Fragment>
+              {feature.icon && (
+                <EuiIcon className="secPrivilegeFeatureIcon" size="m" type={feature.icon} />
+              )}
               {feature.name}
-            </EuiText>
+            </Fragment>
           );
         },
       },
@@ -148,32 +159,35 @@ export class PrivilegeMatrix extends Component<Props, State> {
         return {
           field: 'feature',
           name: (
-            <EuiFlexGroup wrap gutterSize={'xs'}>
-              <Fragment>
-                {item.headerSpaces.map((space: Space) => (
-                  <EuiFlexItem grow={false} key={space.id}>
-                    <EuiText>
-                      <SpaceAvatar space={space} /> {item.isGlobal && space.name}{' '}
+            <Fragment>
+              {item.headerSpaces.map((space: Space) => (
+                <span key={space.id}>
+                  <SpaceAvatar size="s" space={space} />{' '}
+                  {item.isGlobal && (
+                    <span>
+                      Global <br />
+                      (all spaces)
+                    </span>
+                  )}
+                </span>
+              ))}
+              {item.headerSpaces.length !== item.spaces.length && (
+                // @ts-ignore
+                <EuiToolTip
+                  content={
+                    <EuiText size="s">
+                      <ul>
+                        {item.spaces.map((s: Space) => (
+                          <li key={s.id}>{s.name}</li>
+                        ))}
+                      </ul>
                     </EuiText>
-                  </EuiFlexItem>
-                ))}
-                {item.headerSpaces.length !== item.spaces.length && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={
-                        <ul>
-                          {item.spaces.map((s: Space) => (
-                            <li key={s.id}>{s.name}</li>
-                          ))}
-                        </ul>
-                      }
-                    >
-                      <EuiText>({item.spaces.length - item.headerSpaces.length} more)</EuiText>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-              </Fragment>
-            </EuiFlexGroup>
+                  }
+                >
+                  {item.spaces.length - item.headerSpaces.length} more
+                </EuiToolTip>
+              )}
+            </Fragment>
           ),
           render: (feature: Feature & { isBase: boolean }, record: TableRow) => {
             if (item.isGlobal) {
@@ -229,7 +243,26 @@ export class PrivilegeMatrix extends Component<Props, State> {
       }),
     ];
 
-    return <EuiInMemoryTable columns={columns} items={rows} />;
+    return (
+      <EuiInMemoryTable
+        columns={columns}
+        items={rows}
+        // TODO: FIX the ts-ignores
+        // @ts-ignore
+        rowProps={item => {
+          return {
+            className: item.feature.isBase ? 'secPrivilegeMatrix__row--isBasePrivilege' : '',
+          };
+        }}
+        // @ts-ignore
+        cellProps={item => {
+          // TODO: FIX THIS TO ACTUALLY WORK
+          return {
+            className: item.isGlobal ? 'secPrivilegeMatrix__cell--isGlobalPrivilege' : '',
+          };
+        }}
+      />
+    );
   };
 
   private locateGlobalPrivilege = () => {

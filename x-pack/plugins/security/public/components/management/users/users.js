@@ -93,7 +93,7 @@ class UsersUI extends Component {
     const { apiClient, intl } = this.props;
     if (permissionDenied) {
       return (
-        <EuiPage className="mgtUsersListingPage">
+        <EuiPage className="secUsersListingPage">
           <EuiPageBody>
             <EuiPageContent horizontalPosition="center">
               <EuiEmptyPrompt
@@ -222,9 +222,9 @@ class UsersUI extends Component {
         return normalized.indexOf(normalizedQuery) !== -1;
       }) : users;
     return (
-      <EuiPage className="mgtUsersListingPage">
+      <EuiPage className="secUsersListingPage">
         <EuiPageBody>
-          <EuiPageContent className="mgtUsersListingPage__content">
+          <EuiPageContent className="secUsersListingPage__content">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>

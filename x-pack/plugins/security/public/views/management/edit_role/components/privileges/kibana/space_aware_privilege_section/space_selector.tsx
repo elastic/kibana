@@ -55,6 +55,7 @@ export class SpaceSelector extends Component<Props, {}> {
 
     return (
       <EuiComboBox
+        fullWidth
         options={this.props.spaces.map(space =>
           spaceToOption(
             space,
