@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { pure } from 'recompose';
+import { HeaderBreadcrumbs } from '../../components/page/navigation/breadcrumb';
 
 interface Props {
   match: {
@@ -15,6 +16,7 @@ interface Props {
 
 export const HostDetails = pure<Props>(({ match }) => (
   <div>
+    <HeaderBreadcrumbs />
     <h3>Match: {JSON.stringify(match)}</h3>
     <h2>Hostname: {match.params.hostName}</h2>
   </div>

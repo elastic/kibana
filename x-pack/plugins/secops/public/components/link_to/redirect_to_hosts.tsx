@@ -17,7 +17,7 @@ export const RedirectToHostsPage = ({
   },
   location,
 }: RedirectToHostDetailsProps) => {
-  return <Redirect to={`/hosts/${hostName}`} />;
+  return <Redirect to={hostName ? `/hosts/${hostName}` : '/hosts'} />;
 };
 
 export const getHostsUrl = (matches?: { hostName?: string }) => {
