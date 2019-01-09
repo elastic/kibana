@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiTabbedContent,
@@ -35,6 +36,7 @@ import {
 } from '../../../common/util/anomaly_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import { formatValue } from '../../formatters/format_value';
+import { MAX_CHARS } from './anomalies_table_constants';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -218,6 +220,8 @@ export class AnomalyDetails extends Component {
   }
 
   renderCategoryExamples() {
+    const { examples, definition } = this.props;
+
     return (
       <EuiFlexGroup
         direction="column"
@@ -225,9 +229,40 @@ export class AnomalyDetails extends Component {
         gutterSize="m"
         className="mlAnomalyCategoryExamples"
       >
-        {this.props.examples.map((example, i) => {
+        <EuiFlexItem key={`example-terms`}>
+          <EuiText size="xs">
+            <h4 className="mlAnomalyCategoryExamples__terms">Terms</h4>&nbsp;
+            <EuiIconTip
+              aria-label="Description"
+              type="questionInCircle"
+              color="subdued"
+              size="s"
+              content={`A space-delimited string of the common tokens matched in values of the category
+              (may have been truncated to a max character limit of ${MAX_CHARS})`}
+            />
+          </EuiText>
+          <EuiText size="xs">
+            {definition.terms}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiFlexItem key={`example-regex`}>
+          <EuiText size="xs">
+            <h4>Regex</h4>
+          </EuiText>
+          <EuiText size="xs">
+            {definition.regex}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiSpacer size="l" />
+
+        {examples.map((example, i) => {
           return (
             <EuiFlexItem key={`example${i}`}>
+              {(i === 0) &&
+                <EuiText size="s">
+                  <h4>Examples</h4>
+                </EuiText>}
               <span className="mlAnomalyCategoryExamples__item">{example}</span>
             </EuiFlexItem>
           );
@@ -384,6 +419,7 @@ export class AnomalyDetails extends Component {
 AnomalyDetails.propTypes = {
   anomaly: PropTypes.object.isRequired,
   examples: PropTypes.array,
+  definition: PropTypes.object,
   isAggregatedData: PropTypes.bool,
   filter: PropTypes.func,
   influencersLimit: PropTypes.number,
