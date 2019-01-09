@@ -28,12 +28,13 @@ import { toastNotifications } from 'ui/notify';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { PrivilegeMap } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
 import { isReservedRole } from '../../../../lib/role';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
+import { copyRole } from '../lib/copy_role';
+import { transformRoleForSave } from '../lib/transform_role_for_save';
 import { RoleValidationResult, RoleValidator } from '../lib/validate_role';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivileges } from './privileges';
@@ -321,10 +322,6 @@ class EditRolePageUI extends Component<Props, State> {
     return !!this.props.role.name;
   };
 
-  public isPlaceholderPrivilege = (indexPrivilege: IndexPrivilege) => {
-    return indexPrivilege.names.length === 0;
-  };
-
   public saveRole = () => {
     this.validator.enableValidation();
 
@@ -340,14 +337,9 @@ class EditRolePageUI extends Component<Props, State> {
 
       const { httpClient, intl } = this.props;
 
-      const role = {
-        ...this.state.role,
-      };
+      const role = copyRole(this.state.role);
 
-      role.elasticsearch.indices = role.elasticsearch.indices.filter(
-        i => !this.isPlaceholderPrivilege(i)
-      );
-      role.elasticsearch.indices.forEach(index => index.query || delete index.query);
+      transformRoleForSave(role);
 
       saveRole(httpClient, role)
         .then(() => {
