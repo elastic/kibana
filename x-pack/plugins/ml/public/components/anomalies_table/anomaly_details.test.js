@@ -101,7 +101,7 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper.contains(<h4>Regex</h4>)).toBe(true);
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
     expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
     expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
   });
@@ -117,7 +117,7 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper.contains(<h4>Regex</h4>)).toBe(false);
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
     expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
     expect(wrapper.contains(<h4>Examples</h4>)).toBe(false);
   });
@@ -135,7 +135,7 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper.contains(<h4>Regex</h4>)).toBe(false);
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
     expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
     expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
   });
@@ -153,7 +153,7 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper.contains(<h4>Regex</h4>)).toBe(true);
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
     expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
     expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
   });

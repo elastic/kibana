@@ -233,13 +233,13 @@ export class AnomalyDetails extends Component {
         <Fragment>
           <EuiFlexItem key={`example-terms`}>
             <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__terms">Terms</h4>&nbsp;
+              <h4 className="mlAnomalyCategoryExamples__header">Terms</h4>&nbsp;
               <EuiIconTip
                 aria-label="Description"
                 type="questionInCircle"
                 color="subdued"
                 size="s"
-                content={`A space-delimited string of the common tokens matched in values of the category
+                content={`A space separated list of the common tokens that are matched in values of the category
                 (may have been truncated to a max character limit of ${MAX_CHARS})`}
               />
             </EuiText>
@@ -253,7 +253,15 @@ export class AnomalyDetails extends Component {
           <Fragment>
             <EuiFlexItem key={`example-regex`}>
               <EuiText size="xs">
-                <h4>Regex</h4>
+                <h4 className="mlAnomalyCategoryExamples__header">Regex</h4>&nbsp;
+                <EuiIconTip
+                  aria-label="Description"
+                  type="questionInCircle"
+                  color="subdued"
+                  size="s"
+                  content={`The regular expression that is used to search for values that match the category
+                  (may have been truncated to a max character limit of ${MAX_CHARS})`}
+                />
               </EuiText>
               <EuiText size="xs">
                 {definition.regex}
