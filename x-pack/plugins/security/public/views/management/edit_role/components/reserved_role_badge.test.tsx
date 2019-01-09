@@ -18,10 +18,6 @@ const reservedRole: Role = {
     run_as: [],
   },
   kibana: {
-    global: {
-      minimum: ['all'],
-      feature: {},
-    },
     spaces: [
       {
         spaces: ['*'],

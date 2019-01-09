@@ -22,10 +22,6 @@ describe('validateRoleName', () => {
         run_as: [],
       },
       kibana: {
-        global: {
-          minimum: [],
-          feature: {},
-        },
         spaces: [],
       },
     };

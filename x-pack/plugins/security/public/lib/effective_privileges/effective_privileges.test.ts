@@ -58,10 +58,6 @@ const buildRole = (options: BuildRoleOpts = {}) => {
       run_as: [],
     },
     kibana: {
-      global: {
-        minimum: [],
-        feature: {},
-      },
       spaces: [],
     },
   };

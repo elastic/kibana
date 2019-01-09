@@ -14,12 +14,6 @@ export interface Role {
     run_as: string[];
   };
   kibana: {
-    global: {
-      minimum: string[];
-      feature: {
-        [featureId: string]: string[];
-      };
-    };
     spaces: Array<{
       spaces: string[];
       minimum: string[];
