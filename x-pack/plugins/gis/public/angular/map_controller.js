@@ -36,10 +36,6 @@ const app = uiModules.get('app/gis', []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState) => {
 
-  const EMPTY_QUERY = {
-    query: '',
-    language: localStorage.get('kibana.userQueryLanguage') || 'kuery'
-  };
   const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
   let unsubscribe;
@@ -52,7 +48,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       $scope.updateQueryAndDispatch($state.query);
     }
   });
-  $scope.query = EMPTY_QUERY;
+  $scope.query = {};
   $scope.indexPatterns = [];
   $scope.updateQueryAndDispatch = function (newQuery) {
     $scope.query = newQuery;
@@ -105,7 +101,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     } else if (queryFromSavedObject) {
       $scope.updateQueryAndDispatch(queryFromSavedObject);
     } else {
-      $scope.updateQueryAndDispatch(EMPTY_QUERY);
+      $scope.updateQueryAndDispatch({
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage') || 'kuery'
+      });
     }
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
