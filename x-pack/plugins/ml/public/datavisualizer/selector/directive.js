@@ -13,7 +13,6 @@ const module = uiModules.get('apps/ml', ['react']);
 
 import { checkBasicLicense } from 'plugins/ml/license/check_license';
 import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
-import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
 
@@ -25,7 +24,6 @@ uiRoutes
     resolve: {
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,
-      initPromise: initPromise(false)
     }
   });
 

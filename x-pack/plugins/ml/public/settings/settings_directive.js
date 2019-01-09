@@ -15,7 +15,7 @@ const module = uiModules.get('apps/ml', ['react']);
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
-import { initPromise } from '../util/promise';
+import { getSettingsBreadcrumbs } from './breadcrumbs';
 
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
@@ -34,7 +34,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(false)
     }
   });
 
