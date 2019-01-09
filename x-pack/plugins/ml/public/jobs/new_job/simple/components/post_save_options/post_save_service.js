@@ -30,7 +30,7 @@ class PostSaveService {
     this.externalCreateWatch;
   }
 
-  startRealtimeJob(jobId) {
+  startRealtimeJob(jobId, i18n) {
     return new Promise((resolve, reject) => {
       this.status.realtimeJob = this.STATUS.SAVING;
 
@@ -43,7 +43,10 @@ class PostSaveService {
               this.status.realtimeJob = this.STATUS.SAVED;
               resolve();
             }).catch((resp) => {
-              msgs.error('Could not start datafeed: ', resp);
+              msgs.error(
+                i18n('xpack.ml.newJob.simple.postSaveOptions.couldNotStartDatafeedErrorMessage', {
+                  defaultMessage: 'Could not start datafeed:'
+                }), resp);
               this.status.realtimeJob = this.STATUS.SAVE_FAILED;
               reject();
             });
@@ -52,9 +55,9 @@ class PostSaveService {
     });
   }
 
-  apply(jobId, runInRealtime, createWatch) {
+  apply(jobId, runInRealtime, createWatch, i18n) {
     if (runInRealtime) {
-      this.startRealtimeJob(jobId)
+      this.startRealtimeJob(jobId, i18n)
         .then(() => {
           if (createWatch) {
             mlCreateWatchService.createNewWatch(jobId);
