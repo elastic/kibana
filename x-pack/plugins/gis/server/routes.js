@@ -11,7 +11,7 @@ import _ from 'lodash';
 
 const ROOT = `/${GIS_API_PATH}`;
 
-export function initRoutes(server) {
+export function initRoutes(server, licenseUid) {
 
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
@@ -32,7 +32,7 @@ export function initRoutes(server) {
         return null;
       }
 
-      const ems = await getEMSResources();
+      const ems = await getEMSResources(licenseUid);
 
       const layer = ems.fileLayers.find(layer => layer.id === request.query.id);
       if (!layer) {
@@ -52,7 +52,7 @@ export function initRoutes(server) {
 
       let ems;
       try {
-        ems = await getEMSResources();
+        ems = await getEMSResources(licenseUid);
       } catch (e) {
         console.error('Cannot connect to EMS');
         console.error(e);
@@ -77,8 +77,9 @@ export function initRoutes(server) {
     }
   });
 
-  async function getEMSResources() {
+  async function getEMSResources(licenseUid) {
 
+    emsClient.addQueryParams({ license: licenseUid });
     const fileLayerObjs = await emsClient.getFileLayers();
     const tmsServicesObjs = await emsClient.getTMSServices();
 
