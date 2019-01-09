@@ -20,20 +20,6 @@ describe('#allNavlinks', () => {
   });
 });
 
-describe('#allCatalogueEntries', () => {
-  test('returns ui:catalogue/*', () => {
-    const uiActions = new UIActions();
-    expect(uiActions.allCatalogueEntries).toBe('ui:catalogue/*');
-  });
-});
-
-describe('#allManagementLinks', () => {
-  test('returns ui:management/*', () => {
-    const uiActions = new UIActions();
-    expect(uiActions.allManagementLinks).toBe('ui:management/*');
-  });
-});
-
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((featureId: any) => {
     test(`featureId of ${JSON.stringify(featureId)} throws error`, () => {

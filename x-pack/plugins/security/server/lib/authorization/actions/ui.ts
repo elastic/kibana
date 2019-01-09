@@ -11,8 +11,6 @@ const prefix = 'ui:';
 export class UIActions {
   public all = `${prefix}*`;
   public allNavLinks = `${prefix}navLinks/*`;
-  public allCatalogueEntries = `${prefix}catalogue/*`;
-  public allManagementLinks = `${prefix}management/*`;
 
   public get(featureId: keyof UICapabilities, ...uiCapabilityParts: string[]) {
     if (!featureId || !isString(featureId)) {
