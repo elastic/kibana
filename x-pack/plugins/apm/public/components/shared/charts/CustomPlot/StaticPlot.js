@@ -9,6 +9,7 @@ import {
   YAxis,
   HorizontalGridLines,
   LineSeries,
+  LineMarkSeries,
   AreaSeries,
   VerticalRectSeries
 } from 'react-vis';
@@ -76,7 +77,18 @@ class StaticPlot extends PureComponent {
             fill={serie.areaColor}
           />
         );
-
+      case 'linemark':
+        return (
+          <LineMarkSeries
+            getNull={d => d.y !== null}
+            key={serie.title}
+            xType="time"
+            curve={'curveMonotoneX'}
+            data={serie.data}
+            color={serie.color}
+            size={0.5}
+          />
+        );
       default:
         throw new Error(`Unknown type ${serie.type}`);
     }
