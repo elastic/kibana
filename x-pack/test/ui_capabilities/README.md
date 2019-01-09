@@ -67,6 +67,7 @@ global monitoring all
 global monitoring read
 global timelion all
 global timelion read
+global uptime all
 global visualize all
 global visualize read
 
