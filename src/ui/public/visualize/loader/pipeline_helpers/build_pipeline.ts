@@ -122,10 +122,10 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
         'moving_avg',
         'serial_diff',
         'cumulative_sum',
-        'bucket_sum',
-        'bucket_avg',
-        'bucket_min',
-        'bucket_max',
+        'sum_bucket',
+        'avg_bucket',
+        'min_bucket',
+        'max_bucket',
       ].includes(agg.type.name)
     ) {
       const subAgg = agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg];
