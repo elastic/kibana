@@ -17,6 +17,8 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiCallOut,
+  EuiSpacer
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
@@ -24,6 +26,7 @@ import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../../../common/constants';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -353,8 +356,27 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   });
 };
 
-const formatClusters = clusters => {
-  return clusters;
+const handleUnlinkedDeployment = (changeCluster) => {
+  return (
+    <div>
+      <EuiCallOut
+        color="warning"
+        title="Hey! It looks like you have instances that aren't connected to an Elasticsearch cluster."
+        iconType="link"
+      >
+        <p>
+          Click&nbsp;
+          <EuiLink
+            onClick={() => changeCluster(UNLINKED_DEPLOYMENT_CLUSTER_UUID)}
+            data-test-subj="unlinkedDeploymentLink"
+          >
+            here to view these instances.
+          </EuiLink>
+        </p>
+      </EuiCallOut>
+      <EuiSpacer/>
+    </div>
+  );
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
@@ -379,15 +401,17 @@ uiModule.directive('monitoringClusterListing', ($injector) => {
 
       const { sorting, pagination, onTableChange } = scope;
 
-      scope.$watch('clusters', (clusters = []) => {
+      scope.$watch('clusters', (_clusters = []) => {
+        const clusters = _clusters.filter(cluster => cluster.cluster_uuid !== UNLINKED_DEPLOYMENT_CLUSTER_UUID);
         const clusterTable = (
           <I18nProvider>
             <EuiPage>
               <EuiPageBody>
                 <EuiPageContent>
+                  {clusters.length !== _clusters.length ? handleUnlinkedDeployment(_changeCluster) : null}
                   <EuiMonitoringTable
                     className="clusterTable"
-                    rows={formatClusters(clusters)}
+                    rows={clusters}
                     columns={getColumns(
                       showLicenseExpiration,
                       _changeCluster,
