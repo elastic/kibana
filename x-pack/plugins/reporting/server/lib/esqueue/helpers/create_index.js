@@ -53,12 +53,14 @@ const schema = {
   completed_at: { type: 'date' },
   attempts: { type: 'short' },
   max_attempts: { type: 'short' },
+  kibana_name: { type: 'keyword' },
+  kibana_id: { type: 'keyword' },
   status: { type: 'keyword' },
   output: {
     type: 'object',
     properties: {
       content_type: { type: 'keyword' },
-      size: { type: 'keyword' },
+      size: { type: 'long' },
       content: { type: 'object', enabled: false }
     }
   }
