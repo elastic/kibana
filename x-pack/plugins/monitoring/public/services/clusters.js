@@ -15,7 +15,7 @@ function formatClusters(clusters) {
 
 function formatCluster(cluster) {
   if (cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID) {
-    cluster.cluster_name = 'Unlinked Deployment';
+    cluster.cluster_name = 'Unlinked Cluster';
   }
   return cluster;
 }
