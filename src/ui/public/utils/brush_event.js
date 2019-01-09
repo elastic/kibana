@@ -26,7 +26,16 @@ export function onBrushEvent(event, $state) {
   const isNumber = event.data.ordered;
   const isDate = isNumber && event.data.ordered.date;
 
-  if (isDate) {
+  if (!_.get(event.data, 'series[0].values[0].xRaw')) return;
+  const xRaw = event.data.series[0].values[0].xRaw;
+  const column = xRaw.table.columns.find(column => column.id === xRaw.column);
+  if (!column) return;
+  const indexPattern = column.aggConfig.getIndexPattern();
+  const field = column.aggConfig.params.field;
+  if (!field) return;
+  const fieldName = field.name;
+
+  if (isDate && indexPattern.timeFieldName === fieldName) {
     setTimefilter();
   } else if (isNumber) {
     setRange();
@@ -49,7 +58,7 @@ export function onBrushEvent(event, $state) {
     if (event.range.length <= 1) return;
 
     const existingFilter = $state.filters.find(filter => (
-      filter.meta && filter.meta.key === event.data.xAxisField.name
+      filter.meta && filter.meta.key === fieldName
     ));
 
     const min = event.range[0];
@@ -69,16 +78,16 @@ export function onBrushEvent(event, $state) {
     }
 
     if (_.has(existingFilter, 'range')) {
-      existingFilter.range[event.data.xAxisField.name] = range;
+      existingFilter.range[fieldName] = range;
     } else if (_.has(existingFilter, 'script.script.params.gte')
       && _.has(existingFilter, 'script.script.params.lt')) {
       existingFilter.script.script.params.gte = min;
       existingFilter.script.script.params.lt = max;
     } else {
       const newFilter = buildRangeFilter(
-        event.data.xAxisField,
+        field,
         range,
-        event.data.indexPattern,
+        indexPattern,
         event.data.xAxisFormatter);
       $state.$newFilters = [newFilter];
     }

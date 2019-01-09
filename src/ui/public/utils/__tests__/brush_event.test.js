@@ -54,6 +54,30 @@ describe('brushEvent', () => {
   const baseEvent = {
     data: {
       fieldFormatter: _.constant({}),
+      series: [
+        {
+          values: [
+            {
+              xRaw: {
+                column: '1',
+                table: {
+                  columns: [
+                    {
+                      id: '1',
+                      aggConfig: {
+                        params: {},
+                        getIndexPattern: () => ({
+                          timeFieldName: 'time',
+                        })
+                      }
+                    },
+                  ]
+                }
+              }
+            },
+          ]
+        },
+      ]
     },
   };
 
@@ -79,9 +103,14 @@ describe('brushEvent', () => {
   describe('handles an event when the x-axis field is a date field', () => {
     describe('date field is index pattern timefield', () => {
       let dateEvent;
+      const dateField = {
+        name: 'time',
+        type: 'date'
+      };
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
+        dateEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = dateField;
         dateEvent.data.ordered = { date: true };
       });
 
@@ -108,10 +137,15 @@ describe('brushEvent', () => {
 
     describe('date field is not index pattern timefield', () => {
       let dateEvent;
+      const dateField = {
+        name: 'anotherTimeField',
+        type: 'date'
+      };
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.ordered = { date: false };
+        dateEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = dateField;
+        dateEvent.data.ordered = { date: true };
       });
 
       test('creates a new range filter', () => {
@@ -159,9 +193,14 @@ describe('brushEvent', () => {
 
   describe('handles an event when the x-axis field is a number', () => {
     let numberEvent;
+    const numberField = {
+      name: 'numberField',
+      type: 'number'
+    };
 
     beforeEach(() => {
       numberEvent = _.cloneDeep(baseEvent);
+      numberEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = numberField;
       numberEvent.data.ordered = { date: false };
     });
 
