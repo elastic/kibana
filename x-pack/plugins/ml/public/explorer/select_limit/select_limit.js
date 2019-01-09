@@ -43,13 +43,18 @@ function optionValueToLimit(value) {
   return limit;
 }
 
+// This service will be populated by the corresponding angularjs based one.
+export const mlSelectLimitService = {
+  state: null
+};
+
 class SelectLimit extends Component {
   constructor(props) {
     super(props);
 
     // Restore the limit from the state, or default to 5.
-    if (this.props.mlSelectLimitService) {
-      this.mlSelectLimitService = this.props.mlSelectLimitService;
+    if (typeof mlSelectLimitService.state.get === 'function') {
+      this.mlSelectLimitService = mlSelectLimitService;
     }
 
     this.state = {
@@ -100,12 +105,10 @@ class SelectLimit extends Component {
 }
 
 SelectLimit.propTypes = {
-  mlSelectLimitService: PropTypes.object,
   onChangeHandler: PropTypes.func,
 };
 
 SelectLimit.defaultProps = {
-  mlSelectLimitService: undefined,
   onChangeHandler: () => {},
 };
 

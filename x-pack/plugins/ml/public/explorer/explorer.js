@@ -58,9 +58,6 @@ export const Explorer = injectI18n(
       influencers: PropTypes.object,
       jobs: PropTypes.array,
       loading: PropTypes.bool,
-      mlSelectIntervalService: PropTypes.object,
-      mlSelectLimitService: PropTypes.object,
-      mlSelectSeverityService: PropTypes.object,
       noInfluencersConfigured: PropTypes.bool,
       setSwimlaneSelectActive: PropTypes.func,
       setSwimlaneViewBy: PropTypes.func,
@@ -83,10 +80,6 @@ export const Explorer = injectI18n(
         hasResults,
         jobs,
         loading,
-        mlCheckboxShowChartsService,
-        mlSelectIntervalService,
-        mlSelectLimitService,
-        mlSelectSeverityService,
         noInfluencersConfigured,
         setSwimlaneSelectActive,
         showViewBySwimlane,
@@ -189,7 +182,7 @@ export const Explorer = injectI18n(
                         defaultMessage: 'Limit',
                       })}
                     >
-                      <SelectLimit mlSelectLimitService={mlSelectLimitService} />
+                      <SelectLimit />
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
@@ -264,7 +257,7 @@ export const Explorer = injectI18n(
                     defaultMessage: 'Severity threshold',
                   })}
                 >
-                  <SelectSeverity mlSelectSeverityService={mlSelectSeverityService} />
+                  <SelectSeverity />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ width: '170px' }}>
@@ -274,13 +267,13 @@ export const Explorer = injectI18n(
                     defaultMessage: 'Interval',
                   })}
                 >
-                  <SelectInterval mlSelectIntervalService={mlSelectIntervalService} />
+                  <SelectInterval />
                 </EuiFormRow>
               </EuiFlexItem>
               {anomalyChartRecords.length > 0 && (
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                   <EuiFormRow label="&#8203;">
-                    <CheckboxShowCharts mlCheckboxShowChartsService={mlCheckboxShowChartsService} />
+                    <CheckboxShowCharts />
                   </EuiFormRow>
                 </EuiFlexItem>
               )}
@@ -289,7 +282,7 @@ export const Explorer = injectI18n(
             <EuiSpacer size="m" />
 
             <div className="euiText explorer-charts">
-              <ExplorerChartsContainer mlSelectSeverityService={mlSelectSeverityService} />
+              <ExplorerChartsContainer />
             </div>
 
             <AnomaliesTable tableData={tableData} timefilter={timefilter} />

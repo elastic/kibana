@@ -41,6 +41,7 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+import { mlSelectSeverityService } from '../../components/controls/select_severity/select_severity';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -51,7 +52,6 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
-    mlSelectSeverityService: PropTypes.object.isRequired
   }
 
   componentDidMount() {
@@ -65,7 +65,6 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
   renderChart() {
     const {
       tooManyBuckets,
-      mlSelectSeverityService,
       intl,
     } = this.props;
 

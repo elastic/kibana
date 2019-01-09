@@ -6,7 +6,6 @@
 
 import $ from 'jquery';
 
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
@@ -59,7 +58,6 @@ function getChartId(series) {
 function ExplorerChartContainer({
   series,
   tooManyBuckets,
-  mlSelectSeverityService,
   wrapLabel
 }) {
   const {
@@ -139,7 +137,6 @@ function ExplorerChartContainer({
             <ExplorerChartDistribution
               tooManyBuckets={tooManyBuckets}
               seriesConfig={series}
-              mlSelectSeverityService={mlSelectSeverityService}
             />
           );
         }
@@ -147,7 +144,6 @@ function ExplorerChartContainer({
           <ExplorerChartSingleMetric
             tooManyBuckets={tooManyBuckets}
             seriesConfig={series}
-            mlSelectSeverityService={mlSelectSeverityService}
           />
         );
       })()}
@@ -157,10 +153,6 @@ function ExplorerChartContainer({
 
 // Flex layout wrapper for all explorer charts
 export class ExplorerChartsContainer extends React.Component {
-  static propTypes = {
-    mlSelectSeverityService: PropTypes.object.isRequired,
-  }
-
   constructor(props) {
     super(props);
     this.state = {
@@ -172,12 +164,8 @@ export class ExplorerChartsContainer extends React.Component {
 
   componentDidMount() {
     const that = this;
-    const { mlSelectSeverityService } = this.props;
 
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
-      mlSelectSeverityService,
-      updateExplorerCharts,
-    );
+    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(updateExplorerCharts);
 
     mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);
 
@@ -207,12 +195,6 @@ export class ExplorerChartsContainer extends React.Component {
       tooManyBuckets
     } = this.state;
 
-    const {
-      mlSelectSeverityService
-    } = this.props;
-
-    console.warn('state', this.state);
-
     // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
     // If that's the case we trick it doing that with the following settings:
     const chartsWidth = (chartsPerRow === 1) ? 'calc(100% - 20px)' : 'auto';
@@ -227,7 +209,6 @@ export class ExplorerChartsContainer extends React.Component {
             <ExplorerChartContainer
               series={series}
               tooManyBuckets={tooManyBuckets}
-              mlSelectSeverityService={mlSelectSeverityService}
               wrapLabel={wrapLabel}
             />
           </EuiFlexItem>

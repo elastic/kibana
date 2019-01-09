@@ -24,13 +24,12 @@ import {
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
+import { mlSelectSeverityService } from '../../components/controls/select_severity/select_severity';
+
 
 import { CHART_TYPE } from '../explorer_constants';
 
-export function explorerChartsContainerServiceFactory(
-  mlSelectSeverityService,
-  callback
-) {
+export function explorerChartsContainerServiceFactory(callback) {
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;

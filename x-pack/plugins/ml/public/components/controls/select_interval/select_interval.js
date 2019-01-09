@@ -38,12 +38,17 @@ function optionValueToInterval(value) {
   return interval;
 }
 
+// This service will be populated by the corresponding angularjs based one.
+export const mlSelectIntervalService = {
+  state: null
+};
+
 class SelectInterval extends Component {
   constructor(props) {
     super(props);
 
     // Restore the interval from the state, or default to auto.
-    this.mlSelectIntervalService = this.props.mlSelectIntervalService;
+    this.mlSelectIntervalService = mlSelectIntervalService;
     const intervalState = this.mlSelectIntervalService.state.get('interval');
     const intervalValue = _.get(intervalState, 'val', 'auto');
     const interval = optionValueToInterval(intervalValue);

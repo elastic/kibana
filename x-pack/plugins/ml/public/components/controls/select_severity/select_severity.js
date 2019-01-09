@@ -49,13 +49,19 @@ function optionValueToThreshold(value) {
   return threshold;
 }
 
+// This service will be populated by the corresponding angularjs based one.
+export const mlSelectSeverityService = {
+  state: null
+};
+
 class SelectSeverity extends Component {
   constructor(props) {
     super(props);
 
     // Restore the threshold from the state, or default to warning.
-    if (this.props.mlSelectSeverityService) {
-      this.mlSelectSeverityService = this.props.mlSelectSeverityService;
+    if (
+      typeof mlSelectSeverityService.state.get === 'function') {
+      this.mlSelectSeverityService = mlSelectSeverityService;
     }
 
     this.state = {

@@ -93,7 +93,6 @@ module.controller('MlExplorerController', function (
   $scope.mlCheckboxShowChartsService = mlCheckboxShowChartsService;
   $scope.mlSelectLimitService = mlSelectLimitService;
   $scope.mlSelectIntervalService = mlSelectIntervalService;
-  $scope.mlSelectSeverityService = mlSelectSeverityService;
   $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
