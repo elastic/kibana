@@ -80,7 +80,7 @@ export interface SavedObject {
     message: string;
   };
   attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
+  references?: SavedObjectReference[];
 }
 
 export interface SavedObjectReference {

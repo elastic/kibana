@@ -139,9 +139,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       // Inject index id if a reference is saved
-      if (searchSourceValues.indexRef) {
-        searchSourceValues.index = references.find(reference => reference.name === searchSourceValues.indexRef).id;
-        delete searchSourceValues.indexRef;
+      if (searchSourceValues.index) {
+        const reference = references.find(reference => reference.name === searchSourceValues.index);
+        if (reference) {
+          searchSourceValues.index = reference.id;
+        }
       }
 
       const searchSourceFields = this.searchSource.getFields();
@@ -296,7 +298,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         if (searchSourceFields.index) {
           const indexId = searchSourceFields.index;
-          searchSourceFields.indexRef = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+          searchSourceFields.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
             name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
             type: 'index-pattern',
