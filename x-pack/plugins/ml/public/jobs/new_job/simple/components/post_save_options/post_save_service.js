@@ -64,7 +64,7 @@ class PostSaveService {
             if (createWatch) {
               mlCreateWatchService.createNewWatch(jobId)
                 .catch()
-              	.then(() => {
+                .then(() => {
                   resolve();
                 });
             } else {

@@ -728,7 +728,7 @@ module
       $scope.jobState = JOB_STATE.STOPPING;
       mlPopulationJobService.stopDatafeed($scope.formConfig)
         .catch()
-      	.then(() => {
+        .then(() => {
           $scope.$applyAsync();
         });
     };

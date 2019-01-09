@@ -705,7 +705,7 @@ module
       $scope.jobState = JOB_STATE.STOPPING;
       mlMultiMetricJobService.stopDatafeed($scope.formConfig)
         .catch()
-      	.then(() => {
+        .then(() => {
           $scope.$applyAsync();
         });
     };
