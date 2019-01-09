@@ -101,7 +101,7 @@ export function getWebpackConfig({ devtool, watch, production } = {}) {
 
         this.hooks.done.tap('canvas_stats', stats => {
           const content = JSON.stringify(stats.toJson());
-          writeFileSync('canvas_stats.json', content);
+          writeFileSync(path.resolve(__dirname, '../../webpack_stats.json'), content);
         });
       },
     ],
