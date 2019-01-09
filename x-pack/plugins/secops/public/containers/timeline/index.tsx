@@ -15,8 +15,8 @@ import { inputsModel } from '../../store';
 import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {
-  id: string;
   events: EventItem[];
+  id: string;
   loading: boolean;
   loadMore: (cursor: string, tieBreaker: string) => void;
   pageInfo: PageInfo;
@@ -26,17 +26,17 @@ export interface TimelineArgs {
 }
 
 export interface OwnProps {
-  id?: string;
   children?: (args: TimelineArgs) => React.ReactNode;
-  sourceId: string;
-  filterQuery: string;
-  sortField: SortField;
-  poll?: number;
+  id?: string;
   limit: number;
+  filterQuery: string;
+  poll?: number;
+  sortField: SortField;
+  sourceId: string;
 }
 
 export const TimelineQuery = pure<OwnProps>(
-  ({ id = 'timelineQuery', children, filterQuery, sourceId, limit, poll, sortField }) => (
+  ({ children, id = 'timelineQuery', limit, filterQuery, poll, sourceId, sortField }) => (
     <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
       query={timelineQuery}
       fetchPolicy="cache-and-network"

@@ -18,20 +18,20 @@ export interface EventsArgs {
   id: string;
   events: EventItem[];
   loading: boolean;
-  totalCount: number;
-  pageInfo: PageInfo;
   loadMore: (cursor: string) => void;
+  pageInfo: PageInfo;
   refetch: inputsModel.Refetch;
+  totalCount: number;
 }
 
 export interface OwnProps {
-  id?: string;
   children?: (args: EventsArgs) => React.ReactNode;
+  filterQuery?: string;
+  id?: string;
+  poll: number;
   sourceId: string;
   startDate: number;
   endDate: number;
-  filterQuery?: string;
-  poll: number;
 }
 
 export interface EventsComponentReduxProps {
@@ -41,7 +41,7 @@ export interface EventsComponentReduxProps {
 type EventsProps = OwnProps & EventsComponentReduxProps;
 
 const EventsComponentQuery = pure<EventsProps>(
-  ({ id = 'eventsQuery', children, filterQuery, sourceId, startDate, endDate, limit, poll }) => (
+  ({ children, filterQuery, id = 'eventsQuery', limit, poll, sourceId, startDate, endDate }) => (
     <Query<GetEventsQuery.Query, GetEventsQuery.Variables>
       query={eventsQuery}
       fetchPolicy="cache-and-network"

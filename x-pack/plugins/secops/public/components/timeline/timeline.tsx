@@ -40,6 +40,7 @@ interface Props {
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
+  indexPattern: StaticIndexPattern;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
@@ -53,7 +54,6 @@ interface Props {
   show: boolean;
   sort: Sort;
   theme: Theme;
-  indexPattern: StaticIndexPattern;
 }
 
 const WrappedByAutoSizer = styled.div`
@@ -69,6 +69,7 @@ export const Timeline = pure<Props>(
     flyoutHeaderHeight,
     flyoutHeight,
     id,
+    indexPattern,
     itemsPerPage,
     itemsPerPageOptions,
     onChangeItemsPerPage,
@@ -82,7 +83,6 @@ export const Timeline = pure<Props>(
     show,
     sort,
     theme,
-    indexPattern,
   }) => {
     const combinedQueries = combineQueries(dataProviders, indexPattern);
     return (
@@ -137,16 +137,16 @@ export const Timeline = pure<Props>(
                         <Footer
                           dataProviders={dataProviders}
                           serverSideEventCount={totalCount}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           height={footerHeight}
                           isLoading={loading}
                           itemsCount={events.length}
                           itemsPerPage={itemsPerPage}
                           itemsPerPageOptions={itemsPerPageOptions}
                           onChangeItemsPerPage={onChangeItemsPerPage}
+                          onLoadMore={loadMore}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          onLoadMore={loadMore}
                           updatedAt={updatedAt}
                         />
                       </>

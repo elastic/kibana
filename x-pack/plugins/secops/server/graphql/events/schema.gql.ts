@@ -74,7 +74,7 @@ export const eventsSchema = gql`
   }
 
   type EventsData {
-    kpiEventType: [KpiItem!]!
+    kpiEventType: [KpiItem!]
     edges: [EventEdges!]!
     totalCount: Int!
     pageInfo: PageInfo!

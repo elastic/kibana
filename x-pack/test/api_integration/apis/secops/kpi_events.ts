@@ -43,33 +43,33 @@ const kpiEventsTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const events = resp.data.source.Events;
-          expect(events.kpiEventType.length).to.be(5);
+          expect(events.kpiEventType!.length).to.be(5);
 
-          const userLogin: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType, {
+          const userLogin: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
             value: 'user_login',
           }) as GetKpiEventsQuery.KpiEventType;
           expect(userLogin.value).to.be('user_login');
           expect(userLogin.count).to.be(12);
 
-          const userErr: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType, {
+          const userErr: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
             value: 'user_err',
           }) as GetKpiEventsQuery.KpiEventType;
           expect(userErr.value).to.be('user_err');
           expect(userErr.count).to.be(7);
 
-          const userStart: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType, {
+          const userStart: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
             value: 'user_start',
           }) as GetKpiEventsQuery.KpiEventType;
           expect(userStart.value).to.be('user_start');
           expect(userStart.count).to.be(3);
 
-          const credAcq: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType, {
+          const credAcq: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
             value: 'cred_acq',
           }) as GetKpiEventsQuery.KpiEventType;
           expect(credAcq.value).to.be('cred_acq');
           expect(credAcq.count).to.be(1);
 
-          const credDisp: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType, {
+          const credDisp: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
             value: 'cred_disp',
           }) as GetKpiEventsQuery.KpiEventType;
           expect(credDisp.value).to.be('cred_disp');

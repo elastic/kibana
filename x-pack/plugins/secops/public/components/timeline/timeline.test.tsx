@@ -157,41 +157,6 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="scrollableArea"]').exists()).toEqual(true);
     });
 
-    test('it renders the timeline footer when you have data providers', () => {
-      const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <MockedProvider mocks={mocks}>
-              <Timeline
-                id="foo"
-                columnHeaders={headers}
-                columnRenderers={columnRenderers}
-                dataProviders={mockDataProviders}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                onChangeItemsPerPage={noop}
-                onColumnSorted={noop}
-                onDataProviderRemoved={noop}
-                onFilterChange={noop}
-                onRangeSelected={noop}
-                onToggleDataProviderEnabled={noop}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
-                show={true}
-                sort={sort}
-                theme="dark"
-                indexPattern={indexPattern}
-              />
-            </MockedProvider>
-          </DragDropContext>
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
-    });
-
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
@@ -443,59 +408,6 @@ describe('Timeline', () => {
           },
           enabled: false,
         });
-      });
-    });
-
-    describe('onChangeItemsPerPage', () => {
-      test('it invokes the onChangeItemsPerPage callback when the input is updated', () => {
-        const onChangeItemsPerPage = jest.fn();
-
-        const wrapper = mount(
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <MockedProvider mocks={mocks}>
-                <Timeline
-                  id="foo"
-                  columnHeaders={headers}
-                  columnRenderers={columnRenderers}
-                  dataProviders={mockDataProviders}
-                  flyoutHeight={testFlyoutHeight}
-                  flyoutHeaderHeight={flyoutHeaderHeight}
-                  itemsPerPage={5}
-                  itemsPerPageOptions={[5, 10, 20]}
-                  onChangeItemsPerPage={onChangeItemsPerPage}
-                  onColumnSorted={noop}
-                  onDataProviderRemoved={noop}
-                  onFilterChange={noop}
-                  onRangeSelected={noop}
-                  onToggleDataProviderEnabled={noop}
-                  range={'1 Day'}
-                  rowRenderers={rowRenderers}
-                  show={true}
-                  sort={sort}
-                  theme="dark"
-                  indexPattern={indexPattern}
-                />
-              </MockedProvider>
-            </DragDropContext>
-          </ReduxStoreProvider>
-        );
-
-        wrapper
-          .find('[data-test-subj="timelineSizeRowPopover"] button')
-          .first()
-          .simulate('click');
-
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="timelinePickSizeRow"] button')
-          .first()
-          .simulate('click');
-
-        expect(onChangeItemsPerPage).toBeCalled();
-
-        expect(onChangeItemsPerPage.mock.calls[0][0]).toEqual(5);
       });
     });
   });

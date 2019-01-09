@@ -13,10 +13,10 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
-import { HostsTable } from './index';
+import { EventsTable } from './index';
 import { mockData } from './mock';
 
-describe('Load More Table Component', () => {
+describe('Load More Events Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
@@ -27,16 +27,17 @@ describe('Load More Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default Hosts table', () => {
+    test('it renders the default Events table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <HostsTable
+          <EventsTable
             loading={false}
-            data={mockData.Hosts.edges}
-            totalCount={mockData.Hosts.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
+            data={mockData.Events.edges.map(i => i.event)}
+            totalCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             loadMore={loadMore}
+            startDate={1546878704036}
           />
         </ReduxStoreProvider>
       );

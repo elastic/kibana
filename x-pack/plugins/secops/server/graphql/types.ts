@@ -127,7 +127,7 @@ export interface IndexField {
 }
 
 export interface EventsData {
-  kpiEventType: KpiItem[];
+  kpiEventType?: KpiItem[] | null;
 
   edges: EventEdges[];
 
@@ -685,7 +685,7 @@ export namespace IndexFieldResolvers {
 
 export namespace EventsDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = EventsData> {
-    kpiEventType?: KpiEventTypeResolver<KpiItem[], TypeParent, Context>;
+    kpiEventType?: KpiEventTypeResolver<KpiItem[] | null, TypeParent, Context>;
 
     edges?: EdgesResolver<EventEdges[], TypeParent, Context>;
 
@@ -695,7 +695,7 @@ export namespace EventsDataResolvers {
   }
 
   export type KpiEventTypeResolver<
-    R = KpiItem[],
+    R = KpiItem[] | null,
     Parent = EventsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

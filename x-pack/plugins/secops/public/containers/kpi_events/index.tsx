@@ -15,23 +15,23 @@ import { kpiEventsQuery } from './index.gql_query';
 
 export interface KpiEventsArgs {
   id: string;
-  kpiEventType?: KpiItem[];
+  kpiEventType: KpiItem[];
   loading: boolean;
   refetch: inputsModel.Refetch;
 }
 
 export interface OwnProps {
-  id?: string;
   children?: (args: KpiEventsArgs) => React.ReactNode;
+  id?: string;
+  filterQuery?: string;
+  poll: number;
   sourceId: string;
   startDate: number;
   endDate: number;
-  filterQuery?: string;
-  poll: number;
 }
 
 export const KpiEventsQuery = pure<OwnProps>(
-  ({ id = 'kpiEventsQuery', children, filterQuery, sourceId, startDate, endDate, poll }) => (
+  ({ children, filterQuery, id = 'kpiEventsQuery', poll, sourceId, startDate, endDate }) => (
     <Query<GetKpiEventsQuery.Query, GetKpiEventsQuery.Variables>
       query={kpiEventsQuery}
       fetchPolicy="cache-and-network"

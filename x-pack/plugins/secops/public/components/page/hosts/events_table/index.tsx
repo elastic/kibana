@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { getOr, noop } from 'lodash/fp';
+import { getOr, has, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -149,7 +149,8 @@ const getEventsColumns = (startDate: number) => [
     truncateText: true,
     render: ({ event }: { event: EventItem }) => (
       <>
-        {getOr('--', 'source.ip', event).slice(0, 12)} : {getOr('--', 'source.port', event)}
+        {has('source.ip', event) ? getOr('--', 'source.ip', event).slice(0, 12) : '--'} :{' '}
+        {getOr('--', 'source.port', event)}
       </>
     ),
   },
@@ -159,7 +160,7 @@ const getEventsColumns = (startDate: number) => [
     truncateText: true,
     render: ({ event }: { event: EventItem }) => (
       <>
-        {getOr('--', 'destination.ip', event).slice(0, 12)} :{' '}
+        {has('destination.ip', event) ? getOr('--', 'destination.ip', event).slice(0, 12) : '--'} :{' '}
         {getOr('--', 'destination.port', event)}
       </>
     ),

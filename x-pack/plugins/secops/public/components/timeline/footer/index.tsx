@@ -13,14 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { EuiToolTip } from '@elastic/eui';
+import { LoadingPanel } from '../../loading';
 import { DataProvider } from '../data_providers/data_provider';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 import { LastUpdatedAt } from './last_updated';
@@ -48,21 +48,6 @@ interface FooterState {
 
 /** The height of the footer, exported for use in height calculations */
 export const footerHeight = 50; // px
-
-const LoadingSpinnerContainer = styled.span`
-  margin: 0 5px 0 5px;
-`;
-
-/** Displays a loading spinner in a fixed width */
-export const LoadingSpinner = pure<{ show: boolean }>(({ show }) => (
-  <LoadingSpinnerContainer data-test-subj="loadingSpinnerContainer">
-    {show ? (
-      <EuiToolTip content="Loading events">
-        <EuiLoadingSpinner size="m" />
-      </EuiToolTip>
-    ) : null}
-  </LoadingSpinnerContainer>
-));
 
 /** Displays the server-side count of events */
 export const EventsCount = pure<{ serverSideEventCount: number; itemsCount: number }>(
@@ -126,6 +111,17 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       updatedAt,
     } = this.props;
 
+    if (isLoading && !this.state.paginationLoading) {
+      return (
+        <LoadingPanel
+          height="auto"
+          width="100%"
+          text="Loading Timeline data..."
+          data-test-subj="LoadingPanelTimeline"
+        />
+      );
+    }
+
     const button = (
       <EuiButtonEmpty
         size="s"
@@ -152,7 +148,6 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
           {`${item} rows`}
         </EuiContextMenuItem>
       ));
-
     return (
       <>
         <EuiHorizontalRule margin="xs" />
@@ -172,15 +167,14 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                   direction="column"
                 >
                   <EuiFlexItem>
-                    <SpinnerAndEventCount data-test-subj="spinner-and-event-count">
-                      {!hasNextPage && <LoadingSpinner show={isLoading} />}
+                    <SpinnerAndEventCount data-test-subj="timeline-event-count">
                       <EventsCount
                         itemsCount={itemsCount}
                         serverSideEventCount={serverSideEventCount}
                       />
                     </SpinnerAndEventCount>
                   </EuiFlexItem>
-                  {itemsPerPage > itemsCount && (
+                  {serverSideEventCount > itemsPerPage && rowItems.length > 0 && (
                     <EuiFlexItem>
                       <PopoverRowItems
                         className="footer-popover"

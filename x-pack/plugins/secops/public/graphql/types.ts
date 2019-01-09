@@ -98,7 +98,7 @@ export interface IndexField {
 }
 
 export interface EventsData {
-  kpiEventType: KpiItem[];
+  kpiEventType?: KpiItem[] | null;
 
   edges: EventEdges[];
 
@@ -599,7 +599,7 @@ export namespace GetKpiEventsQuery {
   export type Events = {
     __typename?: 'EventsData';
 
-    kpiEventType: KpiEventType[];
+    kpiEventType?: KpiEventType[] | null;
   };
 
   export type KpiEventType = {

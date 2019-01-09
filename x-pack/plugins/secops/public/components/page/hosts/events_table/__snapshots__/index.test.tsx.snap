@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Load More Events Table Component rendering it renders the default Events table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "_id": "Fo8nKWgBiyhPd5Zo3cib",
+        "_index": "auditbeat-7.0.0-2019.01.07",
+        "destination": Object {
+          "ip": "24.168.54.169",
+          "port": 62123,
+        },
+        "event": Object {
+          "category": null,
+          "id": null,
+          "module": "system",
+          "severity": null,
+          "type": null,
+        },
+        "geo": null,
+        "host": Object {
+          "ip": null,
+          "name": "siem-general",
+        },
+        "source": Object {
+          "ip": "10.142.0.6",
+          "port": 9200,
+        },
+        "suricata": null,
+        "timestamp": "2019-01-07T16:31:44.036Z",
+      },
+      Object {
+        "_id": "F48nKWgBiyhPd5Zo3cib",
+        "_index": "auditbeat-7.0.0-2019.01.07",
+        "destination": Object {
+          "ip": "24.168.54.169",
+          "port": 62145,
+        },
+        "event": Object {
+          "category": null,
+          "id": null,
+          "module": "system",
+          "severity": null,
+          "type": null,
+        },
+        "geo": null,
+        "host": Object {
+          "ip": null,
+          "name": "siem-general",
+        },
+        "source": Object {
+          "ip": "10.142.0.6",
+          "port": 9200,
+        },
+        "suricata": null,
+        "timestamp": "2019-01-07T16:31:44.036Z",
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="1546878704036"
+  startDate={1546878704036}
+  totalCount={15546}
+/>
+`;

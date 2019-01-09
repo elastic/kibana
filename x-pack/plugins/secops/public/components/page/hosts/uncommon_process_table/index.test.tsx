@@ -13,7 +13,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { UncommonProcessTable } from './index';
-import { mockData } from './index.mock';
+import { mockData } from './mock';
 
 describe('UncommonProcess Table Component', () => {
   const loadMore = jest.fn();

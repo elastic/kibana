@@ -35,7 +35,7 @@ describe('Load More Table Component', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it renders the loading panel at the begining ', () => {
+    test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
