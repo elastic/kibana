@@ -88,13 +88,17 @@ uiModules
             const list = self.getList();
             if (!list) return;
 
-            const last = _.last(list);
-            const next = last + 1;
-            if (next < self.range.max) {
-              list.push(next);
-            } else {
-              list.push(last);
+            function getNext(last, max) {
+              const next = last + 1;
+              if (next < max) {
+                return next;
+              }
+
+              return max - 1;
             }
+
+            const next = getNext(_.last(list), self.range.max);
+            list.push(next);
           };
 
           /**
