@@ -56,7 +56,7 @@ export const filebeatAuditdRules = [
       { field: 'auditd.log.ppid' },
     ],
   },
-  // CATCHALL Rule
+  // Events with `msg` Rule
   {
     when: {
       exists: ['auditd.log.record_type', 'auditd.log.msg'],
@@ -66,6 +66,17 @@ export const filebeatAuditdRules = [
       { field: 'auditd.log.record_type' },
       { constant: ' msg:' },
       { field: 'auditd.log.msg' },
+    ],
+  },
+  // Events with `msg` Rule
+  {
+    when: {
+      exists: ['auditd.log.record_type'],
+    },
+    format: [
+      { constant: '[AuditD] ' },
+      { field: 'auditd.log.record_type' },
+      { constant: ' event without message.' },
     ],
   },
 ];

@@ -102,7 +102,7 @@ describe('Filebeat Rules', () => {
     ]);
   });
 
-  test('AuditD catchall rule', () => {
+  test('AuditD events with msg rule', () => {
     const event = {
       '@timestamp': '2017-01-31T20:17:14.891Z',
       'auditd.log.auid': '4294967295',
@@ -125,6 +125,26 @@ describe('Filebeat Rules', () => {
         highlights: [],
         value: 'some kind of message',
       },
+    ]);
+  });
+
+  test('AuditD catchall rule', () => {
+    const event = {
+      '@timestamp': '2017-01-31T20:17:14.891Z',
+      'auditd.log.auid': '4294967295',
+      'auditd.log.record_type': 'EXAMPLE',
+      'ecs.version': '1.0.0-beta2',
+      'event.dataset': 'auditd.log',
+      'event.module': 'auditd',
+      'fileset.name': 'log',
+      'input.type': 'log',
+      'log.offset': 174,
+    };
+    const message = format(event);
+    expect(message).toEqual([
+      { constant: '[AuditD] ' },
+      { field: 'auditd.log.record_type', highlights: [], value: 'EXAMPLE' },
+      { constant: ' event without message.' },
     ]);
   });
 });
