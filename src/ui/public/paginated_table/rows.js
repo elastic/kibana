@@ -122,7 +122,7 @@ module.directive('kbnRows', function ($compile) {
         rows.forEach(function (row) {
           const $tr = $(document.createElement('tr')).appendTo($el);
           $scope.columns.forEach(column => {
-            const value = row[column.id] || '';
+            const value = row.hasOwnProperty(column.id) ? row[column.id] : '';
             addCell($tr, value, column, row);
           });
         });

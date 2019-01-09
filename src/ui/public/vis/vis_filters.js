@@ -81,7 +81,7 @@ const VisFiltersProvider = (Private, getAppState) => {
   const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  const filter = (event) => {
+  const filter = (event, { simulate = false } = {}) => {
     const data = event.datum;
     const filters = [];
 
@@ -103,7 +103,9 @@ const VisFiltersProvider = (Private, getAppState) => {
     });
 
     const appState = getAppState();
-    filterBarPushFilters(appState)(_.flatten(filters));
+    if (filters.length && !simulate) {
+      filterBarPushFilters(appState)(_.flatten(filters));
+    }
     return filters;
   };
 

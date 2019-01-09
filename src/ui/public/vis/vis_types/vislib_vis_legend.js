@@ -174,7 +174,14 @@ uiModules.get('kibana')
             .reduce(function (a, b) {
               return a.concat(b);
             }, []);
-          return _.compact(_.uniq(values, 'label'));
+          return _.compact(_.uniq(values, 'label')).map(label => {
+            return {
+              ...label,
+              values: {
+                seriesRaw: label.values[0].seriesRaw,
+              }
+            };
+          });
         }
       }
     };
