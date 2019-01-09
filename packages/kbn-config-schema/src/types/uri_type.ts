@@ -17,18 +17,27 @@
  * under the License.
  */
 
-import url from 'url';
-import { get } from 'lodash';
-import http from 'http';
-import https from 'https';
+import typeDetect from 'type-detect';
+import { internals } from '../internals';
+import { Type, TypeOptions } from './type';
 
-import { parseConfig } from './parse_config';
+export type URIOptions = TypeOptions<string> & {
+  scheme?: string | string[];
+};
 
-export default function (config) {
-  const target = url.parse(get(config, 'url'));
+export class URIType extends Type<string> {
+  constructor(options: URIOptions = {}) {
+    super(internals.string().uri({ scheme: options.scheme }), options);
+  }
 
-  if (!/^https/.test(target.protocol)) return new http.Agent();
-
-  const ignoreCertAndKey = !get(config, 'ssl.alwaysPresentCertificate');
-  return new https.Agent(parseConfig(config, { ignoreCertAndKey }).ssl);
+  protected handleError(type: string, { value }: Record<string, unknown>) {
+    switch (type) {
+      case 'any.required':
+      case 'string.base':
+        return `expected value of type [string] but got [${typeDetect(value)}]`;
+      case 'string.uriCustomScheme':
+      case 'string.uri':
+        return `value is [${value}] but it must be a valid URI (see RFC 3986).`;
+    }
+  }
 }

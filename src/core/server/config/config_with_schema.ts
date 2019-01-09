@@ -17,9 +17,24 @@
  * under the License.
  */
 
-// TODO inline all of these
 import { Type, TypeOf } from '@kbn/config-schema';
+import { ConfigPath } from './config';
 import { Env } from './env';
+
+/**
+ * Describes the function that will be called with raw config value to apply
+ * any required transformations to the deprecated config keys.
+ */
+type DeprecationTransform = (
+  value: Record<string, unknown>,
+  log: (message: string) => void
+) => void;
+
+export interface DeprecationHelpers {
+  rename(oldPath: ConfigPath, newPath: ConfigPath): DeprecationTransform;
+  unused(path: ConfigPath): DeprecationTransform;
+  custom(transform: DeprecationTransform): DeprecationTransform;
+}
 
 /**
  * Interface that defines the static side of a config class.
@@ -37,6 +52,15 @@ export interface ConfigWithSchema<S extends Type<any>, Config> {
    * the injected `schema` helper.
    */
   schema: S;
+
+  /**
+   * Optional function that is used to transform deprecated config values into currently
+   * supported format and log appropriate deprecation messages.
+   * @param rawValue Raw config value.
+   * @param log Deprecation logger.
+   * @returns Transformed raw config value to be validated against schema.
+   */
+  deprecations?: (helpers: DeprecationHelpers) => DeprecationTransform[];
 
   /**
    * @param validatedConfig The result of validating the static `schema` above.

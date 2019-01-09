@@ -23,6 +23,7 @@ import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreContext, CoreService } from '../../types';
 import { Config } from '../config';
 import { DevConfig } from '../dev';
+import { ElasticsearchServiceStartContract } from '../elasticsearch';
 import { BasePathProxyServer, HttpConfig, HttpServiceStartContract } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceStartContract } from '../plugins/plugins_service';
@@ -36,6 +37,7 @@ interface LegacyKbnServer {
 }
 
 interface Deps {
+  es: ElasticsearchServiceStartContract;
   http?: HttpServiceStartContract;
   plugins: PluginsServiceStartContract;
 }
@@ -132,6 +134,7 @@ export class LegacyService implements CoreService {
             }
           : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
+      es: deps.es,
       plugins: deps.plugins,
     });
 
