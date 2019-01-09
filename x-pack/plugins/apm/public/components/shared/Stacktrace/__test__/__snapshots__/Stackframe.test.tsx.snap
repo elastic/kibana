@@ -110,108 +110,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 <Stackframe
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
   stackframe={
     Object {
       "abs_path": "/app/server/routes.js",
@@ -276,69 +174,31 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
               <div
                 className="c2"
               >
-                <FormattedMessage
-                  defaultMessage="{fileName} in {functionName} at {lineNumber}"
-                  id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage"
-                  values={
-                    Object {
-                      "fileName": <styled.span>
-                        server/routes.js
-                      </styled.span>,
-                      "functionName": <styled.span>
-                        &lt;anonymous&gt;
-                      </styled.span>,
-                      "lineNumber": <styled.span>
-                        <FormattedMessage
-                          defaultMessage="line {stackframeLineNumber}"
-                          description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage
-                  + xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
-                          id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
-                          values={
-                            Object {
-                              "stackframeLineNumber": 307,
-                            }
-                          }
-                        />
-                      </styled.span>,
-                    }
-                  }
-                >
-                  <styled.span>
-                    <span
-                      className="c3"
-                    >
-                      server/routes.js
-                    </span>
-                  </styled.span>
-                   in 
-                  <styled.span>
-                    <span
-                      className="c3"
-                    >
-                      &lt;anonymous&gt;
-                    </span>
-                  </styled.span>
-                   at 
-                  <styled.span>
-                    <span
-                      className="c3"
-                    >
-                      <FormattedMessage
-                        defaultMessage="line {stackframeLineNumber}"
-                        description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage
-                  + xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
-                        id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
-                        values={
-                          Object {
-                            "stackframeLineNumber": 307,
-                          }
-                        }
-                      >
-                        line 307
-                      </FormattedMessage>
-                    </span>
-                  </styled.span>
-                </FormattedMessage>
+                <styled.span>
+                  <span
+                    className="c3"
+                  >
+                    server/routes.js
+                  </span>
+                </styled.span>
+                 in
+                 
+                <styled.span>
+                  <span
+                    className="c3"
+                  >
+                    &lt;anonymous&gt;
+                  </span>
+                </styled.span>
+                 at 
+                <styled.span>
+                  <span
+                    className="c3"
+                  >
+                    line 
+                    307
+                  </span>
+                </styled.span>
               </div>
             </styled.div>
           </FrameHeading>

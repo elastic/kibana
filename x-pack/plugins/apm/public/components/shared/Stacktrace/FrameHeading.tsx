@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
 import { colors, fontFamilyCode, px, units } from '../../../style/variables';
@@ -34,43 +33,16 @@ const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
   const lineNumber: number = get(stackframe, 'line.number');
-  const messageWithLineNumber = (
-    <FormattedMessage
-      id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage"
-      defaultMessage="{fileName} in {functionName} at {lineNumber}"
-      values={{
-        fileName: <FileDetail>{stackframe.filename}</FileDetail>,
-        functionName: <FileDetail>{stackframe.function}</FileDetail>,
-        lineNumber: (
-          <FileDetail>
-            <FormattedMessage
-              id="xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
-              defaultMessage="line {stackframeLineNumber}"
-              values={{
-                stackframeLineNumber: stackframe.line.number
-              }}
-              description="Part of composite text: xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage
-                  + xpack.apm.stacktraceTab.exceptionLocationWithLineNumberMessage.lineNumberText"
-            />
-          </FileDetail>
-        )
-      }}
-    />
-  );
-  const messageWithoutLineNumber = (
-    <FormattedMessage
-      id="xpack.apm.stacktraceTab.exceptionLocationMessage"
-      defaultMessage="{fileName} in {functionName}"
-      values={{
-        fileName: <FileDetail>{stackframe.filename}</FileDetail>,
-        functionName: <FileDetail>{stackframe.function}</FileDetail>
-      }}
-    />
-  );
-
   return (
     <FileDetails>
-      {lineNumber > 0 ? messageWithLineNumber : messageWithoutLineNumber}
+      <FileDetail>{stackframe.filename}</FileDetail> in{' '}
+      <FileDetail>{stackframe.function}</FileDetail>
+      {lineNumber > 0 && (
+        <Fragment>
+          {' at '}
+          <FileDetail>line {stackframe.line.number}</FileDetail>
+        </Fragment>
+      )}
     </FileDetails>
   );
 };
