@@ -3,15 +3,16 @@
 set -e
 
 dir="$(pwd)"
+ramDir="/dev/shm/kibana"
 dirTmp="${dir}-tmp"
 
 echo " -> moving $dir onto a ram disk"
 cd ..
 mv "$dir" "$dirTmp"
-mkdir "$dir"
-sudo mount -t tmpfs -o size=5g tmpfs "$dir"
-cp -R "$dirTmp/" "$dir/"
+mkdir "$ramDir"
+ln -s "$ramDir" "$dir"
 cd "$dir"
+git clone "$dirTmp" .
 rm -rf "$dirTmp"
 
-echo " -> $dir is now on a 5GB ram disk"
+echo " -> $dir is now on a ram disk"
