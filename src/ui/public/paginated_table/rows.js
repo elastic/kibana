@@ -59,7 +59,9 @@ module.directive('kbnRows', function ($compile) {
         let $cell;
         let $cellContent;
 
-        if (column.filterable && contents) {
+        const contentsIsDefined = (contents !== null && contents !== undefined);
+
+        if (column.filterable && contentsIsDefined) {
           $cell = createFilterableCell(contents);
           $cellContent = $cell.find('[data-cell-content]');
         } else {
@@ -68,7 +70,7 @@ module.directive('kbnRows', function ($compile) {
 
         // An AggConfigResult can "enrich" cell contents by applying a field formatter,
         // which we want to do if possible.
-        contents = contents ? column.formatter.convert(contents, 'html') : '';
+        contents = contentsIsDefined ? column.formatter.convert(contents, 'html') : '';
 
         if (_.isObject(contents)) {
           if (contents.attr) {
