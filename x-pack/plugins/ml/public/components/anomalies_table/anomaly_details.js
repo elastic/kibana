@@ -229,37 +229,40 @@ export class AnomalyDetails extends Component {
         gutterSize="m"
         className="mlAnomalyCategoryExamples"
       >
-        <EuiFlexItem key={`example-terms`}>
-          <EuiText size="xs">
-            <h4 className="mlAnomalyCategoryExamples__terms">Terms</h4>&nbsp;
-            <EuiIconTip
-              aria-label="Description"
-              type="questionInCircle"
-              color="subdued"
-              size="s"
-              content={`A space-delimited string of the common tokens matched in values of the category
-              (may have been truncated to a max character limit of ${MAX_CHARS})`}
-            />
-          </EuiText>
-          <EuiText size="xs">
-            {definition.terms}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexItem key={`example-regex`}>
-          <EuiText size="xs">
-            <h4>Regex</h4>
-          </EuiText>
-          <EuiText size="xs">
-            {definition.regex}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiSpacer size="l" />
+        {definition !== undefined &&
+        <React.Fragment>
+          <EuiFlexItem key={`example-terms`}>
+            <EuiText size="xs">
+              <h4 className="mlAnomalyCategoryExamples__terms">Terms</h4>&nbsp;
+              <EuiIconTip
+                aria-label="Description"
+                type="questionInCircle"
+                color="subdued"
+                size="s"
+                content={`A space-delimited string of the common tokens matched in values of the category
+                (may have been truncated to a max character limit of ${MAX_CHARS})`}
+              />
+            </EuiText>
+            <EuiText size="xs">
+              {definition.terms}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiFlexItem key={`example-regex`}>
+            <EuiText size="xs">
+              <h4>Regex</h4>
+            </EuiText>
+            <EuiText size="xs">
+              {definition.regex}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiSpacer size="l" />
+        </React.Fragment>}
 
         {examples.map((example, i) => {
           return (
             <EuiFlexItem key={`example${i}`}>
-              {(i === 0) &&
+              {(i === 0 && definition !== undefined) &&
                 <EuiText size="s">
                   <h4>Examples</h4>
                 </EuiText>}

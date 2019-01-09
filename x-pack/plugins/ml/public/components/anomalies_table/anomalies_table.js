@@ -80,16 +80,20 @@ class AnomaliesTable extends Component {
     } else {
       const examples = (item.entityName === 'mlcategory') ?
         _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue]) : undefined;
-      let definition =  undefined;
+      let definition = undefined;
 
       if (examples !== undefined) {
-        definition = await ml.results.getCategoryDefinition(item.jobId, item.source.mlcategory[0]);
+        try {
+          definition = await ml.results.getCategoryDefinition(item.jobId, item.source.mlcategory[0]);
 
-        if (definition.terms && definition.terms.length > MAX_CHARS) {
-          definition.terms = `${definition.terms.substring(0, MAX_CHARS)}...`;
-        }
-        if (definition.regex && definition.regex.length > MAX_CHARS) {
-          definition.terms = `${definition.regex.substring(0, MAX_CHARS)}...`;
+          if (definition.terms && definition.terms.length > MAX_CHARS) {
+            definition.terms = `${definition.terms.substring(0, MAX_CHARS)}...`;
+          }
+          if (definition.regex && definition.regex.length > MAX_CHARS) {
+            definition.terms = `${definition.regex.substring(0, MAX_CHARS)}...`;
+          }
+        } catch(error) {
+          console.log('Error fetching category definition for row item.', error);
         }
       }
 
