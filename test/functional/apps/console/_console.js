@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('console app', function describeIndexTests() {
     before(async function () {
+      log.debug('LIZA');
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
     });
