@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { flow, get, omit } from 'lodash';
+import { flow, omit } from 'lodash';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
 /**
@@ -24,8 +24,15 @@ export const getIndexSettings = async (callCluster: CallCluster, indexName: stri
     throw Boom.notFound(`Index ${indexName} does not exist.`);
   }
 
-  const settings = transformSettings(indexInfo[indexName].settings);
-  const mappings = transformMappings(indexInfo[indexName].mappings);
+  return transformIndexInfo(indexInfo[indexName]);
+};
+
+/**
+ * Exported only for tests
+ */
+export const transformIndexInfo = (indexInfo: any) => {
+  const settings = transformSettings(indexInfo.settings);
+  const mappings = transformMappings(indexInfo.mappings);
 
   return { settings, mappings };
 };
@@ -43,21 +50,21 @@ const removeUnsettableSettings = (settings: object) =>
   ]);
 
 const updateFixableSettings = (settings: any) => {
-  const delayedTimeout = get(settings, 'index.unassigned.node_left.delayed_timeout');
+  const delayedTimeout = settings['index.unassigned.node_left.delayed_timeout'];
   if (delayedTimeout && delayedTimeout < 0) {
-    settings.index.unassigned.node_left.delayed_timeout = 0;
+    settings['index.unassigned.node_left.delayed_timeout'] = 0;
   }
 
   return settings;
 };
 
 const validateSettings = (settings: any) => {
-  if (get(settings, 'index.shard.check_on_startup') === 'fix') {
+  if (settings['index.shard.check_on_startup'] === 'fix') {
     throw new Error(`index.shard.check_on_startup cannot be set to 'fix'`);
   }
 
-  if (get(settings, 'index.percolator.map_unmapped_fields_as_string')) {
-    throw new Error(`index.percolator.map_unmapped_fields_as_string is not longer supported.`);
+  if (settings['index.percolator.map_unmapped_fields_as_string']) {
+    throw new Error(`index.percolator.map_unmapped_fields_as_string is no longer supported.`);
   }
 
   return settings;
@@ -70,19 +77,34 @@ const transformSettings = flow(
   validateSettings
 );
 
-const validateMappings = (mappings: any) => {
-  const mappingTypes = Object.keys(mappings);
-
-  if (mappingTypes.length > 1) {
-    throw new Error(`Cannot reindex indices with more than one mapping type.`);
-  }
-
-  // _all field not supported.
-  if (mappings[mappingTypes[0]] && mappings[mappingTypes[0]]._all) {
-    throw new Error(`Cannot reindex indices with _all field.`);
+const updateFixableMappings = (mappings: any) => {
+  if (mappings._default_) {
+    delete mappings._default_;
   }
 
   return mappings;
 };
 
-const transformMappings = flow(validateMappings);
+const validateMappings = (mappings: any) => {
+  const mappingTypes = Object.keys(mappings);
+
+  if (mappingTypes.length > 1) {
+    throw new Error(`Indices with more than one mapping type are not supported in 7.0.`);
+  }
+
+  // _all field not supported.
+  if (mappings[mappingTypes[0]] && mappings[mappingTypes[0]]._all) {
+    if (mappings[mappingTypes[0]]._all.enabled) {
+      throw new Error(`Mapping types with _all.enabled are not supported in 7.0.`);
+    } else {
+      delete mappings[mappingTypes[0]]._all;
+    }
+  }
+
+  return mappings;
+};
+
+const transformMappings = flow(
+  updateFixableMappings,
+  validateMappings
+);
