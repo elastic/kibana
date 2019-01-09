@@ -22,7 +22,6 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { CreateRecognizerJobsServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
@@ -35,7 +34,6 @@ uiRoutes
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
-      initPromise: initPromise(true)
     }
   });
 
@@ -220,6 +218,7 @@ module
             // if they do, they are marked as such and greyed out.
             checkIfKibanaObjectsExist($scope.formConfig.kibanaObjects);
           }
+          $scope.$applyAsync();
         });
     }
 
@@ -327,6 +326,7 @@ module
                     })
                   );
                 }
+                $scope.$applyAsync();
               });
             }
 
@@ -350,6 +350,7 @@ module
                       })
                     );
                   }
+                  $scope.$applyAsync();
                 });
               });
             }
@@ -370,6 +371,7 @@ module
           obj.saveState = SAVE_STATE.SAVING;
         });
       });
+      $scope.$applyAsync();
     }
 
     function startDatafeeds() {
@@ -448,6 +450,9 @@ module
                   job.errors.push(err.message);
                   job.runningState = DATAFEED_STATE.FAILED;
                   reject(err);
+                })
+                .then(() => {
+                  $scope.$applyAsync();
                 });
             }
           });
@@ -514,7 +519,10 @@ module
         jobIds,
         $scope.formConfig.start,
         $scope.formConfig.end,
-        'explorer');
+        'explorer'
+      );
+
+      $scope.$applyAsync();
     };
 
 
