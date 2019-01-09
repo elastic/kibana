@@ -6,7 +6,7 @@
 
 import { UMPingSortDirectionArg } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
-import { DocCount, Ping, PingResults } from '../../../common/graphql/types';
+import { DocCount, PingResults } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
