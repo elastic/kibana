@@ -59,7 +59,7 @@ module.directive('kbnRows', function ($compile) {
         let $cell;
         let $cellContent;
 
-        if (column.filterable) {
+        if (column.filterable && contents) {
           $cell = createFilterableCell(contents);
           $cellContent = $cell.find('[data-cell-content]');
         } else {
@@ -68,7 +68,7 @@ module.directive('kbnRows', function ($compile) {
 
         // An AggConfigResult can "enrich" cell contents by applying a field formatter,
         // which we want to do if possible.
-        contents = column.formatter.convert(contents, 'html');
+        contents = contents ? column.formatter.convert(contents, 'html') : '';
 
         if (_.isObject(contents)) {
           if (contents.attr) {
@@ -122,7 +122,7 @@ module.directive('kbnRows', function ($compile) {
         rows.forEach(function (row) {
           const $tr = $(document.createElement('tr')).appendTo($el);
           $scope.columns.forEach(column => {
-            const value = row.hasOwnProperty(column.id) ? row[column.id] : '';
+            const value = row[column.id];
             addCell($tr, value, column, row);
           });
         });

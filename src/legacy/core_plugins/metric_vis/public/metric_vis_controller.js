@@ -122,7 +122,7 @@ export class MetricVisComponent extends Component {
           value = `${percentage}%`;
         }
 
-        if (!isPercentageMode) value = this._getFormattedValue(formatter, value);
+        if (!isPercentageMode) value = this._getFormattedValue(formatter, value, 'html');
         if (bucketColumnId) {
           const bucketValue = this._getFormattedValue(bucketFormatter, row[bucketColumnId]);
           title = `${bucketValue} - ${title}`;
