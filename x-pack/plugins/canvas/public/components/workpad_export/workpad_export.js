@@ -147,6 +147,7 @@ export class WorkpadExport extends React.PureComponent {
       <EuiButtonIcon iconType="share" aria-label="Share this workpad" onClick={togglePopover} />
     );
 
+    // TODO: replace this with `showShareContextMenu` in `ui/share` once it's been converted to React
     return (
       <Popover
         button={exportControl}
