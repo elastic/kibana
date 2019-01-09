@@ -21,8 +21,20 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { debounce } from 'lodash';
 
-const validateField = (/* field */) => null;
+import { getValidator, i18nValidationErrorMessages } from '../services/input_validation';
+
+const parseError = (err) => {
+  if (!err) {
+    return null;
+  }
+
+  const [error] = err.details; // Use the first error in the details array (error.details[0])
+  const { type, context: { label } } = error;
+  const message = i18nValidationErrorMessages[type](label);
+  return { message };
+};
 
 /**
  * State transitions: fields update
@@ -35,26 +47,48 @@ export const updateFields = (newValues) => ({ fields }) => ({
 });
 
 /**
+ * State transitions: errors update
+ */
+export const updateFormErrors = (errors, onFormValidityUpdate = () => undefined) => ({ fieldsErrors }) => {
+  const updatedFieldsErrors = {
+    ...fieldsErrors,
+    ...errors,
+  };
+
+  const isFormValid = Object.values(updatedFieldsErrors).every(error => error === null);
+  onFormValidityUpdate(isFormValid);
+
+  return { fieldsErrors: updatedFieldsErrors };
+};
+
+/**
  * State transitions: add setting field to form and errors
  */
-export const addSetting = (setting) => ({ fields, fieldsErrors }) => ({
-  fields: {
-    ...fields,
-    [setting]: '',
-  },
-  fieldsErrors: {
-    ...fieldsErrors,
-    [setting]: validateField(setting)
-  },
-  previewSettingActive: null
-});
+export const addField = (field, validator, onFormValidityUpdate) => ({ fields, fieldsErrors }) => {
+  const fieldValue = '';
+  const { error } = validator.validate({ [field]: fieldValue });
+  const updatedFieldsErrors = updateFormErrors({ [field]: parseError(error) }, onFormValidityUpdate)({ fieldsErrors });
+
+  return ({
+    fields: {
+      ...fields,
+      [field]: fieldValue,
+    },
+    ...updatedFieldsErrors,
+    previewSettingActive: null
+  });
+};
 
 /**
  * State transitions: remove setting from fields and errors
  */
-export const removeSetting = (setting) => ({ fields, fieldsErrors }) => {
-  const { [setting]: value, ...fieldsWithoutSetting } = fields; // eslint-disable-line no-unused-vars
-  const { [setting]: value2, ...fieldsErrorsWithoutSetting } = fieldsErrors; // eslint-disable-line no-unused-vars
+export const removeField = (field, onFormValidityUpdate = () => undefined) => ({ fields, fieldsErrors }) => {
+  const { [field]: value, ...fieldsWithoutSetting } = fields; // eslint-disable-line no-unused-vars
+  const { [field]: value2, ...fieldsErrorsWithoutSetting } = fieldsErrors; // eslint-disable-line no-unused-vars
+
+  const isFormValid = Object.values(fieldsErrorsWithoutSetting).every(error => error === null);
+  onFormValidityUpdate(isFormValid);
+
   return {
     fields: fieldsWithoutSetting,
     fieldsErrors: fieldsErrorsWithoutSetting,
@@ -63,6 +97,7 @@ export const removeSetting = (setting) => ({ fields, fieldsErrors }) => {
 
 export class AdvancedSettingsForm extends PureComponent {
   static propTypes = {
+    onFormValidityUpdate: PropTypes.func.isRequired,
     areErrorsVisible: PropTypes.bool.isRequired,
     schema: PropTypes.object.isRequired
   }
@@ -74,28 +109,52 @@ export class AdvancedSettingsForm extends PureComponent {
     previewSettingActive: null,
   };
 
+  constructor(props) {
+    super(props);
+
+    this.validateFields = debounce(this.validateFields.bind(this), 500);
+
+    this.validator = getValidator(Object.entries(this.props.schema).reduce((acc, [field, schema]) => ({
+      ...acc,
+      [field]: schema.validate.label(schema.label)
+    }), {}));
+  }
+
   toggle = () => {
     this.setState(({ isOpened }) => ({ isOpened: !isOpened, previewSettingActive: null }));
   }
 
   selectSetting = (setting) => {
-    this.setState(addSetting(setting));
+    this.setState(addField(setting, this.validator, this.props.onFormValidityUpdate));
   }
 
   unSelectSetting = (setting) => {
-    this.setState(removeSetting(setting));
+    this.setState(removeField(setting, this.props.onFormValidityUpdate));
   }
 
-  getSettingSelection = (checkIsSelected = true) => (setting) => checkIsSelected
-    ? typeof this.state.fields[setting] !== 'undefined'
-    : typeof this.state.fields[setting] === 'undefined'
+  isSettingSelected = setting => typeof this.state.fields[setting] !== 'undefined'
 
   setPreviewSettingActive = (previewSettingActive) => {
     this.setState({ previewSettingActive });
   }
 
+  validateFields = (fields) => {
+    const { onFormValidityUpdate } = this.props;
+    const errors = {};
+
+    let error;
+    Object.entries(fields).forEach(([field, value]) => {
+      ({ error } = this.validator.validate({ [field]: value }));
+
+      errors[field] = parseError(error);
+    });
+
+    this.setState(updateFormErrors(errors, onFormValidityUpdate));
+  }
+
   onFieldChange = (fields) => {
     this.setState(updateFields(fields));
+    this.validateFields(fields);
   }
 
   renderRowSelectedSetting = (field, value, fieldSchema, areErrorsVisible, fieldErrors) => {
@@ -160,13 +219,18 @@ export class AdvancedSettingsForm extends PureComponent {
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               { Object.keys(schema)
-                .filter(this.getSettingSelection(false))
+                .filter((setting) => !this.isSettingSelected(setting))
                 .map((field, i, arr) => {
                   const fieldSchema = schema[field];
 
                   return (
                     <Fragment key={field}>
-                      <EuiFlexGroup responsive={false} style={{ flexGrow: 0 }}>
+                      <EuiFlexGroup
+                        responsive={false}
+                        style={{ flexGrow: 0 }}
+                        onMouseEnter={() => this.setPreviewSettingActive(field)}
+                        onMouseLeave={() => this.setPreviewSettingActive(null)}
+                      >
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
                             color="success"
@@ -178,7 +242,6 @@ export class AdvancedSettingsForm extends PureComponent {
                         <EuiFlexItem grow={false}>
                           <EuiLink
                             onClick={() => this.setPreviewSettingActive(field)}
-                            onMouseEnter={() => this.setPreviewSettingActive(field)}
                           >
                             {fieldSchema.label}
                           </EuiLink>
