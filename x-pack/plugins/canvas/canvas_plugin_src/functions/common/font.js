@@ -80,10 +80,10 @@ export const font = () => ({
   },
   fn: (context, args) => {
     if (!weights.includes(args.weight)) {
-      throw new Error(`Invalid font weight: ${args.weight}`);
+      throw new Error(`Invalid font weight: '${args.weight}'`);
     }
     if (!alignments.includes(args.align)) {
-      throw new Error(`Invalid text alignment: ${args.align}`);
+      throw new Error(`Invalid text alignment: '${args.align}'`);
     }
 
     // the line height shouldn't ever be lower than the size
