@@ -22,7 +22,6 @@ function mlExplorerDashboardServiceFactory() {
   const dragSelect = service.dragSelect = listenerFactory();
   const swimlaneCellClick = service.swimlaneCellClick = listenerFactory();
   const swimlaneRenderDone = service.swimlaneRenderDone = listenerFactory();
-  service.anomalyDataChange = listenerFactory();
 
   service.init = function () {
     // Clear out any old listeners.

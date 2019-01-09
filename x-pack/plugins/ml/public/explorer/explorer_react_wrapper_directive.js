@@ -50,6 +50,7 @@ module.directive('mlExplorerReactWrapper', function (Private) {
       const props = _.pick(scope, [
         'annotationsData',
         'anomalyChartRecords',
+        'chartsData',
         'hasResults',
         'influencers',
         'jobs',

@@ -26,9 +26,6 @@ import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
-import { explorerChartsContainerServiceFactory } from './explorer_charts_container_service';
-import { mlExplorerDashboardService } from '../explorer_dashboard_service';
-
 import { CHART_TYPE } from '../explorer_constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -153,34 +150,10 @@ function ExplorerChartContainer({
 
 // Flex layout wrapper for all explorer charts
 export class ExplorerChartsContainer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      chartsPerRow: 1,
-      seriesToPlot: [],
-      tooManyBuckets: false,
-    };
-  }
-
   componentDidMount() {
-    const that = this;
-
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(updateExplorerCharts);
-
-    mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);
-
     // Create a div for the tooltip.
     $('.ml-explorer-charts-tooltip').remove();
     $('body').append('<div class="ml-explorer-tooltip ml-explorer-charts-tooltip" style="opacity:0; display: none;">');
-
-    function updateExplorerCharts(data) {
-      that.setState({
-        chartsPerRow: data.chartsPerRow,
-        seriesToPlot: data.seriesToPlot,
-        // convert truthy/falsy value to Boolean
-        tooManyBuckets: !!data.tooManyBuckets,
-      });
-    }
   }
 
   componentWillUnmount() {
@@ -193,7 +166,7 @@ export class ExplorerChartsContainer extends React.Component {
       chartsPerRow,
       seriesToPlot,
       tooManyBuckets
-    } = this.state;
+    } = this.props;
 
     // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
     // If that's the case we trick it doing that with the following settings:

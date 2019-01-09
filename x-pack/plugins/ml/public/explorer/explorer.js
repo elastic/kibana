@@ -75,6 +75,7 @@ export const Explorer = injectI18n(
       const {
         annotationsData,
         anomalyChartRecords,
+        chartsData,
         influencers,
         intl,
         hasResults,
@@ -282,7 +283,7 @@ export const Explorer = injectI18n(
             <EuiSpacer size="m" />
 
             <div className="euiText explorer-charts">
-              <ExplorerChartsContainer />
+              <ExplorerChartsContainer {...chartsData} />
             </div>
 
             <AnomaliesTable tableData={tableData} timefilter={timefilter} />

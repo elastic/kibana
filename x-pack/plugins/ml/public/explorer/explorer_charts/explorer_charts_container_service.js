@@ -26,8 +26,17 @@ import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 import { mlSelectSeverityService } from '../../components/controls/select_severity/select_severity';
 
-
 import { CHART_TYPE } from '../explorer_constants';
+
+export function getDefaultChartsData() {
+  return {
+    chartsPerRow: 1,
+    seriesToPlot: [],
+    // default values, will update on every re-render
+    tooManyBuckets: false,
+    timeFieldName: 'timestamp'
+  };
+}
 
 export function explorerChartsContainerServiceFactory(callback) {
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
@@ -38,23 +47,14 @@ export function explorerChartsContainerServiceFactory(callback) {
   const USE_OVERALL_CHART_LIMITS = false;
   const MAX_CHARTS_PER_ROW = 4;
 
-  function getDefaultData() {
-    return {
-      seriesToPlot: [],
-      // default values, will update on every re-render
-      tooManyBuckets: false,
-      timeFieldName: 'timestamp'
-    };
-  }
-
-  callback(getDefaultData());
+  callback(getDefaultChartsData());
 
   let requestCount = 0;
-  const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+  const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs) {
     const newRequestCount = ++requestCount;
     requestCount = newRequestCount;
 
-    const data = getDefaultData();
+    const data = getDefaultChartsData();
 
     const threshold = mlSelectSeverityService.state.get('threshold');
     const filteredRecords = anomalyRecords.filter((record) => {
@@ -573,6 +573,6 @@ export function explorerChartsContainerServiceFactory(callback) {
     };
   }
 
-  return anomalyDataChangeListener;
+  return anomalyDataChange;
 
 }
