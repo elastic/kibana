@@ -43,7 +43,11 @@ module.directive('mlPostSaveOptions', function (Private) {
       };
 
       $scope.apply = function () {
-        postSaveService.apply($scope.jobId, $scope.runInRealtime, $scope.createWatch);
+        postSaveService.apply($scope.jobId, $scope.runInRealtime, $scope.createWatch)
+          .catch()
+          .then(() => {
+            $scope.$applyAsync();
+          });
       };
     }
   };

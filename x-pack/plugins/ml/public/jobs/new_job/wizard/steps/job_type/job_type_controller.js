@@ -18,7 +18,6 @@ import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './job_type.html';
 import { timefilter } from 'ui/timefilter';
 
@@ -31,7 +30,6 @@ uiRoutes
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
-      initPromise: initPromise(true)
     }
   });
 
