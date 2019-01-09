@@ -52,7 +52,7 @@ describe('Pings domain lib', () => {
         'asc',
         2
       );
-      expect(apiResponse.Total).toBe(2);
+      expect(apiResponse.total).toBe(2);
       expect(apiResponse.Pings).toHaveLength(2);
       testMonitorId('foo', apiResponse.Pings[0].monitor);
       testMonitorId('baz', apiResponse.Pings[1].monitor);
@@ -68,7 +68,7 @@ describe('Pings domain lib', () => {
         'desc',
         2
       );
-      expect(apiResponse.Total).toBe(2);
+      expect(apiResponse.total).toBe(2);
       expect(apiResponse.Pings).toHaveLength(2);
       testMonitorId('bar', apiResponse.Pings[0].monitor);
       testMonitorId('baz', apiResponse.Pings[1].monitor);
@@ -84,7 +84,7 @@ describe('Pings domain lib', () => {
         undefined,
         2
       );
-      expect(apiResponse.Total).toBe(2);
+      expect(apiResponse.total).toBe(2);
       expect(apiResponse.Pings).toHaveLength(2);
       testMonitorId('foo', apiResponse.Pings[0].monitor);
       testMonitorId('bar', apiResponse.Pings[1].monitor);
@@ -100,7 +100,7 @@ describe('Pings domain lib', () => {
         'desc',
         undefined
       );
-      expect(apiResponse.Total).toBe(10);
+      expect(apiResponse.total).toBe(10);
       expect(apiResponse.Pings).toHaveLength(3);
       testMonitorId('bar', apiResponse.Pings[0].monitor);
       testMonitorId('baz', apiResponse.Pings[1].monitor);
@@ -117,7 +117,7 @@ describe('Pings domain lib', () => {
         undefined,
         undefined
       );
-      expect(apiResponse.Total).toBe(10);
+      expect(apiResponse.total).toBe(10);
       expect(apiResponse.Pings).toHaveLength(3);
       testMonitorId('foo', apiResponse.Pings[0].monitor);
       testMonitorId('bar', apiResponse.Pings[1].monitor);

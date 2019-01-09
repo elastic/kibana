@@ -74,7 +74,7 @@ describe('ElasticsearchPingsAdapter class', () => {
       const result = await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
       const count = 3;
 
-      expect(result.Total).toBe(count);
+      expect(result.total).toBe(count);
 
       const pings = result.Pings;
       expect(pings).toHaveLength(count);

@@ -173,7 +173,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">{allPings.Total}</EuiBadge>
+                  <EuiBadge color="primary">{allPings.total}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiPanel paddingSize="l">

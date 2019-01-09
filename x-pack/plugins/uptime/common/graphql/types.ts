@@ -34,10 +34,10 @@ export interface Query {
 }
 
 export interface PingResults {
-  Total: number;
-  Pings: Ping[];
-}
+  total: UnsignedInteger;
 
+  pings?: Ping[] | null;
+}
 /** A request sent from a monitor to a host */
 export interface Ping {
   /** The timestamp of the ping's creation */

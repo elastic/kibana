@@ -37,8 +37,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
 
     size = size ? size : 10;
     return {
-      Total: size,
-      Pings: take(sort ? pings.sort(sortPings(sort)) : pings, size),
+      total: size,
+      pings: take(sort ? pings.sort(sortPings(sort)) : pings, size),
     };
   }
 

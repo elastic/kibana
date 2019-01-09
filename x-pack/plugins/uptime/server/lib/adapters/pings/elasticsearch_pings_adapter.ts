@@ -81,8 +81,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     });
 
     const results: PingResults = {
-      Total: total.value,
-      Pings: pings,
+      total: total.value,
+      pings,
     };
 
     return results;

@@ -11,9 +11,9 @@ export const pingsSchema = gql`
     query: Query
   }
 
-  type Response {
-    Total: UnsignedInteger!
-    Pings: [Ping!]
+  type PingResults {
+    total: UnsignedInteger!
+    pings: [Ping!]
   }
 
   type Query {
@@ -25,7 +25,7 @@ export const pingsSchema = gql`
       status: String
       dateRangeStart: UnsignedInteger!
       dateRangeEnd: UnsignedInteger!
-    ): Response!
+    ): PingResults!
 
     "Gets the number of documents in the target index"
     getDocCount: DocCount!
