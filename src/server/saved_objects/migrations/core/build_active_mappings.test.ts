@@ -45,6 +45,21 @@ describe('buildActiveMappings', () => {
       /Invalid mapping \"_hm\"\. Mappings cannot start with _/
     );
   });
+
+  test('generated hashes are stable', () => {
+    const properties = {
+      aaa: { a: '...', b: '...', c: new Date('2019-01-02'), d: [{ hello: 'world' }] },
+      bbb: { c: new Date('2019-01-02'), d: [{ hello: 'world' }], a: '...', b: '...' },
+      ccc: { c: new Date('2020-01-02'), d: [{ hello: 'world' }], a: '...', b: '...' },
+    };
+
+    const mappings = buildActiveMappings({ properties });
+    const hashes = mappings.doc._meta!.migrationMappingPropertyHashes!;
+
+    expect(hashes.aaa).toBeDefined();
+    expect(hashes.aaa).toEqual(hashes.bbb);
+    expect(hashes.aaa).not.toEqual(hashes.ccc);
+  });
 });
 
 describe('diffMappings', () => {
