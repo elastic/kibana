@@ -10,7 +10,6 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { DataProvider } from './data_providers/data_provider';
 
-// TODO: implement boolean logic to combine queries instead of just taking the first provider
 export const combineQueries = (
   dataProviders: DataProvider[],
   indexPattern: StaticIndexPattern
@@ -18,17 +17,17 @@ export const combineQueries = (
   if (isEmpty(dataProviders)) {
     return null;
   }
+
   const globalQuery = dataProviders.reduce((query, dataProvider) => {
-    if (dataProvider.enabled) {
-      if (query !== '') {
-        query += ' or ';
-      }
-      query += `(${dataProvider.queryMatch}${
-        dataProvider.queryDate ? ` and ${dataProvider.queryDate})` : ')'
-      }`;
-    }
-    return query;
+    const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
+
+    return dataProvider.enabled
+      ? `${prepend(query)} (${dataProvider.queryMatch}${
+          dataProvider.queryDate ? ` and ${dataProvider.queryDate})` : ')'
+        }`
+      : query;
   }, '');
+
   if (isEmpty(globalQuery)) {
     return null;
   }

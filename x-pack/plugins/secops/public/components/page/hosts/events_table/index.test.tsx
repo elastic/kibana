@@ -34,6 +34,7 @@ describe('Load More Events Table Component', () => {
             loading={false}
             data={mockData.Events.edges.map(i => i.event)}
             totalCount={mockData.Events.totalCount}
+            tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             loadMore={loadMore}

@@ -118,9 +118,9 @@ const getHostsColumns = () => [
               name: hostName,
               negated: false,
               queryMatch: `host.name: "${escapeQueryValue(hostName)}"`,
-              queryDate: `@timestamp >= ${
-                moment(host.firstSeen!).valueOf
-              } and @timestamp <= ${moment().valueOf()}`,
+              queryDate: `@timestamp >= ${moment(
+                host.firstSeen!
+              ).valueOf()} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

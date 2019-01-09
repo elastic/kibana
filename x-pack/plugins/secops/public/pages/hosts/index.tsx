@@ -102,6 +102,7 @@ export const Hosts = pure(() => (
                     startDate={from}
                     totalCount={totalCount}
                     nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
                     hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                     loadMore={loadMore}
                   />

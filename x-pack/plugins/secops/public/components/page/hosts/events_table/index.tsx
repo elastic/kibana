@@ -23,8 +23,9 @@ interface OwnProps {
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
+  tiebreaker: string;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadMore: (cursor: string, tiebreaker: string) => void;
   startDate: number;
 }
 
@@ -64,6 +65,7 @@ const EventsTableComponent = pure<EventsTableProps>(
     limit = 5,
     loading,
     loadMore,
+    tiebreaker,
     totalCount,
     nextCursor,
     updateLimitPagination,
@@ -74,7 +76,7 @@ const EventsTableComponent = pure<EventsTableProps>(
       loadingTitle="Events"
       loading={loading}
       pageOfItems={data}
-      loadMore={() => loadMore(nextCursor)}
+      loadMore={() => loadMore(nextCursor, tiebreaker)}
       limit={limit}
       hasNextPage={hasNextPage!}
       itemsPerRow={rowItems}
@@ -149,8 +151,7 @@ const getEventsColumns = (startDate: number) => [
     truncateText: true,
     render: ({ event }: { event: Ecs }) => (
       <>
-        {has('source.ip', event) ? getOr('--', 'source.ip', event).slice(0, 12) : '--'} :{' '}
-        {getOr('--', 'source.port', event)}
+        {formatSafely('source.ip', event)} : {getOr('--', 'source.port', event)}
       </>
     ),
   },
@@ -160,8 +161,7 @@ const getEventsColumns = (startDate: number) => [
     truncateText: true,
     render: ({ event }: { event: Ecs }) => (
       <>
-        {has('destination.ip', event) ? getOr('--', 'destination.ip', event).slice(0, 12) : '--'} :{' '}
-        {getOr('--', 'destination.port', event)}
+        {formatSafely('destination.ip', event)} : {getOr('--', 'destination.port', event)}
       </>
     ),
   },
@@ -176,3 +176,11 @@ const getEventsColumns = (startDate: number) => [
     ),
   },
 ];
+
+const formatSafely = (path: string, data: Ecs) => {
+  if (has('source.ip', event)) {
+    const txt = getOr('--', path, data);
+    return txt && txt.slice ? txt.slice(0, 12) : txt;
+  }
+  return '--';
+};

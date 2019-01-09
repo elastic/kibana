@@ -18,7 +18,7 @@ export interface EventsArgs {
   id: string;
   events: Ecs[];
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadMore: (cursor: string, tiebreaker: string) => void;
   pageInfo: PageInfo;
   refetch: inputsModel.Refetch;
   totalCount: number;
@@ -75,11 +75,12 @@ const EventsComponentQuery = pure<EventsProps>(
           totalCount: getOr(0, 'source.Events.totalCount', data),
           pageInfo: getOr({}, 'source.Events.pageInfo', data),
           events,
-          loadMore: (newCursor: string) =>
+          loadMore: (newCursor: string, tiebreaker: string) =>
             fetchMore({
               variables: {
                 pagination: {
                   cursor: newCursor,
+                  tiebreaker,
                   limit,
                 },
               },

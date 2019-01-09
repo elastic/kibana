@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { DataProvider } from './data_provider';
 
-const HoryzontalBar = styled(EuiHorizontalRule)`
+const HorizontalBar = styled(EuiHorizontalRule)`
   margin: 4px 0px;
 `;
 
@@ -33,7 +33,7 @@ export const IconsFooter = pure<OwnProps>(({ dataProvider }: OwnProps) => {
   ).format('L LTS')}`;
   return (
     <>
-      <HoryzontalBar margin="xs" />
+      <HorizontalBar margin="xs" />
       <GroupIcons
         data-test-subj="data-provider-fo"
         gutterSize="none"
