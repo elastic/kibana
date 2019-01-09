@@ -21,7 +21,9 @@ export async function getAgentStatus({ setup }) {
         bool: {
           should: [
             { term: { [PROCESSOR_NAME]: 'error' } },
-            { term: { [PROCESSOR_NAME]: 'transaction' } }
+            { term: { [PROCESSOR_NAME]: 'transaction' } },
+            { term: { [PROCESSOR_NAME]: 'metric' } },
+            { term: { [PROCESSOR_NAME]: 'sourcemap' } }
           ]
         }
       }

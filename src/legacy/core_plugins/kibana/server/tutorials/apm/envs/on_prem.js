@@ -161,6 +161,8 @@ export function onPremInstructions(apmIndexPattern) {
                 should: [
                   { term: { 'processor.name': 'error' } },
                   { term: { 'processor.name': 'transaction' } },
+                  { term: { 'processor.name': 'metric' } },
+                  { term: { 'processor.name': 'sourcemap' } },
                 ],
               },
             },
