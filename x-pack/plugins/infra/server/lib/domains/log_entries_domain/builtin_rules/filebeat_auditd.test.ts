@@ -32,9 +32,9 @@ describe('Filebeat Rules', () => {
     };
     const message = format(event);
     expect(message).toEqual([
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type', highlights: [], value: 'MAC_IPSEC_EVENT' },
-      { constant: ' src:' },
+      { constant: '] src:' },
       { field: 'auditd.log.src', highlights: [], value: '192.168.2.0' },
       { constant: ' dst:' },
       { field: 'auditd.log.dst', highlights: [], value: '192.168.0.0' },
@@ -81,9 +81,9 @@ describe('Filebeat Rules', () => {
     };
     const message = format(event);
     expect(message).toEqual([
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type', highlights: [], value: 'SYSCALL' },
-      { constant: ' exe:' },
+      { constant: '] exe:' },
       {
         field: 'auditd.log.exe',
         highlights: [],
@@ -117,9 +117,9 @@ describe('Filebeat Rules', () => {
     };
     const message = format(event);
     expect(message).toEqual([
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type', highlights: [], value: 'EXAMPLE' },
-      { constant: ' msg:' },
+      { constant: '] ' },
       {
         field: 'auditd.log.msg',
         highlights: [],
@@ -142,9 +142,9 @@ describe('Filebeat Rules', () => {
     };
     const message = format(event);
     expect(message).toEqual([
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type', highlights: [], value: 'EXAMPLE' },
-      { constant: ' event without message.' },
+      { constant: '] Event without message.' },
     ]);
   });
 });

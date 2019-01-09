@@ -13,9 +13,9 @@ export const filebeatAuditdRules = [
       },
     },
     format: [
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type' },
-      { constant: ' src:' },
+      { constant: '] src:' },
       { field: 'auditd.log.src' },
       { constant: ' dst:' },
       { field: 'auditd.log.dst' },
@@ -40,9 +40,9 @@ export const filebeatAuditdRules = [
       },
     },
     format: [
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type' },
-      { constant: ' exe:' },
+      { constant: '] exe:' },
       { field: 'auditd.log.exe' },
       { constant: ' gid:' },
       { field: 'auditd.log.gid' },
@@ -62,9 +62,9 @@ export const filebeatAuditdRules = [
       exists: ['auditd.log.record_type', 'auditd.log.msg'],
     },
     format: [
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type' },
-      { constant: ' msg:' },
+      { constant: '] ' },
       { field: 'auditd.log.msg' },
     ],
   },
@@ -74,9 +74,9 @@ export const filebeatAuditdRules = [
       exists: ['auditd.log.record_type'],
     },
     format: [
-      { constant: '[AuditD] ' },
+      { constant: '[AuditD][' },
       { field: 'auditd.log.record_type' },
-      { constant: ' event without message.' },
+      { constant: '] Event without message.' },
     ],
   },
 ];
