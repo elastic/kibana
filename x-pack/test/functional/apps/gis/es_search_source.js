@@ -6,16 +6,13 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['gis']);
+  const queryBar = getService('queryBar');
 
   describe('elasticsearch document layer', () => {
     before(async () => {
       await PageObjects.gis.loadSavedMap('document example');
-    });
-
-    after(async () => {
-      await PageObjects.gis.closeInspector();
     });
 
     it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
@@ -31,6 +28,26 @@ export default function ({ getPageObjects }) {
       await PageObjects.gis.triggerSingleRefresh(1000);
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+    });
+
+    describe('query bar', () => {
+      before(async () => {
+        await queryBar.setQuery('machine.os.raw : "win 8"');
+        await queryBar.submitQuery();
+      });
+
+      after(async () => {
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+      });
+
+      it('should apply query to geohashgrid aggregation request', async () => {
+        await PageObjects.gis.openInspectorRequestsView();
+        const requestStats = await PageObjects.gis.getInspectorTableData();
+        const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+        await PageObjects.gis.closeInspector();
+        expect(hits).to.equal('1');
+      });
     });
 
     describe('inspector', () => {
