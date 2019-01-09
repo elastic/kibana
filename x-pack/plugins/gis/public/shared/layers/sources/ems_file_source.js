@@ -5,12 +5,13 @@
  */
 
 import { VectorSource } from './vector_source';
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiLink,
   EuiText,
   EuiSelect,
-  EuiFormRow
+  EuiFormRow,
+  EuiSpacer
 } from '@elastic/eui';
 
 import { GIS_API_PATH } from '../../../../common/constants';
@@ -53,9 +54,21 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  constructor(descriptor, emsFiles) {
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{EMSFileSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">Political boundry vectors hosted by EMS.</p>
+        </EuiText>
+      </Fragment>
+    );
+  }
+
+  constructor(descriptor, { emsFileLayers }) {
     super(descriptor);
-    this._emsFiles = emsFiles;
+    this._emsFiles = emsFileLayers;
   }
 
   async getGeoJsonWithMeta() {

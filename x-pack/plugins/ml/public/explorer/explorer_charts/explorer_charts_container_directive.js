@@ -20,6 +20,8 @@ import { explorerChartsContainerServiceFactory } from './explorer_charts_contain
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 import { mlExplorerDashboardService } from '../explorer_dashboard_service';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -59,7 +61,9 @@ module.directive('mlExplorerChartsContainer', function (
       };
 
       ReactDOM.render(
-        React.createElement(ExplorerChartsContainer, props),
+        <I18nProvider>
+          {React.createElement(ExplorerChartsContainer, props)}
+        </I18nProvider>,
         element[0]
       );
     }
