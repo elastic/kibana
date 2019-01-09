@@ -177,8 +177,8 @@ const getEventsColumns = (startDate: number) => [
   },
 ];
 
-const formatSafely = (path: string, data: Ecs) => {
-  if (has('source.ip', event)) {
+export const formatSafely = (path: string, data: Ecs) => {
+  if (has(path, data)) {
     const txt = getOr('--', path, data);
     return txt && txt.slice ? txt.slice(0, 12) : txt;
   }

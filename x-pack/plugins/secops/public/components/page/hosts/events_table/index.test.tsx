@@ -13,7 +13,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
-import { EventsTable } from './index';
+import { EventsTable, formatSafely } from './index';
 import { mockData } from './mock';
 
 describe('Load More Events Table Component', () => {
@@ -44,6 +44,24 @@ describe('Load More Events Table Component', () => {
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+
+  describe('formatSafely', () => {
+    test('formatSafely happy path', () => {
+      const sourceIp = formatSafely('source.ip', mockData.Events.edges[0].event);
+      const hostName = formatSafely('host.name', mockData.Events.edges[0].event);
+
+      expect(sourceIp).toBe('10.142.0.6');
+      expect(hostName).toBe('siem-general');
+    });
+
+    test('formatSafely unhappy path', () => {
+      const sourceIp = formatSafely('.ip', mockData.Events.edges[0].event);
+      const hostName = formatSafely('.name', mockData.Events.edges[0].event);
+
+      expect(sourceIp).toBe('--');
+      expect(hostName).toBe('--');
     });
   });
 });
