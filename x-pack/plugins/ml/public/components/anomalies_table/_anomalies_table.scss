@@ -111,12 +111,17 @@
         margin-top: 0px;
         flex-basis: 15%;
         font-size: inherit;
+        line-height: 1.5rem;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
 
       .euiDescriptionList__description {
         margin-top: 0px;
         flex-basis: 85%;
         font-size: inherit;
+        line-height: 1.5rem;
       }
 
       .filter-button {
