@@ -263,6 +263,15 @@ export class WorkspaceHandler {
     return parsedLocation;
   }
 
+  private fileUrl(str: string) {
+    let pathName = str.replace(/\\/g, '/');
+    // Windows drive letter must be prefixed with a slash
+    if (pathName[0] !== '/') {
+      pathName = '/' + pathName;
+    }
+    return 'file://' + pathName;
+  }
+
   /**
    * convert a git uri to absolute file path, checkout code into workspace
    * @param uri the uri
@@ -273,7 +282,7 @@ export class WorkspaceHandler {
       const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, revision);
       return {
         workspacePath: workspaceRepo.workdir(),
-        filePath: `file://${path.resolve(workspaceRepo.workdir(), file || '/')}`,
+        filePath: this.fileUrl(path.resolve(workspaceRepo.workdir(), file || '/')),
         uri,
         workspaceRevision,
       };

@@ -18,6 +18,7 @@ interface Job {
   request: LspRequest;
   resolve: (response: ResponseMessage) => void;
   reject: (error: any) => void;
+  startTime: number;
 }
 
 enum WorkspaceStatus {
@@ -70,6 +71,7 @@ export class RequestExpander implements ILanguageServerHandler {
         request,
         resolve,
         reject,
+        startTime: Date.now(),
       });
       if (!this.running) {
         this.running = true;
@@ -154,7 +156,7 @@ export class RequestExpander implements ILanguageServerHandler {
     const job = this.jobQueue.shift();
     if (job) {
       const { request, resolve, reject } = job;
-      this.expand(request).then(
+      this.expand(request, job.startTime).then(
         value => {
           try {
             resolve(value);
@@ -179,7 +181,7 @@ export class RequestExpander implements ILanguageServerHandler {
     setTimeout(this.handle, 0);
   }
 
-  private async expand(request: LspRequest): Promise<ResponseMessage> {
+  private async expand(request: LspRequest, startTime: number): Promise<ResponseMessage> {
     if (request.workspacePath) {
       const ws = this.getWorkspace(request.workspacePath);
       if (ws.status === WorkspaceStatus.Uninitialized) {
@@ -191,7 +193,8 @@ export class RequestExpander implements ILanguageServerHandler {
 
         if (timeout > 0 && ws.initPromise) {
           try {
-            await promiseTimeout(timeout, ws.initPromise);
+            const elasped = Date.now() - startTime;
+            await promiseTimeout(timeout - elasped, ws.initPromise);
           } catch (e) {
             if (e.isTimeout) {
               throw InitializingError;
