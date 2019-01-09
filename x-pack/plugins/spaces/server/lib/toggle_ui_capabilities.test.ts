@@ -19,12 +19,12 @@ const features: Feature[] = [
     id: 'feature_2',
     name: 'Feature 2',
     navLinkId: 'feature2',
+    catalogue: ['feature2Entry'],
+    management: {
+      kibana: ['somethingElse'],
+    },
     privileges: {
       all: {
-        catalogue: ['feature2Entry'],
-        management: {
-          kibana: ['somethingElse'],
-        },
         app: [],
         ui: [],
         savedObject: {
@@ -38,12 +38,12 @@ const features: Feature[] = [
     id: 'feature_3',
     name: 'Feature 3',
     navLinkId: 'feature3',
+    catalogue: ['feature3Entry'],
+    management: {
+      kibana: ['indices'],
+    },
     privileges: {
       all: {
-        catalogue: ['feature3Entry'],
-        management: {
-          kibana: ['indices'],
-        },
         app: [],
         ui: [],
         savedObject: {

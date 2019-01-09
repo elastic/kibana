@@ -13,10 +13,6 @@ export interface FeaturePrivilegeDefinition {
   metadata?: {
     tooltip?: string;
   };
-  management?: {
-    [sectionId: string]: string[];
-  };
-  catalogue?: string[];
   api?: string[];
   app: string[];
   savedObject: {
@@ -33,6 +29,10 @@ export interface Feature {
   icon?: IconType;
   description?: string;
   navLinkId?: string;
+  management?: {
+    [sectionId: string]: string[];
+  };
+  catalogue?: string[];
   privileges: {
     [key: string]: FeaturePrivilegeDefinition;
   };
@@ -56,6 +56,8 @@ const schema = Joi.object({
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string(),
+  management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
+  catalogue: Joi.array().items(Joi.string()),
   privileges: Joi.object()
     .pattern(
       featurePrivilegePartRegex,
@@ -63,8 +65,6 @@ const schema = Joi.object({
         metadata: Joi.object({
           tooltip: Joi.string(),
         }),
-        management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
-        catalogue: Joi.array().items(Joi.string()),
         api: Joi.array().items(Joi.string()),
         app: Joi.array()
           .items(Joi.string())
