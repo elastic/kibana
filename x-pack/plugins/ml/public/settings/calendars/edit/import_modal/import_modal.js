@@ -27,9 +27,16 @@ import {
 import { ImportedEvents } from '../imported_events';
 import { readFile, parseICSFile, filterEvents } from './utils';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 const MAX_FILE_SIZE_MB = 100;
 
-export class ImportModal extends Component {
+export const ImportModal = injectI18n(class ImportModal extends Component {
+  static propTypes = {
+    addImportedEvents: PropTypes.func.isRequired,
+    closeImportModal: PropTypes.func.isRequired,
+  }
+
   constructor(props) {
     super(props);
 
@@ -45,7 +52,10 @@ export class ImportModal extends Component {
 
   handleImport = async (loadedFile) => {
     const incomingFile = loadedFile[0];
-    const errorMessage = 'Could not parse ICS file.';
+    const errorMessage = this.props.intl.formatMessage({
+      id: 'xpack.ml.calendarsEdit.importModal.couldNotParseICSFileErrorMessage',
+      defaultMessage: 'Could not parse ICS file.'
+    });
     let events = [];
 
     if (incomingFile && incomingFile.size <= (MAX_FILE_SIZE_MB * 1000000)) {
@@ -107,7 +117,7 @@ export class ImportModal extends Component {
   );
 
   render() {
-    const { closeImportModal } = this.props;
+    const { closeImportModal, intl } = this.props;
     const {
       fileLoading,
       fileLoaded,
@@ -141,23 +151,34 @@ export class ImportModal extends Component {
               direction="column"
               gutterSize="none"
             >
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiModalHeaderTitle >
-                  Import events
+                  <FormattedMessage
+                    id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
+                    defaultMessage="Import events"
+                  />
                 </EuiModalHeaderTitle>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <p>Import events from an ICS file.</p>
+              <EuiFlexItem grow={false}>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.calendarsEdit.eventsTable.importEventsDescription"
+                    defaultMessage="Import events from an ICS file."
+                  />
+                </p>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalHeader>
 
           <EuiModalBody>
             <EuiFlexGroup direction="column">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiFilePicker
                   compressed
-                  initialPromptText="Select or drag and drop a file"
+                  initialPromptText={intl.formatMessage({
+                    id: 'xpack.ml.calendarsEdit.importModal.selectOrDragAndDropFilePromptText',
+                    defaultMessage: 'Select or drag and drop a file'
+                  })}
                   onChange={this.handleImport}
                   disabled={fileLoading}
                 />
@@ -182,21 +203,22 @@ export class ImportModal extends Component {
               fill
               disabled={fileLoaded === false || errorMessage !== null}
             >
-              Import
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.eventsTable.importButtonLabel"
+                defaultMessage="Import"
+              />
             </EuiButton>
             <EuiButtonEmpty
               onClick={closeImportModal}
             >
-              Cancel
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiModalFooter>
         </EuiModal>
       </Fragment>
     );
   }
-}
-
-ImportModal.propTypes = {
-  addImportedEvents: PropTypes.func.isRequired,
-  closeImportModal: PropTypes.func.isRequired,
-};
+});

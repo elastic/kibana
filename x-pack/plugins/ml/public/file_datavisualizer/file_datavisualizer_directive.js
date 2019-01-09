@@ -18,7 +18,6 @@ import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_priv
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { loadIndexPatterns } from '../util/index_utils';
-import { initPromise } from 'plugins/ml/util/promise';
 import { FileDataVisualizerPage } from './file_datavisualizer';
 
 import uiRoutes from 'ui/routes';
@@ -35,7 +34,6 @@ uiRoutes
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 

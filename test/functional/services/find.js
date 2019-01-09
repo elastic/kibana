@@ -64,7 +64,7 @@ export function FindProvider({ getService }) {
       return await retry.try(async () => {
         const element = await getElementFunction();
         // Calling any method forces a staleness check
-        element.isEnabled();
+        await element.isEnabled();
         return element;
       });
     }
@@ -75,7 +75,7 @@ export function FindProvider({ getService }) {
         return await retry.try(async () => {
           const element = await getElementFunction(leadfootWithTimeout);
           // Calling any method forces a staleness check
-          element.isEnabled();
+          await element.isEnabled();
           return element;
         });
       } finally {
@@ -109,6 +109,7 @@ export function FindProvider({ getService }) {
     }
 
     async setValue(selector, text) {
+      log.debug(`find.setValue(${selector}, ${text})`);
       return await retry.try(async () => {
         const element = await this.byCssSelector(selector);
         await element.click();

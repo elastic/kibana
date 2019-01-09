@@ -40,6 +40,7 @@ export async function loadTransactionDistribution({
   transactionName,
   transactionType = 'request',
   transactionId,
+  traceId,
   kuery
 }: Required<IUrlParams>) {
   return callApi<ITransactionDistributionAPIResponse>({
@@ -50,6 +51,7 @@ export async function loadTransactionDistribution({
       start,
       end,
       transactionId,
+      traceId,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
