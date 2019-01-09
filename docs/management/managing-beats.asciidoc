@@ -64,8 +64,8 @@ Central management supports configuration settings for:
 * {filebeat} inputs
 * {filebeat} and {metricbeat} outputs 
 
-NOTE: Central management supports the following outputs only: {es}, {ls}, and
-Kafka. Other output types are not supported for {beats} that are enrolled in
+NOTE: Central management supports the following outputs only: {es}, {ls}, Kafka,
+and Redis. Other output types are not supported for {beats} that are enrolled in
 central management.
 
 Use the Central Management UI to define and manage settings for supported
