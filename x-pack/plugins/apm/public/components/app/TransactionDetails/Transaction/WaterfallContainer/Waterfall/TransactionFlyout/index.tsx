@@ -21,7 +21,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { APM_AGENT_DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/agents';
+import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
@@ -71,20 +71,14 @@ function DroppedSpansWarning({
     return null;
   }
 
-  const url =
-    APM_AGENT_DROPPED_SPANS_DOCS[transactionDoc.context.service.agent.name];
-
-  const docsLink = url ? (
-    <EuiLink href={url} target="_blank">
-      Learn more.
-    </EuiLink>
-  ) : null;
-
   return (
     <React.Fragment>
       <EuiCallOut size="s">
         The APM agent that reported this transaction dropped {dropped} spans or
-        more based on its configuration. {docsLink}
+        more based on its configuration.{' '}
+        <EuiLink href={DROPPED_SPANS_DOCS} target="_blank">
+          Learn more about dropped spans.
+        </EuiLink>
       </EuiCallOut>
       <EuiHorizontalRule />
     </React.Fragment>
