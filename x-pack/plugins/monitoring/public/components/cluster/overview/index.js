@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { ElasticsearchPanel } from './elasticsearch_panel';
 import { KibanaPanel } from './kibana_panel';
 import { LogstashPanel } from './logstash_panel';
@@ -25,7 +25,7 @@ export function Overview(props) {
 
         { !isFromUnlinkedDeployment ?
           (
-            <div>
+            <Fragment>
               <ElasticsearchPanel
                 {...props.cluster.elasticsearch}
                 version={props.cluster.version}
@@ -35,7 +35,7 @@ export function Overview(props) {
                 showLicenseExpiration={props.showLicenseExpiration}
               />
               <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
-            </div>
+            </Fragment>
           )
           : null
         }
