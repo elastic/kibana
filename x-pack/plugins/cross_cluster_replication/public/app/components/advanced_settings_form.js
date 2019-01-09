@@ -12,29 +12,15 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
   EuiPanel,
-  EuiDescribedFormGroup,
-  EuiFormRow,
   EuiButtonIcon,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { debounce } from 'lodash';
 
-import { getValidator, i18nValidationErrorMessages } from '../services/input_validation';
-
-const parseError = (err) => {
-  if (!err) {
-    return null;
-  }
-
-  const [error] = err.details; // Use the first error in the details array (error.details[0])
-  const { type, context: { label } } = error;
-  const message = i18nValidationErrorMessages[type](label);
-  return { message };
-};
+import { FormEntryRow } from './form_entry_row';
+import { getValidator } from '../services/input_validation';
 
 /**
  * State transitions: fields update
@@ -64,20 +50,13 @@ export const updateFormErrors = (errors, onFormValidityUpdate = () => undefined)
 /**
  * State transitions: add setting field to form and errors
  */
-export const addField = (field, validator, onFormValidityUpdate) => ({ fields, fieldsErrors }) => {
-  const fieldValue = '';
-  const { error } = validator.validate({ [field]: fieldValue });
-  const updatedFieldsErrors = updateFormErrors({ [field]: parseError(error) }, onFormValidityUpdate)({ fieldsErrors });
-
-  return ({
-    fields: {
-      ...fields,
-      [field]: fieldValue,
-    },
-    ...updatedFieldsErrors,
-    previewSettingActive: null
-  });
-};
+export const addField = (field) => ({ fields }) => ({
+  fields: {
+    ...fields,
+    [field]: '',
+  },
+  previewSettingActive: null
+});
 
 /**
  * State transitions: remove setting from fields and errors
@@ -112,8 +91,6 @@ export class AdvancedSettingsForm extends PureComponent {
   constructor(props) {
     super(props);
 
-    this.validateFields = debounce(this.validateFields.bind(this), 500);
-
     this.validator = getValidator(Object.entries(this.props.schema).reduce((acc, [field, schema]) => ({
       ...acc,
       [field]: schema.validate.label(schema.label)
@@ -138,74 +115,29 @@ export class AdvancedSettingsForm extends PureComponent {
     this.setState({ previewSettingActive });
   }
 
-  validateFields = (fields) => {
-    const { onFormValidityUpdate } = this.props;
-    const errors = {};
-
-    let error;
-    Object.entries(fields).forEach(([field, value]) => {
-      ({ error } = this.validator.validate({ [field]: value }));
-
-      errors[field] = parseError(error);
-    });
-
-    this.setState(updateFormErrors(errors, onFormValidityUpdate));
-  }
-
   onFieldChange = (fields) => {
     this.setState(updateFields(fields));
-    this.validateFields(fields);
   }
 
-  renderRowSelectedSetting = (field, value, fieldSchema, areErrorsVisible, fieldErrors) => {
-    const hasError = !!fieldErrors;
-    const isInvalid = hasError &&  (fieldErrors.alwaysVisible || areErrorsVisible);
-
-    return (
-      <EuiDescribedFormGroup
-        title={(
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h4>{fieldSchema.label}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="danger"
-                onClick={() => this.unSelectSetting(field)}
-                iconType="minusInCircle"
-                aria-label="Remove setting"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        description={fieldSchema.description}
-        fullWidth
-        key={field}
-      >
-        <EuiFormRow
-          label={fieldSchema.label}
-          error={fieldErrors && fieldErrors.message}
-          isInvalid={isInvalid}
-          fullWidth
-        >
-          <EuiFieldText
-            isInvalid={isInvalid}
-            value={value}
-            onChange={e => this.onFieldChange({ [field]: e.target.value })}
-            fullWidth
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-    );
+  onFieldsErrorChange = (errors) => {
+    this.setState(updateFormErrors(errors, this.props.onFormValidityUpdate));
   }
 
   renderSelectedSettings = () => {
-    const { fields, fieldsErrors } = this.state;
+    const { fields } = this.state;
     const { areErrorsVisible, schema } = this.props;
+
     return Object.keys(fields).map((field) => (
-      this.renderRowSelectedSetting(field, fields[field], schema[field], areErrorsVisible, fieldsErrors[field])
+      <FormEntryRow
+        key={field}
+        field={field}
+        schema={schema[field]}
+        areErrorsVisible={areErrorsVisible}
+        validator={this.validator}
+        onValueUpdate={this.onFieldChange}
+        onErrorUpdate={this.onFieldsErrorChange}
+        onRemoveRow={this.unSelectSetting}
+      />
     ));
   }
 
