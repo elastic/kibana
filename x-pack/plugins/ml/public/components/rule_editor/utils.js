@@ -187,76 +187,123 @@ export function addItemToFilter(item, filterId) {
 
 export function buildRuleDescription(rule) {
   const { actions, conditions, scope } = rule;
-  let description = i18n.translate('xpack.ml.ruleEditor.ruleDescription.skipText', {
-    defaultMessage: 'skip ',
-  });
+  let actionsText = '';
+  let conditionsText = '';
+  let filtersText = '';
+
   actions.forEach((action, i) => {
     if (i > 0) {
-      description += ' AND ';
+      actionsText += ' AND ';
     }
-    description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.actionTypeText', {
-      defaultMessage: '{action, select, skip_result {result} skip_model_update {model update} other {} }',
-      values: { action }
-    });
+    switch (action) {
+      case ACTION.SKIP_RESULT:
+        actionsText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.resultActionTypeText', {
+          defaultMessage: 'result',
+          description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText +' +
+            'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
+        });
+        break;
+      case ACTION.SKIP_MODEL_UPDATE:
+        actionsText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.modelUpdateActionTypeText', {
+          defaultMessage: 'model update',
+          description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+            'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
+        });
+        break;
+    }
   });
 
-  description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.whenText', {
-    defaultMessage: ' when ',
-  });
   if (conditions !== undefined) {
     conditions.forEach((condition, i) => {
       if (i > 0) {
-        description += ' AND ';
+        conditionsText += ' AND ';
       }
-
-      description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.appliesToTypeText', {
+      conditionsText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.conditionsText', {
         defaultMessage: '{appliesTo} is {operator} {value}',
-        values: { appliesTo: appliesToText(condition.applies_to), operator: operatorToText(condition.operator), value: condition.value }
+        values: { appliesTo: appliesToText(condition.applies_to), operator: operatorToText(condition.operator), value: condition.value },
+        description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+          'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
       });
     });
   }
 
   if (scope !== undefined) {
     if (conditions !== undefined && conditions.length > 0) {
-      description += ' AND ';
+      filtersText += ' AND ';
     }
     const fieldNames = Object.keys(scope);
     fieldNames.forEach((fieldName, i) => {
       if (i > 0) {
-        description += ' AND ';
+        filtersText += ' AND ';
       }
 
       const filter = scope[fieldName];
-      description += i18n.translate('xpack.ml.ruleEditor.ruleDescription.filterTypeText', {
+      filtersText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.filtersText', {
         defaultMessage: '{fieldName} is {filterType} {filterId}',
-        values: { fieldName, filterType: filterTypeToText(filter.filter_type), filterId: filter.filter_id }
+        values: { fieldName, filterType: filterTypeToText(filter.filter_type), filterId: filter.filter_id },
+        description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+          'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
       });
     });
   }
 
-  return description;
+  return i18n.translate('xpack.ml.ruleEditor.ruleDescription', {
+    defaultMessage: 'skip {actions} when {conditions} {filters}',
+    values: {
+      actions: actionsText,
+      conditions: conditionsText,
+      filters: filtersText
+    },
+    description: 'Composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+      'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText.' +
+      ' (Example: skip model update when actual is less than 1 AND ip is in xxx)'
+  });
 }
 
 export function filterTypeToText(filterType) {
-  return i18n.translate('xpack.ml.ruleEditor.filterTypeLabel', {
-    defaultMessage: '{filterType, select, include {in} exclude {not in} other {} }',
-    values: { filterType }
-  });
+  switch (filterType) {
+    case FILTER_TYPE.INCLUDE:
+      return i18n.translate('xpack.ml.ruleEditor.includeFilterTypeText', { defaultMessage: 'in' });
+    case FILTER_TYPE.EXCLUDE:
+      return i18n.translate('xpack.ml.ruleEditor.excludeFilterTypeText', { defaultMessage: 'not in' });
+
+    default:
+      return (filterType !== undefined) ? filterType : '';
+  }
 }
 
 export function appliesToText(appliesTo) {
-  return i18n.translate('xpack.ml.ruleEditor.appliesTypeLabel', {
-    defaultMessage: '{appliesTo, select, actual {actual} typical {typical} diff_from_typical {diff from typical} other {} }',
-    values: { appliesTo }
-  });
+  switch (appliesTo) {
+    case APPLIES_TO.ACTUAL:
+      return i18n.translate('xpack.ml.ruleEditor.actualAppliesTypeText', { defaultMessage: 'actual' });
+    case APPLIES_TO.TYPICAL:
+      return i18n.translate('xpack.ml.ruleEditor.typicalAppliesTypeText', { defaultMessage: 'typical' });
+
+    case APPLIES_TO.DIFF_FROM_TYPICAL:
+      return i18n.translate('xpack.ml.ruleEditor.diffFromTypicalAppliesTypeText', { defaultMessage: 'diff from typical' });
+
+    default:
+      return (appliesTo !== undefined) ? appliesTo : '';
+  }
 }
 
 export function operatorToText(operator) {
-  return i18n.translate('xpack.ml.ruleEditor.operatorTypeLabel', {
-    defaultMessage:
-      '{operator, select, lt {less than} lte {less than or equal to} gt {greater than} gte {greater than or equal to} other {} }',
-    values: { operator }
-  });
+  switch (operator) {
+    case OPERATOR.LESS_THAN:
+      return i18n.translate('xpack.ml.ruleEditor.lessThanOperatorTypeText', { defaultMessage: 'less than' });
+
+    case OPERATOR.LESS_THAN_OR_EQUAL:
+      return i18n.translate('xpack.ml.ruleEditor.lessThanOrEqualToOperatorTypeText', { defaultMessage: 'less than or equal to' });
+
+    case OPERATOR.GREATER_THAN:
+      return i18n.translate('xpack.ml.ruleEditor.greaterThanOperatorTypeText', { defaultMessage: 'greater than' });
+
+    case OPERATOR.GREATER_THAN_OR_EQUAL:
+      return i18n.translate('xpack.ml.ruleEditor.greaterThanOrEqualToOperatorTypeText', { defaultMessage: 'greater than or equal to' });
+
+    default:
+      return (operator !== undefined) ? operator : '';
+  }
 }
 
 // Returns the value of the selected 'applies_to' field from the
