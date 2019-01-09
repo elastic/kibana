@@ -130,6 +130,10 @@ const kibanaFeatures: Feature[] = [
     id: 'indexPatterns',
     name: 'Index Pattern Management',
     icon: 'indexPatternApp',
+    catalogue: ['index_patterns'],
+    management: {
+      kibana: ['indices'],
+    },
     privileges: {
       all: {
         app: ['kibana'],
