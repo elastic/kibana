@@ -20,6 +20,7 @@
 import dateMath from '@elastic/datemath';
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import React, { Component } from 'react';
+import Ipv4Address from 'ui/utils/ipv4_address';
 
 interface Props {
   value?: string | number;
@@ -68,6 +69,7 @@ export class ValueInputType extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
+            isInvalid={typeof value === 'string' && !this.validateIp(value)}
           />
         );
         break;
@@ -94,5 +96,19 @@ export class ValueInputType extends Component<Props> {
 
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.props.onChange(event.target.value);
+  };
+
+  private validateIp = (ipAddress: string) => {
+    if (ipAddress == null || ipAddress === '') {
+      return true;
+    }
+
+    try {
+      // @ts-ignore
+      const ipOjbect = new Ipv4Address(ipAddress);
+      return true;
+    } catch (e) {
+      return false;
+    }
   };
 }
