@@ -22,6 +22,7 @@ import _ from 'lodash';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
 import fetch from 'node-fetch';
+fetch.Promise = require('bluebird');
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 const extendUrl = (url, props) => (
