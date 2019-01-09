@@ -266,7 +266,7 @@ const convertHitToLogEntryDocument = (fields: string[]) => (
             [fieldName]: get(fieldName, hit._source),
           }
         : flattenedFields,
-    {} as { [fieldName: string]: string | number | null }
+    {} as { [fieldName: string]: string | number | boolean | null }
   ),
   key: {
     time: hit.sort[0],
