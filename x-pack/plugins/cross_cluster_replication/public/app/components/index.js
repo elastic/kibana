@@ -16,3 +16,4 @@ export { FollowerIndexDeleteProvider } from './follower_index_delete_provider';
 export { FollowerIndexForm } from './follower_index_form';
 export { FollowerIndexPageTitle } from './follower_index_page_title';
 export { AdvancedSettingsForm } from './advanced_settings_form';
+export { FormEntryRow } from './form_entry_row';
