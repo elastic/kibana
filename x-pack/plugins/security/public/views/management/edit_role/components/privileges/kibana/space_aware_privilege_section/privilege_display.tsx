@@ -36,7 +36,7 @@ export const SupercededPrivilegeDisplay: SFC<SupercededProps> = (props: Superced
   return (
     <PrivilegeDisplay
       {...rest}
-      iconType={'questionInCircle'}
+      iconType={'lock'}
       tooltipContent={
         <FormattedMessage
           id="foo"
@@ -62,11 +62,7 @@ function getDisplayValue(privilege: string | string[], styleMissingPrivilege?: b
     privileges.length === 0 || (privileges.length === 1 && privileges.includes(NO_PRIVILEGE_VALUE));
 
   if (isPrivilegeMissing && styleMissingPrivilege) {
-    displayValue = (
-      <EuiText>
-        <EuiIcon size={'s'} type={'minusInCircle'} /> none
-      </EuiText>
-    );
+    displayValue = <EuiIcon color="subdued" type={'minusInCircle'} />;
   } else {
     displayValue = privileges.map(p => _.capitalize(p)).join(', ');
   }
@@ -79,7 +75,17 @@ function getIconTip(iconType?: IconType, tooltipContent?: ReactNode) {
     return null;
   }
 
-  return <EuiIconTip type={iconType} content={tooltipContent} size={'s'} />;
+  return (
+    <EuiIconTip
+      // TODO: Waiting on update from EUI
+      // iconProps={{
+      //   className: 'eui-alignTop',
+      // }}
+      type={iconType}
+      content={tooltipContent}
+      size={'s'}
+    />
+  );
 }
 
 function coerceToArray(privilege: string | string[]): string[] {

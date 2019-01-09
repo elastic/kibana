@@ -6,15 +6,14 @@
 
 import {
   EuiIcon,
+  // @ts-ignore
   EuiIconTip,
   // @ts-ignore
   EuiInMemoryTable,
   // @ts-ignore
   EuiSuperSelect,
   EuiText,
-  EuiTextProps,
 } from '@elastic/eui';
-import { EuiIconProps } from '@elastic/eui/src/components/icon/icon';
 import { InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -74,7 +73,7 @@ export class FeatureTable extends Component<Props, {}> {
       role,
     }));
 
-    return <EuiInMemoryTable columns={this.getColumns()} items={items} />;
+    return <EuiInMemoryTable responsive={false} columns={this.getColumns()} items={items} />;
   }
 
   public onChange = (featureId: string) => (privilege: string) => {
@@ -120,22 +119,23 @@ export class FeatureTable extends Component<Props, {}> {
             </EuiText>
           );
           tooltipElement = (
-            <EuiIconTip type={'iInCircle'} color={'primary'} content={tooltipContent} />
+            <EuiIconTip
+              // TODO: Waiting on update from EUI
+              // iconProps={{
+              //   className: 'eui-alignTop',
+              // }}
+              type={'iInCircle'}
+              color={'subdued'}
+              content={tooltipContent}
+            />
           );
         }
 
-        const textProps: EuiTextProps = {};
-        const iconProps: EuiIconProps = {};
-        if (!feature.hasAnyPrivilegeAssigned) {
-          textProps.color = 'subdued';
-          iconProps.color = 'subdued';
-        }
-
         return (
-          <EuiText {...textProps}>
-            <EuiIcon {...iconProps} type={feature.icon} />
-            &ensp; {feature.name} {tooltipElement}
-          </EuiText>
+          <span>
+            <EuiIcon size="m" type={feature.icon} className="secPrivilegeFeatureIcon" />
+            {feature.name} {tooltipElement}
+          </span>
         );
       },
     },

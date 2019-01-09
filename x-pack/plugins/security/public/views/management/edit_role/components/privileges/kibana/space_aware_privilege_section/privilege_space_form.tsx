@@ -17,6 +17,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiOverlayMask,
+  EuiSpacer,
   // @ts-ignore
   EuiSuperSelect,
   EuiText,
@@ -84,12 +85,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   public render() {
     return (
       <EuiOverlayMask>
-        <EuiFlyout onClose={this.closeFlyout} size="s" maxWidth={true}>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h1>
+        <EuiFlyout onClose={this.closeFlyout} size="m" maxWidth={true}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>
                 <FormattedMessage id="foo" defaultMessage="Spaces privileges" />
-              </h1>
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>{this.getForm()}</EuiFlyoutBody>
@@ -97,12 +98,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
-                  Close
+                  Cancel
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={this.onSaveClick} fill disabled={!this.canSave()}>
-                  Save
+                  Create space privilege
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -116,7 +117,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     const { intl, spaces } = this.props;
     return (
       <EuiForm>
-        <EuiFormRow label={intl.formatMessage({ id: 'foo', defaultMessage: 'Spaces' })}>
+        <EuiFormRow fullWidth label={intl.formatMessage({ id: 'foo', defaultMessage: 'Spaces' })}>
           <SpaceSelector
             selectedSpaceIds={this.state.selectedSpaceIds}
             onChange={this.onSelectedSpacesChange}
@@ -127,14 +128,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         {this.getPrivilegeCallout()}
 
         <EuiFormRow
-          label={intl.formatMessage({ id: 'foo', defaultMessage: 'Base privilege' })}
-          helpText={intl.formatMessage({
-            id: 'foo',
-            defaultMessage:
-              'Default privilege for apps and settings not listed in the table below.',
-          })}
+          fullWidth
+          label={intl.formatMessage({ id: 'foo', defaultMessage: 'Privilege' })}
         >
           <EuiSuperSelect
+            fullWidth
             onChange={this.onSpaceMinimumPrivilegeChange}
             options={[
               {
@@ -143,7 +141,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                 dropdownDisplay: (
                   <EuiText>
                     <strong>Custom</strong>
-                    <p>Customize access to this space</p>
+                    <p>
+                      Customize access by feature. Defaults to none for features not listed in the
+                      table below.
+                    </p>
                   </EuiText>
                 ),
               },
@@ -175,21 +176,31 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        <EuiFormRow
-          label={this.getFeatureListLabel(this.state.selectedMinimumPrivilege.length > 0)}
-        >
-          <FeatureTable
-            role={this.state.role}
-            features={this.props.features}
-            effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.state.role)}
-            intl={this.props.intl}
-            onChange={this.onFeaturePrivilegesChange}
-            privilegeDefinition={this.props.privilegeDefinition}
-            spacesIndex={this.state.editingIndex}
-            showLocks={this.state.selectedMinimumPrivilege.length === 0}
-            disabled={this.state.selectedMinimumPrivilege.length > 0}
-          />
-        </EuiFormRow>
+        <EuiSpacer size="s" />
+
+        <EuiTitle size="xxs">
+          <h3>{this.getFeatureListLabel(this.state.selectedMinimumPrivilege.length > 0)}</h3>
+        </EuiTitle>
+
+        <EuiSpacer size="xs" />
+
+        <EuiText size="s">
+          <p>{this.getFeatureListDescription(this.state.selectedMinimumPrivilege.length > 0)}</p>
+        </EuiText>
+
+        <EuiSpacer size="l" />
+
+        <FeatureTable
+          role={this.state.role}
+          features={this.props.features}
+          effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.state.role)}
+          intl={this.props.intl}
+          onChange={this.onFeaturePrivilegesChange}
+          privilegeDefinition={this.props.privilegeDefinition}
+          spacesIndex={this.state.editingIndex}
+          showLocks={this.state.selectedMinimumPrivilege.length === 0}
+          disabled={this.state.selectedMinimumPrivilege.length > 0}
+        />
       </EuiForm>
     );
   };
@@ -208,10 +219,26 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     }
   };
 
+  private getFeatureListDescription = (disabled: boolean) => {
+    if (disabled) {
+      return this.props.intl.formatMessage({
+        id: 'foo',
+        defaultMessage:
+          'Showing privilege levels on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.',
+      });
+    } else {
+      return this.props.intl.formatMessage({
+        id: 'foo',
+        defaultMessage:
+          'Increase privilege levels from base privilege on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.',
+      });
+    }
+  };
+
   private getPrivilegeCallout = () => {
     if (this.state.selectedSpaceIds.includes('*')) {
       return (
-        <EuiFormRow>
+        <EuiFormRow fullWidth>
           <EuiCallOut
             color="primary"
             iconType="iInCircle"

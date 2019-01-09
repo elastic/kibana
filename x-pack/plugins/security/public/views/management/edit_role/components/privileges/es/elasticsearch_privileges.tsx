@@ -169,7 +169,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
         <EuiHorizontalRule />
 
         {this.props.editable && (
-          <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
+          <EuiButton iconType={'plusInCircleFilled'} onClick={this.addIndexPrivilege}>
             <FormattedMessage
               id="xpack.security.management.editRoles.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
               defaultMessage="Add index privilege"

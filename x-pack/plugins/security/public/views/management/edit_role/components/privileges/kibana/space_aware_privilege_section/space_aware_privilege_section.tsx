@@ -49,8 +49,8 @@ interface State {
 class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   private globalSpaceEntry: Space = {
     id: '*',
-    name: '* (all spaces)',
-    color: '#afafaf',
+    name: '* Global (all spaces)',
+    color: '#D3DAE6',
     initials: '*',
     disabledFeatures: [],
   };
@@ -181,7 +181,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
             <p>
               <FormattedMessage
                 id="foo"
-                defaultMessage="This role does not grant any access to Kibana."
+                defaultMessage="This role does not grant any access to Kibana. Add privileges to existing spaces or groups of existing spaces using the button below."
               />
             </p>
           </Fragment>
@@ -203,32 +203,16 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
       <EuiButton
         color="primary"
         onClick={this.addSpacePrivilege}
-        iconType={'spacesApp'}
+        iconType={'plusInCircleFilled'}
         data-test-subj={'addSpacePrivilegeButton'}
+        isDisabled={!hasAvailableSpaces}
       >
-        Add a privilege
+        Add space privilege
       </EuiButton>
     );
 
-    const addPrivilegeDescription = (
-      <Fragment>
-        <EuiSpacer size={'s'} />
-        <EuiText color={'subdued'} size={'s'}>
-          <FormattedMessage
-            id="foo"
-            defaultMessage="Customize by existing spaces or groups of existing spaces."
-          />
-        </EuiText>
-      </Fragment>
-    );
-
     if (!hasPrivilegesAssigned) {
-      return (
-        <div>
-          {addPrivilegeButton}
-          {addPrivilegeDescription}
-        </div>
-      );
+      return addPrivilegeButton;
     }
 
     const viewMatrixButton = (
@@ -240,18 +224,11 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
       />
     );
 
-    if (!hasAvailableSpaces) {
-      return viewMatrixButton;
-    }
-
     return (
-      <div>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          {hasAvailableSpaces && <EuiFlexItem grow={false}>{addPrivilegeButton}</EuiFlexItem>}
-          {hasPrivilegesAssigned && <EuiFlexItem grow={false}>{viewMatrixButton}</EuiFlexItem>}
-        </EuiFlexGroup>
-        {hasAvailableSpaces && addPrivilegeDescription}
-      </div>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>{addPrivilegeButton}</EuiFlexItem>
+        {hasPrivilegesAssigned && <EuiFlexItem grow={false}>{viewMatrixButton}</EuiFlexItem>}
+      </EuiFlexGroup>
     );
   };
 

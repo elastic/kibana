@@ -6,12 +6,9 @@
 import {
   EuiBadge,
   EuiBadgeProps,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiButtonEmpty,
   // @ts-ignore
   EuiInMemoryTable,
-  EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -100,30 +97,23 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
         width: '60%',
         render: (spaces: TableSpace[], record: TableRow) => {
           return (
-            <EuiFlexGroup wrap gutterSize={'s'}>
+            <div>
               {spaces.slice(0, SPACES_DISPLAY_COUNT).map((space: TableSpace) => (
-                <EuiFlexItem grow={false} key={space.id}>
-                  <EuiBadge {...getExtraBadgeProps(space)} color={getSpaceColor(space)}>
-                    {space.name}
-                  </EuiBadge>
-                </EuiFlexItem>
+                <EuiBadge
+                  key={space.id}
+                  {...getExtraBadgeProps(space)}
+                  color={getSpaceColor(space)}
+                >
+                  {space.name}
+                </EuiBadge>
               ))}
               {record.spaces.length > SPACES_DISPLAY_COUNT ? (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={
-                      <ul>
-                        {record.spaces.map(s => (
-                          <li key={s.id}>{s.name}</li>
-                        ))}
-                      </ul>
-                    }
-                  >
-                    <EuiText>({spaces.length - SPACES_DISPLAY_COUNT} more)</EuiText>
-                  </EuiToolTip>
-                </EuiFlexItem>
+                // TODO: Hook me up to expand table row to display all spaces inline
+                <EuiButtonEmpty size="xs">
+                  +{spaces.length - SPACES_DISPLAY_COUNT} more
+                </EuiButtonEmpty>
               ) : null}
-            </EuiFlexGroup>
+            </div>
           );
         },
       },
@@ -168,16 +158,20 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
         name: 'Actions',
         actions: [
           {
+            name: 'Edit',
             description: 'Edit these privileges',
             icon: 'pencil',
+            type: 'icon',
             onClick: (item: TableRow) => {
               this.props.onEdit(item.spacesIndex);
             },
           },
           {
+            name: 'Delete',
             description: 'Delete these privileges',
             icon: 'trash',
             color: 'danger',
+            type: 'icon',
             onClick: (item: TableRow) => {
               const roleCopy = copyRole(this.props.role);
               roleCopy.kibana.spaces.splice(item.spacesIndex, 1);
@@ -188,7 +182,20 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
       },
     ];
 
-    return <EuiInMemoryTable columns={columns} items={rows} />;
+    return (
+      <EuiInMemoryTable
+        columns={columns}
+        items={rows}
+        // TODO: FIX the ts-ignores
+        // @ts-ignore
+        rowProps={item => {
+          // TODO: Find the global space the right way
+          return {
+            className: item.spaces[0].id === '*' ? 'secPrivilegeTable__row--isGlobalSpace' : '',
+          };
+        }}
+      />
+    );
   };
 
   private getSortedPrivileges = () => {
