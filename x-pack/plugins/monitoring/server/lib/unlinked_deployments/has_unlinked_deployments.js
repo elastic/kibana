@@ -35,11 +35,9 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
     filters.push(timeRangeFilter);
   }
 
-  const msearch = indexPatternList.reduce((msearch, indexPattern) => {
-    msearch.push({
-      index: indexPattern,
-    });
-    msearch.push({
+  const params = {
+    index: indexPatternList,
+    body: {
       size: 0,
       terminate_after: 1,
       query: {
@@ -47,40 +45,10 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
           filter: filters,
         }
       }
-    });
-    return msearch;
-  }, []);
-  msearch.push({
-    index: 'foosdfsadf',
-  });
-  msearch.push({
-    size: 0,
-    terminate_after: 1,
-    query: {
-      bool: {
-        filter: filters,
-      }
     }
-  });
-
-  const params = {
-    body: msearch
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'msearch', params);
-
-  if (!response.responses) {
-    return false;
-  }
-
-  return response.responses.reduce((hasAny, response) => {
-    if (hasAny) {
-      return hasAny;
-    }
-    if (response.hits) {
-      return response.hits.total > 0;
-    }
-    return false;
-  }, false);
+  const response = await callWithRequest(req, 'search', params);
+  return response.hits.total > 0;
 }
