@@ -23,7 +23,6 @@ export class MBMapContainer extends React.Component {
     if (this._isMounted) {
       this._syncMbMapWithLayerList();
       this._syncMbMapWithInspector();
-      // this._syncMbMapWithAttribution();
     }
   }, 256);
 
@@ -210,27 +209,6 @@ export class MBMapContainer extends React.Component {
       style: this._mbMap.getStyle(),
     });
   };
-
-  // async _syncMbMapWithAttribution() {
-  //   console.log('must sync attribution...');
-  //   const attributionPromises = this.props.layerList.map(layer => {
-  //     return layer.getAttributions();
-  //   });
-  //   const attributions = await Promise.all(attributionPromises);
-  //   const uniqueAttributions = [];
-  //   for (let i = 0; i < attributions.length; i++) {
-  //     for (let j = 0; j < attributions[i].length; j++) {
-  //       const testAttr = attributions[i][j];
-  //       const attr = uniqueAttributions.find((added) => {
-  //         return (added.url === testAttr.url && added.label === testAttr.label);
-  //       });
-  //       if (!attr) {
-  //         uniqueAttributions.push(testAttr);
-  //       }
-  //     }
-  //   }
-  //   console.log(uniqueAttributions);
-  // }
 
   render() {
     // do not debounce syncing zoom and center
