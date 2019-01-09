@@ -85,8 +85,8 @@ export class ContextMenuUi extends Component {
 
     // TODO: Fix with correct logic when paused status info is available from ES, currently all
     // follower indices are assumed to be active: https://github.com/elastic/elasticsearch/issues/37127
-    const pausedFollowerIndexNames = followerIndices.filter(() => false).map((index) => index.name);
-    const activeFollowerIndexNames = followerIndices.filter(() => true).map((index) => index.name);
+    const pausedFollowerIndexNames = followerIndices.filter(({ shards }) => !shards || !shards.length).map((index) => index.name);
+    const activeFollowerIndexNames = followerIndices.filter(({ shards }) => shards && shards.length).map((index) => index.name);
 
     return (
       <EuiPopover

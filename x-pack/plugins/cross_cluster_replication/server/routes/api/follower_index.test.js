@@ -65,7 +65,7 @@ let requestResponseQueue = [];
  * @param {*} response The response to return
  */
 const setHttpRequestResponse = (error, response) => {
-  requestResponseQueue.push ({ error, response });
+  requestResponseQueue.push({ error, response });
 };
 
 const resetHttpRequestResponses = () => requestResponseQueue = [];
@@ -229,7 +229,9 @@ describe('[CCR API Routes] Follower Index', () => {
       routeHandler = routeHandlers.unfollow;
     });
 
-    it('should unfollow a single item', async () => {
+    it('should unfollow await single item', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
       const response = await routeHandler({ params: { id: '1' } });
@@ -239,6 +241,12 @@ describe('[CCR API Routes] Follower Index', () => {
     });
 
     it('should accept a list of ids to unfollow', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
@@ -252,6 +260,10 @@ describe('[CCR API Routes] Follower Index', () => {
       const error = new Error('something went wrong');
       error.response = '{ "error": {} }';
 
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(error);
 

@@ -191,17 +191,27 @@ export const registerFollowerIndexRoutes = (server) => {
       const itemsUnfollowed = [];
       const errors = [];
 
-      await Promise.all(ids.map((_id) => (
-        callWithRequest('ccr.unfollowFollowerIndex', { id: _id })
-          .then(() => itemsUnfollowed.push(_id))
-          .catch(err => {
-            if (isEsError(err)) {
-              errors.push({ id: _id, error: wrapEsError(err) });
-            } else {
-              errors.push({ id: _id, error: wrapUnknownError(err) });
-            }
-          })
-      )));
+      await Promise.all(ids.map(async (_id) => {
+        try {
+          // Pause follower
+          await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+
+          // Close index
+          await callWithRequest('indices.close', { index: _id });
+
+          // Unfollow leader
+          await callWithRequest('ccr.unfollowFollowerIndex', { id: _id });
+
+          // Push success
+          itemsUnfollowed.push(_id);
+        } catch (err) {
+          if (isEsError(err)) {
+            errors.push({ id: _id, error: wrapEsError(err) });
+          } else {
+            errors.push({ id: _id, error: wrapUnknownError(err) });
+          }
+        }
+      }));
 
       return {
         itemsUnfollowed,
