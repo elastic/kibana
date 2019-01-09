@@ -9,7 +9,8 @@ import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiSpacer } from '@elast
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 class ListingUI extends PureComponent {
   getColumns() {
@@ -17,7 +18,9 @@ class ListingUI extends PureComponent {
 
     return [
       {
-        name: 'Name',
+        name: i18n.translate('xpack.monitoring.logstash.nodes.nameTitle', {
+          defaultMessage: 'Name'
+        }),
         field: 'name',
         sortable: true,
         render: (name, node) => (
@@ -40,41 +43,66 @@ class ListingUI extends PureComponent {
         )
       },
       {
-        name: 'CPU Usage',
+        name: i18n.translate('xpack.monitoring.logstash.nodes.cpuUsageTitle', {
+          defaultMessage: 'CPU Usage'
+        }),
         field: 'cpu_usage',
         sortable: true,
         render: value => formatPercentageUsage(value, 100)
       },
       {
-        name: 'Load Average',
+        name: i18n.translate('xpack.monitoring.logstash.nodes.loadAverageTitle', {
+          defaultMessage: 'Load Average'
+        }),
         field: 'load_average',
         sortable: true,
         render: value => formatNumber(value, '0.00')
       },
       {
-        name: 'JVM Heap Used',
+        name: i18n.translate('xpack.monitoring.logstash.nodes.jvmHeapUsedTitle', {
+          defaultMessage: '{javaVirtualMachine} Heap Used',
+          values: { javaVirtualMachine: 'JVM' }
+        }),
         field: 'jvm_heap_used',
         sortable: true,
         render: value => formatPercentageUsage(value, 100)
       },
       {
-        name: 'Events Ingested',
+        name: i18n.translate('xpack.monitoring.logstash.nodes.eventsIngestedTitle', {
+          defaultMessage: 'Events Ingested'
+        }),
         field: 'events_out',
         sortable: true,
         render: value => formatNumber(value, '0.[0]a')
       },
       {
-        name: 'Config Reloads',
+        name: i18n.translate('xpack.monitoring.logstash.nodes.configReloadsTitle', {
+          defaultMessage: 'Config Reloads'
+        }),
         sortable: true,
         render: node => (
           <div>
-            <div>{ node.reloads.successes } successes</div>
-            <div>{ node.reloads.failures } failures</div>
+            <div>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.nodes.configReloadsSuccessCountLabel"
+                defaultMessage="{reloadsSuccesses} successes"
+                values={{ reloadsSuccesses: node.reloads.successes }}
+              />
+            </div>
+            <div>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.nodes.configReloadsFailuresCountLabel"
+                defaultMessage="{reloadsFailures} failures"
+                values={{ reloadsFailures: node.reloads.failures }}
+              />
+            </div>
           </div>
         )
       },
       {
-        name: 'Version',
+        name: i18n.translate('xpack.monitoring.logstash.nodes.versionTitle', {
+          defaultMessage: 'Version'
+        }),
         field: 'version',
         sortable: true,
         render: value => formatNumber(value)
