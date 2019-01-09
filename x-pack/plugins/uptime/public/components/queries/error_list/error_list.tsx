@@ -79,8 +79,8 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
                 },
                 {
                   field: 'statusCode',
-                  name: i18n.translate('xpack.uptime.errorList.columns.responseCode', {
-                    defaultMessage: 'Response code',
+                  name: i18n.translate('xpack.uptime.errorList.columns.statusCode', {
+                    defaultMessage: 'Status code',
                   }),
                   sortable: true,
                 },

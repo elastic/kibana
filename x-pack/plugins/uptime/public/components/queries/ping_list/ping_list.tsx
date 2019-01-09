@@ -65,7 +65,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
         value: 'up',
       },
       {
-        label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatus', {
+        label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatus', {
           defaultMessage: 'Down',
         }),
         value: 'down',
