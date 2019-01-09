@@ -46,7 +46,7 @@ export const WorkpadLoader = compose(
           notify.error(err, { title: `Couldn't upload workpad` });
           // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
           // https://github.com/elastic/kibana/issues/20277
-          if (err.response.status === 403) {
+          if (err.response && err.response.status === 403) {
             props.setCanUserWrite(false);
           }
         }
@@ -81,7 +81,7 @@ export const WorkpadLoader = compose(
         notify.error(err, { title: `Couldn't clone workpad` });
         // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
         // https://github.com/elastic/kibana/issues/20277
-        if (err.response.status === 403) {
+        if (err.response && err.response.status === 403) {
           props.setCanUserWrite(false);
         }
       }
@@ -114,7 +114,7 @@ export const WorkpadLoader = compose(
               errors.push(result.id);
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
-              if (result.err.response.status === 403) {
+              if (result.err.response && result.err.response.status === 403) {
                 props.setCanUserWrite(false);
               }
             } else {
