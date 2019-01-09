@@ -31,6 +31,7 @@ exports[`renders without crashing 1`] = `
           values={Object {}}
         />
         <EuiLink
+          aria-label="Customize the URL identifier"
           color="primary"
           onClick={[Function]}
           type="button"

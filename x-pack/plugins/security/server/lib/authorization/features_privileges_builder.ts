@@ -52,6 +52,19 @@ export class FeaturesPrivilegesBuilder {
     );
   }
 
+  public getCatalogueReadActions(features: Feature[]): string[] {
+    return flatten(
+      features.map(feature => {
+        const { privileges } = feature;
+        if (!privileges || !privileges.read || !privileges.read.catalogue) {
+          return [];
+        }
+
+        return this.buildCatalogueFeaturePrivileges(privileges.read);
+      })
+    );
+  }
+
   public getManagementReadActions(features: Feature[]): string[] {
     return flatten(
       features.map(feature => {
@@ -85,8 +98,21 @@ export class FeaturesPrivilegesBuilder {
       ),
       ...privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui)),
       ...(feature.navLinkId ? [this.actions.ui.get('navLinks', feature.navLinkId)] : []),
+      ...this.buildCatalogueFeaturePrivileges(privilegeDefinition),
       ...this.buildManagementFeaturePrivileges(privilegeDefinition),
     ]);
+  }
+
+  private buildCatalogueFeaturePrivileges(
+    privilegeDefinition: FeaturePrivilegeDefinition
+  ): string[] {
+    if (!privilegeDefinition.catalogue) {
+      return [];
+    }
+
+    return privilegeDefinition.catalogue.map(catalogueEntryId =>
+      this.actions.ui.get('catalogue', catalogueEntryId)
+    );
   }
 
   private buildManagementFeaturePrivileges(

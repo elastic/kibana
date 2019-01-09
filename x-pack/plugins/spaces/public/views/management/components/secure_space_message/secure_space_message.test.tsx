@@ -13,6 +13,7 @@ describe('SecureSpaceMessage', () => {
     setMockCapabilities({
       navLinks: {},
       management: {},
+      catalogue: {},
       spaces: { manage: false },
     });
     expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
@@ -22,6 +23,7 @@ describe('SecureSpaceMessage', () => {
     setMockCapabilities({
       navLinks: {},
       management: {},
+      catalogue: {},
       spaces: { manage: true },
     });
     expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();

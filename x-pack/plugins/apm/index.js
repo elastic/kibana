@@ -76,7 +76,8 @@ export function apm(kibana) {
         navLinkId: 'apm',
         privileges: {
           all: {
-            app: ['apm'],
+            app: ['apm', 'kibana'],
+            catalogue: ['apm'],
             savedObject: {
               all: [],
               read: ['config']

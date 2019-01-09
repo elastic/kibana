@@ -16,11 +16,9 @@ interface SpaceValidatorOptions {
 
 export class SpaceValidator {
   private shouldValidate: boolean;
-  private featureIds: string[];
 
   constructor(options: SpaceValidatorOptions) {
     this.shouldValidate = options.shouldValidate || false;
-    this.featureIds = options.features.map(feature => feature.id);
   }
 
   public enableValidation() {
@@ -104,19 +102,6 @@ export class SpaceValidator {
   }
 
   public validateEnabledFeatures(space: Partial<Space>) {
-    if (!this.shouldValidate) {
-      return valid();
-    }
-
-    const knownDisabledFeatures = (space.disabledFeatures || []).filter(id =>
-      this.featureIds.includes(id)
-    );
-
-    const totalFeatureCount = this.featureIds.length;
-
-    if (knownDisabledFeatures.length === totalFeatureCount) {
-      return invalid(`At least 1 feature must be enabled`);
-    }
     return valid();
   }
 

@@ -24,6 +24,7 @@ export interface UICapabilities {
   management: {
     [sectionId: string]: Record<string, boolean>;
   };
+  catalogue: Record<string, boolean>;
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
 

@@ -6,14 +6,11 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -111,12 +108,12 @@ class ManageSpacePageUI extends Component<Props, State> {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
-      <EuiPage className="spcManagePage" restrictWidth>
-        <EuiPageBody>
-          <EuiForm>{content}</EuiForm>
-          {this.maybeGetSecureSpacesMessage()}
-        </EuiPageBody>
-      </EuiPage>
+      <div className="spcManagePage">
+        <EuiPageContent className="spcManagePage__content">
+          <EuiPageContentBody>{content}</EuiPageContentBody>
+        </EuiPageContent>
+        {this.maybeGetSecureSpacesMessage()}
+      </div>
     );
   }
 
@@ -177,7 +174,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   public getFormHeading = () => {
     return (
-      <EuiTitle size="l">
+      <EuiTitle size="m">
         <h1>
           {this.getTitle()} <ReservedSpaceBadge space={this.state.space as Space} />
         </h1>
@@ -205,7 +202,22 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   public getFormButtons = () => {
-    const saveText = this.editingExistingSpace() ? 'Update space' : 'Create space';
+    const createSpaceText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.createSpaceButton',
+      defaultMessage: 'Create space',
+    });
+
+    const updateSpaceText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.updateSpaceButton',
+      defaultMessage: 'Update space',
+    });
+
+    const cancelButtonText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.manageSpacePage.cancelSpaceButton',
+      defaultMessage: 'Cancel',
+    });
+
+    const saveText = this.editingExistingSpace() ? updateSpaceText : createSpaceText;
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
@@ -215,7 +227,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
-            Cancel
+            {cancelButtonText}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />

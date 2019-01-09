@@ -13,8 +13,9 @@ import {
 
 describe('ML - Endpoints', () => {
 
-  const PATH_START = '/_xpack/';
-  const PATH_START_LENGTH = PATH_START.length;
+  // Check all paths in the ML elasticsearchJsPlugin start with a leading forward slash
+  // so they work if Kibana is run behind a reverse proxy
+  const PATH_START = '/';
   const urls = [];
 
   // Stub objects
@@ -49,7 +50,7 @@ describe('ML - Endpoints', () => {
   describe('paths', () => {
     it(`should start with ${PATH_START}`, () => {
       urls.forEach((url) => {
-        expect(url.substring(0, PATH_START_LENGTH)).to.eql(PATH_START);
+        expect(url[0]).to.eql(PATH_START);
       });
     });
   });

@@ -41,15 +41,12 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiLink
+        aria-label="hide desc"
         color="primary"
         onClick={[Function]}
         type="button"
       >
-        <FormattedMessage
-          defaultMessage="hide"
-          id="xpack.spaces.management.collapsiblePanel.hideLinkText"
-          values={Object {}}
-        />
+        hide desc
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>

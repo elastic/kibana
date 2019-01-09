@@ -10,6 +10,7 @@ export interface EsArchiverOptions {
 
 export interface EsArchiver {
   load(archiveName: string, options?: EsArchiverOptions): Promise<void>;
+  loadIfNeeded(archiveName: string): Promise<void>;
   unload(archiveName: string): Promise<void>;
 }
 
@@ -18,4 +19,5 @@ export interface KibanaFunctionalTestDefaultProviders {
   getService(serviceName: string): any;
   getPageObjects(pageObjectNames: string[]): any;
   loadTestFile(path: string): void;
+  readConfigFile(path: string): any;
 }

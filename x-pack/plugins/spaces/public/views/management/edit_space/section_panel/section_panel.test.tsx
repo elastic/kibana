@@ -11,7 +11,13 @@ import { SectionPanel } from './section_panel';
 
 test('it renders without blowing up', () => {
   const wrapper = shallowWithIntl(
-    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch">
+    <SectionPanel
+      collapsible
+      iconType="logoElasticsearch"
+      title="Elasticsearch"
+      description="desc"
+      intl={null as any}
+    >
       <p>child</p>
     </SectionPanel>
   );
@@ -21,7 +27,13 @@ test('it renders without blowing up', () => {
 
 test('it renders children by default', () => {
   const wrapper = mountWithIntl(
-    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch">
+    <SectionPanel
+      collapsible
+      iconType="logoElasticsearch"
+      title="Elasticsearch"
+      description="desc"
+      intl={null as any}
+    >
       <p className="child">child 1</p>
       <p className="child">child 2</p>
     </SectionPanel>
@@ -33,7 +45,13 @@ test('it renders children by default', () => {
 
 test('it hides children when the "hide" link is clicked', () => {
   const wrapper = mountWithIntl(
-    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch">
+    <SectionPanel
+      collapsible
+      iconType="logoElasticsearch"
+      title="Elasticsearch"
+      description="desc"
+      intl={null as any}
+    >
       <p className="child">child 1</p>
       <p className="child">child 2</p>
     </SectionPanel>

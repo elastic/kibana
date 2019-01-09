@@ -92,6 +92,13 @@ export const security = (kibana) => new kibana.Plugin({
       };
     },
     replaceInjectedVars: async function (originalInjectedVars, request, server) {
+      // if we have a license which doesn't enable security, or we're a legacy user
+      // we shouldn't disable any ui capabilities
+      const { authorization } = server.plugins.security;
+      if (!authorization.mode.useRbacForRequest(request)) {
+        return originalInjectedVars;
+      }
+
       const disableUICapabilites = disableUICapabilitesFactory(server, request);
       // if we're an anonymous route, we disable all ui capabilities
       if (request.route.settings.auth === false) {
@@ -211,7 +218,13 @@ export const security = (kibana) => new kibana.Plugin({
     server.ext('onPostAuth', async function (req, h) {
       const path = req.path;
 
-      const { actions, checkPrivilegesDynamicallyWithRequest } = server.plugins.security.authorization;
+      const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
+
+      // if we don't have a license enabling security, or we're a legacy user, don't validate this request
+      if (!mode.useRbacForRequest(req)) {
+        return h.continue;
+      }
+
       const checkPrivileges = checkPrivilegesDynamicallyWithRequest(req);
 
       // Enforce app restrictions

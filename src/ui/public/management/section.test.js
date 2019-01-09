@@ -115,6 +115,15 @@ describe('ManagementSection', () => {
 
       expect(threwException).toBe(true);
     });
+
+    it('calls listener when item added', () => {
+      let listerCalled = false;
+      const listenerFn = () => { listerCalled = true; };
+
+      section.addListener(listenerFn);
+      section.register('about');
+      expect(listerCalled).toBe(true);
+    });
   });
 
   describe('deregister', () => {
@@ -136,6 +145,14 @@ describe('ManagementSection', () => {
       expect(section.items).toHaveLength(0);
     });
 
+    it('calls listener when item added', () => {
+      let listerCalled = false;
+      const listenerFn = () => { listerCalled = true; };
+
+      section.addListener(listenerFn);
+      section.deregister('about');
+      expect(listerCalled).toBe(true);
+    });
   });
 
   describe('getSection', () => {

@@ -22,6 +22,10 @@ function getMockOriginalInjectedVars() {
         bar: true,
       },
       management: {},
+      catalogue: {
+        fooEntry: true,
+        barEntry: true,
+      },
       feature: {
         someCapability: true,
       },
@@ -30,7 +34,11 @@ function getMockOriginalInjectedVars() {
   };
 }
 
-function createFeaturePrivilege(key: string, capabilities: string[] = []) {
+function createFeaturePrivilege(
+  key: string,
+  capabilities: string[] = [],
+  catalogueEntries: string[] = []
+) {
   return {
     [key]: {
       savedObject: {
@@ -38,6 +46,7 @@ function createFeaturePrivilege(key: string, capabilities: string[] = []) {
         read: [],
       },
       app: [],
+      catalogue: catalogueEntries,
       ui: [...capabilities],
     },
   };
@@ -63,6 +72,10 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {
+        fooEntry: true,
+        barEntry: true,
+      },
       otherFeature: {},
     });
   });
@@ -88,6 +101,10 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {
+        fooEntry: true,
+        barEntry: true,
+      },
       newFeature: {},
       otherFeature: {},
     });
@@ -115,9 +132,60 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {
+        fooEntry: true,
+        barEntry: true,
+      },
       newFeature: {
         capability1: true,
         capability2: true,
+      },
+      otherFeature: {},
+    });
+  });
+
+  it('combines catalogue entries from multiple features', () => {
+    const xpackMainPlugin = getMockXpackMainPlugin([
+      {
+        id: 'newFeature',
+        name: 'my new feature',
+        navLinkId: 'newFeatureNavLink',
+        privileges: {
+          ...createFeaturePrivilege('foo', ['capability1', 'capability2'], ['anotherFooEntry']),
+          ...createFeaturePrivilege('bar', ['capability3', 'capability4'], ['anotherBarEntry']),
+          ...createFeaturePrivilege(
+            'baz',
+            ['capability1', 'capability5'],
+            ['aBazEntry', 'anotherBazEntry']
+          ),
+        },
+      },
+    ]);
+    const originalInjectedVars = getMockOriginalInjectedVars();
+
+    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
+      feature: {
+        someCapability: true,
+      },
+      navLinks: {
+        foo: true,
+        bar: true,
+      },
+      management: {},
+      catalogue: {
+        fooEntry: true,
+        anotherFooEntry: true,
+        barEntry: true,
+        anotherBarEntry: true,
+        aBazEntry: true,
+        anotherBazEntry: true,
+      },
+      newFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+        capability5: true,
       },
       otherFeature: {},
     });
@@ -147,6 +215,10 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {
+        fooEntry: true,
+        barEntry: true,
+      },
       newFeature: {
         capability1: true,
         capability2: true,
@@ -210,6 +282,10 @@ describe('populateUICapabilities', () => {
         bar: true,
       },
       management: {},
+      catalogue: {
+        fooEntry: true,
+        barEntry: true,
+      },
       newFeature: {
         capability1: true,
         capability2: true,
