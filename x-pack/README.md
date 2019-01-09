@@ -100,7 +100,7 @@ We also have SAML API integration tests which set up Elasticsearch and Kibana wi
 node scripts/functional_tests --config test/saml_api_integration/config
 ```
 
-### Running and building Jest integration tests
+#### Running and building Jest integration tests
 
 Jest integration tests can be used to test behavior with Elasticsearch and the Kibana server.
 
