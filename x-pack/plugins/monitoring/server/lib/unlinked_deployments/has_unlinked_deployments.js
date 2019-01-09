@@ -12,23 +12,27 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
     return list;
   }, []);
 
-  // Get the params from the POST body for the request
-  const start = req.payload.timeRange.min;
-  const end = req.payload.timeRange.max;
+  const filters = [unlinkedDeploymentFilter];
+  // Not every page will contain a time range so check for that
+  if (req.payload.timeRange) {
+    const start = req.payload.timeRange.min;
+    const end = req.payload.timeRange.max;
 
-  const timeRangeFilter = {
-    range: {
-      timestamp: {
-        format: 'epoch_millis'
+    const timeRangeFilter = {
+      range: {
+        timestamp: {
+          format: 'epoch_millis'
+        }
       }
-    }
-  };
+    };
 
-  if (start) {
-    timeRangeFilter.range.timestamp.gte = moment.utc(start).valueOf();
-  }
-  if (end) {
-    timeRangeFilter.range.timestamp.lte = moment.utc(end).valueOf();
+    if (start) {
+      timeRangeFilter.range.timestamp.gte = moment.utc(start).valueOf();
+    }
+    if (end) {
+      timeRangeFilter.range.timestamp.lte = moment.utc(end).valueOf();
+    }
+    filters.push(timeRangeFilter);
   }
 
   const msearch = indexPatternList.reduce((msearch, indexPattern) => {
@@ -36,13 +40,10 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
       index: indexPattern,
     });
     msearch.push({
-      size: 1,
+      size: 0,
       query: {
         bool: {
-          filter: [ timeRangeFilter ],
-          must: [{
-            bool: unlinkedDeploymentFilter
-          }]
+          filter: filters,
         }
       }
     });
@@ -50,9 +51,6 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
   }, []);
 
   const params = {
-    filterPath: [
-      'responses.hits.hits._index',
-    ],
     body: msearch
   };
 
@@ -63,10 +61,5 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
     return false;
   }
 
-  const nonClusterCount = response.responses.reduce((total, response) => {
-    total += response.hits.hits.length;
-    return total;
-  }, 0);
-
-  return nonClusterCount > 0;
+  return response.responses.reduce((hasAny, response) => hasAny || response.hits.total > 0, false);
 }

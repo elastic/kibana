@@ -24,19 +24,19 @@ export function Overview(props) {
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
         { !isFromUnlinkedDeployment ?
-          <ElasticsearchPanel
-            {...props.cluster.elasticsearch}
-            version={props.cluster.version}
-            ml={props.cluster.ml}
-            changeUrl={props.changeUrl}
-            license={props.cluster.license}
-            showLicenseExpiration={props.showLicenseExpiration}
-          />
-          : null
-        }
-
-        { !isFromUnlinkedDeployment ?
-          <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
+          (
+            <div>
+              <ElasticsearchPanel
+                {...props.cluster.elasticsearch}
+                version={props.cluster.version}
+                ml={props.cluster.ml}
+                changeUrl={props.changeUrl}
+                license={props.cluster.license}
+                showLicenseExpiration={props.showLicenseExpiration}
+              />
+              <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
+            </div>
+          )
           : null
         }
 

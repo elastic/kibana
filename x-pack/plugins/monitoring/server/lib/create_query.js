@@ -93,20 +93,15 @@ export function createQuery(options) {
     combinedFilters.push(timeRangeFilter);
   }
 
+  if (isFromUnlinkedDeployment) {
+    combinedFilters.push(unlinkedDeploymentFilter);
+  }
+
   const query = {
     bool: {
       filter: combinedFilters.filter(Boolean)
     }
   };
-
-  if (isFromUnlinkedDeployment) {
-    query.bool.filter = [
-      ...query.bool.filter,
-      { bool: unlinkedDeploymentFilter }
-    ];
-  }
-
-
 
   return query;
 }

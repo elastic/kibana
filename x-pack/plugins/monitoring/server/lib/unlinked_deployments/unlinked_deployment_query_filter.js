@@ -5,28 +5,26 @@
  */
 
 export const unlinkedDeploymentFilter = {
-  must: [{
-    bool: {
-      should: [
-        {
-          term: {
-            cluster_uuid: {
-              value: ''
-            }
-          }
-        },
-        {
-          bool: {
-            must_not: [
-              {
-                exists: {
-                  field: 'cluster_uuid'
-                }
-              }
-            ]
+  bool: {
+    should: [
+      {
+        term: {
+          cluster_uuid: {
+            value: ''
           }
         }
-      ]
-    }
-  }]
+      },
+      {
+        bool: {
+          must_not: [
+            {
+              exists: {
+                field: 'cluster_uuid'
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
 };
