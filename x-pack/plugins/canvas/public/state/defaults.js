@@ -16,6 +16,7 @@ export const getDefaultElement = () => {
       height: 300,
       width: 500,
       angle: 0,
+      type: 'element',
     },
     expression: `
       demodata
@@ -34,6 +35,7 @@ export const getDefaultPage = () => {
     },
     transition: {},
     elements: [],
+    groups: [],
   };
 };
 

@@ -46,6 +46,7 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
   }
 
   const params = {
+    ignoreUnavailable: true,
     index: pattern,
     ignore: [404],
     body: {

@@ -297,6 +297,13 @@ export class EmbeddedVisualizeHandler {
     this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
   }
 
+  /**
+   * Force the fetch of new data and renders the chart again.
+   */
+  public reload = () => {
+    this.fetchAndRender(true);
+  };
+
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
@@ -365,13 +372,6 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender();
   };
 
-  /**
-   * Force the fetch of new data and renders the chart again.
-   */
-  private reload = () => {
-    this.fetchAndRender(true);
-  };
-
   private fetch = (forceFetch: boolean = false) => {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
@@ -380,7 +380,9 @@ export class EmbeddedVisualizeHandler {
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
 
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
-      this.dataSubject.next(data);
+      if (data.value) {
+        this.dataSubject.next(data.value);
+      }
       return data;
     });
   };

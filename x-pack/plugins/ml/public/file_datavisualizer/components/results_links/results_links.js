@@ -21,6 +21,8 @@ import moment from 'moment';
 import uiChrome from 'ui/chrome';
 import { ml } from '../../../services/ml_api_service';
 import { isFullLicense } from '../../../license/check_license';
+import { checkPermission } from '../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 
 const RECHECK_DELAY_MS = 3000;
 
@@ -34,9 +36,11 @@ export class ResultsLinks extends Component {
     };
 
     this.recheckTimeout = null;
+    this.showCreateJobLink = true;
   }
 
   componentDidMount() {
+    this.showCreateJobLink = (checkPermission('canCreateJob') && mlNodesAvailable());
     // if this data has a time field,
     // find the start and end times
     if (this.props.timeFieldName !== undefined) {
@@ -102,7 +106,7 @@ export class ResultsLinks extends Component {
           />
         </EuiFlexItem>
 
-        {(isFullLicense() === true && timeFieldName !== undefined) &&
+        {(isFullLicense() === true && timeFieldName !== undefined && this.showCreateJobLink) &&
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}

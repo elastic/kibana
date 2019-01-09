@@ -17,13 +17,12 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../carry`);
 import moment from 'moment';
 const expect = require('chai').expect;
 import _ from 'lodash';
 
-describe(filename, function () {
+describe('carry.js', function () {
   it('fills holes in the data', function () {
     const data = [
       [moment.utc('1980', 'YYYY').valueOf(), 10],
