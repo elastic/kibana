@@ -50,6 +50,18 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
     });
     return msearch;
   }, []);
+  msearch.push({
+    index: 'foosdfsadf',
+  });
+  msearch.push({
+    size: 0,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: filters,
+      }
+    }
+  });
 
   const params = {
     body: msearch
@@ -62,5 +74,13 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
     return false;
   }
 
-  return response.responses.reduce((hasAny, response) => hasAny || response.hits.total > 0, false);
+  return response.responses.reduce((hasAny, response) => {
+    if (hasAny) {
+      return hasAny;
+    }
+    if (response.hits) {
+      return response.hits.total > 0;
+    }
+    return false;
+  }, false);
 }
