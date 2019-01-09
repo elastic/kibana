@@ -1,3 +1,6 @@
+<h1>
+  HI MOM!
+</h1>
 <div
   class="kbnDocTable__container"
   ng-if="hits.length"
@@ -108,5 +111,7 @@
 
 <div ng-if="hits != null && !hits.length" class="kbnDocTable__error">
   <h2><i class="fa fa-meh-o"></i></h2>
-  <h4>No results found</h4>
+  <h4 i18n-id="common.ui.docTable.noResultsTitle"
+    i18n-default-message="No results found"
+  ></h4>
 </div>
