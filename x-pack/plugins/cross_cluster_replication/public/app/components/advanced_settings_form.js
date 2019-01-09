@@ -17,7 +17,7 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import { FormEntryRow } from './form_entry_row';
 import { getValidator } from '../services/input_validation';
@@ -74,174 +74,195 @@ export const removeField = (field, onFormValidityUpdate = () => undefined) => ({
   };
 };
 
-export class AdvancedSettingsForm extends PureComponent {
-  static propTypes = {
-    onFormValidityUpdate: PropTypes.func.isRequired,
-    areErrorsVisible: PropTypes.bool.isRequired,
-    schema: PropTypes.object.isRequired
-  }
+export const AdvancedSettingsForm = injectI18n(
+  class extends PureComponent {
+    static propTypes = {
+      onFormValidityUpdate: PropTypes.func.isRequired,
+      areErrorsVisible: PropTypes.bool.isRequired,
+      schema: PropTypes.object.isRequired
+    }
 
-  state = {
-    isOpened: false,
-    fields: {},
-    fieldsErrors: {},
-    previewSettingActive: null,
-  };
+    state = {
+      isOpened: false,
+      fields: {},
+      fieldsErrors: {},
+      previewSettingActive: null,
+    };
 
-  constructor(props) {
-    super(props);
+    constructor(props) {
+      super(props);
 
-    this.validator = getValidator(Object.entries(this.props.schema).reduce((acc, [field, schema]) => ({
-      ...acc,
-      [field]: schema.validate.label(schema.label)
-    }), {}));
-  }
+      this.validator = getValidator(Object.entries(this.props.schema).reduce((acc, [field, schema]) => ({
+        ...acc,
+        [field]: schema.validate.label(schema.label)
+      }), {}));
+    }
 
-  toggle = () => {
-    this.setState(({ isOpened }) => ({ isOpened: !isOpened, previewSettingActive: null }));
-  }
+    toggle = () => {
+      this.setState(({ isOpened }) => ({ isOpened: !isOpened, previewSettingActive: null }));
+    }
 
-  selectSetting = (setting) => {
-    this.setState(addField(setting, this.validator, this.props.onFormValidityUpdate));
-  }
+    selectSetting = (setting) => {
+      this.setState(addField(setting, this.validator, this.props.onFormValidityUpdate));
+    }
 
-  unSelectSetting = (setting) => {
-    this.setState(removeField(setting, this.props.onFormValidityUpdate));
-  }
+    unSelectSetting = (setting) => {
+      this.setState(removeField(setting, this.props.onFormValidityUpdate));
+    }
 
-  isSettingSelected = setting => typeof this.state.fields[setting] !== 'undefined'
+    isSettingSelected = setting => typeof this.state.fields[setting] !== 'undefined'
 
-  setPreviewSettingActive = (previewSettingActive) => {
-    this.setState({ previewSettingActive });
-  }
+    setPreviewSettingActive = (previewSettingActive) => {
+      this.setState({ previewSettingActive });
+    }
 
-  onFieldChange = (fields) => {
-    this.setState(updateFields(fields));
-  }
+    onFieldChange = (fields) => {
+      this.setState(updateFields(fields));
+    }
 
-  onFieldsErrorChange = (errors) => {
-    this.setState(updateFormErrors(errors, this.props.onFormValidityUpdate));
-  }
+    onFieldsErrorChange = (errors) => {
+      this.setState(updateFormErrors(errors, this.props.onFormValidityUpdate));
+    }
 
-  renderSelectedSettings = () => {
-    const { fields } = this.state;
-    const { areErrorsVisible, schema } = this.props;
+    renderSelectedSettings = () => {
+      const { fields } = this.state;
+      const { areErrorsVisible, schema } = this.props;
 
-    return Object.keys(fields).map((field) => (
-      <FormEntryRow
-        key={field}
-        field={field}
-        schema={schema[field]}
-        areErrorsVisible={areErrorsVisible}
-        validator={this.validator}
-        onValueUpdate={this.onFieldChange}
-        onErrorUpdate={this.onFieldsErrorChange}
-        onRemoveRow={this.unSelectSetting}
-      />
-    ));
-  }
+      return Object.keys(fields).map((field) => (
+        <FormEntryRow
+          key={field}
+          field={field}
+          schema={schema[field]}
+          areErrorsVisible={areErrorsVisible}
+          validator={this.validator}
+          onValueUpdate={this.onFieldChange}
+          onErrorUpdate={this.onFieldsErrorChange}
+          onRemoveRow={this.unSelectSetting}
+        />
+      ));
+    }
 
-  renderSettings = () => {
-    const { schema } = this.props;
-    const { previewSettingActive } = this.state;
+    renderPreview = () => {
+      const { previewSettingActive } = this.state;
+      const { schema } = this.props;
 
-    return (
-      <Fragment>
-        <EuiPanel paddingSize="m">
-          <EuiTitle size="s">
-            <h4>Advanced settings</h4>
+      const currentSetting = previewSettingActive && schema[previewSettingActive];
+
+      if (!currentSetting) {
+        return null;
+      }
+
+      return (
+        <Fragment>
+          <EuiTitle size="xs">
+            <h4>{currentSetting.label}</h4>
           </EuiTitle>
-          <EuiSpacer />
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem>
-              { Object.keys(schema)
-                .filter((setting) => !this.isSettingSelected(setting))
-                .map((field, i, arr) => {
-                  const fieldSchema = schema[field];
+          <EuiSpacer size="s" />
+          <EuiText>
+            {currentSetting.description}
+          </EuiText>
+        </Fragment>
+      );
+    }
 
-                  return (
-                    <Fragment key={field}>
-                      <EuiFlexGroup
-                        responsive={false}
-                        style={{ flexGrow: 0 }}
-                        onMouseEnter={() => this.setPreviewSettingActive(field)}
-                        onMouseLeave={() => this.setPreviewSettingActive(null)}
-                      >
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            color="success"
-                            onClick={() => this.selectSetting(field)}
-                            iconType="plusInCircle"
-                            aria-label="Add setting"
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiLink
-                            onClick={() => this.setPreviewSettingActive(field)}
-                          >
-                            {fieldSchema.label}
-                          </EuiLink>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      {i < arr.length - 1 && <EuiSpacer size="s"/>}
-                    </Fragment>
-                  );
-                }) }
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {previewSettingActive && (
-                <Fragment>
-                  <EuiTitle size="xs">
-                    <h4>{schema[previewSettingActive].label}</h4>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <EuiText>
-                    {schema[previewSettingActive].description}
-                  </EuiText>
-                </Fragment>
+    renderSettings = () => {
+      const { schema } = this.props;
+
+      return (
+        <Fragment>
+          <EuiPanel paddingSize="m">
+            <EuiTitle size="s">
+              <h4>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.sectionTitle"
+                  defaultMessage="Advanced settings"
+                />
+              </h4>
+            </EuiTitle>
+            <EuiSpacer />
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem>
+                { Object.keys(schema)
+                  .filter((setting) => !this.isSettingSelected(setting))
+                  .map((field, i, arr) => {
+                    const fieldSchema = schema[field];
+
+                    return (
+                      <Fragment key={field}>
+                        <EuiFlexGroup
+                          responsive={false}
+                          style={{ flexGrow: 0 }}
+                          onFocus={() => this.setPreviewSettingActive(field)}
+                          onBlur={() => this.setPreviewSettingActive(null)}
+                          onMouseEnter={() => this.setPreviewSettingActive(field)}
+                          onMouseLeave={() => this.setPreviewSettingActive(null)}
+                        >
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              color="success"
+                              onClick={() => this.selectSetting(field)}
+                              iconType="plusInCircle"
+                              aria-label="Add setting"
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiLink
+                              onClick={() => this.setPreviewSettingActive(field)}
+                            >
+                              {fieldSchema.label}
+                            </EuiLink>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                        {i < arr.length - 1 && <EuiSpacer size="s"/>}
+                      </Fragment>
+                    );
+                  }) }
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {this.renderPreview()}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </Fragment>
+      );
+    }
+
+    render() {
+      const { isOpened } = this.state;
+      return (
+        <Fragment>
+          {this.renderSelectedSettings()}
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              {!isOpened && (
+                <EuiButtonEmpty
+                  iconType="plusInCircle"
+                  flush="left"
+                  onClick={this.toggle}
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.addSettingButtonLabel"
+                    defaultMessage="Add advanced setting"
+                  />
+                </EuiButtonEmpty>
+              )}
+              {isOpened && (
+                <EuiButtonEmpty
+                  iconType="cross"
+                  flush="left"
+                  onClick={this.toggle}
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.closePanelButtonLabel"
+                    defaultMessage="Close"
+                  />
+                </EuiButtonEmpty>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </Fragment>
-    );
+          {isOpened && this.renderSettings()}
+        </Fragment>
+      );
+    }
   }
-
-  render() {
-    const { isOpened } = this.state;
-    return (
-      <Fragment>
-        {this.renderSelectedSettings()}
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {!isOpened && (
-              <EuiButtonEmpty
-                iconType="plusInCircle"
-                flush="left"
-                onClick={this.toggle}
-              >
-                <FormattedMessage
-                  id="xpack.todo"
-                  defaultMessage="Add advanced setting"
-                />
-              </EuiButtonEmpty>
-            )}
-            {isOpened && (
-              <EuiButtonEmpty
-                iconType="cross"
-                flush="left"
-                onClick={this.toggle}
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexDetailPanel.closeButtonLabel"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {isOpened && this.renderSettings()}
-      </Fragment>
-    );
-  }
-}
+);

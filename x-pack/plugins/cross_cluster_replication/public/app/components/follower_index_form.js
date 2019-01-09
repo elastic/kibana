@@ -27,7 +27,7 @@ import {
   EuiTitle,
   EuiSuperSelect,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import Joi from 'joi';
 
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
@@ -76,56 +76,96 @@ export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
   }
 });
 
-/* eslint-disable */
-const schemaAdvancedFields = {
+/* eslint-disable max-len */
+const advancedSettingsFields = {
   maxReadRequestOperationCount: {
-    label: 'Max read request operation count',
-    description: 'The maximum number of operations to pull per read from the remote cluster.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle', {
+      defaultMessage: 'Max read request operation count'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountDescription', {
+      defaultMessage: 'The maximum number of operations to pull per read from the remote cluster.'
+    }),
     validate: Joi.number(),
   },
   maxOutstandingReadRequests: {
-    label: 'Max outstanding read requests',
-    description: 'The maximum number of outstanding reads requests from the remote cluster.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle', {
+      defaultMessage: 'Max outstanding read requests'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsDescription', {
+      defaultMessage: 'The maximum number of outstanding reads requests from the remote cluster.'
+    }),
     validate: Joi.number(),
   },
   maxReadRequestSize: {
-    label: 'Max read request size',
-    description: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster (bye value).',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle', {
+      defaultMessage: 'Max read request size'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeDescription', {
+      defaultMessage: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster (bye value).'
+    }),
     validate: Joi.number(),
   },
   maxWriteRequestOperationCount: {
-    label: 'Max write request operation count',
-    description: 'The maximum number of operations per bulk write request executed on the follower.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle', {
+      defaultMessage: 'Max write request operation count'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountDescription', {
+      defaultMessage: 'The maximum number of operations per bulk write request executed on the follower.'
+    }),
     validate: Joi.number(),
   },
   maxWriteRequestSize: {
-    label: 'Max write request size',
-    description: 'The maximum total bytes of operations per bulk write request executed on the follower.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle', {
+      defaultMessage: 'Max write request size'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeDescription', {
+      defaultMessage: 'The maximum total bytes of operations per bulk write request executed on the follower.'
+    }),
     validate: Joi.number(),
   },
   maxOutstandingWriteRequests: {
-    label: 'Max outstanding write requests',
-    description: 'The maximum number of outstanding write requests on the follower.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle', {
+      defaultMessage: 'Max outstanding write requests'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsDescription', {
+      defaultMessage: 'The maximum number of outstanding write requests on the follower.'
+    }),
     validate: Joi.number(),
   },
   maxWriteBufferCount: {
-    label: 'Max write buffer count',
-    description: 'The maximum number of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the number of queued operations goes below the limit.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle', {
+      defaultMessage: 'Max write buffer count'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountDescription', {
+      defaultMessage: 'The maximum number of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the number of queued operations goes below the limit.'
+    }),
     validate: Joi.number(),
   },
   maxWriteBufferSize: {
-    label: 'Max write buffer size',
-    description: 'The maximum total bytes of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the total bytes of queued operations goes below the limit.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle', {
+      defaultMessage: 'Max write buffer size'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeDescription', {
+      defaultMessage: 'The maximum total bytes of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the total bytes of queued operations goes below the limit.'
+    }),
     validate: Joi.number(),
   },
   maxRetryDelay: {
-    label: 'Max retry delay',
-    description: 'The maximum time to wait before retrying an operation that failed exceptionally; an exponential backoff strategy is employed when retrying.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle', {
+      defaultMessage: 'Max retry delay'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayDescription', {
+      defaultMessage: 'The maximum time to wait before retrying an operation that failed exceptionally; an exponential backoff strategy is employed when retrying.'
+    }),
     validate: Joi.number(),
   },
   readPollTimeout: {
-    label: 'Read poll timeout',
-    description: 'The maximum time to wait for new operations on the remote cluster when the follower index is synchronized with the leader index; when the timeout has elapsed, the poll for operations will return to the follower so that it can update some statistics, and then the follower will immediately attempt to read from the leader again.',
+    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle', {
+      defaultMessage: 'Read poll timeout'
+    }),
+    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutDescription', {
+      defaultMessage: 'The maximum time to wait for new operations on the remote cluster when the follower index is synchronized with the leader index; when the timeout has elapsed, the poll for operations will return to the follower so that it can update some statistics, and then the follower will immediately attempt to read from the leader again.'
+    }),
     validate: Joi.number(),
   },
 };
@@ -549,7 +589,7 @@ export const FollowerIndexForm = injectI18n(
           <EuiSpacer size="l" />
           <AdvancedSettingsForm
             areErrorsVisible={areErrorsVisible}
-            schema={schemaAdvancedFields}
+            schema={advancedSettingsFields}
             onFormValidityUpdate={this.updateAdvancedSettingsFormValidity}
           />
           <EuiSpacer size="l" />
