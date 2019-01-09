@@ -18,7 +18,6 @@
  */
 
 import path from 'path';
-import chalk from 'chalk';
 
 import {
   extractHtmlMessages,
@@ -27,17 +26,20 @@ import {
   extractHandlebarsMessages,
 } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
+
 import { createFailError, isFailError } from '../run';
 
-function addMessageToMap(targetMap, key, value) {
+function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
 
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    throw createFailError(`There is more than one default message for the same id "${key}":
-"${existingValue.message}" and "${value.message}"`);
+    reporter.report(
+      createFailError(`There is more than one default message for the same id "${key}":
+"${existingValue.message}" and "${value.message}"`)
+    );
+  } else {
+    targetMap.set(key, value);
   }
-
-  targetMap.set(key, value);
 }
 
 export function filterPaths(inputPaths, paths) {
@@ -70,7 +72,7 @@ function filterEntries(entries, exclude) {
   );
 }
 
-export function validateMessageNamespace(id, filePath, allowedPaths) {
+export function validateMessageNamespace(id, filePath, allowedPaths, reporter) {
   const normalizedPath = normalizePath(filePath);
 
   const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
@@ -78,12 +80,14 @@ export function validateMessageNamespace(id, filePath, allowedPaths) {
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    throw createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
-See .i18nrc.json for the list of supported namespaces.`);
+    reporter.report(
+      createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+See .i18nrc.json for the list of supported namespaces.`)
+    );
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap, config) {
+export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -126,21 +130,31 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config)
       );
 
       for (const { name, content } of files) {
+        const reporterWithContext = reporter.withContext({ name });
+
         try {
-          for (const [id, value] of extractFunction(content)) {
-            validateMessageNamespace(id, name, config.paths);
-            addMessageToMap(targetMap, id, value);
+          for (const [id, value] of extractFunction(content, reporterWithContext)) {
+            validateMessageNamespace(id, name, config.paths, reporterWithContext);
+            addMessageToMap(targetMap, id, value, reporterWithContext);
           }
         } catch (error) {
-          if (isFailError(error)) {
-            throw createFailError(
-              `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
-            );
+          if (!isFailError(error)) {
+            throw error;
           }
 
-          throw error;
+          reporterWithContext.report(error);
         }
       }
     })
   );
+}
+
+export async function getDefaultMessagesMap(inputPaths, config, reporter) {
+  const defaultMessagesMap = new Map();
+
+  for (const inputPath of filterPaths(inputPaths, config.paths)) {
+    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap, config, reporter);
+  }
+
+  return defaultMessagesMap;
 }

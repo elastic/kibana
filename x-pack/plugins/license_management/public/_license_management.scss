@@ -1,12 +1,5 @@
 .licFeature {
   flex-grow: 1;
-  background: $euiColorLightestShade;
-  min-height: 100vh;
-}
-
-.licManagement__pageBody {
-  padding-top: $euiSizeL;
-  min-height: auto;
 }
 
 // EUITODO: Fix modal width/max-width
@@ -19,5 +12,5 @@
 }
 
 .licManagement__ieFlex {
-  flex-shrink: 0; 
+  flex-shrink: 0;
 }

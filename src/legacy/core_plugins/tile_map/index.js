@@ -18,6 +18,7 @@
  */
 
 import { resolve } from 'path';
+import  * as emsClient  from './common/ems_client';
 
 export default function (kibana) {
 
@@ -25,6 +26,11 @@ export default function (kibana) {
     uiExports: {
       visTypes: ['plugins/tile_map/tile_map_vis'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
+    init(server) {
+      server.expose({
+        ems_client: emsClient
+      });
     }
   });
 }

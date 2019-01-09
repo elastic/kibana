@@ -5,9 +5,7 @@
  */
 
 jest.mock('../shared/layers/vector_layer', () => {});
-jest.mock('../shared/layers/sources/ems_file_source', () => {});
-jest.mock('../shared/layers/sources/es_geohashgrid_source', () => {});
-jest.mock('../shared/layers/sources/es_search_source', () => {});
+jest.mock('../shared/layers/sources/all_sources', () => {});
 jest.mock('ui/timefilter', () => ({
   timefilter: {
     getTime: () => {

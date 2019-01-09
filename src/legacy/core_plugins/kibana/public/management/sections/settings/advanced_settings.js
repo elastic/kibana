@@ -25,7 +25,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiPage,
   Query,
 } from '@elastic/eui';
 
@@ -157,36 +156,34 @@ export class AdvancedSettings extends Component {
 
     return (
       <I18nProvider>
-        <EuiPage restrictWidth>
-          <div className="mgtAdvancedSettings">
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem>
-                <PageTitle />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Search
-                  query={query}
-                  categories={this.categories}
-                  onQueryChange={this.onQueryChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <PageSubtitle />
-            <EuiSpacer size="m" />
-            <CallOuts />
-            <EuiSpacer size="m" />
-            <Form
-              settings={filteredSettings}
-              categories={this.categories}
-              categoryCounts={this.categoryCounts}
-              clearQuery={this.clearQuery}
-              save={this.saveConfig}
-              clear={this.clearConfig}
-              showNoResultsMessage={!footerQueryMatched}
-            />
-            <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
-          </div>
-        </EuiPage>
+        <div>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              <PageTitle />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Search
+                query={query}
+                categories={this.categories}
+                onQueryChange={this.onQueryChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <PageSubtitle />
+          <EuiSpacer size="m" />
+          <CallOuts />
+          <EuiSpacer size="m" />
+          <Form
+            settings={filteredSettings}
+            categories={this.categories}
+            categoryCounts={this.categoryCounts}
+            clearQuery={this.clearQuery}
+            save={this.saveConfig}
+            clear={this.clearConfig}
+            showNoResultsMessage={!footerQueryMatched}
+          />
+          <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
+        </div>
       </I18nProvider>
     );
   }

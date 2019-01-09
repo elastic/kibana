@@ -30,6 +30,7 @@ import {
   readFileAsync,
   serializeToJson,
   serializeToJson5,
+  ErrorReporter,
   normalizePath,
 } from './i18n/';
 
@@ -59,22 +60,51 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
     );
   }
 
+  const reporter = new ErrorReporter();
+
   const list = new Listr(
     filteredPaths.map(filteredPath => ({
-      task: messages => extractMessagesFromPathToMap(filteredPath, messages, mergedConfig),
+      task: async messages => {
+        const initialErrorsNumber = reporter.errors.length;
+
+        // Return result if no new errors were reported for this path.
+        const result = await extractMessagesFromPathToMap(
+          filteredPath,
+          messages,
+          mergedConfig,
+          reporter
+        );
+        if (reporter.errors.length === initialErrorsNumber) {
+          return result;
+        }
+
+        // throw an empty error to make listr mark the task as failed without any message
+        throw new Error('');
+      },
       title: filteredPath,
-    }))
+    })),
+    {
+      exitOnError: false,
+    }
   );
 
-  // messages shouldn't be extracted to a file if output is not supplied
-  const messages = await list.run(new Map());
-  if (!output || !messages.size) {
-    return;
+  try {
+    // messages shouldn't be extracted to a file if output is not supplied
+    const messages = await list.run(new Map());
+    if (!output || !messages.size) {
+      return;
+    }
+
+    const sortedMessages = [...messages].sort(([key1], [key2]) => key1.localeCompare(key2));
+    await writeFileAsync(
+      resolve(output, 'en.json'),
+      outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
+    );
+  } catch (error) {
+    if (error.name === 'ListrError' && reporter.errors.length) {
+      throw createFailError(reporter.errors.join('\n\n'));
+    }
+
+    throw error;
   }
-
-  const sortedMessages = [...messages].sort(([key1], [key2]) => key1.localeCompare(key2));
-  await writeFileAsync(
-    resolve(output, 'en.json'),
-    outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
-  );
 });

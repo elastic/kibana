@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { makeWidthFlexible } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent, Fragment } from 'react';
@@ -110,7 +110,7 @@ export class InnerCustomPlot extends PureComponent {
   render() {
     const { series, truncateLegends, noHits, width } = this.props;
 
-    if (_.isEmpty(series) || !width) {
+    if (isEmpty(series) || !width) {
       return null;
     }
 
@@ -131,7 +131,7 @@ export class InnerCustomPlot extends PureComponent {
       options
     });
 
-    if (_.isEmpty(plotValues)) {
+    if (isEmpty(plotValues)) {
       return null;
     }
 
