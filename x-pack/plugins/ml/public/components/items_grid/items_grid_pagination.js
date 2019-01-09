@@ -24,6 +24,8 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 
 function getContextMenuItemIcon(menuItemSetting, itemsPerPage) {
   return (menuItemSetting === itemsPerPage) ? 'check' : 'empty';
@@ -77,7 +79,11 @@ export class ItemsGridPagination extends Component {
         iconSide="right"
         onClick={this.onButtonClick}
       >
-        Items per page: {itemsPerPage}
+        <FormattedMessage
+          id="xpack.ml.itemsGrid.itemsPerPageButtonLabel"
+          defaultMessage="Items per page: {itemsPerPage}"
+          values={{ itemsPerPage }}
+        />
       </EuiButtonEmpty>
     );
 
@@ -90,7 +96,11 @@ export class ItemsGridPagination extends Component {
           icon={getContextMenuItemIcon(pageSize, itemsPerPage)}
           onClick={() => {this.onChangeItemsPerPage(pageSize);}}
         >
-          {pageSize} items
+          <FormattedMessage
+            id="xpack.ml.itemsGrid.itemsCountLabel"
+            defaultMessage="{pageSize} items"
+            values={{ pageSize }}
+          />
         </EuiContextMenuItem>
       );
     });
