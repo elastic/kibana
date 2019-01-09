@@ -21,7 +21,6 @@ import path from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
 import sass from 'node-sass';
-import sassLint from 'sass-lint';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
 import mkdirp from 'mkdirp';
@@ -56,15 +55,6 @@ export class Build {
    */
 
   async build() {
-    const lintResults = sassLint.lintFiles(this.getGlob(), {}, path.resolve(__dirname, '..', '..', '..', '.sass-lint.yml'));
-
-    lintResults.forEach(result => {
-      if (result.messages.length > 0) {
-        this.log.info(`lint errors in ${result.filePath}`);
-        this.log.info(JSON.stringify(result.messages, null, 2));
-      }
-    });
-
     const rendered = await renderSass({
       file: this.source,
       outFile: this.targetPath,

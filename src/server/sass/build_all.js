@@ -21,7 +21,7 @@ import { resolve } from 'path';
 
 import { Build } from './build';
 
-export async function buildAll(styleSheets = [], log, buildDir) {
+export async function buildAll(styleSheets, log, buildDir) {
   const bundles = await Promise.all(styleSheets.map(async styleSheet => {
 
     if (!styleSheet.localPath.endsWith('.scss')) {
