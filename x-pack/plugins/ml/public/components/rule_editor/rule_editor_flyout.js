@@ -561,7 +561,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.ml.ruleEditor.ruleEditorFlyout.ruleDescription"
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
                   defaultMessage="Rules instruct anomaly detectors to change their behavior
                     based on domain-specific knowledge that you provide.
                     When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are
@@ -570,7 +570,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
                     learnMoreLink: (
                       <EuiLink href={docsUrl} target="_blank">
                         <FormattedMessage
-                          id="xpack.ml.ruleEditor.ruleEditorFlyout.ruleDescription.learnMoreLinkText"
+                          id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
                           defaultMessage="Learn more"
                         />
                       </EuiLink>

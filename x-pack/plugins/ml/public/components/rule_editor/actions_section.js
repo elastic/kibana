@@ -56,7 +56,7 @@ export function ActionsSection({
         <EuiFlexItem grow={false}>
           <EuiIconTip
             content={<FormattedMessage
-              id="xpack.ml.ruleEditor.actionsSection.resultNotCreatedTooltip"
+              id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
               defaultMessage="The result will not be created."
             />}
             size="s"
@@ -83,7 +83,7 @@ export function ActionsSection({
         <EuiFlexItem grow={false}>
           <EuiIconTip
             content={<FormattedMessage
-              id="xpack.ml.ruleEditor.actionsSection.valueNotUsedToUpdateModelTooltip"
+              id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
               defaultMessage="The value for that series will not be used to update the model."
             />}
             size="s"
