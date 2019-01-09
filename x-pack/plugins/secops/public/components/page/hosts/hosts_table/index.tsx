@@ -9,6 +9,7 @@ import { defaultTo, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { HostItem, HostsEdges } from '../../../../graphql/types';
@@ -108,6 +109,7 @@ const getHostsColumns = () => [
     hideForMobile: false,
     render: ({ host }: { host: HostItem }) => {
       const hostName = defaultTo('--', host.name);
+      const hostLink = defaultTo('--', <Link to={`hosts/${host._id}`}>{host.name}</Link>);
       return (
         <>
           <DraggableWrapper
@@ -132,7 +134,7 @@ const getHostsColumns = () => [
                   />
                 </DragEffects>
               ) : (
-                hostName
+                hostLink
               )
             }
           />
