@@ -72,10 +72,10 @@ export const progress = () => ({
   },
   fn: (value, args) => {
     if (args.max <= 0) {
-      throw new Error(`'max' must be greater than 0`);
+      throw new Error(`Invalid max value: '${args.max}'. 'max' must be greater than 0`);
     }
     if (value > args.max || value < 0) {
-      throw new Error(`Context must be between 0 and ${args.max}`);
+      throw new Error(`Invalid value: '${value}'. Value must be between 0 and ${args.max}`);
     }
 
     let label = '';
