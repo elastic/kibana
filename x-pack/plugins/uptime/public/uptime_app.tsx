@@ -238,6 +238,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     <EuiHeaderLink
                       iconType="help"
                       href="https://discuss.elastic.co/c/beats/heartbeat"
+                      target="_blank"
                     >
                       Discuss
                     </EuiHeaderLink>
