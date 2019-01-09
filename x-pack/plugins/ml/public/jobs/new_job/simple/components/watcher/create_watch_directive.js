@@ -48,11 +48,13 @@ module.directive('mlCreateWatch', function () {
       }
 
       // load elasticsearch settings to see if email has been configured
-      ml.getNotificationSettings().then((resp) => {
-        if (_.has(resp, 'defaults.xpack.notification.email')) {
-          $scope.ui.emailEnabled = true;
-        }
-      });
+      ml.getNotificationSettings()
+        .then((resp) => {
+          if (_.has(resp, 'defaults.xpack.notification.email')) {
+            $scope.ui.emailEnabled = true;
+            $scope.$applyAsync();
+          }
+        });
 
       // check to see whether a watch for this job has already been created.
       // display a warning if it has.
@@ -62,6 +64,9 @@ module.directive('mlCreateWatch', function () {
         })
         .catch(() => {
           $scope.ui.watchAlreadyExists = false;
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
     }
   };

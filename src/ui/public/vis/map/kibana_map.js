@@ -439,7 +439,9 @@ export class KibanaMap extends EventEmitter {
     }
     this._baseLayerIsDesaturated = isDesaturated;
     this._updateDesaturation();
-    this._leafletBaseLayer.redraw();
+    if (this._leafletBaseLayer) {
+      this._leafletBaseLayer.redraw();
+    }
   }
 
   addDrawControl() {

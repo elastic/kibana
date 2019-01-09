@@ -39,14 +39,14 @@ exports[`Home component should render 1`] = `
     tabs={
       Array [
         Object {
-          "component": [Function],
           "name": "Services",
           "path": "/services",
+          "render": [Function],
         },
         Object {
-          "component": [Function],
           "name": "Traces",
           "path": "/traces",
+          "render": [Function],
         },
       ]
     }

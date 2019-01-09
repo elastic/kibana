@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type TextScale = 'small' | 'medium' | 'large';
 
-export function isTextScale(maybeTextScale: string): maybeTextScale is TextScale {
-  return ['small', 'medium', 'large'].includes(maybeTextScale);
-}
+
+// Maximum number of influencers to display before a 'show more' link is added.
+export const INFLUENCERS_LIMIT = 5;
+
+export const ANOMALIES_TABLE_TABS = {
+  DETAILS: 0,
+  CATEGORY_EXAMPLES: 1
+};
