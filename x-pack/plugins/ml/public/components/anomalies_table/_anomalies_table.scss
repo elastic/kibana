@@ -112,9 +112,7 @@
         flex-basis: 15%;
         font-size: inherit;
         line-height: 1.5rem;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+        @include euiTextTruncate;
       }
 
       .euiDescriptionList__description {
