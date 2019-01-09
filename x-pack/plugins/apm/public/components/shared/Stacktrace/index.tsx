@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
@@ -20,7 +21,17 @@ interface Props {
 
 export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   if (isEmpty(stackframes)) {
-    return <EmptyMessage heading="No stacktrace available." hideSubheading />;
+    return (
+      <EmptyMessage
+        heading={i18n.translate(
+          'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
+          {
+            defaultMessage: 'No stacktrace available.'
+          }
+        )}
+        hideSubheading
+      />
+    );
   }
 
   const groups = getGroupedStackframes(stackframes);

@@ -44,21 +44,21 @@ describe('chartSelectors', () => {
           data: [{ x: 0, y: 100 }, { x: 1000, y: 200 }],
           legendValue: '0 ms',
           title: 'Avg.',
-          type: 'line'
+          type: 'linemark'
         },
         {
           color: '#ecae23',
           data: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
           title: '95th percentile',
           titleShort: '95th',
-          type: 'line'
+          type: 'linemark'
         },
         {
           color: '#f98510',
           data: [{ x: 0, y: 300 }, { x: 1000, y: 400 }],
           title: '99th percentile',
           titleShort: '99th',
-          type: 'line'
+          type: 'linemark'
         }
       ]);
     });
@@ -84,21 +84,21 @@ describe('chartSelectors', () => {
           data: [{ x: 0, y: 5 }, { x: 0, y: 2 }],
           legendValue: '3.5 tpm',
           title: 'HTTP 2xx',
-          type: 'line'
+          type: 'linemark'
         },
         {
           color: '#f98510',
           data: [{ x: 0, y: 1 }],
           legendValue: '1.0 tpm',
           title: 'HTTP 4xx',
-          type: 'line'
+          type: 'linemark'
         },
         {
           color: '#db1374',
           data: [{ x: 0, y: 0 }],
           legendValue: '0.0 tpm',
           title: 'HTTP 5xx',
-          type: 'line'
+          type: 'linemark'
         }
       ]);
     });
