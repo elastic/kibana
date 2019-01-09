@@ -156,7 +156,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 ),
             },
           ];
-          const hasStatus = allPings.Pings.reduce(
+          const hasStatus = allPings.pings.reduce(
             (hasHttpStatus: boolean, currentPing: Ping) =>
               hasHttpStatus || get(currentPing, 'http.response.status_code'),
             false
@@ -213,7 +213,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 </EuiFlexGroup>
                 <EuiInMemoryTable
                   columns={columns}
-                  items={allPings.Pings}
+                  items={allPings.pings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
                   sorting={true}
                 />

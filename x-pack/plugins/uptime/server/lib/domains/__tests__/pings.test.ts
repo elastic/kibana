@@ -53,9 +53,9 @@ describe('Pings domain lib', () => {
         2
       );
       expect(apiResponse.total).toBe(2);
-      expect(apiResponse.Pings).toHaveLength(2);
-      testMonitorId('foo', apiResponse.Pings[0].monitor);
-      testMonitorId('baz', apiResponse.Pings[1].monitor);
+      expect(apiResponse.pings).toHaveLength(2);
+      testMonitorId('foo', apiResponse.pings[0].monitor);
+      testMonitorId('baz', apiResponse.pings[1].monitor);
     });
 
     it('should sort desc and take a range', async () => {
@@ -69,9 +69,9 @@ describe('Pings domain lib', () => {
         2
       );
       expect(apiResponse.total).toBe(2);
-      expect(apiResponse.Pings).toHaveLength(2);
-      testMonitorId('bar', apiResponse.Pings[0].monitor);
-      testMonitorId('baz', apiResponse.Pings[1].monitor);
+      expect(apiResponse.pings).toHaveLength(2);
+      testMonitorId('bar', apiResponse.pings[0].monitor);
+      testMonitorId('baz', apiResponse.pings[1].monitor);
     });
 
     it('should take range without sort', async () => {
@@ -85,9 +85,9 @@ describe('Pings domain lib', () => {
         2
       );
       expect(apiResponse.total).toBe(2);
-      expect(apiResponse.Pings).toHaveLength(2);
-      testMonitorId('foo', apiResponse.Pings[0].monitor);
-      testMonitorId('bar', apiResponse.Pings[1].monitor);
+      expect(apiResponse.pings).toHaveLength(2);
+      testMonitorId('foo', apiResponse.pings[0].monitor);
+      testMonitorId('bar', apiResponse.pings[1].monitor);
     });
 
     it('should sort without range', async () => {
@@ -101,10 +101,10 @@ describe('Pings domain lib', () => {
         undefined
       );
       expect(apiResponse.total).toBe(10);
-      expect(apiResponse.Pings).toHaveLength(3);
-      testMonitorId('bar', apiResponse.Pings[0].monitor);
-      testMonitorId('baz', apiResponse.Pings[1].monitor);
-      testMonitorId('foo', apiResponse.Pings[2].monitor);
+      expect(apiResponse.pings).toHaveLength(3);
+      testMonitorId('bar', apiResponse.pings[0].monitor);
+      testMonitorId('baz', apiResponse.pings[1].monitor);
+      testMonitorId('foo', apiResponse.pings[2].monitor);
     });
 
     it('should return unsorted, with default size of 10', async () => {
@@ -118,10 +118,10 @@ describe('Pings domain lib', () => {
         undefined
       );
       expect(apiResponse.total).toBe(10);
-      expect(apiResponse.Pings).toHaveLength(3);
-      testMonitorId('foo', apiResponse.Pings[0].monitor);
-      testMonitorId('bar', apiResponse.Pings[1].monitor);
-      testMonitorId('baz', apiResponse.Pings[2].monitor);
+      expect(apiResponse.pings).toHaveLength(3);
+      testMonitorId('foo', apiResponse.pings[0].monitor);
+      testMonitorId('bar', apiResponse.pings[1].monitor);
+      testMonitorId('baz', apiResponse.pings[2].monitor);
     });
   });
 });
