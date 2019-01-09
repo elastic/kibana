@@ -43,7 +43,7 @@ export const axisConfig = () => ({
   fn: (context, args) => {
     const positions = ['top', 'bottom', 'left', 'right', ''];
     if (!positions.includes(args.position)) {
-      throw new Error(`Invalid position ${args.position}`);
+      throw new Error(`Invalid position: '${args.position}'`);
     }
 
     const min = typeof args.min === 'string' ? moment.utc(args.min).valueOf() : args.min;
@@ -51,16 +51,16 @@ export const axisConfig = () => ({
 
     if (min != null && isNaN(min)) {
       throw new Error(
-        `Invalid date string '${
+        `Invalid date string: '${
           args.min
-        }' found. 'min' must be a number, date in ms, or ISO8601 date string`
+        }'. 'min' must be a number, date in ms, or ISO8601 date string`
       );
     }
     if (max != null && isNaN(max)) {
       throw new Error(
-        `Invalid date string '${
+        `Invalid date string: '${
           args.max
-        }' found. 'max' must be a number, date in ms, or ISO8601 date string`
+        }'. 'max' must be a number, date in ms, or ISO8601 date string`
       );
     }
 
