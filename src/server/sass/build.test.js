@@ -33,7 +33,11 @@ afterEach(async () => {
 
 it('builds SASS', async () => {
   const cssPath = resolve(TMP, 'style.css');
-  await (new Build(FIXTURE, cssPath)).build();
+  await (new Build(FIXTURE, {
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+  }, cssPath)).build();
 
   expect(readFileSync(cssPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
