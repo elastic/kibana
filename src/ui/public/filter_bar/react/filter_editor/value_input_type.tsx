@@ -76,7 +76,11 @@ export class ValueInputType extends Component<Props> {
       case 'boolean':
         inputElement = (
           <EuiSelect
-            options={[{ value: 'true', text: 'true' }, { value: 'false', text: 'false' }]}
+            options={[
+              { value: undefined, text: 'Pick a value' },
+              { value: 'true', text: 'true' },
+              { value: 'false', text: 'false' },
+            ]}
             value={value}
             onChange={this.onBoolChange}
           />
