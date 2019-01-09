@@ -20,12 +20,7 @@ export const filebeatMySQLRules = [
   },
   {
     when: {
-      exists: [
-        'mysql.slowlog.user',
-        'mysql.slowlog.ip',
-        'mysql.slowlog.query_time.sec',
-        'mysql.slowlog.query',
-      ],
+      exists: ['mysql.slowlog.user', 'mysql.slowlog.query_time.sec', 'mysql.slowlog.query'],
     },
     format: [
       {
@@ -38,7 +33,16 @@ export const filebeatMySQLRules = [
         constant: '@',
       },
       {
+        field: 'mysql.slowlog.host',
+      },
+      {
+        constant: ' [',
+      },
+      {
         field: 'mysql.slowlog.ip',
+      },
+      {
+        constant: '] ',
       },
       {
         constant: ' - ',

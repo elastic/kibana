@@ -33,6 +33,7 @@ describe('Filebeat Rules', () => {
       'mysql.slowlog.query_time.sec': 5,
       'mysql.slowlog.user': 'admin',
       'mysql.slowlog.ip': '192.168.1.42',
+      'mysql.slowlog.host': 'webserver-01',
     };
     const message = format(errorDoc);
     expect(message).toEqual([
@@ -48,9 +49,20 @@ describe('Filebeat Rules', () => {
         constant: '@',
       },
       {
+        field: 'mysql.slowlog.host',
+        highlights: [],
+        value: 'webserver-01',
+      },
+      {
+        constant: ' [',
+      },
+      {
         field: 'mysql.slowlog.ip',
         highlights: [],
         value: '192.168.1.42',
+      },
+      {
+        constant: '] ',
       },
       {
         constant: ' - ',
