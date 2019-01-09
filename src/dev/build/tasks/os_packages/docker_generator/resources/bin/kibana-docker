@@ -98,6 +98,16 @@ kibana_vars=(
     xpack.graph.enabled
     xpack.grokdebugger.enabled
     xpack.infra.enabled
+    xpack.infra.query.partitionSize
+    xpack.infra.query.partitionFactor
+    xpack.infra.sources.default.metricAlias
+    xpack.infra.sources.default.logAlias
+    xpack.infra.sources.default.fields.container
+    xpack.infra.sources.default.fields.host
+    xpack.infra.sources.default.fields.message
+    xpack.infra.sources.default.fields.pod
+    xpack.infra.sources.default.fields.tiebreaker
+    xpack.infra.sources.default.fields.timestamp
     xpack.ml.enabled
     xpack.monitoring.elasticsearch.password
     xpack.monitoring.elasticsearch.pingTimeout
