@@ -18,7 +18,7 @@ describe('Filebeat Rules', () => {
     const message = format(errorDoc);
     expect(message).toEqual([
       {
-        constant: 'MySQL Error: ',
+        constant: '[MySQL][error] ',
       },
       {
         field: 'mysql.error.message',
@@ -38,7 +38,7 @@ describe('Filebeat Rules', () => {
     const message = format(errorDoc);
     expect(message).toEqual([
       {
-        constant: 'MySQL Slow Log: ',
+        constant: '[MySQL][slowlog] ',
       },
       {
         field: 'mysql.slowlog.user',

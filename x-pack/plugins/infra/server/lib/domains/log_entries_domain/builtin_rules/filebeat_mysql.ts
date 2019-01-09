@@ -11,7 +11,7 @@ export const filebeatMySQLRules = [
     },
     format: [
       {
-        constant: 'MySQL Error: ',
+        constant: '[MySQL][error] ',
       },
       {
         field: 'mysql.error.message',
@@ -24,7 +24,7 @@ export const filebeatMySQLRules = [
     },
     format: [
       {
-        constant: 'MySQL Slow Log: ',
+        constant: '[MySQL][slowlog] ',
       },
       {
         field: 'mysql.slowlog.user',
