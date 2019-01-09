@@ -150,28 +150,28 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
     {
       title: 'Process average',
       data: series.processCPUAverage,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmPink,
       legendValue: asPercent(overallValues.processCPUAverage || 0)
     },
     {
       title: 'Process max',
       data: series.processCPUMax,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmPurple,
       legendValue: asPercent(overallValues.processCPUMax || 0)
     },
     {
       title: 'System average',
       data: series.systemCPUAverage,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmGreen,
       legendValue: asPercent(overallValues.systemCPUAverage || 0)
     },
     {
       title: 'System max',
       data: series.systemCPUMax,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmBlue,
       legendValue: asPercent(overallValues.systemCPUMax || 0)
     }
@@ -206,7 +206,7 @@ export function getResponseTimeSeries(
       }),
       data: avg,
       legendValue: asMillis(overallAvgDuration),
-      type: 'line',
+      type: 'linemark',
       color: colors.apmBlue
     },
     {
@@ -218,7 +218,7 @@ export function getResponseTimeSeries(
       ),
       titleShort: '95th',
       data: p95,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmYellow
     },
     {
@@ -230,7 +230,7 @@ export function getResponseTimeSeries(
       ),
       titleShort: '99th',
       data: p99,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmOrange
     }
   ];
@@ -301,7 +301,7 @@ export function getTpmSeries(
       title: getTpmLegendTitle(bucket.key),
       data: bucket.dataPoints,
       legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
-      type: 'line',
+      type: 'linemark',
       color: getColor(bucket.key)
     };
   });
