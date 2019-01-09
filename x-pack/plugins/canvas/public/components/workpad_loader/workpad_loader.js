@@ -288,7 +288,7 @@ export class WorkpadLoader extends React.PureComponent {
     );
 
     const downloadButton = (
-      <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="sortDown">
+      <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="exportAction">
         {`Download (${selectedWorkpads.length})`}
       </EuiButton>
     );
