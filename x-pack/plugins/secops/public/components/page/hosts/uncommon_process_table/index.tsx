@@ -122,7 +122,7 @@ const getUncommonColumns = (startDate: number) => [
             dataProvider={{
               and: [],
               enabled: true,
-              id: `${uncommonProcess._id}`,
+              id: uncommonProcess._id,
               name: processName,
               negated: false,
               queryMatch: `process.name: "${escapeQueryValue(processName)}"`,

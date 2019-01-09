@@ -115,7 +115,7 @@ const getEventsColumns = (startDate: number) => [
             dataProvider={{
               and: [],
               enabled: true,
-              id: `${event._id}`,
+              id: event._id!,
               name: hostName,
               negated: false,
               queryMatch: `host.name: "${escapeQueryValue(hostName)}"`,

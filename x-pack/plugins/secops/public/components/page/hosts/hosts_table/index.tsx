@@ -114,7 +114,7 @@ const getHostsColumns = () => [
             dataProvider={{
               and: [],
               enabled: true,
-              id: `${host._id}`,
+              id: host._id!,
               name: hostName,
               negated: false,
               queryMatch: `host.name: "${escapeQueryValue(hostName)}"`,
