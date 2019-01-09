@@ -13,7 +13,7 @@ export const pingsSchema = gql`
 
   type PingResults {
     total: UnsignedInteger!
-    pings: [Ping!]
+    pings: [Ping!]!
   }
 
   type Query {

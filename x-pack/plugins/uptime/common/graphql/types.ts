@@ -36,7 +36,7 @@ export interface Query {
 export interface PingResults {
   total: UnsignedInteger;
 
-  pings?: Ping[] | null;
+  pings: Ping[];
 }
 /** A request sent from a monitor to a host */
 export interface Ping {
