@@ -732,7 +732,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
-      await find.clickByCssSelector('[href="#/visualize"]');
+      log.debug(`VisualizePage.clickLoadSavedVisButton`);
+      await find.clickByCssSelectorWhenNotDisabled('[href="#/visualize"]');
+      await this.expectExistsVisualizeLandingPage();
     }
 
     async filterVisByName(vizName) {
@@ -746,11 +748,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickVisualizationByName(vizName) {
-      log.debug('clickVisualizationByLinkText(' + vizName + ')');
+      log.debug(`VisualizePage.clickVisualizationByName(${vizName})`);
       return find.clickByPartialLinkText(vizName);
     }
 
     async loadSavedVisualization(vizName, { navigateToVisualize = true } = {}) {
+      log.debug(`VisualizePage.loadSavedVisualization(${vizName})`);
       if (navigateToVisualize) {
         await this.clickLoadSavedVisButton();
       }
@@ -758,6 +761,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async openSavedVisualization(vizName) {
+      log.debug(`VisualizePage.openSavedVisualization(${vizName})`);
       await this.clickVisualizationByName(vizName);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -1077,6 +1081,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickLandingPageBreadcrumbLink() {
       log.debug('clickLandingPageBreadcrumbLink');
       await find.clickByCssSelector(`a[href="#${VisualizeConstants.LANDING_PAGE_PATH}"]`);
+    }
+
+    async expectExistsVisualizeLandingPage() {
+      log.debug(`VisualizePage.expectExistsVisualizeLandingPage`);
+      await testSubjects.existOrFail('visualizeLandingPage');
     }
 
     /**
