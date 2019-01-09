@@ -186,7 +186,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               {
                 defaultMessage:
                   'View {occurrencesCount} occurrences in Discover',
-                values: { occurrencesCount: occurrencesCount as number }
+                values: { occurrencesCount }
               }
             )}
           </EuiButtonEmpty>
