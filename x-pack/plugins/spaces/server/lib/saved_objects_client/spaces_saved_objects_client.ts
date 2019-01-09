@@ -238,7 +238,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {string} id
    * @param {object} [options]
    */
-  public async findRelationships(type: string, id: string, options: FindRelationshipsOptions) {
+  public async findRelationships(type: string, id: string, options: FindRelationshipsOptions = {}) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 

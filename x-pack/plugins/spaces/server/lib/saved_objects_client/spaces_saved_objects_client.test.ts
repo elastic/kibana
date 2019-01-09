@@ -290,6 +290,66 @@ const createMockClient = () => {
       });
     });
 
+    describe('#findRelationships', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await expect(
+          client.findRelationships('foo', '', { namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`throws error if type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await expect(client.findRelationships('space', '')).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`supplements options with undefined namespace`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.findRelationships.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+        const type = Symbol();
+        const id = Symbol();
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
+        const actualReturnValue = await client.findRelationships(type, id, options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.findRelationships).toHaveBeenCalledWith(type, id, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
     describe('#create', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
