@@ -44,10 +44,12 @@ export const WorkpadExport = compose(
       throw new Error(`Unknown export type: ${type}`);
     },
     onCopy: type => {
-      if (type === 'pdf') {
-        return notify.info('The PDF generation URL was copied to your clipboard.');
+      switch (type) {
+        case 'pdf':
+          return notify.info('The PDF generation URL was copied to your clipboard.');
+        case 'reportingConfig':
+          return notify.info(`Copied reporting configuration to clipboard`);
       }
-
       throw new Error(`Unknown export type: ${type}`);
     },
     onExport: type => {

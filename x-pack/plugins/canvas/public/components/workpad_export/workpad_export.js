@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiCodeBlock,
+  EuiCode,
   EuiContextMenu,
   EuiIcon,
   EuiText,
@@ -54,7 +55,7 @@ export class WorkpadExport extends React.PureComponent {
   renderPDFControls = closePopover => {
     const pdfUrl = this.props.getExportUrl('pdf');
     return (
-      <div className="sharePanelContent" data-test-subj="shareReportingForm">
+      <div className="canvasWorkpadExport__panelContent">
         <EuiText size="s">
           <p>PDFs can take a minute or two to generate based upon the size of your workpad</p>
         </EuiText>
@@ -130,14 +131,29 @@ export class WorkpadExport extends React.PureComponent {
   });
 
   renderDisabled = () => {
+    const reportingConfig = `xpack.reporting:
+  enabled: true
+  capture.browser.type: chromium`;
+
     return (
-      <div>
-        Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add
-        this to your kibana.yml file.
+      <div className="canvasWorkpadExport__panelContent">
+        <EuiText size="s">
+          <p>
+            Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add
+            this to your <EuiCode>kibana.yml</EuiCode> file.
+          </p>
+        </EuiText>
         <EuiSpacer />
-        <EuiCodeBlock paddingSize="s" language="yml">
-          xpack.reporting.capture.browser.type: chromium
-        </EuiCodeBlock>
+        <Clipboard content={reportingConfig} onCopy={() => this.props.onCopy('reportingConfig')}>
+          <EuiCodeBlock
+            className="canvasWorkpadExport__reportingConfig"
+            paddingSize="s"
+            fontSize="s"
+            language="yml"
+          >
+            {reportingConfig}
+          </EuiCodeBlock>
+        </Clipboard>
       </div>
     );
   };
