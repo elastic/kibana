@@ -70,7 +70,10 @@ module.directive('mlEnableModelPlotCheckbox', function () {
               $scope.ui.showAdvanced = true;
             }
           })
-          .catch(errorHandler);
+          .catch(errorHandler)
+          .then(() => {
+            $scope.$applyAsync();
+          });
       }
 
       // Re-validate cardinality for updated fields/splitField

@@ -38,11 +38,13 @@ module.directive('mlBucketSpanEstimator', function () {
         console.log('Bucket span could not be estimated', error);
         $scope.ui.bucketSpanEstimator.status = STATUS.FAILED;
         $scope.ui.bucketSpanEstimator.message = 'Bucket span could not be estimated';
+        $scope.$applyAsync();
       };
 
       $scope.guessBucketSpan = function () {
         $scope.ui.bucketSpanEstimator.status = STATUS.RUNNING;
         $scope.ui.bucketSpanEstimator.message = '';
+        $scope.$applyAsync();
 
         // we need to create a request object here because $scope.formConfig
         // includes objects with methods which might break the required
@@ -89,6 +91,7 @@ module.directive('mlBucketSpanEstimator', function () {
             if (notify && typeof $scope.bucketSpanFieldChange === 'function') {
               $scope.bucketSpanFieldChange();
             }
+            $scope.$applyAsync();
           })
           .catch(errorHandler);
       };
