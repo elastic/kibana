@@ -17,26 +17,18 @@
  * under the License.
  */
 
-module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+import Color from 'color';
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:tslint',
-    'run:sasslint',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
-  ]);
+export default (color, fill = 1) => {
+  const initialColor = new Color(color).rgb();
+
+  const opacity = Math.min(Number(fill), 1) * initialColor.valpha;
+  const [r, g, b] = initialColor.color;
+
+  return {
+    fill: opacity > 0,
+    fillColor: new Color([
+      r, g, b, Number(opacity.toFixed(2)),
+    ]).string(),
+  };
 };

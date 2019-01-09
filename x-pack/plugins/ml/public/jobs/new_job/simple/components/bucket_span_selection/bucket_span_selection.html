@@ -1,5 +1,10 @@
 <div class='bucket-span-selection'>
-  <h4 class="euiTitle euiTitle--small" id="ml_aria_label_new_job_bucketspan">Bucket span</h4><i ml-info-icon="new_job_bucketspan" />
+  <h4
+    class="euiTitle euiTitle--small"
+    id="ml_aria_label_new_job_bucketspan"
+    i18n-id="xpack.ml.newJob.simple.bucketSpanSelection.bucketSpanTitle"
+    i18n-default-message="Bucket span"
+  ></h4><i ml-info-icon="new_job_bucketspan" />
   <div class="euiSpacer euiSpacer--s"></div>
   <div class="row">
     <div class="col-md-12">
@@ -26,7 +31,12 @@
           </ml-bucket-span-estimator>
 
         </div>
-        <div ng-hide="ui.bucketSpanValid" class="validation-error">Invalid interval format</div>
+        <div
+          ng-hide="ui.bucketSpanValid"
+          class="validation-error"
+          i18n-id="xpack.ml.newJob.simple.bucketSpanSelection.invalidIntervalFormatLabel"
+          i18n-default-message="Invalid interval format"
+        ></div>
         <div ng-show="ui.bucketSpanEstimator.status===-1" class="validation-error">{{ui.bucketSpanEstimator.message}}</div>
       </div>
     </div>
