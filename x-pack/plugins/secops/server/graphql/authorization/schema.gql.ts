@@ -9,10 +9,11 @@ import gql from 'graphql-tag';
 export const authorizationSchema = gql`
   type AuthorizationItem {
     _id: String!
-    name: String!
-    title: String
-    instances: Int!
-    hosts: [HostEcsFields!]!
+    failures: Int!
+    successes: Int!
+    user: String!
+    from: String!
+    latest: String!
   }
 
   type AuthorizationsEdges {
@@ -28,7 +29,7 @@ export const authorizationSchema = gql`
 
   extend type Source {
     "Gets Authorization success and failures based on a timerange"
-    Authorization(
+    Authorizations(
       timerange: TimerangeInput!
       pagination: PaginationInput!
       filterQuery: String

@@ -31,7 +31,7 @@ export const createUncommonProcessesResolvers = (
 } => ({
   Source: {
     async UncommonProcesses(source, args, { req }, info) {
-      // console.log('----> Uncommon process resolver');
+      console.log('----> Uncommon process resolver');
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
       const options: UncommonProcessesRequestOptions = {
         sourceConfiguration: source.configuration,

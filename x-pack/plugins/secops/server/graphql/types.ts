@@ -57,7 +57,7 @@ export interface Source {
   /** The status of the source */
   status: SourceStatus;
   /** Gets Authorization success and failures based on a timerange */
-  Authorization: AuthorizationsData;
+  Authorizations: AuthorizationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -145,21 +145,15 @@ export interface AuthorizationsEdges {
 export interface AuthorizationItem {
   _id: string;
 
-  name: string;
+  failures: number;
 
-  title?: string | null;
+  successes: number;
 
-  instances: number;
+  user: string;
 
-  hosts: HostEcsFields[];
-}
+  from: string;
 
-export interface HostEcsFields {
-  id?: string | null;
-
-  ip?: string | null;
-
-  name?: string | null;
+  latest: string;
 }
 
 export interface CursorType {
@@ -240,6 +234,14 @@ export interface GeoEcsFields {
   country_iso_code?: string | null;
 
   region_name?: string | null;
+}
+
+export interface HostEcsFields {
+  id?: string | null;
+
+  ip?: string | null;
+
+  name?: string | null;
 }
 
 export interface SourceEcsFields {
@@ -367,7 +369,7 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface AuthorizationSourceArgs {
+export interface AuthorizationsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -459,7 +461,7 @@ export namespace SourceResolvers {
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, Context>;
     /** Gets Authorization success and failures based on a timerange */
-    Authorization?: AuthorizationResolver<AuthorizationsData, TypeParent, Context>;
+    Authorizations?: AuthorizationsResolver<AuthorizationsData, TypeParent, Context>;
     /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Events?: EventsResolver<EventsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -485,12 +487,12 @@ export namespace SourceResolvers {
     Parent,
     Context
   >;
-  export type AuthorizationResolver<
+  export type AuthorizationsResolver<
     R = AuthorizationsData,
     Parent = Source,
     Context = SecOpsContext
-  > = Resolver<R, Parent, Context, AuthorizationArgs>;
-  export interface AuthorizationArgs {
+  > = Resolver<R, Parent, Context, AuthorizationsArgs>;
+  export interface AuthorizationsArgs {
     timerange: TimerangeInput;
 
     pagination: PaginationInput;
@@ -792,13 +794,15 @@ export namespace AuthorizationItemResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationItem> {
     _id?: IdResolver<string, TypeParent, Context>;
 
-    name?: NameResolver<string, TypeParent, Context>;
+    failures?: FailuresResolver<number, TypeParent, Context>;
 
-    title?: TitleResolver<string | null, TypeParent, Context>;
+    successes?: SuccessesResolver<number, TypeParent, Context>;
 
-    instances?: InstancesResolver<number, TypeParent, Context>;
+    user?: UserResolver<string, TypeParent, Context>;
 
-    hosts?: HostsResolver<HostEcsFields[], TypeParent, Context>;
+    from?: FromResolver<string, TypeParent, Context>;
+
+    latest?: LatestResolver<string, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -806,50 +810,29 @@ export namespace AuthorizationItemResolvers {
     Parent = AuthorizationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string,
-    Parent = AuthorizationItem,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type TitleResolver<
-    R = string | null,
-    Parent = AuthorizationItem,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type InstancesResolver<
+  export type FailuresResolver<
     R = number,
     Parent = AuthorizationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type HostsResolver<
-    R = HostEcsFields[],
+  export type SuccessesResolver<
+    R = number,
     Parent = AuthorizationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace HostEcsFieldsResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
-    id?: IdResolver<string | null, TypeParent, Context>;
-
-    ip?: IpResolver<string | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = string | null,
-    Parent = HostEcsFields,
+  export type UserResolver<
+    R = string,
+    Parent = AuthorizationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type IpResolver<
-    R = string | null,
-    Parent = HostEcsFields,
+  export type FromResolver<
+    R = string,
+    Parent = AuthorizationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = HostEcsFields,
+  export type LatestResolver<
+    R = string,
+    Parent = AuthorizationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1112,6 +1095,32 @@ export namespace GeoEcsFieldsResolvers {
   export type RegionNameResolver<
     R = string | null,
     Parent = GeoEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HostEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type IpResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

@@ -80,32 +80,45 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
         filterQuery,
       }}
     >
-      {({ data, loading, refetch, updateQuery }) => {
+      {({ data, loading, fetchMore, refetch }) => {
+        console.log('The data is:', data);
+
         const authorizations = getOr([], 'source.Authorizations.edges', data);
-        const pageInfo = getOr(
-          { endCursor: { value: '' } },
-          'source.Authorizations.pageInfo',
-          data
-        );
-
-        let endCursor = String(limit);
-        if (!isEmpty(pageInfo.endCursor.value)) {
-          endCursor = pageInfo.endCursor.value;
-        }
-
-        const hasNextPage = hasMoreData(parseInt(endCursor, 10), upperLimit, authorizations);
-        const slicedData = authorizations.slice(0, parseInt(endCursor, 10));
+        console.log('The authorizations are', authorizations);
         return children({
           id,
-          loading,
           refetch,
+          loading,
           totalCount: getOr(0, 'source.Authorizations.totalCount', data),
-          authorizations: slicedData,
-          pageInfo: { hasNextPage, endCursor: { value: String(parseInt(endCursor, 10) + limit) } },
+          authorizations,
+          pageInfo: getOr({}, 'source.Authorizations.pageInfo', data),
           loadMore: (newCursor: string) =>
-            updateQuery(prev =>
-              set('source.Authorizations.pageInfo.endCursor.value', newCursor, prev)
-            ),
+            fetchMore({
+              variables: {
+                pagination: {
+                  cursor: newCursor,
+                  limit,
+                },
+              },
+              updateQuery: (prev, { fetchMoreResult }) => {
+                if (!fetchMoreResult) {
+                  return prev;
+                }
+                return {
+                  ...fetchMoreResult,
+                  source: {
+                    ...fetchMoreResult.source,
+                    Hosts: {
+                      ...fetchMoreResult.source.Authorizations,
+                      edges: [
+                        ...prev.source.Authorizations.edges,
+                        ...fetchMoreResult.source.Authorizations.edges,
+                      ],
+                    },
+                  },
+                };
+              },
+            }),
         });
       }}
     </Query>

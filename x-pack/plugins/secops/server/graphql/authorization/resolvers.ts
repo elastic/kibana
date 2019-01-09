@@ -14,7 +14,7 @@ import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryAuthorizationResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AuthorizationResolver>,
+  AppResolverOf<SourceResolvers.AuthorizationsResolver>,
   QuerySourceResolver
 >;
 
@@ -26,12 +26,12 @@ export const createAuthorizationResolvers = (
   libs: AuthorizationResolversDeps
 ): {
   Source: {
-    Authorization: QueryAuthorizationResolver;
+    Authorizations: QueryAuthorizationResolver;
   };
 } => ({
   Source: {
-    async Authorization(source, args, { req }, info) {
-      // console.log('---> Authorization Resolver');
+    async Authorizations(source, args, { req }, info) {
+      console.log('---> Authorization Resolver');
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
       const options: AuthorizationsRequestOptions = {
         sourceConfiguration: source.configuration,
@@ -41,7 +41,7 @@ export const createAuthorizationResolvers = (
         fields: fields.map(field => field.replace('edges.authorization.', '')),
       };
       const x = libs.authorizations.getAuthorizations(req, options);
-      // console.log('---> Authorization Resolver returning', x);
+      console.log('---> Authorization Resolver returning', x);
       return x;
     },
   },

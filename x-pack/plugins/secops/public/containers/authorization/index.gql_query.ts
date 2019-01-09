@@ -15,18 +15,16 @@ export const authorizationQuery = gql`
   ) {
     source(id: $sourceId) {
       id
-      Authorization(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+      Authorizations(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
           authorization {
             _id
-            name
-            title
-            instances
-            hosts {
-              id
-              name
-            }
+            failures
+            successes
+            user
+            from
+            latest
           }
           cursor {
             value

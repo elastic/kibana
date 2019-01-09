@@ -28,7 +28,7 @@ export interface Source {
   /** The status of the source */
   status: SourceStatus;
   /** Gets Authorization success and failures based on a timerange */
-  Authorization: AuthorizationsData;
+  Authorizations: AuthorizationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -116,21 +116,15 @@ export interface AuthorizationsEdges {
 export interface AuthorizationItem {
   _id: string;
 
-  name: string;
+  failures: number;
 
-  title?: string | null;
+  successes: number;
 
-  instances: number;
+  user: string;
 
-  hosts: HostEcsFields[];
-}
+  from: string;
 
-export interface HostEcsFields {
-  id?: string | null;
-
-  ip?: string | null;
-
-  name?: string | null;
+  latest: string;
 }
 
 export interface CursorType {
@@ -211,6 +205,14 @@ export interface GeoEcsFields {
   country_iso_code?: string | null;
 
   region_name?: string | null;
+}
+
+export interface HostEcsFields {
+  id?: string | null;
+
+  ip?: string | null;
+
+  name?: string | null;
 }
 
 export interface SourceEcsFields {
@@ -338,7 +340,7 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface AuthorizationSourceArgs {
+export interface AuthorizationsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -414,10 +416,10 @@ export namespace GetAuthorizationQuery {
 
     id: string;
 
-    Authorization: Authorization;
+    Authorizations: Authorizations;
   };
 
-  export type Authorization = {
+  export type Authorizations = {
     __typename?: 'AuthorizationsData';
 
     totalCount: number;
@@ -430,31 +432,25 @@ export namespace GetAuthorizationQuery {
   export type Edges = {
     __typename?: 'AuthorizationsEdges';
 
-    authorization: _Authorization;
+    authorization: Authorization;
 
     cursor: Cursor;
   };
 
-  export type _Authorization = {
+  export type Authorization = {
     __typename?: 'AuthorizationItem';
 
     _id: string;
 
-    name: string;
+    failures: number;
 
-    title?: string | null;
+    successes: number;
 
-    instances: number;
+    user: string;
 
-    hosts: Hosts[];
-  };
+    from: string;
 
-  export type Hosts = {
-    __typename?: 'HostEcsFields';
-
-    id?: string | null;
-
-    name?: string | null;
+    latest: string;
   };
 
   export type Cursor = {

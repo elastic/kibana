@@ -10,6 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import moment from 'moment';
 import { AuthorizationItem, AuthorizationsEdges, HostEcsFields } from '../../../../graphql/types';
 // TODO: Change out uncommonProcessLimitSelector for AuthorizedLimitSelector
 import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
@@ -72,7 +73,7 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
   }) => (
     <LoadMoreTable
       columns={getAuthorizedColumns()}
-      loadingTitle="Uncommon Processes"
+      loadingTitle="Top Authentication Failures"
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
@@ -82,7 +83,7 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
       updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
       title={
         <h3>
-          Uncommon Processes <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          Top Authentication Failures <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
@@ -99,48 +100,45 @@ export const AuthorizationTable = connect(
   }
 )(AuthorizationTableComponent);
 
-// TODO: Remove this function and replace it with authorized code running
-const extractHostNames = (hosts: HostEcsFields[]) => hosts.map(host => host.name).join(', ');
-
 const getAuthorizedColumns = () => [
   {
-    name: 'Process Name',
+    name: 'Failures',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorized }: { authorized: AuthorizationItem }) => (
-      <>{defaultTo('--', authorized.name)}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.failures)}</>
     ),
   },
   {
-    name: 'Command Line',
+    name: 'Successes',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorized }: { authorized: AuthorizationItem }) => (
-      <>{defaultTo('--', authorized.title)}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.successes)}</>
     ),
   },
   {
-    name: 'Number of Instances',
+    name: 'User',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorized }: { authorized: AuthorizationItem }) => (
-      <>{defaultTo('--', authorized.instances)}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.user)}</>
     ),
   },
   {
-    name: 'Number of Hosts',
+    name: 'From',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorized }: { authorized: AuthorizationItem }) => (
-      <>{authorized.hosts != null ? authorized.hosts.length : '--'}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.from)}</>
     ),
   },
   {
-    name: 'Hosts',
+    name: 'Latest',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorized }: { authorized: AuthorizationItem }) => (
-      <>{authorized.hosts != null ? extractHostNames(authorized.hosts) : '--'}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', moment(authorization.latest).fromNow())}</>
     ),
   },
 ];
