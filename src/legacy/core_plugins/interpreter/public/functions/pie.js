@@ -44,10 +44,7 @@ export const kibanaPie = () => ({
     const responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
     const visConfigParams = JSON.parse(args.visConfig);
 
-    const convertedData = await responseHandler(context, {
-      metric: visConfigParams.metric,
-      buckets: visConfigParams.buckets,
-    });
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',

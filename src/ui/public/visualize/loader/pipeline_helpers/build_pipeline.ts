@@ -252,8 +252,12 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
   pie: (visState, schemas) => {
     const visConfig = visState.params;
-    visConfig.metric = schemas.metric[0];
-    visConfig.buckets = schemas.segment;
+    visConfig.dimensions = {
+      metric: schemas.metric[0],
+      buckets: schemas.segment,
+      splitRow: schemas.split_row,
+      splitColumn: schemas.split_column,
+    };
     return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
   },
 };
