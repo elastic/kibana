@@ -101,8 +101,8 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
       title: 'Job creation failed',
       text: (
         <p>
-          You may not have adequate permissions to create a machine learning
-          job, or this job may already exist.
+          Your current license may not allow for creating machine learning jobs,
+          or this job may already exist.
         </p>
       )
     });
