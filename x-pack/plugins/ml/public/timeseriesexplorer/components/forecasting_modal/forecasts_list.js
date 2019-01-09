@@ -29,7 +29,7 @@ function getColumns(viewForecast) {
   return [
     {
       field: 'forecast_create_timestamp',
-      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastList.createdColumnName', {
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.createdColumnName', {
         defaultMessage: 'Created'
       }),
       dataType: 'date',
@@ -38,7 +38,7 @@ function getColumns(viewForecast) {
     },
     {
       field: 'forecast_start_timestamp',
-      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastList.fromColumnName', {
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.fromColumnName', {
         defaultMessage: 'From'
       }),
       dataType: 'date',
@@ -47,7 +47,7 @@ function getColumns(viewForecast) {
     },
     {
       field: 'forecast_end_timestamp',
-      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastList.toColumnName', {
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.toColumnName', {
         defaultMessage: 'To'
       }),
       dataType: 'date',
@@ -55,7 +55,7 @@ function getColumns(viewForecast) {
       sortable: true
     },
     {
-      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastList.viewColumnName', {
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.viewColumnName', {
         defaultMessage: 'View'
       }),
       render: (forecast) => (
@@ -80,14 +80,14 @@ export function ForecastsList({ forecasts, viewForecast }) {
         style={{ display: 'inline', paddingRight: '5px' }}
       >
         <FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.forecastList.previousForecastsTitle"
+          id="xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTitle"
           defaultMessage="Previous forecasts"
         />
       </h3>
       <EuiToolTip
         position="right"
         content={<FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.forecastList.listsOfFiveRecentlyRunForecastsTooltip"
+          id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
           defaultMessage="Lists a maximum of five of the most recently run forecasts."
         />}
       >

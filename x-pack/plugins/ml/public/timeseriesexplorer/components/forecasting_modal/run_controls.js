@@ -64,7 +64,7 @@ function getRunInputDisabledState(
   if (job.state !== JOB_STATE.OPENED && job.state !== JOB_STATE.CLOSED) {
     return {
       isDisabled: true,
-      isDisabledToolTipText: i18n.translate('xpack.ml.timeSeriesExplorer.runControls.forecastsCanNotRunOnJobsTooltip', {
+      isDisabledToolTipText: i18n.translate('xpack.ml.timeSeriesExplorer.runControls.forecastsCanNotBeRunOnJobsTooltip', {
         defaultMessage: 'Forecasts cannot be run on {jobState} jobs',
         values: { jobState: job.state }
       })
@@ -137,7 +137,7 @@ export function RunControls({
               isInvalid={!isNewForecastDurationValid}
               error={newForecastDurationErrors}
               helpText={<FormattedMessage
-                id="xpack.ml.timeSeriesExplorer.runControls.maximumOfForecastLengthHelpText"
+                id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
                 defaultMessage="Length of forecast, up to a maximum of 8 weeks.
                   Use s for seconds, m for minutes, h for hours, d for days, w for weeks."
               />}

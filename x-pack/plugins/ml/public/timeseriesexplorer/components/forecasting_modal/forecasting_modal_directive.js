@@ -19,6 +19,8 @@ module.directive('mlForecastingModal', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
   return reactDirective(
     injectI18nProvider(ForecastingModal),
+    // reactDirective service requires for react component to have propTypes, but injectI18n doesn't copy propTypes from wrapped component.
+    // That's we pass propTypes directly to reactDirective service.
     Object.keys(ForecastingModal.WrappedComponent.propTypes || {}),
     { restrict: 'E' },
     { timefilter }

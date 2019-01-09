@@ -43,7 +43,7 @@ export function Modal(props) {
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.modal.forecastingTitle"
+              id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastingTitle"
               defaultMessage="Forecasting"
             />
           </EuiModalHeaderTitle>
@@ -78,7 +78,7 @@ export function Modal(props) {
             size="s"
           >
             <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.modal.closeButtonLabel"
+              id="xpack.ml.timeSeriesExplorer.forecastingModal.closeButtonLabel"
               defaultMessage="Close"
             />
           </EuiButtonEmpty>

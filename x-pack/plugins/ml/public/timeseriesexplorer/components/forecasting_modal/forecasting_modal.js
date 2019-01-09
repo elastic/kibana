@@ -107,15 +107,15 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
       isNewForecastDurationValid = false;
       newForecastDurationErrors.push(
         intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationNotBeGreaterThan8WeeksErrorMessage',
-          defaultMessage: 'Forecast duration must not be greater than 8 weeks',
-        })
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeGreaterThanMaximumErrorMessage',
+          defaultMessage: 'Forecast duration must not be greater than {maximumForecastDurationValue} weeks',
+        }, { maximumForecastDurationValue: 8 })
       );
     } else if (duration.asMilliseconds() === 0) {
       isNewForecastDurationValid = false;
       newForecastDurationErrors.push(
         intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationNotBeZeroErrorMessage',
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeZeroErrorMessage',
           defaultMessage: 'Forecast duration must not be zero',
         })
       );
