@@ -38,7 +38,7 @@ export function registerRelationships(server) {
     handler: async (req) => {
       const type = req.params.type;
       const id = req.params.id;
-      const size = req.query.size || 10;
+      const size = req.query.size || 10000;
       const savedObjectsClient = req.getSavedObjectsClient();
 
       return await savedObjectsClient.findRelationships(type, id, { size });

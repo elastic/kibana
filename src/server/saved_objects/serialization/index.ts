@@ -49,6 +49,15 @@ export interface MigrationVersion {
 }
 
 /**
+ * A reference object to anohter saved object.
+ */
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
+/**
  * A saved object type definition that allows for miscellaneous, unknown
  * properties, as current discussions around security, ACLs, etc indicate
  * that future props are likely to be added. Migrations support this
@@ -62,7 +71,7 @@ export interface SavedObjectDoc {
   migrationVersion?: MigrationVersion;
   version?: number;
   updated_at?: Date;
-  references?: object[];
+  references?: SavedObjectReference[];
 
   [rootProp: string]: any;
 }

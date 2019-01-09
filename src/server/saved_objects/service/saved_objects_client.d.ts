@@ -80,6 +80,13 @@ export interface SavedObject {
     message: string;
   };
   attributes: SavedObjectAttributes;
+  references: SavedObjectReference[];
+}
+
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
 }
 
 export interface FindRelationshipsOptions {

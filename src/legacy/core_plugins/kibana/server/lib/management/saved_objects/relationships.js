@@ -17,8 +17,8 @@
  * under the License.
  */
 
-async function findDashboardRelationships(id, size, savedObjectsClient) {
-  const dashboard = await savedObjectsClient.get('dashboard', id);
+async function findDashboardRelationships({ id, size, namespace, savedObjectsClient }) {
+  const dashboard = await savedObjectsClient.get('dashboard', id, { namespace });
   const visualizations = [];
 
   // TODO: should we handle exceptions here or at the parent level?
@@ -29,7 +29,8 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
       visualizationIds.slice(0, size).map(id => ({
         id,
         type: 'visualization',
-      }))
+      })),
+      { namespace }
     );
 
     visualizations.push(
@@ -49,9 +50,10 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
   return visualizations;
 }
 
-async function findVisualizationRelationships(id, size, savedObjectsClient) {
-  await savedObjectsClient.get('visualization', id);
+async function findVisualizationRelationships({ id, size, namespace, savedObjectsClient }) {
+  await savedObjectsClient.get('visualization', id, { namespace });
   const allDashboardsResponse = await savedObjectsClient.find({
+    namespace,
     type: 'dashboard',
     fields: ['title', 'panelsJSON'],
   });
@@ -81,20 +83,21 @@ async function findVisualizationRelationships(id, size, savedObjectsClient) {
   return dashboards;
 }
 
-async function findSavedSearchRelationships(id, size, savedObjectsClient) {
-  const search = await savedObjectsClient.get('search', id);
+async function findSavedSearchRelationships({ id, namespace, savedObjectsClient }) {
+  const search = await savedObjectsClient.get('search', id, { namespace });
 
   const searchSourceJSON = JSON.parse(search.attributes.kibanaSavedObjectMeta.searchSourceJSON);
 
   const indexPatterns = [];
   try {
-    const indexPattern = await savedObjectsClient.get('index-pattern', searchSourceJSON.index);
+    const indexPattern = await savedObjectsClient.get('index-pattern', searchSourceJSON.index, { namespace });
     indexPatterns.push({ id: indexPattern.id, type: 'index-pattern', title: indexPattern.attributes.title });
   } catch (err) {
     // Do nothing
   }
 
   const allVisualizationsResponse = await savedObjectsClient.find({
+    namespace,
     type: 'visualization',
     searchFields: ['savedSearchId'],
     search: id,
@@ -115,16 +118,18 @@ async function findSavedSearchRelationships(id, size, savedObjectsClient) {
   return visualizations.concat(indexPatterns);
 }
 
-async function findIndexPatternRelationships(id, size, savedObjectsClient) {
-  await savedObjectsClient.get('index-pattern', id);
+async function findIndexPatternRelationships({ id, size, namespace, savedObjectsClient }) {
+  await savedObjectsClient.get('index-pattern', id, { namespace });
   const [allVisualizationsResponse, savedSearchResponse] = await Promise.all([
     savedObjectsClient.find({
+      namespace,
       type: 'visualization',
       searchFields: ['kibanaSavedObjectMeta.searchSourceJSON'],
       search: '*',
       fields: [`title`, `kibanaSavedObjectMeta.searchSourceJSON`],
     }),
     savedObjectsClient.find({
+      namespace,
       type: 'search',
       searchFields: ['kibanaSavedObjectMeta.searchSourceJSON'],
       search: '*',
@@ -172,16 +177,16 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
   return visualizations.concat(searches);
 }
 
-export async function findRelationships(type, id, size, savedObjectsClient) {
+export async function findRelationships({ type, id, namespace, size, savedObjectsClient }) {
   switch (type) {
     case 'dashboard':
-      return await findDashboardRelationships(id, size, savedObjectsClient);
+      return await findDashboardRelationships({ id, size, namespace, savedObjectsClient });
     case 'visualization':
-      return await findVisualizationRelationships(id, size, savedObjectsClient);
+      return await findVisualizationRelationships({ id, size, namespace, savedObjectsClient });
     case 'search':
-      return await findSavedSearchRelationships(id, size, savedObjectsClient);
+      return await findSavedSearchRelationships({ id, size, namespace, savedObjectsClient });
     case 'index-pattern':
-      return await findIndexPatternRelationships(id, size, savedObjectsClient);
+      return await findIndexPatternRelationships({ id, size, namespace, savedObjectsClient });
   }
   return [];
 }

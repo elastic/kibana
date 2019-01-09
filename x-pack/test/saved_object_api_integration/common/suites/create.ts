@@ -74,7 +74,6 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         title: 'My favorite vis',
       },
       references: [],
-      migrationVersion: resp.body.migrationVersion,
     });
 
     const expectedSpacePrefix = spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}:`;
@@ -115,7 +114,6 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       attributes: {
         name: `Can't be contained to a space`,
       },
-      migrationVersion: resp.body.migrationVersion,
       references: [],
     });
 

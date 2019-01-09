@@ -51,7 +51,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       payload: {
         attributes: {
           title: 'Testing'
-        }
+        },
+        references: [],
       }
     };
 

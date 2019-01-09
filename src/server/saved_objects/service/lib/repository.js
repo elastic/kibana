@@ -608,7 +608,7 @@ export class SavedObjectsRepository {
     const {
       size = 10000,
       namespace,
-      filterTypes,
+      filterTypes = Object.keys(getRootPropertiesObjects(this._mappings)),
     } = options;
 
     if (!id || typeof id !== 'string') {
@@ -619,42 +619,37 @@ export class SavedObjectsRepository {
       throw new TypeError('type must be a string');
     }
 
-    const sourceObject = await this.get(type, id, { namespace });
-
-    // This code will be removed as these types migrate to use "references"
-    let legacyFindRelationshipsCall;
-    if (['dashboard', 'visualization', 'search', 'index-pattern'].includes(type)) {
-      legacyFindRelationshipsCall = legacyFindRelationships(type, id, size, this);
-    }
-    const bulkGetOpts = (sourceObject.references || []).map(ref => ({ id: ref.id, type: ref.type }));
-    const searchTypes = Array.isArray(filterTypes)
-      ? filterTypes
-      : Object.keys(getRootPropertiesObjects(this._mappings));
+    const { references = [] } = await this.get(type, id, { namespace });
+    const bulkGetOpts = references
+      .filter(ref => filterTypes.includes(ref.type))
+      .map(ref => ({ id: ref.id, type: ref.type }));
+    const searchOpts = {
+      index: this._index,
+      size,
+      from: 0,
+      _source: [
+        'type',
+        'namespace',
+        ...(filterTypes.map(type => `${type}.title`)),
+      ],
+      ignore: [404],
+      rest_total_hits_as_int: true,
+      body: {
+        version: true,
+        query: getRelationshipsQuery({ type, id, namespace, filterTypes })
+      }
+    };
 
     const [{ saved_objects: referencedObjects }, referencedResponse, legacyResponse] = await Promise.all([
       this.bulkGet(bulkGetOpts),
-      this._callCluster('search', {
-        index: this._index,
-        size,
-        from: 0,
-        _source: [
-          'type',
-          'namespace',
-          ...(searchTypes.map(type => `${type}.title`)),
-        ],
-        ignore: [404],
-        rest_total_hits_as_int: true,
-        body: {
-          version: true,
-          query: getRelationshipsQuery({ type, id, namespace, searchTypes })
-        }
-      }),
-      legacyFindRelationshipsCall,
+      this._callCluster('search', searchOpts),
+      // This code will be removed as these types migrate to use "references"
+      legacyFindRelationships({ type, size, namespace, id, savedObjectsClient: this }),
     ]);
 
     const relationshipObjects = [].concat(
       referencedObjects.map(obj => ({ id: obj.id, type: obj.type, ...obj.attributes })),
-      legacyResponse || [],
+      legacyResponse.filter(obj => filterTypes.includes(obj.type)),
       referencedResponse.hits.hits
         .map(hit => this._rawToSavedObject(hit))
         .map(obj => ({ id: obj.id, type: obj.type, ...obj.attributes }))
@@ -664,8 +659,8 @@ export class SavedObjectsRepository {
       const objectsForType = (result[relationshipObject.type] || []);
       // Since we're supporting the legacy method until all saved objects use "references",
       // remove duplicates until then.
-      if (objectsForType.find(obj => obj.id === relationshipObject.id)) return result;
-      const type = relationshipObject.type;
+      if (objectsForType.some(obj => obj.id === relationshipObject.id)) return result;
+      const { type } = relationshipObject;
       delete relationshipObject.type;
       result[type] = objectsForType.concat(relationshipObject);
       return result;

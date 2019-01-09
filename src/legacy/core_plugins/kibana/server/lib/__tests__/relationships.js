@@ -56,12 +56,12 @@ describe('findRelationships', () => {
         ],
       })
     };
-    const result = await findRelationships(
+    const result = await findRelationships({
       type,
       id,
       size,
       savedObjectsClient
-    );
+    });
     expect(result).to.eql([
       { id: '1', title: 'Foo', type: 'visualization' },
       { id: '2', title: 'Bar', type: 'visualization' },
@@ -114,12 +114,12 @@ describe('findRelationships', () => {
       })
     };
 
-    const result = await findRelationships(
+    const result = await findRelationships({
       type,
       id,
       size,
       savedObjectsClient
-    );
+    });
     expect(result).to.eql([
       { id: '1', title: 'My Dashboard', type: 'dashboard' },
       { id: '2', title: 'Your Dashboard', type: 'dashboard' },
@@ -177,12 +177,12 @@ describe('findRelationships', () => {
       })
     };
 
-    const result = await findRelationships(
+    const result = await findRelationships({
       type,
       id,
       size,
       savedObjectsClient
-    );
+    });
     expect(result).to.eql([
       { id: '1', title: 'Foo', type: 'visualization' },
       { id: '2', title: 'Bar', type: 'visualization' },
@@ -282,12 +282,12 @@ describe('findRelationships', () => {
       }
     };
 
-    const result = await findRelationships(
+    const result = await findRelationships({
       type,
       id,
       size,
       savedObjectsClient
-    );
+    });
     expect(result).to.eql([
       { id: '1', type: 'visualization', title: 'Foo' },
       { id: '2', type: 'visualization', title: 'Bar' },
@@ -298,7 +298,7 @@ describe('findRelationships', () => {
 
   it('should return an empty object for invalid types', async () => {
     const type = 'invalid';
-    const result = await findRelationships(type);
+    const result = await findRelationships({ type });
     expect(result).to.eql({});
   });
 });

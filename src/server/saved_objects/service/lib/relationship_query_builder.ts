@@ -21,11 +21,11 @@ interface RelationshipQueryOptions {
   type: string;
   id: string;
   namespace?: string;
-  searchTypes?: string[];
+  filterTypes: string[];
 }
 
 export function getRelationshipsQuery(options: RelationshipQueryOptions) {
-  const { type, id, namespace, searchTypes } = options;
+  const { type, id, namespace, filterTypes } = options;
   return {
     bool: {
       filter: {
@@ -34,7 +34,7 @@ export function getRelationshipsQuery(options: RelationshipQueryOptions) {
             ...(namespace
               ? [{ term: { namespace } }]
               : [{ bool: { must_not: { exists: { field: 'namespace' } } } }]),
-            ...(searchTypes ? [{ terms: { type: searchTypes } }] : []),
+            [{ terms: { type: filterTypes } }],
             {
               nested: {
                 path: 'references',

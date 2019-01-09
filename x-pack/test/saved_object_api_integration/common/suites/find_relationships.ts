@@ -99,7 +99,14 @@ export function findRelationshipsTestSuiteFactory(esArchiver: any, supertest: Su
   const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
-    expect(resp.body).to.have.property('index-pattern');
+    expect(resp.body).to.eql({
+      dashboard: [
+        {
+          id: `${getIdPrefix(spaceId)}be3733a0-9efe-11e7-acb3-3dab96693fab`,
+          title: 'Requests',
+        },
+      ],
+    });
   };
 
   const makeFindRelationshipsTest = (describeFn: DescribeFn) => (

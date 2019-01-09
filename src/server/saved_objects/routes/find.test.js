@@ -74,13 +74,15 @@ describe('GET /api/saved_objects/_find', () => {
           id: 'logstash-*',
           title: 'logstash-*',
           timeFieldName: '@timestamp',
-          notExpandable: true
+          notExpandable: true,
+          references: [],
         }, {
           type: 'index-pattern',
           id: 'stocks-*',
           title: 'stocks-*',
           timeFieldName: '@timestamp',
-          notExpandable: true
+          notExpandable: true,
+          references: [],
         }
       ]
     };

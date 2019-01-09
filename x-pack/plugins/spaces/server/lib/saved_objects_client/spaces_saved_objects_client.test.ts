@@ -38,6 +38,7 @@ const createMockClient = () => {
     bulkCreate: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    findRelationships: jest.fn(),
     errors,
   };
 };

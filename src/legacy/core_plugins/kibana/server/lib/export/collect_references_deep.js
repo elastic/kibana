@@ -26,17 +26,13 @@ export async function collectReferencesDeep(savedObjectClient, objects) {
     const itemsToGet = queue.splice(0, queue.length);
     const { saved_objects: savedObjects } = await savedObjectClient.bulkGet(itemsToGet);
     result.push(...savedObjects);
-    // All references will be replaced with references once all saved object types are migrated
-    const allReferences = [];
-    savedObjects.forEach((obj) => {
-      allReferences.push(...(obj.references || []));
-      allReferences.push(...extractLegacyReferences(obj));
-    });
-    for (const reference of allReferences) {
-      const isInResult = result.findIndex(obj => obj.type === reference.type && obj.id === reference.id) !== -1;
-      if (isInResult) continue;
-      const isInQueue = queue.findIndex(obj => obj.type === reference.type && obj.id === reference.id) !== -1;
-      if (isInQueue) continue;
+    const references = []
+      .concat(...savedObjects.map(obj => obj.references || []))
+      // This line below will be removed once legacy support is removed
+      .concat(...savedObjects.map(obj => extractLegacyReferences(obj)));
+    for (const reference of references) {
+      const isDuplicate = result.concat(queue).some(obj => obj.type === reference.type && obj.id === reference.id);
+      if (isDuplicate) continue;
       queue.push({ type: reference.type, id: reference.id });
     }
   }
@@ -56,7 +52,7 @@ function extractLegacyReferences(savedObject) {
         panels = [];
       }
       for (const panel of panels) {
-        if (panel.type && panel.id) {
+        if (panel.type === 'visualization' && panel.id) {
           legacyReferences.push({ type: panel.type, id: panel.id });
         }
       }

@@ -57,7 +57,8 @@ describe('POST /api/saved_objects/{type}', () => {
     const clientResponse = {
       type: 'index-pattern',
       id: 'logstash-*',
-      title: 'Testing'
+      title: 'Testing',
+      references: [],
     };
 
     savedObjectsClient.create.returns(Promise.resolve(clientResponse));

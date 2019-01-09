@@ -193,7 +193,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findRelationshipsTest(`rbac user with read globall within the ${scenario.spaceId} space`, {
+      findRelationshipsTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
         user: scenario.users.readGlobally,
         spaceId: scenario.spaceId,
         tests: {
