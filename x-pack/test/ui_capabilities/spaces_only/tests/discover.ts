@@ -31,6 +31,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'ml_disabled_space':
           case 'monitoring_disabled_space':
           case 'timelion_disabled_space':
+          case 'uptime_disabled_space':
           case 'visualize_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('discover');
