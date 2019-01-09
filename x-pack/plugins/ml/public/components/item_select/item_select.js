@@ -10,6 +10,7 @@ import template from './item_select.html';
 
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlItemSelect', function () {
@@ -28,6 +29,10 @@ module.directive('mlItemSelect', function () {
     controllerAs: 'mlItemSelect',
     bindToController: true,
     controller: class MlItemSelectController extends InitAfterBindingsWorkaround {
+      constructor() {
+        this.newItemLabel = i18n.translate('xpack.ml.itemSelect.newItemLabel', { defaultMessage: '(new item)' });
+      }
+
       initAfterBindings($scope) {
         this.$scope = $scope;
         this.selectedItems = [];
