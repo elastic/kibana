@@ -8,6 +8,7 @@ import { EuiBadge } from '@elastic/eui';
 import { defaultTo } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { pure } from 'recompose';
 import { HostItem, HostsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsLimitSelector, State } from '../../../../store';
@@ -101,7 +102,9 @@ const getHostsColumns = () => [
     name: 'Host',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.name)}</>, // Host Details Link
+    render: ({ host }: { host: HostItem }) => (
+      <>{defaultTo('--', <Link to={`hosts/${host.name}`}>{host.name}</Link>)}</>
+    ),
   },
   {
     name: 'First seen',
