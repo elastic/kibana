@@ -11,8 +11,6 @@ import { pure } from 'recompose';
 import { HostDetails } from './host_details';
 import { Hosts } from './hosts';
 
-import { EmptyPage } from '../../components/empty_page';
-
 interface Props {
   match: {
     params: { hostName: string };
