@@ -248,7 +248,7 @@ export function buildRuleDescription(rule) {
   }
 
   return i18n.translate('xpack.ml.ruleEditor.ruleDescription', {
-    defaultMessage: 'skip {actions} when {conditions} {filters}',
+    defaultMessage: 'skip {actions} when {conditions}{filters}',
     values: {
       actions: actionsText,
       conditions: conditionsText,
