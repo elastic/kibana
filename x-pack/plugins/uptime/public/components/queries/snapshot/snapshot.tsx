@@ -23,9 +23,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { FormattedMessage } from 'react-intl';
 import { SnapshotHistogram } from '../../functional/snapshot_histogram';
 import { getSnapshotQuery } from './get_snapshot';
 

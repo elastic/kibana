@@ -22,11 +22,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
-import { FormattedMessage } from 'react-intl';
 import { UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
 import { getPingsQuery } from './get_pings';
