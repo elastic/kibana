@@ -25,15 +25,6 @@ import crypto from 'crypto';
 import _ from 'lodash';
 import { IndexMapping, MappingProperties } from './call_cluster';
 
-// rison-node is untyped, so we require rather than import, to avoid TS warnings...
-// tslint:disable-next-line:no-var-requires
-const rison = require('rison-node');
-
-// The diff result, indicating which root-level property change triggers a migration.
-export interface MappingDiff {
-  changedProp: string;
-}
-
 /**
  * Creates an index mapping with the core properties required by saved object
  * indices, as well as the specified additional properties.
@@ -56,7 +47,7 @@ export function buildActiveMappings({
       ...mapping.doc,
       properties,
       _meta: {
-        migrationMappingHash: md5Values(properties),
+        migrationMappingPropertyHashes: md5Values(properties),
       },
     },
   });
@@ -64,25 +55,22 @@ export function buildActiveMappings({
 
 /**
  * Diffs the actual vs expected mappings. The properties are compared using md5 hashes stored in _meta, because
- * actual and expected mappings *can* differ, but if the md5 hashes stored in actual.doc._meta.migrationMappingHash
+ * actual and expected mappings *can* differ, but if the md5 hashes stored in actual.doc._meta.migrationMappingPropertyHashes
  * match our expectations, we don't require a migration. This allows ES to tack on additional mappings that Kibana
  * doesn't know about or expect, without triggering continual migrations.
  */
-export function diffMappings(
-  actual: IndexMapping,
-  expected: IndexMapping
-): MappingDiff | undefined {
+export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
   if (actual.doc.dynamic !== expected.doc.dynamic) {
     return { changedProp: 'doc.dynamic' };
   }
 
-  if (!actual.doc._meta || !actual.doc._meta.migrationMappingHash) {
+  if (!actual.doc._meta || !actual.doc._meta.migrationMappingPropertyHashes) {
     return { changedProp: 'doc._meta' };
   }
 
   const changedProp = findChangedProp(
-    actual.doc._meta.migrationMappingHash,
-    expected.doc._meta!.migrationMappingHash
+    actual.doc._meta.migrationMappingPropertyHashes,
+    expected.doc._meta!.migrationMappingPropertyHashes
   );
 
   return changedProp ? { changedProp: `doc.properties.${changedProp}` } : undefined;
@@ -92,8 +80,35 @@ export function diffMappings(
 function md5Object(obj: any) {
   return crypto
     .createHash('md5')
-    .update(rison.encode(obj))
+    .update(canonicalStringify(obj))
     .digest('hex');
+}
+
+// JSON.stringify is non-canonical, meaning the same object may produce slightly
+// different JSON, depending on compiler optimizations (e.g. object keys
+// are not guaranteed to be sorted). This function consistently produces the same
+// string, if passed an object of the same shape.
+function canonicalStringify(obj: any): string {
+  if (Array.isArray(obj)) {
+    return `[${obj.map(canonicalStringify)}]`;
+  }
+
+  if (!obj || typeof obj !== 'object') {
+    return JSON.stringify(obj);
+  }
+
+  const keys = Object.keys(obj);
+
+  // This is important for properly handling Date
+  if (!keys.length) {
+    return JSON.stringify(obj);
+  }
+
+  const sortedObj = keys
+    .sort((a, b) => a.localeCompare(b))
+    .map(k => `${k}: ${canonicalStringify(obj[k])}`);
+
+  return `{${sortedObj}}`;
 }
 
 // Convert an object's values to md5 hash strings

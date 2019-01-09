@@ -42,13 +42,13 @@ describe('IndexMigrator', () => {
           doc: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingHash: {
-                config: '73cde85b5dab11cb777920da77f7c854',
-                foo: '99e19abc6d1180ecbf132d8a5eaa60ea',
-                migrationVersion: 'f34c5b14d1b6e49dbb0dd2e3c97cb02c',
-                namespace: '52431400f7dca8fce271660a55aa04c9',
-                type: '52431400f7dca8fce271660a55aa04c9',
-                updated_at: '6952c7bde132cc86c181e2be99366b37',
+              migrationMappingPropertyHashes: {
+                config: '87aca8fdb053154f11383fce3dbf3edf',
+                foo: '18c78c995965207ed3f6e7fc5c6e55fe',
+                migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+                namespace: '2f4316de49999235636386fe51dc06c1',
+                type: '2f4316de49999235636386fe51dc06c1',
+                updated_at: '00da57df13e94e9d98437d13ace4bfe0',
               },
             },
             properties: {
@@ -163,13 +163,13 @@ describe('IndexMigrator', () => {
           doc: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingHash: {
-                config: '73cde85b5dab11cb777920da77f7c854',
-                foo: '048823ffe9b30007442525d6207e6771',
-                migrationVersion: 'f34c5b14d1b6e49dbb0dd2e3c97cb02c',
-                namespace: '52431400f7dca8fce271660a55aa04c9',
-                type: '52431400f7dca8fce271660a55aa04c9',
-                updated_at: '6952c7bde132cc86c181e2be99366b37',
+              migrationMappingPropertyHashes: {
+                config: '87aca8fdb053154f11383fce3dbf3edf',
+                foo: '625b32086eb1d1203564cf85062dd22e',
+                migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+                namespace: '2f4316de49999235636386fe51dc06c1',
+                type: '2f4316de49999235636386fe51dc06c1',
+                updated_at: '00da57df13e94e9d98437d13ace4bfe0',
               },
             },
             properties: {

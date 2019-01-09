@@ -52,7 +52,7 @@ describe('diffMappings', () => {
     const actual: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {},
@@ -61,7 +61,7 @@ describe('diffMappings', () => {
     const expected: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar', baz: 'qux' },
+          migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
         },
         dynamic: 'strict',
         properties: {},
@@ -75,7 +75,7 @@ describe('diffMappings', () => {
     const actual: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar', baz: 'qux' },
+          migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
         },
         dynamic: 'strict',
         properties: {},
@@ -84,7 +84,7 @@ describe('diffMappings', () => {
     const expected: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {},
@@ -98,7 +98,7 @@ describe('diffMappings', () => {
     const actual: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {
@@ -109,7 +109,7 @@ describe('diffMappings', () => {
     const expected: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {
@@ -125,7 +125,7 @@ describe('diffMappings', () => {
     const actual: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {},
@@ -134,7 +134,7 @@ describe('diffMappings', () => {
     const expected: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'baz' },
+          migrationMappingPropertyHashes: { foo: 'baz' },
         },
         dynamic: 'strict',
         properties: {},
@@ -148,7 +148,7 @@ describe('diffMappings', () => {
     const actual: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {},
@@ -157,7 +157,7 @@ describe('diffMappings', () => {
     const expected: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'abcde',
         properties: {},
@@ -167,7 +167,7 @@ describe('diffMappings', () => {
     expect(diffMappings(actual, expected)!.changedProp).toEqual('doc.dynamic');
   });
 
-  test('is different if migrationMappingHash is missing from actual', () => {
+  test('is different if migrationMappingPropertyHashes is missing from actual', () => {
     const actual: IndexMapping = {
       doc: {
         _meta: {},
@@ -178,7 +178,7 @@ describe('diffMappings', () => {
     const expected: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {},
@@ -198,7 +198,7 @@ describe('diffMappings', () => {
     const expected: IndexMapping = {
       doc: {
         _meta: {
-          migrationMappingHash: { foo: 'bar' },
+          migrationMappingPropertyHashes: { foo: 'bar' },
         },
         dynamic: 'strict',
         properties: {},
