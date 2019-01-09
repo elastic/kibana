@@ -56,16 +56,6 @@ export interface TransactionV1 extends APMDocV1 {
     };
     type: string;
   };
-  kubernetes?: {
-    pod: {
-      uid: string;
-    };
-  };
-  docker?: {
-    container: {
-      id: string;
-    };
-  };
 }
 
 export interface TransactionV2 extends APMDocV2 {
