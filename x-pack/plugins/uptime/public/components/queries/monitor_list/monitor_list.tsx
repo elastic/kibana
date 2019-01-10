@@ -51,13 +51,13 @@ const monitorListColumns = [
     sortable: true,
   },
   {
-    field: 'ping.monitor.host',
-    name: 'Host',
+    field: 'ping.monitor.id',
+    name: 'ID',
     render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
   },
   {
-    field: 'key.port',
-    name: 'Port',
+    field: 'ping.url.full',
+    name: 'URL',
     sortable: true,
   },
   {
@@ -65,7 +65,6 @@ const monitorListColumns = [
     name: 'Type',
     sortable: true,
   },
-  { field: 'ping.monitor.ip', name: 'IP', sortable: true },
   {
     field: 'upSeries',
     name: 'Monitor History',
