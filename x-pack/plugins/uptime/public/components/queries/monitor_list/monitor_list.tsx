@@ -7,9 +7,9 @@
 import {
   EuiHealth,
   // @ts-ignore missing type definition
-  EuiInMemoryTable,
+  EuiHistogramSeries,
   // @ts-ignore missing type definition
-  EuiLineSeries,
+  EuiInMemoryTable,
   EuiPanel,
   // @ts-ignore missing type definition
   EuiSeriesChart,
@@ -25,6 +25,7 @@ import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
 import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
+import { formatSparklineCounts } from './format_sparkline_counts';
 import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
@@ -101,27 +102,25 @@ const monitorListColumns = [
       return (
         <EuiSeriesChart
           showDefaultAxis={false}
-          width={160}
           height={70}
+          stackBy="y"
+          // TODO: style hack
+          style={{ marginBottom: '-20px' }}
           xType={EuiSeriesChartUtils.SCALE.TIME}
         >
-          <EuiLineSeries
-            lineSize={2}
-            color="green"
+          <EuiHistogramSeries
+            data={formatSparklineCounts(upSeries)}
             name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
               defaultMessage: 'Up',
             })}
-            data={upSeries}
-            showLineMarks={true}
+            color="green"
           />
-          <EuiLineSeries
-            lineSize={2}
-            color="red"
+          <EuiHistogramSeries
+            data={formatSparklineCounts(downSeries)}
             name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
               defaultMessage: 'Down',
             })}
-            data={downSeries}
-            showLineMarks={true}
+            color="red"
           />
         </EuiSeriesChart>
       );
