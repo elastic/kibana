@@ -1,0 +1,15 @@
+/**
+ * 1. Override EUI styles.
+ */
+.rollupJobWizardPage {
+  max-width: 1000px !important;
+  /* 1 */
+  width: 100% !important;
+  /* 1 */ }
+
+.rollupJobWizardStepActions {
+  -webkit-box-align: end;
+  -webkit-align-items: flex-end;
+      -ms-flex-align: end;
+          align-items: flex-end; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNydWRfYXBwL19jcnVkX2FwcC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOztHQUVHO0FBQ0g7RUFDRSw2QkFBNEI7RUFBRSxPQUFPO0VBQ3JDLHVCQUFzQjtFQUFFLE9BQU8sRUFDaEM7O0FBRUQ7RUFDRSx1QkFBcUI7RUFBckIsOEJBQXFCO01BQXJCLG9CQUFxQjtVQUFyQixzQkFBcUIsRUFDdEIiLCJmaWxlIjoidG8uY3NzIn0= */
