@@ -44,12 +44,11 @@
     </div>
   </kbn-top-nav>
 
-  <!-- Filters. -->
-  <filter-bar
-    ng-show="showFilterBar()"
-    state="state"
-    index-patterns="indexPatterns"
-  ></filter-bar>
+  <apply-filters-popover
+    filters="appState.$newFilters"
+    on-cancel="onCancelApplyFilters"
+    on-submit="onApplyFilters"
+  ></apply-filters-popover>
 
   <div
     ng-show="getShouldShowEditHelp()"

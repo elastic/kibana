@@ -236,6 +236,21 @@ app.directive('dashboardApp', function ($injector) {
         queryFilter.setFilters(filters);
       };
 
+      $scope.onCancelApplyFilters = () => {
+        $scope.appState.$newFilters = [];
+      };
+
+      $scope.onApplyFilters = filters => {
+        queryFilter.addFiltersAndChangeTimeFilter(filters);
+        $scope.appState.$newFilters = [];
+      };
+
+      $scope.$watch('appState.$newFilters', (filters = []) => {
+        if (filters.length === 1) {
+          $scope.onApplyFilters(filters);
+        }
+      });
+
       updateTheme();
 
       $scope.indexPatterns = [];
