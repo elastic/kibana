@@ -13,3 +13,5 @@ export const ANOMALIES_TABLE_TABS = {
   DETAILS: 0,
   CATEGORY_EXAMPLES: 1
 };
+
+export const MAX_CHARS = 500;
