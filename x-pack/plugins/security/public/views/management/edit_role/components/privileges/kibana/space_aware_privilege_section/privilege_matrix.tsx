@@ -22,23 +22,21 @@ import {
   // @ts-ignore
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Table } from 'react-virtualized';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
-import {
-  EffectivePrivileges,
-  PRIVILEGE_SOURCE,
-} from '../../../../../../../lib/effective_privileges';
-import { PrivilegeDisplay, SupercededPrivilegeDisplay } from './privilege_display';
+import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
+import { PrivilegeDisplay } from './privilege_display';
 
 interface Props {
   role: Role;
   spaces: Space[];
   features: Feature[];
   effectivePrivileges: EffectivePrivileges;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -74,12 +72,14 @@ export class PrivilegeMatrix extends Component<Props, State> {
         <EuiOverlayMask>
           <EuiModal onClose={this.hideModal}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Privilege summary matrix</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>
+                <FormattedMessage id="foo" defaultMessage="Privilege summary matrix" />
+              </EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>{this.renderTable()}</EuiModalBody>
             <EuiModalFooter>
               <EuiButton onClick={this.hideModal} fill>
-                Close
+                <FormattedMessage id="foo" defaultMessage="Close" />
               </EuiButton>
             </EuiModalFooter>
           </EuiModal>
@@ -89,14 +89,16 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty onClick={this.showModal}>Show privilege summary</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={this.showModal}>
+          <FormattedMessage id="foo" defaultMessage="Show privilege summary" />
+        </EuiButtonEmpty>
         {modal}
       </Fragment>
     );
   }
 
   private renderTable = () => {
-    const { role, features } = this.props;
+    const { role, features, intl } = this.props;
 
     const spacePrivileges = role.kibana;
 
@@ -123,10 +125,10 @@ export class PrivilegeMatrix extends Component<Props, State> {
         feature: {
           id: '*base*',
           isBase: true,
-          name: 'Base privilege',
+          name: intl.formatMessage({ id: 'foo', defaultMessage: 'Base privilege' }),
           privileges: {},
         },
-        tooltip: 'something goes here',
+        tooltip: intl.formatMessage({ id: 'foo', defaultMessage: 'something goes here' }),
         role,
       },
       ...features.map(feature => ({
@@ -141,7 +143,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
     const columns = [
       {
         field: 'feature',
-        name: 'Feature',
+        name: intl.formatMessage({ id: 'foo', defaultMessage: 'Feature' }),
         render: (feature: Feature & { isBase: boolean }) => {
           return feature.isBase ? (
             <Fragment>
@@ -152,7 +154,10 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 //   className: 'eui-alignTop',
                 // }}
                 type="questionInCircle"
-                content="Lowest level privilege allowed"
+                content={intl.formatMessage({
+                  id: 'foo',
+                  defaultMessage: 'Lowest privilege level allowed',
+                })}
                 color="subdued"
               />
             </Fragment>
@@ -210,15 +215,12 @@ export class PrivilegeMatrix extends Component<Props, State> {
       <EuiInMemoryTable
         columns={columns}
         items={rows}
-        // TODO: FIX the ts-ignores
-        // @ts-ignore
-        rowProps={item => {
+        rowProps={(item: TableRow) => {
           return {
             className: item.feature.isBase ? 'secPrivilegeMatrix__row--isBasePrivilege' : '',
           };
         }}
-        // @ts-ignore
-        cellProps={item => {
+        cellProps={(item: any) => {
           // TODO: FIX THIS TO ACTUALLY WORK
           return {
             className: item.isGlobal ? 'secPrivilegeMatrix__cell--isGlobalPrivilege' : '',
