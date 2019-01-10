@@ -302,7 +302,7 @@ export function VislibLibDataProvider(Private) {
       _.forEach(array, function (obj) {
         names.push({
           label: obj.name,
-          values: obj,
+          values: [obj.rawData],
           index: index
         });
 

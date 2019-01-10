@@ -39,6 +39,7 @@ export function getAspects(table, dimensions) {
       if (!aspects[name]) aspects[name] = [];
       aspects[name].push({
         accessor: column.id,
+        column: d.accessor,
         title: column.name,
         fieldFormatter: val => formatter.convert(val, 'text'),
         params: d.params,

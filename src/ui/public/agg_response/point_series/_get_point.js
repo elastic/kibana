@@ -32,31 +32,31 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
     yScale: yScale,
     seriesRaw: series && {
       table,
-      column: series[0].accessor,
+      column: series[0].column,
       row: rowIndex,
       value: row[series[0].accessor],
     },
     xRaw: {
       table,
-      column: x.accessor,
+      column: x.column,
       row: rowIndex,
       value: xRow,
     },
     yRaw: {
       table,
-      column: y.accessor,
+      column: y.column,
       row: rowIndex,
       value: yRow,
     },
     zRaw: z && {
       table,
-      column: z.accessor,
+      column: z.column,
       row: rowIndex,
       value: zRow,
     },
     tableRaw: table.$parent && {
       table: table.$parent.table,
-      column: table.$parent.table.columns[table.$parent.column].id,
+      column: table.$parent.column,
       row: table.$parent.row,
       value: table.$parent.key,
     },
@@ -71,7 +71,6 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
 
   if (series) {
     const seriesArray = series.length ? series : [ series ];
-    //point.aggConfig = seriesArray[0].aggConfig;
     point.series = seriesArray.map(s => s.fieldFormatter(row[s.accessor])).join(' - ');
   } else if (y) {
     // If the data is not split up with a series aspect, then

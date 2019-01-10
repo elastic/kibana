@@ -170,7 +170,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     if (!isHierarchical || agg.type.type !== 'metrics') {
       schemas[schemaName]!.push(createSchemaConfig(cnt++, agg));
     }
-    if (isHierarchical && agg.type.type !== 'metrics') {
+    if ((isHierarchical && agg.type.type !== 'metrics') || metrics.length === responseAggs.length) {
       metrics.forEach((metric: any) => {
         schemas.metric.push(createSchemaConfig(cnt++, metric));
       });

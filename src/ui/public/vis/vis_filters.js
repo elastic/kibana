@@ -90,19 +90,18 @@ const VisFiltersProvider = (Private, getAppState) => {
     const appState = getAppState();
     if (filters.length && !simulate) {
       const flatFilters = _.flatten(filters);
-      filterBarPushFilters(appState)(flatFilters.filter((v, i) => i === flatFilters.findIndex(f => _.isEqual(v, f))));
+      const deduplicatedFilters = flatFilters.filter((v, i) => i === flatFilters.findIndex(f => _.isEqual(v, f)));
+      filterBarPushFilters(appState)(deduplicatedFilters);
     }
   };
 
   const filter = (event, { simulate = false } = {}) => {
-    const data = event.datum;
+    const dataPoints = event.data;
     const filters = [];
 
-    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
-      if (!data[val]) return;
-      const { table, column, row, value } = data[val];
-      const columnIndex = table.columns.findIndex(c => c.id === column);
-      const filter = createFilter(table, columnIndex, row, value);
+    dataPoints.forEach(val => {
+      const { table, column, row, value } = val;
+      const filter = createFilter(table, column, row, value);
       if (filter) {
         if (event.negate) {
           filter.forEach(f => f.meta.negate = !f.meta.negate);
@@ -115,32 +114,6 @@ const VisFiltersProvider = (Private, getAppState) => {
     return filters;
   };
 
-  const pieFilter = event => {
-    let data = event.datum;
-    const filters = [];
-    while (data && data.rawData) {
-      const { table, column, row, value } = data.rawData;
-      const filter = createFilter(table, column, row, value);
-      if (event.negate) {
-        filter.forEach(f => f.meta.negate = !f.meta.negate);
-      }
-      filter.forEach(f => filters.push(f));
-      data = data.parent;
-    }
-
-    if (event.datum.rawData.table.$parent && event.data) {
-      const { table, column, row, key } = event.datum.rawData.table.$parent;
-      const filter = createFilter(table, column, row, key);
-      if (event.negate) {
-        filter.forEach(f => f.meta.negate = !f.meta.negate);
-      }
-      filter.forEach(f => filters.push(f));
-    }
-
-    pushFilters(filters, false);
-    return filters;
-  };
-
   const addFilter = (event) => {
     const filter = createFilter(event.table, event.column, event.row, event.value);
     queryFilter.addFilters(filter);
@@ -149,7 +122,6 @@ const VisFiltersProvider = (Private, getAppState) => {
   return {
     addFilter,
     filter,
-    pieFilter,
     brush: (event) => {
       onBrushEvent(event, getAppState());
     },

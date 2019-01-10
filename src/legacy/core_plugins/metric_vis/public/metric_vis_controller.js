@@ -126,8 +126,6 @@ export class MetricVisComponent extends Component {
         if (bucketColumnId) {
           const bucketValue = this._getFormattedValue(bucketFormatter, row[bucketColumnId]);
           title = `${bucketValue} - ${title}`;
-        } else {
-          title = title;
         }
 
         const shouldColor = config.colorsRange.length > 1;

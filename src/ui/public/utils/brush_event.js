@@ -28,7 +28,7 @@ export function onBrushEvent(event, $state) {
 
   if (!_.get(event.data, 'series[0].values[0].xRaw')) return;
   const xRaw = event.data.series[0].values[0].xRaw;
-  const column = xRaw.table.columns.find(column => column.id === xRaw.column);
+  const column = xRaw.table.columns[xRaw.column];
   if (!column) return;
   const indexPattern = column.aggConfig.getIndexPattern();
   const field = column.aggConfig.params.field;

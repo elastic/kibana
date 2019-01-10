@@ -124,7 +124,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
       }
       opts.events = defaultsDeep({}, opts.events, {
         filterBucket: {
-          defaultAction: opts.name === 'pie' ? visFilters.pieFilter : visFilters.filter,
+          defaultAction: visFilters.filter,
         },
         brush: {
           defaultAction: visFilters.brush,

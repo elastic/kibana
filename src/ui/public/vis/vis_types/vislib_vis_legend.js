@@ -102,11 +102,11 @@ uiModules.get('kibana')
         };
 
         $scope.filter = function (legendData, negate) {
-          $scope.vis.API.events.filter({ datum: legendData.values, negate: negate });
+          $scope.vis.API.events.filter({ data: legendData.values, negate: negate });
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = visFilters.filter({ datum: legendData.values }, { simulate: true });
+          const filters = visFilters.filter({ data: legendData.values }, { simulate: true });
           return filters.length;
         };
 
@@ -177,9 +177,7 @@ uiModules.get('kibana')
           return _.compact(_.uniq(values, 'label')).map(label => {
             return {
               ...label,
-              values: {
-                seriesRaw: label.values[0].seriesRaw,
-              }
+              values: [label.values[0].seriesRaw],
             };
           });
         }

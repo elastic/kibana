@@ -39,6 +39,48 @@ export function VislibLibDispatchProvider(Private, config) {
       this._listeners = {};
     }
 
+    pieClickResponse(data) {
+      const points = [];
+
+      let dataPointer = data;
+      while (dataPointer && dataPointer.rawData) {
+        points.push(dataPointer.rawData);
+        dataPointer = dataPointer.parent;
+      }
+
+      if (data.rawData.table.$parent) {
+        const { table, column, row, key } = data.rawData.table.$parent;
+        points.push({ table, column, row, value: key });
+      }
+
+      return points;
+    }
+
+    seriesClickResponse(data) {
+      const points = [];
+
+      ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
+        if (data[val]) {
+          points.push(data[val]);
+        }
+      });
+
+      return points;
+    }
+
+    clickEventResponse(d) {
+      const _data = d3.event.target.nearestViewportElement ?
+        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
+      const isSlices = !!(_data && _data.slices);
+
+      const data = d.input || d;
+
+      return {
+        e: d3.event,
+        data: isSlices ? this.pieClickResponse(data) : this.seriesClickResponse(data),
+      };
+    }
+
     /**
      * Response to click and hover events
      *
@@ -154,8 +196,8 @@ export function VislibLibDispatchProvider(Private, config) {
       const self = this;
       const addEvent = this.addEvent;
 
-      function click(d, i) {
-        self.emit('click', self.eventResponse(d, i));
+      function click(d) {
+        self.emit('click', self.clickEventResponse(d));
       }
 
       return addEvent('click', click);
