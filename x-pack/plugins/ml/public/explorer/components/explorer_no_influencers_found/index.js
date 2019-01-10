@@ -8,23 +8,4 @@
  * React component for rendering EuiEmptyPrompt when no influencers were found.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiEmptyPrompt } from '@elastic/eui';
-
-export const ExplorerNoInfluencersFound = ({ swimlaneViewByFieldName }) => (
-  <EuiEmptyPrompt
-    iconType="alert"
-    titleSize="xs"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.ml.explorer.noInfluencersFoundTitle"
-          defaultMessage="No {swimlaneViewByFieldName} influencers found"
-          values={{ swimlaneViewByFieldName }}
-        />
-      </h2>
-    }
-  />
-);
+export * from './explorer_no_influencers_found';
