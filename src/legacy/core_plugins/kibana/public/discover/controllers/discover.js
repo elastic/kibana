@@ -65,6 +65,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+import { uiCapabilityRouteSetup } from 'ui/capabilities';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -81,8 +82,9 @@ uiRoutes
         $route.current.params.id
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
-      )
+      ),
   })
+  .addSetupWork(uiCapabilityRouteSetup('discover.show'))
   .when('/discover/:id?', {
     template: indexTemplate,
     reloadOnSearch: false,
@@ -137,12 +139,6 @@ uiRoutes
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));
-      },
-      redirect: function (uiCapabilities, kbnBaseUrl) {
-        if (!uiCapabilities.discover.show) {
-          const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
-          window.location.href = url;
-        }
       }
     }
   });

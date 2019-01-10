@@ -17,5 +17,15 @@
  * under the License.
  */
 
-export { uiCapabilityRouteSetup } from './route_setup';
-export { uiCapabilities, UICapabilities } from './ui_capabilities';
+import { get } from 'lodash';
+import chrome from 'ui/chrome';
+import { UICapabilities } from './ui_capabilities';
+
+export const uiCapabilityRouteSetup = (uiCapability: string) => {
+  return (uiCapabilities: UICapabilities, kbnBaseUrl: string) => {
+    if (!get(uiCapabilities, uiCapability)) {
+      const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
+      window.location.href = url;
+    }
+  };
+};
