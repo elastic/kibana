@@ -25,7 +25,7 @@ export function CPUUsageChart({ data, hoverXHandlers }: Props) {
       <EuiTitle size="s">
         <span>
           {i18n.translate(
-            'xpack.apm.serviceDetails.metrics.cpuUsageChartLabel',
+            'xpack.apm.serviceDetails.metrics.cpuUsageChartTitle',
             {
               defaultMessage: 'CPU usage'
             }

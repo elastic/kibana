@@ -25,7 +25,7 @@ export function MemoryUsageChart({ data, hoverXHandlers }: Props) {
       <EuiTitle size="s">
         <span>
           {i18n.translate(
-            'xpack.apm.serviceDetails.metrics.memoryUsageChartLabel',
+            'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
             {
               defaultMessage: 'Memory usage'
             }

@@ -258,7 +258,7 @@ export class WatcherFlyout extends Component<
             hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
           >
             {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkLabel',
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
               {
                 defaultMessage: 'View watch'
               }
@@ -302,7 +302,7 @@ export class WatcherFlyout extends Component<
               documentationLink: (
                 <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
                   {i18n.translate(
-                    'xpack.apm.serviceDetails.enableErrorReportsPanel.formDescription.documentationLinkLabel',
+                    'xpack.apm.serviceDetails.enableErrorReportsPanel.formDescription.documentationLinkText',
                     {
                       defaultMessage: 'documentation'
                     }
@@ -316,7 +316,7 @@ export class WatcherFlyout extends Component<
         <EuiForm>
           <h3>
             {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.conditionHeader',
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.conditionTitle',
               {
                 defaultMessage: 'Condition'
               }
@@ -348,7 +348,7 @@ export class WatcherFlyout extends Component<
 
           <h3>
             {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleHeader',
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleTitle',
               {
                 defaultMessage: 'Trigger schedule'
               }
@@ -467,7 +467,7 @@ export class WatcherFlyout extends Component<
 
           <h3>
             {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsHeader',
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsTitle',
               {
                 defaultMessage: 'Actions'
               }
@@ -484,7 +484,7 @@ export class WatcherFlyout extends Component<
           </p>
           <EuiSwitch
             label={i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.sendEmailSwitchLabel',
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.sendEmailLabel',
               {
                 defaultMessage: 'Send email'
               }
@@ -534,7 +534,7 @@ export class WatcherFlyout extends Component<
 
           <EuiSwitch
             label={i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationSwitchLabel',
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationLabel',
               {
                 defaultMessage: 'Send Slack notification'
               }
@@ -594,7 +594,7 @@ export class WatcherFlyout extends Component<
           <EuiTitle>
             <h2>
               {i18n.translate(
-                'xpack.apm.serviceDetails.enableErrorReportsPanel.enableErrorReportsHeader',
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.enableErrorReportsTitle',
                 {
                   defaultMessage: 'Enable error reports'
                 }

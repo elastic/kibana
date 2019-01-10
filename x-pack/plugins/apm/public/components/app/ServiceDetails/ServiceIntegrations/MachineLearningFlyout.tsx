@@ -207,7 +207,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                 <EuiTitle>
                   <h2>
                     {i18n.translate(
-                      'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.enableAnomalyDetectionHeader',
+                      'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.enableAnomalyDetectionTitle',
                       {
                         defaultMessage: 'Enable anomaly detection'
                       }
@@ -265,7 +265,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                       title={
                         <span>
                           <FormattedMessage
-                            id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternNotificationMessage"
+                            id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle"
                             defaultMessage="No APM index pattern available. To create a job, please import the APM index pattern via the {setupInstructionLink}"
                             values={{
                               setupInstructionLink: (
@@ -274,7 +274,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                                   hash={`/home/tutorial/apm`}
                                 >
                                   {i18n.translate(
-                                    'xpack.apm.serviceDetails.enableErrorReportsPanel.callout.noPatternNotificationMessage.setupInstructionLinkText',
+                                    'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle.setupInstructionLinkText',
                                     {
                                       defaultMessage: 'Setup Instructions'
                                     }
@@ -304,7 +304,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                         transactionDurationGraphText: (
                           <b>
                             {i18n.translate(
-                              'xpack.apm.serviceDetails.enableErrorReportsPanel.createMLJobDescription.transactionDurationGraphText',
+                              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.transactionDurationGraphText',
                               {
                                 defaultMessage: 'the transaction duration graph'
                               }
@@ -323,7 +323,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                         mlJobsPageLink: (
                           <KibanaLink pathname={'/app/ml'}>
                             {i18n.translate(
-                              'xpack.apm.serviceDetails.enableErrorReportsPanel.manageMLJobDescription.mlJobsPageLinkText',
+                              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
                               {
                                 defaultMessage:
                                   'Machine Learning jobs management page'
@@ -335,7 +335,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                     />{' '}
                     <em>
                       {i18n.translate(
-                        'xpack.apm.serviceDetails.enableErrorReportsPanel.manageMLJobDescription.noteText',
+                        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.noteText',
                         {
                           defaultMessage:
                             'Note: It might take a few minutes for the job to begin calculating results.'
@@ -374,7 +374,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                         disabled={isLoading || hasMLJob || !hasIndexPattern}
                       >
                         {i18n.translate(
-                          'xpack.apm.serviceDetails.enableErrorReportsPanel.createNewJobButtonLabel',
+                          'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',
                           {
                             defaultMessage: 'Create new job'
                           }
