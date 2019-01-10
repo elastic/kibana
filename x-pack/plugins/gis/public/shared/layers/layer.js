@@ -196,5 +196,9 @@ export class ALayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
   }
 
+  getIndexPatternIds() {
+    return  [];
+  }
+
 }
 
