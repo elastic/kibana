@@ -29,18 +29,26 @@ const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
 const mkdirpAsync = promisify(mkdirp);
 
+const DARK_THEME_IMPORTER = (url) => {
+  if (url.includes('k6_colors_light')) {
+    return { file: url.replace('k6_colors_light', 'k6_colors_dark') };
+  }
+
+  return { file: url };
+};
+
 export class Build {
-  constructor(source, log, targetPath) {
-    this.source = source;
+  constructor({ sourcePath, log, targetPath, theme }) {
+    this.sourcePath = sourcePath;
     this.log = log;
     this.targetPath = targetPath;
-    this.includedFiles = [source];
+    this.theme = theme;
+    this.includedFiles = [sourcePath];
   }
 
   /**
    * Glob based on source path
    */
-
   async buildIfIncluded(path) {
     if (this.includedFiles && this.includedFiles.includes(path)) {
       await this.build();
@@ -56,22 +64,23 @@ export class Build {
 
   async build() {
     const rendered = await renderSass({
-      file: this.source,
+      file: this.sourcePath,
       outFile: this.targetPath,
       sourceMap: true,
       sourceMapEmbed: true,
       includePaths: [
         path.resolve(__dirname, '../..'),
-        path.resolve(__dirname, '../../../node_modules')
-      ]
+        path.resolve(__dirname, '../../../node_modules'),
+      ],
+      importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined
     });
 
     const prefixed = postcss([ autoprefixer ]).process(rendered.css);
 
-    this.includedFiles = rendered.stats.includedFiles;
-
     await mkdirpAsync(path.dirname(this.targetPath));
     await writeFile(this.targetPath, prefixed.css);
+
+    this.includedFiles = rendered.stats.includedFiles;
 
     return this;
   }

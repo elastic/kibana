@@ -17,21 +17,21 @@
  * under the License.
  */
 
-const theme = require('../theme');
+import chrome from 'ui/chrome';
 
 // Kibana UI Framework
-require('@kbn/ui-framework/dist/kui_light.css');
+import '@kbn/ui-framework/dist/kui_light.css';
 
-// Elastic UI Framework, light theme
-const euiThemeLight = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6_light.css');
-theme.registerTheme('light', euiThemeLight);
+// EUI Light/Dark theme
+import lightTheme from '!!raw-loader!@elastic/eui/dist/eui_theme_k6_light.css';
+import darkTheme from '!!raw-loader!@elastic/eui/dist/eui_theme_k6_dark.css';
 
-// Elastic UI Framework, dark theme
-const euiThemeDark = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6_dark.css');
-theme.registerTheme('dark', euiThemeDark);
-
-// Set default theme.
-theme.applyTheme('light');
+const styleNode = document.getElementById('themeCss');
+if (styleNode) {
+  styleNode.textContent = chrome.getUiSettingsClient().get('theme:darkMode')
+    ? darkTheme
+    : lightTheme;
+}
 
 // All Kibana styles inside of the /styles dir
 const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.)[^\/\\]+\.less/);

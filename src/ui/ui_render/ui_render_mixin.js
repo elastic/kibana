@@ -20,6 +20,7 @@
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
@@ -65,6 +66,9 @@ export function uiRenderMixin(kbnServer, server, config) {
         throw Boom.notFound(`Unknown app: ${id}`);
       }
 
+      const uiSettings = request.getUiSettingsService();
+      const darkMode = await uiSettings.get('theme:darkMode');
+
       const basePath = config.get('server.basePath');
       const regularBundlePath = `${basePath}/bundles`;
       const dllBundlePath = `${basePath}/built_assets/dlls`;
@@ -73,6 +77,9 @@ export function uiRenderMixin(kbnServer, server, config) {
         `${regularBundlePath}/commons.style.css`,
         `${regularBundlePath}/${app.getId()}.style.css`,
         ...kbnServer.uiExports.styleSheetPaths
+          .filter(path => (
+            path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+          ))
           .map(path => (
             path.localPath.endsWith('.scss')
               ? `${basePath}/built_assets/css/${path.publicPath}`
@@ -147,11 +154,20 @@ export function uiRenderMixin(kbnServer, server, config) {
     const translations = await server.getUiTranslations();
     const basePath = request.getBasePath();
 
+    const legacyMetadata = await getLegacyKibanaPayload({
+      app,
+      translations,
+      request,
+      includeUserProvidedConfig,
+      injectedVarsOverrides
+    });
+
     return h.view('ui_app', {
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
       locale: i18n.getLocale(),
+      darkMode: get(legacyMetadata.uiSettings.user, ['theme:darkMode', 'userValue'], false),
 
       injectedMetadata: {
         version: kbnServer.version,
@@ -166,13 +182,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           ),
         ),
 
-        legacyMetadata: await getLegacyKibanaPayload({
-          app,
-          translations,
-          request,
-          includeUserProvidedConfig,
-          injectedVarsOverrides
-        }),
+        legacyMetadata,
       },
     });
   }
