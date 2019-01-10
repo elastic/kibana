@@ -17,34 +17,35 @@
  * under the License.
  */
 
-import path from 'path';
-import sass from 'node-sass';
+import { resolve } from 'path';
+import { readFileSync } from 'fs';
+
+import del from 'del';
+
 import { Build } from './build';
 
-jest.mock('node-sass');
+const TMP = resolve(__dirname, '__tmp__');
+const FIXTURE = resolve(__dirname, '__fixtures__/index.scss');
 
-describe('SASS builder', () => {
-  jest.mock('fs');
+afterEach(async () => {
+  await del(TMP);
+});
 
-  it('generates a glob', () => {
-    const builder = new Build('/foo/style.sass');
-    expect(builder.getGlob()).toEqual(path.join('/foo', '**', '*.s{a,c}ss'));
-  });
+it('builds SASS', async () => {
+  const cssPath = resolve(TMP, 'style.css');
+  await (new Build(FIXTURE, {
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+  }, cssPath)).build();
 
-  it('builds SASS', () => {
-    sass.render.mockImplementation(() => Promise.resolve(null, { css: 'test' }));
-    const builder = new Build('/foo/style.sass');
-    builder.build();
-
-    const sassCall = sass.render.mock.calls[0][0];
-    expect(sassCall.file).toEqual('/foo/style.sass');
-    expect(sassCall.outFile).toEqual(path.join('/foo', 'style.css'));
-    expect(sassCall.sourceMap).toBe(true);
-    expect(sassCall.sourceMapEmbed).toBe(true);
-  });
-
-  it('has an output file with a different extension', () => {
-    const builder = new Build('/foo/style.sass');
-    expect(builder.outputPath()).toEqual(path.join('/foo', 'style.css'));
-  });
+  expect(readFileSync(cssPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
+    .toMatchInlineSnapshot(`
+"foo bar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+/*# sourceMappingURL=... */"
+`);
 });

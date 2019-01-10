@@ -8,7 +8,10 @@ import { events as esqueueEvents } from './esqueue';
 import { oncePerServer } from './once_per_server';
 
 function createWorkersFn(server) {
-  const queueConfig = server.config().get('xpack.reporting.queue');
+  const config = server.config();
+  const queueConfig = config.get('xpack.reporting.queue');
+  const kibanaName = config.get('server.name');
+  const kibanaId = config.get('server.uuid');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
   // Once more document types are added, this will need to be passed in
@@ -25,6 +28,8 @@ function createWorkersFn(server) {
         return executeJob(payload, cancellationToken);
       };
       const workerOptions = {
+        kibanaName,
+        kibanaId,
         interval: queueConfig.pollInterval,
         intervalErrorMultiplier: queueConfig.pollIntervalErrorMultiplier,
       };
