@@ -54,15 +54,11 @@ describe('TaskStore', () => {
         supportedTypes: ['a', 'b', 'c'],
       });
 
-      try {
-        await store.init();
-      } catch (err) {
-        expect(err.message).toBe(
-          `Template version ${getTemplateVersion(
-            xPackage.version
-          )} could not be saved: existing template version Infinity is newer!`
-        );
-      }
+      await expect(store.init()).rejects.toMatchObject({
+        message: `Template version ${getTemplateVersion(
+          xPackage.version
+        )} could not be saved: existing template version Infinity is newer!`,
+      });
     });
   });
 
