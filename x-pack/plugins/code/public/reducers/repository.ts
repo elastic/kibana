@@ -66,9 +66,8 @@ export const repository = handleActions(
         return state;
       }
     },
-    [String(deleteRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
+    [String(deleteRepoFinished)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, (draft: RepositoryState) => {
-        feature/merge-code
         draft.repositories = state.repositories.filter(repo => repo.uri !== action.payload);
       }),
     [String(importRepo)]: (state: RepositoryState) =>
