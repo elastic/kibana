@@ -774,6 +774,8 @@ export namespace GetTimelineQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
+    id?: string | null;
+
     name?: string | null;
 
     ip?: string | null;
