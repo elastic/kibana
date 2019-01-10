@@ -18,7 +18,7 @@ exports[`FeatureTable can render without spaces 1`] = `
   }
   items={Array []}
   pagination={false}
-  responsive={true}
+  responsive={false}
   sorting={false}
 />
 `;

@@ -172,7 +172,6 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 </span>
               ))}
               {item.headerSpaces.length !== item.spaces.length && (
-                // @ts-ignore
                 <EuiToolTip
                   content={
                     <EuiText size="s">
@@ -184,7 +183,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
                     </EuiText>
                   }
                 >
-                  {item.spaces.length - item.headerSpaces.length} more
+                  <span>{item.spaces.length - item.headerSpaces.length} more</span>
                 </EuiToolTip>
               )}
             </Fragment>

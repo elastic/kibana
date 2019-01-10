@@ -5,13 +5,12 @@
  */
 
 import {
-  EuiIcon,
   // @ts-ignore
+  EuiButtonGroup,
+  EuiIcon,
   EuiIconTip,
   // @ts-ignore
   EuiInMemoryTable,
-  // @ts-ignore
-  EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
@@ -73,10 +72,23 @@ export class FeatureTable extends Component<Props, {}> {
       role,
     }));
 
-    return <EuiInMemoryTable responsive={false} columns={this.getColumns()} items={items} />;
+    const { rankedFeaturePrivileges } = effectivePrivileges;
+    // TODO: This siimply grabs the available privileges from the first feature we encounter.
+    // As of now, features can have 'all' and 'read' as available privileges. Once that assumption breaks,
+    // this will need updating. This is a simplifying measure to enable the new UI.
+    const availablePrivileges = Object.values(rankedFeaturePrivileges)[0];
+
+    return (
+      <EuiInMemoryTable
+        responsive={false}
+        columns={this.getColumns(availablePrivileges)}
+        items={items}
+      />
+    );
   }
 
-  public onChange = (featureId: string) => (privilege: string) => {
+  public onChange = (featureId: string) => (featurePrivilegeId: string) => {
+    const privilege = featurePrivilegeId.substr(`${featureId}_`.length);
     if (privilege === NO_PRIVILEGE_VALUE) {
       this.props.onChange(featureId, []);
     } else {
@@ -84,7 +96,7 @@ export class FeatureTable extends Component<Props, {}> {
     }
   };
 
-  private getColumns = () => [
+  private getColumns = (availablePrivileges: string[]) => [
     {
       field: 'feature',
       name: this.props.intl.formatMessage({
@@ -183,39 +195,29 @@ export class FeatureTable extends Component<Props, {}> {
           return <PrivilegeDisplay privilege={actualPrivilegeValue} {...tipProps} />;
         }
 
-        const privilegeOptions = featurePrivileges.map(privilege => {
-          const isAllowedPrivilege = enabledFeaturePrivileges.includes(privilege);
+        const options = availablePrivileges.map(priv => {
           return {
-            disabled: !isAllowedPrivilege,
-            value: privilege,
-            inputDisplay: <PrivilegeDisplay privilege={privilege} styleMissingPrivilege={false} />,
-            dropdownDisplay: (
-              <PrivilegeDisplay privilege={privilege} styleMissingPrivilege={false} />
-            ),
+            id: `${featureId}_${priv}`,
+            label: _.capitalize(priv),
+            // TODO: Waiting on update from EUI
+            isDisabled: !enabledFeaturePrivileges.includes(priv),
           };
         });
 
+        options.push({
+          id: `${featureId}_${NO_PRIVILEGE_VALUE}`,
+          label: 'None',
+          // TODO: Waiting on update from EUI
+          isDisabled: !allowsNone,
+        });
+
         return (
-          <EuiSuperSelect
-            compressed
+          <EuiButtonGroup
+            name={`featurePrivilege_${featureId}`}
+            options={options}
+            idSelected={`${featureId}_${actualPrivilegeValue || NO_PRIVILEGE_VALUE}`}
             onChange={this.onChange(featureId)}
-            options={[
-              {
-                disabled: !allowsNone,
-                value: NO_PRIVILEGE_VALUE,
-                inputDisplay: (
-                  <PrivilegeDisplay privilege={NO_PRIVILEGE_VALUE} styleMissingPrivilege={false} />
-                ),
-                dropdownDisplay: (
-                  <EuiText>
-                    <strong>No privileges</strong>
-                  </EuiText>
-                ),
-              },
-              ...privilegeOptions,
-            ]}
-            hasDividers
-            valueOfSelected={actualPrivilegeValue || NO_PRIVILEGE_VALUE}
+            color={'primary'}
           />
         );
       },

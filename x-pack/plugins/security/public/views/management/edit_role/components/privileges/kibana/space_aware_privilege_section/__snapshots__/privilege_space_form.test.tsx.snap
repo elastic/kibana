@@ -8,29 +8,29 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
     maxWidth={true}
     onClose={[Function]}
     ownFocus={false}
-    size="s"
+    size="m"
   >
     <EuiFlyoutHeader
-      hasBorder={false}
+      hasBorder={true}
     >
       <EuiTitle
         size="m"
         textTransform="none"
       >
-        <h1>
+        <h2>
           <FormattedMessage
             defaultMessage="Spaces privileges"
             id="foo"
             values={Object {}}
           />
-        </h1>
+        </h2>
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <EuiForm>
         <EuiFormRow
           describedByIds={Array []}
-          fullWidth={false}
+          fullWidth={true}
           hasEmptyLabelSpace={false}
           label="Spaces"
         >
@@ -58,14 +58,13 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         </EuiFormRow>
         <EuiFormRow
           describedByIds={Array []}
-          fullWidth={false}
+          fullWidth={true}
           hasEmptyLabelSpace={false}
-          helpText="Default privilege for apps and settings not listed in the table below."
-          label="Base privilege"
+          label="Privilege"
         >
           <EuiSuperSelect
             compressed={false}
-            fullWidth={false}
+            fullWidth={true}
             hasDividers={true}
             onChange={[Function]}
             options={
@@ -79,7 +78,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                       Custom
                     </strong>
                     <p>
-                      Customize access to this space
+                      Customize access by feature. Defaults to none for features not listed in the table below.
                     </p>
                   </EuiText>,
                   "inputDisplay": <EuiText
@@ -137,164 +136,50 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             valueOfSelected="custom"
           />
         </EuiFormRow>
-        <EuiFormRow
-          describedByIds={Array []}
-          fullWidth={false}
-          hasEmptyLabelSpace={false}
-          label="Customize by feature"
+        <EuiSpacer
+          size="s"
+        />
+        <EuiTitle
+          size="xxs"
+          textTransform="none"
         >
-          <FeatureTable
-            disabled={false}
-            effectivePrivileges={
-              EffectivePrivileges {
-                "assignedGlobalBaseActions": Array [],
-                "globalPrivilege": Object {
-                  "base": Array [],
-                  "feature": Object {},
-                  "spaces": Array [],
-                },
-                "privilegeDefinition": PrivilegeDefinition {
-                  "privilegeActionMap": Object {
-                    "features": Object {},
-                    "global": Object {},
-                    "space": Object {},
-                  },
-                },
-                "rankedFeaturePrivileges": Object {},
-                "role": Object {
-                  "elasticsearch": Object {
-                    "cluster": Array [
-                      "all",
-                    ],
-                    "indices": Array [],
-                    "run_as": Array [],
-                  },
-                  "kibana": Array [
-                    Object {
-                      "base": Array [],
-                      "feature": Object {},
-                      "spaces": Array [],
-                    },
-                  ],
-                  "name": "test role",
-                },
-              }
-            }
-            features={Array []}
-            intl={
-              Object {
-                "defaultFormats": Object {},
-                "defaultLocale": "en",
-                "formatDate": [Function],
-                "formatHTMLMessage": [Function],
-                "formatMessage": [Function],
-                "formatNumber": [Function],
-                "formatPlural": [Function],
-                "formatRelative": [Function],
-                "formatTime": [Function],
-                "formats": Object {
-                  "date": Object {
-                    "full": Object {
-                      "day": "numeric",
-                      "month": "long",
-                      "weekday": "long",
-                      "year": "numeric",
-                    },
-                    "long": Object {
-                      "day": "numeric",
-                      "month": "long",
-                      "year": "numeric",
-                    },
-                    "medium": Object {
-                      "day": "numeric",
-                      "month": "short",
-                      "year": "numeric",
-                    },
-                    "short": Object {
-                      "day": "numeric",
-                      "month": "numeric",
-                      "year": "2-digit",
-                    },
-                  },
-                  "number": Object {
-                    "currency": Object {
-                      "style": "currency",
-                    },
-                    "percent": Object {
-                      "style": "percent",
-                    },
-                  },
-                  "relative": Object {
-                    "days": Object {
-                      "units": "day",
-                    },
-                    "hours": Object {
-                      "units": "hour",
-                    },
-                    "minutes": Object {
-                      "units": "minute",
-                    },
-                    "months": Object {
-                      "units": "month",
-                    },
-                    "seconds": Object {
-                      "units": "second",
-                    },
-                    "years": Object {
-                      "units": "year",
-                    },
-                  },
-                  "time": Object {
-                    "full": Object {
-                      "hour": "numeric",
-                      "minute": "numeric",
-                      "second": "numeric",
-                      "timeZoneName": "short",
-                    },
-                    "long": Object {
-                      "hour": "numeric",
-                      "minute": "numeric",
-                      "second": "numeric",
-                      "timeZoneName": "short",
-                    },
-                    "medium": Object {
-                      "hour": "numeric",
-                      "minute": "numeric",
-                      "second": "numeric",
-                    },
-                    "short": Object {
-                      "hour": "numeric",
-                      "minute": "numeric",
-                    },
-                  },
-                },
-                "formatters": Object {
-                  "getDateTimeFormat": [Function],
-                  "getMessageFormat": [Function],
-                  "getNumberFormat": [Function],
-                  "getPluralFormat": [Function],
-                  "getRelativeFormat": [Function],
-                },
-                "locale": "en",
-                "messages": Object {},
-                "now": [Function],
-                "onError": [Function],
-                "textComponent": Symbol(react.fragment),
-                "timeZone": null,
-              }
-            }
-            onChange={[Function]}
-            privilegeDefinition={
-              PrivilegeDefinition {
+          <h3>
+            Customize by feature
+          </h3>
+        </EuiTitle>
+        <EuiSpacer
+          size="xs"
+        />
+        <EuiText
+          grow={true}
+          size="s"
+        >
+          <p>
+            Increase privilege levels from base privilege on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="l"
+        />
+        <FeatureTable
+          disabled={false}
+          effectivePrivileges={
+            EffectivePrivileges {
+              "assignedGlobalBaseActions": Array [],
+              "globalPrivilege": Object {
+                "base": Array [],
+                "feature": Object {},
+                "spaces": Array [],
+              },
+              "privilegeDefinition": PrivilegeDefinition {
                 "privilegeActionMap": Object {
                   "features": Object {},
                   "global": Object {},
                   "space": Object {},
                 },
-              }
-            }
-            role={
-              Object {
+              },
+              "rankedFeaturePrivileges": Object {},
+              "role": Object {
                 "elasticsearch": Object {
                   "cluster": Array [
                     "all",
@@ -310,12 +195,144 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   },
                 ],
                 "name": "test role",
-              }
+              },
             }
-            showLocks={true}
-            spacesIndex={0}
-          />
-        </EuiFormRow>
+          }
+          features={Array []}
+          intl={
+            Object {
+              "defaultFormats": Object {},
+              "defaultLocale": "en",
+              "formatDate": [Function],
+              "formatHTMLMessage": [Function],
+              "formatMessage": [Function],
+              "formatNumber": [Function],
+              "formatPlural": [Function],
+              "formatRelative": [Function],
+              "formatTime": [Function],
+              "formats": Object {
+                "date": Object {
+                  "full": Object {
+                    "day": "numeric",
+                    "month": "long",
+                    "weekday": "long",
+                    "year": "numeric",
+                  },
+                  "long": Object {
+                    "day": "numeric",
+                    "month": "long",
+                    "year": "numeric",
+                  },
+                  "medium": Object {
+                    "day": "numeric",
+                    "month": "short",
+                    "year": "numeric",
+                  },
+                  "short": Object {
+                    "day": "numeric",
+                    "month": "numeric",
+                    "year": "2-digit",
+                  },
+                },
+                "number": Object {
+                  "currency": Object {
+                    "style": "currency",
+                  },
+                  "percent": Object {
+                    "style": "percent",
+                  },
+                },
+                "relative": Object {
+                  "days": Object {
+                    "units": "day",
+                  },
+                  "hours": Object {
+                    "units": "hour",
+                  },
+                  "minutes": Object {
+                    "units": "minute",
+                  },
+                  "months": Object {
+                    "units": "month",
+                  },
+                  "seconds": Object {
+                    "units": "second",
+                  },
+                  "years": Object {
+                    "units": "year",
+                  },
+                },
+                "time": Object {
+                  "full": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                    "timeZoneName": "short",
+                  },
+                  "long": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                    "timeZoneName": "short",
+                  },
+                  "medium": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                  },
+                  "short": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                  },
+                },
+              },
+              "formatters": Object {
+                "getDateTimeFormat": [Function],
+                "getMessageFormat": [Function],
+                "getNumberFormat": [Function],
+                "getPluralFormat": [Function],
+                "getRelativeFormat": [Function],
+              },
+              "locale": "en",
+              "messages": Object {},
+              "now": [Function],
+              "onError": [Function],
+              "textComponent": Symbol(react.fragment),
+              "timeZone": null,
+            }
+          }
+          onChange={[Function]}
+          privilegeDefinition={
+            PrivilegeDefinition {
+              "privilegeActionMap": Object {
+                "features": Object {},
+                "global": Object {},
+                "space": Object {},
+              },
+            }
+          }
+          role={
+            Object {
+              "elasticsearch": Object {
+                "cluster": Array [
+                  "all",
+                ],
+                "indices": Array [],
+                "run_as": Array [],
+              },
+              "kibana": Array [
+                Object {
+                  "base": Array [],
+                  "feature": Object {},
+                  "spaces": Array [],
+                },
+              ],
+              "name": "test role",
+            }
+          }
+          showLocks={true}
+          spacesIndex={0}
+        />
       </EuiForm>
     </EuiFlyoutBody>
     <EuiFlyoutFooter>
@@ -340,7 +357,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Close
+            Cancel
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
@@ -355,7 +372,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Save
+            Create space privilege
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

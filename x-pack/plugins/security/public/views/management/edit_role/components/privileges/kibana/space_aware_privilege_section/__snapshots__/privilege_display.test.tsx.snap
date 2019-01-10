@@ -2,7 +2,7 @@
 
 exports[`SupercededPrivilegeDisplay renders a superceded privilege 1`] = `
 <Component
-  iconType="questionInCircle"
+  iconType="lock"
   intl={
     Object {
       "defaultFormats": Object {},

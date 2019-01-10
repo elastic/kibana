@@ -196,9 +196,8 @@ exports[`it renders without crashing 1`] = `
         color="primary"
         fill={false}
         iconSide="left"
-        iconType="plusInCircle"
+        iconType="plusInCircleFilled"
         onClick={[Function]}
-        size="s"
         type="button"
       >
         <FormattedMessage

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
+import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
@@ -26,16 +26,19 @@ describe('PrivilegeMatrix', () => {
       {
         id: 'feature1',
         name: 'feature 1',
+        icon: 'apmApp',
         privileges: {},
       },
       {
         id: 'feature2',
         name: 'feature 2',
+        icon: 'apmApp',
         privileges: {},
       },
       {
         id: 'feature3',
         name: 'feature 3',
+        icon: 'apmApp',
         privileges: {},
       },
     ];
@@ -102,7 +105,7 @@ describe('PrivilegeMatrix', () => {
       />
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find(EuiButtonEmpty).simulate('click');
     wrapper.update();
 
     const { columns, items } = wrapper.find(EuiInMemoryTable).props() as any;
