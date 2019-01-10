@@ -45,7 +45,7 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl) {
+module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, config) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -139,7 +139,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         ];
 
         const mapping = indexPattern.fields.byName;
-        if (indexPattern.timeFieldName) {
+        const hideTimeColumn = config.get('doc_table:hideTimeColumn');
+        if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(cellTemplate({
             timefield: true,
             formatted: _displayField(row, indexPattern.timeFieldName),

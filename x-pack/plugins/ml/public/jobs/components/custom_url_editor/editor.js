@@ -30,6 +30,8 @@ import {
 
 import { isValidCustomUrlSettingsTimeRange } from '../../../jobs/components/custom_url_editor/utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import {
   TIME_RANGE_TYPE,
@@ -39,17 +41,31 @@ import {
 function getLinkToOptions() {
   return [{
     id: URL_TYPE.KIBANA_DASHBOARD,
-    label: 'Kibana dashboard',
+    label: i18n.translate('xpack.ml.customUrlEditor.kibanaDashboardLabel', {
+      defaultMessage: 'Kibana dashboard'
+    }),
   }, {
     id: URL_TYPE.KIBANA_DISCOVER,
-    label: 'Discover',
+    label: i18n.translate('xpack.ml.customUrlEditor.discoverLabel', {
+      defaultMessage: 'Discover'
+    }),
   }, {
     id: URL_TYPE.OTHER,
-    label: 'Other',
+    label: i18n.translate('xpack.ml.customUrlEditor.otherLabel', {
+      defaultMessage: 'Other'
+    }),
   }];
 }
 
-export class CustomUrlEditor extends Component {
+export const CustomUrlEditor = injectI18n(class CustomUrlEditor extends Component {
+  static propTypes = {
+    customUrl: PropTypes.object,
+    setEditCustomUrl: PropTypes.func.isRequired,
+    savedCustomUrls: PropTypes.array.isRequired,
+    dashboards: PropTypes.array.isRequired,
+    indexPatterns: PropTypes.array.isRequired,
+    queryEntityFieldNames: PropTypes.array.isRequired,
+  };
 
   constructor(props) {
     super(props);
@@ -150,6 +166,7 @@ export class CustomUrlEditor extends Component {
       dashboards,
       indexPatterns,
       queryEntityFieldNames,
+      intl
     } = this.props;
 
     if (customUrl === undefined) {
@@ -184,20 +201,38 @@ export class CustomUrlEditor extends Component {
     });
 
     const isInvalidLabel = !isValidLabel(label, savedCustomUrls);
-    const invalidLabelError = (isInvalidLabel === true) ? ['A unique label must be supplied'] : [];
+    const invalidLabelError = (isInvalidLabel === true) ? [
+      intl.formatMessage({
+        id: 'xpack.ml.customUrlsEditor.invalidLabelErrorMessage',
+        defaultMessage: 'A unique label must be supplied'
+      })
+    ] : [];
 
     const isInvalidTimeRange = !isValidCustomUrlSettingsTimeRange(timeRange);
-    const invalidIntervalError = (isInvalidTimeRange === true) ? ['Invalid interval format'] : [];
+    const invalidIntervalError = (isInvalidTimeRange === true) ? [
+      intl.formatMessage({
+        id: 'xpack.ml.customUrlsList.invalidIntervalFormatErrorMessage',
+        defaultMessage: 'Invalid interval format'
+      })
+    ] : [];
 
     return (
       <React.Fragment>
         <EuiTitle size="xs">
-          <h4>Create new custom URL</h4>
+          <h4>
+            <FormattedMessage
+              id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+              defaultMessage="Create new custom URL"
+            />
+          </h4>
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiForm className="ml-edit-url-form">
           <EuiFormRow
-            label="Label"
+            label={<FormattedMessage
+              id="xpack.ml.customUrlsEditor.labelLabel"
+              defaultMessage="Label"
+            />}
             className="url-label"
             error={invalidLabelError}
             isInvalid={isInvalidLabel}
@@ -211,7 +246,10 @@ export class CustomUrlEditor extends Component {
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Link to"
+            label={<FormattedMessage
+              id="xpack.ml.customUrlsEditor.linkToLabel"
+              defaultMessage="Link to"
+            />}
             compressed
           >
             <EuiRadioGroup
@@ -224,7 +262,10 @@ export class CustomUrlEditor extends Component {
 
           {type === URL_TYPE.KIBANA_DASHBOARD &&
             <EuiFormRow
-              label="Dashboard name"
+              label={<FormattedMessage
+                id="xpack.ml.customUrlsEditor.dashboardNameLabel"
+                defaultMessage="Dashboard name"
+              />}
               compressed
             >
               <EuiSelect
@@ -238,7 +279,10 @@ export class CustomUrlEditor extends Component {
 
           {type === URL_TYPE.KIBANA_DISCOVER &&
             <EuiFormRow
-              label="Index pattern"
+              label={<FormattedMessage
+                id="xpack.ml.customUrlsEditor.indexPatternLabel"
+                defaultMessage="Index pattern"
+              />}
               compressed
             >
               <EuiSelect
@@ -253,10 +297,16 @@ export class CustomUrlEditor extends Component {
           {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
             entityOptions.length > 0 &&
             <EuiFormRow
-              label="Query entities"
+              label={<FormattedMessage
+                id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+                defaultMessage="Query entities"
+              />}
             >
               <EuiComboBox
-                placeholder="Select entities"
+                placeholder={intl.formatMessage({
+                  id: 'xpack.ml.customUrlsEditor.selectEntitiesPlaceholder',
+                  defaultMessage: 'Select entities'
+                })}
                 options={entityOptions}
                 selectedOptions={selectedEntityOptions}
                 onChange={this.onQueryEntitiesChange}
@@ -269,7 +319,10 @@ export class CustomUrlEditor extends Component {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiFormRow
-                  label="Time range"
+                  label={<FormattedMessage
+                    id="xpack.ml.customUrlsEditor.timeRangeLabel"
+                    defaultMessage="Time range"
+                  />}
                   className="url-time-range"
                   compressed
                 >
@@ -284,7 +337,10 @@ export class CustomUrlEditor extends Component {
               {(timeRange.type === TIME_RANGE_TYPE.INTERVAL) &&
                 <EuiFlexItem>
                   <EuiFormRow
-                    label="Interval"
+                    label={<FormattedMessage
+                      id="xpack.ml.customUrlsEditor.intervalLabel"
+                      defaultMessage="Interval"
+                    />}
                     className="url-time-range"
                     error={invalidIntervalError}
                     isInvalid={isInvalidTimeRange}
@@ -304,7 +360,10 @@ export class CustomUrlEditor extends Component {
 
           {type === URL_TYPE.OTHER &&
             <EuiFormRow
-              label="URL"
+              label={<FormattedMessage
+                id="xpack.ml.customUrlsEditor.urlLabel"
+                defaultMessage="URL"
+              />}
               compressed
               fullWidth={true}
             >
@@ -323,14 +382,4 @@ export class CustomUrlEditor extends Component {
       </React.Fragment>
     );
   }
-}
-CustomUrlEditor.propTypes = {
-  customUrl: PropTypes.object,
-  setEditCustomUrl: PropTypes.func.isRequired,
-  savedCustomUrls: PropTypes.array.isRequired,
-  dashboards: PropTypes.array.isRequired,
-  indexPatterns: PropTypes.array.isRequired,
-  queryEntityFieldNames: PropTypes.array.isRequired,
-};
-
-
+});
