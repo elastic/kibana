@@ -24,7 +24,7 @@ interface OwnProps {
   dataProvider: DataProvider;
 }
 export const IconsFooter = pure<OwnProps>(({ dataProvider }: OwnProps) => {
-  if (!dataProvider.queryDate || (dataProvider.queryDate && isEmpty(dataProvider.queryDate))) {
+  if (!dataProvider.queryDate || isEmpty(dataProvider.queryDate)) {
     return null;
   }
   const dates = dataProvider.queryDate.trim().match(/\d+/g);

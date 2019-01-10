@@ -8,6 +8,7 @@ import { defaultWidth } from '../../../components/timeline/body';
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
+import { Direction } from '../../../graphql/types';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -90,7 +91,7 @@ export const timelineDefaults: Readonly<
   show: false,
   sort: {
     columnId: 'timestamp',
-    sortDirection: 'descending',
+    sortDirection: Direction.descending,
   },
   width: defaultWidth,
 };

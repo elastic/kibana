@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr } from 'lodash/fp';
+import { get, getOr, last } from 'lodash/fp';
 import { EcsEdges, EventsData, KpiItem } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
@@ -40,7 +40,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     );
     const hasNextPage = eventsEdges.length === limit + 1;
     const edges = hasNextPage ? eventsEdges.splice(0, limit) : eventsEdges;
-    const lastCursor = get('cursor', edges.slice(-1)[0]);
+    const lastCursor = get('cursor', last(edges));
     return {
       kpiEventType,
       edges,

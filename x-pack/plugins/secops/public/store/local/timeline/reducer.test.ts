@@ -7,6 +7,7 @@
 import { set } from 'lodash/fp';
 import { TimelineById } from '.';
 import { defaultWidth } from '../../../components/timeline/body';
+import { Direction } from '../../../graphql/types';
 import {
   addNewTimeline,
   addTimelineProvider,
@@ -51,7 +52,7 @@ const timelineByIdMock: TimelineById = {
     show: true,
     sort: {
       columnId: 'timestamp',
-      sortDirection: 'descending',
+      sortDirection: Direction.descending,
     },
     width: defaultWidth,
   },
@@ -238,7 +239,7 @@ describe('Timeline', () => {
         id: 'foo',
         sort: {
           columnId: 'some column',
-          sortDirection: 'descending',
+          sortDirection: Direction.descending,
         },
         timelineById: timelineByIdMock,
       });
@@ -250,12 +251,16 @@ describe('Timeline', () => {
         id: 'foo',
         sort: {
           columnId: 'some column',
-          sortDirection: 'descending',
+          sortDirection: Direction.descending,
         },
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(
-        set('foo.sort', { columnId: 'some column', sortDirection: 'descending' }, timelineByIdMock)
+        set(
+          'foo.sort',
+          { columnId: 'some column', sortDirection: Direction.descending },
+          timelineByIdMock
+        )
       );
     });
   });
@@ -315,7 +320,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -379,7 +384,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -434,7 +439,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
           itemsPerPage: 50,
@@ -489,7 +494,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -563,7 +568,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,

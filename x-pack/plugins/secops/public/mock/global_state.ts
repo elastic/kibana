@@ -5,6 +5,7 @@
  */
 
 import { defaultWidth } from '../components/timeline/body';
+import { Direction } from '../graphql/types';
 import { State } from '../store';
 
 export const mockGlobalState: State = {
@@ -65,7 +66,7 @@ export const mockGlobalState: State = {
           itemsPerPageOptions: [5, 10, 20],
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
           width: defaultWidth,
         },

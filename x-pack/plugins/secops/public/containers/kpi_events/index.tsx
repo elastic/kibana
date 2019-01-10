@@ -52,7 +52,7 @@ export const KpiEventsQuery = pure<OwnProps>(
         },
         sortField: {
           sortFieldId: 'timestamp',
-          direction: 'descending' as Direction,
+          direction: Direction.descending,
         },
       }}
     >

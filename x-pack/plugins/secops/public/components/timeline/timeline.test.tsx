@@ -12,6 +12,7 @@ import { DragDropContext } from 'react-beautiful-dnd';
 
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { eventsQuery } from '../../containers/events/index.gql_query';
+import { Direction } from '../../graphql/types';
 import { mockGlobalState } from '../../mock';
 import { mockEcsData } from '../../mock';
 import { createStore, State } from '../../store';
@@ -28,7 +29,7 @@ const testFlyoutHeight = 980;
 describe('Timeline', () => {
   const sort: Sort = {
     columnId: 'timestamp',
-    sortDirection: 'descending',
+    sortDirection: Direction.descending,
   };
 
   const indexPattern = {

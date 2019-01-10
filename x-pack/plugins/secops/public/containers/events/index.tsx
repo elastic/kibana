@@ -57,7 +57,7 @@ const EventsComponentQuery = pure<EventsProps>(
         },
         sortField: {
           sortFieldId: 'timestamp',
-          direction: 'descending' as Direction,
+          direction: Direction.descending,
         },
         timerange: {
           interval: '12h',

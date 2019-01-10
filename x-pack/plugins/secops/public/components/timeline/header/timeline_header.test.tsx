@@ -10,6 +10,7 @@ import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import { Direction } from '../../../graphql/types';
 import { mockGlobalState } from '../../../mock';
 import { createStore, State } from '../../../store';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
@@ -42,7 +43,7 @@ describe('Header', () => {
               show={true}
               sort={{
                 columnId: 'timestamp',
-                sortDirection: 'descending',
+                sortDirection: Direction.descending,
               }}
               theme="dark"
             />

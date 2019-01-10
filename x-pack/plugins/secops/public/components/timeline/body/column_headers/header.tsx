@@ -10,6 +10,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { Direction } from '../../../../graphql/types';
 import { OnColumnSorted, OnFilterChange } from '../../events';
 import { Sort, SortDirection } from '../sort';
 import { SortIndicator } from '../sort/sort_indicator';
@@ -30,14 +31,14 @@ const unhandledSortDirection = (x: never): never => {
 };
 
 /** Given a current sort direction, it returns the next sort direction */
-export const getNextSortDirection = (currentSort: Sort): SortDirection => {
+export const getNextSortDirection = (currentSort: Sort): Direction => {
   switch (currentSort.sortDirection) {
-    case 'descending':
-      return 'ascending';
-    case 'ascending':
-      return 'descending';
+    case Direction.descending:
+      return Direction.ascending;
+    case Direction.ascending:
+      return Direction.descending;
     case 'none':
-      return 'descending';
+      return Direction.descending;
     default:
       return unhandledSortDirection(currentSort.sortDirection);
   }
@@ -52,8 +53,10 @@ interface GetNewSortDirectionOnClickParams {
 export const getNewSortDirectionOnClick = ({
   clickedHeader,
   currentSort,
-}: GetNewSortDirectionOnClickParams): SortDirection =>
-  clickedHeader.id === currentSort.columnId ? getNextSortDirection(currentSort) : 'descending';
+}: GetNewSortDirectionOnClickParams): Direction =>
+  clickedHeader.id === currentSort.columnId
+    ? getNextSortDirection(currentSort)
+    : Direction.descending;
 
 interface Props {
   header: ColumnHeader;
