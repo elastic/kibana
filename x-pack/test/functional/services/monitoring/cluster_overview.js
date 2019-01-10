@@ -57,9 +57,12 @@ export function MonitoringClusterOverviewProvider({ getService }) {
 
     async isOnClusterOverview() {
       await retry.try(async () =>  {
+        const clusterHeadingElement  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+        expect(await clusterHeadingElement.isDisplayed()).to.be(true);
+      });
+      await retry.try(async () =>  {
         const clusterHeading  = await testSubjects.find(SUBJ_CLUSTER_NAME);
-        const headingText = await clusterHeading.getVisibleText();
-        expect(headingText).not.to.be.empty();
+        expect(await clusterHeading.getVisibleText()).not.to.be.empty();
       });
       return true;
     }

@@ -19,6 +19,17 @@
               </div>
             </div>
           </div>
+
+          <!-- Search. -->
+          <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
+            <query-bar
+              query="query"
+              app-name="'maps'"
+              on-submit="updateQueryAndDispatch"
+              index-patterns="indexPatterns"
+            ></query-bar>
+          </div>
+
         </div>
       </kbn-top-nav>
     </div>
