@@ -5,12 +5,11 @@
  */
 
 import React from 'react';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { KibanaLink } from '../../../utils/url';
+import { KibanaLink, QueryParamsDecoded } from '../../../utils/url';
 import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
-  query: StringMap;
+  query: QueryParamsDecoded;
 }
 
 export class DiscoverButton extends React.Component<Props> {

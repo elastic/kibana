@@ -9,7 +9,12 @@ import React, { Component } from 'react';
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 import { IUrlParams } from '../../../../../../store/urlParams';
-import { fromQuery, history, toQuery } from '../../../../../../utils/url';
+import {
+  fromQuery,
+  history,
+  QueryParams,
+  toQuery
+} from '../../../../../../utils/url';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { AgentMark } from '../get_agent_marks';
@@ -143,7 +148,7 @@ export class Waterfall extends Component<Props> {
     );
   }
 
-  private setQueryParams(params: Partial<IUrlParams>) {
+  private setQueryParams(params: QueryParams) {
     const { location } = this.props;
     history.replace({
       ...location,

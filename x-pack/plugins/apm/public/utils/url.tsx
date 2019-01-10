@@ -70,31 +70,35 @@ export const ViewMLJob: React.SFC<ViewMLJobArgs> = ({
   );
 };
 
-export function toQuery(search?: string): StringMap<any> {
+export function toQuery(search?: string): QueryParams {
   return search ? qs.parse(search.slice(1)) : {};
 }
 
-export function fromQuery(query: StringMap) {
+export function fromQuery(query: QueryParams) {
   const encodedQuery = encodeQuery(query, ['_g', '_a']);
   return stringifyWithoutEncoding(encodedQuery);
 }
 
-export function encodeQuery(query: StringMap, exclude: string[] = []) {
-  return mapValues(query, (value: any, key: string) => {
-    if (exclude.includes(key)) {
+export function encodeQuery(query: QueryParams, exclude: string[] = []) {
+  return mapValues(query, (value, key) => {
+    if (exclude.includes(key as string)) {
       return encodeURI(value);
     }
     return qs.escape(value);
   });
 }
 
-function stringifyWithoutEncoding(query: StringMap) {
+function stringifyWithoutEncoding(query: QueryParams) {
   return qs.stringify(query, undefined, undefined, {
     encodeURIComponent: (v: string) => v
   });
 }
 
-function risonSafeDecode(value: string) {
+function risonSafeDecode(value?: string) {
+  if (!value) {
+    return {};
+  }
+
   try {
     const decoded = rison.decode(value);
     return isPlainObject(decoded) ? (decoded as StringMap) : {};
@@ -103,7 +107,7 @@ function risonSafeDecode(value: string) {
   }
 }
 
-function decodeAndMergeG(g: string, toBeMerged?: StringMap) {
+function decodeAndMergeG(g?: string, toBeMerged?: StringMap) {
   const decoded = risonSafeDecode(g);
   return { ...DEFAULT_KIBANA_TIME_RANGE, ...decoded, ...toBeMerged };
 }
@@ -177,8 +181,26 @@ export function getKibanaHref(kibanaLinkArgs: KibanaLinkArgs): string {
 // The two components have different APIs: `path` vs `pathname` and one uses EuiLink the other react-router's Link (which behaves differently)
 // Suggestion: Deprecate RelativeLink, and clean up KibanaLink
 
-export interface QueryWithG extends StringMap {
+export interface QueryParams {
+  transactionId?: string;
+  traceId?: string;
+  detailTab?: string;
+  flyoutDetailTab?: string;
+  waterfallItemId?: string;
+  spanId?: string;
+  page?: string;
+  sortDirection?: string;
+  sortField?: string;
+  kuery?: string;
+  _g?: string;
+  _a?: string;
+}
+
+export interface QueryParamsDecoded {
+  transactionId?: string;
+  traceId?: string;
   _g?: StringMap;
+  _a?: StringMap;
 }
 
 export interface KibanaLinkArgs {
@@ -188,7 +210,7 @@ export interface KibanaLinkArgs {
   };
   pathname: string;
   hash?: string;
-  query?: QueryWithG;
+  query?: QueryParamsDecoded;
   disabled?: boolean;
   to?: StringMap;
   className?: string;

@@ -35,7 +35,7 @@ describe('fromQuery', () => {
       fromQuery({
         foo: 'bar',
         name: 'john doe'
-      })
+      } as any)
     ).toEqual('foo=bar&name=john%20doe');
   });
 
@@ -46,7 +46,7 @@ describe('fromQuery', () => {
         _g: 'john doe:',
         a: 'john doe:',
         _a: 'john doe:'
-      })
+      } as any)
     ).toEqual('g=john%20doe%3A&_g=john%20doe:&a=john%20doe%3A&_a=john%20doe:');
   });
 });

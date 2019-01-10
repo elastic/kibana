@@ -10,9 +10,10 @@ import {
   getAPMIndexPattern,
   ISavedObject
 } from '../../../services/rest/savedObjects';
+import { QueryParamsDecoded } from '../../../utils/url';
 
 export function getQueryWithIndexPattern(
-  query: StringMap = {},
+  query: QueryParamsDecoded,
   indexPattern?: ISavedObject
 ) {
   if ((query._a && query._a.index) || !indexPattern) {
@@ -31,7 +32,7 @@ export function getQueryWithIndexPattern(
 }
 
 interface Props {
-  query?: StringMap;
+  query: QueryParamsDecoded;
   children: (query: StringMap) => ReactElement<any>;
 }
 
