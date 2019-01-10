@@ -71,6 +71,9 @@ export const Explorer = injectI18n(
 
     viewByChangeHandler = e => this.props.setSwimlaneViewBy(e.target.value);
 
+    onSwimlaneEnterHandler = () => this.props.setSwimlaneSelectActive(true);
+    onSwimlaneLeaveHandler = () => this.props.setSwimlaneSelectActive(false);
+
     render() {
       const {
         annotationsData,
@@ -82,7 +85,6 @@ export const Explorer = injectI18n(
         jobs,
         loading,
         noInfluencersConfigured,
-        setSwimlaneSelectActive,
         showViewBySwimlane,
         swimlaneOverall,
         swimlaneViewBy,
@@ -152,8 +154,8 @@ export const Explorer = injectI18n(
 
             <div
               className="ml-explorer-swimlane euiText"
-              onMouseEnter={() => setSwimlaneSelectActive(true)}
-              onMouseLeave={() => setSwimlaneSelectActive(false)}
+              onMouseEnter={this.onSwimlaneEnterHandler}
+              onMouseLeave={this.onSwimlaneLeaveHandler}
             >
               <ExplorerSwimlane {...swimlaneOverall} />
             </div>
@@ -210,8 +212,8 @@ export const Explorer = injectI18n(
                 {showViewBySwimlane && (
                   <div
                     className="ml-explorer-swimlane euiText"
-                    onMouseEnter={() => setSwimlaneSelectActive(true)}
-                    onMouseLeave={() => setSwimlaneSelectActive(false)}
+                    onMouseEnter={this.onSwimlaneEnterHandler}
+                    onMouseLeave={this.onSwimlaneLeaveHandler}
                   >
                     <ExplorerSwimlane {...swimlaneViewBy} />
                   </div>
