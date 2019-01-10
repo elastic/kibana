@@ -132,7 +132,7 @@ export const MonitorList = ({
           <EuiPanel paddingSize="l">
             <EuiInMemoryTable
               columns={monitorListColumns}
-              isLoading={loading}
+              loading={loading}
               items={monitors}
               pagination={monitorListPagination}
               sorting={true}
