@@ -14,7 +14,8 @@ let store: TaskStore;
 
 describe('TaskPoller', () => {
   beforeEach(() => {
-    const callCluster = sinon.spy();
+    const callCluster = sinon.stub();
+    callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
     store = new TaskStore({
       callCluster,
       logger: mockLogger(),

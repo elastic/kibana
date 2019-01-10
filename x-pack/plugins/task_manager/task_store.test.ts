@@ -13,7 +13,8 @@ import { mockLogger } from './test_utils';
 describe('TaskStore', () => {
   describe('init', () => {
     test('creates the task manager index', async () => {
-      const callCluster = sinon.spy();
+      const callCluster = sinon.stub();
+      callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
       const store = new TaskStore({
         callCluster,
         logger: mockLogger(),
@@ -24,7 +25,7 @@ describe('TaskStore', () => {
 
       await store.init();
 
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledTwice(callCluster); // store.init calls twice: once to check for existing template, once to put the template (if needed)
 
       sinon.assert.calledWithMatch(callCluster, 'indices.putTemplate', {
         body: {
@@ -41,12 +42,14 @@ describe('TaskStore', () => {
 
   describe('schedule', () => {
     async function testSchedule(task: TaskInstance) {
-      const callCluster = sinon.spy(() =>
+      const callCluster = sinon.stub();
+      callCluster.withArgs('index').returns(
         Promise.resolve({
           _id: 'testid',
           _version: 3344,
         })
       );
+      callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
       const store = new TaskStore({
         callCluster,
         logger: mockLogger(),
@@ -54,11 +57,12 @@ describe('TaskStore', () => {
         maxAttempts: 2,
         supportedTypes: ['report', 'dernstraight', 'yawn'],
       });
+      await store.init();
       const result = await store.schedule(task);
 
-      sinon.assert.calledTwice(callCluster);
+      sinon.assert.calledThrice(callCluster);
 
-      return { result, callCluster, arg: callCluster.args[1][1] };
+      return { result, callCluster, arg: callCluster.args[2][1] };
     }
 
     test('serializes the params and state', async () => {
@@ -83,7 +87,7 @@ describe('TaskStore', () => {
       });
     });
 
-    test('retiurns a concrete task instance', async () => {
+    test('returns a concrete task instance', async () => {
       const task = {
         params: { hello: 'world' },
         state: { foo: 'bar' },

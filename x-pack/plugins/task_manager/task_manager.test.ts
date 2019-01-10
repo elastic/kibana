@@ -75,6 +75,9 @@ describe('TaskManager', () => {
   });
 
   function testOpts() {
+    const callCluster = sinon.stub();
+    callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
+
     const $test = {
       events: {} as any,
       afterPluginsInit: _.noop,
@@ -100,7 +103,7 @@ describe('TaskManager', () => {
         plugins: {
           elasticsearch: {
             getCluster() {
-              return { callWithInternalUser: _.noop };
+              return { callWithInternalUser: callCluster };
             },
             status: {
               on(eventName: string, callback: () => any) {
