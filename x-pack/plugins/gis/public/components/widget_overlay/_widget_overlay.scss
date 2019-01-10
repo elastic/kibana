@@ -10,7 +10,6 @@
   top: $euiSizeM;
   right: $euiSizeM;
   bottom: $euiSizeM;
-  // left: $euiSizeM;
   pointer-events: none; /* 1 */
 }
 
@@ -28,7 +27,7 @@
   display: flex;
   pointer-events: all; /* 1 */
 
-  &.euiPanel--shadow {
+  &.gisWidgetControl-hasShadow {
     @include euiBottomShadowLarge;
   }
 

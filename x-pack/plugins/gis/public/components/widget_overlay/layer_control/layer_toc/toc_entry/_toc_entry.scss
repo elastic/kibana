@@ -2,3 +2,16 @@
   padding: $euiSizeS $euiSize;
   position: relative;
 }
+
+.gisTocEntry-visible {
+  opacity: 1;
+}
+
+.gisTocEntry-notVisible {
+  opacity: 0.5;
+}
+
+.gisTocEntry__grab:hover {
+  cursor: grab;
+}
+

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {  } from 'react';
+import React, { Fragment } from 'react';
 import uuid from 'uuid/v4';
 
 import {
@@ -37,13 +37,16 @@ export function JoinEditor({ joins, layer, onChange }) {
       };
 
       return (
-        <Join
-          key={index}
-          join={joinDescriptor}
-          layer={layer}
-          onChange={handleOnChange}
-          onRemove={handleOnRemove}
-        />
+        <Fragment>
+          <EuiSpacer size="m"  />
+          <Join
+            key={index}
+            join={joinDescriptor}
+            layer={layer}
+            onChange={handleOnChange}
+            onRemove={handleOnRemove}
+          />
+        </Fragment>
       );
     });
   };
@@ -73,7 +76,6 @@ export function JoinEditor({ joins, layer, onChange }) {
           <EuiButtonIcon iconType="plusInCircle" onClick={addJoin} aria-label="Add join" title="Add join" />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m"  />
 
       {renderJoins()}
     </div>

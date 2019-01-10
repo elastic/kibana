@@ -27,7 +27,7 @@ export const VisibilityToggle = ({
   return (
     <div className={classes}>
       <input
-        className="euiSwitch__input"
+        className="gisVisibilityToggle__input"
         name={name}
         id={id}
         type="checkbox"

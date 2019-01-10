@@ -12,12 +12,13 @@ import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
 
 import {
-  EuiHorizontalRule,
   EuiFlexItem,
   EuiTitle,
-  EuiSpacer,
   EuiPanel,
   EuiFlexGroup,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 
 export class LayerPanel  extends React.Component {
@@ -62,28 +63,28 @@ export class LayerPanel  extends React.Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false} className="gisLayerPanel__header">
-          <EuiTitle size="s" className="gisLayerPanel__title">
-            <h1>
+        <EuiFlyoutHeader hasBorder className="gisLayerPanel__footer">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
               {selectedLayer.getIcon()}
-              {this.state.displayName}
-            </h1>
-          </EuiTitle>
-          <EuiSpacer size="m"/>
-          <EuiHorizontalRule margin="none"/>
-        </EuiFlexItem>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2>{this.state.displayName}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
 
-        <EuiFlexItem className="gisLayerPanel__body">
+        <EuiFlyoutBody className="gisLayerPanel__body">
           <SettingsPanel/>
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
-        </EuiFlexItem>
+        </EuiFlyoutBody>
 
-        <EuiFlexItem grow={false} className="gisLayerPanel__footer">
-          <EuiHorizontalRule margin="none"/>
-          <EuiSpacer size="m"/>
+        <EuiFlyoutFooter className="gisLayerPanel__footer">
           <FlyoutFooter/>
-        </EuiFlexItem>
+        </EuiFlyoutFooter>
       </EuiFlexGroup>
     );
   }

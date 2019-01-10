@@ -2,7 +2,6 @@
   position: relative;
   display: inline-block;
   min-height: 20px;
-  color: $euiColorMediumShade;
 
   .gisVisibilityToggle__body {
     line-height: 19px;
@@ -38,7 +37,7 @@
     z-index: 1;
   }
 
-  .euiSwitch__input {
+  .gisVisibilityToggle__input {
     z-index: 2;
     position: absolute;
     opacity: 0;
@@ -48,10 +47,8 @@
   }
 
   .gisVisibilityToggle__body {
+    @include size($euiSize);
     display: block;
-    display: block;
-    height: 16px;
-    width: 16px;
   }
 
   &:hover,
@@ -63,19 +60,19 @@
       opacity: 0;
     }
 
-    .euiSwitch__input:checked {
+    .gisVisibilityToggle__input:checked {
       + .gisVisibilityToggle__body > .gisVisibilityToggle__eye {
         opacity: 1;
       }
     }
+  }
 
-    .euiSwitch__input:not(:checked) {
-      + .gisVisibilityToggle__body > .gisVisibilityToggle__content {
-        opacity: 0;
-      }
-      + .gisVisibilityToggle__body > .gisVisibilityToggle__eyeClosed {
-        opacity: 1;
-      }
+  .gisVisibilityToggle__input:not(:checked) {
+    + .gisVisibilityToggle__body > .gisVisibilityToggle__content {
+      opacity: 0;
+    }
+    + .gisVisibilityToggle__body > .gisVisibilityToggle__eyeClosed {
+      opacity: 1;
     }
   }
 }
