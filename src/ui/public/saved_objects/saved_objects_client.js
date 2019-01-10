@@ -70,8 +70,8 @@ export class SavedObjectsClient {
         body: {
           attributes,
           migrationVersion: options.migrationVersion,
-          references: options.references
-        }
+          references: options.references,
+        },
       })
       .catch(error => {
         if (isAutoCreateIndexError(error)) {

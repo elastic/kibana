@@ -96,7 +96,7 @@ export interface FindRelationshipsOptions {
 }
 
 export interface FindRelationshipResponse {
-  [key: string]: SavedObjectAttributes[]
+  [key: string]: SavedObjectAttributes[];
 }
 
 export interface SavedObjectsClient {
@@ -120,6 +120,6 @@ export interface SavedObjectsClient {
   findRelationships: (
     type: string,
     id: string,
-    options: FindRelationshipsOptions
+    options: FindRelationshipsOptions,
   ) => Promise<FindRelationshipResponse>;
 }

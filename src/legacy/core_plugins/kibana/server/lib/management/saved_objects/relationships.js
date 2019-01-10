@@ -30,7 +30,7 @@ async function findDashboardRelationships({ id, size, namespace, savedObjectsCli
         id,
         type: 'visualization',
       })),
-      { namespace }
+      { namespace },
     );
 
     visualizations.push(

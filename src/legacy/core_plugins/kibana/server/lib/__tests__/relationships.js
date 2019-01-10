@@ -187,7 +187,7 @@ describe('findRelationships', () => {
       { id: '1', title: 'Foo', type: 'visualization' },
       { id: '2', title: 'Bar', type: 'visualization' },
       { id: '3', title: 'FooBar', type: 'visualization' },
-      { id: 'index-pattern:1', type: 'index-pattern', title: 'My Index Pattern' }
+      { id: 'index-pattern:1', type: 'index-pattern', title: 'My Index Pattern' },
     ]);
   });
 
@@ -292,7 +292,7 @@ describe('findRelationships', () => {
       { id: '1', type: 'visualization', title: 'Foo' },
       { id: '2', type: 'visualization', title: 'Bar' },
       { id: '1', type: 'search', title: 'Foo' },
-      { id: '2', type: 'search', title: 'Bar' }
+      { id: '2', type: 'search', title: 'Bar' },
     ]);
   });
 

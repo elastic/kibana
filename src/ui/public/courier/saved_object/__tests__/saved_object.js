@@ -299,7 +299,9 @@ describe('Saved Object', function () {
           .then((savedObject) => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
               return BluebirdPromise.resolve({
-                type: 'dashboard', id, version: 2
+                id,
+                version: 2,
+                type: 'dashboard',
               });
             });
             return savedObject.save();
@@ -440,7 +442,7 @@ describe('Saved Object', function () {
         .then(() => {
           const response = {
             found: true,
-            _source: { dinosaurs: { tRex: 'has big teeth' } }
+            _source: { dinosaurs: { tRex: 'has big teeth' } },
           };
           return savedObject.applyESResp(response);
         })

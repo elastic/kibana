@@ -45,7 +45,7 @@ export const createCreateRoute = prereqs => {
               .keys({
                 name: Joi.string().required(),
                 type: Joi.string().required(),
-                id: Joi.string().required()
+                id: Joi.string().required(),
               })
           ).optional(),
         }).required(),

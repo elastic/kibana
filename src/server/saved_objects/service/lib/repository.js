@@ -25,7 +25,7 @@ import { decorateEsError } from './decorate_es_error';
 import { getRelationshipsQuery } from './relationship_query_builder';
 import * as errors from './errors';
 import {
-  findRelationships as legacyFindRelationships
+  findRelationships as legacyFindRelationships,
 } from '../../../../legacy/core_plugins/kibana/server/lib/management/saved_objects/relationships';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -83,7 +83,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       overwrite = false,
       namespace,
-      references = []
+      references = [],
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -148,7 +148,7 @@ export class SavedObjectsRepository {
         migrationVersion: object.migrationVersion,
         namespace,
         updated_at: time,
-        references: object.references || []
+        references: object.references || [],
       });
       const raw = this._serializer.savedObjectToRaw(migrated);
 
@@ -482,7 +482,7 @@ export class SavedObjectsRepository {
     const {
       version,
       namespace,
-      references = []
+      references = [],
     } = options;
 
     const time = this._getCurrentTime();
@@ -636,8 +636,8 @@ export class SavedObjectsRepository {
       rest_total_hits_as_int: true,
       body: {
         version: true,
-        query: getRelationshipsQuery({ type, id, namespace, filterTypes })
-      }
+        query: getRelationshipsQuery({ type, id, namespace, filterTypes }),
+      },
     };
 
     const [{ saved_objects: referencedObjects }, referencedResponse, legacyResponse] = await Promise.all([
@@ -652,7 +652,7 @@ export class SavedObjectsRepository {
       legacyResponse.filter(obj => filterTypes.includes(obj.type)),
       referencedResponse.hits.hits
         .map(hit => this._rawToSavedObject(hit))
-        .map(obj => ({ id: obj.id, type: obj.type, ...obj.attributes }))
+        .map(obj => ({ id: obj.id, type: obj.type, ...obj.attributes })),
     );
 
     return relationshipObjects.reduce((result, relationshipObject) => {

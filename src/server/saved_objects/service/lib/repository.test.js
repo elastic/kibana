@@ -265,8 +265,8 @@ describe('SavedObjectsRepository', () => {
         references: [{
           name: 'ref_0',
           type: 'test',
-          id: '123'
-        }]
+          id: '123',
+        }],
       });
 
       expect(response).toEqual({
@@ -281,7 +281,7 @@ describe('SavedObjectsRepository', () => {
           name: 'ref_0',
           type: 'test',
           id: '123',
-        }]
+        }],
       });
     });
 
@@ -458,8 +458,8 @@ describe('SavedObjectsRepository', () => {
           type: 'index-pattern',
           ...mockTimestampFields,
           'index-pattern': { title: 'Test Two' },
-          references: [{ name: 'ref_0', type: 'test', id: '2' }]
-        }
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        },
       ]);
 
       sinon.assert.calledOnce(onBeforeWrite);
@@ -486,7 +486,7 @@ describe('SavedObjectsRepository', () => {
             ...mockTimestampFields,
             config: { title: 'Test One!!' },
             migrationVersion: { foo: '2.3.4' },
-            references: []
+            references: [],
           },
           { create: { _type: 'doc', _id: 'index-pattern:two' } },
           {
@@ -494,8 +494,8 @@ describe('SavedObjectsRepository', () => {
             ...mockTimestampFields,
             'index-pattern': { title: 'Test Two!!' },
             migrationVersion: { foo: '2.3.4' },
-            references: []
-          }
+            references: [],
+          },
         ]
       }));
     });
@@ -640,7 +640,7 @@ describe('SavedObjectsRepository', () => {
             type: 'config',
             ...mockTimestampFields,
             config: { title: 'Test One' },
-            references: []
+            references: [],
           },
           { create: { _type: 'doc', _id: 'foo-namespace:index-pattern:two' } },
           {
@@ -648,8 +648,8 @@ describe('SavedObjectsRepository', () => {
             type: 'index-pattern',
             ...mockTimestampFields,
             'index-pattern': { title: 'Test Two' },
-            references: []
-          }
+            references: [],
+          },
         ]
       }));
       sinon.assert.calledOnce(onBeforeWrite);
@@ -1217,8 +1217,8 @@ describe('SavedObjectsRepository', () => {
         references: [{
           name: 'ref_0',
           type: 'test',
-          id: '1'
-        }]
+          id: '1',
+        }],
       });
       expect(response).toEqual({
         id,
@@ -1230,7 +1230,7 @@ describe('SavedObjectsRepository', () => {
           name: 'ref_0',
           type: 'test',
           id: '1',
-        }]
+        }],
       });
     });
 
@@ -1256,8 +1256,8 @@ describe('SavedObjectsRepository', () => {
         references: [{
           name: 'ref_0',
           type: 'test',
-          id: '1'
-        }]
+          id: '1',
+        }],
       });
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -1273,8 +1273,8 @@ describe('SavedObjectsRepository', () => {
               name: 'ref_0',
               type: 'test',
               id: '1',
-            }]
-          }
+            }],
+          },
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -1291,8 +1291,8 @@ describe('SavedObjectsRepository', () => {
         references: [{
           name: 'ref_0',
           type: 'test',
-          id: '1'
-        }]
+          id: '1',
+        }],
       });
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -1308,8 +1308,8 @@ describe('SavedObjectsRepository', () => {
               name: 'ref_0',
               type: 'test',
               id: '1',
-            }]
-          }
+            }],
+          },
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -1327,8 +1327,8 @@ describe('SavedObjectsRepository', () => {
         references: [{
           name: 'ref_0',
           type: 'test',
-          id: '1'
-        }]
+          id: '1',
+        }],
       });
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -1344,8 +1344,8 @@ describe('SavedObjectsRepository', () => {
               name: 'ref_0',
               type: 'test',
               id: '1',
-            }]
-          }
+            }],
+          },
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -1582,20 +1582,20 @@ describe('SavedObjectsRepository', () => {
                 id: 'visualization:1',
                 type: 'visualization',
                 visualization: {
-                  title: 'My Vis'
+                  title: 'My Vis',
                 },
                 references: [{
                   id: 'pattern*',
                   type: 'index-pattern',
-                  name: 'indexPattern'
-                }]
+                  name: 'indexPattern',
+                }],
               },
             };
           case 'mget':
             expect(params.body.docs).toHaveLength(1);
             expect(params.body.docs[0]).toEqual({
               _id: 'index-pattern:pattern*',
-              _type: 'doc'
+              _type: 'doc',
             });
             return {
               docs: [{
@@ -1606,11 +1606,11 @@ describe('SavedObjectsRepository', () => {
                   id: 'index-pattern:pattern*',
                   type: 'index-pattern',
                   'index-pattern': {
-                    someAttr: true
+                    someAttr: true,
                   },
-                  references: []
-                }
-              }]
+                  references: [],
+                },
+              }],
             };
           case 'search':
             if (get(params, 'body.query.bool.filter.bool.must[1].term.type') !== 'dashboard') {
@@ -1626,10 +1626,10 @@ describe('SavedObjectsRepository', () => {
                     type: 'dashboard',
                     dashboard: {
                       title: 'Foo',
-                    }
-                  }
-                }]
-              }
+                    },
+                  },
+                }],
+              },
             };
           default:
             throw new Error(`Unhandled method "${method}"`);
