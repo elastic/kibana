@@ -96,3 +96,20 @@ Object {
   "writeBufferSizeBytes": "write buffer size in bytes",
 }
 `;
+
+exports[`[CCR] follower index serialization serializeFollowerIndex() serializes object to Elasticsearch follower index object 1`] = `
+Object {
+  "leader_index": "leader index",
+  "max_outstanding_read_requests": "foo",
+  "max_outstanding_write_requests": "foo",
+  "max_read_request_operation_count": "foo",
+  "max_read_request_size": "foo",
+  "max_retry_delay": "foo",
+  "max_write_buffer_count": "foo",
+  "max_write_buffer_size": "foo",
+  "max_write_request_operation_count": "foo",
+  "max_write_request_size": "foo",
+  "read_poll_timeout": "foo",
+  "remote_cluster": "remote cluster",
+}
+`;
