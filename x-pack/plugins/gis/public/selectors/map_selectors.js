@@ -162,7 +162,7 @@ export const getSelectedLayerJoinDescriptors = createSelector(
     });
   });
 
-export const getIndexPatternIds = createSelector(
+export const getUniqueIndexPatternIds = createSelector(
   getLayerList,
   (layerList) => {
     const indexPatternIds = [];

@@ -22,7 +22,7 @@ import {
   setQuery,
 } from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
-import { getIndexPatternIds } from '../selectors/map_selectors';
+import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -31,6 +31,7 @@ import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
+const DEFAULT_QUERY_LANGUAGE = 'kuery';
 
 const app = uiModules.get('app/gis', []);
 
@@ -103,7 +104,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     } else {
       $scope.updateQueryAndDispatch({
         query: '',
-        language: localStorage.get('kibana.userQueryLanguage') || 'kuery'
+        language: localStorage.get('kibana.userQueryLanguage') || DEFAULT_QUERY_LANGUAGE
       });
     }
 
@@ -144,7 +145,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       updateTheme();
     }
 
-    const nextIndexPatternIds = getIndexPatternIds(state);
+    const nextIndexPatternIds = getUniqueIndexPatternIds(state);
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
       updateIndexPatterns(nextIndexPatternIds);
