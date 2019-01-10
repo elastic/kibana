@@ -59,7 +59,7 @@ describe('brushEvent', () => {
           values: [
             {
               xRaw: {
-                column: '1',
+                column: 0,
                 table: {
                   columns: [
                     {
