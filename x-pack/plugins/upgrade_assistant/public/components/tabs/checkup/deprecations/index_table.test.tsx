@@ -10,12 +10,11 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { IndexDeprecationTableProps, IndexDeprecationTableUI } from './index_table';
 
 describe('IndexDeprecationTable', () => {
-  const actions = [{ label: 'Do it', url: 'http://justdoit.com' }];
   const defaultProps = {
     indices: [
-      { index: 'index1', details: 'Index 1 deets', actions },
-      { index: 'index2', details: 'Index 2 deets', actions },
-      { index: 'index3', details: 'Index 3 deets', actions },
+      { index: 'index1', details: 'Index 1 deets', reindex: true },
+      { index: 'index2', details: 'Index 2 deets', reindex: true },
+      { index: 'index3', details: 'Index 3 deets', reindex: true },
     ],
   } as IndexDeprecationTableProps;
 
@@ -49,34 +48,19 @@ describe('IndexDeprecationTable', () => {
   items={
     Array [
       Object {
-        "actions": Array [
-          Object {
-            "label": "Do it",
-            "url": "http://justdoit.com",
-          },
-        ],
         "details": "Index 1 deets",
         "index": "index1",
+        "reindex": true,
       },
       Object {
-        "actions": Array [
-          Object {
-            "label": "Do it",
-            "url": "http://justdoit.com",
-          },
-        ],
         "details": "Index 2 deets",
         "index": "index2",
+        "reindex": true,
       },
       Object {
-        "actions": Array [
-          Object {
-            "label": "Do it",
-            "url": "http://justdoit.com",
-          },
-        ],
         "details": "Index 3 deets",
         "index": "index3",
+        "reindex": true,
       },
     ]
   }

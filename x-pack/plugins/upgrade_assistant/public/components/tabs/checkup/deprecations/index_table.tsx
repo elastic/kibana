@@ -15,12 +15,8 @@ const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
 export interface IndexDeprecationDetails {
   index: string;
+  reindex: boolean;
   details?: string;
-  actions?: Array<{
-    label: string;
-    url?: string;
-    reindex?: boolean;
-  }>;
 }
 
 export interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
@@ -136,30 +132,21 @@ export class IndexDeprecationTableUI extends React.Component<
   }
 
   private get actionsColumn() {
-    // NOTE: this naive implementation assumes all indices in the table have
-    // the same actions (can still have different URLs). This should work for known usecases.
+    // NOTE: this naive implementation assumes all indices in the table are
+    // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
-    if (!indices.find(i => i.actions !== undefined)) {
+    if (!indices.find(i => i.reindex)) {
       return null;
     }
 
-    const actions = indices[0].actions!;
-
     return {
-      actions: actions.map((action, idx) => ({
-        render(index: IndexDeprecationDetails) {
-          const { url, label, reindex } = index.actions![idx];
-          if (reindex) {
-            return <ReindexButton indexName={index.index} />;
-          } else {
-            return (
-              <EuiButton size="s" href={url} target="_blank">
-                {label}
-              </EuiButton>
-            );
-          }
+      actions: [
+        {
+          render(indexDep: IndexDeprecationDetails) {
+            return <ReindexButton indexName={indexDep.index} />;
+          },
         },
-      })),
+      ],
     };
   }
 }

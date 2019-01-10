@@ -15,6 +15,8 @@ import { COLOR_MAP, LEVEL_MAP } from '../constants';
 import { DeprecationCell } from './cell';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
 
+const OLD_INDEX_MESSAGE = `Index created before ${CURRENT_MAJOR_VERSION}.0`;
+
 const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
 };
@@ -35,7 +37,7 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      actions={deprecation.actions}
+      reindexIndexName={deprecation.message === OLD_INDEX_MESSAGE ? deprecation.index! : undefined}
       docUrl={deprecation.url}
       items={items}
     />
@@ -66,10 +68,6 @@ interface IndexDeprecationProps {
  * Shows a single deprecation and table of affected indices with details for each index.
  */
 const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
-  if (deprecation.message === `Index created before ${CURRENT_MAJOR_VERSION}.0`) {
-    indices = indices.map(i => ({ ...i, actions: [{ label: 'Reindex', reindex: true }] }));
-  }
-
   return (
     <DeprecationCell docUrl={deprecation.url}>
       <IndexDeprecationTable indices={indices} />
@@ -93,12 +91,11 @@ export const DeprecationList: StatelessComponent<{
     const indices = deprecations.map(dep => ({
       index: dep.index!,
       details: dep.details,
-      actions: dep.actions,
+      reindex: dep.message === OLD_INDEX_MESSAGE,
     }));
 
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
-    // If we're grouping by index show all info for each message
     return (
       <div>
         {deprecations.sort(sortByLevelDesc).map(dep => (

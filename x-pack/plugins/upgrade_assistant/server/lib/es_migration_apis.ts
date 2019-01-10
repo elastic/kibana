@@ -12,10 +12,6 @@ import { DeprecationAPIResponse, DeprecationInfo } from 'src/legacy/core_plugins
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
-  actions?: Array<{
-    label: string;
-    url: string;
-  }>;
 }
 
 export interface UpgradeAssistantStatus {
