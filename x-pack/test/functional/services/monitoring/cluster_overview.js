@@ -54,8 +54,15 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   return new class ClusterOverview {
 
     async isOnClusterOverview() {
-      const pageId = await retry.try(() => testSubjects.find(SUBJ_CLUSTER_OVERVIEW));
-      return pageId !== null;
+      await retry.try(async () =>  {
+        const clusterHeadingElement  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+        expect(await clusterHeadingElement.isDisplayed()).to.be(true);
+      });
+      await retry.try(async () =>  {
+        const clusterHeading  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+        expect(await clusterHeading.getVisibleText()).not.to.be.empty();
+      });
+      return true;
     }
     getClusterName() {
       return testSubjects.getVisibleText(SUBJ_CLUSTER_NAME);
