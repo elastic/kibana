@@ -89,10 +89,7 @@ export function initPutRolesApi(
           then: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))),
           otherwise: Joi.array().items(Joi.string().valid(Object.keys(privileges.space))),
         }),
-        feature: Object.entries(privileges.features).reduce((acc, [feature, featurePrivileges]) => ({
-          ...acc,
-          [feature]: Joi.array().items(Joi.string().valid(Object.keys(featurePrivileges)))
-        }), {}),
+        feature: Joi.object().pattern(/^[a-zA-Z0-9_-]+$/, Joi.array().items(Joi.string().regex(/^[a-zA-Z0-9_-]+$/))),
         spaces: Joi.alternatives(
           allSpacesSchema,
           Joi.array().items(Joi.string().regex(/^[a-z0-9_-]+$/)),

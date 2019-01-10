@@ -142,6 +142,58 @@ describe('PUT role', () => {
       },
     });
 
+    putRoleTest(`only allows features that match the pattern`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            feature: {
+              '!foo': ['foo']
+            }
+          }
+        ]
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          //eslint-disable-next-line max-len
+          message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [\"!foo\" is not allowed]]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.0.feature.&#x21;foo'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
+    putRoleTest(`only allows feature privileges that match the pattern`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            feature: {
+              foo: ['!foo']
+            }
+          }
+        ]
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          //eslint-disable-next-line max-len
+          message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" with value \"!foo\" fails to match the required pattern: /^[a-zA-Z0-9_-]+$/]]]]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.0.feature.foo.0'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
     describe('global', () => {
       putRoleTest(`only allows known Kibana global base privileges`, {
         name: 'foo-role',
@@ -162,60 +214,6 @@ describe('PUT role', () => {
             statusCode: 400,
             validation: {
               keys: ['kibana.0.base.0'],
-              source: 'payload',
-            },
-          },
-        },
-      });
-
-      putRoleTest(`only allows known Kibana features`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
-            {
-              feature: {
-                baz: ['all']
-              },
-              spaces: ['*']
-            }
-          ]
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [\"baz\" is not allowed]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.feature.baz'],
-              source: 'payload',
-            },
-          },
-        },
-      });
-
-      putRoleTest(`only allows known Kibana feature privileges`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
-            {
-              feature: {
-                foo: ['foo-privilege-3']
-              },
-              spaces: ['*']
-            }
-          ]
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" must be one of [foo-privilege-1, foo-privilege-2]]]]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.feature.foo.0'],
               source: 'payload',
             },
           },
@@ -325,60 +323,6 @@ describe('PUT role', () => {
             statusCode: 400,
             validation: {
               keys: ['kibana.0.base.0'],
-              source: 'payload',
-            },
-          },
-        },
-      });
-
-      putRoleTest(`only allows known Kibana features`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
-            {
-              feature: {
-                baz: ['foo']
-              },
-              spaces: ['foo-space']
-            }
-          ],
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [\"baz\" is not allowed]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.feature.baz'],
-              source: 'payload',
-            },
-          },
-        },
-      });
-
-      putRoleTest(`only allows known Kibana feature privileges`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
-            {
-              feature: {
-                foo: ['foo-privilege-3']
-              },
-              spaces: ['foo-space']
-            }
-          ],
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" must be one of [foo-privilege-1, foo-privilege-2]]]]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.feature.foo.0'],
               source: 'payload',
             },
           },
