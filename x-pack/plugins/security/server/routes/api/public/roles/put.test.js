@@ -221,6 +221,39 @@ describe('PUT role', () => {
           },
         },
       });
+
+      putRoleTest(`only allows one global entry`, {
+        name: 'foo-role',
+        payload: {
+          kibana: [
+            {
+              feature: {
+                foo: ['foo-privilege-1']
+              },
+              spaces: ['*']
+            },
+            {
+              feature: {
+                bar: ['bar-privilege-1']
+              },
+              spaces: ['*']
+            }
+          ]
+        },
+        asserts: {
+          statusCode: 400,
+          result: {
+            error: 'Bad Request',
+            //eslint-disable-next-line max-len
+            message: `child \"kibana\" fails because [\"kibana\" position 1 contains a duplicate value]`,
+            statusCode: 400,
+            validation: {
+              keys: ['kibana.1'],
+              source: 'payload'
+            }
+          },
+        },
+      });
     });
 
     describe('space', () => {
@@ -348,6 +381,39 @@ describe('PUT role', () => {
               keys: ['kibana.0.feature.foo.0'],
               source: 'payload',
             },
+          },
+        },
+      });
+
+      putRoleTest(`only allows space to be in one entry`, {
+        name: 'foo-role',
+        payload: {
+          kibana: [
+            {
+              feature: {
+                foo: ['foo-privilege-1']
+              },
+              spaces: ['marketing']
+            },
+            {
+              feature: {
+                bar: ['bar-privilege-1']
+              },
+              spaces: ['sales', 'marketing']
+            }
+          ]
+        },
+        asserts: {
+          statusCode: 400,
+          result: {
+            error: 'Bad Request',
+            //eslint-disable-next-line max-len
+            message: `child \"kibana\" fails because [\"kibana\" position 1 contains a duplicate value]`,
+            statusCode: 400,
+            validation: {
+              keys: ['kibana.1'],
+              source: 'payload'
+            }
           },
         },
       });

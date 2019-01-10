@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, pick, identity } from 'lodash';
+import { flatten, pick, identity, intersection } from 'lodash';
 import Joi from 'joi';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
@@ -98,7 +98,9 @@ export function initPutRolesApi(
           Joi.array().items(Joi.string().regex(/^[a-z0-9_-]+$/)),
         ).default([GLOBAL_RESOURCE])
       })
-    );
+    ).unique((a, b) => {
+      return intersection(a.spaces, b.spaces).length !== 0;
+    });
   };
 
   const schema = Joi.object().keys({
@@ -124,6 +126,7 @@ export function initPutRolesApi(
     path: '/api/security/role/{name}',
     async handler(request, h) {
       const { name } = request.params;
+
       try {
         const existingRoleResponse = await callWithRequest(request, 'shield.getRole', {
           name,
@@ -138,7 +141,6 @@ export function initPutRolesApi(
         await callWithRequest(request, 'shield.putRole', { name, body });
         return h.response().code(204);
       } catch (err) {
-        console.log(err);
         throw wrapError(err);
       }
     },
