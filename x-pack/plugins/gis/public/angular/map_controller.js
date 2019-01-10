@@ -17,7 +17,7 @@ import {
   setSelectedLayer,
   setTimeFilters,
   setRefreshConfig,
-  mapExtentChanged,
+  setGoto,
   replaceLayerList,
 } from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
@@ -27,7 +27,6 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
-import { getMapReady } from "../selectors/map_selectors";
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
@@ -35,7 +34,6 @@ const app = uiModules.get('app/gis', []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
 
-  let isLayersListInitializedFromSavedObject = false;
   const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
   let unsubscribe;
@@ -54,19 +52,21 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
     });
 
     // sync store with savedMap mapState
-    // layerList is synced after map has initialized and extent is known.
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
       const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
       store.dispatch(setTimeFilters(timeFilters));
-      store.dispatch(mapExtentChanged({
+      store.dispatch(setGoto({
+        lat: mapState.center.lat,
+        lon: mapState.center.lon,
         zoom: mapState.zoom,
-        center: mapState.center,
       }));
       if (mapState.refreshConfig) {
         store.dispatch(setRefreshConfig(mapState.refreshConfig));
       }
     }
+    const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
+    store.dispatch(replaceLayerList(layerList));
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
@@ -77,17 +77,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
   });
 
   function handleStoreChanges(store) {
+    // theme changes must triggered in digest cycle because top nav is still angular
     if (isDarkTheme !== getIsDarkTheme(store.getState())) {
       isDarkTheme = getIsDarkTheme(store.getState());
       updateTheme();
-    }
-
-    // Part of initial syncing of store from saved object
-    // Delayed until after map is ready so map extent is known
-    if (!isLayersListInitializedFromSavedObject && getMapReady(store.getState())) {
-      isLayersListInitializedFromSavedObject = true;
-      const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
-      store.dispatch(replaceLayerList(layerList));
     }
   }
 
@@ -135,7 +128,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       });
 
       if (savedMap.id !== $route.current.params.id) {
-        kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        $scope.$evalAsync(() => {
+          kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        });
       }
     }
     return { id };

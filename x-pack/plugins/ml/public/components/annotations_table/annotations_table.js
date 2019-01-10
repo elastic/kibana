@@ -44,13 +44,22 @@ import { mlTableService } from '../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
-class AnnotationsTable extends Component {
+const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
+  static propTypes = {
+    annotations: PropTypes.array,
+    jobs: PropTypes.array,
+    isSingleMetricViewerLinkVisible: PropTypes.bool,
+    isNumberBadgeVisible: PropTypes.bool
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -109,7 +118,10 @@ class AnnotationsTable extends Component {
   }
 
   componentDidMount() {
-    if (this.props.annotations === undefined) {
+    if (
+      this.props.annotations === undefined &&
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0
+    ) {
       this.getAnnotations();
     }
   }
@@ -118,6 +130,7 @@ class AnnotationsTable extends Component {
     if (
       this.props.annotations === undefined &&
       this.state.isLoading === false &&
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
       this.getAnnotations();
@@ -210,7 +223,8 @@ class AnnotationsTable extends Component {
   render() {
     const {
       isSingleMetricViewerLinkVisible = true,
-      isNumberBadgeVisible = false
+      isNumberBadgeVisible = false,
+      intl
     } = this.props;
 
     if (this.props.annotations === undefined) {
@@ -238,13 +252,28 @@ class AnnotationsTable extends Component {
     if (annotations.length === 0) {
       return (
         <EuiCallOut
-          title="No annotations created for this job"
+          title={<FormattedMessage
+            id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"
+            defaultMessage="No annotations created for this job"
+          />}
           iconType="iInCircle"
         >
           {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) &&
             <p>
-              To create an annotation,
-              open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
+              <FormattedMessage
+                id="xpack.ml.annotationsTable.howToCreateAnnotationDescription"
+                defaultMessage="To create an annotation, open the {linkToSingleMetricView}"
+                values={{
+                  linkToSingleMetricView: (
+                    <EuiLink onClick={() => this.openSingleMetricView()}>
+                      <FormattedMessage
+                        id="xpack.ml.annotationsTable.howToCreateAnnotationDescription.singleMetricViewerLinkText"
+                        defaultMessage="Single Metric Viewer"
+                      />
+                    </EuiLink>
+                  )
+                }}
+              />
             </p>
           }
         </EuiCallOut>
@@ -256,45 +285,66 @@ class AnnotationsTable extends Component {
     const columns = [
       {
         field: 'annotation',
-        name: 'Annotation',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.annotationColumnName',
+          defaultMessage: 'Annotation',
+        }),
         sortable: true
       },
       {
         field: 'timestamp',
-        name: 'From',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.fromColumnName',
+          defaultMessage: 'From',
+        }),
         dataType: 'date',
         render: renderDate,
         sortable: true,
       },
       {
         field: 'end_timestamp',
-        name: 'To',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.toColumnName',
+          defaultMessage: 'To',
+        }),
         dataType: 'date',
         render: renderDate,
         sortable: true,
       },
       {
         field: 'create_time',
-        name: 'Creation date',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.creationDateColumnName',
+          defaultMessage: 'Creation date',
+        }),
         dataType: 'date',
         render: renderDate,
         sortable: true,
       },
       {
         field: 'create_username',
-        name: 'Created by',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.createdByColumnName',
+          defaultMessage: 'Created by',
+        }),
         sortable: true,
       },
       {
         field: 'modified_time',
-        name: 'Last modified date',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.lastModifiedDateColumnName',
+          defaultMessage: 'Last modified date',
+        }),
         dataType: 'date',
         render: renderDate,
         sortable: true,
       },
       {
         field: 'modified_username',
-        name: 'Last modified by',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.lastModifiedByColumnName',
+          defaultMessage: 'Last modified by',
+        }),
         sortable: true,
       },
     ];
@@ -303,7 +353,10 @@ class AnnotationsTable extends Component {
     if (jobIds.length > 1) {
       columns.unshift({
         field: 'job_id',
-        name: 'job ID',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.jobIdColumnName',
+          defaultMessage: 'job ID',
+        }),
         sortable: true,
       });
     }
@@ -311,7 +364,10 @@ class AnnotationsTable extends Component {
     if (isNumberBadgeVisible) {
       columns.unshift({
         field: 'key',
-        name: 'Label',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.labelColumnName',
+          defaultMessage: 'Label',
+        }),
         sortable: true,
         width: '60px',
         render: (key) => {
@@ -328,23 +384,45 @@ class AnnotationsTable extends Component {
       columns.push({
         align: RIGHT_ALIGNMENT,
         width: '60px',
-        name: 'View',
+        name: intl.formatMessage({
+          id: 'xpack.ml.annotationsTable.viewColumnName',
+          defaultMessage: 'View',
+        }),
         render: (annotation) => {
           const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
-          const openInSingleMetricViewerText = isDrillDownAvailable
-            ? 'Open in Single Metric Viewer'
-            : 'Job configuration not supported in Single Metric Viewer';
+          const openInSingleMetricViewerTooltipText = isDrillDownAvailable ? (
+            <FormattedMessage
+              id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
+              defaultMessage="Open in Single Metric Viewer"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
+              defaultMessage="Job configuration not supported in Single Metric Viewer"
+            />
+          );
+          const openInSingleMetricViewerAriaLabelText = isDrillDownAvailable ? (
+            <FormattedMessage
+              id="xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel"
+              defaultMessage="Open in Single Metric Viewer"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel"
+              defaultMessage="Job configuration not supported in Single Metric Viewer"
+            />
+          );
 
           return (
             <EuiToolTip
               position="bottom"
-              content={openInSingleMetricViewerText}
+              content={openInSingleMetricViewerTooltipText}
             >
               <EuiButtonIcon
                 onClick={() => this.openSingleMetricView(annotation)}
                 disabled={!isDrillDownAvailable}
                 iconType="stats"
-                aria-label={openInSingleMetricViewerText}
+                aria-label={openInSingleMetricViewerAriaLabelText}
               />
             </EuiToolTip>
           );
@@ -377,12 +455,6 @@ class AnnotationsTable extends Component {
       />
     );
   }
-}
-AnnotationsTable.propTypes = {
-  annotations: PropTypes.array,
-  jobs: PropTypes.array,
-  isSingleMetricViewerLinkVisible: PropTypes.bool,
-  isNumberBadgeVisible: PropTypes.bool
-};
+});
 
 export { AnnotationsTable };

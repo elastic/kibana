@@ -1,7 +1,7 @@
 /*
  ******
  ****** This is a collection of CSS overrides that make Kibana look better for
- ****** generating PDF reports with Phantom.
+ ****** generating PDF reports with headless browser
  ******
  */
 
@@ -117,7 +117,7 @@ visualize-app .visEditor__canvas {
  * reporting/export_types/printable_pdf/server/lib/screenshot.js or this will also hide the visualization
  * we want to capture.
  * 2. React grid item's transform affects the visualizations, even when they are using fixed positioning. Chrome seems
- * to handle this fine, but firefox moves the visualizations around, as I suspect Phantom since it had a problem.
+ * to handle this fine, but firefox moves the visualizations around.
  */
  dashboard-app .react-grid-item {
   height: 0 !important; /* 1. */

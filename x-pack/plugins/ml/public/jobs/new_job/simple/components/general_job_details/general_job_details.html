@@ -61,7 +61,7 @@
           aria-describedby="ml_aria_description_new_job_dedicated_index"
           class='kuiCheckBox'
           ng-model  ="formConfig.useDedicatedIndex" />
-        <span class='kuiCheckBoxLabel__text'>
+        <span class='kuiCheckBoxLabel__text dedicated-index-label'>
           <span id="ml_aria_label_new_job_dedicated_index">Use dedicated index</span>
           <i ml-info-icon="new_job_dedicated_index" ></i>
         </span>
@@ -80,7 +80,7 @@
           aria-describedby="ml_aria_description_new_job_model_memory_limit"
           type="text"
           ng-model='formConfig.modelMemoryLimit'
-          class="kuiTextInput kuiTextInput--large" />
+          class="kuiTextInput kuiTextInput--large model-memory-input-input" />
         <div ng-hide="ui.validation.checks.modelMemoryLimit.valid" class="validation-error">{{ ui.validation.checks.modelMemoryLimit.message }}</div>
       </div>
     </div>
