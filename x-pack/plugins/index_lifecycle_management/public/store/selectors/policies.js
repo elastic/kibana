@@ -242,6 +242,8 @@ export const phaseToES = (state, phase, originalEsPhase) => {
         }`;
       }
     }
+  } else {
+    delete esPhase.actions.rollover;
   }
   if (phase[PHASE_NODE_ATTRS]) {
     const [ name, value, ] = phase[PHASE_NODE_ATTRS].split(':');
@@ -253,18 +255,26 @@ export const phaseToES = (state, phase, originalEsPhase) => {
   if (isNumber(phase[PHASE_REPLICA_COUNT])) {
     esPhase.actions.allocate = esPhase.actions.allocate || {};
     esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
+  } else {
+    if (esPhase.actions.allocate) {
+      delete esPhase.actions.allocate.require;
+    }
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
     esPhase.actions.forcemerge = {
       max_num_segments: phase[PHASE_FORCE_MERGE_SEGMENTS]
     };
+  } else {
+    delete esPhase.actions.forcemerge;
   }
 
   if (phase[PHASE_SHRINK_ENABLED] && isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
     esPhase.actions.shrink = {
       number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
     };
+  } else {
+    delete esPhase.actions.shrink;
   }
   return esPhase;
 };
