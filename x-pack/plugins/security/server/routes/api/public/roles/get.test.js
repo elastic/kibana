@@ -86,37 +86,6 @@ describe('GET roles', () => {
         },
       },
     });
-
-    getRolesTest(`return error if we have empty resources`, {
-      callWithRequestImpl: async () => ({
-        first_role: {
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['read'],
-              resources: [],
-            },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
-          },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
-      }),
-      asserts: {
-        statusCode: 500,
-        result: {
-          error: 'Internal Server Error',
-          statusCode: 500,
-          message: 'An internal server error occurred',
-        },
-      },
-    });
   });
 
   describe('success', () => {
@@ -170,7 +139,7 @@ describe('GET roles', () => {
     });
 
     describe('global', () => {
-      getRolesTest(`transforms matching applications with * resource to kibana global minimum privileges`, {
+      getRolesTest(`transforms matching applications with * resource to kibana global base privileges`, {
         callWithRequestImpl: async () => ({
           first_role: {
             cluster: [],
@@ -403,6 +372,37 @@ describe('GET roles', () => {
           ],
         },
       });
+    });
+
+    getRolesTest(`return error if we have empty resources`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['read'],
+              resources: [],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 500,
+        result: {
+          error: 'Internal Server Error',
+          statusCode: 500,
+          message: 'An internal server error occurred',
+        },
+      },
     });
 
     getRolesTest(`resource not * without space: prefix returns empty kibana section with _transform_error set to ['kibana']`, {
@@ -916,7 +916,7 @@ describe('GET role', () => {
     });
 
     describe('global', () => {
-      getRoleTest(`transforms matching applications with * resource to kibana global minimum privileges`, {
+      getRoleTest(`transforms matching applications with * resource to kibana global base privileges`, {
         name: 'first_role',
         callWithRequestImpl: async () => ({
           first_role: {
@@ -1021,7 +1021,7 @@ describe('GET role', () => {
     });
 
     describe('space', () => {
-      getRoleTest(`transforms matching applications with space resources to kibana space minimum privileges`, {
+      getRoleTest(`transforms matching applications with space resources to kibana space base privileges`, {
         name: 'first_role',
         callWithRequestImpl: async () => ({
           first_role: {
