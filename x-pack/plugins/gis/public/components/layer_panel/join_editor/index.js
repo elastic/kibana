@@ -6,6 +6,7 @@
 
 import { connect } from 'react-redux';
 import { JoinEditor } from './view';
+import { getSelectedLayer, getSelectedLayerJoinDescriptors } from '../../../selectors/map_selectors';
 import { setJoinsForLayer } from '../../../actions/store_actions';
 
 function mapDispatchToProps(dispatch) {
@@ -16,12 +17,10 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-function mapStateToProps({}, props) {
+function mapStateToProps(state = {}) {
   return {
-    joins: props.layer.getJoins().map(join => {
-      return join.toDescriptor();
-    }),
-    layer: props.layer,
+    joins: getSelectedLayerJoinDescriptors(state),
+    layer: getSelectedLayer(state),
   };
 }
 

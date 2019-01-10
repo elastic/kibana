@@ -223,7 +223,7 @@ export class VectorLayer extends ALayer {
           join: join
         };
       }
-      startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
+      startLoading(sourceDataId, requestToken, dataFilters);
       const leftSourceName = await this.getSourceName();
       const {
         rawData,
