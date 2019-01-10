@@ -22,6 +22,11 @@ jest.mock('../../services/field_format_service', () => ({
     getFieldFormat: jest.fn()
   }
 }));
+jest.mock('../../services/job_service', () => ({
+  mlJobService: {
+    getJob: jest.fn()
+  }
+}));
 
 // The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
 // TODO: Refactor the involved tests to avoid this duplication
