@@ -213,7 +213,7 @@ export const policyFromES = (policy) => {
   };
 };
 
-export const phaseToES = (state, phase, originalEsPhase) => {
+export const phaseToES = (phase, originalEsPhase) => {
   const esPhase = { ...originalEsPhase };
 
   if (!phase[PHASE_ENABLED]) {

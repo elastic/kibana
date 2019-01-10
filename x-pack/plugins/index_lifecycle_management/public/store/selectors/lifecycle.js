@@ -215,7 +215,7 @@ export const getLifecycle = state => {
       const esPolicy = getPolicyByName(state, policyName).policy || {};
       const esPhase = esPolicy.phases ? esPolicy.phases[phaseName] : {};
       if (phase[PHASE_ENABLED]) {
-        accum[phaseName] = phaseToES(state, phase, esPhase);
+        accum[phaseName] = phaseToES(phase, esPhase);
 
         // These seem to be constants
         if (phaseName === PHASE_DELETE) {
