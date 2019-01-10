@@ -78,12 +78,21 @@ export const SERVICE_COLUMNS = [
   },
   {
     field: 'transactionsPerMinute',
-    name: i18n.translate('xpack.apm.servicesTable.transPerMinuteColumnLabel', {
-      defaultMessage: 'Trans. per minute'
-    }),
+    name: i18n.translate(
+      'xpack.apm.servicesTable.transactionsPerMinuteColumnLabel',
+      {
+        defaultMessage: 'Trans. per minute'
+      }
+    ),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => `${formatNumber(value)} tpm`
+    render: (value: number) =>
+      `${formatNumber(value)} ${i18n.translate(
+        'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
+        {
+          defaultMessage: 'tpm'
+        }
+      )}`
   },
   {
     field: 'errorsPerMinute',
@@ -92,7 +101,13 @@ export const SERVICE_COLUMNS = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => `${formatNumber(value)} err.`
+    render: (value: number) =>
+      `${formatNumber(value)} ${i18n.translate(
+        'xpack.apm.servicesTable.errorsPerMinuteUnitLabel',
+        {
+          defaultMessage: 'err.'
+        }
+      )}`
   }
 ];
 
