@@ -6,5 +6,5 @@
 
 export function getChartContainerWidth() {
   const chartContainer = document.querySelector('.explorer-charts');
-  return Math.floor(chartContainer.offsetWidth);
+  return Math.floor(chartContainer && chartContainer.clientWidth || 0);
 }
