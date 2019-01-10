@@ -45,20 +45,19 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsExist(['5,000']);
     await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
     await dashboardExpect.dataTableRowCount(5);
-    // TODO add test for 'bar chart' viz
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     // TODO add test for 'region map viz'
     // TODO add test for 'tsvb gauge' viz
     await dashboardExpect.tsvbTimeSeriesLegendCount(1);
     // TODO add test for 'geo map' viz
-    // This test the the precence of two input control embeddables
+    // This tests the presence of the two input control embeddables
     await dashboardExpect.inputControlItemCount(5);
     await dashboardExpect.tsvbTableCellCount(20);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
     await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.675']);
     await dashboardExpect.tsvbMetricValuesExist(['210,007,889,606']);
     // TODO add test for 'animal sound pie' viz
-    // This test either the area chart and non timebased line chart points
+    // This tests the area chart and non timebased line chart points
     await dashboardExpect.lineChartPointsCount(5);
     // TODO add test for 'scripted filter and query' viz
     // TODO add test for 'animal weight linked to search' viz
