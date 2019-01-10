@@ -196,6 +196,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.state.role)}
           intl={this.props.intl}
           onChange={this.onFeaturePrivilegesChange}
+          onChangeAll={this.onChangeAllFeaturePrivileges}
           privilegeDefinition={this.props.privilegeDefinition}
           spacesIndex={this.state.editingIndex}
           showLocks={this.state.selectedBasePrivilege.length === 0}
@@ -300,6 +301,33 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       delete form.feature[featureId];
     } else {
       form.feature[featureId] = [...privileges];
+    }
+
+    this.setState({
+      role,
+    });
+  };
+
+  private onChangeAllFeaturePrivileges = (privileges: string[]) => {
+    const role = copyRole(this.state.role);
+    const form = role.kibana[this.state.editingIndex];
+
+    const effectivePrivileges = this.props.effectivePrivilegesFactory.getInstance(role);
+
+    if (privileges.length === 0) {
+      form.feature = {};
+    } else {
+      this.props.features.forEach(feature => {
+        const canAssign = effectivePrivileges.canAssignSpaceFeaturePrivilege(
+          feature.id,
+          privileges[0],
+          this.state.editingIndex
+        );
+
+        if (canAssign) {
+          form.feature[feature.id] = [...privileges];
+        }
+      });
     }
 
     this.setState({

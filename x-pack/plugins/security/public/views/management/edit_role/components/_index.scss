@@ -1,5 +1,6 @@
 @import './collapsible_panel/collapsible_panel';
 @import './privileges/kibana/space_aware_privilege_section/index';
+@import './privileges/kibana/feature_table/index';
 
 .secPrivilegeFeatureIcon {
   flex-shrink: 0;

@@ -13,7 +13,7 @@ import {
   EuiInMemoryTable,
   EuiText,
 } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
@@ -26,6 +26,7 @@ import {
 } from '../../../../../../../lib/effective_privileges';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
+import { ChangeAllPrivilegesControl } from './change_all_privileges';
 
 interface Props {
   role: Role;
@@ -35,6 +36,7 @@ interface Props {
   intl: InjectedIntl;
   spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
+  onChangeAll: (privileges: string[]) => void;
   disabled?: boolean;
   showLocks?: boolean;
 }
@@ -153,10 +155,18 @@ export class FeatureTable extends Component<Props, {}> {
     },
     {
       field: 'role',
-      name: this.props.intl.formatMessage({
-        id: 'xpack.roles.management.enabledRoleFeaturesEnabledColumnTitle',
-        defaultMessage: 'Privilege',
-      }),
+      name: (
+        <span>
+          <FormattedMessage
+            id="xpack.roles.management.enabledRoleFeaturesEnabledColumnTitle"
+            defaultMessage="Privilege"
+          />
+          <ChangeAllPrivilegesControl
+            privileges={[...availablePrivileges, NO_PRIVILEGE_VALUE]}
+            onChange={this.onChangeAllFeaturePrivileges}
+          />
+        </span>
+      ),
       render: (roleEntry: Role, record: TableRow) => {
         const featureId = record.feature.id;
 
@@ -253,5 +263,13 @@ export class FeatureTable extends Component<Props, {}> {
     return [PRIVILEGE_SOURCE.NONE, PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY].includes(
       this.getPrivilegeExplanation(featureId).source
     );
+  };
+
+  private onChangeAllFeaturePrivileges = (privilege: string) => {
+    if (privilege === NO_PRIVILEGE_VALUE) {
+      this.props.onChangeAll([]);
+    } else {
+      this.props.onChangeAll([privilege]);
+    }
   };
 }
