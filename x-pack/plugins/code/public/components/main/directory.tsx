@@ -99,7 +99,7 @@ export const Directory = withRouter((props: Props) => {
   }
   const { resource, org, repo, revision } = props.match.params;
   const getUrl = (pathType: PathTypes) => (path: string) =>
-    `/${resource}/${org}/${repo}/${revision}/${pathType}/${path}`;
+    `/${resource}/${org}/${repo}/${pathType}/${revision}/${path}`;
   const fileList = (
     <DirectoryNodes
       nodes={files}

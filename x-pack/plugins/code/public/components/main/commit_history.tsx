@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTextColor } from '@elastic/eui';
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -39,13 +32,6 @@ const Header = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-`;
-
-const Title = styled.div`
-  color: #1a1a1a;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 4px 0 18px;
 `;
 
 const TimeLine = styled.div`
@@ -128,7 +114,11 @@ const CommitGroup = (props: { commits: CommitInfo[]; date: string }) => {
   );
 };
 
-export const CommitHistory = (props: { commits: CommitInfo[]; repoUri: string }) => {
+export const CommitHistory = (props: {
+  commits: CommitInfo[];
+  repoUri: string;
+  header: React.ReactNode;
+}) => {
   if (!props.commits) {
     return (
       <CommitMessages>
@@ -144,10 +134,7 @@ export const CommitHistory = (props: { commits: CommitInfo[]; repoUri: string })
   ));
   return (
     <CommitMessages>
-      <Header>
-        <Title>Recent Commits</Title>
-        <EuiButton>View All</EuiButton>
-      </Header>
+      <Header>{props.header}</Header>
       {commitList}
     </CommitMessages>
   );
