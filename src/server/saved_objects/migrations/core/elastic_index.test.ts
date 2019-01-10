@@ -56,23 +56,6 @@ describe('ElasticIndex', () => {
       );
     });
 
-    test('handles v7 indices', async () => {
-      const callCluster = sinon.spy(async (path: string, { index }: any) => {
-        return {
-          [index]: {
-            aliases: { foo: index },
-            mappings: {
-              dynamic: 'strict',
-              properties: { a: 'b' },
-            },
-          },
-        };
-      });
-
-      const result = await Index.fetchInfo(callCluster, '.baz');
-      expect(result).toMatchSnapshot();
-    });
-
     test('fails if there are multiple root types', async () => {
       const callCluster = sinon.spy(async (path: string, { index }: any) => {
         return {
@@ -658,7 +641,16 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeFalsy();
-      expect(callCluster.args).toEqual([['indices.get', { ignore: [404], index: '.myalias' }]]);
+      expect(callCluster.args).toEqual([
+        [
+          'indices.get',
+          {
+            ignore: [404],
+            index: '.myalias',
+            include_type_name: true,
+          },
+        ],
+      ]);
     });
 
     test('is true if there are no migrations defined', async () => {
