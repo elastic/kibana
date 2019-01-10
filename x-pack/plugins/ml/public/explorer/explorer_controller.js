@@ -174,6 +174,7 @@ module.controller('MlExplorerController', function (
 
   $scope.viewBySwimlaneOptions = [];
   $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
+  $scope.viewBySwimlaneDataLoading = false;
 
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store filters.
@@ -811,6 +812,7 @@ module.controller('MlExplorerController', function (
   function loadViewBySwimlane(fieldValues) {
     // reset the swimlane data to avoid flickering where the old dataset would briefly show up.
     $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
+    $scope.viewBySwimlaneDataLoading = true;
 
     skipCellClicks = true;
     // finish() function, called after each data set has been loaded and processed.
@@ -833,6 +835,8 @@ module.controller('MlExplorerController', function (
           }
         }
       }
+
+      $scope.viewBySwimlaneDataLoading = false;
 
       skipCellClicks = false;
       console.log('Explorer view by swimlane data set:', $scope.viewBySwimlaneData);

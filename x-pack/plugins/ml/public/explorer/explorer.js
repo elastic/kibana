@@ -91,6 +91,7 @@ export const Explorer = injectI18n(
         swimlaneViewByFieldName,
         tableData,
         viewByLoadedForTimeFormatted,
+        viewBySwimlaneDataLoading,
         viewBySwimlaneOptions,
       } = this.props;
 
@@ -219,7 +220,11 @@ export const Explorer = injectI18n(
                   </div>
                 )}
 
-                {!showViewBySwimlane && (
+                {viewBySwimlaneDataLoading && (
+                  <LoadingIndicator/>
+                )}
+
+                {!showViewBySwimlane && !viewBySwimlaneDataLoading && (
                   <ExplorerNoInfluencersFound swimlaneViewByFieldName={swimlaneViewByFieldName} />
                 )}
               </React.Fragment>
