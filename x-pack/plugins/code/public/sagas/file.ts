@@ -43,12 +43,12 @@ import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
-    const { uri, revision, path } = action.payload!;
+    const { uri, revision, path, parents } = action.payload!;
     if (path) {
       const requestedPaths: string[] = yield select(requestedPathsSelector);
       const shouldFetch = !some(requestedPaths, p => p.startsWith(path));
       if (shouldFetch) {
-        yield call(fetchPath, { uri, revision, path });
+        yield call(fetchPath, { uri, revision, path, parents });
       }
       const pathSegments = path.split('/');
       let currentPath = '';

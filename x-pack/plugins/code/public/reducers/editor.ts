@@ -36,7 +36,7 @@ const initialState: EditorState = {
 export const editor = handleActions(
   {
     [String(findReferences)]: (state: EditorState, action: any) =>
-      produce<EditorState>(state, draft => {
+      produce<EditorState>(state, (draft: EditorState) => {
         draft.refPayload = action.payload;
         draft.showing = true;
         draft.loading = true;

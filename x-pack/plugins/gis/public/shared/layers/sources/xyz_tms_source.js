@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiFieldText,
   EuiText,
   EuiFormRow,
+  EuiSpacer
 } from '@elastic/eui';
 
 import { TMSSource } from './tms_source';
@@ -19,7 +20,7 @@ export class XYZTMSSource extends TMSSource {
 
   static type = 'EMS_XYZ';
 
-  static typeDisplayName = 'TMS XYZ';
+  static typeDisplayName = 'Tile Map Service from URL';
 
   static createDescriptor(urlTemplate) {
     return {
@@ -35,6 +36,20 @@ export class XYZTMSSource extends TMSSource {
       onPreviewSource(source);
     };
     return (<XYZTMSEditor previewTMS={previewTMS} />);
+  }
+
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{XYZTMSSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            Map tiles from a URL that includes the XYZ coordinates
+          </p>
+        </EuiText>
+      </Fragment>
+    );
   }
 
   renderDetails() {

@@ -51,7 +51,7 @@ export const languageServer = handleActions(
       state: LanguageServerState,
       action: Action<string>
     ) =>
-      produce<LanguageServerState>(state, draft => {
+      produce<LanguageServerState>(state, (draft: LanguageServerState) => {
         draft.installServerLoading[action.payload!] = false;
         draft.languageServers.find(ls => ls.name === action.payload)!.status =
           LanguageServerStatus.READY;

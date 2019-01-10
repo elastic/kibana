@@ -1,15 +1,34 @@
 <div ng-if="card.existsInDocs === true" class="card-contents">
   <div class="stats euiText">
     <div ng-if="card.aggregatable === true" class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
-      {{ card.stats.count }} <ng-pluralize count="card.stats.count" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
+      <span
+        i18n-id="xpack.ml.fieldDataCard.cardGeoPoint.cardStatsCountDocumentsPercentsLabel"
+        i18n-default-message="{cardStatsCount, plural, one {# document} other {# documents}}"
+        i18n-values="{
+          cardStatsCount: card.stats.count,
+        }"
+      ></span>
       ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
     </div>
-    <div ng-if="card.aggregatable === true" class="stat"><i class="fa fa-cubes" aria-hidden="true"></i> {{ card.stats.cardinality }} distinct
-      <ng-pluralize count="card.stats.cardinality" when="{'1':'value', 'other':'values'}">values</ng-pluralize>
+    <div ng-if="card.aggregatable === true" class="stat"><i class="fa fa-cubes" aria-hidden="true"></i>
+      <span
+        i18n-id="xpack.ml.fieldDataCard.cardGeoPoint.cardStatsCardinalityDistinctValuesLabel"
+        i18n-default-message="{cardStatsCardinality} distinct {cardStatsCardinality, plural, one {value} other {values}}"
+        i18n-values="{
+          cardStatsCardinality: card.stats.cardinality,
+        }"
+      ></span>
     </div>
   </div>
   <div ng-if="card.stats.examples.length > 0" class="stats euiText">
-    <div class="stat"><ng-pluralize count="card.stats.examples.length" when="{'1':'value', 'other':'examples'}">examples</ng-pluralize></div>
+    <div
+      class="stat"
+      i18n-id="xpack.ml.fieldDataCard.cardGeoPoint.cardStatsExamplesLabel"
+      i18n-default-message="{cardStatsExamplesLength, plural, one {value} other {examples}}"
+      i18n-values="{
+        cardStatsExamplesLength: card.stats.examples.length,
+      }"
+    ></div>
     <div ng-repeat="example in card.stats.examples">
       {{ example }}
     </div>

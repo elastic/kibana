@@ -123,8 +123,8 @@ export default function ({ getService, getPageObjects }) {
           await primaryBasicClusterLink.click();
 
           expect(await clusterOverview.isOnClusterOverview()).to.be(true);
-          expect(await clusterOverview.getClusterName()).to.be('production');
 
+          expect(await clusterOverview.getClusterName()).to.be('production');
           await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters'); // reset for next test
         });
 

@@ -56,7 +56,7 @@ export class CodeFileTree extends React.Component<Props> {
   };
 
   public flattenDirectory: (node: Tree) => Tree[] = (node: Tree) => {
-    if (node.childrenCount === 1) {
+    if (node.childrenCount === 1 && node.children![0].type === FileTreeItemType.Directory) {
       return [node, ...this.flattenDirectory(node.children![0])];
     } else {
       return [node];
@@ -68,19 +68,18 @@ export class CodeFileTree extends React.Component<Props> {
     const onClick = () => this.onClick(node);
     switch (node.type) {
       case FileTreeItemType.Directory: {
-        const onFolderClick = (e: React.MouseEvent<HTMLDivElement>) => {
-          const target = e.target as HTMLElement;
-          if (target.tagName === 'DIV') {
-            this.onClick(node);
-          } else {
-            this.getTreeToggler(node.path || '')();
-          }
+        const onFolderClick = () => {
+          this.getTreeToggler(node.path || '')();
         };
         return (
-          <div onClick={onFolderClick} className={className} role="button">
-            {forceOpen ? <FolderOpenTriangle /> : <FolderClosedTriangle />}
-            <EuiIcon type={forceOpen ? 'folderClosed' : 'folderOpen'} />
-            <DirectoryNode>{`${node.name}/`}</DirectoryNode>
+          <div className={className}>
+            {forceOpen ? (
+              <FolderOpenTriangle onClick={onFolderClick} />
+            ) : (
+              <FolderClosedTriangle onClick={onFolderClick} />
+            )}
+            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} onClick={onClick} />
+            <DirectoryNode onClick={onClick}>{`${node.name}/`}</DirectoryNode>
           </div>
         );
       }

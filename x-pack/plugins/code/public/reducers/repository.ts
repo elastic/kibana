@@ -66,8 +66,9 @@ export const repository = handleActions(
         return state;
       }
     },
-    [String(deleteRepoFinished)]: (state: RepositoryState, action: Action<any>) =>
-      produce<RepositoryState>(state, draft => {
+    [String(deleteRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, (draft: RepositoryState) => {
+        feature/merge-code
         draft.repositories = state.repositories.filter(repo => repo.uri !== action.payload);
       }),
     [String(importRepo)]: (state: RepositoryState) =>
@@ -75,7 +76,7 @@ export const repository = handleActions(
         draft.importLoading = true;
       }),
     [String(importRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
-      produce<RepositoryState>(state, draft => {
+      produce<RepositoryState>(state, (draft: RepositoryState) => {
         draft.importLoading = false;
         draft.showCallOut = true;
         draft.callOutType = CallOutType.success;

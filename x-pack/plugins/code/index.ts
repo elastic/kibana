@@ -60,7 +60,7 @@ export const code = (kibana: any) =>
         description: 'Code Search Plugin',
         main: 'plugins/code/app',
       },
-      styleSheetPaths: resolve(__dirname, 'public/styles.scss'),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
 
     config(Joi: any) {
