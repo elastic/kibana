@@ -10,7 +10,7 @@
  * React component for rendering a select element with limit options.
  */
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { get } from 'lodash';
 import React, { Component } from 'react';
 
 import {
@@ -67,7 +67,7 @@ class SelectLimit extends Component {
     // set initial state from service if available
     if (this.mlSelectLimitService !== undefined) {
       const limitState = this.mlSelectLimitService.state.get('limit');
-      const limitValue = _.get(limitState, 'val', 10);
+      const limitValue = get(limitState, 'val', 10);
       const limit = optionValueToLimit(limitValue);
       // set initial selected option equal to limit value
       const selectedOption = LIMIT_OPTIONS.find(opt => (opt.val === limit.val));

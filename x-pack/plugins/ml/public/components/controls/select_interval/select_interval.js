@@ -9,7 +9,7 @@
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
-import _ from 'lodash';
+import { get } from 'lodash';
 import React, { Component } from 'react';
 
 import {
@@ -51,7 +51,7 @@ class SelectInterval extends Component {
     // Restore the interval from the state, or default to auto.
     this.mlSelectIntervalService = mlSelectIntervalService;
     const intervalState = this.mlSelectIntervalService.state.get('interval');
-    const intervalValue = _.get(intervalState, 'val', 'auto');
+    const intervalValue = get(intervalState, 'val', 'auto');
     const interval = optionValueToInterval(intervalValue);
     this.mlSelectIntervalService.state.set('interval', interval);
 

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import $ from 'jquery';
-
 export function getChartContainerWidth() {
-  const $chartContainer = $('.explorer-charts');
-  return Math.floor($chartContainer.width());
+  const chartContainer = document.querySelector('.explorer-charts');
+  return Math.floor(chartContainer.offsetWidth);
 }

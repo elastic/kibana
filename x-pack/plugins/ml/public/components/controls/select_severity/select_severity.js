@@ -10,7 +10,7 @@
  * React component for rendering a select element with threshold levels.
  */
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -73,7 +73,7 @@ class SelectSeverity extends Component {
     // set initial state from service if available
     if (this.mlSelectSeverityService !== undefined) {
       const thresholdState = this.mlSelectSeverityService.state.get('threshold');
-      const thresholdValue = _.get(thresholdState, 'val', 0);
+      const thresholdValue = get(thresholdState, 'val', 0);
       const threshold = optionValueToThreshold(thresholdValue);
       // set initial selected option equal to threshold value
       const selectedOption = SEVERITY_OPTIONS.find(opt => (opt.val === threshold.val));

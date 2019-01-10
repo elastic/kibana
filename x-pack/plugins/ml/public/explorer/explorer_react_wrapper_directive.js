@@ -8,7 +8,7 @@
  * AngularJS directive wrapper for rendering Anomaly Explorer's React component.
  */
 
-import _ from 'lodash';
+import { pick } from 'lodash';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -48,7 +48,7 @@ module.directive('mlExplorerReactWrapper', function (Private) {
     }
 
     function render() {
-      const props = _.pick(scope, [
+      const props = pick(scope, [
         'annotationsData',
         'anomalyChartRecords',
         'chartsData',
