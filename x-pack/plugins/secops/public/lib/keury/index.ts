@@ -5,6 +5,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { isString } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 export const convertKueryToElasticSearchQuery = (
@@ -21,7 +22,7 @@ export const convertKueryToElasticSearchQuery = (
 };
 
 export const escapeQueryValue = (val: number | string = ''): string | number => {
-  if (typeof val === 'string') {
+  if (isString(val)) {
     return val.replace(/"/g, '\\"');
   }
 
