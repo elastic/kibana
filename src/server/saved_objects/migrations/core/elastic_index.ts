@@ -52,7 +52,11 @@ export interface FullIndexInfo {
  * index mappings are somewhat what we expect.
  */
 export async function fetchInfo(callCluster: CallCluster, index: string): Promise<FullIndexInfo> {
-  const result = await callCluster('indices.get', { ignore: [404], index });
+  const result = await callCluster('indices.get', {
+    ignore: [404],
+    index,
+    include_type_name: true,
+  });
 
   if ((result as NotFound).status === 404) {
     return {
