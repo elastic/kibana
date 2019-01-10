@@ -15,7 +15,7 @@ import { watchStatusAndLicenseToInitialize } from
 export function gis(kibana) {
 
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
     id: 'gis',
     configPrefix: 'xpack.gis',
     publicDir: resolve(__dirname, 'public'),
@@ -46,11 +46,13 @@ export function gis(kibana) {
       if (gisEnabled) {
         const thisPlugin = this;
         const xpackMainPlugin = server.plugins.xpack_main;
+        let routesInitialized = false;
 
         watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
           async license => {
-            if (license && license.gis) {
-              initRoutes(server);
+            if (license && license.gis && !routesInitialized) {
+              routesInitialized = true;
+              initRoutes(server, license.uid);
             }
           });
 

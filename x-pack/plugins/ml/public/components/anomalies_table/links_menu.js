@@ -22,16 +22,16 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
-import { ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
-import { isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
-import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
-import { getFieldTypeFromMapping } from 'plugins/ml/services/mapping_service';
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { getUrlForRecord } from 'plugins/ml/util/custom_url_utils';
-import { getIndexPatterns } from 'plugins/ml/util/index_utils';
-import { replaceStringTokens } from 'plugins/ml/util/string_utils';
+import { ES_FIELD_TYPES } from '../../../common/constants/field_types';
+import { checkPermission } from '../../privilege/check_privilege';
+import { isRuleSupported } from '../../../common/util/anomaly_utils';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { ml } from '../../services/ml_api_service';
+import { mlJobService } from '../../services/job_service';
+import { getUrlForRecord } from '../../util/custom_url_utils';
+import { getIndexPatterns } from '../../util/index_utils';
+import { replaceStringTokens } from '../../util/string_utils';
 
 
 /*

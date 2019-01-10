@@ -17,276 +17,24 @@ import React, {
 } from 'react';
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiInMemoryTable,
   EuiText,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  formatHumanReadableDate,
-  formatHumanReadableDateTime,
-  formatHumanReadableDateTimeSeconds
-} from '../../util/date_utils';
+import { getColumns } from './anomalies_table_columns';
 
-import { DescriptionCell } from './description_cell';
-import { DetectorCell } from './detector_cell';
-import { EntityCell } from './entity_cell';
-import { InfluencersCell } from './influencers_cell';
 import { AnomalyDetails } from './anomaly_details';
-import { LinksMenu } from './links_menu';
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 
 import { mlTableService } from '../../services/table_service';
-import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
-import { getSeverityColor, isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
-import { formatValue } from 'plugins/ml/formatters/format_value';
-import { RuleEditorFlyout } from 'plugins/ml/components/rule_editor';
-
-
-const INFLUENCERS_LIMIT = 5;    // Maximum number of influencers to display before a 'show more' link is added.
-
-
-function renderTime(date, aggregationInterval) {
-  if (aggregationInterval === 'hour') {
-    return formatHumanReadableDateTime(date);
-  } else if (aggregationInterval === 'second') {
-    return formatHumanReadableDateTimeSeconds(date);
-  } else {
-    return formatHumanReadableDate(date);
-  }
-}
-
-function showLinksMenuForItem(item) {
-  const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
-  return (canConfigureRules ||
-    item.isTimeSeriesViewDetector ||
-    item.entityName === 'mlcategory' ||
-    item.customUrls !== undefined);
-}
-
-function getColumns(
-  items,
-  examplesByJobId,
-  isAggregatedData,
-  interval,
-  timefilter,
-  showViewSeriesLink,
-  showRuleEditorFlyout,
-  itemIdToExpandedRowMap,
-  toggleRow,
-  filter) {
-
-  const columns = [
-    {
-      name: '',
-      render: (item) => (
-        <EuiButtonIcon
-          onClick={() => toggleRow(item)}
-          iconType={itemIdToExpandedRowMap[item.rowId] ? 'arrowDown' : 'arrowRight'}
-          aria-label={itemIdToExpandedRowMap[item.rowId] ? i18n.translate('xpack.ml.anomaliesTable.hideDetailsButtonAriaLabel', {
-            defaultMessage: 'Hide details'
-          }) : i18n.translate('xpack.ml.anomaliesTable.showDetailsButtonAriaLabel', {
-            defaultMessage: 'Show details'
-          })}
-          data-row-id={item.rowId}
-        />
-      )
-    },
-    {
-      field: 'time',
-      name: i18n.translate('xpack.ml.anomaliesTable.timeColumnName', {
-        defaultMessage: 'time'
-      }),
-      dataType: 'date',
-      render: (date) => renderTime(date, interval),
-      textOnly: true,
-      sortable: true
-    },
-    {
-      field: 'severity',
-      name: isAggregatedData === true ? i18n.translate('xpack.ml.anomaliesTable.maxSeverityColumnName', {
-        defaultMessage: 'max severity'
-      }) : i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-        defaultMessage: 'severity'
-      }),
-      render: (score) => (
-        <EuiHealth color={getSeverityColor(score)} compressed="true">
-          {score >= 1 ? Math.floor(score) : '< 1'}
-        </EuiHealth>
-      ),
-      sortable: true
-    },
-    {
-      field: 'detector',
-      name: i18n.translate('xpack.ml.anomaliesTable.detectorColumnName', {
-        defaultMessage: 'detector'
-      }),
-      render: (detectorDescription, item) => (
-        <DetectorCell
-          detectorDescription={detectorDescription}
-          numberOfRules={item.rulesLength}
-        />
-      ),
-      textOnly: true,
-      sortable: true
-    }
-  ];
-
-  if (items.some(item => item.entityValue !== undefined)) {
-    columns.push({
-      field: 'entityValue',
-      name: i18n.translate('xpack.ml.anomaliesTable.foundForColumnName', {
-        defaultMessage: 'found for'
-      }),
-      render: (entityValue, item) => (
-        <EntityCell
-          entityName={item.entityName}
-          entityValue={entityValue}
-          filter={filter}
-        />
-      ),
-      textOnly: true,
-      sortable: true
-    });
-  }
-
-  if (items.some(item => item.influencers !== undefined)) {
-    columns.push({
-      field: 'influencers',
-      name: i18n.translate('xpack.ml.anomaliesTable.influencedByColumnName', {
-        defaultMessage: 'influenced by'
-      }),
-      render: (influencers) => (
-        <InfluencersCell
-          limit={INFLUENCERS_LIMIT}
-          influencers={influencers}
-        />
-      ),
-      textOnly: true,
-      sortable: true
-    });
-  }
-
-  // Map the additional 'sort' fields to the actual, typical and description
-  // fields to ensure sorting is done correctly on the underlying metric value
-  // and not on e.g. the actual values array as a String.
-  if (items.some(item => item.actual !== undefined)) {
-    columns.push({
-      field: 'actualSort',
-      name: i18n.translate('xpack.ml.anomaliesTable.actualColumnName', {
-        defaultMessage: 'actual'
-      }),
-      render: (actual, item) => {
-        const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
-        return formatValue(item.actual, item.source.function, fieldFormat);
-      },
-      sortable: true
-    });
-  }
-
-  if (items.some(item => item.typical !== undefined)) {
-    columns.push({
-      field: 'typicalSort',
-      name: i18n.translate('xpack.ml.anomaliesTable.typicalColumnName', {
-        defaultMessage: 'typical'
-      }),
-      render: (typical, item) => {
-        const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
-        return formatValue(item.typical, item.source.function, fieldFormat);
-      },
-      sortable: true
-    });
-
-    // Assume that if we are showing typical, there will be an actual too,
-    // so we can add a column to describe how actual compares to typical.
-    const nonTimeOfDayOrWeek = items.some((item) => {
-      const summaryRecFunc = item.source.function;
-      return summaryRecFunc !== 'time_of_day' && summaryRecFunc !== 'time_of_week';
-    });
-    if (nonTimeOfDayOrWeek === true) {
-      columns.push({
-        field: 'metricDescriptionSort',
-        name: i18n.translate('xpack.ml.anomaliesTable.descriptionColumnName', {
-          defaultMessage: 'description'
-        }),
-        render: (metricDescriptionSort, item) => (
-          <DescriptionCell
-            actual={item.actual}
-            typical={item.typical}
-          />
-        ),
-        textOnly: true,
-        sortable: true
-      });
-    }
-  }
-
-  columns.push({
-    field: 'jobId',
-    name: i18n.translate('xpack.ml.anomaliesTable.jobIdColumnName', {
-      defaultMessage: 'job ID'
-    }),
-    sortable: true
-  });
-
-  const showLinks = (showViewSeriesLink === true) || items.some(item => showLinksMenuForItem(item));
-
-  if (showLinks === true) {
-    columns.push({
-      name: i18n.translate('xpack.ml.anomaliesTable.actionsColumnName', {
-        defaultMessage: 'actions'
-      }),
-      render: (item) => {
-        if (showLinksMenuForItem(item) === true) {
-          return (
-            <LinksMenu
-              anomaly={item}
-              showViewSeriesLink={showViewSeriesLink}
-              isAggregatedData={isAggregatedData}
-              interval={interval}
-              timefilter={timefilter}
-              showRuleEditorFlyout={showRuleEditorFlyout}
-            />
-          );
-        } else {
-          return null;
-        }
-      },
-      sortable: false
-    });
-  }
-
-  const showExamples = items.some(item => item.entityName === 'mlcategory');
-  if (showExamples === true) {
-    columns.push({
-      name: i18n.translate('xpack.ml.anomaliesTable.categoryExamplesColumnName', {
-        defaultMessage: 'category examples'
-      }),
-      sortable: false,
-      truncateText: true,
-      render: (item) => {
-        const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
-        return (
-          <EuiText size="xs">
-            {examples.map((example, i) => {
-              return <span key={`example${i}`} className="category-example">{example}</span>;
-            }
-            )}
-          </EuiText>
-        );
-      },
-      textOnly: true,
-    });
-  }
-
-  return columns;
-}
+import { RuleEditorFlyout } from '../../components/rule_editor';
+import {
+  INFLUENCERS_LIMIT,
+  ANOMALIES_TABLE_TABS
+} from './anomalies_table_constants';
 
 class AnomaliesTable extends Component {
   constructor(props) {
@@ -325,7 +73,7 @@ class AnomaliesTable extends Component {
     return null;
   }
 
-  toggleRow = (item) => {
+  toggleRow = (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
@@ -334,6 +82,7 @@ class AnomaliesTable extends Component {
         _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue]) : undefined;
       itemIdToExpandedRowMap[item.rowId] = (
         <AnomalyDetails
+          tabIndex={tab}
           anomaly={item}
           examples={examples}
           isAggregatedData={this.isShowingAggregatedData()}
@@ -405,6 +154,7 @@ class AnomaliesTable extends Component {
 
     const columns = getColumns(
       tableData.anomalies,
+      tableData.jobIds,
       tableData.examplesByJobId,
       this.isShowingAggregatedData(),
       tableData.interval,

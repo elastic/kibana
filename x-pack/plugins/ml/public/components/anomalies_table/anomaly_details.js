@@ -11,16 +11,19 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiSpacer,
+  EuiTabbedContent,
   EuiText
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
@@ -125,15 +128,6 @@ function getDetailsItems(anomaly, examples, filter) {
     description: timeDesc
   });
 
-  if (examples !== undefined && examples.length > 0) {
-    examples.forEach((example, index) => {
-      const title = (index === 0) ? i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
-        defaultMessage: 'category examples',
-      }) : '';
-      items.push({ title, description: example });
-    });
-  }
-
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.functionTitle', {
       defaultMessage: 'function',
@@ -227,10 +221,60 @@ export class AnomalyDetails extends Component {
     this.state = {
       showAllInfluencers: false
     };
+
+    if (this.props.examples !== undefined && this.props.examples.length > 0) {
+      this.tabs = [{
+        id: 'Details',
+        name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detailsTitle', {
+          defaultMessage: 'Details',
+        }),
+        content: (
+          <Fragment>
+            <div className="ml-anomalies-table-details">
+              {this.renderDescription()}
+              <EuiSpacer size="m" />
+              {this.renderDetails()}
+              {this.renderInfluencers()}
+            </div>
+          </Fragment>
+        )
+      },
+      {
+        id: 'Category examples',
+        name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
+          defaultMessage: 'Category examples',
+        }),
+        content: (
+          <Fragment>
+            {this.renderCategoryExamples()}
+          </Fragment>
+        ),
+      }
+      ];
+    }
   }
 
   toggleAllInfluencers() {
     this.setState({ showAllInfluencers: !this.state.showAllInfluencers });
+  }
+
+  renderCategoryExamples() {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        justifyContent="center"
+        gutterSize="m"
+        className="mlAnomalyCategoryExamples"
+      >
+        {this.props.examples.map((example, i) => {
+          return (
+            <EuiFlexItem key={`example${i}`}>
+              <span className="mlAnomalyCategoryExamples__item">{example}</span>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    );
   }
 
   renderDescription() {
@@ -238,7 +282,7 @@ export class AnomalyDetails extends Component {
     const source = anomaly.source;
 
     let anomalyDescription;
-    if (anomaly.entityName !== undefined (source.partition_field_name !== undefined) &&
+    if (anomaly.entityName !== undefined && (source.partition_field_name !== undefined) &&
       (source.partition_field_name !== anomaly.entityName)) {
       anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyFoundForAndDetectedInDescription', {
         defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector} found for {anomalyEntityName} {anomalyEntityValue} ' +
@@ -429,15 +473,27 @@ export class AnomalyDetails extends Component {
   }
 
   render() {
+    const { tabIndex } = this.props;
 
-    return (
-      <div className="ml-anomalies-table-details">
-        {this.renderDescription()}
-        <EuiSpacer size="m" />
-        {this.renderDetails()}
-        {this.renderInfluencers()}
-      </div>
-    );
+    if (this.tabs !== undefined) {
+      return (
+        <EuiTabbedContent
+          tabs={this.tabs}
+          size="s"
+          initialSelectedTab={this.tabs[tabIndex]}
+          onTabClick={() => {}}
+        />
+      );
+    } else {
+      return (
+        <div className="ml-anomalies-table-details">
+          {this.renderDescription()}
+          <EuiSpacer size="m" />
+          {this.renderDetails()}
+          {this.renderInfluencers()}
+        </div>
+      );
+    }
   }
 }
 
@@ -446,5 +502,6 @@ AnomalyDetails.propTypes = {
   examples: PropTypes.array,
   isAggregatedData: PropTypes.bool,
   filter: PropTypes.func,
-  influencersLimit: PropTypes.number
+  influencersLimit: PropTypes.number,
+  tabIndex: PropTypes.number.isRequired
 };
