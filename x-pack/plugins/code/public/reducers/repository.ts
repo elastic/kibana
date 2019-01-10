@@ -67,7 +67,7 @@ export const repository = handleActions(
       }
     },
     [String(deleteRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
-      produce<RepositoryState>(state, draft => {
+      produce<RepositoryState>(state, (draft: RepositoryState) => {
         draft.repositories = state.repositories.filter(repo => repo.uri !== action.payload);
       }),
     [String(importRepo)]: (state: RepositoryState) =>
@@ -75,7 +75,7 @@ export const repository = handleActions(
         draft.importLoading = true;
       }),
     [String(importRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
-      produce<RepositoryState>(state, draft => {
+      produce<RepositoryState>(state, (draft: RepositoryState) => {
         draft.importLoading = false;
         draft.showCallOut = true;
         draft.callOutType = CallOutType.success;

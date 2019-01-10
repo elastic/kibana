@@ -108,7 +108,7 @@ export const symbol = handleActions(
         draft.lastRequestPath = action.payload || '';
       }),
     [String(loadStructureSuccess)]: (state: SymbolState, action: Action<SymbolsPayload>) =>
-      produce<SymbolState>(state, draft => {
+      produce<SymbolState>(state, (draft: SymbolState) => {
         draft.loading = false;
         const { path, data } = action.payload!;
         draft.structureTree[path] = generateStructureTree(data);
@@ -128,7 +128,7 @@ export const symbol = handleActions(
       }
     },
     [String(openSymbolPath)]: (state: SymbolState, action: any) =>
-      produce<SymbolState>(state, draft => {
+      produce<SymbolState>(state, (draft: SymbolState) => {
         const path = action.payload!;
         if (!state.openPaths.includes(path)) {
           draft.openPaths.push(path);
