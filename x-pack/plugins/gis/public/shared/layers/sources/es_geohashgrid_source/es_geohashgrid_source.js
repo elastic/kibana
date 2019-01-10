@@ -24,7 +24,6 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESSourceDetails } from '../../../components/es_source_details';
-import { ZOOM_TO_PRECISION } from '../../../utils/zoom_to_precision';
 import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
@@ -108,32 +107,6 @@ export class ESGeohashGridSource extends VectorSource {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
-  async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
-    targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPoints({
-      precision: targetPrecision,
-      extent: searchFilters.buffer,
-      timeFilters: searchFilters.timeFilters,
-      layerName,
-      query: searchFilters.query,
-    });
-
-    if (this._descriptor.requestType === RENDER_AS.GRID) {
-      featureCollection.features.forEach((feature) => {
-        //replace geometries with the polygon
-        feature.geometry = makeGeohashGridPolygon(feature);
-      });
-    }
-
-    return {
-      data: featureCollection,
-      meta: {
-        areResultsTrimmed: true
-      }
-    };
-  }
-
   isFieldAware() {
     return true;
   }
@@ -156,13 +129,41 @@ export class ESGeohashGridSource extends VectorSource {
     return  [this._descriptor.indexPatternId];
   }
 
+  isGeohashPrecisionAware() {
+    return true;
+  }
+
+  async getGeoJsonWithMeta({ layerName }, searchFilters) {
+    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
+      geohashPrecision: searchFilters.geohashPrecision,
+      extent: searchFilters.buffer,
+      timeFilters: searchFilters.timeFilters,
+      layerName,
+      query: searchFilters.query,
+    });
+
+    if (this._descriptor.requestType === RENDER_AS.GRID) {
+      featureCollection.features.forEach((feature) => {
+        //replace geometries with the polygon
+        feature.geometry = makeGeohashGridPolygon(feature);
+      });
+    }
+
+    return {
+      data: featureCollection,
+      meta: {
+        areResultsTrimmed: true
+      }
+    };
+  }
+
   async getNumberFields() {
     return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
     });
   }
 
-  async getGeoJsonPoints({ precision, extent, timeFilters, layerName, query }) {
+  async getGeoJsonPoints({ geohashPrecision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
     try {
@@ -176,7 +177,7 @@ export class ESGeohashGridSource extends VectorSource {
       throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
     }
 
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geohashPrecision), aggSchemas.all);
 
     let resp;
     try {
