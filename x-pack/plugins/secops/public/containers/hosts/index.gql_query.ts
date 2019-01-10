@@ -24,6 +24,7 @@ export const hostsQuery = gql`
             os
             version
             firstSeen
+            hostId
           }
           cursor {
             value

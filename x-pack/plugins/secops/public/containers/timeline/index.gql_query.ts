@@ -37,6 +37,7 @@ export const timelineQuery = gql`
               id
             }
             host {
+              id
               name
               ip
             }

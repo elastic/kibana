@@ -118,7 +118,7 @@ const getEventsColumns = (startDate: number) => [
               id: event._id!,
               name: hostName,
               negated: false,
-              queryMatch: `host.name: "${escapeQueryValue(hostName)}"`,
+              queryMatch: `host.id: "${escapeQueryValue(event.host!.id!)}"`,
               queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>

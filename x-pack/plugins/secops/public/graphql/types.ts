@@ -239,6 +239,8 @@ export interface HostItem {
   version?: string | null;
 
   os?: string | null;
+
+  hostId?: string | null;
 }
 
 export interface UncommonProcessesData {
@@ -455,6 +457,8 @@ export namespace GetEventsQuery {
     name?: string | null;
 
     ip?: string | null;
+
+    id?: string | null;
   };
 
   export type _Source = {
@@ -558,6 +562,8 @@ export namespace GetHostsQuery {
     version?: string | null;
 
     firstSeen?: string | null;
+
+    hostId?: string | null;
   };
 
   export type Cursor = {

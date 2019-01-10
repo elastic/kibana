@@ -268,6 +268,8 @@ export interface HostItem {
   version?: string | null;
 
   os?: string | null;
+
+  hostId?: string | null;
 }
 
 export interface UncommonProcessesData {
@@ -1130,6 +1132,8 @@ export namespace HostItemResolvers {
     version?: VersionResolver<string | null, TypeParent, Context>;
 
     os?: OsResolver<string | null, TypeParent, Context>;
+
+    hostId?: HostIdResolver<string | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SecOpsContext> = Resolver<
@@ -1157,6 +1161,11 @@ export namespace HostItemResolvers {
     Parent,
     Context
   >;
+  export type HostIdResolver<
+    R = string | null,
+    Parent = HostItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace UncommonProcessesDataResolvers {

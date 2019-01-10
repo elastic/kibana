@@ -45,6 +45,7 @@ export const eventsQuery = gql`
             host {
               name
               ip
+              id
             }
             source {
               ip

@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SortField, TimerangeInput } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { FilterQuery, SortRequest, SortRequestDirection } from '../types';
-import { EventsRequestOptions } from './types';
+import { EventsRequestOptions, TimerangeFilter } from './types';
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   'host.name': 'host.name',
   'host.ip': 'host.ip',
+  'host.id': 'host.id',
   'event.category': 'suricata.eve.alert.category',
   'event.id': 'suricata.eve.flow_id',
   'event.module': 'event.module',
@@ -32,25 +34,28 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
 
 export const buildQuery = (options: EventsRequestOptions) => {
   const { limit, cursor, tiebreaker } = options.pagination;
-  const { sortFieldId, direction } = options.sortField;
   const { fields, filterQuery } = options;
   const esFields = [...reduceFields(fields, eventFieldsMap)];
-  let filter = [...createQueryFilterClauses(filterQuery as FilterQuery)];
+  const filterClause = [...createQueryFilterClauses(filterQuery as FilterQuery)];
 
-  if (options.timerange) {
-    const { to, from } = options.timerange!;
-    filter = [
-      ...filter,
-      {
-        range: {
-          [options.sourceConfiguration.fields.timestamp]: {
-            gte: from,
-            lte: to,
+  const getTimerangeFilter = (timerange: TimerangeInput | undefined): TimerangeFilter[] => {
+    if (timerange) {
+      const { to, from } = timerange;
+      return [
+        {
+          range: {
+            [options.sourceConfiguration.fields.timestamp]: {
+              gte: from,
+              lte: to,
+            },
           },
         },
-      },
-    ];
-  }
+      ];
+    }
+    return [];
+  };
+
+  const filter = [...filterClause, ...getTimerangeFilter(options.timerange)];
 
   const agg = options.fields.includes('kpiEventType')
     ? {
@@ -70,12 +75,18 @@ export const buildQuery = (options: EventsRequestOptions) => {
     ? [{ match_all: {} }, { exists: { field: 'event.type' } }]
     : [{ match_all: {} }];
 
-  let sort: SortRequest = [];
-  if (sortFieldId) {
-    const field: string = sortFieldId === 'timestamp' ? '@timestamp' : sortFieldId;
-    const dir: SortRequestDirection = direction === 'descending' ? 'desc' : 'asc';
-    sort = [...sort, { [field]: dir }, { [options.sourceConfiguration.fields.tiebreaker]: dir }];
-  }
+  const getSortField = (sortField: SortField) => {
+    if (sortField.sortFieldId) {
+      const field: string =
+        sortField.sortFieldId === 'timestamp' ? '@timestamp' : sortField.sortFieldId;
+      const dir: SortRequestDirection = sortField.direction === 'descending' ? 'desc' : 'asc';
+
+      return [{ [field]: dir }, { [options.sourceConfiguration.fields.tiebreaker]: dir }];
+    }
+    return [];
+  };
+
+  const sort: SortRequest = getSortField(options.sortField);
 
   const queryDsl = {
     allowNoIndices: true,

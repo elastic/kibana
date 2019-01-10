@@ -35,7 +35,7 @@ export const IconsFooter = pure<OwnProps>(({ dataProvider }: OwnProps) => {
     <>
       <HorizontalBar margin="xs" />
       <GroupIcons
-        data-test-subj="data-provider-fo"
+        data-test-subj="data-provider-icons-footer"
         gutterSize="none"
         alignItems="center"
         justifyContent="flexStart"

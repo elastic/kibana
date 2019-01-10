@@ -16,7 +16,7 @@ import { getEventsQueryMock, mockEventsData } from './mock';
 import { eventsSchema } from './schema.gql';
 
 const testCaseSource = {
-  id: 'Test case to query Hosts',
+  id: 'Test case to query Events',
   query: `
     query GetEventsQuery(
       $timerange: TimerangeInput!

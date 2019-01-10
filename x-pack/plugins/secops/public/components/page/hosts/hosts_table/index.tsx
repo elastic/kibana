@@ -117,7 +117,7 @@ const getHostsColumns = () => [
               id: host._id!,
               name: hostName,
               negated: false,
-              queryMatch: `host.name: "${escapeQueryValue(hostName)}"`,
+              queryMatch: `host.id: "${escapeQueryValue(host.hostId!)}"`,
               queryDate: `@timestamp >= ${moment(
                 host.firstSeen!
               ).valueOf()} and @timestamp <= ${moment().valueOf()}`,

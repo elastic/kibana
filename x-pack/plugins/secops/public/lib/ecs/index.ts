@@ -43,7 +43,7 @@ export const getMappedEcsValue = ({
 }): string | undefined => {
   const path = getOr(fieldName, fieldName, mappedEcsSchemaFieldNames); // defaults to the fieldName if there is no override
   if (has(path, data)) {
-    return get(path, data) as string;
+    return get(path, data);
   }
   return undefined;
 };
