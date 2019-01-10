@@ -35,25 +35,25 @@ export function validateJobObject(job) {
   if (job.datafeed_config === null || typeof job.datafeed_config !== 'object') {
     throw new Error(i18n.translate('xpack.ml.models.jobValidation.validateJobObject.datafeedConfigIsNotObjectErrorMessage', {
       defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-      values: { invalidParamName: 'datafeed_config' },
+      values: { invalidParamName: 'job.datafeed_config' },
     }));
   }
   if (!Array.isArray(job.datafeed_config.indices)) {
     throw new Error(i18n.translate('xpack.ml.models.jobValidation.validateJobObject.indicesAreNotArrayErrorMessage', {
       defaultMessage: 'Invalid {invalidParamName}: Needs to be an Array.',
-      values: { invalidParamName: 'indices' },
+      values: { invalidParamName: 'job.datafeed_config.indices' },
     }));
   }
   if (job.data_description === null || typeof job.data_description !== 'object') {
     throw new Error(i18n.translate('xpack.ml.models.jobValidation.validateJobObject.dataDescriptionIsNotObjectErrorMessage', {
       defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-      values: { invalidParamName: 'data_description' },
+      values: { invalidParamName: 'job.data_description' },
     }));
   }
   if (typeof job.data_description.time_field !== 'string') {
     throw new Error(i18n.translate('xpack.ml.models.jobValidation.validateJobObject.timeFieldIsNotStringErrorMessage', {
       defaultMessage: 'Invalid {invalidParamName}: Needs to be a string.',
-      values: { invalidParamName: 'time_field' },
+      values: { invalidParamName: 'job.data_description.time_field' },
     }));
   }
 }
