@@ -10,12 +10,12 @@ exports[`#deserializeFeaturePrivilege throws error when deserializing feature-fo
 
 exports[`#deserializeFeaturePrivilege throws error when deserializing foo_feature_foo.privilege-1 1`] = `"Feature privilege 'foo_feature_foo.privilege-1' didn't match pattern"`;
 
-exports[`#deserializeGlobalMinimumPrivilege throws Error if isn't a minimum privilege 1`] = `"Unrecognized global minimum privilege"`;
+exports[`#deserializeGlobalBasePrivilege throws Error if isn't a base privilege 1`] = `"Unrecognized global base privilege"`;
 
-exports[`#deserializeSpaceMinimumPrivilege throws Error if prefixed with space_ but not a reserved privilege 1`] = `"Unrecognized space minimum privilege"`;
+exports[`#deserializeSpaceBasePrivilege throws Error if prefixed with space_ but not a reserved privilege 1`] = `"Unrecognized space base privilege"`;
 
-exports[`#deserializeSpaceMinimumPrivilege throws Error if provided 'all' 1`] = `"Unrecognized space minimum privilege"`;
+exports[`#deserializeSpaceBasePrivilege throws Error if provided 'all' 1`] = `"Unrecognized space base privilege"`;
 
-exports[`#serializeGlobalMinimumPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized global minimum privilege"`;
+exports[`#serializeGlobalBasePrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized global base privilege"`;
 
-exports[`#serializeSpaceMinimumPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized space minimum privilege"`;
+exports[`#serializeSpaceBasePrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized space base privilege"`;

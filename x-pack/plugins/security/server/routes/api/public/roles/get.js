@@ -42,11 +42,11 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
       value: roleKibanaApplications.map(({ resources, privileges }) => {
       // if we're dealing with a global entry, which we've ensured above is only possible if it's the only item in the array
         if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
-          const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
-          const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
+          const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
+          const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
 
           return {
-            base: basePrivileges,
+            base: basePrivileges.map(privilege => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)),
             feature: featurePrivileges.reduce((acc, privilege) => {
               const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
               return {
@@ -61,10 +61,10 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
           };
         }
 
-        const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
-        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
+        const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege));
+        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege));
         return {
-          base: basePrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceMinimumPrivilege(privilege)),
+          base: basePrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceBasePrivilege(privilege)),
           feature: featurePrivileges.reduce((acc, privilege) => {
             const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
             return {

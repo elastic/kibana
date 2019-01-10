@@ -24,7 +24,7 @@ export function initPutRolesApi(
         return {
           privileges: [
             ...base ? base.map(
-              privilege => PrivilegeSerializer.serializeGlobalMinimumPrivilege(privilege)
+              privilege => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)
             ) : [],
             ...feature ? flatten(
               Object.entries(feature).map(
@@ -42,7 +42,7 @@ export function initPutRolesApi(
       return {
         privileges: [
           ...base ? base.map(
-            privilege => PrivilegeSerializer.serializeSpaceMinimumPrivilege(privilege)
+            privilege => PrivilegeSerializer.serializeSpaceBasePrivilege(privilege)
           ) : [],
           ...feature ? flatten(
             Object.entries(feature).map(
