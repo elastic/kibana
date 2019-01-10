@@ -20,7 +20,7 @@ export class WMSSource extends TMSSource {
 
   static type = 'WMS';
 
-  static typeDisplayName = 'WMS';
+  static typeDisplayName = 'Web Map Service';
 
   static createDescriptor({ serviceUrl, layers, styles }) {
     return {
@@ -46,7 +46,9 @@ export class WMSSource extends TMSSource {
         <strong>{WMSSource.typeDisplayName}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">Web Map Service (WMS)</p>
+          <p className="euiTextColor--subdued">
+            Maps from OGC Standard WMS
+          </p>
         </EuiText>
       </Fragment>
     );

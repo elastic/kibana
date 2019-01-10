@@ -1016,7 +1016,8 @@ module.controller('MlExplorerController', function (
           anomalies,
           interval: resp.interval,
           examplesByJobId: resp.examplesByJobId,
-          showViewSeriesLink: true
+          showViewSeriesLink: true,
+          jobIds
         };
       });
 

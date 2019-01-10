@@ -40,7 +40,6 @@ import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prep
 import { PopulationJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
@@ -55,7 +54,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 
@@ -359,13 +357,13 @@ module
 
       mlPopulationJobService.clearChartData();
 
-      // $scope.chartStates.eventRate = CHART_STATE.LOADING;
       setFieldsChartStates(CHART_STATE.LOADING);
 
       if ($scope.formConfig.fields.length) {
         $scope.ui.showFieldCharts = true;
         mlPopulationJobService.getLineChartResults($scope.formConfig, thisLoadTimestamp)
           .then((resp) => {
+            $scope.$applyAsync();
             loadDocCountData(resp.detectors);
           })
           .catch((resp) => {
@@ -374,6 +372,7 @@ module
               const id = field.id;
               $scope.chartStates.fields[id] = CHART_STATE.NO_RESULTS;
             });
+            $scope.$applyAsync();
           });
       } else {
         $scope.ui.showFieldCharts = false;
@@ -391,13 +390,16 @@ module
 
               $scope.chartData.lastLoadTimestamp = null;
               chartDataUtils.updateChartMargin($scope.chartData);
-              $scope.$broadcast('render');
               $scope.chartStates.eventRate = (resp.totalResults) ? CHART_STATE.LOADED : CHART_STATE.NO_RESULTS;
+              $scope.$broadcast('render');
             }
           })
           .catch((resp) => {
             $scope.chartStates.eventRate = CHART_STATE.NO_RESULTS;
             msgs.error(resp.message);
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       }
     };
@@ -406,6 +408,7 @@ module
       _.each($scope.chartStates.fields, (chart, key) => {
         $scope.chartStates.fields[key] = state;
       });
+      $scope.$applyAsync();
     }
 
     function drawCards(fieldIndex, animate = true) {
@@ -531,7 +534,6 @@ module
                 // as it may have failed because we've hit the limit of open jobs
                 saveNewDatafeed(job, false);
               });
-
           })
           .catch((resp) => {
             // save failed
@@ -541,6 +543,7 @@ module
               }),
               resp.resp
             );
+            $scope.$applyAsync();
           });
       } else {
         // show the advanced section as the model memory limit is invalid
@@ -555,7 +558,6 @@ module
       function saveNewDatafeed(job, startDatafeedAfterSave) {
         mlJobService.saveNewDatafeed(job.datafeed_config, job.job_id)
           .then(() => {
-
             if (startDatafeedAfterSave) {
               mlPopulationJobService.startDatafeed($scope.formConfig)
                 .then(() => {
@@ -589,7 +591,12 @@ module
                     }),
                     resp
                   );
+                })
+                .then(() => {
+                  $scope.$applyAsync();
                 });
+            } else {
+              $scope.$applyAsync();
             }
           })
           .catch((resp) => {
@@ -599,6 +606,7 @@ module
               }),
               resp
             );
+            $scope.$applyAsync();
           });
       }
     };
@@ -619,6 +627,7 @@ module
           .then((state) => {
             if (state === 'stopped') {
               console.log('Stopping poll because datafeed state is: ' + state);
+              $scope.$applyAsync();
               $scope.$broadcast('render-results');
               forceStop = true;
             }
@@ -665,6 +674,7 @@ module
       // fade the bar chart once we have results
         toggleSwimlaneVisibility();
       }
+      $scope.$applyAsync();
       $scope.$broadcast('render-results');
     }
 
@@ -716,7 +726,11 @@ module
     $scope.stopJob = function () {
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
-      mlPopulationJobService.stopDatafeed($scope.formConfig);
+      mlPopulationJobService.stopDatafeed($scope.formConfig)
+        .catch()
+        .then(() => {
+          $scope.$applyAsync();
+        });
     };
 
     $scope.moveToAdvancedJobCreation = function () {
