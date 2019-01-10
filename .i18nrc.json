@@ -34,6 +34,7 @@
     "xpack.security": "x-pack/plugins/security",
     "xpack.spaces": "x-pack/plugins/spaces",
     "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant",
+    "xpack.uptime": "x-pack/plugins/uptime",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
