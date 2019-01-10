@@ -20,4 +20,10 @@ export const convertKueryToElasticSearchQuery = (
   }
 };
 
-export const escapeQueryValue = (val: string = '') => val.replace(/"/g, '\\"');
+export const escapeQueryValue = (val: number | string = ''): string | number => {
+  if (typeof val === 'string') {
+    return val.replace(/"/g, '\\"');
+  }
+
+  return val;
+};
