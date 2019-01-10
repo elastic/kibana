@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { HostDetails } from './host_details';
@@ -20,7 +20,9 @@ interface Props {
 
 export const HostsContainer = pure<Props>(({ match }) => (
   <div>
-    <Route path={`${match.url}/:hostName`} component={HostsContainer} />
-    {match.params.hostName ? <HostDetails match={match} /> : <Hosts />}
+    <Switch>
+      <Route exact path={'/hosts'} component={Hosts} />
+      <Route path={`${match.url}/:hostName`} component={HostDetails} />
+    </Switch>
   </div>
 ));
