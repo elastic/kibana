@@ -8,6 +8,8 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
+import xPackage from '../../package.json';
+import { getTemplateVersion } from './lib/get_template_version';
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
 const DOC_TYPE = '_doc';
@@ -135,6 +137,7 @@ export class TaskStore {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
           },
+          version: getTemplateVersion(xPackage.version),
         },
       });
       this._isInitialized = true;
