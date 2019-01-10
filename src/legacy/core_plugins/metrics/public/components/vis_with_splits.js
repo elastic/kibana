@@ -72,6 +72,7 @@ export function visWithSplits(WrappedComponent) {
             onBrush={props.onBrush}
             additionalLabel={label}
             backgroundColor={props.backgroundColor}
+            getConfig={props.getConfig}
           />
         </div>
       );

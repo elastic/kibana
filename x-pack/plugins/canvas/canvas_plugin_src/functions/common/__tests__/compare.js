@@ -24,10 +24,14 @@ describe('compare', () => {
 
       it('throws when invalid op is provided', () => {
         expect(() => fn(1, { op: 'boo', to: 2 })).to.throwException(e => {
-          expect(e.message).to.be('Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.');
+          expect(e.message).to.be(
+            `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
+          );
         });
         expect(() => fn(1, { op: 'boo' })).to.throwException(e => {
-          expect(e.message).to.be('Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.');
+          expect(e.message).to.be(
+            `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
+          );
         });
       });
     });
