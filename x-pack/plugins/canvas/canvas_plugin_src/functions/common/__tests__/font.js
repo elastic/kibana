@@ -105,7 +105,7 @@ describe('font', () => {
 
       it('throws when provided an invalid weight', () => {
         expect(() => fn(null, { weight: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be('Invalid font weight: foo');
+          expect(e.message).to.be(`Invalid font weight: 'foo'`);
         });
       });
     });
@@ -175,7 +175,7 @@ describe('font', () => {
         expect(fn)
           .withArgs(null, { align: 'foo' })
           .to.throwException(e => {
-            expect(e.message).to.be('Invalid text alignment: foo');
+            expect(e.message).to.be(`Invalid text alignment: 'foo'`);
           });
       });
     });

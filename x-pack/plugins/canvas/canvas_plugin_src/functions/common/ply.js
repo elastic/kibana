@@ -95,7 +95,7 @@ export const ply = () => ({
       byColumns = args.by.map(by => {
         const column = context.columns.find(column => column.name === by);
         if (!column) {
-          throw new Error(`No such column: ${by}`);
+          throw new Error(`Column not found: '${by}'`);
         }
         return column;
       });
