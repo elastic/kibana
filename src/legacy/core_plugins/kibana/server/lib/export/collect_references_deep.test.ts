@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SavedObject } from '../../../../../../server/saved_objects/service/saved_objects_client';
 import { collectReferencesDeep } from './collect_references_deep';
 
 const data = [
@@ -66,9 +67,17 @@ const data = [
 
 test('collects dashboard and all dependencies', async () => {
   const savedObjectClient = {
-    bulkGet: jest.fn(objects => {
+    errors: {},
+    create: jest.fn(),
+    bulkCreate: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+    findRelationships: jest.fn(),
+    bulkGet: jest.fn(getObjects => {
       return {
-        saved_objects: objects.map(obj =>
+        saved_objects: getObjects.map((obj: SavedObject) =>
           data.find(row => row.id === obj.id && row.type === obj.type)
         ),
       };

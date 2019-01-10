@@ -34,7 +34,7 @@ export interface BulkCreateObject {
 }
 
 export interface BulkCreateResponse {
-  savedObjects: SavedObject[];
+  saved_objects: SavedObject[];
 }
 
 export interface FindOptions extends BaseOptions {
@@ -47,7 +47,7 @@ export interface FindOptions extends BaseOptions {
 }
 
 export interface FindResponse {
-  savedObjects: SavedObject[];
+  saved_objects: SavedObject[];
   total: number;
   perPage: number;
   page: number;
@@ -64,7 +64,7 @@ export interface BulkGetObject {
 export type BulkGetObjects = BulkGetObject[];
 
 export interface BulkGetResponse {
-  savedObjects: SavedObject[];
+  saved_objects: SavedObject[];
 }
 
 export interface SavedObjectAttributes {

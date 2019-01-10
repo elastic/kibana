@@ -18,21 +18,37 @@
  */
 
 import { get } from 'lodash';
+import {
+  SavedObject,
+  SavedObjectsClient,
+} from '../../../../../../server/saved_objects/service/saved_objects_client';
 
-export async function collectReferencesDeep(savedObjectClient, objects) {
+interface ObjectsToCollect {
+  id: string;
+  type: string;
+}
+
+export async function collectReferencesDeep(
+  savedObjectClient: SavedObjectsClient,
+  objects: ObjectsToCollect[]
+) {
   const result = [];
   const queue = [...objects];
   while (queue.length !== 0) {
     const itemsToGet = queue.splice(0, queue.length);
     const { saved_objects: savedObjects } = await savedObjectClient.bulkGet(itemsToGet);
     result.push(...savedObjects);
-    const references = []
+    const references = Array<ObjectsToCollect>()
       .concat(...savedObjects.map(obj => obj.references || []))
       // This line below will be removed once legacy support is removed
       .concat(...savedObjects.map(obj => extractLegacyReferences(obj)));
     for (const reference of references) {
-      const isDuplicate = result.concat(queue).some(obj => obj.type === reference.type && obj.id === reference.id);
-      if (isDuplicate) continue;
+      const isDuplicate = queue
+        .concat(result)
+        .some(obj => obj.type === reference.type && obj.id === reference.id);
+      if (isDuplicate) {
+        continue;
+      }
       queue.push({ type: reference.type, id: reference.id });
     }
   }
@@ -41,13 +57,13 @@ export async function collectReferencesDeep(savedObjectClient, objects) {
 
 // Function will be used until each type use "references", each type
 // will be removed once migrated to new structure
-function extractLegacyReferences(savedObject) {
+function extractLegacyReferences(savedObject: SavedObject): ObjectsToCollect[] {
   const legacyReferences = [];
-  switch(savedObject.type) {
+  switch (savedObject.type) {
     case 'dashboard':
       let panels;
       try {
-        panels = JSON.parse(get(savedObject, 'attributes.panelsJSON', []));
+        panels = JSON.parse(get(savedObject, 'attributes.panelsJSON'));
       } catch (e) {
         panels = [];
       }
@@ -77,8 +93,12 @@ function extractLegacyReferences(savedObject) {
   return legacyReferences;
 }
 
-function extractSearchSourceIndexPattern(savedObject) {
-  const searchSourceJSON = get(savedObject, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+function extractSearchSourceIndexPattern(savedObject: SavedObject): ObjectsToCollect | undefined {
+  const searchSourceJSON = get(
+    savedObject,
+    'attributes.kibanaSavedObjectMeta.searchSourceJSON',
+    ''
+  );
   try {
     const searchSource = JSON.parse(searchSourceJSON);
     if (searchSource.index) {
