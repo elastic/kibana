@@ -22,7 +22,6 @@ import _ from 'lodash';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
 import fetch from 'node-fetch';
-fetch.Promise = require('bluebird');
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 const extendUrl = (url, props) => (
@@ -155,9 +154,15 @@ export class EMSClientV66 {
         );
         fetch(url)
           .then(
-            response => resolve(response),
-            err => reject(err)
-          ).finally(() => clearTimeout(timer));
+            response => {
+              clearTimeout(timer);
+              resolve(response);
+            },
+            err => {
+              clearTimeout(timer);
+              reject(err);
+            }
+          );
       });
   }
 
