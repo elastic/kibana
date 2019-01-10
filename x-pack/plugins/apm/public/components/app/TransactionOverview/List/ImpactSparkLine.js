@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { units, borderRadius, px, colors } from '../../../../style/variables';
@@ -23,7 +24,13 @@ const ImpactBar = styled.div`
 
 function ImpactSparkline({ impact }) {
   if (!impact && impact !== 0) {
-    return <div>N/A</div>;
+    return (
+      <div>
+        {i18n.translate('xpack.apm.transactionsTable.notAvailableLabel', {
+          defaultMessage: 'N/A'
+        })}
+      </div>
+    );
   }
 
   return (

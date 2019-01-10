@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { units, px } from '../../../../style/variables';
@@ -22,9 +23,10 @@ const ImpactTooltip = () => (
       trigger="hover"
       overlay={
         <Tooltip>
-          Impact shows the most used and
-          <br />
-          slowest endpoints in your service.
+          {i18n.translate('xpack.apm.transactionsTable.impactTooltip', {
+            defaultMessage:
+              'Impact shows the most used and slowest endpoints in your service.'
+          })}
         </Tooltip>
       }
     >
