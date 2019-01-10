@@ -27,7 +27,6 @@ import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
-import './timepicker.less';
 import '../directives/input_datetime';
 import '../directives/inequality';
 import './refresh_intervals';
