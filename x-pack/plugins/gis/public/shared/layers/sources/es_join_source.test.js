@@ -44,7 +44,7 @@ describe('getMetricFields', () => {
     expect(metrics[0]).toEqual({
       type: 'count',
       propertyKey: '__kbnjoin__count_groupby_myIndex.myTermField',
-      propertyLabel: 'count(*) group by myIndex.myTermField',
+      propertyLabel: 'count of myIndex:myTermField',
     });
   });
 
@@ -60,12 +60,12 @@ describe('getMetricFields', () => {
       type: 'sum',
       field: sumFieldName,
       propertyKey: '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField',
-      propertyLabel: 'sum(myFieldGettingSummed) group by myIndex.myTermField',
+      propertyLabel: 'sum myFieldGettingSummed of myIndex:myTermField',
     });
     expect(metrics[1]).toEqual({
       type: 'count',
       propertyKey: '__kbnjoin__count_groupby_myIndex.myTermField',
-      propertyLabel: 'count(*) group by myIndex.myTermField',
+      propertyLabel: 'count of myIndex:myTermField',
     });
   });
 });
