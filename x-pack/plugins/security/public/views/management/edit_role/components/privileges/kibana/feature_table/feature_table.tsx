@@ -38,7 +38,6 @@ interface Props {
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
   disabled?: boolean;
-  showLocks?: boolean;
 }
 
 interface ToolTipDefinition {
@@ -194,15 +193,13 @@ export class FeatureTable extends Component<Props, {}> {
           !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
 
         if (!canChangePrivilege) {
-          const tipProps: Record<string, string> = {};
-          if (this.props.showLocks) {
-            tipProps.iconType = 'lock';
-            tipProps.tooltipContent = this.props.intl.formatMessage({
-              id: 'foo',
-              defaultMessage: privilegeExplanation.details,
-            });
-          }
-          return <PrivilegeDisplay privilege={actualPrivilegeValue} {...tipProps} />;
+          return (
+            <PrivilegeDisplay
+              scope={this.isConfiguringGlobalPrivileges() ? 'global' : 'space'}
+              privilege={actualPrivilegeValue}
+              explanation={privilegeExplanation}
+            />
+          );
         }
 
         const options = availablePrivileges.map(priv => {
@@ -235,28 +232,31 @@ export class FeatureTable extends Component<Props, {}> {
   ];
 
   private getEnabledFeaturePrivileges = (featurePrivileges: string[], featureId: string) => {
-    const { effectivePrivileges, spacesIndex } = this.props;
-    if (spacesIndex >= 0) {
-      return featurePrivileges.filter(p =>
-        effectivePrivileges.canAssignSpaceFeaturePrivilege(featureId, p, this.props.spacesIndex)
-      );
+    const { effectivePrivileges } = this.props;
+
+    if (this.isConfiguringGlobalPrivileges()) {
+      // Global feature privileges are not limited by effective privileges.
+      return featurePrivileges;
     }
-    // Global feature privileges are not limited by effective privileges.
-    return featurePrivileges;
+
+    return featurePrivileges.filter(p =>
+      effectivePrivileges.canAssignSpaceFeaturePrivilege(featureId, p, this.props.spacesIndex)
+    );
   };
 
   private getPrivilegeExplanation = (featureId: string): ExplanationResult => {
     const { effectivePrivileges, spacesIndex } = this.props;
-    if (spacesIndex >= 0) {
-      return effectivePrivileges.explainActualSpaceFeaturePrivilege(featureId, spacesIndex);
+
+    if (this.isConfiguringGlobalPrivileges()) {
+      // Global feature privileges are not limited by effective privileges.
+      return {
+        privilege: effectivePrivileges.getActualGlobalFeaturePrivilege(featureId),
+        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
+        details: '',
+      };
     }
 
-    // Global feature privileges are not limited by effective privileges.
-    return {
-      privilege: effectivePrivileges.getActualGlobalFeaturePrivilege(featureId),
-      source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
-      details: '',
-    };
+    return effectivePrivileges.explainActualSpaceFeaturePrivilege(featureId, spacesIndex);
   };
 
   private allowsNoneForPrivilegeAssignment = (featureId: string): boolean => {
@@ -272,4 +272,7 @@ export class FeatureTable extends Component<Props, {}> {
       this.props.onChangeAll([privilege]);
     }
   };
+
+  private isConfiguringGlobalPrivileges = () =>
+    this.props.role.kibana[this.props.spacesIndex].spaces.includes('*');
 }

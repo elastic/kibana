@@ -15,12 +15,9 @@ import React, { Component } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { getSpaceColor } from 'x-pack/plugins/spaces/common';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
-import {
-  EffectivePrivilegesFactory,
-  PRIVILEGE_SOURCE,
-} from '../../../../../../../lib/effective_privileges';
+import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
-import { PrivilegeDisplay, SupercededPrivilegeDisplay } from './privilege_display';
+import { PrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -40,6 +37,7 @@ type TableSpace = Space &
 interface TableRow {
   spaces: TableSpace[];
   spacesIndex: number;
+  isGlobal: boolean;
   privileges: {
     base: string[];
     feature: {
@@ -74,6 +72,7 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
       return {
         spaces,
         spacesIndex,
+        isGlobal: spacePrivs.spaces.includes('*'),
         privileges: {
           base: spacePrivs.base || [],
           feature: spacePrivs.feature || {},
@@ -127,31 +126,13 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
 
           const hasCustomizations = Object.keys(privileges.feature).length > 0;
 
-          switch (actualPrivilege.source) {
-            case PRIVILEGE_SOURCE.NONE:
-            case PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY:
-              return (
-                <PrivilegeDisplay
-                  privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
-                />
-              );
-            case PRIVILEGE_SOURCE.EFFECTIVE:
-              return (
-                <PrivilegeDisplay
-                  privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
-                />
-              );
-            case PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED:
-              return (
-                <SupercededPrivilegeDisplay
-                  privilege={actualPrivilege.privilege}
-                  supercededPrivilege={actualPrivilege.supercededPrivilege}
-                  overrideSource={actualPrivilege.overrideSource}
-                />
-              );
-            default:
-              return <PrivilegeDisplay privilege={'**unknown**'} color="danger" />;
-          }
+          return (
+            <PrivilegeDisplay
+              scope={record.isGlobal ? 'global' : 'space'}
+              explanation={hasCustomizations ? undefined : actualPrivilege}
+              privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
+            />
+          );
         },
       },
       {

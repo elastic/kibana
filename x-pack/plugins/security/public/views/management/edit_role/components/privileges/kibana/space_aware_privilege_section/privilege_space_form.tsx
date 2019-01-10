@@ -199,7 +199,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           onChangeAll={this.onChangeAllFeaturePrivileges}
           privilegeDefinition={this.props.privilegeDefinition}
           spacesIndex={this.state.editingIndex}
-          showLocks={this.state.selectedBasePrivilege.length === 0}
           disabled={this.state.selectedBasePrivilege.length > 0}
         />
       </EuiForm>
@@ -280,6 +279,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       form.base = [];
     } else {
       form.base = [basePrivilege];
+      form.feature = {};
     }
 
     this.setState({

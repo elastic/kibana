@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { FeaturePrivilegeSet } from '../../../common/model/privileges/feature_privileges';
 import { PrivilegeDefinition } from '../../../common/model/privileges/privilege_definition';
@@ -15,6 +16,10 @@ interface PrivilegeValidationResponse {
   details: string;
 }
 
+interface PrivilegeScenario extends ActionSet {
+  source: PRIVILEGE_SOURCE;
+}
+
 /**
  * Describes the source of a privilege.
  */
@@ -25,11 +30,14 @@ export enum PRIVILEGE_SOURCE {
   /** Privilege is assigned directly to the entity */
   ASSIGNED_DIRECTLY,
 
-  /** Privilege is derived from either a space base privilege, or global base privilege */
-  EFFECTIVE,
+  /** Privilege is derived from space base privilege */
+  EFFECTIVE_SPACE_BASE,
 
-  /** Privilege was originally assigned directly, but has been superceded by a more-permissive base privilege */
-  EFFECTIVE_OVERRIDES_ASSIGNED,
+  /** Privilege is derived from global base privilege */
+  EFFECTIVE_GLOBAL_BASE,
+
+  /** Privilege is derived from global feature privilege */
+  EFFECTIVE_GLOBAL_FEATURE,
 }
 
 export interface ExplanationResult {
@@ -37,6 +45,7 @@ export interface ExplanationResult {
   supercededPrivilege?: string;
   overrideSource?: string;
   source: PRIVILEGE_SOURCE;
+  overridesAssigned?: boolean;
   details: string;
 }
 
@@ -124,32 +133,15 @@ export class EffectivePrivileges {
     const { base = [], spaces = [] } = this.role.kibana[spacesIndex] || {};
     const globalFeaturePrivileges = this.globalPrivilege.feature[featureId] || [];
 
-    const scenarios: ActionSet[] = [
-      {
-        name: 'global base privilege',
-        actions: this.assignedGlobalBaseActions,
-      },
-      {
-        name: 'space base privilege',
-        actions: this.privilegeDefinition.getSpacesPrivileges().getActions(base[0]),
-      },
-    ];
-
-    if (globalFeaturePrivileges.length > 0 && !spaces.includes('*')) {
-      scenarios.push({
-        name: 'global feature privilege',
-        actions: this.privilegeDefinition
-          .getFeaturePrivileges()
-          .getActions(featureId, globalFeaturePrivileges[0]),
-      });
-    }
+    const scenarios: PrivilegeScenario[] = [];
 
     const hasAssignedFeaturePrivilege = assignedFeaturePrivilege !== NO_PRIVILEGE_VALUE;
-    let spaceFeaturePrivilegeScenario: ActionSet | null = null;
+    let spaceFeaturePrivilegeScenario: PrivilegeScenario | null = null;
 
     if (hasAssignedFeaturePrivilege) {
       spaceFeaturePrivilegeScenario = {
-        name: 'space feature privilege',
+        name: i18n.translate('foo', { defaultMessage: 'space feature privilege' }),
+        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
         actions: this.privilegeDefinition
           .getFeaturePrivileges()
           .getActions(featureId, assignedFeaturePrivilege),
@@ -157,12 +149,35 @@ export class EffectivePrivileges {
       scenarios.push(spaceFeaturePrivilegeScenario);
     }
 
+    scenarios.push(
+      {
+        name: i18n.translate('foo', { defaultMessage: 'space base privilege' }),
+        source: PRIVILEGE_SOURCE.EFFECTIVE_SPACE_BASE,
+        actions: this.privilegeDefinition.getSpacesPrivileges().getActions(base[0]),
+      },
+      {
+        name: i18n.translate('foo', { defaultMessage: 'global base privilege' }),
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
+        actions: this.assignedGlobalBaseActions,
+      }
+    );
+
+    if (globalFeaturePrivileges.length > 0 && !spaces.includes('*')) {
+      scenarios.push({
+        name: i18n.translate('foo', { defaultMessage: 'global feature privilege' }),
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_FEATURE,
+        actions: this.privilegeDefinition
+          .getFeaturePrivileges()
+          .getActions(featureId, globalFeaturePrivileges[0]),
+      });
+    }
+
     const winningScenario = this.locateHighestGrantedFeaturePrivilege(featureId, scenarios);
     if (!winningScenario) {
       return {
         privilege: NO_PRIVILEGE_VALUE,
         source: PRIVILEGE_SOURCE.NONE,
-        details: 'No feature privilege assigned',
+        details: i18n.translate('foo', { defaultMessage: 'No feature privilege assigned' }),
       };
     }
 
@@ -172,8 +187,8 @@ export class EffectivePrivileges {
     ) {
       return {
         privilege: assignedFeaturePrivilege,
-        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
-        details: 'Assigned directly',
+        source: winningScenario.scenario.source,
+        details: i18n.translate('foo', { defaultMessage: 'Assigned directly' }),
       };
     }
 
@@ -181,10 +196,12 @@ export class EffectivePrivileges {
       privilege: winningScenario.privilege,
       supercededPrivilege: hasAssignedFeaturePrivilege ? assignedFeaturePrivilege : undefined,
       overrideSource: hasAssignedFeaturePrivilege ? winningScenario.scenario.name : undefined,
-      source: hasAssignedFeaturePrivilege
-        ? PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED
-        : PRIVILEGE_SOURCE.EFFECTIVE,
-      details: `Granted via ${winningScenario.scenario.name}`,
+      source: winningScenario.scenario.source,
+      overridesAssigned: hasAssignedFeaturePrivilege,
+      details: i18n.translate('foo', {
+        defaultMessage: 'Granted via {source}',
+        values: { source: winningScenario.scenario.name },
+      }),
     };
   }
 
@@ -219,8 +236,10 @@ export class EffectivePrivileges {
 
       return {
         privilege: isSet ? globalBasePrivilege[0] : NO_PRIVILEGE_VALUE,
-        source: isSet ? PRIVILEGE_SOURCE.EFFECTIVE : PRIVILEGE_SOURCE.NONE,
-        details: isSet ? `Granted via global base privilege` : `Not assigned`,
+        source: isSet ? PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE : PRIVILEGE_SOURCE.NONE,
+        details: isSet
+          ? i18n.translate('foo', { defaultMessage: 'Granted via global base privilege' })
+          : i18n.translate('foo', { defaultMessage: 'Not assigned' }),
       };
     }
     const allowsAssigned = this.validateSpaceBasePrivilege(base[0]);
@@ -228,15 +247,16 @@ export class EffectivePrivileges {
       return {
         privilege: base[0],
         source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
-        details: `Assigned directly`,
+        details: i18n.translate('foo', { defaultMessage: 'Assigned directly' }),
       };
     }
 
     return {
       privilege: globalBasePrivilege[0],
       supercededPrivilege: base[0],
-      overrideSource: 'global base privilege',
-      source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+      overrideSource: i18n.translate('foo', { defaultMessage: 'global base privilege' }),
+      source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
+      overridesAssigned: true,
       details: allowsAssigned.details,
     };
   }
@@ -356,8 +376,8 @@ export class EffectivePrivileges {
 
   private locateHighestGrantedFeaturePrivilege(
     featureId: string,
-    scenarios: ActionSet[]
-  ): { scenario: ActionSet; privilege: string } | null {
+    scenarios: PrivilegeScenario[]
+  ): { scenario: PrivilegeScenario; privilege: string } | null {
     const featurePrivileges = this.rankedFeaturePrivileges[featureId] || [];
 
     // inspect feature privileges in ranked order (most permissive -> least permissive)

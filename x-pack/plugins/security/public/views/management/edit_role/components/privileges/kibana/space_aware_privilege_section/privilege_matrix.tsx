@@ -23,6 +23,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
+import { Table } from 'react-virtualized';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
@@ -42,6 +43,24 @@ interface Props {
 
 interface State {
   showModal: boolean;
+}
+
+interface TableRow {
+  feature: Feature & { isBase: boolean };
+  tooltip?: string;
+  role: Role;
+}
+
+interface SpacesColumn {
+  isGlobal: boolean;
+  spacesIndex: number;
+  spaces: Space[];
+  privileges: {
+    base: string[];
+    feature: {
+      [featureId: string]: string[];
+    };
+  };
 }
 
 export class PrivilegeMatrix extends Component<Props, State> {
@@ -83,18 +102,15 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
     const globalPrivilege = this.locateGlobalPrivilege();
 
-    const items: any[] = [];
+    const spacesColumns: SpacesColumn[] = [];
 
     spacePrivileges.forEach((spacePrivs, spacesIndex) => {
-      items.push({
+      spacesColumns.push({
         isGlobal: spacePrivs.spaces.includes('*'),
         spacesIndex,
-        spaces: spacePrivs.spaces.map(spaceId =>
-          this.props.spaces.find(space => space.id === spaceId)
-        ),
-        headerSpaces: spacePrivs.spaces
-          .filter((s, index, arr) => arr.length < 5 || index < 3)
-          .map(spaceId => this.props.spaces.find(space => space.id === spaceId)),
+        spaces: spacePrivs.spaces
+          .map(spaceId => this.props.spaces.find(space => space.id === spaceId))
+          .filter(Boolean) as Space[],
         privileges: {
           base: spacePrivs.base,
           feature: spacePrivs.feature,
@@ -102,11 +118,6 @@ export class PrivilegeMatrix extends Component<Props, State> {
       });
     });
 
-    interface TableRow {
-      feature: Feature & { isBase: boolean };
-      tooltip?: string;
-      role: Role;
-    }
     const rows: TableRow[] = [
       {
         feature: {
@@ -155,12 +166,12 @@ export class PrivilegeMatrix extends Component<Props, State> {
           );
         },
       },
-      ...items.map(item => {
+      ...spacesColumns.map(item => {
         return {
           field: 'feature',
           name: (
             <Fragment>
-              {item.headerSpaces.map((space: Space) => (
+              {item.spaces.map((space: Space) => (
                 <span key={space.id}>
                   <SpaceAvatar size="s" space={space} />{' '}
                   {item.isGlobal && (
@@ -171,7 +182,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
                   )}
                 </span>
               ))}
-              {item.headerSpaces.length !== item.spaces.length && (
+              {item.spaces.length !== item.spaces.length && (
                 <EuiToolTip
                   content={
                     <EuiText size="s">
@@ -183,60 +194,13 @@ export class PrivilegeMatrix extends Component<Props, State> {
                     </EuiText>
                   }
                 >
-                  <span>{item.spaces.length - item.headerSpaces.length} more</span>
+                  <span>{item.spaces.length - item.spaces.length} more</span>
                 </EuiToolTip>
               )}
             </Fragment>
           ),
           render: (feature: Feature & { isBase: boolean }, record: TableRow) => {
-            if (item.isGlobal) {
-              if (feature.isBase) {
-                return <PrivilegeDisplay privilege={globalPrivilege.base} />;
-              }
-
-              const actualPrivileges = this.props.effectivePrivileges.getActualGlobalFeaturePrivilege(
-                feature.id
-              );
-
-              return <PrivilegeDisplay privilege={actualPrivileges} />;
-            } else {
-              // not global
-
-              if (feature.isBase) {
-                const actualBasePrivileges = this.props.effectivePrivileges.explainActualSpaceBasePrivilege(
-                  item.spacesIndex
-                );
-
-                if (actualBasePrivileges.source === PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED) {
-                  return (
-                    <SupercededPrivilegeDisplay
-                      privilege={actualBasePrivileges.privilege}
-                      supercededPrivilege={actualBasePrivileges.supercededPrivilege}
-                      overrideSource={actualBasePrivileges.overrideSource}
-                    />
-                  );
-                }
-
-                return <PrivilegeDisplay privilege={actualBasePrivileges.privilege} />;
-              }
-
-              const actualPrivileges = this.props.effectivePrivileges.explainActualSpaceFeaturePrivilege(
-                feature.id,
-                item.spacesIndex
-              );
-
-              if (actualPrivileges.source === PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED) {
-                return (
-                  <SupercededPrivilegeDisplay
-                    privilege={actualPrivileges.privilege}
-                    supercededPrivilege={actualPrivileges.supercededPrivilege}
-                    overrideSource={actualPrivileges.overrideSource}
-                  />
-                );
-              }
-
-              return <PrivilegeDisplay privilege={actualPrivileges.privilege} />;
-            }
+            return this.renderPrivilegeDisplay(item, record, globalPrivilege.base);
           },
         };
       }),
@@ -262,6 +226,55 @@ export class PrivilegeMatrix extends Component<Props, State> {
         }}
       />
     );
+  };
+
+  private renderPrivilegeDisplay = (
+    column: SpacesColumn,
+    { feature }: TableRow,
+    globalBasePrivilege: string[]
+  ) => {
+    if (column.isGlobal) {
+      if (feature.isBase) {
+        return <PrivilegeDisplay scope={'global'} privilege={globalBasePrivilege} />;
+      }
+
+      const actualPrivileges = this.props.effectivePrivileges.getActualGlobalFeaturePrivilege(
+        feature.id
+      );
+
+      return <PrivilegeDisplay scope={'global'} privilege={actualPrivileges} />;
+    } else {
+      // not global
+
+      if (feature.isBase) {
+        // Space base privilege
+        const actualBasePrivileges = this.props.effectivePrivileges.explainActualSpaceBasePrivilege(
+          column.spacesIndex
+        );
+
+        return (
+          <PrivilegeDisplay
+            scope={'space'}
+            explanation={actualBasePrivileges}
+            privilege={actualBasePrivileges.privilege}
+          />
+        );
+      }
+
+      // Space feature privilege
+      const actualPrivileges = this.props.effectivePrivileges.explainActualSpaceFeaturePrivilege(
+        feature.id,
+        column.spacesIndex
+      );
+
+      return (
+        <PrivilegeDisplay
+          scope={'space'}
+          explanation={actualPrivileges}
+          privilege={actualPrivileges.privilege}
+        />
+      );
+    }
   };
 
   private locateGlobalPrivilege = () => {

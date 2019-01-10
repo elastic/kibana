@@ -6,23 +6,52 @@
 import { EuiIcon, EuiIconTip, EuiText, EuiTextProps, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
+import { ExplanationResult, PRIVILEGE_SOURCE } from 'plugins/security/lib/effective_privileges';
 import React, { ReactNode, SFC } from 'react';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 
 interface Props extends EuiTextProps {
   privilege: string | string[];
+  scope: 'global' | 'space';
+  explanation?: ExplanationResult;
   styleMissingPrivilege?: boolean;
   iconType?: IconType;
   tooltipContent?: ReactNode;
 }
 
-interface SupercededProps extends Props {
-  supercededPrivilege?: string;
-  overrideSource?: string;
-}
-
 export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
-  const { privilege, styleMissingPrivilege, iconType, tooltipContent, ...rest } = props;
+  const { scope, explanation } = props;
+
+  if (!explanation) {
+    return <SimplePrivilegeDisplay {...props} />;
+  }
+
+  if (explanation.overridesAssigned) {
+    return <SupercededPrivilegeDisplay {...props} />;
+  }
+
+  if (
+    scope === 'space' &&
+    [PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE, PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_FEATURE].includes(
+      explanation.source
+    )
+  ) {
+    return <EffectivePrivilegeDisplay {...props} />;
+  }
+
+  return <SimplePrivilegeDisplay {...props} />;
+};
+
+export const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
+  const {
+    privilege,
+    styleMissingPrivilege,
+    iconType,
+    tooltipContent,
+    scope,
+    explanation,
+    ...rest
+  } = props;
 
   return (
     <EuiText {...rest}>
@@ -31,11 +60,12 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
   );
 };
 
-export const SupercededPrivilegeDisplay: SFC<SupercededProps> = (props: SupercededProps) => {
-  const { supercededPrivilege, overrideSource, ...rest } = props;
+export const SupercededPrivilegeDisplay: SFC<Props> = (props: Props) => {
+  const { supercededPrivilege, overrideSource } = props.explanation || ({} as ExplanationResult);
+
   return (
-    <PrivilegeDisplay
-      {...rest}
+    <SimplePrivilegeDisplay
+      {...props}
       iconType={'lock'}
       tooltipContent={
         <FormattedMessage
@@ -44,6 +74,17 @@ export const SupercededPrivilegeDisplay: SFC<SupercededProps> = (props: Superced
           values={{ supercededPrivilege: `'${supercededPrivilege}'`, overrideSource }}
         />
       }
+    />
+  );
+};
+
+export const EffectivePrivilegeDisplay: SFC<Props> = (props: Props) => {
+  const { explanation, ...rest } = props;
+  return (
+    <SimplePrivilegeDisplay
+      {...rest}
+      iconType={'lock'}
+      tooltipContent={explanation && explanation.details}
     />
   );
 };
