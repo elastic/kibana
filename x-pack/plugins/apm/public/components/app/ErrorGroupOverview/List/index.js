@@ -105,9 +105,12 @@ class List extends Component {
         }
       },
       {
-        name: i18n.translate('xpack.apm.errorsTable.errorMessageColumnLabel', {
-          defaultMessage: 'Error message and culprit'
-        }),
+        name: i18n.translate(
+          'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
+          {
+            defaultMessage: 'Error message and culprit'
+          }
+        ),
         field: 'message',
         sortable: false,
         width: '50%',

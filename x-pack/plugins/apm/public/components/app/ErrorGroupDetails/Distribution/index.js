@@ -24,7 +24,12 @@ export function getFormattedBuckets(buckets, bucketSize) {
   });
 }
 
-function Distribution({ distribution, title = 'Occurrences' }) {
+function Distribution({
+  distribution,
+  title = i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
+    defaultMessage: 'Occurrences'
+  })
+}) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize

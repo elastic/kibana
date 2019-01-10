@@ -172,7 +172,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         <EuiTitle size="s">
           <h3>
             {i18n.translate(
-              'xpack.apm.errorGroupDetails.errorOccurrenceHeader',
+              'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
               {
                 defaultMessage: 'Error occurrence'
               }
@@ -182,7 +182,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         <DiscoverErrorButton error={error} kuery={urlParams.kuery}>
           <EuiButtonEmpty iconType="discoverApp">
             {i18n.translate(
-              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverLabel',
+              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
               {
                 defaultMessage:
                   'View {occurrencesCount} occurrences in Discover',
