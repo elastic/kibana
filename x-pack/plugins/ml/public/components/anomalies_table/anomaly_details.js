@@ -281,48 +281,30 @@ export class AnomalyDetails extends Component {
     const anomaly = this.props.anomaly;
     const source = anomaly.source;
 
-    let anomalyDescription;
-    if (anomaly.entityName !== undefined && (source.partition_field_name !== undefined) &&
-      (source.partition_field_name !== anomaly.entityName)) {
-      anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyFoundForAndDetectedInDescription', {
-        defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector} found for {anomalyEntityName} {anomalyEntityValue} ' +
-          'detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
+    let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
+      defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
+      values: {
+        anomalySeverity: getSeverity(anomaly.severity),
+        anomalyDetector: anomaly.detector,
+      }
+    });
+    if (anomaly.entityName !== undefined) {
+      anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.foundForLabel', {
+        defaultMessage: ' found for {anomalyEntityName} {anomalyEntityValue}',
         values: {
-          anomalySeverity: getSeverity(anomaly.severity),
-          anomalyDetector: anomaly.detector,
-          anomalyEntityName: anomaly.entityName,
-          anomalyEntityValue: anomaly.entityValue,
-          sourcePartitionFieldName: source.partition_field_name,
-          sourcePartitionFieldValue: source.partition_field_value,
-        }
-      });
-    } else if ((source.partition_field_name !== undefined) &&
-      (source.partition_field_name !== anomaly.entityName)) {
-      i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyDetectedInDescription', {
-        defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector} detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
-        values: {
-          anomalySeverity: getSeverity(anomaly.severity),
-          anomalyDetector: anomaly.detector,
-          sourcePartitionFieldName: source.partition_field_name,
-          sourcePartitionFieldValue: source.partition_field_value,
-        }
-      });
-    } else if (anomaly.entityName !== undefined) {
-      i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyFoundForDescription', {
-        defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector} found for {anomalyEntityName} {anomalyEntityValue}',
-        values: {
-          anomalySeverity: getSeverity(anomaly.severity),
-          anomalyDetector: anomaly.detector,
           anomalyEntityName: anomaly.entityName,
           anomalyEntityValue: anomaly.entityValue,
         }
       });
-    } else {
-      anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyDescription', {
-        defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
+    }
+
+    if ((source.partition_field_name !== undefined) &&
+        (source.partition_field_name !== anomaly.entityName)) {
+      anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detectedInLabel', {
+        defaultMessage: ' detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
         values: {
-          anomalySeverity: getSeverity(anomaly.severity),
-          anomalyDetector: anomaly.detector,
+          sourcePartitionFieldName: source.partition_field_name,
+          sourcePartitionFieldValue: source.partition_field_value,
         }
       });
     }
@@ -341,6 +323,7 @@ export class AnomalyDetails extends Component {
         }
       });
     }
+
     return (
       <React.Fragment>
         <EuiText size="xs">
