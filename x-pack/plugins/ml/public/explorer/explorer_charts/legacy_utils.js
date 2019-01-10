@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// This file includes utils which should eventuelly become obsolete once Anomaly Explorer
+// is fully migrated to React. Their purpose is to retain functionality while we migrate step by step.
+
 export function getChartContainerWidth() {
   const chartContainer = document.querySelector('.explorer-charts');
   return Math.floor(chartContainer && chartContainer.clientWidth || 0);

@@ -164,7 +164,7 @@ export const Explorer = injectI18n(
             {viewBySwimlaneOptions.length > 0 && (
               <React.Fragment>
                 <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFlexItem grow={false}>
                     <EuiFormRow
                       label={intl.formatMessage({
                         id: 'xpack.ml.explorer.viewByLabel',
@@ -179,7 +179,7 @@ export const Explorer = injectI18n(
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFlexItem grow={false}>
                     <EuiFormRow
                       label={intl.formatMessage({
                         id: 'xpack.ml.explorer.limitLabel',
