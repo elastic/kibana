@@ -109,7 +109,6 @@ const getHostsColumns = () => [
     hideForMobile: false,
     render: ({ host }: { host: HostItem }) => {
       const hostName = defaultTo('--', host.name);
-      const hostLink = defaultTo('--', <Link to={`hosts/${host._id}`}>{host.name}</Link>);
       return (
         <>
           <DraggableWrapper
@@ -134,7 +133,7 @@ const getHostsColumns = () => [
                   />
                 </DragEffects>
               ) : (
-                hostLink
+                <Link to={`hosts/${host.hostId}`}>{hostName}</Link> // TODO: Does this need escapeQueryValue() or encodeURIComponent()?
               )
             }
           />
