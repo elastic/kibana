@@ -72,6 +72,7 @@ export default function Tooltip({
   header,
   footer,
   tooltipPoints,
+  bucketSize,
   x,
   y,
   ...props
@@ -86,7 +87,12 @@ export default function Tooltip({
   return (
     <Hint {...props} value={{ x, y }}>
       <TooltipElm>
-        <Header>{header || moment(x).format('MMMM Do YYYY, HH:mm:ss')}</Header>
+        <Header>
+          {header ||
+            moment(x).format('MMMM Do YYYY, HH:mm:ss') +
+              ' - ' +
+              moment(x + bucketSize).format('HH:mm:ss')}
+        </Header>
 
         <Content>
           {showLegends ? (

@@ -165,6 +165,7 @@ export class HistogramInner extends PureComponent {
               header={tooltipHeader(hoveredBucket)}
               footer={tooltipFooter(hoveredBucket)}
               tooltipPoints={[{ value: formatYLong(hoveredBucket.y) }]}
+              bucketSize={bucketSize}
               x={hoveredBucket.x}
               y={yDomain[1] / 2}
             />
