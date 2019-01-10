@@ -6,6 +6,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import xPackage from '../../package.json';
+import { getTemplateVersion } from './lib/get_template_version';
 import { TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
@@ -37,6 +39,30 @@ describe('TaskStore', () => {
         },
         name: 'tasky',
       });
+    });
+
+    test('throws error if newer index template exists', async () => {
+      const callCluster = sinon.stub();
+      callCluster
+        .withArgs('indices.getTemplate')
+        .returns(Promise.resolve({ tasky: { version: Infinity } }));
+      const store = new TaskStore({
+        callCluster,
+        logger: mockLogger(),
+        index: 'tasky',
+        maxAttempts: 2,
+        supportedTypes: ['a', 'b', 'c'],
+      });
+
+      try {
+        await store.init();
+      } catch (err) {
+        expect(err.message).toBe(
+          `Template version ${getTemplateVersion(
+            xPackage.version
+          )} could not be saved: existing template version Infinity is newer!`
+        );
+      }
     });
   });
 
