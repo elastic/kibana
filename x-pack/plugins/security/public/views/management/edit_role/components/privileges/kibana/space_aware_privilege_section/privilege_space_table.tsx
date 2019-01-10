@@ -10,6 +10,7 @@ import {
   // @ts-ignore
   EuiInMemoryTable,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
@@ -29,6 +30,10 @@ interface Props {
   displaySpaces: Space[];
 }
 
+interface State {
+  expandedSpacesGroups: number[];
+}
+
 type TableSpace = Space &
   Partial<{
     deleted: boolean;
@@ -46,7 +51,11 @@ interface TableRow {
   };
 }
 
-export class PrivilegeSpaceTable extends Component<Props, {}> {
+export class PrivilegeSpaceTable extends Component<Props, State> {
+  public state = {
+    expandedSpacesGroups: [] as number[],
+  };
+
   public render() {
     return this.renderKibanaPrivileges();
   }
@@ -95,9 +104,13 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
         name: 'Spaces',
         width: '60%',
         render: (spaces: TableSpace[], record: TableRow) => {
+          const displayedSpaces = this.state.expandedSpacesGroups.includes(record.spacesIndex)
+            ? spaces
+            : spaces.slice(0, SPACES_DISPLAY_COUNT);
+
           return (
             <div>
-              {spaces.slice(0, SPACES_DISPLAY_COUNT).map((space: TableSpace) => (
+              {displayedSpaces.map((space: TableSpace) => (
                 <EuiBadge
                   key={space.id}
                   {...getExtraBadgeProps(space)}
@@ -106,12 +119,25 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
                   {space.name}
                 </EuiBadge>
               ))}
-              {record.spaces.length > SPACES_DISPLAY_COUNT ? (
-                // TODO: Hook me up to expand table row to display all spaces inline
-                <EuiButtonEmpty size="xs">
-                  +{spaces.length - SPACES_DISPLAY_COUNT} more
+              {spaces.length > displayedSpaces.length ? (
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
+                >
+                  <FormattedMessage
+                    id="foo"
+                    defaultMessage="+{count} more"
+                    values={{ count: spaces.length - displayedSpaces.length }}
+                  />
                 </EuiButtonEmpty>
-              ) : null}
+              ) : (
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
+                >
+                  <FormattedMessage id="foo" defaultMessage="show less" />
+                </EuiButtonEmpty>
+              )}
             </div>
           );
         },
@@ -153,11 +179,7 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
             icon: 'trash',
             color: 'danger',
             type: 'icon',
-            onClick: (item: TableRow) => {
-              const roleCopy = copyRole(this.props.role);
-              roleCopy.kibana.splice(item.spacesIndex, 1);
-              this.props.onChange(roleCopy);
-            },
+            onClick: this.onDeleteSpacePrivilege,
           },
         ],
       },
@@ -183,6 +205,29 @@ export class PrivilegeSpaceTable extends Component<Props, {}> {
     const spacePrivileges = this.props.role.kibana;
     return spacePrivileges.sort((priv1, priv2) => {
       return priv1.spaces.includes('*') ? -1 : priv1.spaces.includes('*') ? 1 : 0;
+    });
+  };
+
+  private toggleExpandSpacesGroup = (spacesIndex: number) => {
+    if (this.state.expandedSpacesGroups.includes(spacesIndex)) {
+      this.setState({
+        expandedSpacesGroups: this.state.expandedSpacesGroups.filter(i => i !== spacesIndex),
+      });
+    } else {
+      this.setState({
+        expandedSpacesGroups: [...this.state.expandedSpacesGroups, spacesIndex],
+      });
+    }
+  };
+
+  private onDeleteSpacePrivilege = (item: TableRow) => {
+    const roleCopy = copyRole(this.props.role);
+    roleCopy.kibana.splice(item.spacesIndex, 1);
+
+    this.props.onChange(roleCopy);
+
+    this.setState({
+      expandedSpacesGroups: this.state.expandedSpacesGroups.filter(i => i !== item.spacesIndex),
     });
   };
 }
