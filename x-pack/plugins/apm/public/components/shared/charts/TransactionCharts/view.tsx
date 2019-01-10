@@ -45,19 +45,22 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-const millisecondsLabel =
-  '- ' +
-  i18n.translate('xpack.apm.metrics.transactionChart.millisecondsLabel', {
+const msTimeUnitLabel = i18n.translate(
+  'xpack.apm.metrics.transactionChart.msTimeUnitLabel',
+  {
     defaultMessage: 'ms'
-  });
+  }
+);
 
 export class TransactionChartsView extends Component<TransactionChartProps> {
   public getResponseTimeTickFormatter = (t: number) => {
-    return this.props.charts.noHits ? millisecondsLabel : asMillis(t);
+    return this.props.charts.noHits ? `- ${msTimeUnitLabel}` : asMillis(t);
   };
 
   public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return this.props.charts.noHits || !p ? millisecondsLabel : asMillis(p.y);
+    return this.props.charts.noHits || !p
+      ? `- ${msTimeUnitLabel}`
+      : asMillis(p.y);
   };
 
   public getTPMFormatter = (t: number | null) => {
