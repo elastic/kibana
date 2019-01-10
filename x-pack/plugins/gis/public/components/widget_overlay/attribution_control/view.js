@@ -23,11 +23,11 @@ export class AttributionControl  extends React.Component {
   }
 
   componentDidMount() {
-    this._isMouunted = true;
+    this._isMounted = true;
   }
 
   componentWillUnmount() {
-    this._isMouunted = false;
+    this._isMounted = false;
   }
 
   componentDidUpdate() {
@@ -40,7 +40,7 @@ export class AttributionControl  extends React.Component {
       return layer.getAttributions();
     });
     const attributions = await Promise.all(attributionPromises);
-    if (!this._isMouunted) {
+    if (!this._isMounted) {
       return;
     }
 
@@ -57,9 +57,7 @@ export class AttributionControl  extends React.Component {
       }
     }
     if (!_.isEqual(this.state.uniqueAttributions, uniqueAttributions)) {
-      this.setState({
-        uniqueAttributions: uniqueAttributions
-      });
+      this.setState({ uniqueAttributions });
     }
   };
 
