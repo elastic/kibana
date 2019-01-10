@@ -55,19 +55,19 @@ exports[`HistoryTabs should render correctly 1`] = `
     size="l"
   />
   <Route
-    component={[Function]}
     key="/one"
     path="/one"
+    render={[Function]}
   />
   <Route
-    component={[Function]}
     key="/two"
     path="/two"
+    render={[Function]}
   />
   <Route
-    component={[Function]}
     key="/three"
     path="/three"
+    render={[Function]}
   />
 </React.Fragment>
 `;

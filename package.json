@@ -27,7 +27,7 @@
       "extraPatterns": [
         "build",
         "optimize",
-        "dlls",
+        "built_assets",
         ".eslintcache"
       ]
     }
