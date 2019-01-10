@@ -52,7 +52,11 @@ export interface FullIndexInfo {
  * index mappings are somewhat what we expect.
  */
 export async function fetchInfo(callCluster: CallCluster, index: string): Promise<FullIndexInfo> {
-  const result = await callCluster('indices.get', { ignore: [404], index });
+  const result = await callCluster('indices.get', {
+    ignore: [404],
+    index,
+    include_type_name: true,
+  });
 
   if ((result as NotFound).status === 404) {
     return {
@@ -296,7 +300,7 @@ export async function claimAlias(
  *
  * @param {FullIndexInfo} indexInfo
  */
-async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
+function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
   const currentTypes = getTypes(indexInfo.mappings);
   const isV5Index = currentTypes.length > 1 || currentTypes[0] !== ROOT_TYPE;
   if (isV5Index) {

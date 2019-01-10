@@ -11,14 +11,18 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 
 import {
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
+  EuiTabbedContent,
   EuiText
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
@@ -32,6 +36,7 @@ import {
 } from '../../../common/util/anomaly_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import { formatValue } from '../../formatters/format_value';
+import { MAX_CHARS } from './anomalies_table_constants';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -115,13 +120,6 @@ function getDetailsItems(anomaly, examples, filter) {
     description: timeDesc
   });
 
-  if (examples !== undefined && examples.length > 0) {
-    examples.forEach((example, index) => {
-      const title = (index === 0) ? 'category examples' : '';
-      items.push({ title, description: example });
-    });
-  }
-
   items.push({
     title: 'function',
     description: (source.function !== 'metric') ? source.function : source.function_description
@@ -188,10 +186,103 @@ export class AnomalyDetails extends Component {
     this.state = {
       showAllInfluencers: false
     };
+
+    if (this.props.examples !== undefined && this.props.examples.length > 0) {
+      this.tabs = [{
+        id: 'Details',
+        name: 'Details',
+        content: (
+          <Fragment>
+            <div className="ml-anomalies-table-details">
+              {this.renderDescription()}
+              <EuiSpacer size="m" />
+              {this.renderDetails()}
+              {this.renderInfluencers()}
+            </div>
+          </Fragment>
+        )
+      },
+      {
+        id: 'Category examples',
+        name: 'Category examples',
+        content: (
+          <Fragment>
+            {this.renderCategoryExamples()}
+          </Fragment>
+        ),
+      }
+      ];
+    }
   }
 
   toggleAllInfluencers() {
     this.setState({ showAllInfluencers: !this.state.showAllInfluencers });
+  }
+
+  renderCategoryExamples() {
+    const { examples, definition } = this.props;
+
+    return (
+      <EuiFlexGroup
+        direction="column"
+        justifyContent="center"
+        gutterSize="m"
+        className="mlAnomalyCategoryExamples"
+      >
+        {(definition !== undefined && definition.terms) &&
+        <Fragment>
+          <EuiFlexItem key={`example-terms`}>
+            <EuiText size="xs">
+              <h4 className="mlAnomalyCategoryExamples__header">Terms</h4>&nbsp;
+              <EuiIconTip
+                aria-label="Description"
+                type="questionInCircle"
+                color="subdued"
+                size="s"
+                content={`A space separated list of the common tokens that are matched in values of the category
+                (may have been truncated to a max character limit of ${MAX_CHARS})`}
+              />
+            </EuiText>
+            <EuiText size="xs">
+              {definition.terms}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+        </Fragment> }
+        {(definition !== undefined && definition.regex) &&
+          <Fragment>
+            <EuiFlexItem key={`example-regex`}>
+              <EuiText size="xs">
+                <h4 className="mlAnomalyCategoryExamples__header">Regex</h4>&nbsp;
+                <EuiIconTip
+                  aria-label="Description"
+                  type="questionInCircle"
+                  color="subdued"
+                  size="s"
+                  content={`The regular expression that is used to search for values that match the category
+                  (may have been truncated to a max character limit of ${MAX_CHARS})`}
+                />
+              </EuiText>
+              <EuiText size="xs">
+                {definition.regex}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+          </Fragment>}
+
+        {examples.map((example, i) => {
+          return (
+            <EuiFlexItem key={`example${i}`}>
+              {(i === 0 && definition !== undefined) &&
+                <EuiText size="s">
+                  <h4>Examples</h4>
+                </EuiText>}
+              <span className="mlAnomalyCategoryExamples__item">{example}</span>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    );
   }
 
   renderDescription() {
@@ -315,22 +406,36 @@ export class AnomalyDetails extends Component {
   }
 
   render() {
+    const { tabIndex } = this.props;
 
-    return (
-      <div className="ml-anomalies-table-details">
-        {this.renderDescription()}
-        <EuiSpacer size="m" />
-        {this.renderDetails()}
-        {this.renderInfluencers()}
-      </div>
-    );
+    if (this.tabs !== undefined) {
+      return (
+        <EuiTabbedContent
+          tabs={this.tabs}
+          size="s"
+          initialSelectedTab={this.tabs[tabIndex]}
+          onTabClick={() => {}}
+        />
+      );
+    } else {
+      return (
+        <div className="ml-anomalies-table-details">
+          {this.renderDescription()}
+          <EuiSpacer size="m" />
+          {this.renderDetails()}
+          {this.renderInfluencers()}
+        </div>
+      );
+    }
   }
 }
 
 AnomalyDetails.propTypes = {
   anomaly: PropTypes.object.isRequired,
   examples: PropTypes.array,
+  definition: PropTypes.object,
   isAggregatedData: PropTypes.bool,
   filter: PropTypes.func,
-  influencersLimit: PropTypes.number
+  influencersLimit: PropTypes.number,
+  tabIndex: PropTypes.number.isRequired
 };

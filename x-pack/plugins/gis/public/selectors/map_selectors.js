@@ -135,21 +135,27 @@ export const getDataFilters = createSelector(
 
 export const getDataSources = createSelector(getMetadata, metadata => metadata ? metadata.data_sources : null);
 
-export const getSelectedLayer = createSelector(
-  getSelectedLayerId,
-  getLayerListRaw,
-  getDataSources,
-  (selectedLayerId, layerList, dataSources) => {
-    const selectedLayer = layerList.find(layerDescriptor => layerDescriptor.id === selectedLayerId);
-    return createLayerInstance(selectedLayer, dataSources);
-  });
-
 export const getLayerList = createSelector(
   getLayerListRaw,
   getDataSources,
   (layerList, dataSources) => {
     return layerList.map(layerDescriptor =>
       createLayerInstance(layerDescriptor, dataSources));
+  });
+
+export const getSelectedLayer = createSelector(
+  getSelectedLayerId,
+  getLayerList,
+  (selectedLayerId, layerList) => {
+    return layerList.find(layer => layer.getId() === selectedLayerId);
+  });
+
+export const getSelectedLayerJoinDescriptors = createSelector(
+  getSelectedLayer,
+  (selectedLayer) => {
+    return selectedLayer.getJoins().map(join => {
+      return join.toDescriptor();
+    });
   });
 
 export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));
