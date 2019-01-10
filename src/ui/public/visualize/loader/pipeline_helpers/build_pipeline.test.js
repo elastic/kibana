@@ -19,6 +19,8 @@
 
 import { prepareJson, prepareString, buildPipelineVisFunction } from './build_pipeline';
 
+jest.mock('ui/agg_types/buckets/date_histogram', () => ({}));
+
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
     it('returns a correctly formatted key/value string', () => {
