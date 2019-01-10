@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { UICapabilities } from 'ui/capabilities';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
@@ -20,6 +21,9 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           username: scenario.username,
           password: scenario.password,
         });
+
+        const capabilities: UICapabilities = uiCapabilities.value as UICapabilities;
+
         switch (scenario.username) {
           // these users have a read/write view of Discover
           case 'no_kibana_privileges': // we're stuck with this one until post 7.0
@@ -30,21 +34,23 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'dual_privileges_all':
           case 'discover_all':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: true,
               showWriteControls: true,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users have a read-only view of Discover
           case 'dual_privileges_read':
           case 'discover_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: true,
               showWriteControls: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users can't do anything with Discover
           case 'apm_all':
@@ -67,11 +73,12 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: false,
               showWriteControls: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(false);
             break;
           default:
             throw new UnreachableError(scenario);

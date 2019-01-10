@@ -131,9 +131,9 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
-        catalogue: ['fooEntry', 'barEntry'],
         privileges: {
           bar: {
+            catalogue: ['fooEntry', 'barEntry'],
             app: [],
             savedObject: {
               all: [],
@@ -379,5 +379,123 @@ describe('#getUIReadActions', () => {
     ];
     const result = builder.getUIReadActions(features);
     expect(result).toEqual([actions.ui.get('bar', 'bar-ui-capability')]);
+  });
+});
+
+describe('#getManagementReadActions', () => {
+  test(`includes management actions from the read privileges`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // wrong privilege name
+          bar: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no management read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        management: {
+          kibana: ['fooManagementLink', 'otherManagementLink'],
+          es: ['barManagementLink', 'bazManagementLink'],
+        },
+        privileges: {
+          // this management capability should show up in the results
+          read: {
+            app: [],
+            management: {
+              kibana: ['fooManagementLink'],
+              es: ['barManagementLink', 'bazManagementLink'],
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getManagementReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('management', 'kibana', 'fooManagementLink'),
+      actions.ui.get('management', 'es', 'barManagementLink'),
+      actions.ui.get('management', 'es', 'bazManagementLink'),
+    ]);
+  });
+});
+
+describe('#getCatalogueReadActions', () => {
+  test(`includes catalogue actions from the read privileges`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // wrong privilege name
+          bar: {
+            catalogue: [],
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no catalogue read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        catalogue: ['barCatalogueLink', 'bazCatalogueLink', 'anotherCatalogueLink'],
+        privileges: {
+          // this catalogue capability should show up in the results
+          read: {
+            app: [],
+            catalogue: ['barCatalogueLink', 'bazCatalogueLink'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getCatalogueReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('catalogue', 'barCatalogueLink'),
+      actions.ui.get('catalogue', 'bazCatalogueLink'),
+    ]);
   });
 });

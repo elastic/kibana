@@ -20,6 +20,13 @@ describe('#allNavlinks', () => {
   });
 });
 
+describe('#allCatalogueEntries', () => {
+  test('returns ui:catalogue/*', () => {
+    const uiActions = new UIActions();
+    expect(uiActions.allCatalogueEntries).toBe('ui:catalogue/*');
+  });
+});
+
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((featureId: any) => {
     test(`featureId of ${JSON.stringify(featureId)} throws error`, () => {

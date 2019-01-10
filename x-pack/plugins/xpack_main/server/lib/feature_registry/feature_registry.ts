@@ -13,6 +13,10 @@ export interface FeaturePrivilegeDefinition {
   metadata?: {
     tooltip?: string;
   };
+  management?: {
+    [sectionId: string]: string[];
+  };
+  catalogue?: string[];
   api?: string[];
   app: string[];
   savedObject: {
@@ -46,6 +50,12 @@ const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
+const managementSchema = Joi.object().pattern(
+  managementSectionIdRegex,
+  Joi.array().items(Joi.string())
+);
+const catalogueSchema = Joi.array().items(Joi.string());
+
 const schema = Joi.object({
   id: Joi.string()
     .regex(featurePrivilegePartRegex)
@@ -56,8 +66,8 @@ const schema = Joi.object({
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string(),
-  management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
-  catalogue: Joi.array().items(Joi.string()),
+  management: managementSchema,
+  catalogue: catalogueSchema,
   privileges: Joi.object()
     .pattern(
       featurePrivilegePartRegex,
@@ -65,6 +75,8 @@ const schema = Joi.object({
         metadata: Joi.object({
           tooltip: Joi.string(),
         }),
+        management: managementSchema,
+        catalogue: catalogueSchema,
         api: Joi.array().items(Joi.string()),
         app: Joi.array()
           .items(Joi.string())
@@ -88,10 +100,7 @@ const schema = Joi.object({
 const features: Record<string, Feature> = {};
 
 export function registerFeature(feature: Feature) {
-  const validateResult = Joi.validate(feature, schema);
-  if (validateResult.error) {
-    throw validateResult.error;
-  }
+  validateFeature(feature);
 
   if (feature.id in features) {
     throw new Error(`Feature with id ${feature.id} is already registered.`);
@@ -106,4 +115,51 @@ export function unregisterFeature(feature: Feature) {
 
 export function getFeatures(): Feature[] {
   return _.cloneDeep(Object.values(features));
+}
+
+function validateFeature(feature: Feature) {
+  const validateResult = Joi.validate(feature, schema);
+  if (validateResult.error) {
+    throw validateResult.error;
+  }
+
+  const { management = {}, catalogue = [] } = feature;
+
+  Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {
+    const unknownCatalogueEntries = _.difference(privilegeDefinition.catalogue || [], catalogue);
+    if (unknownCatalogueEntries.length > 0) {
+      throw new Error(
+        `Feature privilege ${
+          feature.id
+        }.${privilegeId} has unknown catalogue entries: ${unknownCatalogueEntries.join(', ')}`
+      );
+    }
+
+    Object.entries(privilegeDefinition.management || {}).forEach(
+      ([managementSectionId, managementEntry]) => {
+        if (!management[managementSectionId]) {
+          throw new Error(
+            `Feature privilege ${
+              feature.id
+            }.${privilegeId} has unknown management section: ${managementSectionId}`
+          );
+        }
+
+        const unknownSectionEntries = _.difference(
+          managementEntry,
+          management[managementSectionId]
+        );
+
+        if (unknownSectionEntries.length > 0) {
+          throw new Error(
+            `Feature privilege ${
+              feature.id
+            }.${privilegeId} has unknown management entries for section ${managementSectionId}: ${unknownSectionEntries.join(
+              ', '
+            )}`
+          );
+        }
+      }
+    );
+  });
 }

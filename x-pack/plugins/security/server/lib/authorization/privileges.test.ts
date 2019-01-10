@@ -21,13 +21,17 @@ test(`builds privileges correctly`, () => {
       name: 'Foo Feature',
       icon: 'arrowDown',
       navLinkId: 'kibana:foo-feature',
-      catalogue: ['fooAppEntry1', 'fooAppEntry2'],
+      catalogue: ['fooAppEntry1', 'fooAppEntry2', 'fooReadEntry'],
       management: {
         foo: ['fooManagementLink', 'anotherFooManagementLink'],
       },
       privileges: {
         all: {
           app: ['foo-app'],
+          catalogue: ['fooAppEntry1', 'fooAppEntry2'],
+          management: {
+            foo: ['fooManagementLink', 'anotherFooManagementLink'],
+          },
           savedObject: {
             all: ['foo-saved-object-type'],
             read: ['bad-saved-object-type'],
@@ -37,6 +41,10 @@ test(`builds privileges correctly`, () => {
         read: {
           app: ['foo-app'],
           api: ['foo/read/api'],
+          catalogue: ['fooReadEntry'],
+          management: {
+            foo: ['anotherFooManagementLink'],
+          },
           savedObject: {
             all: [],
             read: ['foo-saved-object-type', 'bar-saved-object-type'],
@@ -49,6 +57,10 @@ test(`builds privileges correctly`, () => {
       id: 'bar-feature',
       name: 'Bar Feature',
       icon: 'arrowUp',
+      catalogue: ['barCatalogue'],
+      management: {
+        kibana: ['yeppers'],
+      },
       privileges: {
         all: {
           app: ['bar-app'],
@@ -59,6 +71,9 @@ test(`builds privileges correctly`, () => {
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
+          management: {
+            kibana: ['yeppers'],
+          },
           app: ['bar-app'],
           api: ['bar/read/api'],
           savedObject: {
@@ -113,6 +128,7 @@ test(`builds privileges correctly`, () => {
           'saved_object:bar-saved-object-type/get',
           'saved_object:bar-saved-object-type/find',
           'ui:bar-feature/show',
+          'ui:management/kibana/yeppers',
         ],
       },
       'foo-feature': {
@@ -152,9 +168,7 @@ test(`builds privileges correctly`, () => {
           'saved_object:bar-saved-object-type/find',
           'ui:foo-feature/show',
           'ui:navLinks/kibana:foo-feature',
-          'ui:catalogue/fooAppEntry1',
-          'ui:catalogue/fooAppEntry2',
-          'ui:management/foo/fooManagementLink',
+          'ui:catalogue/fooReadEntry',
           'ui:management/foo/anotherFooManagementLink',
         ],
       },
@@ -183,6 +197,9 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:management/foo/anotherFooManagementLink',
+        'ui:management/kibana/yeppers',
+        'ui:catalogue/fooReadEntry',
         'ui:navLinks/*',
       ],
     },
@@ -222,6 +239,9 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:management/foo/anotherFooManagementLink',
+        'ui:management/kibana/yeppers',
+        'ui:catalogue/fooReadEntry',
         'ui:navLinks/*',
       ],
     },
