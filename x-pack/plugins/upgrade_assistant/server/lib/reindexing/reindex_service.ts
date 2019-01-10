@@ -17,9 +17,10 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
+  ReindexWarning,
 } from '../../../common/types';
 import { findBooleanFields, getReindexWarnings, transformFlatSettings } from './index_settings';
-import { FlatSettings, ReindexWarning } from './types';
+import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -122,8 +123,10 @@ export const reindexServiceFactory = (
    * @param indexName
    */
   const getFlatSettings = async (indexName: string) => {
+    // TODO: set `include_type_name` to false in
     const flatSettings = (await callCluster('transport.request', {
-      path: `/${encodeURIComponent(indexName)}?flat_settings`,
+      // &include_type_name=true
+      path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
     })) as { [indexName: string]: FlatSettings };
 
     if (!flatSettings[indexName]) {

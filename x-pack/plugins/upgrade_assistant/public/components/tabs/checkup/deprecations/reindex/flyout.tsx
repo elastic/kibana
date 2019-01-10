@@ -8,19 +8,27 @@ import React from 'react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiOverlayMask,
   EuiPortal,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
+// @ts-ignore
+import { euiZModal } from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { Subscription } from 'rxjs';
 import { ReindexStatus } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
+import { ReindexConfirmModal } from './confirm_modal';
 import { ReindexPollingService, ReindexState } from './polling_service';
 import { ReindexProgress } from './progress';
+import { ReindexWarningSummary } from './warnings';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -50,6 +58,7 @@ export const ReindexFlyoutUI: React.StatelessComponent<{
     reindexTaskPercComplete,
     lastCompletedStep,
     errorMessage,
+    reindexWarnings,
   } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
@@ -60,31 +69,43 @@ export const ReindexFlyoutUI: React.StatelessComponent<{
           <h2>Reindex {indexName}</h2>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiText>
-            <p>This tool can be used to reindex old indices.</p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiCallOut title="This may cause problems" color="warning" iconType="help">
-            During a reindex, the index will not be able to ingest new documents, update documents,
+          <EuiCallOut title="Be careful" color="warning" iconType="help">
+            While reindexing, the index will not be able to ingest new documents, update documents,
             or delete documents. Depending on how this index is being used in your system, this may
             cause problems and you may need to use a different strategy to reindex this index.
           </EuiCallOut>
+          <EuiSpacer />
+          <ReindexWarningSummary warnings={reindexWarnings} />
           <EuiSpacer size="xl" />
-          <ReindexProgress
-            lastCompletedStep={lastCompletedStep}
-            reindexStatus={status}
-            reindexTaskPercComplete={reindexTaskPercComplete}
-            errorMessage={errorMessage}
-          />
-          <EuiButton
-            color="warning"
-            onClick={startReindex}
-            isLoading={loading}
-            disabled={loading || status === ReindexStatus.completed}
-          >
-            {buttonLabel(status)}
-          </EuiButton>
+          {status !== undefined && (
+            <ReindexProgress
+              lastCompletedStep={lastCompletedStep}
+              reindexStatus={status}
+              reindexTaskPercComplete={reindexTaskPercComplete}
+              errorMessage={errorMessage}
+            />
+          )}
         </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+                Cancel
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="warning"
+                onClick={startReindex}
+                isLoading={loading}
+                disabled={loading || status === ReindexStatus.completed}
+              >
+                {buttonLabel(status)}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     </EuiPortal>
   );
@@ -97,6 +118,7 @@ interface ReindexFlyoutProps {
 
 interface ReindexFlyoutState {
   reindexState: ReindexState;
+  showWarningsModal: boolean;
 }
 
 /**
@@ -111,6 +133,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
     this.service = new ReindexPollingService(this.props.indexName);
     this.state = {
       reindexState: this.service.status$.value,
+      showWarningsModal: false,
     };
   }
 
@@ -129,7 +152,48 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
 
   public render() {
     return (
-      <ReindexFlyoutUI startReindex={this.service.startReindex} {...this.props} {...this.state} />
+      <React.Fragment>
+        <ReindexFlyoutUI startReindex={this.startReindex} {...this.props} {...this.state} />
+        {this.renderWarningsModal()}
+      </React.Fragment>
     );
   }
+
+  private renderWarningsModal = () => {
+    const {
+      reindexState: { reindexWarnings },
+      showWarningsModal,
+    } = this.state;
+
+    if (!showWarningsModal) {
+      return null;
+    }
+
+    return (
+      // @ts-ignore
+      <EuiOverlayMask style={`z-index: ${euiZModal + 50}`}>
+        <ReindexConfirmModal
+          indexName={this.props.indexName}
+          warnings={reindexWarnings!}
+          closeModal={this.closeWarningsModal}
+          startReindex={this.startReindex}
+        />
+      </EuiOverlayMask>
+    );
+  };
+
+  private startReindex = () => {
+    const { reindexWarnings } = this.state.reindexState;
+
+    if (this.state.showWarningsModal) {
+      this.setState({ showWarningsModal: false });
+      this.service.startReindex();
+    } else if (reindexWarnings && reindexWarnings.length > 0) {
+      this.setState({ showWarningsModal: true });
+    } else {
+      this.service.startReindex();
+    }
+  };
+
+  private closeWarningsModal = () => this.setState({ showWarningsModal: false });
 }

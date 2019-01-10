@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
+import { ReindexStatus, ReindexStep, ReindexWarning } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import { ReindexFlyoutUI } from './flyout';
 
@@ -22,6 +22,7 @@ describe('ReindexFlyout', () => {
       status: ReindexStatus.inProgress,
       reindexTaskPercComplete: null,
       errorMessage: null,
+      reindexWarnings: [ReindexWarning.allField],
     },
   };
 
@@ -48,4 +49,6 @@ describe('ReindexFlyout', () => {
     wrapper.find('EuiButton').simulate('click');
     expect(props.startReindex).toHaveBeenCalled();
   });
+
+  // it('when button is clicked and there are warnings it opens modal');
 });

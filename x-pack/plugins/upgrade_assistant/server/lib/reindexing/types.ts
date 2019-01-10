@@ -25,8 +25,3 @@ export interface FlatSettings {
     [type: string]: TypeMapping;
   };
 }
-
-export enum ReindexWarning {
-  allField,
-  booleanFields,
-}

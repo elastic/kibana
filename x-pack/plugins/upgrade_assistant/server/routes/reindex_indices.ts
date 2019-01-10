@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
-import { ReindexStatus } from '../../common/types';
+import { ReindexSavedObject, ReindexStatus, ReindexWarning } from '../../common/types';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 
 export function registerReindexIndicesRoutes(server: Server) {
@@ -73,15 +73,38 @@ export function registerReindexIndicesRoutes(server: Server) {
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexService = reindexServiceFactory(client, callCluster);
 
-      const reindexOp = await reindexService.findReindexOperation(indexName);
+      let reindexOp: ReindexSavedObject | null = null;
+      let reindexWarnings: ReindexWarning[] = [];
 
-      // If the reindexOp is in progress but our worker hasn't picked it up, force it to refresh.
-      if (reindexOp.attributes.status === ReindexStatus.inProgress && !worker.includes(reindexOp)) {
-        server.log(['debug', 'upgrade_assistant'], 'Manually refreshing worker.');
-        worker.forceRefresh();
+      try {
+        reindexOp = await reindexService.findReindexOperation(indexName);
+
+        // If the reindexOp is in progress but our worker hasn't picked it up, force it to refresh.
+        if (
+          reindexOp.attributes.status === ReindexStatus.inProgress &&
+          !worker.includes(reindexOp)
+        ) {
+          server.log(['debug', 'upgrade_assistant'], 'Manually refreshing worker.');
+          worker.forceRefresh();
+        }
+      } catch (e) {
+        if (not404(e)) {
+          throw e;
+        }
       }
 
-      return reindexOp.attributes;
+      try {
+        reindexWarnings = await reindexService.detectReindexWarnings(indexName);
+      } catch (e) {
+        if (not404(e)) {
+          throw e;
+        }
+      }
+
+      return {
+        warnings: reindexWarnings,
+        reindexOp: reindexOp ? reindexOp.attributes : null,
+      };
     },
   });
 
@@ -94,3 +117,7 @@ export function registerReindexIndicesRoutes(server: Server) {
     },
   });
 }
+
+const not404 = (e: any) => {
+  return !e.output || e.output.statusCode !== 404;
+};

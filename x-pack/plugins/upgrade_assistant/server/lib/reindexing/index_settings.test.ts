@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReindexWarning } from '../../../common/types';
 import { findBooleanFields, getReindexWarnings, transformFlatSettings } from './index_settings';
-import { ReindexWarning } from './types';
 
 describe('transformFlatSettings', () => {
   it('does not blow up for empty mappings', () => {
@@ -115,19 +115,6 @@ describe('transformFlatSettings', () => {
     ).toThrowError(`Indices with more than one mapping type are not supported in 7.0.`);
   });
 
-  it('does not allow indices with _all.enablead = true', () => {
-    expect(() => {
-      transformFlatSettings({
-        settings: {},
-        mappings: {
-          myType: {
-            _all: { enabled: true },
-          },
-        },
-      });
-    }).toThrowError(`Mapping types with _all.enabled are not supported in 7.0`);
-  });
-
   it('removes _all.enablead = false', () => {
     expect(
       transformFlatSettings({
@@ -135,6 +122,24 @@ describe('transformFlatSettings', () => {
         mappings: {
           myType: {
             _all: { enabled: false },
+          },
+        },
+      })
+    ).toEqual({
+      settings: {},
+      mappings: {
+        myType: {},
+      },
+    });
+  });
+
+  it('removes _all.enablead = true', () => {
+    expect(
+      transformFlatSettings({
+        settings: {},
+        mappings: {
+          myType: {
+            _all: { enabled: true },
           },
         },
       })

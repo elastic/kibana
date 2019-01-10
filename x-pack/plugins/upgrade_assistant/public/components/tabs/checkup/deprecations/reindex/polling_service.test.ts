@@ -11,8 +11,12 @@ const mockClient = {
     lastCompletedStep: ReindexStep.created,
     status: ReindexStatus.inProgress,
   }),
-  get: jest.fn().mockRejectedValue({
-    response: { status: 404 },
+  get: jest.fn().mockResolvedValue({
+    status: 200,
+    data: {
+      warnings: [],
+      reindexOp: null,
+    },
   }),
 };
 jest.mock('axios', () => ({
@@ -21,15 +25,19 @@ jest.mock('axios', () => ({
 
 import { ReindexPollingService } from './polling_service';
 
-describe('ReindexFlyout', () => {
+describe('ReindexPollingService', () => {
   beforeEach(() => {
     mockClient.post.mockReset();
     mockClient.get.mockReset();
   });
 
-  it('does not poll when first check is a 404', async () => {
-    mockClient.get.mockRejectedValueOnce({
-      response: { status: 404 },
+  it('does not poll when reindexOp is null', async () => {
+    mockClient.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        warnings: [],
+        reindexOp: null,
+      },
     });
 
     const service = new ReindexPollingService('myIndex');
@@ -43,9 +51,12 @@ describe('ReindexFlyout', () => {
     mockClient.get.mockResolvedValue({
       status: 200,
       data: {
-        lastCompletedStep: ReindexStep.created,
-        status: ReindexStatus.failed,
-        errorMessage: `Oh no!`,
+        warnings: [],
+        reindexOp: {
+          lastCompletedStep: ReindexStep.created,
+          status: ReindexStatus.failed,
+          errorMessage: `Oh no!`,
+        },
       },
     });
 
@@ -61,8 +72,11 @@ describe('ReindexFlyout', () => {
     mockClient.get.mockResolvedValue({
       status: 200,
       data: {
-        lastCompletedStep: ReindexStep.created,
-        status: ReindexStatus.inProgress,
+        warnings: [],
+        reindexOp: {
+          lastCompletedStep: ReindexStep.created,
+          status: ReindexStatus.inProgress,
+        },
       },
     });
 

@@ -11,9 +11,9 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
+  ReindexWarning,
 } from '../../../common/types';
 import { LOCK_WINDOW, ReindexService, reindexServiceFactory } from './reindex_service';
-import { ReindexWarning } from './types';
 
 describe('reindexService', () => {
   let savedObjectClient: jest.Mocked<SavedObjectsClient>;
@@ -54,7 +54,7 @@ describe('reindexService', () => {
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
       expect(reindexWarnings).toEqual([ReindexWarning.allField, ReindexWarning.booleanFields]);
       expect(callCluster).toHaveBeenCalledWith('transport.request', {
-        path: `/myIndex?flat_settings`,
+        path: `/myIndex?flat_settings=true`,
       });
     });
   });

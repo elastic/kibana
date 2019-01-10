@@ -20,25 +20,24 @@ exports[`ReindexFlyout renders 1`] = `
       </h2>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
-      <EuiText
-        grow={true}
-        size="m"
-      >
-        <p>
-          This tool can be used to reindex old indices.
-        </p>
-      </EuiText>
-      <EuiSpacer
-        size="l"
-      />
       <EuiCallOut
         color="warning"
         iconType="help"
         size="m"
-        title="This may cause problems"
+        title="Be careful"
       >
-        During a reindex, the index will not be able to ingest new documents, update documents, or delete documents. Depending on how this index is being used in your system, this may cause problems and you may need to use a different strategy to reindex this index.
+        While reindexing, the index will not be able to ingest new documents, update documents, or delete documents. Depending on how this index is being used in your system, this may cause problems and you may need to use a different strategy to reindex this index.
       </EuiCallOut>
+      <EuiSpacer
+        size="l"
+      />
+      <Component
+        warnings={
+          Array [
+            0,
+          ]
+        }
+      />
       <EuiSpacer
         size="xl"
       />
@@ -47,18 +46,50 @@ exports[`ReindexFlyout renders 1`] = `
         reindexStatus={0}
         reindexTaskPercComplete={null}
       />
-      <EuiButton
-        color="warning"
-        disabled={true}
-        fill={false}
-        iconSide="left"
-        isLoading={true}
-        onClick={[MockFunction]}
-        type="button"
-      >
-        Reindexing…
-      </EuiButton>
     </EuiFlyoutBody>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="l"
+        justifyContent="spaceBetween"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiButtonEmpty
+            color="primary"
+            flush="left"
+            iconSide="left"
+            iconType="cross"
+            onClick={[MockFunction]}
+            type="button"
+          >
+            Cancel
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiButton
+            color="warning"
+            disabled={true}
+            fill={true}
+            iconSide="left"
+            isLoading={true}
+            onClick={[MockFunction]}
+            type="button"
+          >
+            Reindexing…
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
   </EuiFlyout>
 </EuiPortal>
 `;

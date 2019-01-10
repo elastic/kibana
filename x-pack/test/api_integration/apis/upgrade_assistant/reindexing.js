@@ -22,7 +22,7 @@ export default function ({ getService }) {
     let lastState;
 
     while (true) {
-      lastState = (await supertest.get(`/api/upgrade_assistant/reindex/${indexName}`).expect(200)).body;
+      lastState = (await supertest.get(`/api/upgrade_assistant/reindex/${indexName}`).expect(200)).body.reindexOp;
       // Once the operation is completed or failed and unlocked, stop polling.
       if (lastState.status !== ReindexStatus.inProgress && lastState.locked === null) {
         break;
@@ -74,6 +74,7 @@ export default function ({ getService }) {
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
       const lastState = await waitForReindexToComplete();
+      expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
 
       // const x = await es.indices.exists({ index: indexName });

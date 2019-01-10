@@ -5,7 +5,8 @@
  */
 
 import { flow, omit } from 'lodash';
-import { FlatSettings, MappingProperties, ReindexWarning, TypeMapping } from './types';
+import { ReindexWarning } from '../../../common/types';
+import { FlatSettings, MappingProperties, TypeMapping } from './types';
 
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
@@ -113,28 +114,15 @@ const updateFixableMappings = (mappings: FlatSettings['mappings']) => {
     delete mappings._default_;
   }
 
-  return mappings;
-};
-
-const validateMappings = (mappings: FlatSettings['mappings']) => {
   const mapping = getSingleMappingType(mappings);
-
-  // _all field not supported.
   if (mapping && mapping._all) {
-    if (mapping._all.enabled) {
-      throw new Error(`Mapping types with _all.enabled are not supported in 7.0.`);
-    } else {
-      delete mapping._all;
-    }
+    delete mapping._all;
   }
 
   return mappings;
 };
 
-const transformMappings = flow(
-  updateFixableMappings,
-  validateMappings
-);
+const transformMappings = flow(updateFixableMappings);
 
 const getSingleMappingType = (mappings: FlatSettings['mappings']): TypeMapping | undefined => {
   const mappingTypes = Object.keys(mappings);

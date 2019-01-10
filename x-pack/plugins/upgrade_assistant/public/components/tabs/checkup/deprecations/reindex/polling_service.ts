@@ -7,7 +7,12 @@ import axios from 'axios';
 import chrome from 'ui/chrome';
 
 import { BehaviorSubject } from 'rxjs';
-import { ReindexOperation, ReindexStatus, ReindexStep } from '../../../../../../common/types';
+import {
+  ReindexOperation,
+  ReindexStatus,
+  ReindexStep,
+  ReindexWarning,
+} from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 
 const POLL_INTERVAL = 1000;
@@ -29,6 +34,12 @@ export interface ReindexState {
   status?: ReindexStatus;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
+  reindexWarnings?: ReindexWarning[];
+}
+
+interface StatusResponse {
+  warnings?: ReindexWarning[];
+  reindexOp?: ReindexOperation;
 }
 
 /**
@@ -62,7 +73,7 @@ export class ReindexPollingService {
         chrome.addBasePath(`/api/upgrade_assistant/reindex/${this.indexName}`)
       );
 
-      this.updateWithReindexOp(data);
+      this.updateWithResponse({ reindexOp: data });
       this.updateStatus();
     } catch (e) {
       this.status$.next({ ...this.status$.value, status: ReindexStatus.failed });
@@ -77,41 +88,40 @@ export class ReindexPollingService {
 
   private updateStatus = async () => {
     try {
-      const { data } = await APIClient.get<ReindexOperation>(
+      const { data } = await APIClient.get<StatusResponse>(
         chrome.addBasePath(`/api/upgrade_assistant/reindex/${this.indexName}`)
       );
-      this.updateWithReindexOp(data);
+      this.updateWithResponse(data);
 
       // Keep polling if it has completed or failed.
-      if (data.status === ReindexStatus.inProgress) {
+      if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
         this.pollTimeout = setTimeout(this.updateStatus, POLL_INTERVAL);
       }
     } catch (e) {
-      if (e.response && e.response.status === 404) {
-        // Ignore any 404s (means reindex hasn't been started yet).
-      } else {
-        this.status$.next({
-          ...this.status$.value,
-          status: ReindexStatus.failed,
-        });
-
-        throw e;
-      }
+      this.status$.next({
+        ...this.status$.value,
+        status: ReindexStatus.failed,
+      });
     }
-
-    this.status$.next({
-      ...this.status$.value,
-      loadingState: LoadingState.Success,
-    });
   };
 
-  private updateWithReindexOp = (reindexOp: ReindexOperation) => {
-    this.status$.next({
+  private updateWithResponse = ({ reindexOp, warnings }: StatusResponse) => {
+    const nextValue = {
       ...this.status$.value,
-      lastCompletedStep: reindexOp.lastCompletedStep,
-      status: reindexOp.status,
-      reindexTaskPercComplete: reindexOp.reindexTaskPercComplete,
-      errorMessage: reindexOp.errorMessage,
-    });
+      loadingState: LoadingState.Success,
+    };
+
+    if (warnings) {
+      nextValue.reindexWarnings = warnings;
+    }
+
+    if (reindexOp) {
+      nextValue.lastCompletedStep = reindexOp.lastCompletedStep;
+      nextValue.status = reindexOp.status;
+      nextValue.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
+      nextValue.errorMessage = reindexOp.errorMessage;
+    }
+
+    this.status$.next(nextValue);
   };
 }
