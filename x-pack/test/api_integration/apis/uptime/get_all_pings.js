@@ -49,7 +49,7 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      expect(apiResponse.total).to.be(1);
+      expect(apiResponse.total).to.be(2);
       expect(apiResponse.pings.length).to.be(1);
       expect(apiResponse.pings[0].monitor.id).to.be('http@https://www.github.com/');
     });
