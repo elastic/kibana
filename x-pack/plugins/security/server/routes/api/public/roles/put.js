@@ -18,56 +18,51 @@ export function initPutRolesApi(
   application
 ) {
 
-  const transformKibanaPrivilegesToEs = (kibanaPrivileges) => {
-    const kibanaApplicationPrivileges = [];
-    if (kibanaPrivileges.global) {
-      kibanaApplicationPrivileges.push({
-        privileges: [
-          ...kibanaPrivileges.global.minimum ? kibanaPrivileges.global.minimum.map(
-            privilege => PrivilegeSerializer.serializeGlobalMinimumPrivilege(privilege)
-          ) : [],
-          ...kibanaPrivileges.global.feature ? flatten(
-            Object.entries(kibanaPrivileges.global.feature).map(
-              ([featureName, privileges])=> privileges.map(
-                privilege => PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
-              )
-            )
-          ) : [],
-        ],
-        application,
-        resources: [GLOBAL_RESOURCE],
-      });
-    }
-
-    if (kibanaPrivileges.space) {
-      for(const [spaceId, spacePrivileges] of Object.entries(kibanaPrivileges.space)) {
-        kibanaApplicationPrivileges.push({
+  const transformKibanaPrivilegesToEs = (kibanaPrivileges = []) => {
+    return kibanaPrivileges.map(({ base, feature, spaces }) => {
+      if (spaces.length === 1 && spaces[0] === GLOBAL_RESOURCE) {
+        return {
           privileges: [
-            ...spacePrivileges.minimum ? spacePrivileges.minimum.map(
-              privilege => PrivilegeSerializer.serializeSpaceMinimumPrivilege(privilege)
+            ...base ? base.map(
+              privilege => PrivilegeSerializer.serializeGlobalMinimumPrivilege(privilege)
             ) : [],
-            ...spacePrivileges.feature ? flatten(
-              Object.entries(spacePrivileges.feature).map(
-                ([featureName, privileges])=> privileges.map(
+            ...feature ? flatten(
+              Object.entries(feature).map(
+                ([featureName, featurePrivileges])=> featurePrivileges.map(
                   privilege => PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
                 )
               )
-            ) : []
+            ) : [],
           ],
           application,
-          resources: [ResourceSerializer.serializeSpaceResource(spaceId)],
-        });
+          resources: [GLOBAL_RESOURCE]
+        };
       }
-    }
 
-    return kibanaApplicationPrivileges;
+      return {
+        privileges: [
+          ...base ? base.map(
+            privilege => PrivilegeSerializer.serializeSpaceMinimumPrivilege(privilege)
+          ) : [],
+          ...feature ? flatten(
+            Object.entries(feature).map(
+              ([featureName, featurePrivileges])=> featurePrivileges.map(
+                privilege => PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
+              )
+            )
+          ) : []
+        ],
+        application,
+        resources: spaces.map(resource => ResourceSerializer.serializeSpaceResource(resource)),
+      };
+    });
   };
 
   const transformRolesToEs = (
     payload,
     existingApplications = []
   ) => {
-    const { elasticsearch = {}, kibana = {} } = payload;
+    const { elasticsearch = {}, kibana = [] } = payload;
     const otherApplications = existingApplications.filter(
       roleApplication => roleApplication.application !== application
     );
@@ -84,28 +79,26 @@ export function initPutRolesApi(
     }, identity);
   };
 
-  const getGlobalSchema = () => {
+  const getKibanaSchema = () => {
     const privileges = authorization.privileges.get();
-    const featureObject = Object.entries(privileges.features).reduce((acc, [feature, featurePrivileges]) => ({
-      ...acc,
-      [feature]: Joi.array().items(Joi.string().valid(Object.keys(featurePrivileges)))
-    }), {});
-    const featureSchema = Joi.object(featureObject);
-    return Joi.object({
-      minimum: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))),
-      feature: featureSchema,
-    });
-  };
-
-  const getSpaceSchema = () => {
-    const privileges = authorization.privileges.get();
-    return Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.object({
-      minimum: Joi.array().items(Joi.string().valid(Object.keys(privileges.space))),
-      feature: Joi.object(Object.entries(privileges.features).reduce((acc, [feature, featurePrivileges]) => ({
-        ...acc,
-        [feature]: Joi.array().items(Joi.string().valid(Object.keys(featurePrivileges)))
-      }), {}))
-    }));
+    const allSpacesSchema = Joi.array().length(1).items(Joi.string().valid([GLOBAL_RESOURCE]));
+    return Joi.array().items(
+      Joi.object({
+        base: Joi.alternatives().when('spaces', {
+          is: allSpacesSchema,
+          then: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))),
+          otherwise: Joi.array().items(Joi.string().valid(Object.keys(privileges.space))),
+        }),
+        feature: Object.entries(privileges.features).reduce((acc, [feature, featurePrivileges]) => ({
+          ...acc,
+          [feature]: Joi.array().items(Joi.string().valid(Object.keys(featurePrivileges)))
+        }), {}),
+        spaces: Joi.alternatives(
+          allSpacesSchema,
+          Joi.array().items(Joi.string().regex(/^[a-z0-9_-]+$/)),
+        ).default([GLOBAL_RESOURCE])
+      })
+    );
   };
 
   const schema = Joi.object().keys({
@@ -123,10 +116,7 @@ export function initPutRolesApi(
       }),
       run_as: Joi.array().items(Joi.string()),
     }),
-    kibana: Joi.object().keys({
-      global: Joi.lazy(() => getGlobalSchema()),
-      space: Joi.lazy(() => getSpaceSchema()),
-    })
+    kibana: Joi.lazy(() => getKibanaSchema())
   });
 
   server.route({
@@ -148,6 +138,7 @@ export function initPutRolesApi(
         await callWithRequest(request, 'shield.putRole', { name, body });
         return h.response().code(204);
       } catch (err) {
+        console.log(err);
         throw wrapError(err);
       }
     },

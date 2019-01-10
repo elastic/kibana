@@ -46,11 +46,12 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
           },
         ],
       },
-      kibana: {
-        global: {
-          minimum: ['all'],
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['*'],
         },
-      },
+      ],
     })
     .expect(204);
 
@@ -65,143 +66,132 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
           },
         ],
       },
-      kibana: {
-        global: {
-          minimum: ['read'],
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['*'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_user')
     .send({
-      kibana: {
-        global: {
-          minimum: ['all'],
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['*'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_dashboard_only_user')
     .send({
-      kibana: {
-        global: {
-          minimum: ['read'],
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['*'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_default_space_all_user')
     .send({
-      kibana: {
-        space: {
-          default: {
-            minimum: ['all'],
-          },
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['default'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_default_space_read_user')
     .send({
-      kibana: {
-        space: {
-          default: {
-            minimum: ['read'],
-          },
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['default'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_space_1_all_user')
     .send({
-      kibana: {
-        space: {
-          space_1: {
-            minimum: ['all'],
-          },
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['space_1'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_space_1_read_user')
     .send({
-      kibana: {
-        space: {
-          space_1: {
-            minimum: ['read'],
-          },
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['space_1'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_space_2_all_user')
     .send({
-      kibana: {
-        space: {
-          space_2: {
-            minimum: ['all'],
-          },
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['space_2'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_space_2_read_user')
     .send({
-      kibana: {
-        space: {
-          space_2: {
-            minimum: ['read'],
-          },
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['space_2'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_space_1_2_all_user')
     .send({
-      kibana: {
-        space: {
-          space_1: {
-            minimum: ['all'],
-          },
-          space_2: {
-            minimum: ['all'],
-          },
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['space_1', 'space_2'],
         },
-      },
+      ],
     })
     .expect(204);
 
   await supertest
     .put('/api/security/role/kibana_rbac_space_1_2_read_user')
     .send({
-      kibana: {
-        space: {
-          space_1: {
-            minimum: ['read'],
-          },
-          space_2: {
-            minimum: ['read'],
-          },
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['space_1', 'space_2'],
         },
-      },
+      ],
     })
     .expect(204);
 

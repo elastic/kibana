@@ -143,76 +143,79 @@ describe('PUT role', () => {
     });
 
     describe('global', () => {
-      putRoleTest(`only allows known Kibana global minimum privileges`, {
+      putRoleTest(`only allows known Kibana global base privileges`, {
         name: 'foo-role',
         payload: {
-          kibana: {
-            global: {
-              minimum: ["foo"]
+          kibana: [
+            {
+              base: ['foo'],
+              spaces: ['*']
             }
-          }
+          ]
         },
         asserts: {
           statusCode: 400,
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [child \"global\" fails because [child \"minimum\" fails because [\"minimum\" at position 0 fails because [\"0\" must be one of [all, read]]]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"base\" fails because [\"base\" at position 0 fails because [\"0\" must be one of [all, read]]]]]`,
             statusCode: 400,
             validation: {
-              keys: ['kibana.global.minimum.0'],
+              keys: ['kibana.0.base.0'],
               source: 'payload',
             },
           },
         },
       });
 
-      putRoleTest(`only allows known Kibana global features`, {
+      putRoleTest(`only allows known Kibana features`, {
         name: 'foo-role',
         payload: {
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 baz: ['all']
-              }
+              },
+              spaces: ['*']
             }
-          }
+          ]
         },
         asserts: {
           statusCode: 400,
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [child \"global\" fails because [child \"feature\" fails because [\"baz\" is not allowed]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [\"baz\" is not allowed]]]`,
             statusCode: 400,
             validation: {
-              keys: ['kibana.global.feature.baz'],
+              keys: ['kibana.0.feature.baz'],
               source: 'payload',
             },
           },
         },
       });
 
-      putRoleTest(`only allows known Kibana global feature privileges`, {
+      putRoleTest(`only allows known Kibana feature privileges`, {
         name: 'foo-role',
         payload: {
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 foo: ['foo-privilege-3']
-              }
+              },
+              spaces: ['*']
             }
-          }
+          ]
         },
         asserts: {
           statusCode: 400,
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [child \"global\" fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" must be one of [foo-privilege-1, foo-privilege-2]]]]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" must be one of [foo-privilege-1, foo-privilege-2]]]]]]`,
             statusCode: 400,
             validation: {
-              keys: ['kibana.global.feature.foo.0'],
+              keys: ['kibana.0.feature.foo.0'],
               source: 'payload',
             },
           },
@@ -221,128 +224,128 @@ describe('PUT role', () => {
     });
 
     describe('space', () => {
-      putRoleTest(`doesn't allow * space ID`, {
-        name: 'foo-role',
-        payload: {
-          kibana: {
-            space: {
-              '*': ['test-space-privilege-1']
-            }
-          }
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            message: `child \"kibana\" fails because [child \"space\" fails because [\"*\" is not allowed]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.space.&#x2a;'],
-              source: 'payload',
-            },
-          },
-        },
-      });
 
       putRoleTest(`doesn't allow * in a space ID`, {
         name: 'foo-role',
         payload: {
-          kibana: {
-            space: {
-              'foo-*': ['test-space-privilege-1']
+          kibana: [
+            {
+              spaces: ['foo-*']
             }
-          }
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            message: `child \"kibana\" fails because [child \"space\" fails because [\"foo-*\" is not allowed]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.space.foo-&#x2a;'],
-              source: 'payload',
-            },
-          },
-        },
-      });
-
-      putRoleTest(`only allows known Kibana space minimum privileges`, {
-        name: 'foo-role',
-        payload: {
-          kibana: {
-            space: {
-              marketing: {
-                minimum: ["foo"]
-              }
-            }
-          }
+          ],
         },
         asserts: {
           statusCode: 400,
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [child \"space\" fails because [child \"marketing\" fails because [child \"minimum\" fails because [\"minimum\" at position 0 fails because [\"0\" must be one of [all, read]]]]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"spaces\" fails because [\"spaces\" at position 0 fails because [\"0\" must be one of [*]], \"spaces\" at position 0 fails because [\"0\" with value \"foo-*\" fails to match the required pattern: /^[a-z0-9_-]+$/]]]]`,
             statusCode: 400,
             validation: {
-              keys: ['kibana.space.marketing.minimum.0'],
+              keys: ['kibana.0.spaces.0', 'kibana.0.spaces.0'],
               source: 'payload',
             },
           },
         },
       });
 
-      putRoleTest(`only allows known Kibana global features`, {
+      putRoleTest(`can't assign space and global in same entry`, {
         name: 'foo-role',
         payload: {
-          kibana: {
-            space: {
-              marketing: {
-                feature: {
-                  baz: ['all']
-                }
-              }
+          kibana: [
+            {
+              spaces: ['*', 'foo-space']
             }
-          }
+          ],
         },
         asserts: {
           statusCode: 400,
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [child \"space\" fails because [child \"marketing\" fails because [child \"feature\" fails because [\"baz\" is not allowed]]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"spaces\" fails because [\"spaces\" at position 1 fails because [\"1\" must be one of [*]], \"spaces\" at position 0 fails because [\"0\" with value \"*\" fails to match the required pattern: /^[a-z0-9_-]+$/]]]]`,
             statusCode: 400,
             validation: {
-              keys: ['kibana.space.marketing.feature.baz'],
+              keys: ['kibana.0.spaces.1', 'kibana.0.spaces.0'],
               source: 'payload',
             },
           },
         },
       });
 
-      putRoleTest(`only allows known Kibana global feature privileges`, {
+      putRoleTest(`only allows known Kibana space base privileges`, {
         name: 'foo-role',
         payload: {
-          kibana: {
-            space: {
-              marketing: {
-                feature: {
-                  foo: ['foo-privilege-3']
-                }
-              }
+          kibana: [
+            {
+              base: ['foo'],
+              spaces: ['foo-space']
             }
-          }
+          ],
         },
         asserts: {
           statusCode: 400,
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [child \"space\" fails because [child \"marketing\" fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" must be one of [foo-privilege-1, foo-privilege-2]]]]]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"base\" fails because [\"base\" at position 0 fails because [\"0\" must be one of [all, read]]]]]`,
             statusCode: 400,
             validation: {
-              keys: ['kibana.space.marketing.feature.foo.0'],
+              keys: ['kibana.0.base.0'],
+              source: 'payload',
+            },
+          },
+        },
+      });
+
+      putRoleTest(`only allows known Kibana features`, {
+        name: 'foo-role',
+        payload: {
+          kibana: [
+            {
+              feature: {
+                baz: ['foo']
+              },
+              spaces: ['foo-space']
+            }
+          ],
+        },
+        asserts: {
+          statusCode: 400,
+          result: {
+            error: 'Bad Request',
+            //eslint-disable-next-line max-len
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [\"baz\" is not allowed]]]`,
+            statusCode: 400,
+            validation: {
+              keys: ['kibana.0.feature.baz'],
+              source: 'payload',
+            },
+          },
+        },
+      });
+
+      putRoleTest(`only allows known Kibana feature privileges`, {
+        name: 'foo-role',
+        payload: {
+          kibana: [
+            {
+              feature: {
+                foo: ['foo-privilege-3']
+              },
+              spaces: ['foo-space']
+            }
+          ],
+        },
+        asserts: {
+          statusCode: 400,
+          result: {
+            error: 'Bad Request',
+            //eslint-disable-next-line max-len
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" must be one of [foo-privilege-1, foo-privilege-2]]]]]]`,
+            statusCode: 400,
+            validation: {
+              keys: ['kibana.0.feature.foo.0'],
               source: 'payload',
             },
           },
@@ -392,6 +395,46 @@ describe('PUT role', () => {
       },
     });
 
+    putRoleTest(`if spaces isn't specifed, defaults to global`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            base: ['all']
+          }
+        ]
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [async () => ({}), async () => { }],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application,
+                    privileges: [
+                      'all',
+                    ],
+                    resources: [GLOBAL_RESOURCE],
+                  },
+                ],
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: null,
+      },
+    });
+
     putRoleTest(`creates role with everything`, {
       name: 'foo-role',
       payload: {
@@ -413,29 +456,30 @@ describe('PUT role', () => {
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
-        kibana: {
-          global: {
-            minimum: ['all', 'read'],
+        kibana: [
+          {
+            base: ['all', 'read'],
             feature: {
               foo: ['foo-privilege-1', 'foo-privilege-2'],
               bar: ['bar-privilege-1', 'bar-privilege-2']
-            }
-          },
-          space: {
-            'test-space-1': {
-              minimum: ['all', 'read'],
-              feature: {
-                bar: ['bar-privilege-1', 'bar-privilege-2']
-              }
             },
-            'test-space-2': {
-              minimum: ['all', 'read'],
-              feature: {
-                foo: ['foo-privilege-1', 'foo-privilege-2'],
-              }
-            }
+            spaces: ['*']
+          },
+          {
+            base: ['all', 'read'],
+            feature: {
+              bar: ['bar-privilege-1', 'bar-privilege-2']
+            },
+            spaces: ['test-space-1', 'test-space-2']
+          },
+          {
+            base: ['all', 'read'],
+            feature: {
+              foo: ['foo-privilege-1', 'foo-privilege-2'],
+            },
+            spaces: ['test-space-3']
           }
-        },
+        ]
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
       callWithRequestImpls: [async () => ({}), async () => { }],
@@ -468,7 +512,7 @@ describe('PUT role', () => {
                       'feature_bar.bar-privilege-1',
                       'feature_bar.bar-privilege-2',
                     ],
-                    resources: ['space:test-space-1']
+                    resources: ['space:test-space-1', 'space:test-space-2']
                   },
                   {
                     application,
@@ -478,7 +522,7 @@ describe('PUT role', () => {
                       'feature_foo.foo-privilege-1',
                       'feature_foo.foo-privilege-2',
                     ],
-                    resources: ['space:test-space-2']
+                    resources: ['space:test-space-3']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -528,29 +572,30 @@ describe('PUT role', () => {
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
-        kibana: {
-          global: {
-            minimum: ['all'],
+        kibana: [
+          {
+            base: ['all'],
             feature: {
               foo: ['foo-privilege-1'],
               bar: ['bar-privilege-1']
-            }
-          },
-          space: {
-            'test-space-1': {
-              minimum: ['all'],
-              feature: {
-                foo: ['foo-privilege-2']
-              }
             },
-            'test-space-2': {
-              minimum: ['read'],
-              feature: {
-                bar: ['bar-privilege-2']
-              }
-            }
+            spaces: ['*']
+          },
+          {
+            base: ['all'],
+            feature: {
+              foo: ['foo-privilege-2']
+            },
+            spaces: ['test-space-1', 'test-space-2']
+          },
+          {
+            base: ['read'],
+            feature: {
+              bar: ['bar-privilege-2']
+            },
+            spaces: ['test-space-3']
           }
-        },
+        ],
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
       callWithRequestImpls: [
@@ -610,7 +655,7 @@ describe('PUT role', () => {
                       'space_all',
                       'feature_foo.foo-privilege-2'
                     ],
-                    resources: ['space:test-space-1']
+                    resources: ['space:test-space-1', 'space:test-space-2']
                   },
                   {
                     application,
@@ -618,7 +663,7 @@ describe('PUT role', () => {
                       'space_read',
                       'feature_bar.bar-privilege-2',
                     ],
-                    resources: ['space:test-space-2']
+                    resources: ['space:test-space-3']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -668,11 +713,12 @@ describe('PUT role', () => {
             ],
             run_as: ['test-run-as-1', 'test-run-as-2'],
           },
-          kibana: {
-            global: {
-              minimum: ['all', 'read']
-            },
-          },
+          kibana: [
+            {
+              base: ['all', 'read'],
+              spaces: ['*']
+            }
+          ]
         },
         preCheckLicenseImpl: defaultPreCheckLicenseImpl,
         callWithRequestImpls: [
