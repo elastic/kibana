@@ -24,7 +24,7 @@ export const getPingsQuery = gql`
       size: $size
     ) {
       total
-      Pings {
+      pings {
         timestamp
         http {
           response {
