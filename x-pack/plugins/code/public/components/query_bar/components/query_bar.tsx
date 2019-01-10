@@ -7,10 +7,14 @@
 import { debounce, isEqual } from 'lodash';
 import React, { Component } from 'react';
 
+import { SearchOptions as ISearchOptions } from '../../../actions';
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import { connect } from 'react-redux';
+import { repositorySearch, saveSearchOptions } from '../../../actions';
+import { RootState } from '../../../reducers';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionGroup,
@@ -37,6 +41,11 @@ interface Props {
   disableAutoFocus?: boolean;
   appName: string;
   suggestionProviders: SuggestionsProvider[];
+  repositorySearch: (p: { query: string }) => void;
+  saveSearchOptions: (searchOptions: ISearchOptions) => void;
+  repoSearchResults: any[];
+  searchLoading: boolean;
+  searchOptions: ISearchOptions;
 }
 
 interface State {
@@ -49,7 +58,7 @@ interface State {
   currentProps?: Props;
 }
 
-export class QueryBar extends Component<Props, State> {
+export class CodeQueryBar extends Component<Props, State> {
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
@@ -407,7 +416,13 @@ export class QueryBar extends Component<Props, State> {
                       aria-activedescendant={activeDescendant}
                       role="textbox"
                     />
-                    <SearchOptions />
+                    <SearchOptions
+                      repositorySearch={this.props.repositorySearch}
+                      saveSearchOptions={this.props.saveSearchOptions}
+                      repoSearchResults={this.props.repoSearchResults}
+                      searchLoading={this.props.searchLoading}
+                      searchOptions={this.props.searchOptions}
+                    />
                   </div>
                 </div>
               </form>
@@ -429,3 +444,21 @@ export class QueryBar extends Component<Props, State> {
     );
   }
 }
+
+const mapStateToProps = (state: RootState) => ({
+  repoSearchResults: state.search.repositorySearchResults
+    ? state.search.repositorySearchResults.repositories
+    : [],
+  searchLoading: state.search.isLoading,
+  searchOptions: state.search.searchOptions || { repoScopes: [] },
+});
+
+const mapDispatchToProps = {
+  repositorySearch,
+  saveSearchOptions,
+};
+
+export const QueryBar = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CodeQueryBar);

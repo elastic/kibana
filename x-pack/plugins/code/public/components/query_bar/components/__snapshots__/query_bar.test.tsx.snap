@@ -1,12 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`render correctly with empty query string 1`] = `
-<QueryBar
+<CodeQueryBar
   appName="mockapp"
   disableAutoFocus={false}
   onSelect={[Function]}
   onSubmit={[Function]}
   query=""
+  repoSearchResults={Array []}
+  repositorySearch={[Function]}
+  saveSearchOptions={[Function]}
+  searchLoading={false}
+  searchOptions={
+    Object {
+      "repoScopes": Array [],
+    }
+  }
   suggestionProviders={Array []}
 >
   <EuiFlexGroup
@@ -173,6 +182,47 @@ exports[`render correctly with empty query string 1`] = `
                         </div>
                       </EuiFormControlLayout>
                     </EuiFieldText>
+                    <SearchOptions
+                      repoSearchResults={Array []}
+                      repositorySearch={[Function]}
+                      saveSearchOptions={[Function]}
+                      searchLoading={false}
+                      searchOptions={
+                        Object {
+                          "repoScopes": Array [],
+                        }
+                      }
+                    >
+                      <div>
+                        <div
+                          className="kuiLocalSearchAssistedInput__assistance"
+                        >
+                          <EuiButtonEmpty
+                            color="primary"
+                            iconSide="left"
+                            onClick={[Function]}
+                            size="xs"
+                            type="button"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <span
+                                className="euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  Options
+                                </span>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
+                        </div>
+                      </div>
+                    </SearchOptions>
                   </div>
                 </div>
               </form>
@@ -192,7 +242,7 @@ exports[`render correctly with empty query string 1`] = `
       </EuiFlexItem>
     </div>
   </EuiFlexGroup>
-</QueryBar>
+</CodeQueryBar>
 `;
 
 exports[`render correctly with input query string changed 1`] = `
@@ -238,12 +288,21 @@ exports[`render correctly with input query string changed 1`] = `
       }
     }
   >
-    <QueryBar
+    <CodeQueryBar
       appName="mockapp"
       disableAutoFocus={false}
       onSelect={[Function]}
       onSubmit={[Function]}
       query=""
+      repoSearchResults={Array []}
+      repositorySearch={[Function]}
+      saveSearchOptions={[Function]}
+      searchLoading={false}
+      searchOptions={
+        Object {
+          "repoScopes": Array [],
+        }
+      }
       suggestionProviders={
         Array [
           Object {
@@ -422,6 +481,47 @@ exports[`render correctly with input query string changed 1`] = `
                             </div>
                           </EuiFormControlLayout>
                         </EuiFieldText>
+                        <SearchOptions
+                          repoSearchResults={Array []}
+                          repositorySearch={[Function]}
+                          saveSearchOptions={[Function]}
+                          searchLoading={false}
+                          searchOptions={
+                            Object {
+                              "repoScopes": Array [],
+                            }
+                          }
+                        >
+                          <div>
+                            <div
+                              className="kuiLocalSearchAssistedInput__assistance"
+                            >
+                              <EuiButtonEmpty
+                                color="primary"
+                                iconSide="left"
+                                onClick={[Function]}
+                                size="xs"
+                                type="button"
+                              >
+                                <button
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  onClick={[Function]}
+                                  type="button"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__text"
+                                    >
+                                      Options
+                                    </span>
+                                  </span>
+                                </button>
+                              </EuiButtonEmpty>
+                            </div>
+                          </div>
+                        </SearchOptions>
                       </div>
                     </div>
                   </form>
@@ -441,7 +541,7 @@ exports[`render correctly with input query string changed 1`] = `
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-    </QueryBar>
+    </CodeQueryBar>
   </Router>
 </MemoryRouter>
 `;

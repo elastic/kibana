@@ -22,14 +22,8 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { unique } from 'lodash';
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import styled from 'styled-components';
-import {
-  repositorySearch,
-  saveSearchOptions,
-  SearchOptions as ISearchOptions,
-} from '../../../actions';
-import { RootState } from '../../../reducers';
+import { SearchOptions as ISearchOptions } from '../../../actions';
 
 const SelectedRepo = styled.div`
   max-width: 60%;
@@ -62,7 +56,7 @@ interface Props {
   searchOptions: ISearchOptions;
 }
 
-class Options extends Component<Props, State> {
+export class SearchOptions extends Component<Props, State> {
   public state: State = {
     isFlyoutOpen: false,
     scope: Scope.Default,
@@ -202,21 +196,3 @@ class Options extends Component<Props, State> {
     });
   };
 }
-
-const mapStateToProps = (state: RootState) => ({
-  repoSearchResults: state.search.repositorySearchResults
-    ? state.search.repositorySearchResults.repositories
-    : [],
-  searchLoading: state.search.isLoading,
-  searchOptions: state.search.searchOptions || { repoScopes: [] },
-});
-
-const mapDispatchToProps = {
-  repositorySearch,
-  saveSearchOptions,
-};
-
-export const SearchOptions = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Options);

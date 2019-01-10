@@ -10,16 +10,21 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import sinon from 'sinon';
 
-import { QueryBar } from '..';
 import { AutocompleteSuggestionType } from '../suggestions';
 import props from './props.json';
+import { CodeQueryBar } from './query_bar';
 
 test('render correctly with empty query string', () => {
   const emptyFn = () => {
     return;
   };
   const queryBarComp = mount(
-    <QueryBar
+    <CodeQueryBar
+      repositorySearch={emptyFn}
+      saveSearchOptions={emptyFn}
+      repoSearchResults={[]}
+      searchLoading={false}
+      searchOptions={{ repoScopes: [] }}
       query=""
       disableAutoFocus={false}
       appName="mockapp"
@@ -67,7 +72,12 @@ test('render correctly with input query string changed', done => {
 
   const queryBarComp = mount(
     <MemoryRouter initialEntries={[{ pathname: '/', key: 'testKey' }]}>
-      <QueryBar
+      <CodeQueryBar
+        repositorySearch={emptyFn}
+        saveSearchOptions={emptyFn}
+        repoSearchResults={[]}
+        searchLoading={false}
+        searchOptions={{ repoScopes: [] }}
         query=""
         disableAutoFocus={false}
         appName="mockapp"
