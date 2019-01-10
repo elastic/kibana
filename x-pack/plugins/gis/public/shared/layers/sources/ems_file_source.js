@@ -103,7 +103,6 @@ export class EMSFileSource extends VectorSource {
 
   async getAttributions() {
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
-    console.log(fileSource);
     return fileSource.attributions;
   }
 

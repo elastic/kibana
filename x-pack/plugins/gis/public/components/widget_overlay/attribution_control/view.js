@@ -31,6 +31,10 @@ export class AttributionControl  extends React.Component {
     this._isMouunted = false;
   }
 
+  componentDidUpdate() {
+    this._syncMbMapWithAttribution();
+  }
+
   _syncMbMapWithAttribution = async () => {
 
     const attributionPromises = this.props.layerList.map(layer => {
@@ -71,7 +75,9 @@ export class AttributionControl  extends React.Component {
   }
 
   render() {
-    this._syncMbMapWithAttribution();
+    if (this.state.uniqueAttributions.length === 0) {
+      return null;
+    }
     const attributions = this._renderAttributions();
     return (
       <EuiPanel className="gisWidgetControl" hasShadow paddingSize="s">
