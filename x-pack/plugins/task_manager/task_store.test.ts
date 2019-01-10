@@ -8,6 +8,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
+import { mockLogger } from './test_utils';
 
 describe('TaskStore', () => {
   describe('init', () => {
@@ -15,6 +16,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy();
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
@@ -47,6 +49,7 @@ describe('TaskStore', () => {
       );
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['report', 'dernstraight', 'yawn'],
@@ -119,6 +122,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits } }));
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
@@ -283,6 +287,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits } }));
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         supportedTypes: ['a', 'b', 'c'],
         index: 'tasky',
         maxAttempts: 2,
@@ -304,6 +309,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         supportedTypes: ['a', 'b', 'c'],
         index: 'tasky',
         maxAttempts: 2,
@@ -444,6 +450,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ _version: task.version + 1 }));
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
@@ -488,6 +495,7 @@ describe('TaskStore', () => {
       );
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         index: 'myindex',
         maxAttempts: 2,
         supportedTypes: ['a'],

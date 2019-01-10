@@ -58,6 +58,7 @@ export class TaskManager {
       index: config.get('xpack.task_manager.index'),
       maxAttempts: config.get('xpack.task_manager.max_attempts'),
       supportedTypes: Object.keys(this.definitions),
+      logger,
     });
     const pool = new TaskPool({
       logger,

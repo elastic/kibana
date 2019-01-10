@@ -10,6 +10,7 @@
 
 import xPackage from '../../package.json';
 import { getTemplateVersion } from './lib/get_template_version';
+import { Logger } from './lib/logger';
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
 const DOC_TYPE = '_doc';
@@ -19,6 +20,7 @@ export interface StoreOpts {
   index: string;
   maxAttempts: number;
   supportedTypes: string[];
+  logger: Logger;
 }
 
 export interface FetchOpts {
@@ -71,6 +73,7 @@ export class TaskStore {
   private index: string;
   private supportedTypes: string[];
   private _isInitialized = false; // tslint:disable-line:variable-name
+  private logger: Logger;
 
   /**
    * Constructs a new TaskStore.
@@ -79,12 +82,14 @@ export class TaskStore {
    * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
    * @prop {string[]} supportedTypes - The task types supported by this store
+   * @prop {Logger} logger - The task manager logger.
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
     this.maxAttempts = opts.maxAttempts;
     this.supportedTypes = opts.supportedTypes;
+    this.logger = opts.logger;
 
     this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
   }
@@ -98,55 +103,86 @@ export class TaskStore {
   }
 
   /**
-   * Initializes the store, ensuring the task manager index is created and up to date.
+   * Initializes the store, ensuring the task manager index template is created
+   * and the version is up to date.
    */
   public async init() {
     if (this._isInitialized) {
       throw new Error('TaskStore has already been initialized!');
     }
 
-    const properties = {
-      type: { type: 'keyword' },
-      task: {
-        properties: {
-          taskType: { type: 'keyword' },
-          runAt: { type: 'date' },
-          interval: { type: 'text' },
-          attempts: { type: 'integer' },
-          status: { type: 'keyword' },
-          params: { type: 'text' },
-          state: { type: 'text' },
-          user: { type: 'keyword' },
-          scope: { type: 'keyword' },
-        },
-      },
-    };
+    let existingVersion = -Infinity;
+    const templateName = this.index;
+    const templateVersion = getTemplateVersion(xPackage.version);
 
     try {
-      const templateResult = await this.callCluster('indices.putTemplate', {
-        name: this.index,
-        body: {
-          index_patterns: [this.index],
-          mappings: {
-            _doc: {
-              dynamic: 'strict',
-              properties,
-            },
-          },
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-          version: getTemplateVersion(xPackage.version),
-        },
+      const templateCheck = await this.callCluster('indices.getTemplate', {
+        // check if template exists
+        name: templateName,
+        filter_path: '*.version',
       });
-      this._isInitialized = true;
-      return templateResult;
+      existingVersion = templateCheck[templateName] ? templateCheck[templateName].version : null; // extract the existing version
     } catch (err) {
-      throw err;
+      if (err.statusCode !== 404) {
+        // ignore not found
+        throw err;
+      }
     }
 
-    return;
+    if (existingVersion > templateVersion) {
+      throw new Error(
+        `Template version ${templateVersion} could not be saved: existing template version ${existingVersion} is newer!`
+      );
+    } else if (existingVersion === templateVersion) {
+      this.logger.debug(
+        `Not installing ${this.index} index template: version ${templateVersion} already exists.`
+      );
+      return; // the latest template is already saved. Nothing to do.
+    } else if (existingVersion < templateVersion) {
+      this.logger.info(
+        `Upgrading ${
+          this.index
+        } index template. Old version: ${existingVersion}, New version: ${templateVersion}.`
+      );
+    }
+
+    const templateResult = await this.callCluster('indices.putTemplate', {
+      name: templateName,
+      body: {
+        index_patterns: [this.index],
+        mappings: {
+          _doc: {
+            dynamic: 'strict',
+            properties: {
+              type: { type: 'keyword' },
+              task: {
+                properties: {
+                  taskType: { type: 'keyword' },
+                  runAt: { type: 'date' },
+                  interval: { type: 'text' },
+                  attempts: { type: 'integer' },
+                  status: { type: 'keyword' },
+                  params: { type: 'text' },
+                  state: { type: 'text' },
+                  user: { type: 'keyword' },
+                  scope: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        },
+        settings: {
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+        version: templateVersion,
+      },
+    });
+
+    this._isInitialized = true;
+    this.logger.info(`Installed ${this.index} index template: version ${templateVersion}`);
+
+    return templateResult;
   }
 
   get isInitialized() {

@@ -17,6 +17,7 @@ describe('TaskPoller', () => {
     const callCluster = sinon.spy();
     store = new TaskStore({
       callCluster,
+      logger: mockLogger(),
       index: 'tasky',
       maxAttempts: 2,
       supportedTypes: ['a', 'b', 'c'],
