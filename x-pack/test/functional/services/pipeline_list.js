@@ -55,7 +55,7 @@ export function PipelineListProvider({ getService }) {
     async getRowCounts() {
       const ids = await this.getRowIds();
       const isSelecteds = await Promise.all(
-        ids.map(id => testSubjects.isSelected(getSelectCheckbox(id)))
+        ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id)))
       );
       const total = isSelecteds.length;
       const isSelected = isSelecteds.filter(Boolean).length;
@@ -71,7 +71,7 @@ export function PipelineListProvider({ getService }) {
     async getRowsFromTable() {
       const ids = await this.getRowIds();
       const valuesByKey = await propsAsync({
-        selected: Promise.all(ids.map(id => testSubjects.isSelected(getSelectCheckbox(id)))),
+        selected: Promise.all(ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id)))),
         id: ids,
         description: testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION),
         lastModified: testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED),
