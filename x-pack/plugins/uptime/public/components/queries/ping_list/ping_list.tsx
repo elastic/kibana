@@ -181,7 +181,6 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   <EuiFlexItem>
                     <EuiFormRow label="Status">
                       <EuiComboBox
-                        loading={loading}
                         isClearable={false}
                         singleSelection={{ asPlainText: true }}
                         selectedOptions={[this.state.selectedOption]}
@@ -198,7 +197,6 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                     <EuiFormRow label="Max Search Size">
                       <EuiFieldNumber
                         defaultValue={this.state.maxSearchSize.toString()}
-                        loading={loading}
                         min={0}
                         max={10000} // 10k is the max default size in ES, and a good max sane size for this page
                         onBlur={e => {
