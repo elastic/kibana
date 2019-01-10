@@ -102,6 +102,7 @@ describe('PrivilegeMatrix', () => {
         spaces={spaces}
         features={features}
         effectivePrivileges={effectivePrivileges}
+        intl={null as any}
       />
     );
 

@@ -29,7 +29,10 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
 import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
+import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
+
+const SPACES_DISPLAY_COUNT = 4;
 
 interface Props {
   role: Role;
@@ -176,7 +179,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
           field: 'feature',
           name: (
             <Fragment>
-              {item.spaces.map((space: Space) => (
+              {item.spaces.slice(0, SPACES_DISPLAY_COUNT).map((space: Space) => (
                 <span key={space.id}>
                   <SpaceAvatar size="s" space={space} />{' '}
                   {item.isGlobal && (
@@ -187,20 +190,18 @@ export class PrivilegeMatrix extends Component<Props, State> {
                   )}
                 </span>
               ))}
-              {item.spaces.length !== item.spaces.length && (
-                <EuiToolTip
-                  content={
-                    <EuiText size="s">
-                      <ul>
-                        {item.spaces.map((s: Space) => (
-                          <li key={s.id}>{s.name}</li>
-                        ))}
-                      </ul>
-                    </EuiText>
-                  }
-                >
-                  <span>{item.spaces.length - item.spaces.length} more</span>
-                </EuiToolTip>
+              {item.spaces.length > SPACES_DISPLAY_COUNT && (
+                <SpacesPopoverList
+                  spaces={item.spaces}
+                  intl={this.props.intl}
+                  buttonText={this.props.intl.formatMessage(
+                    {
+                      id: 'foo',
+                      defaultMessage: '+{count} more',
+                    },
+                    { count: item.spaces.length - SPACES_DISPLAY_COUNT }
+                  )}
+                />
               )}
             </Fragment>
           ),

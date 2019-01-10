@@ -104,9 +104,33 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         name: 'Spaces',
         width: '60%',
         render: (spaces: TableSpace[], record: TableRow) => {
-          const displayedSpaces = this.state.expandedSpacesGroups.includes(record.spacesIndex)
-            ? spaces
-            : spaces.slice(0, SPACES_DISPLAY_COUNT);
+          const isExpanded = this.state.expandedSpacesGroups.includes(record.spacesIndex);
+          const displayedSpaces = isExpanded ? spaces : spaces.slice(0, SPACES_DISPLAY_COUNT);
+
+          let button = null;
+          if (spaces.length > displayedSpaces.length) {
+            button = (
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
+              >
+                <FormattedMessage
+                  id="foo"
+                  defaultMessage="+{count} more"
+                  values={{ count: spaces.length - displayedSpaces.length }}
+                />
+              </EuiButtonEmpty>
+            );
+          } else if (isExpanded) {
+            button = (
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
+              >
+                <FormattedMessage id="foo" defaultMessage="show less" />
+              </EuiButtonEmpty>
+            );
+          }
 
           return (
             <div>
@@ -119,25 +143,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   {space.name}
                 </EuiBadge>
               ))}
-              {spaces.length > displayedSpaces.length ? (
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
-                >
-                  <FormattedMessage
-                    id="foo"
-                    defaultMessage="+{count} more"
-                    values={{ count: spaces.length - displayedSpaces.length }}
-                  />
-                </EuiButtonEmpty>
-              ) : (
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
-                >
-                  <FormattedMessage id="foo" defaultMessage="show less" />
-                </EuiButtonEmpty>
-              )}
+              {button}
             </div>
           );
         },

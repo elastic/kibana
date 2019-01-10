@@ -221,6 +221,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.props.role)}
         features={this.props.features}
         spaces={this.getDisplaySpaces()}
+        intl={this.props.intl}
       />
     );
 
