@@ -192,8 +192,6 @@ export class MBMapContainer extends React.Component {
     syncLayerOrder(this._mbMap, layerList);
   };
 
-
-
   _syncMbMapWithInspector = () => {
     if (!this.props.isMapReady) {
       return;
