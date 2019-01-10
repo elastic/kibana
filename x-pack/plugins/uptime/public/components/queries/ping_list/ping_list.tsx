@@ -89,7 +89,9 @@ export class Pings extends React.Component<PingListProps, PingListState> {
           if (error) {
             return `Error ${error.message}`;
           }
-          const { allPings } = data;
+          const {
+            allPings: { total, pings },
+          } = data;
           const columns = [
             {
               field: 'monitor.status',
@@ -140,7 +142,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 ),
             },
           ];
-          const hasStatus = allPings.reduce(
+          const hasStatus = pings.reduce(
             (hasHttpStatus: boolean, currentPing: Ping) =>
               hasHttpStatus || get(currentPing, 'http.response.status_code'),
             false
@@ -157,7 +159,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">{allPings.length}</EuiBadge>
+                  <EuiBadge color="primary">{total}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiPanel paddingSize="l">
@@ -196,7 +198,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 <EuiInMemoryTable
                   loading={loading}
                   columns={columns}
-                  items={allPings}
+                  items={pings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
                   sorting={true}
                 />
