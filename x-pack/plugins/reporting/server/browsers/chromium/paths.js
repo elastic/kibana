@@ -29,3 +29,6 @@ export const paths = {
     binaryRelativePath: 'headless_shell-windows\\headless_shell.exe'
   }]
 };
+
+export const getChromeLogLocation = (binaryPath) =>
+  path.join(binaryPath, '..', 'chrome_debug.log');

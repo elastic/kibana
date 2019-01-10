@@ -75,6 +75,7 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger,
       pollInterval: config.get('xpack.task_manager.poll_interval'),
+      store,
       work(): Promise<void> {
         return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
       },
@@ -85,10 +86,23 @@ export class TaskManager {
     this.poller = poller;
 
     kbnServer.afterPluginsInit(async () => {
-      this.isInitialized = true;
       store.addSupportedTypes(Object.keys(this.definitions));
-      await store.init();
-      await poller.start();
+      const startPoller = () => {
+        return poller
+          .start()
+          .then(() => {
+            this.isInitialized = true;
+          })
+          .catch((err: Error) => {
+            logger.warning(err.message);
+
+            // rety again to initialize store and poller, using the timing of
+            // task_manager's configurable poll interval
+            const retryInterval = config.get('xpack.task_manager.poll_interval');
+            setTimeout(() => startPoller(), retryInterval);
+          });
+      };
+      return startPoller();
     });
   }
 
