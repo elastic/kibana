@@ -27,6 +27,7 @@ export const PHASE_ROLLOVER_MINIMUM_AGE_UNITS = 'selectedMinimumAgeUnits';
 
 export const PHASE_FORCE_MERGE_SEGMENTS = 'selectedForceMergeSegments';
 export const PHASE_FORCE_MERGE_ENABLED = 'forceMergeEnabled';
+export const PHASE_FREEZE_ENABLED = 'freezeEnabled';
 
 export const PHASE_SHRINK_ENABLED = 'shrinkEnabled';
 
