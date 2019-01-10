@@ -480,20 +480,32 @@ module
         fields: numberFields
       })
         .then((resp) => {
-          // Add the metric stats to the existing stats in the corresponding card.
-          _.each($scope.metricCards, (card) => {
+          const noDocumentCount = indexPattern.timeFieldName === undefined;
+          let docCountCardIndex = undefined;
+
+          // Add the metric stats to the existing stats in the corresponding card. [ {documentCounts:...}, {fieldName: ..} ]
+          _.each($scope.metricCards, (card, index) => {
             if (card.fieldName !== undefined) {
               card.stats = { ...card.stats, ...(_.find(resp, { fieldName: card.fieldName })) };
             } else {
               // Document count card.
-              card.stats = _.find(resp, (stats) => {
-                return stats.fieldName === undefined;
-              });
+              if (noDocumentCount) {
+                docCountCardIndex = index;
+              } else {
+                card.stats = _.find(resp, (stats) => {
+                  return stats.fieldName === undefined;
+                });
+              }
             }
 
             card.loading = false;
           });
 
+          // Remove document count card and sidebar from view
+          if (noDocumentCount) {
+            $scope.metricCards.splice(docCountCardIndex, 1);
+            $scope.showSidebar = false;
+          }
           // Clear the filter spinner if it's running.
           $scope.metricFilterIcon = 0;
         })
