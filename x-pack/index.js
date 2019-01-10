@@ -34,6 +34,7 @@ import { rollup } from './plugins/rollup';
 import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
+import { uptimeMonitoring } from './plugins/uptime_monitoring';
 
 module.exports = function (kibana) {
   return [
@@ -67,5 +68,6 @@ module.exports = function (kibana) {
     remoteClusters(kibana),
     crossClusterReplication(kibana),
     upgradeAssistant(kibana),
+    uptimeMonitoring(kibana),
   ];
 };
