@@ -7,8 +7,7 @@
 import React, { Fragment } from 'react';
 import _ from 'lodash';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiText,
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
@@ -68,7 +67,8 @@ export class AttributionControl  extends React.Component {
     return this.state.uniqueAttributions.map((attribution, index) => {
       return (
         <Fragment key={index}>
-          <EuiLink href={attribution.url} target="_blank">{attribution.label}</EuiLink>
+          <EuiLink color="subdued" href={attribution.url} target="_blank">{attribution.label}</EuiLink>
+          {index < (this.state.uniqueAttributions.length - 1) && ', '}
         </Fragment>
       );
     });
@@ -80,16 +80,10 @@ export class AttributionControl  extends React.Component {
     }
     const attributions = this._renderAttributions();
     return (
-      <EuiPanel className="gisWidgetControl" hasShadow paddingSize="s">
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            {attributions}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiPanel className="gisWidgetControl gisAttributionControl" paddingSize="none" grow={false}>
+        <EuiText color="subdued" size="xs">
+          <small>{attributions}</small>
+        </EuiText>
       </EuiPanel>
     );
   }
