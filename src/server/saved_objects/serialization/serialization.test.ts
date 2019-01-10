@@ -114,6 +114,7 @@ describe('saved object conversion', () => {
           acl: '33.3.5',
         },
         updated_at: now,
+        references: [],
       };
       expect(expected).toEqual(actual);
     });
@@ -186,6 +187,7 @@ describe('saved object conversion', () => {
         attributes: {
           world: 'earth',
         },
+        references: [],
       });
     });
 
@@ -201,6 +203,7 @@ describe('saved object conversion', () => {
       expect(actual).toEqual({
         id: 'universe',
         type: 'hello',
+        references: [],
       });
     });
 
@@ -237,6 +240,7 @@ describe('saved object conversion', () => {
           },
           namespace: 'foo-namespace',
           updated_at: new Date(),
+          references: [],
         },
       };
 

@@ -78,6 +78,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       attributes: {
         name: 'My favorite global object',
       },
+      references: [],
     });
   };
 
@@ -114,6 +115,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         uiStateJSON: resp.body.attributes.uiStateJSON,
         kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
       },
+      references: [],
     });
   };
 

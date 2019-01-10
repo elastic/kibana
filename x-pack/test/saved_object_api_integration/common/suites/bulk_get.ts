@@ -78,6 +78,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
@@ -108,6 +109,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
             kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
           },
+          references: [],
         },
         {
           id: `${getIdPrefix(spaceId)}does not exist`,
@@ -125,6 +127,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });

@@ -63,12 +63,12 @@
 import Boom from 'boom';
 import _ from 'lodash';
 import Semver from 'semver';
-import { MigrationVersion, SavedObjectDoc } from '../../serialization';
+import { MigrationVersion, RawSavedObjectDoc } from '../../serialization';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
 
-export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
+export type TransformFn = (doc: RawSavedObjectDoc) => RawSavedObjectDoc;
 
-type ValidateDoc = (doc: SavedObjectDoc) => void;
+type ValidateDoc = (doc: RawSavedObjectDoc) => void;
 
 interface MigrationDefinition {
   [type: string]: { [version: string]: TransformFn };
@@ -142,11 +142,11 @@ export class DocumentMigrator implements VersionedTransformer {
   /**
    * Migrates a document to the latest version.
    *
-   * @param {SavedObjectDoc} doc
-   * @returns {SavedObjectDoc}
+   * @param {RawSavedObjectDoc} doc
+   * @returns {RawSavedObjectDoc}
    * @memberof DocumentMigrator
    */
-  public migrate = (doc: SavedObjectDoc): SavedObjectDoc => {
+  public migrate = (doc: RawSavedObjectDoc): RawSavedObjectDoc => {
     return this.transformDoc(doc);
   };
 }
@@ -225,7 +225,7 @@ function buildDocumentTransform({
   migrations: ActiveMigrations;
   validateDoc: ValidateDoc;
 }): TransformFn {
-  return function transformAndValidate(doc: SavedObjectDoc) {
+  return function transformAndValidate(doc: RawSavedObjectDoc) {
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
@@ -243,7 +243,7 @@ function buildDocumentTransform({
   };
 }
 
-function applyMigrations(doc: SavedObjectDoc, migrations: ActiveMigrations) {
+function applyMigrations(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
   while (true) {
     const prop = nextUnmigratedProp(doc, migrations);
     if (!prop) {
@@ -256,14 +256,14 @@ function applyMigrations(doc: SavedObjectDoc, migrations: ActiveMigrations) {
 /**
  * Gets the doc's props, handling the special case of "type".
  */
-function props(doc: SavedObjectDoc) {
+function props(doc: RawSavedObjectDoc) {
   return Object.keys(doc).concat(doc.type);
 }
 
 /**
  * Looks up the prop version in a saved object document or in our latest migrations.
  */
-function propVersion(doc: SavedObjectDoc | ActiveMigrations, prop: string) {
+function propVersion(doc: RawSavedObjectDoc | ActiveMigrations, prop: string) {
   return (
     (doc[prop] && doc[prop].latestVersion) ||
     (doc.migrationVersion && (doc as any).migrationVersion[prop])
@@ -273,7 +273,7 @@ function propVersion(doc: SavedObjectDoc | ActiveMigrations, prop: string) {
 /**
  * Sets the doc's migrationVersion to be the most recent version
  */
-function markAsUpToDate(doc: SavedObjectDoc, migrations: ActiveMigrations) {
+function markAsUpToDate(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
   return {
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
@@ -288,7 +288,7 @@ function markAsUpToDate(doc: SavedObjectDoc, migrations: ActiveMigrations) {
  * about the document and transform that caused the failure.
  */
 function wrapWithTry(version: string, prop: string, transform: TransformFn, log: Logger) {
-  return function tryTransformDoc(doc: SavedObjectDoc) {
+  return function tryTransformDoc(doc: RawSavedObjectDoc) {
     try {
       const result = transform(doc);
 
@@ -313,7 +313,7 @@ function wrapWithTry(version: string, prop: string, transform: TransformFn, log:
 /**
  * Finds the first unmigrated property in the specified document.
  */
-function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
+function nextUnmigratedProp(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
   return props(doc).find(p => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
@@ -343,10 +343,10 @@ function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
  * Applies any relevent migrations to the document for the specified property.
  */
 function migrateProp(
-  doc: SavedObjectDoc,
+  doc: RawSavedObjectDoc,
   prop: string,
   migrations: ActiveMigrations
-): SavedObjectDoc {
+): RawSavedObjectDoc {
   const originalType = doc.type;
   let migrationVersion = _.clone(doc.migrationVersion) || {};
   const typeChanged = () => !doc.hasOwnProperty(prop) || doc.type !== originalType;
@@ -367,7 +367,7 @@ function migrateProp(
 /**
  * Retrieves any prop transforms that have not been applied to doc.
  */
-function applicableTransforms(migrations: ActiveMigrations, doc: SavedObjectDoc, prop: string) {
+function applicableTransforms(migrations: ActiveMigrations, doc: RawSavedObjectDoc, prop: string) {
   const minVersion = propVersion(doc, prop);
   const { transforms } = migrations[prop];
   return minVersion
@@ -380,7 +380,7 @@ function applicableTransforms(migrations: ActiveMigrations, doc: SavedObjectDoc,
  * has not mutated migrationVersion in an unsupported way.
  */
 function updateMigrationVersion(
-  doc: SavedObjectDoc,
+  doc: RawSavedObjectDoc,
   migrationVersion: MigrationVersion,
   prop: string,
   version: string
@@ -396,7 +396,7 @@ function updateMigrationVersion(
  * as this could get us into an infinite loop. So, we explicitly check for that here.
  */
 function assertNoDowngrades(
-  doc: SavedObjectDoc,
+  doc: RawSavedObjectDoc,
   migrationVersion: MigrationVersion,
   prop: string,
   version: string

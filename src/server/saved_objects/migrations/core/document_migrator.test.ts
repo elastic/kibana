@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { SavedObjectDoc } from '../../serialization';
+import { RawSavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
 
 describe('DocumentMigrator', () => {
@@ -486,13 +486,13 @@ describe('DocumentMigrator', () => {
       ...testOpts(),
       migrations: {
         aaa: {
-          '1.2.3': (doc: SavedObjectDoc) => doc,
-          '10.4.0': (doc: SavedObjectDoc) => doc,
-          '2.2.1': (doc: SavedObjectDoc) => doc,
+          '1.2.3': (doc: RawSavedObjectDoc) => doc,
+          '10.4.0': (doc: RawSavedObjectDoc) => doc,
+          '2.2.1': (doc: RawSavedObjectDoc) => doc,
         },
         bbb: {
-          '3.2.3': (doc: SavedObjectDoc) => doc,
-          '2.0.0': (doc: SavedObjectDoc) => doc,
+          '3.2.3': (doc: RawSavedObjectDoc) => doc,
+          '2.0.0': (doc: RawSavedObjectDoc) => doc,
         },
       },
     });
@@ -525,11 +525,11 @@ describe('DocumentMigrator', () => {
 });
 
 function renameAttr(path: string, newPath: string) {
-  return (doc: SavedObjectDoc) =>
-    _.omit(_.set(doc, newPath, _.get(doc, path)), path) as SavedObjectDoc;
+  return (doc: RawSavedObjectDoc) =>
+    _.omit(_.set(doc, newPath, _.get(doc, path)), path) as RawSavedObjectDoc;
 }
 
 function setAttr(path: string, value: any) {
-  return (doc: SavedObjectDoc) =>
-    _.set(doc, path, _.isFunction(value) ? value(_.get(doc, path)) : value) as SavedObjectDoc;
+  return (doc: RawSavedObjectDoc) =>
+    _.set(doc, path, _.isFunction(value) ? value(_.get(doc, path)) : value) as RawSavedObjectDoc;
 }

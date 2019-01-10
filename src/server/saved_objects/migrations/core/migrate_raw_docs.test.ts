@@ -34,12 +34,12 @@ describe('migrateRawDocs', () => {
     expect(result).toEqual([
       {
         _id: 'a:b',
-        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {} },
+        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
         _type: ROOT_TYPE,
       },
       {
         _id: 'c:d',
-        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {} },
+        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {}, references: [] },
         _type: ROOT_TYPE,
       },
     ]);
@@ -58,7 +58,7 @@ describe('migrateRawDocs', () => {
       { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
       {
         _id: 'c:d',
-        _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {} },
+        _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {}, references: [] },
         _type: ROOT_TYPE,
       },
     ]);
@@ -72,6 +72,7 @@ describe('migrateRawDocs', () => {
             name: 'DDD',
           },
           migrationVersion: {},
+          references: [],
         },
       ],
     ]);

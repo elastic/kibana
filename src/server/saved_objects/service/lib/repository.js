@@ -419,7 +419,7 @@ export class SavedObjectsRepository {
           ...time && { updated_at: time },
           version: doc._version,
           attributes: doc._source[type],
-          references: doc._source.references,
+          references: doc._source.references || [],
           migrationVersion: doc._source.migrationVersion,
         };
       })
@@ -462,7 +462,7 @@ export class SavedObjectsRepository {
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
       attributes: response._source[type],
-      references: response._source.references,
+      references: response._source.references || [],
       migrationVersion: response._source.migrationVersion,
     };
   }

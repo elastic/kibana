@@ -63,7 +63,7 @@ export interface SavedObjectReference {
  * that future props are likely to be added. Migrations support this
  * scenario out of the box.
  */
-export interface SavedObjectDoc {
+interface SavedObjectDoc {
   attributes: object;
   id: string;
   type: string;
@@ -71,10 +71,16 @@ export interface SavedObjectDoc {
   migrationVersion?: MigrationVersion;
   version?: number;
   updated_at?: Date;
-  references?: SavedObjectReference[];
 
   [rootProp: string]: any;
 }
+
+interface Referencable {
+  references: SavedObjectReference[];
+}
+
+export type RawSavedObjectDoc = SavedObjectDoc & Partial<Referencable>;
+export type SanitizedSavedObjectDoc = SavedObjectDoc & Referencable;
 
 function assertNonEmptyString(value: string, name: string) {
   if (!value || typeof value !== 'string') {
@@ -109,16 +115,16 @@ export class SavedObjectsSerializer {
    *
    *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
    */
-  public rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
+  public rawToSavedObject({ _id, _source, _version }: RawDoc): SanitizedSavedObjectDoc {
     const { type, namespace } = _source;
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       attributes: _source[type],
+      references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
-      ...(_source.references && { references: _source.references }),
       ...(_version != null && { version: _version }),
     };
   }
@@ -126,9 +132,9 @@ export class SavedObjectsSerializer {
   /**
    * Converts a document from the saved object client format to the format that is stored in elasticsearch.
    *
-   * @param {SavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
+   * @param {SanitizedSavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
    */
-  public savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
+  public savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): RawDoc {
     const {
       id,
       type,
@@ -142,10 +148,10 @@ export class SavedObjectsSerializer {
     const source = {
       [type]: attributes,
       type,
+      references,
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
-      ...(references && { references }),
     };
 
     return {

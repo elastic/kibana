@@ -902,7 +902,8 @@ describe('SavedObjectsRepository', () => {
           type: doc._source.type,
           ...mockTimestampFields,
           version: doc._version,
-          attributes: doc._source[doc._source.type]
+          attributes: doc._source[doc._source.type],
+          references: [],
         });
       });
     });
@@ -925,7 +926,8 @@ describe('SavedObjectsRepository', () => {
           type: doc._source.type,
           ...mockTimestampFields,
           version: doc._version,
-          attributes: doc._source[doc._source.type]
+          attributes: doc._source[doc._source.type],
+          references: [],
         });
       });
     });
@@ -1014,7 +1016,8 @@ describe('SavedObjectsRepository', () => {
         version: 2,
         attributes: {
           title: 'Testing'
-        }
+        },
+        references: [],
       });
     });
 
@@ -1029,7 +1032,8 @@ describe('SavedObjectsRepository', () => {
         version: 2,
         attributes: {
           title: 'Testing'
-        }
+        },
+        references: [],
       });
     });
 
@@ -1176,7 +1180,8 @@ describe('SavedObjectsRepository', () => {
         type: 'config',
         ...mockTimestampFields,
         version: 2,
-        attributes: { title: 'Test' }
+        attributes: { title: 'Test' },
+        references: [],
       });
       expect(savedObjects[1]).toEqual({
         id: 'bad',

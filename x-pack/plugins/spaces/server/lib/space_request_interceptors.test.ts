@@ -229,6 +229,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -265,6 +266,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -302,6 +304,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -348,6 +351,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'Default Space',
             },
+            references: [],
           },
         ];
 
@@ -379,6 +383,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
           {
             id: 'b-space',
@@ -386,6 +391,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'b space',
             },
+            references: [],
           },
         ];
 

@@ -41,7 +41,10 @@ export function migrateRawDocs(
     if (serializer.isRawSavedObject(raw)) {
       const savedObject = serializer.rawToSavedObject(raw);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
-      return serializer.savedObjectToRaw(migrateDoc(savedObject));
+      return serializer.savedObjectToRaw({
+        references: [],
+        ...migrateDoc(savedObject),
+      });
     }
 
     return raw;
