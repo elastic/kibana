@@ -139,8 +139,8 @@ export const Explorer = injectI18n(
                   id="xpack.ml.explorer.topInfuencersTitle"
                   defaultMessage="Top Influencers"
                 />
-                <InfluencersList influencers={influencers} />
               </span>
+              <InfluencersList influencers={influencers} />
             </div>
           )}
 
