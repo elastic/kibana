@@ -48,10 +48,10 @@ export class TransactionOverviewView extends React.Component<
     return (
       <React.Fragment>
         {serviceTransactionTypes.length > 1 ? (
-          <EuiFormRow>
+          <EuiFormRow label="Filter by type">
             <EuiSelect
               options={serviceTransactionTypes.map(type => ({
-                text: `Filter by type: ${type}`,
+                text: `${type}`,
                 value: type
               }))}
               value={transactionType}
