@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import {
   EuiFormRow,
   EuiFlexGroup,
@@ -14,32 +13,44 @@ import {
   EuiRange
 } from '@elastic/eui';
 
-
-
 const DEFAULT_MIN_SIZE = 1;
 const DEFAULT_MAX_SIZE = 64;
 
-export function SizeRangeSelector({ minSize, maxSize, onChange }) {
+export class SizeRangeSelector extends React.Component {
 
-  const onSizeChange = (min, max) => {
-    onChange({
+  _onSizeChange = (min, max) => {
+    this.props.onChange({
       minSize: min,
       maxSize: max
     });
   };
 
-  const onMinSizeChange = (e) => {
-    const updatedMinSize = parseInt(e.target.value, 10);
-    onSizeChange(updatedMinSize, updatedMinSize > maxSize ? updatedMinSize : maxSize);
-  };
+  _areSizesValid() {
+    return typeof this.props.minSize === 'number' && typeof this.props.maxSize === 'number';
+  }
 
-  const onMaxSizeChange = (e) => {
-    const updatedMaxSize = parseInt(e.target.value, 10);
-    onSizeChange(updatedMaxSize < minSize ? updatedMaxSize : minSize, updatedMaxSize);
-  };
+  componentDidUpdate() {
+    if (!this._areSizesValid()) {
+      this._onSizeChange(DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE);
+    }
+  }
 
+  render() {
 
-  if (typeof minSize === 'number' && typeof maxSize === 'number') {
+    if (!this._areSizesValid()) {
+      return null;
+    }
+
+    const onMinSizeChange = (e) => {
+      const updatedMinSize = parseInt(e.target.value, 10);
+      this._onSizeChange(updatedMinSize, updatedMinSize > this.props.maxSize ? updatedMinSize : this.props.maxSize);
+    };
+
+    const onMaxSizeChange = (e) => {
+      const updatedMaxSize = parseInt(e.target.value, 10);
+      this._onSizeChange(updatedMaxSize < this.props.minSize ? updatedMaxSize : this.props.minSize, updatedMaxSize);
+    };
+
     return (
       <EuiFormRow>
         <EuiFlexGroup>
@@ -51,7 +62,7 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
               <EuiRange
                 min={DEFAULT_MIN_SIZE}
                 max={DEFAULT_MAX_SIZE}
-                value={minSize.toString()}
+                value={this.props.minSize.toString()}
                 onChange={onMinSizeChange}
                 showInput
                 showRange
@@ -66,7 +77,7 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
               <EuiRange
                 min={DEFAULT_MIN_SIZE}
                 max={DEFAULT_MAX_SIZE}
-                value={maxSize.toString()}
+                value={this.props.maxSize.toString()}
                 onChange={onMaxSizeChange}
                 showInput
                 showRange
@@ -76,11 +87,9 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
         </EuiFlexGroup>
       </EuiFormRow>
     );
-  } else {
-    onSizeChange(DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE);
-    return null;
   }
 }
+
 
 SizeRangeSelector.propTypes = {
   minSize: PropTypes.number,
