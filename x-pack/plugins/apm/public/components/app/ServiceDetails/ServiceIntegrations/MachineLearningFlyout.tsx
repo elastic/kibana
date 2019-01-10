@@ -92,8 +92,8 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public addErrorToast = () => {
-    const { location, urlParams } = this.props;
-    const { serviceName = 'unknown', transactionType } = urlParams;
+    const { urlParams } = this.props;
+    const { serviceName = 'unknown' } = urlParams;
 
     if (!serviceName) {
       return;
@@ -101,35 +101,20 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
 
     toastNotifications.addWarning({
       title: i18n.translate(
-        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.existedJobNotificationTitle',
+        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
         {
-          defaultMessage: 'Job already exists'
+          defaultMessage: 'Job creation failed'
         }
       ),
       text: (
         <p>
           {i18n.translate(
-            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.existedJobNotificationText',
+            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
             {
-              defaultMessage: `There's already a job running for anomaly detection on {serviceName} ({transactionType}).`,
-              values: {
-                serviceName,
-                transactionType: transactionType as string
-              }
+              defaultMessage:
+                'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
             }
-          )}{' '}
-          <ViewMLJob
-            serviceName={serviceName}
-            transactionType={transactionType}
-            location={location}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.existedJobNotificationText.viewJobLinkText',
-              {
-                defaultMessage: 'View existing job'
-              }
-            )}
-          </ViewMLJob>
+          )}
         </p>
       )
     });
