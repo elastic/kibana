@@ -186,7 +186,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     it('handles pie function', () => {
-      const params = { metric: {}, buckets: [] };
+      const params = {};
       const schemas = {
         metric: [0],
         segment: [1, 2]

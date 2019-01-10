@@ -213,7 +213,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const visConfig = visState.params;
     visConfig.dimensions = {
       metrics: schemas.metric,
-      buckets: schemas.bucket,
+      buckets: schemas.bucket || [],
       splitRow: schemas.split_row,
       splitColumn: schemas.split_column,
     };

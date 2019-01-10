@@ -10,17 +10,17 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles pie function 1`] = `"kibana_pie visConfig='{\\"metric\\":0,\\"buckets\\":[1,2]}' "`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles pie function 1`] = `"kibana_pie visConfig='{\\"dimensions\\":{\\"metric\\":0,\\"buckets\\":[1,2]}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function with buckets 1`] = `"regionmap visConfig='{\\"metric\\":0,\\"bucket\\":1}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function without buckets 1`] = `"regionmap visConfig='{\\"metric\\":0}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0],\\"splitRow\\":[1,2]}}' "`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0],\\"buckets\\":[],\\"splitRow\\":[1,2]}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits and buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0,1],\\"buckets\\":[3],\\"splitRow\\":[2,4]}}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function without splits or buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0,1]}}' "`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function without splits or buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0,1],\\"buckets\\":[]}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function with buckets 1`] = `"tagcloud visConfig='{\\"metrics\\":[0],\\"bucket\\":1}' "`;
 
