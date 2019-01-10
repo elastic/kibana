@@ -116,6 +116,10 @@ export class Keystore {
     return this.keys().indexOf(key) > -1;
   }
 
+  get(key) {
+    return this.data[key];
+  }
+
   add(key, value) {
     this.data[key] = value;
   }

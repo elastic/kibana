@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecretStore } from './lib/secret_store.ts';
+export { SecretStore } from './lib/secret_store';

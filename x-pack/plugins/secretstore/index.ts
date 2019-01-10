@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
+import crypto from 'crypto';
+import { join, resolve } from 'path';
+import { Keystore } from '../../../src/server/keystore';
+import { getData } from '../../../src/server/path';
 import { SecretStore } from './server';
 
-const existence = (object: any, type: string) => {
-  return object ? `${type} object exists` : `${type} does not exist`;
-};
+const path = join(getData(), 'kibana.keystore');
+const keystore = new Keystore(path);
 
 export const secretstore = (kibana: any) => {
   return new kibana.Plugin({
@@ -17,75 +19,36 @@ export const secretstore = (kibana: any) => {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      savedObjectSchema: {
+      savedObjectSchemas: {
         secretType: {
           hidden: true,
         },
       },
-      pluginContextProvider: dependentPlugin => {
-        return {
-          getSecretStoreReader: () => {
-            return new SecretStoreReader(depedentPlugin);
-          },
-        };
-      },
     },
 
     init(server: any) {
-      server.expose('secretstore', new SecretStoreReader());
-      server.addMemoizedFactoryToRequest('getSecretStoreWriter', request => {
-        const client = request.getSavedObjectsClient({ includesHiddenTypes: ['secretType'] });
-        return new SecretStoreWriter(client, request);
-      });
       const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
-      warn(existence(server.savedObjects, 'server.savedObjects'));
-      server.savedObjects.addScopedSavedObjectsClientWrapperFactory(999, (args: any) => {
-        const { client } = args;
-        // warn('I am warning you this is bad');
-        return {
-          errors: client.errors,
-          get: async (type: string, id: string, options: any = {}) => {
-            warn(`get type:'${type}' and id:'${id}'`);
-            return await client.get(type, id, options);
-          },
-          find: async (options: any = {}) => {
-            warn(`find options:'${JSON.stringify(options)}'`);
-            return await client.find(options);
-          },
-          bulkCreate: async (objects: any[], options: any = {}) => {
-            warn(
-              `bulkCreate objects:'${JSON.stringify(objects)}' and options:'${JSON.stringify(
-                options
-              )}'`
-            );
-            return await client.bulkCreate(objects, options);
-          },
-          bulkGet: async (objects: any[], options: any = {}) => {
-            warn(
-              `bulkGet objects:'${JSON.stringify(objects)}' and options:'${JSON.stringify(
-                options
-              )}'`
-            );
-            return await client.bulkGet(objects, options);
-          },
-          update: async (type: string, id: string, attributes: any, options: any = {}) => {
-            warn(`update type:'${type}' and id:'${id}' and attrs:'${JSON.stringify(attributes)}'`);
-            return await client.update(type, id, attributes, options);
-          },
-          create: async (type: string, attributes: any = {}, options: any = {}) => {
-            warn(
-              `create type:'${type}' and options:'${JSON.stringify(
-                options
-              )}' and attrs:'${JSON.stringify(attributes)}'`
-            );
-            return await client.create(type, attributes, options);
-          },
-          delete: async (type: string, id: string, options: any = {}) => {
-            warn(`delete type:'${type}' and id:'${id}' and options:'${JSON.stringify(options)}'`);
-            return await client.delete(type, id, options);
-          },
-        };
-      });
+      warn('Checking for keystore...');
+      if (!keystore.exists()) {
+        warn('Keystore not found!');
+        keystore.reset();
+        keystore.save();
+        warn(`New keystore created ${keystore.path}`);
+      }
+
+      if (!keystore.has('xpack.secretstore.secret')) {
+        keystore.add('xpack.secretstore.secret', crypto.randomBytes(128).toString('hex'));
+        warn(
+          'The keystore did not contain any secret used by the secretstore, one has been auto-generated for use.'
+        );
+      }
+
+      const so = new SecretStore(
+        server.savedObjects,
+        'secretType',
+        keystore.get('xpack.secretstore.secret')
+      );
+      server.expose('secretstore', so);
     },
   });
 };

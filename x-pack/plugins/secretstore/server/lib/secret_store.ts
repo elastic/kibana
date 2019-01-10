@@ -13,10 +13,10 @@ export class SecretStore {
   public readonly unhideAttribute: (deets: any) => any;
   private readonly type: string;
 
-  constructor(savedObjectsClient: SavedObjectsClient, type: string) {
+  constructor(savedObjectsClient: SavedObjectsClient, type: string, key?: Buffer) {
     this.type = type;
-    const key = crypto.randomBytes(128).toString('hex');
-    const crypt = buildCrypt({ key });
+    key = key || crypto.randomBytes(128);
+    const crypt = buildCrypt({ key: key.toString('hex') });
 
     this.hideAttribute = async (deets: any, attributeToHide: string) => {
       // extract attribute to hide from object
