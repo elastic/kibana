@@ -27,7 +27,7 @@ import {
   watchInitRepoCmd,
 } from './repository';
 import { watchDocumentSearch, watchRepositorySearch, watchSearchRouteChange } from './search';
-import { watchRepoCloneSuccess } from './status';
+import { watchRepoCloneSuccess, watchRepoDeleteFinished } from './status';
 import { watchLoadStructure } from './structure';
 import { watchLoadUserConfig } from './user';
 
@@ -57,6 +57,7 @@ export function* rootSaga() {
   yield fork(watchLoadBlame);
   yield fork(watchBlame);
   yield fork(watchRepoCloneSuccess);
+  yield fork(watchRepoDeleteFinished);
   yield fork(watchLoadLanguageServers);
   yield fork(watchInstallLanguageServer);
 }

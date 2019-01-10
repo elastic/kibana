@@ -13,3 +13,13 @@ export const loadStatusFailed = createAction<string>('LOAD STATUS FAILED');
 export const loadRepo = createAction<string>('LOAD REPO');
 export const loadRepoSuccess = createAction<any>('LOAD REPO SUCCESS');
 export const loadRepoFailed = createAction<any>('LOAD REPO FAILED');
+
+export interface RepoProgress {
+  repoUri: string;
+  progress: number;
+  cloneProgress?: any;
+}
+
+export const updateCloneProgress = createAction<RepoProgress>('UPDATE CLONE PROGRESS');
+export const updateIndexProgress = createAction<RepoProgress>('UPDATE INDEX PROGRESS');
+export const updateDeleteProgress = createAction<RepoProgress>('UPDATE DELETE PROGRESS');
