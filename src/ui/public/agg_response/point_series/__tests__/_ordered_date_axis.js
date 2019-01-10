@@ -19,7 +19,6 @@
 
 import moment from 'moment';
 import _ from 'lodash';
-import sinon from 'sinon';
 import expect from 'expect.js';
 import { orderedDateAxis } from '../_ordered_date_axis';
 
@@ -32,17 +31,14 @@ describe('orderedDateAxis', function () {
       }
     },
     chart: {
+      ordered: {},
       aspects: {
-        x: {
-          aggConfig: {
-            fieldIsTimeField: _.constant(true),
-            buckets: {
-              getScaledDateFormat: _.constant('hh:mm:ss'),
-              getInterval: _.constant(moment.duration(15, 'm')),
-              getBounds: _.constant({ min: moment().subtract(15, 'm'), max: moment() })
-            }
+        x: [{
+          params: {
+            format: 'hh:mm:ss',
+            bounds: { min: moment().subtract(15, 'm').valueOf(), max: moment().valueOf() }
           }
-        }
+        }]
       }
     }
   };
@@ -78,23 +74,16 @@ describe('orderedDateAxis', function () {
         .to.have.property('date', true);
     });
 
-    it('relies on agg.buckets for the interval', function () {
-      const args = _.cloneDeep(baseArgs);
-      const spy = sinon.spy(args.chart.aspects.x.aggConfig.buckets, 'getInterval');
-      orderedDateAxis(args.chart);
-      expect(spy).to.have.property('callCount', 1);
-    });
-
     it('sets the min/max when the buckets are bounded', function () {
       const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.chart);
-      expect(moment.isMoment(args.chart.ordered.min)).to.be(true);
-      expect(moment.isMoment(args.chart.ordered.max)).to.be(true);
+      expect(args.chart.ordered).to.have.property('min');
+      expect(args.chart.ordered).to.have.property('max');
     });
 
     it('does not set the min/max when the buckets are unbounded', function () {
       const args = _.cloneDeep(baseArgs);
-      args.chart.aspects.x.aggConfig.buckets.getBounds = _.constant();
+      args.chart.aspects.x[0].params.bounds = null;
       orderedDateAxis(args.chart);
       expect(args.chart.ordered).to.not.have.property('min');
       expect(args.chart.ordered).to.not.have.property('max');

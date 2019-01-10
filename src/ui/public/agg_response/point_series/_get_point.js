@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
   const zRow = z && row[z.accessor];
-  const xRow = row[x.accessor];
+  const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
   const yRow = row[y.accessor];
 
   const point = {

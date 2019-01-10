@@ -35,6 +35,7 @@ export function getAspects(table, dimensions) {
     dimension.forEach(d => {
       if (!d) return;
       const column = table.columns[d.accessor];
+      if (!column) return;
       const formatter = getFormat(d.format);
       if (!aspects[name]) aspects[name] = [];
       aspects[name].push({
