@@ -1,0 +1,5 @@
+// Makes sure the listing page is full height with proper background
+map-listing, .gisListingPage {
+  display: flex;
+  flex-grow: 1;
+}

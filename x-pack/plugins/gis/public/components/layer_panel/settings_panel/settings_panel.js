@@ -112,7 +112,7 @@ export class SettingsPanel extends Component {
       <EuiFormRow
         label="Layer opacity"
       >
-        <div className="alphaRange">
+        <div className="gisAlphaRange">
           <EuiRange
             min={.00}
             max={1.00}

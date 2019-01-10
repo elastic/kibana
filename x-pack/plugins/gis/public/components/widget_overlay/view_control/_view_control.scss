@@ -1,0 +1,10 @@
+.gisViewControl__coordinates {
+  padding: $euiSizeXS $euiSizeS;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.gisViewControl__gotoButton {
+  min-width: 0;
+  pointer-events: all; /* 1 */
+}

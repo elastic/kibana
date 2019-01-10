@@ -101,7 +101,7 @@ export class TOCEntry extends React.Component {
 
     return (
       <div
-        className="layerEntry"
+        className="gisTocEntry"
         id={layer.getId()}
         data-layerid={layer.getId()}
       >
@@ -111,7 +111,7 @@ export class TOCEntry extends React.Component {
           responsive={false}
           className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'visible' : 'notvisible'}
         >
-          <EuiFlexItem grow={false} className="layerEntry--visibility">
+          <EuiFlexItem grow={false} className="gisTocEntry--visibility">
             {visibilityIndicator}
           </EuiFlexItem>
           <EuiFlexItem>

@@ -21,7 +21,7 @@ export class StaticColorSelection extends React.Component {
     return (<EuiColorPicker
       onChange={onOptionChange}
       color={this.props.selectedOptions ? this.props.selectedOptions.color : null}
-      className="colorPicker"
+      className="gisColorPicker"
     />);
   }
 }

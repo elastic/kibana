@@ -144,7 +144,7 @@ export class AddLayerPanel extends Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false} className="gisViewPanel__header">
+        <EuiFlexItem grow={false} className="gisLayerPanel__header">
           <EuiTitle size="s">
             <h1>Add layer</h1>
           </EuiTitle>
@@ -156,7 +156,7 @@ export class AddLayerPanel extends Component {
           {this._renderAddLayerForm()}
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false} className="gisViewPanel__footer">
+        <EuiFlexItem grow={false} className="gisLayerPanel__footer">
           <EuiHorizontalRule margin="none"/>
           <EuiSpacer size="m"/>
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>

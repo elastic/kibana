@@ -30,8 +30,8 @@ export function LayerControl(props) {
           gutterSize="none"
         >
           <EuiFlexItem>
-            <EuiTitle size="s">
-              <h1>Layers</h1>
+            <EuiTitle size="xs">
+              <h2>Layers</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

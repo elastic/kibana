@@ -62,8 +62,8 @@ export class LayerPanel  extends React.Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false} className="gisViewPanel__header">
-          <EuiTitle size="s" className="gisViewPanel__title">
+        <EuiFlexItem grow={false} className="gisLayerPanel__header">
+          <EuiTitle size="s" className="gisLayerPanel__title">
             <h1>
               {selectedLayer.getIcon()}
               {this.state.displayName}
@@ -73,13 +73,13 @@ export class LayerPanel  extends React.Component {
           <EuiHorizontalRule margin="none"/>
         </EuiFlexItem>
 
-        <EuiFlexItem className="gisViewPanel__body">
+        <EuiFlexItem className="gisLayerPanel__body">
           <SettingsPanel/>
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false} className="gisViewPanel__footer">
+        <EuiFlexItem grow={false} className="gisLayerPanel__footer">
           <EuiHorizontalRule margin="none"/>
           <EuiSpacer size="m"/>
           <FlyoutFooter/>

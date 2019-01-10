@@ -22,7 +22,7 @@ export const VisibilityToggle = ({
   children,
   className
 }) => {
-  const classes = classNames('visibilityToggle', className);
+  const classes = classNames('gisVisibilityToggle', className);
 
   return (
     <div className={classes}>
@@ -36,18 +36,18 @@ export const VisibilityToggle = ({
         onChange={onChange}
       />
 
-      <span className="visibilityToggle__body">
-        <span className="visibilityToggle__eye" >
+      <span className="gisVisibilityToggle__body">
+        <span className="gisVisibilityToggle__eye" >
           <EuiIcon
             type={'eye'}
           />
         </span>
-        <span className="visibilityToggle__eyeClosed" >
+        <span className="gisVisibilityToggle__eyeClosed" >
           <EuiIcon
             type={'eyeClosed'}
           />
         </span>
-        <span className="visibilityToggle__content">
+        <span className="gisVisibilityToggle__content">
           {children}
         </span>
       </span>

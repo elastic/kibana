@@ -1,0 +1,39 @@
+.gisLayerPanel__header,
+.gisLayerPanel__body,
+.gisLayerPanel__footer {
+  padding: $euiSize;
+}
+
+.gisLayerPanel__header {
+  padding-bottom: 0;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
+}
+
+.gisLayerPanel__title {
+  svg {
+    margin: -.1em .5em 0 0;
+  }
+}
+
+.gisLayerPanel__body {
+  overflow: hidden;
+  overflow-y: auto;
+  @include euiScrollBar;
+
+  > * {
+    flex: 0 0 auto;
+  }
+
+  > *:not(:last-child) {
+    margin-bottom: $euiSize;
+  }
+}
+
+.gisLayerPanel__footer {
+  padding-top: 0;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 ($euiSize *-1) $euiSize (-$euiSize / 2) $euiColorLightestShade;
+}

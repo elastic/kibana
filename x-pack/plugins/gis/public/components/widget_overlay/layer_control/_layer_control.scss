@@ -1,0 +1,4 @@
+.gisWidgetControl__tocHolder {
+  @include euiScrollBar;
+  overflow-y: auto;
+}
