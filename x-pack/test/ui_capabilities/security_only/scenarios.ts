@@ -99,11 +99,12 @@ const DualPrivilegesAll: DualPrivilegesAll = {
         },
       ],
     },
-    kibana: {
-      global: {
-        minimum: ['all'],
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -124,11 +125,12 @@ const DualPrivilegesRead: DualPrivilegesRead = {
         },
       ],
     },
-    kibana: {
-      global: {
-        minimum: ['read'],
+    kibana: [
+      {
+        base: ['read'],
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -141,11 +143,12 @@ const All: All = {
   password: 'all-password',
   role: {
     name: 'all_role',
-    kibana: {
-      global: {
-        minimum: ['all'],
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -158,13 +161,14 @@ const ApmAll: ApmAll = {
   password: 'apm_all-password',
   role: {
     name: 'apm_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           apm: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -177,13 +181,14 @@ const CanvasAll: CanvasAll = {
   password: 'canvas_all-password',
   role: {
     name: 'canvas_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           canvas: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -196,13 +201,14 @@ const CanvasRead: CanvasRead = {
   password: 'canvas_read-password',
   role: {
     name: 'canvas_read_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           canvas: ['read'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -215,13 +221,14 @@ const DashboardAll: DashboardAll = {
   password: 'dashboard_all-password',
   role: {
     name: 'dashboard_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           dashboard: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -234,13 +241,14 @@ const DashboardRead: DashboardRead = {
   password: 'dashboard_read-password',
   role: {
     name: 'dashboard_read_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           dashboard: ['read'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -253,13 +261,14 @@ const DevToolsAll: DevToolsAll = {
   password: 'dev_tools_all-password',
   role: {
     name: 'dev_tools_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           dev_tools: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -272,13 +281,14 @@ const DiscoverAll: DiscoverAll = {
   password: 'discover_all-password',
   role: {
     name: 'discover_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           discover: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -291,13 +301,14 @@ const DiscoverRead: DiscoverRead = {
   password: 'discover_read-password',
   role: {
     name: 'discover_read_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           discover: ['read'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -310,13 +321,14 @@ const GraphAll: GraphAll = {
   password: 'graph_all-password',
   role: {
     name: 'graph_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           graph: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -329,13 +341,14 @@ const GraphRead: GraphRead = {
   password: 'graph_read-password',
   role: {
     name: 'graph_read_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           graph: ['read'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -348,13 +361,14 @@ const GisAll: GisAll = {
   password: 'gis_all-password',
   role: {
     name: 'gis_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           gis: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -367,13 +381,14 @@ const GisRead: GisRead = {
   password: 'gis_read-password',
   role: {
     name: 'gis_read_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           gis: ['read'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -386,13 +401,14 @@ const InfrastructureAll: InfrastructureAll = {
   password: 'infrastructure_all-password',
   role: {
     name: 'infrastructure_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           infrastructure: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -405,13 +421,14 @@ const LogsAll: LogsAll = {
   password: 'logs_all-password',
   role: {
     name: 'logs_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           logs: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -424,13 +441,14 @@ const MlAll: MlAll = {
   password: 'ml_all-password',
   role: {
     name: 'ml_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           ml: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -443,13 +461,14 @@ const MonitoringAll: MonitoringAll = {
   password: 'monitoring_all-password',
   role: {
     name: 'monitoring_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           monitoring: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -462,13 +481,14 @@ const TimelionAll: TimelionAll = {
   password: 'timelion_all-password',
   role: {
     name: 'timelion_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           timelion: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -481,13 +501,14 @@ const TimelionRead: TimelionRead = {
   password: 'timelion_read-password',
   role: {
     name: 'timelion_read_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           timelion: ['read'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -500,13 +521,14 @@ const UptimeAll: UptimeAll = {
   password: 'uptime_all-password',
   role: {
     name: 'uptime_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           uptime: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -519,13 +541,14 @@ const VisualizeAll: VisualizeAll = {
   password: 'visualize_all-password',
   role: {
     name: 'visualize_all_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           visualize: ['all'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -538,13 +561,14 @@ const VisualizeRead: VisualizeRead = {
   password: 'visualize_read-password',
   role: {
     name: 'visualize_read_role',
-    kibana: {
-      global: {
+    kibana: [
+      {
         feature: {
           visualize: ['read'],
         },
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
