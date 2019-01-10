@@ -22,10 +22,6 @@ contractTests('Kibana  Framework Adapter', {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: xpackKbnServerConfig,
     });
-    // const config = legacyServer.server.config();
-    // config.extendSchema(beatsPluginConfig, {}, configPrefix);
-
-    // config.set('xpack.beats.encryptionKey', 'foo');
   },
   async after() {
     await servers.stop();
