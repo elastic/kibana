@@ -24,6 +24,7 @@
 @import '../components/autocomplete/autocomplete';
 @import '../components/border_connection/border_connection';
 @import '../components/border_resize_handle/border_resize_handle';
+@import '../components/clipboard/clipboard';
 @import '../components/color_dot/color_dot';
 @import '../components/color_palette/color_palette';
 @import '../components/color_picker_mini/color_picker_mini';
@@ -52,6 +53,7 @@
 @import '../components/toolbar/toolbar';
 @import '../components/toolbar/tray/tray';
 @import '../components/workpad/workpad';
+@import '../components/workpad_export/workpad_export';
 @import '../components/workpad_loader/workpad_loader';
 @import '../components/workpad_loader/workpad_dropzone/workpad_dropzone';
 @import '../components/workpad_page/workpad_page';
