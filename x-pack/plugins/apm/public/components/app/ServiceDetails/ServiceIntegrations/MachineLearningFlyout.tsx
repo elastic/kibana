@@ -90,26 +90,19 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public addErrorToast = () => {
-    const { location, urlParams } = this.props;
-    const { serviceName = 'unknown', transactionType } = urlParams;
+    const { urlParams } = this.props;
+    const { serviceName = 'unknown' } = urlParams;
 
     if (!serviceName) {
       return;
     }
 
     toastNotifications.addWarning({
-      title: 'Job already exists',
+      title: 'Job creation failed',
       text: (
         <p>
-          There&apos;s already a job running for anomaly detection on{' '}
-          {serviceName} ({transactionType}).{' '}
-          <ViewMLJob
-            serviceName={serviceName}
-            transactionType={transactionType}
-            location={location}
-          >
-            View existing job
-          </ViewMLJob>
+          Your current license may not allow for creating machine learning jobs,
+          or this job may already exist.
         </p>
       )
     });
