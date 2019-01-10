@@ -4,20 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore: EuiBreadcrumbs has no exported member
+import { EuiBreadcrumbs, EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
-import { HeaderBreadcrumbs } from '../../components/page/navigation/breadcrumb';
+import styled from 'styled-components';
+import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 
-interface Props {
-  match: {
-    params: { hostId: string };
-  };
-}
-
-export const HostDetails = pure<Props>(({ match }) => (
+export const HostDetails = pure<HostComponentProps>(({ match }) => (
   <div>
-    <HeaderBreadcrumbs />
-    <h3>Match: {JSON.stringify(match)}</h3>
-    <h2>HostId: {match.params.hostId}</h2>
+    <HostBreadcrumbWrapper breadcrumbs={getBreadcrumbs(match.params.hostId!)} />
+    <EuiPanel>
+      <EuiTitle>
+        <h2>Host Details</h2>
+      </EuiTitle>
+      <div>
+        Match Params: <pre>{JSON.stringify(match, null, 2)}</pre>
+      </div>
+    </EuiPanel>
   </div>
 ));
+
+const getBreadcrumbs = (hostId: string) => [
+  {
+    text: 'Hosts',
+    href: getHostsUrl(),
+  },
+  {
+    text: hostId,
+  },
+];
+
+const HostBreadcrumbWrapper = styled(EuiBreadcrumbs)`
+  margin: 10px 0;
+`;

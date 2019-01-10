@@ -5,24 +5,18 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { HostDetails } from './host_details';
 import { Hosts } from './hosts';
 
-interface Props {
-  match: {
-    params: { hostId: string };
-    url: string;
-  };
-}
-
-export const HostsContainer = pure<Props>(({ match }) => (
+export const HostsContainer = pure<RouteComponentProps>(({ match }) => (
   <div>
     <Switch>
       <Route exact path={'/hosts'} component={Hosts} />
       <Route path={`${match.url}/:hostId`} component={HostDetails} />
+      <Redirect to="/hosts" />
     </Switch>
   </div>
 ));
