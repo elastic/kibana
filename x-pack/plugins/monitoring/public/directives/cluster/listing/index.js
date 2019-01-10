@@ -365,12 +365,11 @@ const handleUnlinkedDeployment = (changeCluster) => {
         iconType="link"
       >
         <p>
-          Click&nbsp;
           <EuiLink
             onClick={() => changeCluster(UNLINKED_DEPLOYMENT_CLUSTER_UUID)}
             data-test-subj="unlinkedDeploymentLink"
           >
-            here to view these instances.
+            View these instances.
           </EuiLink>
         </p>
       </EuiCallOut>

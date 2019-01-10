@@ -50,5 +50,8 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return response.hits.total > 0;
+  if (response && response.hits) {
+    return response.hits.total > 0;
+  }
+  return false;
 }
