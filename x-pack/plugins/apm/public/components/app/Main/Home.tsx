@@ -20,12 +20,12 @@ const homeTabs: IHistoryTab[] = [
   {
     path: '/services',
     name: 'Services',
-    component: ServiceOverview
+    render: props => <ServiceOverview {...props} />
   },
   {
     path: '/traces',
     name: 'Traces',
-    component: TraceOverview
+    render: props => <TraceOverview {...props} />
   }
 ];
 
