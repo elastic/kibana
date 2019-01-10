@@ -67,6 +67,11 @@ const monitorListColumns = [
     ),
   },
   {
+    field: 'ping.monitor.ip',
+    name: 'IP',
+    sortable: true,
+  },
+  {
     field: 'upSeries',
     name: 'Monitor History',
     // @ts-ignore TODO fix typing

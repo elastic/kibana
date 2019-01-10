@@ -41,7 +41,7 @@ export const MonitorStatusBar = ({
       if (!monitorStatus.length) {
         return `No data found for monitor id ${monitorId}`;
       }
-      const { monitor, tcp } = monitorStatus[0];
+      const { monitor, tcp, url } = monitorStatus[0];
 
       return (
         <EuiPanel>
@@ -62,13 +62,12 @@ export const MonitorStatusBar = ({
             <EuiFlexItem grow={false}>
               Last update: {moment(monitor.timestamp).fromNow()}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>Host: {monitor.host}</EuiFlexItem>
-            <EuiFlexItem grow={false}>Port: {tcp.port}</EuiFlexItem>
+            <EuiFlexItem grow={false}>URL: {url.full}</EuiFlexItem>
+            <EuiFlexItem grow={false}>IP: {monitor.ip}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               Duration: {monitor.duration.us / 1000}
               ms
             </EuiFlexItem>
-            <EuiFlexItem>Scheme: {monitor.scheme}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       );
