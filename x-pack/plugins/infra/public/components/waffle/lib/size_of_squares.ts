@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SCALE_FACTOR = 0.6;
+export const SCALE_FACTOR = 0.55;
 export const MAX_SIZE = Infinity;
 export const MIN_SIZE = 24;
 
