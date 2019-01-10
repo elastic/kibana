@@ -73,7 +73,7 @@ export const search = handleActions<SearchState, any>(
         }
       }),
     [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>
-      produce<SearchState>(state, draft => {
+      produce<SearchState>(state, (draft: SearchState) => {
         const {
           from,
           page,

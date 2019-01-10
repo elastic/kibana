@@ -92,7 +92,7 @@ export const file = handleActions(
         draft.loading = true;
       }),
     [String(fetchRepoTreeSuccess)]: (state: FileState, action: Action<RepoTreePayload>) =>
-      produce<FileState>(state, draft => {
+      produce<FileState>(state, (draft: FileState) => {
         draft.loading = false;
         const { tree, path } = action.payload!;
         mergeTree(draft, tree, path);
@@ -102,7 +102,7 @@ export const file = handleActions(
         draft.requestedPaths.push(path);
       }),
     [String(resetRepoTree)]: (state: FileState) =>
-      produce<FileState>(state, draft => {
+      produce<FileState>(state, (draft: FileState) => {
         draft.tree = initialState.tree;
         draft.openedPaths = initialState.openedPaths;
       }),
@@ -111,7 +111,7 @@ export const file = handleActions(
         draft.loading = false;
       }),
     [String(openTreePath)]: (state: FileState, action: any) =>
-      produce<FileState>(state, draft => {
+      produce<FileState>(state, (draft: FileState) => {
         const path = action.payload!;
         if (!state.openedPaths.includes(path)) {
           draft.openedPaths.push(path);
@@ -129,7 +129,7 @@ export const file = handleActions(
         draft.commits = action.payload;
       }),
     [String(fetchRepoBranchesSuccess)]: (state: FileState, action: any) =>
-      produce<FileState>(state, draft => {
+      produce<FileState>(state, (draft: FileState) => {
         const references = action.payload as ReferenceInfo[];
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);

@@ -27,7 +27,7 @@ export const blame = handleActions<BlameState, any>(
         draft.loading = true;
       }),
     [String(loadBlameSuccess)]: (state: BlameState, action: Action<GitBlame[]>) =>
-      produce<BlameState>(state, draft => {
+      produce<BlameState>(state, (draft: BlameState) => {
         draft.blames = action.payload!;
         draft.loading = false;
       }),
