@@ -36,7 +36,9 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       onMoveColumn: '=?',
     },
     template: headerHtml,
-    controller: function ($scope) {
+    controller: function ($scope, config) {
+      $scope.hideTimeColumn = config.get('doc_table:hideTimeColumn');
+
       $scope.isSortableColumn = function isSortableColumn(columnName) {
         return (
           !!$scope.indexPattern
