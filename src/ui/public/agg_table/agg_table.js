@@ -131,8 +131,8 @@ uiModules
                 return _.reduce(tableRows, function (prev, curr) {
                 // some metrics return undefined for some of the values
                 // derivative is an example of this as it returns undefined in the first row
-                  if (curr[col.id].value === undefined) return prev;
-                  return prev + curr[i].value;
+                  if (curr[col.id] === undefined) return prev;
+                  return prev + curr[col.id];
                 }, 0);
               };
 
@@ -148,13 +148,13 @@ uiModules
                   }
                   break;
                 case 'min':
-                  formattedColumn.total = formatter.convert(_.chain(table.rows).map(i).map('value').min().value());
+                  formattedColumn.total = formatter.convert(_.chain(table.rows).map(col.id).min().value());
                   break;
                 case 'max':
-                  formattedColumn.total = formatter.convert(_.chain(table.rows).map(i).map('value').max().value());
+                  formattedColumn.total = formatter.convert(_.chain(table.rows).map(col.id).max().value());
                   break;
                 case 'count':
-                  formattedColumn.total = formatter.convert(table.rows.length);
+                  formattedColumn.total = table.rows.length;
                   break;
                 default:
                   break;
