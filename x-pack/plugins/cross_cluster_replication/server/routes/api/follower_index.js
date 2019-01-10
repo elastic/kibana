@@ -14,6 +14,7 @@ import {
 } from '../../lib/follower_index_serialization';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
+import { removeEmptyFields } from '../../../common/services/utils';
 
 export const registerFollowerIndexRoutes = (server) => {
   const isEsError = isEsErrorFactory(server);
@@ -86,7 +87,7 @@ export const registerFollowerIndexRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { name, ...rest } = request.payload;
-      const body = serializeFollowerIndex(rest);
+      const body = removeEmptyFields(serializeFollowerIndex(rest));
 
       try {
         return await callWithRequest('ccr.saveFollowerIndex', { name, body });

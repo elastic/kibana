@@ -71,7 +71,32 @@ export const deserializeFollowerIndex = ({ index, shards }) => ({
 export const deserializeListFollowerIndices = followerIndices =>
   followerIndices.map(deserializeFollowerIndex);
 
-export const serializeFollowerIndex = ({ remoteCluster, leaderIndex }) => ({
-  remote_cluster: remoteCluster,
-  leader_index: leaderIndex,
+export const serializeAdvancedSettings = ({
+  maxReadRequestOperationCount,
+  maxOutstandingReadRequests,
+  maxReadRequestSize,
+  maxWriteRequestOperationCount,
+  maxWriteRequestSize,
+  maxOutstandingWriteRequests,
+  maxWriteBufferCount,
+  maxWriteBufferSize,
+  maxRetryDelay,
+  readPollTimeout,
+}) => ({
+  max_read_request_operation_count: maxReadRequestOperationCount,
+  max_outstanding_read_requests: maxOutstandingReadRequests,
+  max_read_request_size: maxReadRequestSize,
+  max_write_request_operation_count: maxWriteRequestOperationCount,
+  max_write_request_size: maxWriteRequestSize,
+  max_outstanding_write_requests: maxOutstandingWriteRequests,
+  max_write_buffer_count: maxWriteBufferCount,
+  max_write_buffer_size: maxWriteBufferSize,
+  max_retry_delay: maxRetryDelay,
+  read_poll_timeout: readPollTimeout,
+});
+
+export const serializeFollowerIndex = (followerIndex) => ({
+  remote_cluster: followerIndex.remoteCluster,
+  leader_index: followerIndex.leaderIndex,
+  ...serializeAdvancedSettings(followerIndex)
 });

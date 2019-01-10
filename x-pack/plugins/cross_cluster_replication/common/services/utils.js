@@ -15,3 +15,15 @@ export const wait = (time = 1000) => (data) => {
     setTimeout(() => resolve(data), time);
   });
 };
+
+/**
+ * Utility to remove empty fields ("") from a request body
+ */
+export const removeEmptyFields = (body) => (
+  Object.entries(body).reduce((acc, [key, value]) => {
+    if (value !== '') {
+      acc[key] = value;
+    }
+    return acc;
+  }, {})
+);
