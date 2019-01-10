@@ -77,6 +77,7 @@ export function apm(kibana) {
         catalogue: ['apm'],
         privileges: {
           all: {
+            catalogue: ['apm'],
             app: ['apm', 'kibana'],
             savedObject: {
               all: [],
