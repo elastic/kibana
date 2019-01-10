@@ -45,7 +45,8 @@ export default function ({ getService }) {
                   version: 1,
                   attributes: {
                     'title': 'Count of requests'
-                  }
+                  },
+                  references: [],
                 }
               ]
             });

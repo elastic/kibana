@@ -65,7 +65,8 @@ export default function ({ getService }) {
                     visState: resp.body.saved_objects[0].attributes.visState,
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
                     kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
-                  }
+                  },
+                  references: [],
                 },
                 {
                   id: 'does not exist',
@@ -83,7 +84,8 @@ export default function ({ getService }) {
                   attributes: {
                     buildNum: 8467,
                     defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab'
-                  }
+                  },
+                  references: [],
                 }
               ]
             });

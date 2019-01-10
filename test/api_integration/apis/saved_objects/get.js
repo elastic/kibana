@@ -47,7 +47,8 @@ export default function ({ getService }) {
                 visState: resp.body.attributes.visState,
                 uiStateJSON: resp.body.attributes.uiStateJSON,
                 kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta
-              }
+              },
+              references: [],
             });
           })
       ));
