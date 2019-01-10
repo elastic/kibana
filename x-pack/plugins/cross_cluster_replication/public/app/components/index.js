@@ -17,5 +17,4 @@ export { FollowerIndexResumeProvider } from './follower_index_resume_provider';
 export { FollowerIndexUnfollowProvider } from './follower_index_unfollow_provider';
 export { FollowerIndexForm } from './follower_index_form';
 export { FollowerIndexPageTitle } from './follower_index_page_title';
-export { AdvancedSettingsForm } from './advanced_settings_form';
 export { FormEntryRow } from './form_entry_row';
