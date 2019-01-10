@@ -91,8 +91,7 @@ export class ESGeohashGridSource extends VectorSource {
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
-            Group documents into grid cells and display metrics for each cell.
-            Great for displaying large datasets.
+            Group geospatial data in grids with metrics for each gridded cell
           </p>
         </EuiText>
       </Fragment>

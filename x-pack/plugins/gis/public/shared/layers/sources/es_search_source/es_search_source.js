@@ -50,7 +50,7 @@ export class ESSearchSource extends VectorSource {
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
-          Display documents from an elasticsearch index.
+            Geospatial data from an Elasticsearch index
           </p>
         </EuiText>
       </Fragment>);
