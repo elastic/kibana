@@ -19,6 +19,7 @@ module.service('mlCheckboxShowChartsService', function (Private) {
   this.state = mlCheckboxShowChartsService.state = stateFactory('mlCheckboxShowCharts', {
     showCharts: true
   });
+  mlCheckboxShowChartsService.initialized = true;
 })
   .directive('mlCheckboxShowCharts', function ($injector) {
     const reactDirective = $injector.get('reactDirective');

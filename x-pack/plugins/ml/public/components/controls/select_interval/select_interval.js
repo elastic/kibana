@@ -40,6 +40,7 @@ function optionValueToInterval(value) {
 
 // This service will be populated by the corresponding angularjs based one.
 export const mlSelectIntervalService = {
+  intialized: false,
   state: null
 };
 

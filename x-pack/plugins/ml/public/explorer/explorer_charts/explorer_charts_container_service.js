@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Service for the container for the anomaly charts in the
  * Machine Learning Explorer dashboard.
@@ -13,7 +11,6 @@
  * and manages the layout of the charts in the containing div.
  */
 
-import $ from 'jquery';
 import _ from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
@@ -24,7 +21,11 @@ import {
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
-import { mlSelectSeverityService } from '../../components/controls/select_severity/select_severity';
+import {
+  mlSelectSeverityService,
+  SEVERITY_OPTIONS,
+} from '../../components/controls/select_severity/select_severity';
+import { getChartContainerWidth } from './legacy_utils';
 
 import { CHART_TYPE } from '../explorer_constants';
 
@@ -56,14 +57,16 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     const data = getDefaultChartsData();
 
-    const threshold = mlSelectSeverityService.state.get('threshold');
+    const threshold = (mlSelectSeverityService.initalized)
+      ? mlSelectSeverityService.state.get('threshold')
+      : SEVERITY_OPTIONS[0];
+
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= threshold.val;
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
-    const $chartContainer = $('.explorer-charts');
-    const chartsContainerWidth = Math.floor($chartContainer.width());
+    const chartsContainerWidth = getChartContainerWidth();
     let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
     if (allSeriesRecords.length === 1) {
       chartsPerRow = 1;

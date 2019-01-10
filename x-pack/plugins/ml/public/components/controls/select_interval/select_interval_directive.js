@@ -19,6 +19,7 @@ module.service('mlSelectIntervalService', function (Private) {
   this.state = mlSelectIntervalService.state = stateFactory('mlSelectInterval', {
     interval: { display: 'Auto', val: 'auto' }
   });
+  mlSelectIntervalService.initialized = true;
 })
   .directive('mlSelectInterval', function ($injector) {
     const reactDirective = $injector.get('reactDirective');

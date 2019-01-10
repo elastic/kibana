@@ -19,6 +19,7 @@ import makeId from '@elastic/eui/lib/components/form/form_row/make_id';
 
 // This service will be populated by the corresponding angularjs based one.
 export const mlCheckboxShowChartsService = {
+  intialized: false,
   state: null
 };
 

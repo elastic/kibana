@@ -30,7 +30,7 @@ const optionsMap = {
   'critical': 75,
 };
 
-const SEVERITY_OPTIONS = [
+export const SEVERITY_OPTIONS = [
   { val: 0, display: 'warning', color: getSeverityColor(0) },
   { val: 25, display: 'minor', color: getSeverityColor(25) },
   { val: 50, display: 'major', color: getSeverityColor(50) },
@@ -51,6 +51,7 @@ function optionValueToThreshold(value) {
 
 // This service will be populated by the corresponding angularjs based one.
 export const mlSelectSeverityService = {
+  intialized: false,
   state: null
 };
 
@@ -59,8 +60,7 @@ class SelectSeverity extends Component {
     super(props);
 
     // Restore the threshold from the state, or default to warning.
-    if (
-      typeof mlSelectSeverityService.state.get === 'function') {
+    if (mlSelectSeverityService.intialized) {
       this.mlSelectSeverityService = mlSelectSeverityService;
     }
 

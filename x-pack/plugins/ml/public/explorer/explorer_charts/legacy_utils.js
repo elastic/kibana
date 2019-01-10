@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './explorer_no_influencers_found';
+import $ from 'jquery';
+
+export function getChartContainerWidth() {
+  const $chartContainer = $('.explorer-charts');
+  return Math.floor($chartContainer.width());
+}

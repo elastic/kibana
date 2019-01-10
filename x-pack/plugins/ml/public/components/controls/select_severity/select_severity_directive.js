@@ -19,6 +19,7 @@ module.service('mlSelectSeverityService', function (Private) {
   this.state = mlSelectSeverityService.state = stateFactory('mlSelectSeverity', {
     threshold: { display: 'warning', val: 0 }
   });
+  mlSelectSeverityService.intialized = true;
 })
   .directive('mlSelectSeverity', function ($injector) {
     const reactDirective = $injector.get('reactDirective');

@@ -19,4 +19,5 @@ module.service('mlSelectLimitService', function (Private) {
   this.state = mlSelectLimitService.state = stateFactory('mlSelectLimit', {
     limit: { display: '10', val: 10 }
   });
+  mlSelectLimitService.initialized = true;
 });

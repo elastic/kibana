@@ -33,7 +33,7 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
-import { mlSelectSeverityService } from '../../components/controls/select_severity/select_severity';
+import { mlSelectSeverityService, SEVERITY_OPTIONS } from '../../components/controls/select_severity/select_severity';
 
 import { CHART_TYPE } from '../explorer_constants';
 
@@ -371,7 +371,7 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
         .on('mouseout', () => mlChartTooltipService.hide());
 
       // Update all dots to new positions.
-      const threshold = mlSelectSeverityService.state.get('threshold');
+      const threshold = (mlSelectSeverityService.initiliazed) ? mlSelectSeverityService.state.get('threshold') : SEVERITY_OPTIONS[0];
       dots.attr('cx', d => lineChartXScale(d.date))
         .attr('cy', d => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
         .attr('class', (d) => {

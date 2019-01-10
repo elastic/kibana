@@ -123,6 +123,7 @@ module.controller('MlExplorerController', function (
 
   const anomalyDataChange = explorerChartsContainerServiceFactory((data) => {
     $scope.chartsData = {
+      ...getDefaultChartsData(),
       chartsPerRow: data.chartsPerRow,
       seriesToPlot: data.seriesToPlot,
       // convert truthy/falsy value to Boolean

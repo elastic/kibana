@@ -35,9 +35,9 @@ function optionValueToLimit(value) {
   // Get corresponding limit object with required display and val properties from the specified value.
   let limit = LIMIT_OPTIONS.find(opt => (opt.val === value));
 
-  // Default to 5 if supplied value doesn't map to one of the options.
+  // Default to 10 if supplied value doesn't map to one of the options.
   if (limit === undefined) {
-    limit = LIMIT_OPTIONS[0];
+    limit = LIMIT_OPTIONS[1];
   }
 
   return limit;
@@ -45,6 +45,7 @@ function optionValueToLimit(value) {
 
 // This service will be populated by the corresponding angularjs based one.
 export const mlSelectLimitService = {
+  initialized: false,
   state: null
 };
 
@@ -52,13 +53,13 @@ class SelectLimit extends Component {
   constructor(props) {
     super(props);
 
-    // Restore the limit from the state, or default to 5.
-    if (typeof mlSelectLimitService.state.get === 'function') {
+    // Restore the limit from the state, or default to 10.
+    if (mlSelectLimitService.initialized) {
       this.mlSelectLimitService = mlSelectLimitService;
     }
 
     this.state = {
-      valueDisplay: LIMIT_OPTIONS[0].display,
+      valueDisplay: LIMIT_OPTIONS[1].display,
     };
   }
 
@@ -66,7 +67,7 @@ class SelectLimit extends Component {
     // set initial state from service if available
     if (this.mlSelectLimitService !== undefined) {
       const limitState = this.mlSelectLimitService.state.get('limit');
-      const limitValue = _.get(limitState, 'val', 5);
+      const limitValue = _.get(limitState, 'val', 10);
       const limit = optionValueToLimit(limitValue);
       // set initial selected option equal to limit value
       const selectedOption = LIMIT_OPTIONS.find(opt => (opt.val === limit.val));
