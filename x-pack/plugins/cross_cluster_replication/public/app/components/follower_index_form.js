@@ -27,19 +27,13 @@ import {
   EuiTitle,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import Joi from 'joi';
 
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import routing from '../services/routing';
-import { API_STATUS } from '../constants';
+import { API_STATUS, follwerIndexFormSchema } from '../constants';
 import { SectionError } from './section_error';
-import { AdvancedSettingsForm } from './advanced_settings_form';
-import { validateFollowerIndex } from '../services/follower_index_validators';
 import { loadIndices } from '../services/api';
-
-const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+import { FormEntryRow } from './form_entry_row';
 
 const getFirstConnectedCluster = (clusters) => {
   for (let i = 0; i < clusters.length; i++) {
@@ -52,8 +46,9 @@ const getFirstConnectedCluster = (clusters) => {
 
 const getEmptyFollowerIndex = (remoteClusters) => ({
   name: '',
-  remoteCluster: getFirstConnectedCluster(remoteClusters).name,
+  remoteCluster: remoteClusters ? getFirstConnectedCluster(remoteClusters).name : '',
   leaderIndex: '',
+  ...Object.keys(follwerIndexFormSchema.advanced).reduce((acc, field) => ({ ...acc, [field]: '' }), {})
 });
 
 /**
@@ -76,101 +71,6 @@ export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
   }
 });
 
-/* eslint-disable max-len */
-const advancedSettingsFields = {
-  maxReadRequestOperationCount: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle', {
-      defaultMessage: 'Max read request operation count'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountDescription', {
-      defaultMessage: 'The maximum number of operations to pull per read from the remote cluster.'
-    }),
-    validate: Joi.number(),
-  },
-  maxOutstandingReadRequests: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle', {
-      defaultMessage: 'Max outstanding read requests'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsDescription', {
-      defaultMessage: 'The maximum number of outstanding reads requests from the remote cluster.'
-    }),
-    validate: Joi.number(),
-  },
-  maxReadRequestSize: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle', {
-      defaultMessage: 'Max read request size'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeDescription', {
-      defaultMessage: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster (bye value).'
-    }),
-    validate: Joi.number(),
-  },
-  maxWriteRequestOperationCount: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle', {
-      defaultMessage: 'Max write request operation count'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountDescription', {
-      defaultMessage: 'The maximum number of operations per bulk write request executed on the follower.'
-    }),
-    validate: Joi.number(),
-  },
-  maxWriteRequestSize: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle', {
-      defaultMessage: 'Max write request size'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeDescription', {
-      defaultMessage: 'The maximum total bytes of operations per bulk write request executed on the follower.'
-    }),
-    validate: Joi.number(),
-  },
-  maxOutstandingWriteRequests: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle', {
-      defaultMessage: 'Max outstanding write requests'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsDescription', {
-      defaultMessage: 'The maximum number of outstanding write requests on the follower.'
-    }),
-    validate: Joi.number(),
-  },
-  maxWriteBufferCount: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle', {
-      defaultMessage: 'Max write buffer count'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountDescription', {
-      defaultMessage: 'The maximum number of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the number of queued operations goes below the limit.'
-    }),
-    validate: Joi.number(),
-  },
-  maxWriteBufferSize: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle', {
-      defaultMessage: 'Max write buffer size'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeDescription', {
-      defaultMessage: 'The maximum total bytes of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the total bytes of queued operations goes below the limit.'
-    }),
-    validate: Joi.number(),
-  },
-  maxRetryDelay: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle', {
-      defaultMessage: 'Max retry delay'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayDescription', {
-      defaultMessage: 'The maximum time to wait before retrying an operation that failed exceptionally; an exponential backoff strategy is employed when retrying.'
-    }),
-    validate: Joi.number(),
-  },
-  readPollTimeout: {
-    label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle', {
-      defaultMessage: 'Read poll timeout'
-    }),
-    description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutDescription', {
-      defaultMessage: 'The maximum time to wait for new operations on the remote cluster when the follower index is synchronized with the leader index; when the timeout has elapsed, the poll for operations will return to the follower so that it can update some statistics, and then the follower will immediately attempt to read from the leader again.'
-    }),
-    validate: Joi.number(),
-  },
-};
-/* eslint-enable */
-
 export const FollowerIndexForm = injectI18n(
   class extends PureComponent {
     static propTypes = {
@@ -190,63 +90,34 @@ export const FollowerIndexForm = injectI18n(
       const followerIndex = isNew
         ? getEmptyFollowerIndex(this.props.remoteClusters)
         : {
+          ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
         };
 
       this.state = {
-        followerIndex,
-        fieldsErrors: validateFollowerIndex(followerIndex),
-        advancedSettingsFormValid: true,
-        areErrorsVisible: false,
         isNew,
+        followerIndex,
+        fieldsErrors: {},
+        areErrorsVisible: false,
+        areAdvancedSettingsVisible: false,
       };
 
       this.validateIndexName = debounce(this.validateIndexName, 500);
     }
 
     onFieldsChange = (fields) => {
-      const errors = validateFollowerIndex(fields);
       this.setState(updateFields(fields));
-      this.setState(updateFormErrors(errors));
 
       if (this.props.apiError) {
         this.props.clearApiError();
       }
     };
 
-    onClusterChange = (remoteCluster) => {
-      this.onFieldsChange({ remoteCluster });
-    };
-
-    updateAdvancedSettingsFormValidity = (isValid) => this.setState({ advancedSettingsFormValid: isValid })
-
-    getFields = () => {
-      return this.state.followerIndex;
-    };
-
-    isFormValid() {
-      return Object.values(this.state.fieldsErrors).every(error => error === null) && this.state.advancedSettingsFormValid;
+    onFieldsErrorChange = (errors) => {
+      this.setState(updateFormErrors(errors));
     }
 
-    sendForm = () => {
-      const isFormValid = this.isFormValid();
-
-      this.setState({ areErrorsVisible: !isFormValid });
-
-      if (!isFormValid) {
-        return;
-      }
-
-      const { name, ...followerIndex } = this.getFields();
-
-      this.props.saveFollowerIndex(name, followerIndex);
-    };
-
-    cancelForm = () => {
-      routing.navigate('/follower_indices');
-    };
-
-    onIndexNameChange = (name) => {
+    onIndexNameChange = ({ name }) => {
       this.onFieldsChange({ name });
       this.validateIndexName(name);
     }
@@ -272,6 +143,40 @@ export const FollowerIndexForm = injectI18n(
         // Silently fail...
       }
     }
+
+    onClusterChange = (remoteCluster) => {
+      this.onFieldsChange({ remoteCluster });
+    };
+
+    getFields = () => {
+      return this.state.followerIndex;
+    };
+
+    toggleAdvancedSettings = () => {
+      this.setState(({ areAdvancedSettingsVisible }) => ({ areAdvancedSettingsVisible: !areAdvancedSettingsVisible }));
+    }
+
+    isFormValid() {
+      return Object.values(this.state.fieldsErrors).every(error => error === null);
+    }
+
+    sendForm = () => {
+      const isFormValid = this.isFormValid();
+
+      this.setState({ areErrorsVisible: !isFormValid });
+
+      if (!isFormValid) {
+        return;
+      }
+
+      const { name, ...followerIndex } = this.getFields();
+
+      this.props.saveFollowerIndex(name, followerIndex);
+    };
+
+    cancelForm = () => {
+      routing.navigate('/follower_indices');
+    };
 
     /**
      * Secctions Renders
@@ -303,72 +208,41 @@ export const FollowerIndexForm = injectI18n(
 
     renderForm = () => {
       const {
-        followerIndex: {
-          name,
-          remoteCluster,
-          leaderIndex,
-        },
+        followerIndex,
         isNew,
         areErrorsVisible,
+        areAdvancedSettingsVisible,
         fieldsErrors,
       } = this.state;
+
+      const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
+        ? (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
+            defaultMessage="Hide advanced setting"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
+            defaultMessage="Show advanced setting"
+          />
+        );
 
       /**
        * Follower index name
        */
-      const renderFollowerIndexName = () => {
-        const hasError = !!fieldsErrors.name;
-        const isInvalid = hasError &&  (fieldsErrors.name.alwaysVisible || areErrorsVisible);
-
-        return (
-          <EuiDescribedFormGroup
-            title={(
-              <EuiTitle size="s">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle"
-                    defaultMessage="Name"
-                  />
-                </h4>
-              </EuiTitle>
-            )}
-            description={(
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription"
-                defaultMessage="A name for the follower index."
-              />
-            )}
-            fullWidth
-          >
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.followerIndexName.fieldNameLabel"
-                  defaultMessage="Name"
-                />
-              )}
-              helpText={(
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
-                  defaultMessage="Spaces and the characters {characterList} are not allowed."
-                  values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
-                />
-              )}
-              error={fieldsErrors.name && fieldsErrors.name.message}
-              isInvalid={isInvalid}
-              fullWidth
-            >
-              <EuiFieldText
-                isInvalid={isInvalid}
-                value={name}
-                onChange={e => this.onIndexNameChange(e.target.value)}
-                fullWidth
-                disabled={!isNew}
-              />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        );
-      };
+      const renderFollowerIndexName = () => (
+        <FormEntryRow
+          field="name"
+          value={followerIndex.name}
+          error={fieldsErrors.name}
+          schema={follwerIndexFormSchema.name}
+          disabled={!isNew}
+          areErrorsVisible={areErrorsVisible}
+          onValueUpdate={this.onIndexNameChange}
+          onErrorUpdate={this.onFieldsErrorChange}
+        />
+      );
 
       /**
        * Remote Cluster
@@ -414,13 +288,13 @@ export const FollowerIndexForm = injectI18n(
                 { isNew && (
                   <EuiSuperSelect
                     options={remoteClustersOptions}
-                    valueOfSelected={remoteCluster}
+                    valueOfSelected={followerIndex.remoteCluster}
                     onChange={this.onClusterChange}
                   />
                 )}
                 { !isNew && (
                   <EuiFieldText
-                    value={remoteCluster}
+                    value={followerIndex.remoteCluster}
                     fullWidth
                     disabled={true}
                   />
@@ -434,62 +308,49 @@ export const FollowerIndexForm = injectI18n(
       /**
        * Leader index
        */
-      const renderLeaderIndex = () => {
-        const hasError = !!fieldsErrors.leaderIndex;
-        const isInvalid = hasError && areErrorsVisible;
+      const renderLeaderIndex = () => (
+        <FormEntryRow
+          field="leaderIndex"
+          value={followerIndex.leaderIndex}
+          error={fieldsErrors.leaderIndex}
+          schema={follwerIndexFormSchema.leaderIndex}
+          disabled={!isNew}
+          areErrorsVisible={areErrorsVisible}
+          onValueUpdate={this.onFieldsChange}
+          onErrorUpdate={this.onFieldsErrorChange}
+        />
+      );
 
-        return (
-          <EuiDescribedFormGroup
-            title={(
-              <EuiTitle size="s">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle"
-                    defaultMessage="Leader index"
-                  />
-                </h4>
-              </EuiTitle>
-            )}
-            description={(
-              <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription1"
-                    defaultMessage="The leader index you want to replicate from the remote cluster."
-                  />
-                </p>
-              </Fragment>
-            )}
-            fullWidth
+      /**
+       * Advanced settings
+       */
+      const renderAdvancedSettings = () => (
+        <Fragment>
+          <EuiButtonEmpty
+            iconType={areAdvancedSettingsVisible ? "minusInCircle" : "plusInCircle"}
+            flush="left"
+            onClick={this.toggleAdvancedSettings}
           >
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.fieldLeaderIndexLabel"
-                  defaultMessage="Leader index"
-                />
-              )}
-              helpText={(
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
-                  defaultMessage="Spaces and the characters {characterList} are not allowed."
-                  values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
-                />
-              )}
-              isInvalid={isInvalid}
-              error={fieldsErrors.leaderIndex && fieldsErrors.leaderIndex.message}
-              fullWidth
-            >
-              <EuiFieldText
-                isInvalid={isInvalid}
-                value={leaderIndex}
-                onChange={e => this.onFieldsChange({ leaderIndex: e.target.value })}
-                fullWidth
+            { toggleAdvancedSettingButtonLabel }
+          </EuiButtonEmpty>
+          <EuiSpacer size="s" />
+          {areAdvancedSettingsVisible && (
+            Object.entries(follwerIndexFormSchema.advanced).map(([field, schema]) => (
+              <FormEntryRow
+                key={field}
+                field={field}
+                value={followerIndex[field]}
+                error={fieldsErrors[field]}
+                schema={schema}
+                areErrorsVisible={areErrorsVisible}
+                onValueUpdate={this.onFieldsChange}
+                onErrorUpdate={this.onFieldsErrorChange}
+                onRemoveRow={this.unSelectSetting}
               />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        );
-      };
+            ))
+          )}
+        </Fragment>
+      );
 
       /**
        * Form Error warning message
@@ -585,13 +446,9 @@ export const FollowerIndexForm = injectI18n(
             {renderFollowerIndexName()}
             {renderRemoteClusterField()}
             {renderLeaderIndex()}
+            <EuiSpacer size="s" />
+            {renderAdvancedSettings()}
           </EuiForm>
-          <EuiSpacer size="l" />
-          <AdvancedSettingsForm
-            areErrorsVisible={areErrorsVisible}
-            schema={advancedSettingsFields}
-            onFormValidityUpdate={this.updateAdvancedSettingsFormValidity}
-          />
           <EuiSpacer size="l" />
           {renderFormErrorWarning()}
           <EuiSpacer size="l" />

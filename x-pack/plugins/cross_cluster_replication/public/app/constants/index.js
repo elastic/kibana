@@ -6,3 +6,4 @@
 
 export { API_STATUS } from './api';
 export { SECTIONS } from './sections';
+export { follwerIndexFormSchema } from './form_schemas';

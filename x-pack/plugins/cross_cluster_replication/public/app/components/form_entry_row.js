@@ -11,12 +11,9 @@ import { debounce } from 'lodash';
 
 import {
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFieldText,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { i18nValidationErrorMessages } from '../services/input_validation';
@@ -37,8 +34,8 @@ const parseError = (err) => {
   }
 
   const [error] = err.details; // Use the first error in the details array (error.details[0])
-  const { type, context: { label } } = error;
-  const message = i18nValidationErrorMessages[type](label);
+  const { type, context } = error;
+  const message = i18nValidationErrorMessages[type](context);
   return { message };
 };
 
@@ -46,74 +43,47 @@ export class FormEntryRow extends PureComponent {
   static propTypes = {
     onValueUpdate: PropTypes.func.isRequired,
     onErrorUpdate: PropTypes.func.isRequired,
-    onRemoveRow: PropTypes.func.isRequired,
-    defaultValue: PropTypes.string,
     field: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
+    error: PropTypes.object,
     schema: PropTypes.object.isRequired,
+    disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
-    validator: PropTypes.object.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value: props.defaultValue || '',
-      error: this.validateField('', false)
-    };
-
-    this.validateField = debounce(this.validateField.bind(this), 500);
+  componentDidMount() {
+    this.validateField(this.props.value);
+    this.validateField = debounce(this.validateField.bind(this), 300);
   }
 
   onFieldChange = (value) => {
     const { field, onValueUpdate } = this.props;
 
-    this.setState({ value });
     onValueUpdate({ [field]: value });
 
-    // We don't add the error in the setState() call above
-    // because the "validateField()" call is debounced
     this.validateField(value);
   }
 
-  validateField = (value, updateState = true) => {
-    const { field, validator, onErrorUpdate } = this.props;
+  validateField = (value) => {
+    const { field, schema: { validator, label }, onErrorUpdate } = this.props;
+    const result = validator.label(label).validate(value);
+    const error = parseError(result.error);
 
-    const error = parseError(validator.validate({ [field]: value }).error);
     onErrorUpdate({ [field]: error });
-
-    if (updateState) {
-      this.setState({ error });
-    }
-
-    return error;
   }
 
   render() {
-    const { field, schema, areErrorsVisible, onRemoveRow } = this.props;
-    const { value, error } = this.state;
+    const { field, value, error, schema, disabled, areErrorsVisible } = this.props;
 
     const hasError = !!error;
-    const isInvalid = hasError && areErrorsVisible;
+    const isInvalid = hasError && (error.alwaysVisible || areErrorsVisible);
 
     return (
       <EuiDescribedFormGroup
         title={(
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h4>{schema.label}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="danger"
-                onClick={() => onRemoveRow(field)}
-                iconType="minusInCircle"
-                aria-label="Remove setting"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="s">
+            <h4>{schema.label}</h4>
+          </EuiTitle>
         )}
         description={schema.description}
         fullWidth
@@ -121,6 +91,7 @@ export class FormEntryRow extends PureComponent {
       >
         <EuiFormRow
           label={schema.label}
+          helpText={schema.helpText}
           error={error && error.message}
           isInvalid={isInvalid}
           fullWidth
@@ -129,6 +100,7 @@ export class FormEntryRow extends PureComponent {
             isInvalid={isInvalid}
             value={value}
             onChange={e => this.onFieldChange(e.target.value)}
+            disabled={disabled === true}
             fullWidth
           />
         </EuiFormRow>
