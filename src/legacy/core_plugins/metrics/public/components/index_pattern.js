@@ -42,11 +42,13 @@ export const IndexPattern = props => {
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
+  const rollupSearchName = `${prefix}rollup_search`;
 
   const defaults = {
     [indexPatternName]: '*',
     [intervalName]: 'auto',
-    [dropBucketName]: 1
+    [dropBucketName]: 1,
+    [rollupSearchName]: 0
   };
 
   const htmlId = htmlIdGenerator();
@@ -73,6 +75,22 @@ export const IndexPattern = props => {
             />
           </EuiFormRow>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.indexPattern.searchRolledUpData"
+              defaultMessage="Searching rolled-up data?"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="s" />
+          <YesNo
+            value={model[rollupSearchName]}
+            name={rollupSearchName}
+            onChange={props.onChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('timeField')}
