@@ -128,9 +128,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
     const dateRangeIsInvalid = () => this.state.dateRangeStart > this.state.dateRangeEnd;
     return (
-      <Router basename={routerBasename}>
-        <ApolloProvider client={graphQLClient}>
-          <I18nProvider>
+      <I18nProvider>
+        <Router basename={routerBasename}>
+          <ApolloProvider client={graphQLClient}>
             <EuiPage className="app-wrapper-panel">
               <EuiHeader>
                 {/*
@@ -295,9 +295,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 </Switch>
               </EuiPageContent>
             </EuiPage>
-          </I18nProvider>
-        </ApolloProvider>
-      </Router>
+          </ApolloProvider>
+        </Router>
+      </I18nProvider>
     );
   }
 
