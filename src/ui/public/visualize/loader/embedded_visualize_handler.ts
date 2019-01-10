@@ -380,7 +380,9 @@ export class EmbeddedVisualizeHandler {
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
 
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
-      this.dataSubject.next(data);
+      if (data.value) {
+        this.dataSubject.next(data.value);
+      }
       return data;
     });
   };

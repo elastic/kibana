@@ -75,9 +75,25 @@
     min-width: 150px;
   }
 
+  .mlAnomalyCategoryExamples__link {
+    width: 100%;
+  }
+
   .category-example {
     display: block;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mlAnomalyCategoryExamples {
+    padding: $euiSizeL;
+  }
+
+  .mlAnomalyCategoryExamples__item {
+    display: block;
+    white-space: wrap;
+    font-family: $euiCodeFontFamily;
   }
 
   .interim-result {
@@ -95,12 +111,15 @@
         margin-top: 0px;
         flex-basis: 15%;
         font-size: inherit;
+        line-height: 1.5rem;
+        @include euiTextTruncate;
       }
 
       .euiDescriptionList__description {
         margin-top: 0px;
         flex-basis: 85%;
         font-size: inherit;
+        line-height: 1.5rem;
       }
 
       .filter-button {

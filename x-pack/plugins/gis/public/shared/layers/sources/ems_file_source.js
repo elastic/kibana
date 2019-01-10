@@ -108,10 +108,6 @@ export class EMSFileSource extends VectorSource {
 
   }
 
-  async isTimeAware() {
-    return false;
-  }
-
   canFormatFeatureProperties() {
     return true;
   }
