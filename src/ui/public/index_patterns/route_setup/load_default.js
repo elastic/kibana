@@ -78,6 +78,7 @@ export default function (opts) {
           let defaultId = config.get('defaultIndex');
           let defined = !!defaultId;
           const exists = _.contains(patterns, defaultId);
+          console.log('Does the default index pattern exist?', exists);
 
           if (defined && !exists) {
             config.remove('defaultIndex');
@@ -88,6 +89,7 @@ export default function (opts) {
             // If there is only one index pattern, set it as default
             if (patterns.length === 1) {
               defaultId = patterns[0];
+              console.log('Automatically setting default index pattern to', defaultId);
               config.set('defaultIndex', defaultId);
             } else {
               throw new NoDefaultIndexPattern();
