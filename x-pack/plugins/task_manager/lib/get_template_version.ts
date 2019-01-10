@@ -14,6 +14,9 @@ import { padLeft } from 'lodash';
  * 50 are beta builds, and below 99 are RC builds, with 99 indicating a release
  * the (internal) format of the id is there so we can easily do after/before
  * checks on the id
+ *
+ * Note: the conversion method is carried over from Elasticsearch:
+ * https://github.com/elastic/elasticsearch/blob/de962b2/server/src/main/java/org/elasticsearch/Version.java
  */
 export function getTemplateVersion(versionStr: string): number {
   // break up the string parts

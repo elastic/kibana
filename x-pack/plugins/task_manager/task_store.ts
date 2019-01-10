@@ -116,16 +116,16 @@ export class TaskStore {
     const templateVersion = getTemplateVersion(xPackage.version);
 
     try {
+      // check if template exists
       const templateCheck = await this.callCluster('indices.getTemplate', {
-        // check if template exists
         name: templateName,
         filter_path: '*.version',
       });
-      existingVersion = templateCheck[templateName] ? templateCheck[templateName].version : null; // extract the existing version
+      // extract the existing version
+      existingVersion = templateCheck[templateName] ? templateCheck[templateName].version : null;
     } catch (err) {
       if (err.statusCode !== 404) {
-        // ignore not found
-        throw err;
+        throw err; // ignore not found
       }
     }
 
