@@ -411,7 +411,11 @@ export function setQuery({ query }) {
   return async (dispatch, getState) => {
     dispatch({
       type: SET_QUERY,
-      query,
+      query: {
+        ...query,
+        // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
+        queryLastTriggeredAt: (new Date()).toISOString(),
+      },
     });
 
     const dataFilters = getDataFilters(getState());
