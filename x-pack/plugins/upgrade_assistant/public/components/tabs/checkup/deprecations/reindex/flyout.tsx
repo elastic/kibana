@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiButton,
@@ -62,30 +62,33 @@ export const ReindexFlyoutUI: React.StatelessComponent<{
   } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
+  const body =
+    status !== undefined ? (
+      <ReindexProgress
+        lastCompletedStep={lastCompletedStep}
+        reindexStatus={status}
+        reindexTaskPercComplete={reindexTaskPercComplete}
+        errorMessage={errorMessage}
+      />
+    ) : (
+      <Fragment>
+        <EuiCallOut title="Be careful" color="warning" iconType="help">
+          While reindexing, the index will not be able to ingest new documents, update documents, or
+          delete documents. Depending on how this index is being used in your system, this may cause
+          problems and you may need to use a different strategy to reindex this index.
+        </EuiCallOut>
+        <EuiSpacer />
+        <ReindexWarningSummary warnings={reindexWarnings} />
+      </Fragment>
+    );
+
   return (
     <EuiPortal>
       <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m">
         <EuiFlyoutHeader hasBorder>
           <h2>Reindex {indexName}</h2>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiCallOut title="Be careful" color="warning" iconType="help">
-            While reindexing, the index will not be able to ingest new documents, update documents,
-            or delete documents. Depending on how this index is being used in your system, this may
-            cause problems and you may need to use a different strategy to reindex this index.
-          </EuiCallOut>
-          <EuiSpacer />
-          <ReindexWarningSummary warnings={reindexWarnings} />
-          <EuiSpacer size="xl" />
-          {status !== undefined && (
-            <ReindexProgress
-              lastCompletedStep={lastCompletedStep}
-              reindexStatus={status}
-              reindexTaskPercComplete={reindexTaskPercComplete}
-              errorMessage={errorMessage}
-            />
-          )}
-        </EuiFlyoutBody>
+        <EuiFlyoutBody>{body}</EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -152,10 +155,10 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
 
   public render() {
     return (
-      <React.Fragment>
+      <Fragment>
         <ReindexFlyoutUI startReindex={this.startReindex} {...this.props} {...this.state} />
         {this.renderWarningsModal()}
-      </React.Fragment>
+      </Fragment>
     );
   }
 

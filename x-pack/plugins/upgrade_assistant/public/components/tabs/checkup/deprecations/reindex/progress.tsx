@@ -50,12 +50,12 @@ export const ReindexProgress: React.StatelessComponent<{
   // Reindex step is special because it encompasses 2 steps (started and completed) and
   // displays a progress bar.
   const reindexProgressBar =
-    lastCompletedStep < ReindexStep.reindexStarted ? (
+    lastCompletedStep < ReindexStep.newIndexCreated ? (
       <span />
-    ) : reindexTaskPercComplete === 0 ? (
-      <EuiProgress size="s" />
+    ) : reindexTaskPercComplete ? (
+      <EuiProgress size="s" value={reindexTaskPercComplete} max={1} />
     ) : (
-      <EuiProgress size="s" value={reindexTaskPercComplete || 0} max={1} />
+      <EuiProgress size="s" />
     );
 
   const reindexingDocsStep = { title: 'Reindexing documents' } as EuiContainedStepProps;

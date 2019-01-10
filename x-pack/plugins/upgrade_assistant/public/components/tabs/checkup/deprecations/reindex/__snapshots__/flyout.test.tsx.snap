@@ -20,27 +20,6 @@ exports[`ReindexFlyout renders 1`] = `
       </h2>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        size="m"
-        title="Be careful"
-      >
-        While reindexing, the index will not be able to ingest new documents, update documents, or delete documents. Depending on how this index is being used in your system, this may cause problems and you may need to use a different strategy to reindex this index.
-      </EuiCallOut>
-      <EuiSpacer
-        size="l"
-      />
-      <Component
-        warnings={
-          Array [
-            0,
-          ]
-        }
-      />
-      <EuiSpacer
-        size="xl"
-      />
       <Component
         errorMessage={null}
         reindexStatus={0}
