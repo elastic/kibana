@@ -23,7 +23,7 @@ export const getPingsQuery = gql`
       sort: $sort
       size: $size
     ) {
-      Total
+      total
       Pings {
         timestamp
         http {
