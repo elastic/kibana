@@ -10,13 +10,13 @@ import React from 'react';
 
 import moment = require('moment');
 import { EMPTY_VALUE, plainColumnRenderer } from '.';
-import { mockECSData } from '../../../../mock';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
+import { mockEcsData } from '../../../../mock';
 
 describe('plain_column_renderer', () => {
-  let mockDatum: ECS;
+  let mockDatum: Ecs;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockECSData[0]);
+    mockDatum = cloneDeep(mockEcsData[0]);
   });
 
   test('should return isInstance false if source is empty', () => {
@@ -71,7 +71,7 @@ describe('plain_column_renderer', () => {
   test('should return a formatted value of timestamp if timestamp has a valid value', () => {
     const column = plainColumnRenderer.renderColumn('timestamp', mockDatum);
     const wrapper = mount(<span>{column}</span>);
-    expect(wrapper.text()).toEqual(moment(mockDatum.timestamp).format());
+    expect(wrapper.text()).toEqual(moment(mockDatum.timestamp!).format());
   });
 
   test('should return the value of event.type if event.type has a valid value', () => {

@@ -13,6 +13,7 @@ export const hostsSchema = gql`
     firstSeen: String
     version: String
     os: String
+    hostId: String
   }
 
   type HostsEdges {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getOr } from 'lodash/fp';
 import { SourceResolvers } from '../../graphql/types';
 import { Events } from '../../lib/events';
 import { EventsRequestOptions } from '../../lib/events/types';
@@ -13,11 +14,11 @@ import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryEventsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.GetEventsResolver>,
+  AppResolverOf<SourceResolvers.EventsResolver>,
   QuerySourceResolver
 >;
 
-interface EventsResolversDeps {
+export interface EventsResolversDeps {
   events: Events;
 }
 
@@ -25,17 +26,19 @@ export const createEventsResolvers = (
   libs: EventsResolversDeps
 ): {
   Source: {
-    getEvents: QueryEventsResolver;
+    Events: QueryEventsResolver;
   };
 } => ({
   Source: {
-    async getEvents(source, args, { req }, info) {
-      const fields = getFields(info.fieldNodes[0]);
+    async Events(source, args, { req }, info) {
+      const fields = getFields(getOr([], 'fieldNodes[0]', info));
       const options: EventsRequestOptions = {
         sourceConfiguration: source.configuration,
-        timerange: args.timerange,
+        timerange: args.timerange!,
+        pagination: args.pagination,
+        sortField: args.sortField,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(f => f.replace('events.', '')),
+        fields: fields.map(f => f.replace('edges.event.', '')),
       };
       return libs.events.getEvents(req, options);
     },

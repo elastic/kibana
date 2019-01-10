@@ -7,7 +7,9 @@
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+
 import { ColumnHeaders } from '.';
+import { Direction } from '../../../../graphql/types';
 import { Sort } from '../sort';
 import { headers } from './headers';
 
@@ -15,7 +17,7 @@ describe('ColumnHeaders', () => {
   describe('rendering', () => {
     const sort: Sort = {
       columnId: 'fooColumn',
-      sortDirection: 'descending',
+      sortDirection: Direction.descending,
     };
 
     test('it renders the other (data-driven) column headers', () => {

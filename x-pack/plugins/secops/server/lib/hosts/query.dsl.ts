@@ -14,6 +14,7 @@ export const hostsFieldsMap: Readonly<Record<string, string>> = {
   firstSeen: '@timestamp',
   name: 'host.name',
   os: 'host.os.name',
+  hostId: 'host.id',
   version: 'host.os.version',
 };
 

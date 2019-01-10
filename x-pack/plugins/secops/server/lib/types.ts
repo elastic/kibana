@@ -145,3 +145,10 @@ export interface Hits<T, U> {
     hits: U[];
   };
 }
+export type SortRequestDirection = 'asc' | 'desc';
+
+interface SortRequestField {
+  [field: string]: SortRequestDirection;
+}
+
+export type SortRequest = SortRequestField[];

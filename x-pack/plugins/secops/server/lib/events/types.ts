@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventsData, SourceConfiguration, TimerangeInput } from '../../graphql/types';
+import {
+  EventsData,
+  PaginationInput,
+  SortField,
+  SourceConfiguration,
+  TimerangeInput,
+} from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { ESQuery, SearchHit } from '../types';
 
@@ -14,12 +20,14 @@ export interface EventsAdapter {
 
 export interface EventsRequestOptions {
   sourceConfiguration: SourceConfiguration;
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | undefined;
+  pagination: PaginationInput;
+  sortField: SortField;
+  timerange?: TimerangeInput;
+  filterQuery?: ESQuery;
   fields: string[];
 }
 
-export interface EventData extends SearchHit {
+export interface EventHit extends SearchHit {
   sort: string[];
   _source: {
     // tslint:disable-next-line:no-any
@@ -28,5 +36,14 @@ export interface EventData extends SearchHit {
   aggregations: {
     // tslint:disable-next-line:no-any
     [agg: string]: any;
+  };
+}
+
+export interface TimerangeFilter {
+  range: {
+    [timestamp: string]: {
+      gte: number;
+      lte: number;
+    };
   };
 }

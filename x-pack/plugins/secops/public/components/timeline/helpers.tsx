@@ -4,19 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventsProps } from '../../containers/events';
+import { isEmpty } from 'lodash/fp';
+import { StaticIndexPattern } from 'ui/index_patterns';
+
+import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { DataProvider } from './data_providers/data_provider';
 
-// TODO: implement boolean logic to combine queries instead of just taking the first provider
 export const combineQueries = (
-  dataProviders: DataProvider[]
-): { queryProps: EventsProps; resParm: string } | null =>
-  dataProviders.length
-    ? {
-        queryProps: dataProviders[0].componentQueryProps as EventsProps,
-        resParm: dataProviders[0].componentResultParam,
-      }
-    : null;
+  dataProviders: DataProvider[],
+  indexPattern: StaticIndexPattern
+): { filterQuery: string } | null => {
+  if (isEmpty(dataProviders)) {
+    return null;
+  }
+
+  const globalQuery = dataProviders.reduce((query, dataProvider) => {
+    const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
+
+    return dataProvider.enabled
+      ? `${prepend(query)} (${dataProvider.queryMatch}${
+          dataProvider.queryDate ? ` and ${dataProvider.queryDate})` : ')'
+        }`
+      : query;
+  }, '');
+
+  if (isEmpty(globalQuery)) {
+    return null;
+  }
+  return {
+    filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
+  };
+};
 
 interface CalculateBodyHeightParams {
   /** The the height of the flyout container, which is typically the entire "page", not including the standard Kibana navigation */
@@ -36,7 +54,3 @@ export const calculateBodyHeight = ({
   timelineFooterHeight = 0,
 }: CalculateBodyHeightParams): number =>
   flyoutHeight - (flyoutHeaderHeight + timelineHeaderHeight + timelineFooterHeight);
-
-/** Returns true if the response indicates data is loading */
-export const getIsLoading = (resData: { loading?: boolean }): boolean =>
-  resData.loading != null && resData.loading;

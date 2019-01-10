@@ -6,6 +6,8 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+
+import { Direction } from '../../../../graphql/types';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 import {
@@ -24,7 +26,7 @@ describe('Header', () => {
   };
   const sort: Sort = {
     columnId: columnHeader.id,
-    sortDirection: 'descending',
+    sortDirection: Direction.descending,
   };
 
   describe('rendering', () => {
@@ -89,7 +91,7 @@ describe('Header', () => {
 
       expect(mockOnColumnSorted).toBeCalledWith({
         columnId: columnHeader.id,
-        sortDirection: 'ascending', // (because the previous state was 'descending')
+        sortDirection: 'ascending', // (because the previous state was Direction.descending)
       });
     });
   });
@@ -102,7 +104,7 @@ describe('Header', () => {
     test('it returns "none" when sort direction when the header id does NOT match the sort column id', () => {
       const nonMatching: Sort = {
         columnId: 'differentSocks',
-        sortDirection: 'descending',
+        sortDirection: Direction.descending,
       };
 
       expect(getSortDirection({ header: columnHeader, sort: nonMatching })).toEqual('none');
@@ -113,7 +115,7 @@ describe('Header', () => {
     test('it returns "ascending" when the current direction is "descending"', () => {
       const sortDescending: Sort = {
         columnId: columnHeader.id,
-        sortDirection: 'descending',
+        sortDirection: Direction.descending,
       };
 
       expect(getNextSortDirection(sortDescending)).toEqual('ascending');
@@ -122,10 +124,10 @@ describe('Header', () => {
     test('it returns "descending" when the current direction is "ascending"', () => {
       const sortAscending: Sort = {
         columnId: columnHeader.id,
-        sortDirection: 'ascending',
+        sortDirection: Direction.ascending,
       };
 
-      expect(getNextSortDirection(sortAscending)).toEqual('descending');
+      expect(getNextSortDirection(sortAscending)).toEqual(Direction.descending);
     });
 
     test('it returns "descending" by default', () => {
@@ -134,7 +136,7 @@ describe('Header', () => {
         sortDirection: 'none',
       };
 
-      expect(getNextSortDirection(sortNone)).toEqual('descending');
+      expect(getNextSortDirection(sortNone)).toEqual(Direction.descending);
     });
   });
 
@@ -142,7 +144,7 @@ describe('Header', () => {
     test('it returns the expected new sort direction when the header id matches the sort column id', () => {
       const sortMatches: Sort = {
         columnId: columnHeader.id,
-        sortDirection: 'descending',
+        sortDirection: Direction.descending,
       };
 
       expect(
@@ -150,7 +152,7 @@ describe('Header', () => {
           clickedHeader: columnHeader,
           currentSort: sortMatches,
         })
-      ).toEqual('ascending');
+      ).toEqual(Direction.ascending);
     });
 
     test('it returns the expected new sort direction when the header id does NOT match the sort column id', () => {
@@ -164,7 +166,7 @@ describe('Header', () => {
           clickedHeader: columnHeader,
           currentSort: sortDoesNotMatch,
         })
-      ).toEqual('descending');
+      ).toEqual(Direction.descending);
     });
   });
 });

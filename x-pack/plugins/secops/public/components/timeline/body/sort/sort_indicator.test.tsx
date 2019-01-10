@@ -6,12 +6,14 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+
+import { Direction } from '../../../../graphql/types';
 import { getDirection, SortIndicator } from './sort_indicator';
 
 describe('SortIndicator', () => {
   describe('rendering', () => {
     test('it renders the sort indicator', () => {
-      const wrapper = mount(<SortIndicator sortDirection="descending" />);
+      const wrapper = mount(<SortIndicator sortDirection={Direction.descending} />);
 
       expect(
         wrapper
@@ -24,11 +26,11 @@ describe('SortIndicator', () => {
 
   describe('getDirection', () => {
     test('it returns the expected symbol when the direction is ascending', () => {
-      expect(getDirection('ascending')).toEqual('sortUp');
+      expect(getDirection(Direction.ascending)).toEqual('sortUp');
     });
 
     test('it returns the expected symbol when the direction is descending', () => {
-      expect(getDirection('descending')).toEqual('sortDown');
+      expect(getDirection(Direction.descending)).toEqual('sortDown');
     });
 
     test('it returns the expected symbol (undefined) when the direction is neither ascending, nor descending', () => {

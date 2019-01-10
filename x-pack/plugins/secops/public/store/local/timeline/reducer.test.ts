@@ -7,12 +7,12 @@
 import { set } from 'lodash/fp';
 import { TimelineById } from '.';
 import { defaultWidth } from '../../../components/timeline/body';
+import { Direction } from '../../../graphql/types';
 import {
   addNewTimeline,
   addTimelineProvider,
   removeTimelineProvider,
   updateTimelineItemsPerPage,
-  updateTimelinePageIndex,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
   updateTimelineProviders,
@@ -20,20 +20,18 @@ import {
   updateTimelineShowTimeline,
   updateTimelineSort,
 } from './helpers';
-import { DEFAULT_PAGE_COUNT, timelineDefaults } from './model';
+import { timelineDefaults } from './model';
 
 const timelineByIdMock: TimelineById = {
   foo: {
-    activePage: 0,
     dataProviders: [
       {
         and: [],
         id: '123',
         name: 'data provider 1',
         enabled: true,
-        componentQuery: null,
-        componentQueryProps: {},
-        componentResultParam: 'some query',
+        queryMatch: '',
+        queryDate: '',
         negated: false,
       },
     ],
@@ -49,13 +47,12 @@ const timelineByIdMock: TimelineById = {
     kqlQuery: '',
     title: '',
     noteIds: [],
-    pageCount: DEFAULT_PAGE_COUNT,
     pinnedEventIds: {},
     range: '1 Day',
     show: true,
     sort: {
       columnId: 'timestamp',
-      sortDirection: 'descending',
+      sortDirection: Direction.descending,
     },
     width: defaultWidth,
   },
@@ -112,9 +109,8 @@ describe('Timeline', () => {
           id: '567',
           name: 'data provider 2',
           enabled: true,
-          componentQuery: null,
-          componentQueryProps: {},
-          componentResultParam: 'some query',
+          queryMatch: '',
+          queryDate: '',
           negated: false,
         },
         timelineById: timelineByIdMock,
@@ -128,9 +124,8 @@ describe('Timeline', () => {
         id: '567',
         name: 'data provider 2',
         enabled: true,
-        componentQuery: null,
-        componentQueryProps: {},
-        componentResultParam: 'some query',
+        queryMatch: '',
+        queryDate: '',
         negated: false,
       };
       const update = addTimelineProvider({
@@ -148,9 +143,8 @@ describe('Timeline', () => {
         id: '123',
         name: 'data provider 1',
         enabled: true,
-        componentQuery: null,
-        componentQueryProps: {},
-        componentResultParam: 'some query',
+        queryMatch: '',
+        queryDate: '',
         negated: false,
       };
       const update = addTimelineProvider({
@@ -167,9 +161,8 @@ describe('Timeline', () => {
         id: '123',
         name: 'my name changed',
         enabled: true,
-        componentQuery: null,
-        componentQueryProps: {},
-        componentResultParam: 'some query',
+        queryMatch: '',
+        queryDate: '',
         negated: false,
       };
       const update = addTimelineProvider({
@@ -191,9 +184,8 @@ describe('Timeline', () => {
             id: '567',
             name: 'data provider 2',
             enabled: true,
-            componentQuery: null,
-            componentQueryProps: {},
-            componentResultParam: 'some query',
+            queryMatch: '',
+            queryDate: '',
             negated: false,
           },
         ],
@@ -208,9 +200,8 @@ describe('Timeline', () => {
         id: '567',
         name: 'data provider 2',
         enabled: true,
-        componentQuery: null,
-        componentQueryProps: {},
-        componentResultParam: 'some query',
+        queryMatch: '',
+        queryDate: '',
         negated: false,
       };
       const update = updateTimelineProviders({
@@ -248,7 +239,7 @@ describe('Timeline', () => {
         id: 'foo',
         sort: {
           columnId: 'some column',
-          sortDirection: 'descending',
+          sortDirection: Direction.descending,
         },
         timelineById: timelineByIdMock,
       });
@@ -260,12 +251,16 @@ describe('Timeline', () => {
         id: 'foo',
         sort: {
           columnId: 'some column',
-          sortDirection: 'descending',
+          sortDirection: Direction.descending,
         },
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(
-        set('foo.sort', { columnId: 'some column', sortDirection: 'descending' }, timelineByIdMock)
+        set(
+          'foo.sort',
+          { columnId: 'some column', sortDirection: Direction.descending },
+          timelineByIdMock
+        )
       );
     });
   });
@@ -300,7 +295,6 @@ describe('Timeline', () => {
       });
       const expected: TimelineById = {
         foo: {
-          activePage: 0,
           id: 'foo',
           dataProviders: [
             {
@@ -308,9 +302,8 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: false, // This value changed from true to false
-              componentQuery: null,
-              componentQueryProps: {},
-              componentResultParam: 'some query',
+              queryMatch: '',
+              queryDate: '',
               negated: false,
             },
           ],
@@ -327,9 +320,8 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
-          pageCount: DEFAULT_PAGE_COUNT,
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
@@ -345,9 +337,8 @@ describe('Timeline', () => {
         id: '456',
         name: 'data provider 1',
         enabled: true,
-        componentQuery: null,
-        componentQueryProps: {},
-        componentResultParam: 'some query',
+        queryMatch: '',
+        queryDate: '',
         negated: false,
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
@@ -359,7 +350,6 @@ describe('Timeline', () => {
       });
       const expected: TimelineById = {
         foo: {
-          activePage: 0,
           id: 'foo',
           dataProviders: [
             {
@@ -367,9 +357,8 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: false, // value we are updating from true to false
-              componentQuery: null,
-              componentQueryProps: {},
-              componentResultParam: 'some query',
+              queryMatch: '',
+              queryDate: '',
               negated: false,
             },
             {
@@ -377,9 +366,8 @@ describe('Timeline', () => {
               id: '456',
               name: 'data provider 1',
               enabled: true,
-              componentQuery: null,
-              componentQueryProps: {},
-              componentResultParam: 'some query',
+              queryMatch: '',
+              queryDate: '',
               negated: false,
             },
           ],
@@ -396,9 +384,8 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
-          pageCount: DEFAULT_PAGE_COUNT,
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
@@ -427,7 +414,6 @@ describe('Timeline', () => {
       });
       const expected: TimelineById = {
         foo: {
-          activePage: 0,
           id: 'foo',
           dataProviders: [
             {
@@ -435,9 +421,8 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: true,
-              componentQuery: null,
-              componentQueryProps: {},
-              componentResultParam: 'some query',
+              queryMatch: '',
+              queryDate: '',
               negated: false,
             },
           ],
@@ -454,9 +439,8 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
-          pageCount: DEFAULT_PAGE_COUNT,
           pinnedEventIds: {},
           itemsPerPage: 50,
           itemsPerPageOptions: [10, 25, 50],
@@ -485,16 +469,14 @@ describe('Timeline', () => {
       });
       const expected: TimelineById = {
         foo: {
-          activePage: 0,
           dataProviders: [
             {
               and: [],
               id: '123',
               name: 'data provider 1',
               enabled: true,
-              componentQuery: null,
-              componentQueryProps: {},
-              componentResultParam: 'some query',
+              queryMatch: '',
+              queryDate: '',
               negated: false,
             },
           ],
@@ -512,70 +494,11 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
-          pageCount: DEFAULT_PAGE_COUNT,
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [100, 200, 300], // updated
-          width: defaultWidth,
-        },
-      };
-      expect(update).toEqual(expected);
-    });
-  });
-
-  describe('#updateTimelinePageIndex', () => {
-    test('should return a new reference and not the same reference', () => {
-      const update = updateTimelinePageIndex({
-        id: 'foo',
-        activePage: 1, // value we are updating from 0 to 1
-        timelineById: timelineByIdMock,
-      });
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    it('should change active page from 0 to 1', () => {
-      const update = updateTimelinePageIndex({
-        id: 'foo',
-        activePage: 1, // value we are updating from 0 to 1
-        timelineById: timelineByIdMock,
-      });
-      const expected: TimelineById = {
-        foo: {
-          activePage: 1,
-          id: 'foo',
-          dataProviders: [
-            {
-              and: [],
-              id: '123',
-              name: 'data provider 1',
-              enabled: true,
-              componentQuery: null,
-              componentQueryProps: {},
-              componentResultParam: 'some query',
-              negated: false,
-            },
-          ],
-          description: '',
-          eventIdToNoteIds: {},
-          historyIds: [],
-          isFavorite: false,
-          isLive: false,
-          kqlMode: 'filter',
-          kqlQuery: '',
-          title: '',
-          noteIds: [],
-          range: '1 Day',
-          show: true,
-          sort: {
-            columnId: 'timestamp',
-            sortDirection: 'descending',
-          },
-          pageCount: 2,
-          pinnedEventIds: {},
-          itemsPerPage: 25,
-          itemsPerPageOptions: [10, 25, 50],
           width: defaultWidth,
         },
       };
@@ -608,9 +531,8 @@ describe('Timeline', () => {
         id: '456',
         name: 'data provider 2',
         enabled: true,
-        componentQuery: null,
-        componentQueryProps: {},
-        componentResultParam: 'some query',
+        queryMatch: '',
+        queryDate: '',
         negated: false,
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
@@ -621,16 +543,14 @@ describe('Timeline', () => {
       });
       const expected: TimelineById = {
         foo: {
-          activePage: 0,
           dataProviders: [
             {
               and: [],
               id: '456',
               name: 'data provider 2',
               enabled: true,
-              componentQuery: null,
-              componentQueryProps: {},
-              componentResultParam: 'some query',
+              queryMatch: '',
+              queryDate: '',
               negated: false,
             },
           ],
@@ -648,9 +568,8 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
-          pageCount: DEFAULT_PAGE_COUNT,
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],

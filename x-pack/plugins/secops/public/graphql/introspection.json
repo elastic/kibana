@@ -110,17 +110,33 @@
             "deprecationReason": null
           },
           {
-            "name": "getEvents",
-            "description": "Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified",
+            "name": "Events",
+            "description": "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified",
             "args": [
               {
-                "name": "timerange",
+                "name": "pagination",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null }
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "sortField",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "SortField", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "timerange",
+                "description": "",
+                "type": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null },
                 "defaultValue": null
               },
               {
@@ -130,7 +146,11 @@
                 "defaultValue": null
               }
             ],
-            "type": { "kind": "OBJECT", "name": "EventsData", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "EventsData", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -246,6 +266,18 @@
           {
             "name": "auditbeatAlias",
             "description": "The alias to read auditbeat data from",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "packetbeatAlias",
+            "description": "The alias to read packetbeat data from",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -424,6 +456,94 @@
             "deprecationReason": null
           },
           {
+            "name": "filebeatAliasExists",
+            "description": "Whether the configured filebeat alias exists",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "filebeatIndicesExist",
+            "description": "Whether the configured alias or wildcard pattern resolve to any filebeat indices",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "filebeatIndices",
+            "description": "The list of indices in the filebeat alias",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "packetbeatAliasExists",
+            "description": "Whether the configured packetbeat alias exists",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "packetbeatIndicesExist",
+            "description": "Whether the configured alias or wildcard pattern resolve to any packetbeat indices",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "packetbeatIndices",
+            "description": "The list of indices in the packetbeat alias",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "indexFields",
             "description": "The list of fields defined in the index mappings",
             "args": [
@@ -546,6 +666,95 @@
       },
       {
         "kind": "INPUT_OBJECT",
+        "name": "PaginationInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "limit",
+            "description": "The limit parameter allows you to configure the maximum amount of items to be returned",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "cursor",
+            "description": "The cursor parameter defines the next result you want to fetch",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "tiebreaker",
+            "description": "The tiebreaker parameter allow to be more precise to fetch the next item",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Int",
+        "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. ",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SortField",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "sortFieldId",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "direction",
+            "description": "",
+            "type": { "kind": "ENUM", "name": "Direction", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "Direction",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "ascending",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "descending",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
         "name": "TimerangeInput",
         "description": "",
         "fields": null,
@@ -605,23 +814,19 @@
             "description": "",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
+              "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "LIST",
+                "kind": "NON_NULL",
                 "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "KpiItem", "ofType": null }
-                }
+                "ofType": { "kind": "OBJECT", "name": "KpiItem", "ofType": null }
               }
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "events",
+            "name": "edges",
             "description": "",
             "args": [],
             "type": {
@@ -633,9 +838,33 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "EventItem", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "EcsEdges", "ofType": null }
                 }
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalCount",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -683,11 +912,54 @@
       },
       {
         "kind": "OBJECT",
-        "name": "EventItem",
+        "name": "EcsEdges",
+        "description": "",
+        "fields": [
+          {
+            "name": "event",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "ECS", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "CursorType", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ECS",
         "description": "",
         "fields": [
           {
             "name": "_id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "_index",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -747,6 +1019,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "UserEcsFields", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -868,14 +1148,6 @@
         "fields": [
           {
             "name": "id",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostname",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -1013,45 +1285,87 @@
         "possibleTypes": null
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "PaginationInput",
+        "kind": "OBJECT",
+        "name": "UserEcsFields",
         "description": "",
-        "fields": null,
-        "inputFields": [
+        "fields": [
           {
-            "name": "limit",
-            "description": "The limit parameter allows you to configure the maximum amount of items to be returned",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-            },
-            "defaultValue": null
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           },
           {
-            "name": "cursor",
-            "description": "The cursor parameter defines the next result you want to fetch",
+            "name": "name",
+            "description": "",
+            "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "tiebreaker",
-            "description": "The tiebreaker parameter allow to be more precise to fetch the next item",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
-        "interfaces": null,
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
       {
-        "kind": "SCALAR",
-        "name": "Int",
-        "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. ",
-        "fields": null,
+        "kind": "OBJECT",
+        "name": "CursorType",
+        "description": "",
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tiebreaker",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "inputFields": null,
-        "interfaces": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PageInfo",
+        "description": "",
+        "fields": [
+          {
+            "name": "endCursor",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "CursorType", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hasNextPage",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -1189,62 +1503,12 @@
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "CursorType",
-        "description": "",
-        "fields": [
-          {
-            "name": "value",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
           },
           {
-            "name": "tiebreaker",
+            "name": "hostId",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "PageInfo",
-        "description": "",
-        "fields": [
-          {
-            "name": "endCursor",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "CursorType", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hasNextPage",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

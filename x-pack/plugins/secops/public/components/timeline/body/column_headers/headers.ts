@@ -37,7 +37,7 @@ export const headers: ColumnHeader[] = [
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'host.hostname',
+    id: 'host.name',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'Hostname',
   },

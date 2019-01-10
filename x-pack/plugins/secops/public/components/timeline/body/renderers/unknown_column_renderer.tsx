@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { ColumnRenderer, EMPTY_VALUE } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 export const unknownColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName: string, data: ECS) => true,
-  renderColumn: (columnName: string, data: ECS) => <>{EMPTY_VALUE}</>,
+  isInstance: (columnName: string, data: Ecs) => true,
+  renderColumn: (columnName: string, data: Ecs) => <>{EMPTY_VALUE}</>,
 };

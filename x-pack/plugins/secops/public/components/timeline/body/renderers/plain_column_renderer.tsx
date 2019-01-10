@@ -9,20 +9,18 @@ import moment from 'moment';
 import React from 'react';
 
 import { ColumnRenderer, EMPTY_VALUE } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
-export const dataExistsAtColumn = (columnName: string, data: ECS): boolean => has(columnName, data);
+export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean => has(columnName, data);
 
 export const plainColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName: string, ecs: ECS) => dataExistsAtColumn(columnName, ecs),
+  isInstance: (columnName: string, ecs: Ecs) => dataExistsAtColumn(columnName, ecs),
 
-  renderColumn: (columnName: string, data: ECS) => {
-    const getOrEmpty = getOr(EMPTY_VALUE);
-
+  renderColumn: (columnName: string, data: Ecs) => {
     return columnName !== 'timestamp' ? (
-      <>{getOrEmpty(columnName, data)}</>
+      <>{getOr(EMPTY_VALUE, columnName, data)}</>
     ) : (
-      <>{moment(data.timestamp).format()}</>
+      <>{moment(data!.timestamp!).format()}</>
     );
   },
 };

@@ -5,13 +5,13 @@
  */
 
 import { RowRenderer } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 const unhandledRowRenderer = (): never => {
   throw new Error('Unhandled Row Renderer');
 };
 
-export const getRowRenderer = (ecs: ECS, rowRenderers: RowRenderer[]): RowRenderer => {
+export const getRowRenderer = (ecs: Ecs, rowRenderers: RowRenderer[]): RowRenderer => {
   const renderer = rowRenderers.find(rowRenderer => rowRenderer.isInstance(ecs));
   if (renderer == null) {
     return unhandledRowRenderer();

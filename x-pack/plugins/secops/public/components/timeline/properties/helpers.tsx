@@ -197,7 +197,7 @@ export const StreamLive = pure<{ isLive: boolean; timelineId: string; updateIsLi
           fill={isLive ? true : false}
           iconType="play"
           iconSide="left"
-          isDisabled={false}
+          isDisabled={true}
           onClick={() => updateIsLive({ id: timelineId, isLive: !isLive })}
         >
           Stream Live

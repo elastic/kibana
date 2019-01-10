@@ -8,12 +8,12 @@ import { get, getOr } from 'lodash/fp';
 import React from 'react';
 
 import { ColumnRenderer, EMPTY_VALUE, getSuricataCVEFromSignature } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 const suricataColumnsOverridden = ['event.id'];
 
 export const suricataColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName: string, ecs: ECS) => {
+  isInstance: (columnName: string, ecs: Ecs) => {
     if (
       suricataColumnsOverridden.includes(columnName) &&
       ecs &&
@@ -26,7 +26,7 @@ export const suricataColumnRenderer: ColumnRenderer = {
     return false;
   },
 
-  renderColumn: (columnName: string, data: ECS) => {
+  renderColumn: (columnName: string, data: Ecs) => {
     switch (columnName) {
       case 'event.id':
         const signature = get('suricata.eve.alert.signature', data) as string;

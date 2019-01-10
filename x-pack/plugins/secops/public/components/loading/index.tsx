@@ -41,4 +41,7 @@ export const InfraLoadingStaticContentPanel = styled.div`
   align-self: center;
   text-align: center;
   height: fit-content;
+  .euiPanel.euiPanel--paddingMedium {
+    padding: 10px;
+  }
 `;

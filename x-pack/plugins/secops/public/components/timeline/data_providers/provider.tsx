@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
 import { Actions } from './actions';
 import { DataProvider } from './data_provider';
+import { IconsFooter } from './icons_footer';
 
 const PanelProvider = styled(EuiPanel)`
   && {
@@ -41,6 +42,7 @@ export const Provider = pure<Props>(
         onDataProviderRemoved={onDataProviderRemoved}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
       />
+      <IconsFooter dataProvider={dataProvider} />
     </PanelProvider>
   )
 );

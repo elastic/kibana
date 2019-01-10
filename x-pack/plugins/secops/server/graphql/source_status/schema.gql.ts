@@ -26,6 +26,18 @@ export const sourceStatusSchema = gql`
     auditbeatIndicesExist: Boolean!
     "The list of indices in the auditbeat alias"
     auditbeatIndices: [String!]!
+    "Whether the configured filebeat alias exists"
+    filebeatAliasExists: Boolean!
+    "Whether the configured alias or wildcard pattern resolve to any filebeat indices"
+    filebeatIndicesExist: Boolean!
+    "The list of indices in the filebeat alias"
+    filebeatIndices: [String!]!
+    "Whether the configured packetbeat alias exists"
+    packetbeatAliasExists: Boolean!
+    "Whether the configured alias or wildcard pattern resolve to any packetbeat indices"
+    packetbeatIndicesExist: Boolean!
+    "The list of indices in the packetbeat alias"
+    packetbeatIndices: [String!]!
     "The list of fields defined in the index mappings"
     indexFields(indexType: IndexType = ANY): [IndexField!]!
   }

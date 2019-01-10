@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { RowRenderer } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 const PlainRow = styled.div`
   width: 100%;
@@ -21,6 +21,6 @@ const PlainRow = styled.div`
 `;
 
 export const plainRowRenderer: RowRenderer = {
-  isInstance: (data: ECS) => true,
-  renderRow: (data: ECS, children: React.ReactNode) => <PlainRow>{children}</PlainRow>,
+  isInstance: (data: Ecs) => true,
+  renderRow: (data: Ecs, children: React.ReactNode) => <PlainRow>{children}</PlainRow>,
 };

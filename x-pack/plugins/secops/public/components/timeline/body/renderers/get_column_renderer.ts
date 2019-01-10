@@ -5,7 +5,7 @@
  */
 
 import { ColumnRenderer } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
 const unhandledColumnRenderer = (): never => {
   throw new Error('Unhandled Column Renderer');
@@ -14,7 +14,7 @@ const unhandledColumnRenderer = (): never => {
 export const getColumnRenderer = (
   columnName: string,
   columnRenderers: ColumnRenderer[],
-  ecs: ECS
+  ecs: Ecs
 ): ColumnRenderer => {
   const renderer = columnRenderers.find(columnRenderer =>
     columnRenderer.isInstance(columnName, ecs)

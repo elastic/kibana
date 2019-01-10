@@ -5,8 +5,8 @@
  */
 
 import { defaultWidth } from '../components/timeline/body';
+import { Direction } from '../graphql/types';
 import { State } from '../store';
-import { DEFAULT_PAGE_COUNT } from '../store/local/timeline/model';
 
 export const mockGlobalState: State = {
   local: {
@@ -18,6 +18,9 @@ export const mockGlobalState: State = {
       query: {
         hosts: {
           limit: 2,
+        },
+        events: {
+          limit: 10,
         },
         uncommonProcesses: {
           limit: 0,
@@ -45,7 +48,6 @@ export const mockGlobalState: State = {
     timeline: {
       timelineById: {
         test: {
-          activePage: 0,
           id: 'test',
           itemsPerPage: 5,
           dataProviders: [],
@@ -60,12 +62,11 @@ export const mockGlobalState: State = {
           noteIds: [],
           range: '1 Day',
           show: false,
-          pageCount: DEFAULT_PAGE_COUNT,
           pinnedEventIds: {},
           itemsPerPageOptions: [5, 10, 20],
           sort: {
             columnId: 'timestamp',
-            sortDirection: 'descending',
+            sortDirection: Direction.descending,
           },
           width: defaultWidth,
         },

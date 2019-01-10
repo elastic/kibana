@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import uuid from 'uuid';
 
-import { EventsQuery } from '../../containers/events';
-import { EcsField, getMappedEcsValue } from '../../lib/ecs';
+import { Ecs } from '../../graphql/types';
+import { EcsField, getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../lib/ecs';
+import { escapeQueryValue } from '../../lib/keury';
 import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { ECS } from '../timeline/ecs';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -69,7 +70,7 @@ export const getIconFromType = (type: string) => {
 
 interface GetItemsParams {
   /** the runtime representation of an event */
-  data: ECS;
+  data: Ecs;
   /** all the fields that are populated in `data` */
   populatedFields: EcsField[];
 }
@@ -99,14 +100,16 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] => {
             data,
             fieldName: field.name,
           })}`,
-          componentResultParam: 'events',
-          componentQuery: EventsQuery,
-          componentQueryProps: {
-            sourceId: 'default',
-            startDate: 1521830963132, // TODO / IMPORTANT / DISCUSS: we need to know the date from the data provider that brought in this data
-            endDate: 1521862432253, // TODO / IMPORTANT / DISCUSS: we need to know the date from the data provider that brought in this data
-            filterQuery: '',
-          },
+          queryMatch: `${getOr(
+            field.name,
+            field.name,
+            mappedEcsSchemaFieldNames
+          )}: "${escapeQueryValue(
+            getMappedEcsValue({
+              data,
+              fieldName: field.name,
+            })
+          )}"`,
           negated: false,
           and: [],
         }}

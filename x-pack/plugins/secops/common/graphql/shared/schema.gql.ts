@@ -30,6 +30,16 @@ export const sharedSchema = gql`
     tiebreaker: String
   }
 
+  enum Direction {
+    ascending
+    descending
+  }
+
+  input SortField {
+    sortFieldId: String
+    direction: Direction
+  }
+
   type PageInfo {
     endCursor: CursorType
     hasNextPage: Boolean

@@ -8,13 +8,12 @@ import { defaultWidth } from '../../../components/timeline/body';
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
+import { Direction } from '../../../graphql/types';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
 
 export interface TimelineModel {
-  /** The current page of events being displayed */
-  activePage: number;
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
   /** The story told by the events and notes in this timeline */
@@ -41,8 +40,6 @@ export interface TimelineModel {
   title: string;
   /** Notes added to the timeline itself. Notes added to events are stored (separately) in `eventIdToNote` */
   noteIds: string[];
-  /** The total number of pages containing events */
-  pageCount: number;
   /** Events pinned to this timeline */
   pinnedEventIds: { [eventId: string]: boolean };
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
@@ -58,7 +55,6 @@ export interface TimelineModel {
 export const timelineDefaults: Readonly<
   Pick<
     TimelineModel,
-    | 'activePage'
     | 'dataProviders'
     | 'description'
     | 'eventIdToNoteIds'
@@ -71,7 +67,6 @@ export const timelineDefaults: Readonly<
     | 'kqlQuery'
     | 'title'
     | 'noteIds'
-    | 'pageCount'
     | 'pinnedEventIds'
     | 'range'
     | 'show'
@@ -79,7 +74,6 @@ export const timelineDefaults: Readonly<
     | 'width'
   >
 > = {
-  activePage: 0,
   dataProviders: [],
   description: '',
   eventIdToNoteIds: {},
@@ -92,13 +86,12 @@ export const timelineDefaults: Readonly<
   kqlQuery: '',
   title: '',
   noteIds: [],
-  pageCount: DEFAULT_PAGE_COUNT,
   pinnedEventIds: {},
   range: '1 Day',
   show: false,
   sort: {
     columnId: 'timestamp',
-    sortDirection: 'descending',
+    sortDirection: Direction.descending,
   },
   width: defaultWidth,
 };

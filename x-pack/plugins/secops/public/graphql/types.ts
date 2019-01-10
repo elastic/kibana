@@ -27,8 +27,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-  /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  getEvents?: EventsData | null;
+  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+  Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -42,6 +42,8 @@ export interface SourceConfiguration {
   logAlias: string;
   /** The alias to read auditbeat data from */
   auditbeatAlias: string;
+  /** The alias to read packetbeat data from */
+  packetbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -68,6 +70,18 @@ export interface SourceStatus {
   auditbeatIndicesExist: boolean;
   /** The list of indices in the auditbeat alias */
   auditbeatIndices: string[];
+  /** Whether the configured filebeat alias exists */
+  filebeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any filebeat indices */
+  filebeatIndicesExist: boolean;
+  /** The list of indices in the filebeat alias */
+  filebeatIndices: string[];
+  /** Whether the configured packetbeat alias exists */
+  packetbeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
+  packetbeatIndicesExist: boolean;
+  /** The list of indices in the packetbeat alias */
+  packetbeatIndices: string[];
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
@@ -84,9 +98,13 @@ export interface IndexField {
 }
 
 export interface EventsData {
-  kpiEventType: KpiItem[];
+  kpiEventType?: KpiItem[] | null;
 
-  events: EventItem[];
+  edges: EcsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
 }
 
 export interface KpiItem {
@@ -95,8 +113,16 @@ export interface KpiItem {
   count: number;
 }
 
-export interface EventItem {
+export interface EcsEdges {
+  event: Ecs;
+
+  cursor: CursorType;
+}
+
+export interface Ecs {
   _id?: string | null;
+
+  _index?: string | null;
 
   destination?: DestinationEcsFields | null;
 
@@ -111,6 +137,8 @@ export interface EventItem {
   suricata?: SuricataEcsFields | null;
 
   timestamp?: string | null;
+
+  user?: UserEcsFields | null;
 }
 
 export interface DestinationEcsFields {
@@ -139,8 +167,6 @@ export interface GeoEcsFields {
 
 export interface HostEcsFields {
   id?: string | null;
-
-  hostname?: string | null;
 
   ip?: string | null;
 
@@ -171,6 +197,24 @@ export interface SuricataAlertData {
   signature_id?: number | null;
 }
 
+export interface UserEcsFields {
+  id?: number | null;
+
+  name?: string | null;
+}
+
+export interface CursorType {
+  value: string;
+
+  tiebreaker?: string | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -195,18 +239,8 @@ export interface HostItem {
   version?: string | null;
 
   os?: string | null;
-}
 
-export interface CursorType {
-  value: string;
-
-  tiebreaker?: string | null;
-}
-
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
+  hostId?: string | null;
 }
 
 export interface UncommonProcessesData {
@@ -244,15 +278,6 @@ export interface SayMyName {
 // InputTypes
 // ====================================================
 
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: number;
-  /** The beginning of the timerange */
-  from: number;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -260,6 +285,21 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId?: string | null;
+
+  direction?: Direction | null;
+}
+
+export interface TimerangeInput {
+  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
+  interval: string;
+  /** The end of the timerange */
+  to: number;
+  /** The beginning of the timerange */
+  from: number;
 }
 
 // ====================================================
@@ -270,8 +310,12 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface GetEventsSourceArgs {
-  timerange: TimerangeInput;
+export interface EventsSourceArgs {
+  pagination: PaginationInput;
+
+  sortField: SortField;
+
+  timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
 }
@@ -303,6 +347,11 @@ export enum IndexType {
   AUDITBEAT = 'AUDITBEAT',
 }
 
+export enum Direction {
+  ascending = 'ascending',
+  descending = 'descending',
+}
+
 // ====================================================
 // END: Typescript template
 // ====================================================
@@ -315,6 +364,8 @@ export namespace GetEventsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
+    pagination: PaginationInput;
+    sortField: SortField;
     filterQuery?: string | null;
   };
 
@@ -329,25 +380,51 @@ export namespace GetEventsQuery {
 
     id: string;
 
-    getEvents?: GetEvents | null;
-  };
-
-  export type GetEvents = {
-    __typename?: 'EventsData';
-
-    events: Events[];
-
-    kpiEventType: KpiEventType[];
+    Events: Events;
   };
 
   export type Events = {
-    __typename?: 'EventItem';
+    __typename?: 'EventsData';
+
+    totalCount: number;
+
+    pageInfo: PageInfo;
+
+    edges: Edges[];
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+
+    tiebreaker?: string | null;
+  };
+
+  export type Edges = {
+    __typename?: 'EcsEdges';
+
+    event: Event;
+  };
+
+  export type Event = {
+    __typename?: 'ECS';
 
     _id?: string | null;
 
+    _index?: string | null;
+
     timestamp?: string | null;
 
-    event?: Event | null;
+    event?: _Event | null;
 
     host?: Host | null;
 
@@ -360,7 +437,7 @@ export namespace GetEventsQuery {
     suricata?: Suricata | null;
   };
 
-  export type Event = {
+  export type _Event = {
     __typename?: 'EventEcsFields';
 
     type?: string | null;
@@ -377,9 +454,11 @@ export namespace GetEventsQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    hostname?: string | null;
+    name?: string | null;
 
     ip?: string | null;
+
+    id?: string | null;
   };
 
   export type _Source = {
@@ -428,14 +507,6 @@ export namespace GetEventsQuery {
     signature?: string | null;
 
     signature_id?: number | null;
-  };
-
-  export type KpiEventType = {
-    __typename?: 'KpiItem';
-
-    value: string;
-
-    count: number;
   };
 }
 
@@ -491,6 +562,8 @@ export namespace GetHostsQuery {
     version?: string | null;
 
     firstSeen?: string | null;
+
+    hostId?: string | null;
   };
 
   export type Cursor = {
@@ -511,6 +584,44 @@ export namespace GetHostsQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace GetKpiEventsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+    pagination: PaginationInput;
+    sortField: SortField;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Events: Events;
+  };
+
+  export type Events = {
+    __typename?: 'EventsData';
+
+    kpiEventType?: KpiEventType[] | null;
+  };
+
+  export type KpiEventType = {
+    __typename?: 'KpiItem';
+
+    value: string;
+
+    count: number;
   };
 }
 
@@ -541,6 +652,8 @@ export namespace SourceQuery {
     auditbeatAlias: string;
 
     logAlias: string;
+
+    packetbeatAlias: string;
   };
 
   export type Status = {
@@ -565,6 +678,153 @@ export namespace SourceQuery {
     type: string;
 
     aggregatable: boolean;
+  };
+}
+
+export namespace GetTimelineQuery {
+  export type Variables = {
+    sourceId: string;
+    pagination: PaginationInput;
+    sortField: SortField;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Events: Events;
+  };
+
+  export type Events = {
+    __typename?: 'EventsData';
+
+    totalCount: number;
+
+    pageInfo: PageInfo;
+
+    edges: Edges[];
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+
+    tiebreaker?: string | null;
+  };
+
+  export type Edges = {
+    __typename?: 'EcsEdges';
+
+    event: Event;
+  };
+
+  export type Event = {
+    __typename?: 'ECS';
+
+    _id?: string | null;
+
+    _index?: string | null;
+
+    timestamp?: string | null;
+
+    event?: _Event | null;
+
+    host?: Host | null;
+
+    source?: _Source | null;
+
+    destination?: Destination | null;
+
+    geo?: Geo | null;
+
+    suricata?: Suricata | null;
+  };
+
+  export type _Event = {
+    __typename?: 'EventEcsFields';
+
+    type?: string | null;
+
+    severity?: number | null;
+
+    module?: string | null;
+
+    category?: string | null;
+
+    id?: number | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    name?: string | null;
+
+    ip?: string | null;
+  };
+
+  export type _Source = {
+    __typename?: 'SourceEcsFields';
+
+    ip?: string | null;
+
+    port?: number | null;
+  };
+
+  export type Destination = {
+    __typename?: 'DestinationEcsFields';
+
+    ip?: string | null;
+
+    port?: number | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    region_name?: string | null;
+
+    country_iso_code?: string | null;
+  };
+
+  export type Suricata = {
+    __typename?: 'SuricataEcsFields';
+
+    eve?: Eve | null;
+  };
+
+  export type Eve = {
+    __typename?: 'SuricataEveData';
+
+    proto?: string | null;
+
+    flow_id?: number | null;
+
+    alert?: Alert | null;
+  };
+
+  export type Alert = {
+    __typename?: 'SuricataAlertData';
+
+    signature?: string | null;
+
+    signature_id?: number | null;
   };
 }
 

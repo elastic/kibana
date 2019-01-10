@@ -8,13 +8,13 @@ import { has } from 'lodash/fp';
 import React from 'react';
 
 import { ColumnRenderer, EMPTY_VALUE } from '.';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
 
-export const dataNotExistsAtColumn = (columnName: string, data: ECS): boolean =>
+export const dataNotExistsAtColumn = (columnName: string, data: Ecs): boolean =>
   !has(columnName, data);
 
 export const emptyColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName: string, ecs: ECS) => dataNotExistsAtColumn(columnName, ecs),
+  isInstance: (columnName: string, ecs: Ecs) => dataNotExistsAtColumn(columnName, ecs),
 
-  renderColumn: (columnName: string, data: ECS) => <>{EMPTY_VALUE}</>,
+  renderColumn: (columnName: string, data: Ecs) => <>{EMPTY_VALUE}</>,
 };

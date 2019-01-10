@@ -10,6 +10,8 @@ const actionCreator = actionCreatorFactory('x-pack/secops/local/hosts');
 
 export const updateHostsLimit = actionCreator<{ limit: number }>('UPDATE_HOSTS_LIMIT');
 
+export const updateEventsLimit = actionCreator<{ limit: number }>('UPDATE_EVENTS_LIMIT');
+
 export const updateUncommonProcessesLimit = actionCreator<{ limit: number }>(
   'UPDATE_UNCOMMONPROCESSES_LIMIT'
 );

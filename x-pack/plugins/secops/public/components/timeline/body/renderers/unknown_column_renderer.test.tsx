@@ -9,14 +9,14 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import { EMPTY_VALUE } from '.';
-import { mockECSData } from '../../../../mock';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
+import { mockEcsData } from '../../../../mock';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 
 describe('unknown_column_renderer', () => {
-  let mockDatum: ECS;
+  let mockDatum: Ecs;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockECSData[0]);
+    mockDatum = cloneDeep(mockEcsData[0]);
   });
 
   test('should return isInstance true with a made up column name', () => {

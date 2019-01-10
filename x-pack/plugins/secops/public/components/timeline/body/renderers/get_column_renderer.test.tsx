@@ -10,17 +10,17 @@ import React from 'react';
 
 import { EMPTY_VALUE } from '.';
 import { columnRenderers } from '.';
-import { mockECSData } from '../../../../mock';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
+import { mockEcsData } from '../../../../mock';
 import { getColumnRenderer } from './get_column_renderer';
 
 describe('get_column_renderer', () => {
-  let nonSuricata: ECS;
-  let suricata: ECS;
+  let nonSuricata: Ecs;
+  let suricata: Ecs;
 
   beforeEach(() => {
-    nonSuricata = cloneDeep(mockECSData[0]);
-    suricata = cloneDeep(mockECSData[2]);
+    nonSuricata = cloneDeep(mockEcsData[0]);
+    suricata = cloneDeep(mockEcsData[2]);
   });
 
   test('should render event id when dealing with data that is not suricata', () => {

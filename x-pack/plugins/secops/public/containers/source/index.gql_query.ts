@@ -13,6 +13,7 @@ export const sourceQuery = gql`
       configuration {
         auditbeatAlias
         logAlias
+        packetbeatAlias
       }
       status {
         auditbeatIndicesExist

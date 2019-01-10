@@ -21,9 +21,11 @@ const getBackgroundColor = (theme: Theme): string =>
 
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Theme }>`
   transition: background-color 0.7s ease;
-  background-color: ${({ isDraggingOver, themeName }) =>
-    isDraggingOver ? '#f0f8ff' : getBackgroundColor(themeName)};
   min-height: 100px;
+  .euiPanel {
+    background-color: ${({ isDraggingOver, themeName }) =>
+      isDraggingOver ? '#f0f8ff' : getBackgroundColor(themeName)};
+  }
 `;
 
 export const DroppableWrapper = pure<Props>(

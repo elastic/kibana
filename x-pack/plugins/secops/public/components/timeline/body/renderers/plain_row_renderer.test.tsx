@@ -9,13 +9,13 @@ import React from 'react';
 
 import { cloneDeep } from 'lodash';
 import { plainRowRenderer } from '.';
-import { mockECSData } from '../../../../mock';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
+import { mockEcsData } from '../../../../mock';
 
 describe('plain_row_renderer', () => {
-  let mockDatum: ECS;
+  let mockDatum: Ecs;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockECSData[0]);
+    mockDatum = cloneDeep(mockEcsData[0]);
   });
 
   test('should always return isInstance true', () => {

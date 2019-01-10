@@ -9,13 +9,13 @@ import { cloneDeep, omit, set } from 'lodash/fp';
 import React from 'react';
 
 import { EMPTY_VALUE, suricataColumnRenderer } from '.';
-import { mockECSData } from '../../../../mock';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
+import { mockEcsData } from '../../../../mock';
 
 describe('suricata_column_renderer', () => {
-  let mockDatum: ECS;
+  let mockDatum: Ecs;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockECSData[2]);
+    mockDatum = cloneDeep(mockEcsData[2]);
   });
 
   test('should return isInstance of false if event is empty', () => {
@@ -29,7 +29,7 @@ describe('suricata_column_renderer', () => {
   });
 
   test('should return isInstance of false if event module does not equal suricata', () => {
-    mockDatum.event.module = 'some other value';
+    mockDatum.event!.module = 'some other value';
     expect(suricataColumnRenderer.isInstance('event.id', mockDatum)).toBe(false);
   });
 
@@ -38,7 +38,7 @@ describe('suricata_column_renderer', () => {
   });
 
   test('should return isInstance true if event is NOT empty and module equals SurICaTA', () => {
-    mockDatum.event.module = 'SurICaTA';
+    mockDatum.event!.module = 'SurICaTA';
     expect(suricataColumnRenderer.isInstance('event.id', mockDatum)).toBe(true);
   });
 

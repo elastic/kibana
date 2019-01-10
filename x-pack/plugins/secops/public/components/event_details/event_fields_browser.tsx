@@ -11,13 +11,13 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 
+import { Ecs } from '../../graphql/types';
 import { getPopulatedMappedFields, virtualEcsSchema } from '../../lib/ecs';
-import { ECS } from '../timeline/ecs';
 import { columns } from './columns';
 import { getItems, search } from './helpers';
 
 interface Props {
-  data: ECS;
+  data: Ecs;
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */

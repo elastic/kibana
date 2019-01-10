@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, head } from 'lodash/fp';
+import { get, getOr, head, last } from 'lodash/fp';
 import { HostsData, HostsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
@@ -32,7 +32,7 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     const hostsEdges = hits.map(hit => formatHostsData(options.fields, hit, hostsFieldsMap));
     const hasNextPage = hostsEdges.length === limit + 1;
     const edges = hasNextPage ? hostsEdges.splice(0, limit) : hostsEdges;
-    const lastCursor = get('cursor', edges.slice(-1)[0]);
+    const lastCursor = get('cursor', last(edges));
     return {
       edges,
       totalCount,

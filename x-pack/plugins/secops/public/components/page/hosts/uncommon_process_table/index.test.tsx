@@ -7,14 +7,13 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { UncommonProcessTable } from './index';
-import { mockData } from './index.mock';
+import { mockData } from './mock';
 
 describe('UncommonProcess Table Component', () => {
   const loadMore = jest.fn();
@@ -37,6 +36,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
+            startDate={1546965070707}
           />
         </ReduxStoreProvider>
       );

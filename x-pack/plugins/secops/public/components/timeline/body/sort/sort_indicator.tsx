@@ -10,24 +10,26 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { SortDirection } from '.';
+import { Direction } from '../../../../graphql/types';
 
-export type SortDirectionIndicator = undefined | 'sortUp' | 'sortDown';
+enum SortDirectionIndicatorEnum {
+  SORT_UP = 'sortUp',
+  SORT_DOWN = 'sortDown',
+}
 
-const unhandledDirection = (x: never): never => {
-  throw new Error('Unhandled sort direction');
-};
+export type SortDirectionIndicator = undefined | SortDirectionIndicatorEnum;
 
 /** Returns the symbol that corresponds to the specified `SortDirection` */
 export const getDirection = (sortDirection: SortDirection): SortDirectionIndicator => {
   switch (sortDirection) {
-    case 'ascending':
-      return 'sortUp';
-    case 'descending':
-      return 'sortDown';
+    case Direction.ascending:
+      return SortDirectionIndicatorEnum.SORT_UP;
+    case Direction.descending:
+      return SortDirectionIndicatorEnum.SORT_DOWN;
     case 'none':
       return undefined;
     default:
-      return unhandledDirection(sortDirection);
+      throw new Error('Unhandled sort direction');
   }
 };
 

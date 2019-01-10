@@ -9,16 +9,16 @@ import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 
 import { suricataRowRenderer } from '.';
-import { mockECSData } from '../../../../mock';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
+import { mockEcsData } from '../../../../mock';
 
 describe('plain_row_renderer', () => {
-  let nonSuricata: ECS;
-  let suricata: ECS;
+  let nonSuricata: Ecs;
+  let suricata: Ecs;
 
   beforeEach(() => {
-    nonSuricata = cloneDeep(mockECSData[0]);
-    suricata = cloneDeep(mockECSData[2]);
+    nonSuricata = cloneDeep(mockEcsData[0]);
+    suricata = cloneDeep(mockEcsData[2]);
   });
 
   test('should return false if not a suricata datum', () => {

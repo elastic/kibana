@@ -9,13 +9,13 @@ import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 
 import { EMPTY_VALUE, emptyColumnRenderer } from '.';
-import { mockECSData } from '../../../../mock';
-import { ECS } from '../../ecs';
+import { Ecs } from '../../../../graphql/types';
+import { mockEcsData } from '../../../../mock';
 
 describe('empty_column_renderer', () => {
-  let mockDatum: ECS;
+  let mockDatum: Ecs;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockECSData[0]);
+    mockDatum = cloneDeep(mockEcsData[0]);
   });
 
   test('should return isInstance true if source is empty', () => {

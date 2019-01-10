@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ECS } from '../components/timeline/ecs';
+import { Ecs } from '../graphql/types';
 
-export const mockECSData: ECS[] = [
+export const mockEcsData: Ecs[] = [
   {
     _id: '1',
     timestamp: '2018-11-05T19:03:25.937Z',
     host: {
-      hostname: 'apache',
+      name: 'apache',
       ip: '192.168.0.1',
     },
     event: {
-      id: '1',
+      id: 1,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -30,7 +30,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '1',
+      id: 1,
       name: 'john.dee',
     },
     geo: {
@@ -42,11 +42,11 @@ export const mockECSData: ECS[] = [
     _id: '3',
     timestamp: '2018-11-07T19:03:25.937Z',
     host: {
-      hostname: 'nginx',
+      name: 'nginx',
       ip: '192.168.0.1',
     },
     event: {
-      id: '3',
+      id: 3,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -61,7 +61,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '3',
+      id: 3,
       name: 'evan.davis',
     },
     geo: {
@@ -73,11 +73,11 @@ export const mockECSData: ECS[] = [
     _id: '4',
     timestamp: '2018-11-08T19:03:25.937Z',
     host: {
-      hostname: 'suricata',
+      name: 'suricata',
       ip: '192.168.0.1',
     },
     event: {
-      id: '4',
+      id: 4,
       category: 'Attempted Administrator Privilege Gain',
       type: 'Alert',
       module: 'suricata',
@@ -102,7 +102,7 @@ export const mockECSData: ECS[] = [
       },
     },
     user: {
-      id: '4',
+      id: 4,
       name: 'jenny.jones',
     },
     geo: {
@@ -114,11 +114,11 @@ export const mockECSData: ECS[] = [
     _id: '5',
     timestamp: '2018-11-09T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '5',
+      id: 5,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -133,7 +133,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '5',
+      id: 5,
       name: 'becky.davis',
     },
     geo: {
@@ -145,11 +145,11 @@ export const mockECSData: ECS[] = [
     _id: '6',
     timestamp: '2018-11-10T19:03:25.937Z',
     host: {
-      hostname: 'braden.davis',
+      name: 'braden.davis',
       ip: '192.168.0.1',
     },
     event: {
-      id: '6',
+      id: 6,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -172,11 +172,11 @@ export const mockECSData: ECS[] = [
     _id: '8',
     timestamp: '2018-11-12T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '8',
+      id: 8,
       category: 'Web Application Attack',
       type: 'Alert',
       module: 'suricata',
@@ -201,7 +201,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '8',
+      id: 8,
       name: 'jone.doe',
     },
     geo: {
@@ -213,11 +213,11 @@ export const mockECSData: ECS[] = [
     _id: '7',
     timestamp: '2018-11-11T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '7',
+      id: 7,
       category: 'Access',
       type: 'HTTP Request',
       module: 'apache',
@@ -232,7 +232,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '7',
+      id: 7,
       name: 'jone.doe',
     },
     geo: {
@@ -244,11 +244,11 @@ export const mockECSData: ECS[] = [
     _id: '9',
     timestamp: '2018-11-13T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '9',
+      id: 9,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -263,7 +263,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '9',
+      id: 9,
       name: 'jone.doe',
     },
     geo: {
@@ -275,11 +275,11 @@ export const mockECSData: ECS[] = [
     _id: '10',
     timestamp: '2018-11-14T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '10',
+      id: 10,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -294,7 +294,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '10',
+      id: 10,
       name: 'jone.doe',
     },
     geo: {
@@ -306,11 +306,11 @@ export const mockECSData: ECS[] = [
     _id: '11',
     timestamp: '2018-11-15T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '11',
+      id: 11,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -325,7 +325,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '11',
+      id: 11,
       name: 'jone.doe',
     },
     geo: {
@@ -337,11 +337,11 @@ export const mockECSData: ECS[] = [
     _id: '12',
     timestamp: '2018-11-16T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '12',
+      id: 12,
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -356,7 +356,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '12',
+      id: 12,
       name: 'jone.doe',
     },
     geo: {
@@ -368,11 +368,11 @@ export const mockECSData: ECS[] = [
     _id: '2',
     timestamp: '2018-11-06T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '2',
+      id: 2,
       category: 'Authentication',
       type: 'Authentication Success',
       module: 'authlog',
@@ -387,7 +387,7 @@ export const mockECSData: ECS[] = [
       port: 6343,
     },
     user: {
-      id: '1',
+      id: 1,
       name: 'joe.bob',
     },
     geo: {
@@ -399,11 +399,11 @@ export const mockECSData: ECS[] = [
     _id: '13',
     timestamp: '2018-13-12T19:03:25.937Z',
     host: {
-      hostname: 'joe.computer',
+      name: 'joe.computer',
       ip: '192.168.0.1',
     },
     event: {
-      id: '13',
+      id: 13,
       category: 'Web Application Attack',
       type: 'Alert',
       module: 'suricata',

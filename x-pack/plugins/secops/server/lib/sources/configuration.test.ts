@@ -89,6 +89,7 @@ describe('the ConfigurationSourcesAdapter', () => {
             metricAlias: 'METRIC_ALIAS',
             logAlias: 'LOG_ALIAS',
             auditbeatAlias: 'AUDITBEAT_ALIAS',
+            packetbeatAlias: 'PACKETBEAT_ALIAS',
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },

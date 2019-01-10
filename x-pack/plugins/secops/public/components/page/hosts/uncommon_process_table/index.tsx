@@ -5,7 +5,8 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo } from 'lodash/fp';
+import { defaultTo, noop } from 'lodash/fp';
+import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -15,8 +16,11 @@ import {
   UncommonProcessesEdges,
   UncommonProcessItem,
 } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
+import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Provider } from '../../../timeline/data_providers/provider';
 
 interface OwnProps {
   data: UncommonProcessesEdges[];
@@ -25,6 +29,7 @@ interface OwnProps {
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
+  startDate: number;
 }
 
 interface UncommonProcessTableReduxProps {
@@ -72,9 +77,10 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
+    startDate,
   }) => (
     <LoadMoreTable
-      columns={getUncommonColumns()}
+      columns={getUncommonColumns(startDate)}
       loadingTitle="Uncommon Processes"
       loading={loading}
       pageOfItems={data}
@@ -103,14 +109,42 @@ export const UncommonProcessTable = connect(
 
 const extractHostNames = (hosts: HostEcsFields[]) => hosts.map(host => host.name).join(', ');
 
-const getUncommonColumns = () => [
+const getUncommonColumns = (startDate: number) => [
   {
-    name: 'Process Name',
+    name: 'Name',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultTo('--', uncommonProcess.name)}</>
-    ),
+    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => {
+      const processName = defaultTo('--', uncommonProcess.name);
+      return (
+        <>
+          <DraggableWrapper
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id: uncommonProcess._id,
+              name: processName,
+              negated: false,
+              queryMatch: `process.name: "${escapeQueryValue(processName)}"`,
+              queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider
+                    dataProvider={dataProvider}
+                    onDataProviderRemoved={noop}
+                    onToggleDataProviderEnabled={noop}
+                  />
+                </DragEffects>
+              ) : (
+                processName
+              )
+            }
+          />
+        </>
+      );
+    },
   },
   {
     name: 'Command Line',

@@ -14,7 +14,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { HostsTable } from './index';
-import { mockData } from './index.mock';
+import { mockData } from './mock';
 
 describe('Load More Table Component', () => {
   const loadMore = jest.fn();
