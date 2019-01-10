@@ -10,6 +10,7 @@ import {
   EuiInMemoryTable,
   // @ts-ignore missing type definition
   EuiLineSeries,
+  EuiLink,
   EuiPanel,
   // @ts-ignore missing type definition
   EuiSeriesChart,
@@ -53,17 +54,17 @@ const monitorListColumns = [
   {
     field: 'ping.monitor.id',
     name: 'ID',
-    render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
+    render: (id: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{id}</Link>,
   },
   {
     field: 'ping.url.full',
     name: 'URL',
     sortable: true,
-  },
-  {
-    field: 'ping.monitor.type',
-    name: 'Type',
-    sortable: true,
+    render: (url: string) => (
+      <EuiLink href={url} rel="noopener" target="_blank">
+        {url}
+      </EuiLink>
+    ),
   },
   {
     field: 'upSeries',

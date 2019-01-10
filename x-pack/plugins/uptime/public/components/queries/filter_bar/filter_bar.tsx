@@ -53,18 +53,6 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
             },
           ],
         },
-        // TODO: add health to this select
-        {
-          type: 'field_value_selection',
-          field: 'monitor.id',
-          name: 'Host',
-          multiSelect: false,
-          options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
-            value: idValue,
-            view: idValue,
-          })),
-          searchThreshold: SEARCH_THRESHOLD,
-        },
         {
           type: 'field_value_selection',
           field: 'tcp.port',

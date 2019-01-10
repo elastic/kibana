@@ -64,6 +64,8 @@ export interface Ping {
   tcp?: Tcp | null;
 
   tls?: Tls | null;
+
+  url?: Url | null;
 }
 /** An agent for recording a beat */
 export interface Beat {
@@ -250,6 +252,10 @@ export interface Tls {
   certificates?: string | null;
 
   rtt?: Rtt | null;
+}
+
+export interface Url {
+  full?: string | null;
 }
 
 export interface DocCount {

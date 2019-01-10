@@ -27,14 +27,13 @@ export const getMonitorListQuery = gql`
           monitor {
             id
             status
-            type
-            url {
-              full
-            }
             ip
             duration {
               us
             }
+          }
+          url {
+            full
           }
         }
         upSeries {
