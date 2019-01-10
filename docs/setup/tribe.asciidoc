@@ -1,5 +1,5 @@
 [[tribe]]
-== Using Kibana with Tribe nodes
+== Using Kibana with tribe nodes
 
 NOTE: While tribe nodes have been deprecated in Elasticsearch in favor of
 <<management-cross-cluster-search>>, you can still use Kibana with tribe nodes until
