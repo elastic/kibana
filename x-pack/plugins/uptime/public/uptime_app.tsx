@@ -22,7 +22,6 @@ import {
   EuiHeaderSection,
   // @ts-ignore missing typings for EuiHeaderSectionItem
   EuiHeaderSectionItem,
-  EuiIcon,
   EuiPage,
   EuiPageContent,
   EuiPopover,
@@ -140,7 +139,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     iconTitle="Uptime"
                   >
                     Uptime
-                    <EuiIcon style={{ paddingLeft: '8px' }} size="xl" type="beaker" />
                   </EuiHeaderLogo>
                 </EuiHeaderSectionItem>
                 {!isUsingK7Design && (
@@ -239,8 +237,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     <EuiHeaderLink
                       iconType="help"
                       href="https://discuss.elastic.co/c/beats/heartbeat"
+                      target="_blank"
                     >
-                      Help
+                      Discuss
                     </EuiHeaderLink>
                   </EuiHeaderLinks>
                 </EuiHeaderSection>
