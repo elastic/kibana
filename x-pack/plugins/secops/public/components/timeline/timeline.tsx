@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { TimelineQuery } from '../../containers/timeline';
-import { Direction, Ecs } from '../../graphql/types';
+import { Direction } from '../../graphql/types';
 import { Theme } from '../../store/local/app/model';
 import { AutoSizer } from '../auto_sizer';
 import { Body } from './body';
@@ -123,7 +123,7 @@ export const Timeline = pure<Props>(
                           id={id}
                           columnHeaders={columnHeaders}
                           columnRenderers={columnRenderers}
-                          data={events as Ecs[]}
+                          data={events}
                           height={calculateBodyHeight({
                             flyoutHeight,
                             flyoutHeaderHeight,
