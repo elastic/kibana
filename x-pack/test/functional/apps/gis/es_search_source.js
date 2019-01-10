@@ -9,6 +9,7 @@ import expect from 'expect.js';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['gis']);
   const queryBar = getService('queryBar');
+  const inspector = getService('inspector');
 
   describe('elasticsearch document layer', () => {
     before(async () => {
@@ -17,9 +18,9 @@ export default function ({ getPageObjects, getService }) {
 
     async function getRequestTimestamp() {
       await PageObjects.gis.openInspectorRequestsView();
-      const requestStats = await PageObjects.gis.getInspectorTableData();
+      const requestStats = await inspector.getTableData();
       const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
-      await PageObjects.gis.closeInspector();
+      await inspector.close();
       return requestTimestamp;
     }
 
@@ -44,9 +45,9 @@ export default function ({ getPageObjects, getService }) {
 
       it('should apply query to search request', async () => {
         await PageObjects.gis.openInspectorRequestsView();
-        const requestStats = await PageObjects.gis.getInspectorTableData();
+        const requestStats = await inspector.getTableData();
         const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
-        await PageObjects.gis.closeInspector();
+        await inspector.close();
         expect(hits).to.equal('1');
       });
 
@@ -61,7 +62,7 @@ export default function ({ getPageObjects, getService }) {
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
         await PageObjects.gis.openInspectorRequestsView();
-        const requestStats = await PageObjects.gis.getInspectorTableData();
+        const requestStats = await inspector.getTableData();
         const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
         expect(hits).to.equal('6');
       });

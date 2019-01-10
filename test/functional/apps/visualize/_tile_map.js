@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const inspector = getService('inspector');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -104,8 +105,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('tile map chart', function indexPatternCreation() {
         it('should have inspector enabled', async function () {
-          const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-          expect(spyToggleExists).to.be(true);
+          await inspector.expectIsEnabled();
         });
 
         it('should show correct tile map data on default zoom level', async function () {
@@ -122,10 +122,10 @@ export default function ({ getService, getPageObjects }) {
           //level 0
           await PageObjects.visualize.clickMapZoomOut();
 
-          await PageObjects.visualize.openInspector();
-          await PageObjects.visualize.setInspectorTablePageSize(50);
-          const actualTableData = await PageObjects.visualize.getInspectorTableData();
-          await PageObjects.visualize.closeInspector();
+          await inspector.open();
+          await inspector.setTablePageSize(50);
+          const actualTableData = await inspector.getTableData();
+          await inspector.close();
           compareTableData(actualTableData, expectedTableData);
         });
 
@@ -161,9 +161,9 @@ export default function ({ getService, getPageObjects }) {
           ];
 
           await PageObjects.visualize.clickMapFitDataBounds();
-          await PageObjects.visualize.openInspector();
-          const data = await PageObjects.visualize.getInspectorTableData();
-          await PageObjects.visualize.closeInspector();
+          await inspector.open();
+          const data = await inspector.getTableData();
+          await inspector.close();
           compareTableData(data, expectedPrecision2DataTable);
         });
 
@@ -174,13 +174,13 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickMapZoomIn();
 
           const mapBounds = await PageObjects.visualize.getMapBounds();
-          await PageObjects.visualize.closeInspector();
+          await inspector.close();
 
           await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
 
           const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
 
-          await PageObjects.visualize.closeInspector();
+          await inspector.close();
           // For some reason the values are slightly different, so we can't check that they are equal. But we did
           // have a bug where after the save, there were _no_ map bounds. So this checks for the later case, but
           // until we figure out how to make sure the map center is always the exact same, we can't comparison check.
@@ -195,20 +195,18 @@ export default function ({ getService, getPageObjects }) {
         it('when checked adds filters to aggregation', async () => {
           const vizName1 = 'Visualization TileMap';
           await PageObjects.visualize.loadSavedVisualization(vizName1);
-          await PageObjects.visualize.openInspector();
-          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
-          await PageObjects.visualize.closeInspector();
-          expect(tableHeaders).to.eql(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.open();
+          await inspector.expectTableHeaders(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.close();
         });
 
         it('when not checked does not add filters to aggregation', async () => {
           await PageObjects.visualize.toggleOpenEditor(2);
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
-          await PageObjects.visualize.openInspector();
-          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
-          await PageObjects.visualize.closeInspector();
-          expect(tableHeaders).to.eql(['geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.open();
+          await inspector.expectTableHeaders(['geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.close();
         });
 
         after(async () => {

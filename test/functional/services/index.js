@@ -33,4 +33,5 @@ export { RenderableProvider } from './renderable';
 export { TableProvider } from './table';
 export { BrowserProvider } from './browser';
 
+export * from './visualizations';
 export * from './dashboard';
