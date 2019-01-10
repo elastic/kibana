@@ -17,17 +17,6 @@
  * under the License.
  */
 
-import { FilterMeta, LatLon, MetaFilter } from './meta_filter';
+import './directive';
 
-export type GeoBoundingBoxFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-  value: string; // The formatted value
-  params: {
-    bottom_right: LatLon;
-    top_left: LatLon;
-  };
-};
-
-export type GeoBoundingBoxFilter = MetaFilter & {
-  meta: GeoBoundingBoxFilterMeta;
-};
+export { ApplyFiltersPopover } from './apply_filters_popover';

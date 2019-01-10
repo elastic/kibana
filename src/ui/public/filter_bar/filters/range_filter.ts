@@ -28,6 +28,7 @@ export interface RangeFilterParams {
 
 export type RangeFilterMeta = FilterMeta & {
   key: string; // The name of the field
+  value: string; // The formatted value
   params: RangeFilterParams;
 };
 

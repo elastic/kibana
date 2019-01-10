@@ -23,10 +23,7 @@ import { FilterViews } from './index';
 export function getGeoPolygonFilterViews(filter: GeoPolygonFilter): FilterViews {
   return {
     getDisplayText() {
-      const { meta } = filter;
-      const { key, params } = meta;
-      const { points } = params;
-      return `${key}: ${points.map(point => JSON.stringify(point)).join(', ')}`;
+      return `${filter.meta.key}: ${filter.meta.value}`;
     },
   };
 }

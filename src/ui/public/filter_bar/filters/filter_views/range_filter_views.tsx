@@ -23,28 +23,7 @@ import { FilterViews } from './index';
 export function getRangeFilterViews(filter: RangeFilter): FilterViews {
   return {
     getDisplayText() {
-      const { meta } = filter;
-      const { key, params } = meta;
-      const { gt, gte, lt, lte } = params;
-      return `${key}: ${getFrom(gt, gte)} to ${getTo(lt, lte)}`;
+      return `${filter.meta.key}: ${filter.meta.value}`;
     },
   };
-}
-
-function getFrom(gt: string | number | undefined, gte: string | number | undefined): string {
-  if (typeof gt !== 'undefined' && gt !== null) {
-    return `${gt}`;
-  } else if (typeof gte !== 'undefined' && gte !== null) {
-    return `${gte}`;
-  }
-  return '-∞';
-}
-
-function getTo(lt: string | number | undefined, lte: string | number | undefined): string {
-  if (typeof lt !== 'undefined' && lt !== null) {
-    return `${lt}`;
-  } else if (typeof lte !== 'undefined' && lte !== null) {
-    return `${lte}`;
-  }
-  return '∞';
 }

@@ -33,7 +33,7 @@ export interface PhraseSuggestorState {
   isLoading: boolean;
 }
 
-export abstract class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
+export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
   T,
   PhraseSuggestorState
 > {

@@ -23,10 +23,7 @@ import { FilterViews } from './index';
 export function getGeoBoundingBoxFilterViews(filter: GeoBoundingBoxFilter): FilterViews {
   return {
     getDisplayText() {
-      const { meta } = filter;
-      const { key, params } = meta;
-      const { bottom_right: bottomRight, top_left: topLeft } = params;
-      return `${key}: ${JSON.stringify(topLeft)} to ${JSON.stringify(bottomRight)}`;
+      return `${filter.meta.key}: ${filter.meta.value}`;
     },
   };
 }

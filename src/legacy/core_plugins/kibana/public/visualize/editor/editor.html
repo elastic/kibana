@@ -53,12 +53,12 @@
     </div>
   </kbn-top-nav>
 
-  <!-- Filters. -->
-  <filter-bar
-    ng-if="vis.type.options.showFilterBar"
-    state="state"
-    index-patterns="[indexPattern]"
-  ></filter-bar>
+  <apply-filters-popover
+    key="applyFiltersKey"
+    filters="state.$newFilters"
+    on-cancel="onCancelApplyFilters"
+    on-submit="onApplyFilters"
+  ></apply-filters-popover>
 
   <div
     class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"

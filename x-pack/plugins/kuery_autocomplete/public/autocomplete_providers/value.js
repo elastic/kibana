@@ -32,7 +32,7 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
 
     const suggestionsByField = fields.map(field => {
       return getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
-        const quotedValues = data.map(value => `"${escapeQuotes(value)}"`);
+        const quotedValues = data.map(value => typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });
     });

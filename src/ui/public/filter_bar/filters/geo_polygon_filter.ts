@@ -21,6 +21,7 @@ import { FilterMeta, LatLon, MetaFilter } from './meta_filter';
 
 export type GeoPolygonFilterMeta = FilterMeta & {
   key: string; // The name of the field
+  value: string; // The formatted value
   params: {
     points: LatLon[];
   };

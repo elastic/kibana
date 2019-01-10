@@ -28,7 +28,6 @@ import { IndexPattern } from 'ui/index_patterns';
 import { QueryBar } from 'ui/query_bar';
 import { Storage } from 'ui/storage';
 
-// TODO combine all the filter actions into a single event handler?
 interface Props {
   query: {
     query: string;
