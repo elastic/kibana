@@ -56,23 +56,6 @@ describe('ElasticIndex', () => {
       );
     });
 
-    test('handles v7 indices', async () => {
-      const callCluster = sinon.spy(async (path: string, { index }: any) => {
-        return {
-          [index]: {
-            aliases: { foo: index },
-            mappings: {
-              dynamic: 'strict',
-              properties: { a: 'b' },
-            },
-          },
-        };
-      });
-
-      const result = await Index.fetchInfo(callCluster, '.baz');
-      expect(result).toMatchSnapshot();
-    });
-
     test('fails if there are multiple root types', async () => {
       const callCluster = sinon.spy(async (path: string, { index }: any) => {
         return {

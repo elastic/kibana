@@ -65,7 +65,7 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
 
   const [indexName, indexInfo] = Object.entries(result)[0];
 
-  return assertIsSupportedIndex({ ...normalizeV6AndV7(indexInfo), exists: true, indexName });
+  return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 
 /**
@@ -288,26 +288,6 @@ export async function claimAlias(
 }
 
 /**
- * ES7 removed the "doc" property from mappings. This function takes a v6 or v7
- * index info object and returns an object in v6 form.
- */
-function normalizeV6AndV7(indexInfo: FullIndexInfo) {
-  const mappings = indexInfo.mappings as any;
-  const isV7Index = !mappings.doc && mappings.dynamic && mappings.properties;
-
-  if (!isV7Index) {
-    return indexInfo;
-  }
-
-  return {
-    ...indexInfo,
-    mappings: {
-      doc: mappings,
-    },
-  };
-}
-
-/**
  * This is a rough check to ensure that the index being migrated satisfies at least
  * some rudimentary expectations. Past Kibana indices had multiple root documents, etc
  * and the migration system does not (yet?) handle those indices. They need to be upgraded
@@ -316,7 +296,7 @@ function normalizeV6AndV7(indexInfo: FullIndexInfo) {
  *
  * @param {FullIndexInfo} indexInfo
  */
-function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
+async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
   const currentTypes = getTypes(indexInfo.mappings);
   const isV5Index = currentTypes.length > 1 || currentTypes[0] !== ROOT_TYPE;
   if (isV5Index) {
