@@ -7,7 +7,7 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { KibanaLink } from '../../utils/url';
+import { KibanaLink } from '../../utils/url/KibanaLink';
 
 export function SetupInstructionsLink({
   buttonFill = false

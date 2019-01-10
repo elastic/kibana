@@ -9,7 +9,7 @@ import { first, get } from 'lodash';
 import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
+import { fromQuery, history, toQuery } from '../../../../utils/url/url_helpers';
 import {
   getPropertyTabNames,
   PropertiesTable,

@@ -14,7 +14,7 @@ import {
   history,
   QueryParams,
   toQuery
-} from '../../../../../../utils/url';
+} from '../../../../../../utils/url/url_helpers';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { AgentMark } from '../get_agent_marks';

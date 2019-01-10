@@ -10,11 +10,10 @@ import {
   TRACE_ID,
   TRANSACTION_ID
 } from 'x-pack/plugins/apm/common/constants';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { DiscoverButton } from './DiscoverButton';
 
-export function getDiscoverQuery(transaction: Transaction): StringMap {
+export function getDiscoverQuery(transaction: Transaction) {
   const transactionId = transaction.transaction.id;
   const traceId =
     transaction.version === 'v2' ? transaction.trace.id : undefined;

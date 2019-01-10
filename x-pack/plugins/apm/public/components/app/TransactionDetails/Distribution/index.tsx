@@ -11,7 +11,7 @@ import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
+import { fromQuery, history, toQuery } from '../../../../utils/url/url_helpers';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';

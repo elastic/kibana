@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import idx from 'idx';
 import React from 'react';
-import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
+import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url/url_helpers';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   Transaction,

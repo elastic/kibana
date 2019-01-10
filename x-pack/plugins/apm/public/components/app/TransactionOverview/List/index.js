@@ -8,13 +8,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
-import { RelativeLink, legacyEncodeURIComponent } from '../../../../utils/url';
 import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
+import { legacyEncodeURIComponent } from '../../../../utils/url/url_helpers';
+import { KibanaLink } from '../../../../utils/url/KibanaLink';
 
-const TransactionNameLink = styled(RelativeLink)`
+const TransactionNameLink = styled(KibanaLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
@@ -43,7 +44,7 @@ export default function TransactionList({ items, serviceName, ...rest }) {
 
         return (
           <TooltipOverlay content={transactionName || notAvailableLabel}>
-            <TransactionNameLink path={transactionPath}>
+            <TransactionNameLink hash={transactionPath}>
               {transactionName || notAvailableLabel}
             </TransactionNameLink>
           </TooltipOverlay>

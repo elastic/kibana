@@ -8,10 +8,10 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url/KibanaLink';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { RelativeLink } from '../../../../utils/url';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
@@ -38,7 +38,7 @@ function formatString(value?: string | null) {
   );
 }
 
-const AppLink = styled(RelativeLink)`
+const AppLink = styled(KibanaLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -53,7 +53,7 @@ export const SERVICE_COLUMNS = [
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink path={`/${serviceName}/transactions`}>
+        <AppLink pathname={'/app/apm'} hash={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>

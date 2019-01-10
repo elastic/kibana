@@ -9,7 +9,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { StringMap } from '../../../../typings/common';
-import { legacyDecodeURIComponent } from '../../../utils/url';
+import { legacyDecodeURIComponent } from '../../../utils/url/url_helpers';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
 import { ServiceDetails } from '../ServiceDetails';

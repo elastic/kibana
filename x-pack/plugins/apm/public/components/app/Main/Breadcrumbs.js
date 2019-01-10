@@ -10,7 +10,7 @@ import { flatten, capitalize } from 'lodash';
 
 import chrome from 'ui/chrome';
 
-import { toQuery } from '../../../utils/url';
+import { toQuery } from '../../../utils/url/url_helpers';
 import { routes } from './routeConfig';
 
 class Breadcrumbs extends React.Component {

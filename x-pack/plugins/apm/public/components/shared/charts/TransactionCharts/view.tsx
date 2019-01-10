@@ -17,7 +17,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
+import { ViewMLJob } from 'x-pack/plugins/apm/public/utils/url/ViewMLJob';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 // @ts-ignore
@@ -112,7 +112,9 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
             serviceName={serviceName}
             transactionType={transactionType}
             location={this.props.location}
-          />
+          >
+            View Job
+          </ViewMLJob>
         </ShiftedEuiText>
       </EuiFlexItem>
     );

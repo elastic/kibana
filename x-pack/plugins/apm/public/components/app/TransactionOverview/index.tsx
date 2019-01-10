@@ -12,7 +12,7 @@ import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/c
 import { TransactionListRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionList';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/utils/url';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/utils/url/url_helpers';
 // @ts-ignore
 import List from './List';
 

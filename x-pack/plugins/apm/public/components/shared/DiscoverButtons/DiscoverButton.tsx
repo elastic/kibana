@@ -5,28 +5,25 @@
  */
 
 import React from 'react';
-import { KibanaLink, QueryParamsDecoded } from '../../../utils/url';
+import { KibanaLink } from '../../../utils/url/KibanaLink';
+import { QueryParamsDecoded } from '../../../utils/url/url_helpers';
 import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
   query: QueryParamsDecoded;
 }
 
-export class DiscoverButton extends React.Component<Props> {
-  public render() {
-    const { query, children, ...rest } = this.props;
-    return (
-      <QueryWithIndexPattern query={query}>
-        {queryWithIndexPattern => (
-          <KibanaLink
-            pathname={'/app/kibana'}
-            hash={'/discover'}
-            query={queryWithIndexPattern}
-            children={children}
-            {...rest}
-          />
-        )}
-      </QueryWithIndexPattern>
-    );
-  }
+export function DiscoverButton({ query, ...rest }: Props) {
+  return (
+    <QueryWithIndexPattern query={query}>
+      {queryWithIndexPattern => (
+        <KibanaLink
+          pathname={'/app/kibana'}
+          hash={'/discover'}
+          query={queryWithIndexPattern}
+          {...rest}
+        />
+      )}
+    </QueryWithIndexPattern>
+  );
 }

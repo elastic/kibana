@@ -74,7 +74,7 @@ exports[`DetailView should render StickyProperties 1`] = `
       Object {
         "fieldName": "transaction.id",
         "label": "Transaction sample ID",
-        "val": <Connect(Component)
+        "val": <Connect(UnconnectedKibanaLink)
           hash="/myService/transactions/myTransactionType/myTransactionName"
           pathname="/app/apm"
           query={
@@ -85,7 +85,7 @@ exports[`DetailView should render StickyProperties 1`] = `
           }
         >
           myTransactionName
-        </Connect(Component)>,
+        </Connect(UnconnectedKibanaLink)>,
         "width": "25%",
       },
       Object {

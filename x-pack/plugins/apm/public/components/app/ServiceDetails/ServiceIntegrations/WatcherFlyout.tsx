@@ -34,7 +34,7 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
-import { UnconnectedKibanaLink } from '../../../../utils/url';
+import { UnconnectedKibanaLink } from '../../../../utils/url/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
 type ScheduleKey = keyof Schedule;

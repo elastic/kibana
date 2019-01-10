@@ -29,7 +29,8 @@ import {
 import { getAPMIndexPattern } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
 import { MLJobsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/machineLearningJobs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { KibanaLink, ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
+import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url/KibanaLink';
+import { ViewMLJob } from 'x-pack/plugins/apm/public/utils/url/ViewMLJob';
 import { TransactionSelect } from './TransactionSelect';
 
 interface FlyoutProps {

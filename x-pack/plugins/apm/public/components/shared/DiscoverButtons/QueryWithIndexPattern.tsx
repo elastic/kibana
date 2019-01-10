@@ -5,12 +5,11 @@
  */
 
 import React, { ReactElement } from 'react';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   getAPMIndexPattern,
   ISavedObject
 } from '../../../services/rest/savedObjects';
-import { QueryParamsDecoded } from '../../../utils/url';
+import { QueryParamsDecoded } from '../../../utils/url/url_helpers';
 
 export function getQueryWithIndexPattern(
   query: QueryParamsDecoded,
@@ -33,7 +32,7 @@ export function getQueryWithIndexPattern(
 
 interface Props {
   query: QueryParamsDecoded;
-  children: (query: StringMap) => ReactElement<any>;
+  children: (query: QueryParamsDecoded) => ReactElement<any>;
 }
 
 interface State {
