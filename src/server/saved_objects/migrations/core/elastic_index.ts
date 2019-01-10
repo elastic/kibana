@@ -52,7 +52,11 @@ export interface FullIndexInfo {
  * index mappings are somewhat what we expect.
  */
 export async function fetchInfo(callCluster: CallCluster, index: string): Promise<FullIndexInfo> {
-  const result = await callCluster('indices.get', { ignore: [404], index });
+  const result = await callCluster('indices.get', {
+    ignore: [404],
+    index,
+    include_type_name: true,
+  });
 
   if ((result as NotFound).status === 404) {
     return {
@@ -65,7 +69,7 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
 
   const [indexName, indexInfo] = Object.entries(result)[0];
 
-  return assertIsSupportedIndex({ ...normalizeV6AndV7(indexInfo), exists: true, indexName });
+  return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 
 /**
@@ -285,26 +289,6 @@ export async function claimAlias(
   });
 
   await callCluster('indices.refresh', { index });
-}
-
-/**
- * ES7 removed the "doc" property from mappings. This function takes a v6 or v7
- * index info object and returns an object in v6 form.
- */
-function normalizeV6AndV7(indexInfo: FullIndexInfo) {
-  const mappings = indexInfo.mappings as any;
-  const isV7Index = !mappings.doc && mappings.dynamic && mappings.properties;
-
-  if (!isV7Index) {
-    return indexInfo;
-  }
-
-  return {
-    ...indexInfo,
-    mappings: {
-      doc: mappings,
-    },
-  };
 }
 
 /**
