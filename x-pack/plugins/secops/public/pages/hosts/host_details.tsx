@@ -10,7 +10,7 @@ import { HeaderBreadcrumbs } from '../../components/page/navigation/breadcrumb';
 
 interface Props {
   match: {
-    params: { hostName: string };
+    params: { hostId: string };
   };
 }
 
@@ -18,6 +18,6 @@ export const HostDetails = pure<Props>(({ match }) => (
   <div>
     <HeaderBreadcrumbs />
     <h3>Match: {JSON.stringify(match)}</h3>
-    <h2>Hostname: {match.params.hostName}</h2>
+    <h2>HostId: {match.params.hostId}</h2>
   </div>
 ));

@@ -8,18 +8,18 @@ import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 type RedirectToHostDetailsProps = RouteComponentProps<{
-  hostName?: string;
+  hostId?: string;
 }>;
 
 export const RedirectToHostsPage = ({
   match: {
-    params: { hostName },
+    params: { hostId },
   },
   location,
 }: RedirectToHostDetailsProps) => {
-  return <Redirect to={hostName ? `/hosts/${hostName}` : '/hosts'} />;
+  return <Redirect to={hostId ? `/hosts/${hostId}` : '/hosts'} />;
 };
 
-export const getHostsUrl = (matches?: { hostName?: string }) => {
+export const getHostsUrl = (matches?: { hostId?: string }) => {
   return `#/link-to/hosts`;
 };

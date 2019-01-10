@@ -13,7 +13,7 @@ import { Hosts } from './hosts';
 
 interface Props {
   match: {
-    params: { hostName: string };
+    params: { hostId: string };
     url: string;
   };
 }
@@ -22,7 +22,7 @@ export const HostsContainer = pure<Props>(({ match }) => (
   <div>
     <Switch>
       <Route exact path={'/hosts'} component={Hosts} />
-      <Route path={`${match.url}/:hostName`} component={HostDetails} />
+      <Route path={`${match.url}/:hostId`} component={HostDetails} />
     </Switch>
   </div>
 ));
