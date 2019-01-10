@@ -82,7 +82,11 @@ export const topHitMetricAgg = new MetricAggType({
           };
         } else {
           if (field.readFromDocValues) {
-            output.params.docvalue_fields = [ { field: field.name, format: 'use_field_mapping' } ];
+            // always format date fields as date_time to avoid
+            // displaying unformatted dates like epoch_millis
+            // or other not-accepted momentjs formats
+            const format = field.type === 'date' ? 'date_time' : 'use_field_mapping';
+            output.params.docvalue_fields = [ { field: field.name, format } ];
           }
           output.params._source = field.name === '_source' ? true : field.name;
         }
