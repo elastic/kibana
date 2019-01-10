@@ -1,0 +1,10 @@
+.canvasWorkpadExport__panelContent {
+  padding: $euiSize;
+}
+.canvasWorkpadExport__reportingConfig {
+  .euiCodeBlock__pre {
+    @include euiScrollBar;
+    overflow-x: auto;
+    white-space: pre;
+  }
+}
