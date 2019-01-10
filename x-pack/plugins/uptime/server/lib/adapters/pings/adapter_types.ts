@@ -12,10 +12,10 @@ export interface UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string,
-    status?: string,
-    sort?: string,
-    size?: number
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
   ): Promise<PingResults>;
 
   getLatestMonitorDocs(

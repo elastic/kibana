@@ -49,10 +49,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string,
-    status?: string,
-    sort?: string,
-    size?: number
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
   ): Promise<PingResults> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;

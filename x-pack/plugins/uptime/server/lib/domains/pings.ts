@@ -17,10 +17,10 @@ export class UMPingsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string,
-    status?: string,
-    sort?: string,
-    size?: number
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
   ): Promise<PingResults> {
     return this.adapter.getAll(
       request,

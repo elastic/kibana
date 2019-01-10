@@ -5,11 +5,11 @@
  */
 
 import { take } from 'lodash';
-import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
+import { UMGqlRange } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './adapter_types';
 
-const sortPings = (sort: UMPingSortDirectionArg) =>
+const sortPings = (sort: string) =>
   sort === 'asc'
     ? (a: Ping, b: Ping) => (Date.parse(a.timestamp) > Date.parse(b.timestamp) ? 1 : 0)
     : (a: Ping, b: Ping) => (Date.parse(a.timestamp) > Date.parse(b.timestamp) ? 0 : 1);
@@ -25,10 +25,10 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string,
-    status?: string,
-    sort?: UMPingSortDirectionArg,
-    size?: number
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
   ): Promise<PingResults> {
     let pings = this.pingsDB;
     if (monitorId) {
