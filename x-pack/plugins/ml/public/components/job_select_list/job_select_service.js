@@ -158,7 +158,7 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
         txt = splitJobId(jobs[0]).job;
         if (jobs.length > 1) {
           txt = i18n('xpack.ml.jobSelect.jobDescription', {
-            defaultMessage: '{jobId} and {jobsAmount} {jobsAmount, plural, zero {# other} one {# other} other {# others}}',
+            defaultMessage: '{jobId} and {jobsAmount, plural, zero {# other} one {# other} other {# others}}',
             values: {
               jobId: splitJobId(jobs[0]).job,
               jobsAmount: jobs.length - 1,

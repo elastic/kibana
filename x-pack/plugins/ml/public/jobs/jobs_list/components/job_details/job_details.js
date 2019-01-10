@@ -133,7 +133,10 @@ class JobDetailsUI extends Component {
       if (mlAnnotationsEnabled) {
         tabs.push({
           id: 'annotations',
-          name: 'Annotations',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.annotationsLabel',
+            defaultMessage: 'Annotations'
+          }),
           content: <AnnotationsTable jobs={[job]} drillDown={true} />,
         });
       }

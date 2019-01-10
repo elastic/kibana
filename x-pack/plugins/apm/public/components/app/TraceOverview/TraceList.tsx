@@ -70,12 +70,13 @@ const traceListColumns: ITableColumn[] = [
 ];
 
 export function TraceList({ items = [], noItemsMessage, isLoading }: Props) {
-  return isLoading ? null : (
+  const noItems = isLoading ? null : noItemsMessage;
+  return (
     <ManagedTable
       columns={traceListColumns}
       items={items}
       initialSort={{ field: 'impact', direction: 'desc' }}
-      noItemsMessage={noItemsMessage}
+      noItemsMessage={noItems}
       initialPageSize={25}
     />
   );
