@@ -5,6 +5,7 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
@@ -22,7 +23,14 @@ export function MemoryUsageChart({ data, hoverXHandlers }: Props) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <span>Memory usage</span>
+        <span>
+          {i18n.translate(
+            'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
+            {
+              defaultMessage: 'Memory usage'
+            }
+          )}
+        </span>
       </EuiTitle>
       <CustomPlot
         {...hoverXHandlers}

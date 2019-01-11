@@ -5,7 +5,7 @@
  */
 
 
-import { mount, shallow } from 'enzyme';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { Overrides } from './overrides';
@@ -26,7 +26,7 @@ describe('Overrides', () => {
   test('render overrides', () => {
     const props = getProps();
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <Overrides {...props} />
     );
 
@@ -40,7 +40,7 @@ describe('Overrides', () => {
     const props = getProps();
     props.overrides.format = FORMAT_1;
 
-    const component = mount(
+    const component = mountWithIntl(
       <Overrides {...props} />
     );
 
