@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from '@elastic/elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 
 import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export async function fetchLatestTime(
   search: <Hit, Aggregations>(
-    params: SearchParams
+    params: RequestParams.Search
   ) => Promise<InfraDatabaseSearchResponse<Hit, Aggregations>>,
   indices: string[],
   timeField: string
 ): Promise<number> {
   const response = await search<any, { max_time?: { value: number } }>({
-    allowNoIndices: true,
+    allow_no_indices: true,
     body: {
       aggregations: {
         max_time: {
@@ -30,7 +30,7 @@ export async function fetchLatestTime(
       },
       size: 0,
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: indices,
   });
 

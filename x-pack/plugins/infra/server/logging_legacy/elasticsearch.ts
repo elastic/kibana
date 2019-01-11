@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MSearchParams, MSearchResponse, SearchParams, SearchResponse } from '@elastic/elasticsearch';
+import { MSearchResponse, RequestParams, SearchResponse } from '@elastic/elasticsearch';
 
 export interface ESCluster {
   callWithRequest(
     request: any,
     endpoint: 'msearch',
-    clientOptions: MSearchParams,
+    clientOptions: RequestParams.Msearch,
     options?: object
   ): Promise<MSearchResponse<object>>;
   callWithRequest(
     request: any,
     endpoint: 'search',
-    clientOptions: SearchParams,
+    clientOptions: RequestParams.Search,
     options?: object
   ): Promise<SearchResponse<object>>;
   callWithRequest(

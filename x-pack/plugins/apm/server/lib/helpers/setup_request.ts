@@ -5,7 +5,7 @@
  */
 
 /* tslint:disable no-console */
-import { AggregationSearchResponse, SearchParams } from '@elastic/elasticsearch';
+import { AggregationSearchResponse, RequestParams } from '@elastic/elasticsearch';
 import { Legacy } from 'kibana';
 import moment from 'moment';
 
@@ -15,7 +15,7 @@ function decodeEsQuery(esQuery?: string): object {
 
 export type ESClient = <T = void, U = void>(
   type: string,
-  params: SearchParams
+  params: RequestParams.Search
 ) => Promise<AggregationSearchResponse<T, U>>;
 
 export interface Setup {

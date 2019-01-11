@@ -5,7 +5,7 @@
  */
 
 import * as Boom from 'boom';
-import { SearchParams } from '@elastic/elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import * as Joi from 'joi';
 
 import {
@@ -48,7 +48,7 @@ export const initContainedSearchResultsRoutes = (framework: InfraBackendFramewor
       };
 
       try {
-        const search = <Hit>(params: SearchParams) =>
+        const search = <Hit>(params: RequestParams.Search) =>
           callWithRequest<Hit>(request, 'search', params);
 
         const searchResults = await fetchSearchResultsBetween(
@@ -76,7 +76,7 @@ export const initContainedSearchResultsRoutes = (framework: InfraBackendFramewor
 };
 
 export async function fetchSearchResultsBetween(
-  search: <Hit>(params: SearchParams) => Promise<InfraDatabaseSearchResponse<Hit, any>>,
+  search: <Hit>(params: RequestParams.Search) => Promise<InfraDatabaseSearchResponse<Hit, any>>,
   indices: string[],
   fields: LogEntryFieldsMapping,
   start: LogEntryTime,

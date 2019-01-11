@@ -5,7 +5,7 @@
  */
 
 import * as Boom from 'boom';
-import { SearchParams } from '@elastic/elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import * as Joi from 'joi';
 
 import {
@@ -57,7 +57,7 @@ export const initAdjacentSearchResultsRoutes = (framework: InfraBackendFramework
       };
 
       try {
-        const search = <Hit>(params: SearchParams) =>
+        const search = <Hit>(params: RequestParams.Search) =>
           callWithRequest<Hit, any>(request, 'search', params);
 
         const latestTime = await fetchLatestTime(
@@ -109,7 +109,7 @@ export const initAdjacentSearchResultsRoutes = (framework: InfraBackendFramework
 };
 
 export async function fetchSearchResults(
-  search: <Hit>(params: SearchParams) => Promise<InfraDatabaseSearchResponse<Hit>>,
+  search: <Hit>(params: RequestParams.Search) => Promise<InfraDatabaseSearchResponse<Hit>>,
   indices: string[],
   fields: LogEntryFieldsMapping,
   target: LogEntryTime,

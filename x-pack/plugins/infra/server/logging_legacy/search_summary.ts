@@ -5,7 +5,7 @@
  */
 
 import * as Boom from 'boom';
-import { SearchParams } from '@elastic/elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import * as Joi from 'joi';
 
 import { SearchSummaryApiPostPayload, SearchSummaryApiPostResponse } from '../../common/http_api';
@@ -52,7 +52,7 @@ export const initSearchSummaryRoutes = (framework: InfraBackendFrameworkAdapter)
       };
 
       try {
-        const search = <Hit, Aggregations>(params: SearchParams) =>
+        const search = <Hit, Aggregations>(params: RequestParams.Search) =>
           callWithRequest<Hit, Aggregations>(request, 'search', params);
         const summaryBuckets = await fetchSummaryBuckets(
           search,
@@ -81,7 +81,7 @@ export const initSearchSummaryRoutes = (framework: InfraBackendFrameworkAdapter)
 
 async function fetchSummaryBuckets(
   search: <Hit, Aggregations>(
-    params: SearchParams
+    params: RequestParams.Search
   ) => Promise<InfraDatabaseSearchResponse<Hit, Aggregations>>,
   indices: string[],
   fields: LogEntryFieldsMapping,
@@ -94,7 +94,7 @@ async function fetchSummaryBuckets(
   query: string
 ): Promise<SearchSummaryBucket[]> {
   const response = await search<any, { count_by_date?: DateHistogramResponse }>({
-    allowNoIndices: true,
+    allow_no_indices: true,
     body: {
       aggregations: {
         count_by_date: {
@@ -142,7 +142,7 @@ async function fetchSummaryBuckets(
       },
       size: 0,
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: indices,
   });
 

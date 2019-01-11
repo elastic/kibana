@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from '@elastic/elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import { TRACE_ID } from '../../../common/constants';
 import { Span } from '../../../typings/es_schemas/Span';
 import { Transaction } from '../../../typings/es_schemas/Transaction';
@@ -18,7 +18,7 @@ export async function getTrace(
 ): Promise<TraceAPIResponse> {
   const { start, end, client, config } = setup;
 
-  const params: SearchParams = {
+  const params: RequestParams.Search = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 1000,

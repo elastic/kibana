@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from '@elastic/elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import { oc } from 'ts-optchain';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
@@ -23,7 +23,7 @@ export async function getTransaction(
 ): Promise<TransactionAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const params: SearchParams = {
+  const params: RequestParams.Search = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 1,

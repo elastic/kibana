@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from '@elastic/elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -21,7 +21,7 @@ export async function calculateBucketSize(
 ) {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const params: SearchParams = {
+  const params: RequestParams.Search = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
