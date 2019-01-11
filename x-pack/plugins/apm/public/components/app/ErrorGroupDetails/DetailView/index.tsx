@@ -12,6 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import idx from 'idx';
 import { first, get } from 'lodash';
 import React from 'react';
@@ -96,7 +97,7 @@ const exceptionStacktraceTab = {
 interface Props {
   errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {

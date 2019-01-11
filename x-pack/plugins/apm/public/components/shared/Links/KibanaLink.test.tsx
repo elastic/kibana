@@ -5,6 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
+import { Location } from 'history';
 import React from 'react';
 import url from 'url';
 import { UnconnectedKibanaLink } from './KibanaLink';

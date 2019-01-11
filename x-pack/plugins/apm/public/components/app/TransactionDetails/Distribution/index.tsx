@@ -6,6 +6,7 @@
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import d3 from 'd3';
+import { Location } from 'history';
 import React, { Component } from 'react';
 import {
   fromQuery,
@@ -49,7 +50,7 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 }
 
 interface Props {
-  location: any;
+  location: Location;
   distribution: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }

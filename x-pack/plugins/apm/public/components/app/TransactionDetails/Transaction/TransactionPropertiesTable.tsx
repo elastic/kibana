@@ -6,6 +6,7 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { first, get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -49,7 +50,7 @@ function getTabs(transactionData: Transaction) {
 }
 
 interface TransactionPropertiesTableProps {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
   waterfall: IWaterfall;

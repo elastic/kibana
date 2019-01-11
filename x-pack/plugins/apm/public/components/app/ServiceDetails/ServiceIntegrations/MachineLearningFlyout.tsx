@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
@@ -37,7 +38,7 @@ interface FlyoutProps {
   isOpen: boolean;
   onClose: () => void;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
   serviceTransactionTypes: string[];
 }
 
@@ -163,7 +164,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public render() {
-    const { isOpen, onClose, urlParams } = this.props;
+    const { isOpen, onClose, urlParams, location } = this.props;
     const { serviceName, transactionType } = urlParams;
     const { isLoading, hasIndexPattern, selectedTransactionType } = this.state;
 

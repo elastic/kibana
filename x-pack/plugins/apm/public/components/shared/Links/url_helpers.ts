@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import createHistory from 'history/createHashHistory';
 import { isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';

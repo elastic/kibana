@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
@@ -44,7 +45,7 @@ interface Props {
   agentMarks: AgentMark[];
   urlParams: IUrlParams;
   waterfall: IWaterfall;
-  location: any;
+  location: Location;
   serviceColors: IServiceColors;
 }
 

@@ -7,7 +7,7 @@
 import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
 import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { TransactionListRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionList';
@@ -16,13 +16,9 @@ import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 // @ts-ignore
 import List from './List';
 
-interface TransactionOverviewProps {
+interface TransactionOverviewProps extends RouteComponentProps {
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
-  // TODO: find better react-router-dom withRouter prop type handling?
-  history: any;
-  location: any;
-  match: any;
 }
 
 export class TransactionOverviewView extends React.Component<
@@ -90,6 +86,4 @@ export class TransactionOverviewView extends React.Component<
   }
 }
 
-export const TransactionOverview = withRouter<TransactionOverviewProps>(
-  TransactionOverviewView
-);
+export const TransactionOverview = withRouter(TransactionOverviewView);

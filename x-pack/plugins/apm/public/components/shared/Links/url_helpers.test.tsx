@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import url from 'url';
 // @ts-ignore
 import { toJson } from '../testHelpers';

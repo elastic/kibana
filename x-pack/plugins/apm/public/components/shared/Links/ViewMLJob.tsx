@@ -5,13 +5,14 @@
  */
 
 import { EuiLink } from '@elastic/eui';
+import { Location } from 'history';
 import React from 'react';
 import { getKibanaHref } from './url_helpers';
 
 interface Props {
   serviceName: string;
   transactionType?: string;
-  location: any;
+  location: Location;
 }
 
 export const ViewMLJob: React.SFC<Props> = ({

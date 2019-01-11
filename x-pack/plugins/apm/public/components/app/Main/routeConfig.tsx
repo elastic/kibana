@@ -6,8 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { legacyDecodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { StringMap } from '../../../../typings/common';
 // @ts-ignore
@@ -22,15 +21,12 @@ interface BreadcrumbArgs {
   };
 }
 
-interface RenderArgs {
-  location: StringMap;
-  match: {
-    params: StringMap;
-  };
+interface RouteParams {
+  serviceName: string;
 }
 
 const renderAsRedirectTo = (to: string) => {
-  return ({ location }: RenderArgs) => (
+  return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
       to={{
         ...location,
@@ -98,7 +94,7 @@ export const routes = [
         exact: true,
         path: '/:serviceName',
         breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
-        render: (props: RenderArgs) =>
+        render: (props: RouteComponentProps<RouteParams>) =>
           renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
             props
           )

@@ -13,6 +13,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { ViewMLJob } from 'x-pack/plugins/apm/public/components/shared/Links/ViewMLJob';
@@ -27,7 +28,7 @@ import { SyncChartGroup } from '../SyncChartGroup';
 interface TransactionChartProps {
   charts: ITransactionChartData;
   chartWrapper?: React.ComponentClass | React.SFC;
-  location: any;
+  location: Location;
   urlParams: IUrlParams;
   mlAvailable: boolean;
   hasMLJob: boolean;

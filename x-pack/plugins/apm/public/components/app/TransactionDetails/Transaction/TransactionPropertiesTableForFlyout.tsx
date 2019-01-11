@@ -5,6 +5,7 @@
  */
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { Location } from 'history';
 import { first, get } from 'lodash';
 import React from 'react';
 import {
@@ -32,7 +33,7 @@ function getTabs(transactionData: Transaction) {
 }
 
 interface Props {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
 }

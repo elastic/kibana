@@ -5,12 +5,13 @@
  */
 
 import { shallow } from 'enzyme';
+import { Location } from 'history';
 import React from 'react';
 import { ViewMLJob } from './ViewMLJob';
 
 describe('ViewMLJob', () => {
   it('should render component', () => {
-    const location = { search: '' };
+    const location = { search: '' } as Location;
     const wrapper = shallow(
       <ViewMLJob
         serviceName="myServiceName"
@@ -23,7 +24,7 @@ describe('ViewMLJob', () => {
   });
 
   it('should have correct path props', () => {
-    const location = { search: '' };
+    const location = { search: '' } as Location;
     const wrapper = shallow(
       <ViewMLJob
         serviceName="myServiceName"

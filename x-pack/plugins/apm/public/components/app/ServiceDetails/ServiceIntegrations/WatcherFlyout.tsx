@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
 import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
@@ -58,7 +59,7 @@ const SmallInput = styled.div`
 interface WatcherFlyoutProps {
   urlParams: IUrlParams;
   onClose: () => void;
-  location: any;
+  location: Location;
   isOpen: boolean;
 }
 

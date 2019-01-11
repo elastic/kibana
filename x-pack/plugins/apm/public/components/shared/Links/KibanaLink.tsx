@@ -5,6 +5,7 @@
  */
 
 import { EuiLink } from '@elastic/eui';
+import { Location } from 'history';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
