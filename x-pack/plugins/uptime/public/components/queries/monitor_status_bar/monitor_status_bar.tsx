@@ -79,7 +79,7 @@ export const MonitorStatusBar = ({
                           { defaultMessage: 'Up' }
                         )
                       : i18n.translate(
-                          'xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel',
+                          'xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel',
                           { defaultMessage: 'Down' }
                         )}
                   </EuiHealth>

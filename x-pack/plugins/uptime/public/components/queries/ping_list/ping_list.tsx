@@ -144,16 +144,18 @@ export class Pings extends React.Component<PingListProps, PingListState> {
           const columns = [
             {
               field: 'monitor.status',
-              name: i18n.translate('xpack.uptime.pingList.columns.status', {
+              name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
                 defaultMessage: 'Status',
               }),
               render: (pingStatus: string) => (
                 <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
-                  <FormattedMessage
-                    id="xpack.uptime.pingList.columns.status"
-                    defaultMessage="{status}"
-                    values={{ status: pingStatus === 'up' ? 'Up' : 'Down' }}
-                  />
+                  {pingStatus === 'up'
+                    ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
+                        defaultMessage: 'Up',
+                      })
+                    : i18n.translate('xpack.uptime.pingList.statusColumnHealthDownLabel', {
+                        defaultMessage: 'Down',
+                      })}
                 </EuiHealth>
               ),
               sortable: true,
