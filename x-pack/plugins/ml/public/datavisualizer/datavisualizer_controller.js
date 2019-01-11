@@ -305,12 +305,18 @@ module
 
       const metricCards = [];
 
-      // Add a config for 'document count', identified by no field name.
-      metricCards.push({
-        type: ML_JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        loading: true
-      });
+      // Add a config for 'document count', identified by no field name if index is timeseries based
+      if (indexPattern.timeFieldName !== undefined) {
+        metricCards.push({
+          type: ML_JOB_FIELD_TYPES.NUMBER,
+          existsInDocs: true,
+          loading: true
+        });
+      } else {
+        // disable timeRangeSelector and remove sidebar if index not timeseries based
+        timefilter.disableTimeRangeSelector();
+        $scope.showSidebar = false;
+      }
 
       // Add on 1 for the document count card.
       // TODO - remove the '+1' if document count goes in its own section.
@@ -480,32 +486,20 @@ module
         fields: numberFields
       })
         .then((resp) => {
-          const noDocumentCount = (indexPattern.timeFieldName === undefined);
-          let docCountCardIndex = undefined;
-
           // Add the metric stats to the existing stats in the corresponding card. [ {documentCounts:...}, {fieldName: ..} ]
-          _.each($scope.metricCards, (card, index) => {
+          _.each($scope.metricCards, (card) => {
             if (card.fieldName !== undefined) {
               card.stats = { ...card.stats, ...(_.find(resp, { fieldName: card.fieldName })) };
             } else {
               // Document count card.
-              if (noDocumentCount) {
-                docCountCardIndex = index;
-              } else {
-                card.stats = _.find(resp, (stats) => {
-                  return stats.fieldName === undefined;
-                });
-              }
+              card.stats = _.find(resp, (stats) => {
+                return stats.fieldName === undefined;
+              });
             }
 
             card.loading = false;
           });
 
-          // Remove document count card and sidebar from view
-          if (noDocumentCount) {
-            $scope.metricCards.splice(docCountCardIndex, 1);
-            $scope.showSidebar = false;
-          }
           // Clear the filter spinner if it's running.
           $scope.metricFilterIcon = 0;
         })
