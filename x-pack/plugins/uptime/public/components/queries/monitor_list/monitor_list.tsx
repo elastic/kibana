@@ -115,7 +115,7 @@ const monitorListColumns = [
           <EuiLineSeries
             lineSize={2}
             color="red"
-            name={i18n.translate('xpack.uptime.monitorList.downLineSeries.name', {
+            name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
               defaultMessage: 'Down',
             })}
             data={downSeries}
