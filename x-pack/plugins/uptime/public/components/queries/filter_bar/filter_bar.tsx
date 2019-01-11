@@ -54,7 +54,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
               name: i18n.translate('xpack.uptime.filterBar.filterUp', { defaultMessage: 'Up' }),
             },
             {
-              value: i18n.translate('xpack.uptime.filterBar.filterDown', {
+              value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
                 defaultMessage: 'Down',
               }),
               name: 'Down',
