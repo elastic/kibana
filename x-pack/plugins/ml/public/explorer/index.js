@@ -8,7 +8,7 @@
 
 import 'plugins/ml/explorer/explorer_controller';
 import 'plugins/ml/explorer/explorer_dashboard_service';
-import 'plugins/ml/explorer/explorer_swimlane_directive';
+import 'plugins/ml/explorer/explorer_react_wrapper_directive';
 import 'plugins/ml/explorer/explorer_charts';
 import 'plugins/ml/explorer/select_limit';
 import 'plugins/ml/components/job_select_list';
