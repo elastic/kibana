@@ -79,7 +79,7 @@ exports[`DetailView should render StickyProperties 1`] = `
           pathname="/app/apm"
           query={
             Object {
-              "traceid": "traceId",
+              "traceId": "traceId",
               "transactionId": "myTransactionName",
             }
           }
