@@ -107,7 +107,7 @@ export const MonitorCharts = ({
                   <FormattedMessage
                     id="xpack.uptime.monitorCharts.rttBreakdownTitle"
                     defaultMessage="RTT Breakdown ms"
-                    description="The 'ms' is an abbreviation of milliseconds."
+                    description="The 'ms' is an abbreviation for milliseconds."
                   />
                 </h4>
               </EuiTitle>
@@ -137,21 +137,21 @@ export const MonitorCharts = ({
                     curve="curveBasis"
                   />
                   <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.content', {
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.contentLabel', {
                       defaultMessage: 'Content',
                     })}
                     data={rttContentSeries}
                     curve="curveBasis"
                   />
                   <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.response', {
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.responseLabel', {
                       defaultMessage: 'Response',
                     })}
                     data={rttResponseSeries}
                     curve="curveBasis"
                   />
                   <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.tcp', {
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.tcpLabel', {
                       defaultMessage: 'Tcp',
                     })}
                     data={rttTcpSeries}
@@ -164,8 +164,9 @@ export const MonitorCharts = ({
               <EuiTitle size="xs">
                 <h4>
                   <FormattedMessage
-                    id="xpack.uptime.monitorCharts.monitorDuration.title"
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
                     defaultMessage="Monitor Duration ms"
+                    description="The 'ms' is an abbreviation for milliseconds."
                   />
                 </h4>
               </EuiTitle>
@@ -178,7 +179,7 @@ export const MonitorCharts = ({
                 >
                   <EuiAreaSeries
                     name={i18n.translate(
-                      'xpack.uptime.monitorCharts.monitorDuration.series.durationRange',
+                      'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
                       {
                         defaultMessage: 'Duration range',
                       }
@@ -188,7 +189,7 @@ export const MonitorCharts = ({
                   />
                   <EuiLineSeries
                     name={i18n.translate(
-                      'xpack.uptime.monitorCharts.monitorDuration.series.meanDuration',
+                      'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
                       {
                         defaultMessage: 'Mean duration',
                       }
@@ -204,7 +205,7 @@ export const MonitorCharts = ({
             <h4>
               <FormattedMessage
                 id="xpack.uptime.monitorCharts.checkStatus.title"
-                defaultMessage="Check Status"
+                defaultMessage="Check status"
               />
             </h4>
           </EuiTitle>
@@ -217,16 +218,19 @@ export const MonitorCharts = ({
               stackBy="y"
             >
               <EuiAreaSeries
-                name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCount', {
+                name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
                   defaultMessage: 'Up count',
                 })}
                 data={upSeries}
                 color="green"
               />
               <EuiAreaSeries
-                name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.downCount', {
-                  defaultMessage: 'Down count',
-                })}
+                name={i18n.translate(
+                  'xpack.uptime.monitorCharts.checkStatus.series.downCountLabel',
+                  {
+                    defaultMessage: 'Down count',
+                  }
+                )}
                 data={downSeries}
                 color="red"
               />
