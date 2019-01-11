@@ -6,8 +6,8 @@
 
 
 import { i18n } from '@kbn/i18n';
-import { getPrivileges } from 'plugins/ml/privilege/get_privileges';
-import { hasLicenseExpired } from 'plugins/ml/license/check_license';
+import { getPrivileges } from './get_privileges';
+import { hasLicenseExpired } from '../license/check_license';
 
 let privileges = {};
 

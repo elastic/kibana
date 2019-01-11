@@ -80,11 +80,12 @@ const DualPrivilegesAll: User = {
         },
       ],
     },
-    kibana: {
-      global: {
-        minimum: ['all'],
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -102,11 +103,12 @@ const DualPrivilegesRead: User = {
         },
       ],
     },
-    kibana: {
-      global: {
-        minimum: ['read'],
+    kibana: [
+      {
+        base: ['read'],
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -116,11 +118,12 @@ const GlobalAll: User = {
   password: 'global_all-password',
   role: {
     name: 'global_all_role',
-    kibana: {
-      global: {
-        minimum: ['all'],
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -130,11 +133,12 @@ const GlobalRead: User = {
   password: 'global_read-password',
   role: {
     name: 'global_read_role',
-    kibana: {
-      global: {
-        minimum: ['read'],
+    kibana: [
+      {
+        base: ['read'],
+        spaces: ['*'],
       },
-    },
+    ],
   },
 };
 
@@ -144,13 +148,12 @@ const EverythingSpaceAll: User = {
   password: 'everything_space_all-password',
   role: {
     name: 'everything_space_all_role',
-    kibana: {
-      space: {
-        everything_space: {
-          minimum: ['all'],
-        },
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['everything_space'],
       },
-    },
+    ],
   },
 };
 
@@ -160,13 +163,12 @@ const EverythingSpaceRead: User = {
   password: 'everything_space_read-password',
   role: {
     name: 'everything_space_read_role',
-    kibana: {
-      space: {
-        everything_space: {
-          minimum: ['read'],
-        },
+    kibana: [
+      {
+        base: ['read'],
+        spaces: ['everything_space'],
       },
-    },
+    ],
   },
 };
 
@@ -176,13 +178,12 @@ const NothingSpaceAll: User = {
   password: 'nothing_space_all-password',
   role: {
     name: 'nothing_space_all_role',
-    kibana: {
-      space: {
-        nothing_space: {
-          minimum: ['all'],
-        },
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['nothing_space'],
       },
-    },
+    ],
   },
 };
 
@@ -192,13 +193,12 @@ const NothingSpaceRead: User = {
   password: 'nothing_space_read-password',
   role: {
     name: 'nothing_space_read_role',
-    kibana: {
-      space: {
-        nothing_space: {
-          minimum: ['read'],
-        },
+    kibana: [
+      {
+        base: ['read'],
+        spaces: ['nothing_space'],
       },
-    },
+    ],
   },
 };
 

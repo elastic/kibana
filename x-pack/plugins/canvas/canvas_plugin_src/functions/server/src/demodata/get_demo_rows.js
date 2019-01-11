@@ -15,5 +15,5 @@ export function getDemoRows(arg) {
   if (arg === 'shirts') {
     return cloneDeep(shirts);
   }
-  throw new Error(`Invalid data set: ${arg}, use 'ci' or 'shirts'.`);
+  throw new Error(`Invalid data set: '${arg}', use 'ci' or 'shirts'.`);
 }
