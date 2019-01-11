@@ -90,7 +90,7 @@ export const Snapshot = ({
                 <EuiFlexItem>
                   <EuiPanel>
                     <EuiStat
-                      description={i18n.translate('xpack.uptime.snapshot.stats.down.description', {
+                      description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
                         defaultMessage: 'Down',
                       })}
                       textAlign="center"
@@ -102,7 +102,7 @@ export const Snapshot = ({
                 <EuiFlexItem>
                   <EuiPanel>
                     <EuiStat
-                      description={i18n.translate('xpack.uptime.snapshot.stats.total.description', {
+                      description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
                         defaultMessage: 'Total',
                       })}
                       textAlign="center"
@@ -133,7 +133,7 @@ export const Snapshot = ({
                       <h5>
                         <FormattedMessage
                           id="xpack.uptime.snapshot.emptyPrompt.title"
-                          defaultMessage="No Histogram Data Available"
+                          defaultMessage="No histogram data available"
                         />
                       </h5>
                     </EuiTitle>
