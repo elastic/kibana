@@ -10,6 +10,7 @@ import './vendor/jquery_ui_sortable.js';
 import './vendor/jquery_ui_sortable.css';
 
 // import the uiExports that we want to "use"
+import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
