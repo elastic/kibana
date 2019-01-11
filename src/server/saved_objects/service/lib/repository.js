@@ -648,11 +648,19 @@ export class SavedObjectsRepository {
     ]);
 
     const relationshipObjects = [].concat(
-      referencedObjects.map(obj => ({ id: obj.id, type: obj.type, title: obj.attributes.title })),
+      referencedObjects.map(obj => ({
+        id: obj.id,
+        type: obj.type,
+        ...(obj.attributes.title ? { title: obj.attributes.title } : {})
+      })),
       legacyResponse.filter(obj => filterTypes.includes(obj.type)),
       referencedResponse.hits.hits
         .map(hit => this._rawToSavedObject(hit))
-        .map(obj => ({ id: obj.id, type: obj.type, title: obj.attributes.title })),
+        .map(obj => ({
+          id: obj.id,
+          type: obj.type,
+          ...(obj.attributes.title ? { title: obj.attributes.title } : {})
+        })),
     );
 
     return relationshipObjects.reduce((result, relationshipObject) => {

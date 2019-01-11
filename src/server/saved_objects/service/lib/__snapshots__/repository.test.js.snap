@@ -9,7 +9,6 @@ Object {
   "index-pattern": Array [
     Object {
       "id": "pattern*",
-      "someAttr": true,
     },
   ],
 }
