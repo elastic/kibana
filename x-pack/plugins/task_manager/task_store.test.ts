@@ -8,6 +8,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
+import { mockLogger } from './test_utils';
 
 describe('TaskStore', () => {
   describe('init', () => {
@@ -18,11 +19,16 @@ describe('TaskStore', () => {
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
+        logger: mockLogger(),
       });
 
       await store.init();
 
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledTwice(callCluster);
+
+      sinon.assert.calledWithMatch(callCluster, 'indices.getTemplate', {
+        name: 'tasky',
+      });
 
       sinon.assert.calledWithMatch(callCluster, 'indices.putTemplate', {
         body: {
@@ -50,12 +56,13 @@ describe('TaskStore', () => {
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['report', 'dernstraight', 'yawn'],
+        logger: mockLogger(),
       });
       const result = await store.schedule(task);
 
-      sinon.assert.calledTwice(callCluster);
+      sinon.assert.calledThrice(callCluster);
 
-      return { result, callCluster, arg: callCluster.args[1][1] };
+      return { result, callCluster, arg: callCluster.args[2][1] };
     }
 
     test('serializes the params and state', async () => {
@@ -122,6 +129,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
+        logger: mockLogger(),
       });
 
       const result = await store.fetch(opts);
@@ -286,6 +294,7 @@ describe('TaskStore', () => {
         supportedTypes: ['a', 'b', 'c'],
         index: 'tasky',
         maxAttempts: 2,
+        logger: mockLogger(),
         ...opts,
       });
 
@@ -307,6 +316,7 @@ describe('TaskStore', () => {
         supportedTypes: ['a', 'b', 'c'],
         index: 'tasky',
         maxAttempts: 2,
+        logger: mockLogger(),
       });
 
       const result = await store.fetchAvailableTasks();
@@ -447,6 +457,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
+        logger: mockLogger(),
       });
 
       const result = await store.update(task);
@@ -491,6 +502,7 @@ describe('TaskStore', () => {
         index: 'myindex',
         maxAttempts: 2,
         supportedTypes: ['a'],
+        logger: mockLogger(),
       });
       const result = await store.remove(id);
 

@@ -20,6 +20,7 @@ describe('TaskPoller', () => {
       index: 'tasky',
       maxAttempts: 2,
       supportedTypes: ['a', 'b', 'c'],
+      logger: mockLogger(),
     });
   });
 
