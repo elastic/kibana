@@ -51,7 +51,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
           items: [
             {
               value: 'up',
-              name: i18n.translate('xpack.uptime.filterBar.filterUp', { defaultMessage: 'Up' }),
+              name: i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
+                defaultMessage: 'Up',
+              }),
             },
             {
               value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
@@ -65,7 +67,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         {
           type: 'field_value_selection',
           field: 'monitor.id',
-          name: i18n.translate('xpack.uptime.filterBar.options.host', { defaultMessage: 'Host' }),
+          name: i18n.translate('xpack.uptime.filterBar.options.hostLabel', {
+            defaultMessage: 'Host',
+          }),
           multiSelect: false,
           options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
             value: idValue,
@@ -76,7 +80,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         {
           type: 'field_value_selection',
           field: 'tcp.port',
-          name: i18n.translate('xpack.uptime.filterBar.options.port', { defaultMessage: 'Port' }),
+          name: i18n.translate('xpack.uptime.filterBar.options.portLabel', {
+            defaultMessage: 'Port',
+          }),
           multiSelect: false,
           options: take(port, MAX_SELECTION_LENGTH).map((portValue: any) => ({
             value: portValue,
@@ -87,7 +93,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         {
           type: 'field_value_selection',
           field: 'monitor.scheme',
-          name: i18n.translate('xpack.uptime.filterBar.options.type', { defaultMessage: 'Type' }),
+          name: i18n.translate('xpack.uptime.filterBar.options.typeLabel', {
+            defaultMessage: 'Type',
+          }),
           multiSelect: false,
           options: scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
           searchThreshold: SEARCH_THRESHOLD,
