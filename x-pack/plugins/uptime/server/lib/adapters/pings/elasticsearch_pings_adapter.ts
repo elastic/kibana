@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
+import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -49,7 +49,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     status?: string,
     sort?: UMPingSortDirectionArg,
     size?: number
-  ): Promise<Ping[]> {
+  ): Promise<PingResults> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
     const must: any[] = [];
@@ -72,13 +72,20 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       },
     };
     const {
-      hits: { hits },
+      hits: { hits, total },
     } = await this.database.search(request, params);
 
-    return hits.map(({ _source }: any) => {
+    const pings: Ping[] = hits.map(({ _source }: any) => {
       const timestamp = _source['@timestamp'];
       return { timestamp, ..._source };
     });
+
+    const results: PingResults = {
+      total: total.value,
+      pings,
+    };
+
+    return results;
   }
 
   public async getLatestMonitorDocs(

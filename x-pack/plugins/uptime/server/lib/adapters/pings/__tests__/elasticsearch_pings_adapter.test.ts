@@ -35,6 +35,9 @@ describe('ElasticsearchPingsAdapter class', () => {
     ];
     mockEsResult = {
       hits: {
+        total: {
+          value: mockHits.length,
+        },
         hits: mockHits,
       },
     };
@@ -69,11 +72,15 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('returns data in the appropriate shape', async () => {
       const result = await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
+      const count = 3;
 
-      expect(result).toHaveLength(3);
-      expect(result[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
-      expect(result[1].timestamp).toBe('2018-10-30T18:53:59.792Z');
-      expect(result[2].timestamp).toBe('2018-10-30T18:55:59.792Z');
+      expect(result.total).toBe(count);
+
+      const pings = result.pings!;
+      expect(pings).toHaveLength(count);
+      expect(pings[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
+      expect(pings[1].timestamp).toBe('2018-10-30T18:53:59.792Z');
+      expect(pings[2].timestamp).toBe('2018-10-30T18:55:59.792Z');
     });
 
     it('creates appropriate sort and size parameters', async () => {

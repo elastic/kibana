@@ -81,12 +81,44 @@
           "type" : "envelope",
           "coordinates" : [
             [
-              -131.611171875002,
-              39.17729080254418
+              -130.50168,
+              45.55574
             ],
             [
-              -69.20882812500054,
-              25.973294086525087
+              -70.72014,
+              18.91275
+            ]
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "gis-map:8eabdab0-144f-11e9-809f-ad25bb78262c",
+    "source": {
+      "type" : "gis-map",
+      "gis-map" : {
+        "title" : "document example with query",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"machine.os.raw : \\\"ios\\\"\",\"language\":\"kuery\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[\"machine.os\"]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"alphaValue\":1},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isDarkMode\":false}",
+        "bounds" : {
+          "type" : "envelope",
+          "coordinates" : [
+            [
+              -130.50168,
+              45.55574
+            ],
+            [
+              -70.72014,
+              18.91275
             ]
           ]
         }
@@ -113,12 +145,12 @@
           "type" : "envelope",
           "coordinates" : [
             [
-              -131.611171875002,
-              39.17729080254418
+              14.1441,
+              31.99653
             ],
             [
-              -69.20882812500054,
-              25.973294086525087
+              140.52442,
+              -32.07532
             ]
           ]
         }

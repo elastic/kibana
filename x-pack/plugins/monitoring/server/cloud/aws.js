@@ -5,7 +5,7 @@
  */
 
 import { get, isString, omit } from 'lodash';
-import { fromCallback } from 'bluebird';
+import { promisify } from 'util';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 import fs from 'fs';
@@ -38,8 +38,8 @@ export class AWSCloudService extends CloudService {
       json: true
     };
 
-    return fromCallback(callback => request(req, callback), { multiArgs: true })
-      .then(response => this._parseResponse(response[1], (body) => this._parseBody(body)))
+    return promisify(request)(req)
+      .then(response => this._parseResponse(response.body, (body) => this._parseBody(body)))
     // fall back to file detection
       .catch(() => this._tryToDetectUuid());
   }
@@ -96,7 +96,7 @@ export class AWSCloudService extends CloudService {
   _tryToDetectUuid() {
     // Windows does not have an easy way to check
     if (!this._isWindows) {
-      return fromCallback(callback => this._fs.readFile('/sys/hypervisor/uuid', 'utf8', callback))
+      return promisify(this._fs.readFile)('/sys/hypervisor/uuid', 'utf8')
         .then(uuid => {
           if (isString(uuid)) {
           // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase

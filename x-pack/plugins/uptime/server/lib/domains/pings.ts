@@ -5,7 +5,7 @@
  */
 
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../common/domain_types';
-import { DocCount, HistogramSeries, Ping } from '../../../common/graphql/types';
+import { DocCount, HistogramSeries, Ping, PingResults } from '../../../common/graphql/types';
 import { UMPingsAdapter } from '../adapters/pings';
 
 export class UMPingsDomain {
@@ -21,7 +21,7 @@ export class UMPingsDomain {
     status?: string,
     sort?: UMPingSortDirectionArg,
     size?: number
-  ): Promise<Ping[]> {
+  ): Promise<PingResults> {
     return this.adapter.getAll(
       request,
       dateRangeStart,
