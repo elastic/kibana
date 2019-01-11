@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
+import $ from 'jquery';
+
 import React from 'react';
 
 import {
@@ -54,7 +55,6 @@ function getChartId(series) {
 function ExplorerChartContainer({
   series,
   tooManyBuckets,
-  mlSelectSeverityService,
   wrapLabel
 }) {
   const {
@@ -134,7 +134,6 @@ function ExplorerChartContainer({
             <ExplorerChartDistribution
               tooManyBuckets={tooManyBuckets}
               seriesConfig={series}
-              mlSelectSeverityService={mlSelectSeverityService}
             />
           );
         }
@@ -142,7 +141,6 @@ function ExplorerChartContainer({
           <ExplorerChartSingleMetric
             tooManyBuckets={tooManyBuckets}
             seriesConfig={series}
-            mlSelectSeverityService={mlSelectSeverityService}
           />
         );
       })()}
@@ -151,37 +149,44 @@ function ExplorerChartContainer({
 }
 
 // Flex layout wrapper for all explorer charts
-export function ExplorerChartsContainer({
-  chartsPerRow,
-  seriesToPlot,
-  tooManyBuckets,
-  mlSelectSeverityService
-}) {
-  // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
-  // If that's the case we trick it doing that with the following settings:
-  const chartsWidth = (chartsPerRow === 1) ? 'calc(100% - 20px)' : 'auto';
-  const chartsColumns = (chartsPerRow === 1) ? 0 : chartsPerRow;
+export class ExplorerChartsContainer extends React.Component {
+  componentDidMount() {
+    // Create a div for the tooltip.
+    $('.ml-explorer-charts-tooltip').remove();
+    $('body').append('<div class="ml-explorer-tooltip ml-explorer-charts-tooltip" style="opacity:0; display: none;">');
+  }
 
-  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+  componentWillUnmount() {
+    // Remove div for the tooltip.
+    $('.ml-explorer-charts-tooltip').remove();
+  }
 
-  return (
-    <EuiFlexGrid columns={chartsColumns}>
-      {(seriesToPlot.length > 0) && seriesToPlot.map((series) => (
-        <EuiFlexItem key={getChartId(series)} className="ml-explorer-chart-container" style={{ minWidth: chartsWidth }}>
-          <ExplorerChartContainer
-            series={series}
-            tooManyBuckets={tooManyBuckets}
-            mlSelectSeverityService={mlSelectSeverityService}
-            wrapLabel={wrapLabel}
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
-  );
+  render() {
+    const {
+      chartsPerRow,
+      seriesToPlot,
+      tooManyBuckets
+    } = this.props;
+
+    // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
+    // If that's the case we trick it doing that with the following settings:
+    const chartsWidth = (chartsPerRow === 1) ? 'calc(100% - 20px)' : 'auto';
+    const chartsColumns = (chartsPerRow === 1) ? 0 : chartsPerRow;
+
+    const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+
+    return (
+      <EuiFlexGrid columns={chartsColumns}>
+        {(seriesToPlot.length > 0) && seriesToPlot.map((series) => (
+          <EuiFlexItem key={getChartId(series)} className="ml-explorer-chart-container" style={{ minWidth: chartsWidth }}>
+            <ExplorerChartContainer
+              series={series}
+              tooManyBuckets={tooManyBuckets}
+              wrapLabel={wrapLabel}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    );
+  }
 }
-ExplorerChartsContainer.propTypes = {
-  seriesToPlot: PropTypes.array.isRequired,
-  tooManyBuckets: PropTypes.bool.isRequired,
-  mlSelectSeverityService: PropTypes.object.isRequired,
-  mlChartTooltipService: PropTypes.object.isRequired
-};
