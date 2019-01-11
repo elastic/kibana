@@ -164,7 +164,7 @@ export const MonitorList = ({
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                id="xpack.uptime.monitorList.heading"
+                id="xpack.uptime.monitorList.monitoringStatusTitle"
                 defaultMessage="Monitor status"
               />
             </h5>
