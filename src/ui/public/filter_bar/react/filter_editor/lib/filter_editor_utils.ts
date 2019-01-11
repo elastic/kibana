@@ -19,7 +19,13 @@
 
 import { omit } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
-import { FieldFilter, MetaFilter, PhraseFilter, PhrasesFilter } from '../../../filters';
+import {
+  FieldFilter,
+  MetaFilter,
+  PhraseFilter,
+  PhrasesFilter,
+  RangeFilter,
+} from '../../../filters';
 import { FILTER_OPERATORS } from './filter_operators';
 
 export function getIndexPatternFromFilter(
@@ -62,5 +68,10 @@ export function getFilterParams(filter: MetaFilter): any {
       return (filter as PhraseFilter).meta.params.query;
     case 'phrases':
       return (filter as PhrasesFilter).meta.params;
+    case 'range':
+      return {
+        from: (filter as RangeFilter).meta.params.gte,
+        to: (filter as RangeFilter).meta.params.lt,
+      };
   }
 }

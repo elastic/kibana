@@ -54,6 +54,7 @@ import { Operator } from './lib/filter_operators';
 import { OperatorInput } from './operator_input';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
+import { RangeValueInput } from './range_value_input';
 
 interface Props {
   filter: MetaFilter;
@@ -209,6 +210,14 @@ export class FilterEditor extends Component<Props, State> {
             onChange={this.onParamsChange}
           />
         );
+      case 'range':
+        return (
+          <RangeValueInput
+            field={this.state.selectedField}
+            value={this.state.params}
+            onChange={this.onParamsChange}
+          />
+        );
     }
   }
 
@@ -305,7 +314,7 @@ export class FilterEditor extends Component<Props, State> {
       case 'phrases':
         return buildPhrasesFilter(selectedField, params, indexPattern);
       case 'range':
-        const newParams = { gte: params.range.from, lt: params.range.to };
+        const newParams = { gte: params.from, lt: params.to };
         return buildRangeFilter(selectedField, newParams, indexPattern);
       case 'exists':
         return buildExistsFilter(selectedField, indexPattern);
