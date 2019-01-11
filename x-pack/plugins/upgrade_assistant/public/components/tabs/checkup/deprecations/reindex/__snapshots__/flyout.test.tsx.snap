@@ -19,12 +19,59 @@ exports[`ReindexFlyout renders 1`] = `
         myIndex
       </h2>
     </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      <Component
-        errorMessage={null}
-        reindexStatus={0}
-        reindexTaskPercComplete={null}
-      />
+    <EuiFlyoutBody
+      style={
+        Object {
+          "display": "flex",
+        }
+      }
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="column"
+        gutterSize="l"
+        justifyContent="spaceBetween"
+        responsive={true}
+        style={
+          Object {
+            "flexGrow": 1,
+          }
+        }
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiCallOut
+            color="warning"
+            iconType="help"
+            size="m"
+            title="Be careful"
+          >
+            While reindexing, the index will not be able to ingest new documents, update documents, or delete documents. Depending on how this index is being used in your system, this may cause problems and you may need to use a different strategy to reindex this index.
+          </EuiCallOut>
+          <EuiSpacer
+            size="l"
+          />
+          <Component
+            warnings={
+              Array [
+                0,
+              ]
+            }
+          />
+          <EuiSpacer
+            size="l"
+          />
+          <Component
+            errorMessage={null}
+            reindexStatus={0}
+            reindexTaskPercComplete={null}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyoutBody>
     <EuiFlyoutFooter>
       <EuiFlexGroup

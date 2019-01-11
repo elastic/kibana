@@ -4,31 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, HTMLAttributes } from 'react';
 
 import {
+  CommonProps,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiOverlayMask,
   EuiPortal,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-// @ts-ignore
-import { euiZModal } from '@elastic/eui/dist/eui_theme_k6_light.json';
-import { Subscription } from 'rxjs';
 import { ReindexStatus } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
-import { ReindexConfirmModal } from './confirm_modal';
-import { ReindexPollingService, ReindexState } from './polling_service';
+import { ReindexState } from './polling_service';
 import { ReindexProgress } from './progress';
 import { ReindexWarningSummary } from './warnings';
+
+export const EuiFlyoutBodyTyped: React.SFC<
+  CommonProps & HTMLAttributes<HTMLDivElement>
+> = EuiFlyoutBody;
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -49,9 +51,18 @@ const buttonLabel = (status?: ReindexStatus) => {
 export const ReindexFlyoutUI: React.StatelessComponent<{
   indexName: string;
   closeFlyout: () => void;
-  startReindex: () => void;
+  confirmInputValue: string;
+  onConfirmInputChange: (e: any) => void;
   reindexState: ReindexState;
-}> = ({ indexName, closeFlyout, startReindex, reindexState }) => {
+  startReindex: () => void;
+}> = ({
+  indexName,
+  closeFlyout,
+  confirmInputValue,
+  onConfirmInputChange,
+  reindexState,
+  startReindex,
+}) => {
   const {
     loadingState,
     status,
@@ -61,26 +72,8 @@ export const ReindexFlyoutUI: React.StatelessComponent<{
     reindexWarnings,
   } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
-
-  const body =
-    status !== undefined ? (
-      <ReindexProgress
-        lastCompletedStep={lastCompletedStep}
-        reindexStatus={status}
-        reindexTaskPercComplete={reindexTaskPercComplete}
-        errorMessage={errorMessage}
-      />
-    ) : (
-      <Fragment>
-        <EuiCallOut title="Be careful" color="warning" iconType="help">
-          While reindexing, the index will not be able to ingest new documents, update documents, or
-          delete documents. Depending on how this index is being used in your system, this may cause
-          problems and you may need to use a different strategy to reindex this index.
-        </EuiCallOut>
-        <EuiSpacer />
-        <ReindexWarningSummary warnings={reindexWarnings} />
-      </Fragment>
-    );
+  const hasWarnings = Boolean(reindexWarnings && reindexWarnings.length);
+  const confirmFilled = confirmInputValue === 'CONFIRM';
 
   return (
     <EuiPortal>
@@ -88,7 +81,44 @@ export const ReindexFlyoutUI: React.StatelessComponent<{
         <EuiFlyoutHeader hasBorder>
           <h2>Reindex {indexName}</h2>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{body}</EuiFlyoutBody>
+        <EuiFlyoutBodyTyped style={{ display: 'flex' }}>
+          <EuiFlexGroup direction="column" justifyContent="spaceBetween" style={{ flexGrow: 1 }}>
+            <EuiFlexItem grow={false}>
+              <EuiCallOut title="Be careful" color="warning" iconType="help">
+                While reindexing, the index will not be able to ingest new documents, update
+                documents, or delete documents. Depending on how this index is being used in your
+                system, this may cause problems and you may need to use a different strategy to
+                reindex this index.
+              </EuiCallOut>
+              <EuiSpacer />
+              <ReindexWarningSummary warnings={reindexWarnings} />
+              <EuiSpacer />
+              {status !== undefined && (
+                <ReindexProgress
+                  lastCompletedStep={lastCompletedStep}
+                  reindexStatus={status}
+                  reindexTaskPercComplete={reindexTaskPercComplete}
+                  errorMessage={errorMessage}
+                />
+              )}
+            </EuiFlexItem>
+            {hasWarnings && status === undefined && (
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <strong>Type "CONFIRM" below if you accept these changes</strong>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiFieldText
+                  placeholder="CONFIRM"
+                  fullWidth
+                  value={confirmInputValue}
+                  onChange={onConfirmInputChange}
+                  aria-label="Reindex confirmation"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlyoutBodyTyped>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -102,7 +132,9 @@ export const ReindexFlyoutUI: React.StatelessComponent<{
                 color="warning"
                 onClick={startReindex}
                 isLoading={loading}
-                disabled={loading || status === ReindexStatus.completed}
+                disabled={
+                  loading || status === ReindexStatus.completed || (hasWarnings && !confirmFilled)
+                }
               >
                 {buttonLabel(status)}
               </EuiButton>
@@ -117,86 +149,44 @@ export const ReindexFlyoutUI: React.StatelessComponent<{
 interface ReindexFlyoutProps {
   indexName: string;
   closeFlyout: () => void;
+  reindexState: ReindexState;
+  startReindex: () => void;
 }
 
 interface ReindexFlyoutState {
-  reindexState: ReindexState;
-  showWarningsModal: boolean;
+  confirmInputValue: string;
 }
 
 /**
  * Wrapper for the UI that manages setting up the polling service and subscribing to its state.
  */
 export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutState> {
-  private service: ReindexPollingService;
-  private subscription?: Subscription;
-
   constructor(props: ReindexFlyoutProps) {
     super(props);
-    this.service = new ReindexPollingService(this.props.indexName);
     this.state = {
-      reindexState: this.service.status$.value,
-      showWarningsModal: false,
+      confirmInputValue: '',
     };
   }
 
-  public async componentDidMount() {
-    this.subscription = this.service.status$.subscribe(reindexState =>
-      this.setState({ reindexState })
-    );
-  }
-
-  public async componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      delete this.subscription;
-    }
-  }
-
   public render() {
+    const { closeFlyout, indexName, reindexState, startReindex } = this.props;
+    const { confirmInputValue } = this.state;
+
     return (
       <Fragment>
-        <ReindexFlyoutUI startReindex={this.startReindex} {...this.props} {...this.state} />
-        {this.renderWarningsModal()}
+        <ReindexFlyoutUI
+          closeFlyout={closeFlyout}
+          indexName={indexName}
+          confirmInputValue={confirmInputValue}
+          onConfirmInputChange={this.onConfirmInputChange}
+          reindexState={reindexState}
+          startReindex={startReindex}
+        />
       </Fragment>
     );
   }
 
-  private renderWarningsModal = () => {
-    const {
-      reindexState: { reindexWarnings },
-      showWarningsModal,
-    } = this.state;
-
-    if (!showWarningsModal) {
-      return null;
-    }
-
-    return (
-      // @ts-ignore
-      <EuiOverlayMask style={`z-index: ${euiZModal + 50}`}>
-        <ReindexConfirmModal
-          indexName={this.props.indexName}
-          warnings={reindexWarnings!}
-          closeModal={this.closeWarningsModal}
-          startReindex={this.startReindex}
-        />
-      </EuiOverlayMask>
-    );
+  private onConfirmInputChange = (e: any) => {
+    this.setState({ confirmInputValue: e.target.value });
   };
-
-  private startReindex = () => {
-    const { reindexWarnings } = this.state.reindexState;
-
-    if (this.state.showWarningsModal) {
-      this.setState({ showWarningsModal: false });
-      this.service.startReindex();
-    } else if (reindexWarnings && reindexWarnings.length > 0) {
-      this.setState({ showWarningsModal: true });
-    } else {
-      this.service.startReindex();
-    }
-  };
-
-  private closeWarningsModal = () => this.setState({ showWarningsModal: false });
 }

@@ -15,6 +15,8 @@ describe('ReindexFlyout', () => {
   const defaultProps = {
     indexName: 'myIndex',
     closeFlyout: jest.fn(),
+    confirmInputValue: 'CONFIRM',
+    onConfirmInputChange: jest.fn(),
     startReindex: jest.fn(),
     reindexState: {
       loadingState: LoadingState.Success,
@@ -49,6 +51,4 @@ describe('ReindexFlyout', () => {
     wrapper.find('EuiButton').simulate('click');
     expect(props.startReindex).toHaveBeenCalled();
   });
-
-  // it('when button is clicked and there are warnings it opens modal');
 });
