@@ -197,7 +197,7 @@ function getTransactionLink(error: APMError, transaction?: Transaction) {
       hash={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceid: get(transaction, TRACE_ID)
+        traceId: get(transaction, TRACE_ID)
       }}
     >
       {transaction.transaction.id}
