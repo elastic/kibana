@@ -98,11 +98,19 @@ export class ESSearchSource extends VectorSource {
     return true;
   }
 
+  isQueryAware() {
+    return true;
+  }
+
   getFieldNames() {
     return [
       this._descriptor.geoField,
       ...this._descriptor.tooltipProperties
     ];
+  }
+
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
   }
 
   renderDetails() {
@@ -159,6 +167,7 @@ export class ESSearchSource extends VectorSource {
         }
         return filters;
       });
+      searchSource.setField('query', searchFilters.query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,

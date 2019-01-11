@@ -18,9 +18,17 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-// @ts-ignore: implicit any for JS file
-import { createEsTestCluster, esTestConfig, kibanaServerTestUser, kibanaTestUser } from '@kbn/test';
-import { defaultsDeep } from 'lodash';
+import {
+  createEsTestCluster,
+  DEFAULT_SUPERUSER_PASS,
+  esTestConfig,
+  kbnTestConfig,
+  kibanaServerTestUser,
+  kibanaTestUser,
+  setupUsers,
+  // @ts-ignore: implicit any for JS file
+} from '@kbn/test';
+import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -144,10 +152,39 @@ export async function startTestServers({
   settings = {},
 }: {
   adjustTimeout: (timeout: number) => void;
-  settings: Record<string, any>;
+  settings: {
+    es?: {
+      license: 'oss' | 'basic' | 'gold' | 'trial';
+      [key: string]: any;
+    };
+    kbn?: {
+      /**
+       * An array of directories paths, passed in via absolute path strings
+       */
+      plugins?: {
+        paths: string[];
+        [key: string]: any;
+      };
+      [key: string]: any;
+    };
+    /**
+     * Users passed in via this prop are created in ES in adition to the standard elastic and kibana users.
+     * Note, this prop is ignored when using an oss, or basic license
+     */
+    users?: Array<{ username: string; password: string; roles: string[] }>;
+  };
 }) {
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
+  }
+  const license = get<'oss' | 'basic' | 'gold' | 'trial'>(settings, 'es.license', 'oss');
+  const usersToBeAdded = get(settings, 'users', []);
+  if (usersToBeAdded.length > 0) {
+    if (license !== 'trial') {
+      throw new Error(
+        'Adding users is only supported by startTestServers when using a trial license'
+      );
+    }
   }
 
   const log = new ToolingLog({
@@ -159,15 +196,41 @@ export async function startTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createEsTestCluster({ log });
+  const es = createEsTestCluster(
+    defaultsDeep({}, get(settings, 'es', {}), {
+      log,
+      license,
+      password: license === 'trial' ? DEFAULT_SUPERUSER_PASS : undefined,
+    })
+  );
 
   log.indent(-4);
 
-  adjustTimeout(es.getStartTimeout());
+  // Add time for KBN and adding users
+  adjustTimeout(es.getStartTimeout() + 100000);
 
   await es.start();
 
-  const root = createRootWithCorePlugins(settings);
+  const kbnSettings: any = get(settings, 'kbn', {});
+  if (['gold', 'trial'].includes(license)) {
+    await setupUsers(log, esTestConfig.getUrlParts().port, [
+      ...usersToBeAdded,
+      // user elastic
+      esTestConfig.getUrlParts(),
+      // user kibana
+      kbnTestConfig.getUrlParts(),
+    ]);
+
+    // Override provided configs, we know what the elastic user is now
+    kbnSettings.elasticsearch = {
+      url: esTestConfig.getUrl(),
+      username: esTestConfig.getUrlParts().username,
+      password: esTestConfig.getUrlParts().password,
+    };
+  }
+
+  const root = createRootWithCorePlugins(kbnSettings);
+
   await root.start();
 
   const kbnServer = getKbnServer(root);
