@@ -38,7 +38,7 @@ const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 const monitorListColumns = [
   {
     field: 'ping.monitor.status',
-    name: i18n.translate('xpack.uptime.monitorList.columns.status.heading', {
+    name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
       defaultMessage: 'Status',
     }),
     render: (status: string) => (
