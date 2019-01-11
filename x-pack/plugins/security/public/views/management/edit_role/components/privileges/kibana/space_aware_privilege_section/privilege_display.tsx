@@ -42,7 +42,7 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
   return <SimplePrivilegeDisplay {...props} />;
 };
 
-export const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
+const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
   const {
     privilege,
     styleMissingPrivilege,

@@ -7,16 +7,19 @@
 import { EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PrivilegeDisplay, SupercededPrivilegeDisplay } from './privilege_display';
+import { PRIVILEGE_SOURCE } from '../../../../../../../lib/effective_privileges';
+import { PrivilegeDisplay } from './privilege_display';
 
 describe('PrivilegeDisplay', () => {
   it('renders a simple privilege', () => {
-    const wrapper = mountWithIntl(<PrivilegeDisplay privilege={'all'} />);
+    const wrapper = mountWithIntl(<PrivilegeDisplay privilege={'all'} scope={'space'} />);
     expect(wrapper.text().trim()).toEqual('All');
   });
 
   it('renders a privilege with custom styling', () => {
-    const wrapper = mountWithIntl(<PrivilegeDisplay privilege={'all'} color={'danger'} />);
+    const wrapper = mountWithIntl(
+      <PrivilegeDisplay privilege={'all'} color={'danger'} scope={'space'} />
+    );
     expect(wrapper.text().trim()).toEqual('All');
     expect(wrapper.find(EuiText).props()).toMatchObject({
       color: 'danger',
@@ -25,7 +28,12 @@ describe('PrivilegeDisplay', () => {
 
   it('renders a privilege with tooltip, if provided', () => {
     const wrapper = mountWithIntl(
-      <PrivilegeDisplay privilege={'all'} tooltipContent={<b>ahh</b>} iconType={'asterisk'} />
+      <PrivilegeDisplay
+        privilege={'all'}
+        tooltipContent={<b>ahh</b>}
+        iconType={'asterisk'}
+        scope={'space'}
+      />
     );
     expect(wrapper.text().trim()).toEqual('All');
     expect(wrapper.find(EuiIconTip).props()).toMatchObject({
@@ -33,15 +41,19 @@ describe('PrivilegeDisplay', () => {
       content: <b>ahh</b>,
     });
   });
-});
 
-describe('SupercededPrivilegeDisplay', () => {
   it('renders a superceded privilege', () => {
     const wrapper = shallowWithIntl(
-      <SupercededPrivilegeDisplay
+      <PrivilegeDisplay
         privilege={'all'}
-        supercededPrivilege={'read'}
-        overrideSource={'my override source'}
+        scope={'space'}
+        explanation={{
+          supercededPrivilege: 'read',
+          overrideSource: 'my override source',
+          privilege: 'all',
+          source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
+          details: 'details',
+        }}
       />
     );
     expect(wrapper).toMatchSnapshot();

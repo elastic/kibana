@@ -121,6 +121,7 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
                 features={this.props.features}
                 intl={this.props.intl}
                 onChange={this.onFeaturePrivilegeChange}
+                onChangeAll={this.onChangeAllFeaturePrivileges}
                 spacesIndex={-1}
               />
             </EuiFormRow>
@@ -152,6 +153,20 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
       form.feature[featureId] = [...privileges];
     } else {
       delete form.feature[featureId];
+    }
+    this.props.onChange(role);
+  };
+
+  private onChangeAllFeaturePrivileges = (privileges: string[]) => {
+    const role = copyRole(this.props.role);
+
+    const form = this.locateGlobalPrivilege(role, true);
+    if (privileges.length > 0) {
+      this.props.features.forEach(feature => {
+        form.feature[feature.id] = [...privileges];
+      });
+    } else {
+      form.feature = {};
     }
     this.props.onChange(role);
   };

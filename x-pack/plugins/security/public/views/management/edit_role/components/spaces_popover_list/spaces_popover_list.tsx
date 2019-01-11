@@ -9,7 +9,6 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
-  EuiLink,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';

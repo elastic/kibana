@@ -18,7 +18,6 @@ import {
   EuiOverlayMask,
   // @ts-ignore
   EuiSuperSelect,
-  EuiText,
   // @ts-ignore
   EuiToolTip,
 } from '@elastic/eui';
