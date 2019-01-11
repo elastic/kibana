@@ -162,7 +162,7 @@ export class TaskStore {
         index_patterns: [this.index],
         mappings: {
           _doc: {
-            dynamic: 'strict',
+            dynamic: false,
             properties: {
               type: { type: 'keyword' },
               task: {
