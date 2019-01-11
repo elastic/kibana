@@ -82,7 +82,7 @@ export function validateParams(params: any, type: string) {
   switch (type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
-      return typeof params === 'string' && (!moment || !moment.isValid());
+      return typeof params === 'string' && moment && moment.isValid();
     case 'ip':
       try {
         // @ts-ignore
