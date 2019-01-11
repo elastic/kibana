@@ -44,7 +44,7 @@ import { themeSelector } from '../../store/local/app';
 import { Theme } from '../../store/local/app/model';
 import { State } from '../../store/reducer';
 import { NotFoundPage } from '../404';
-import { Hosts } from '../hosts';
+import { HostsContainer } from '../hosts';
 import { Network } from '../network';
 import { Overview } from '../overview';
 
@@ -132,7 +132,7 @@ const HomePageComponent = pure<Props>(({ theme }) => (
                     <Switch>
                       <Redirect from="/" exact={true} to="/overview" />
                       <Route path="/overview" component={Overview} />
-                      <Route path="/hosts" component={Hosts} />
+                      <Route path="/hosts" component={HostsContainer} />
                       <Route path="/network" component={Network} />
                       <Route path="/link-to" component={LinkToPage} />
                       <Route component={NotFoundPage} />
