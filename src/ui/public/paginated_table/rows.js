@@ -45,12 +45,12 @@ module.directive('kbnRows', function ($compile) {
               return;
             }
 
-            $scope.filter({ datum: { rawData: {
+            $scope.filter({ data: [{
               table: $scope.table,
               row: $scope.rows.findIndex(r => r === row),
-              column: column.id,
+              column: $scope.table.columns.findIndex(c => c.id === column.id),
               value
-            } }, negate });
+            }], negate });
           };
 
           return $compile($template)(scope);
