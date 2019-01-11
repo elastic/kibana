@@ -64,6 +64,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         >
           <EuiSuperSelect
             compressed={false}
+            data-test-subj="basePrivilegeComboBox"
             fullWidth={true}
             hasDividers={true}
             onChange={[Function]}
@@ -87,7 +88,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   >
                     Custom
                   </EuiText>,
-                  "value": "custom",
+                  "value": "basePrivilege_custom",
                 },
                 Object {
                   "disabled": false,
@@ -108,7 +109,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   >
                     Read
                   </EuiText>,
-                  "value": "read",
+                  "value": "basePrivilege_read",
                 },
                 Object {
                   "disabled": false,
@@ -129,11 +130,11 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   >
                     All
                   </EuiText>,
-                  "value": "all",
+                  "value": "basePrivilege_all",
                 },
               ]
             }
-            valueOfSelected="custom"
+            valueOfSelected="basePrivilege_custom"
           />
         </EuiFormRow>
         <EuiSpacer
@@ -352,6 +353,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         >
           <EuiButtonEmpty
             color="primary"
+            data-test-subj="cancelSpacePrivilegeButton"
             flush="left"
             iconSide="left"
             iconType="cross"
@@ -367,6 +369,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         >
           <EuiButton
             color="primary"
+            data-test-subj="createSpacePrivilegeButton"
             disabled={true}
             fill={true}
             iconSide="left"
