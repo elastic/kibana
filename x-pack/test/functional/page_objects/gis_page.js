@@ -207,6 +207,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('mapboxStyleTab');
       const mapboxStyleContainer = await testSubjects.find('mapboxStyleContainer');
       const mapboxStyleJson = await mapboxStyleContainer.getVisibleText();
+      await this.closeInspector();
       let mapboxStyle;
       try {
         mapboxStyle = JSON.parse(mapboxStyleJson);

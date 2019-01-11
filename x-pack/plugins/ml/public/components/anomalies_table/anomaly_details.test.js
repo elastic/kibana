@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { AnomalyDetails } from './anomaly_details';
 
 const props = {
@@ -85,5 +85,76 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails {...categoryTabProps} />
     );
     expect(wrapper.prop('initialSelectedTab').id).toBe('Category examples');
+  });
+
+  test('Renders with terms and regex when definition prop is not undefined', () => {
+    const categoryTabProps = {
+      ...props,
+      tabIndex: 1,
+      definition: {
+        terms: 'example terms for test',
+        regex: '.*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver'
+      }
+    };
+
+    const wrapper = mount(
+      <AnomalyDetails {...categoryTabProps} />
+    );
+
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+  });
+
+  test('Renders only with examples when definition prop is undefined', () => {
+    const categoryTabProps = {
+      ...props,
+      tabIndex: 1,
+      definition: undefined
+    };
+
+    const wrapper = mount(
+      <AnomalyDetails {...categoryTabProps} />
+    );
+
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(false);
+  });
+
+  test('Renders only with terms when definition.regex is undefined', () => {
+    const categoryTabProps = {
+      ...props,
+      tabIndex: 1,
+      definition: {
+        terms: 'example terms for test',
+      }
+    };
+
+    const wrapper = mount(
+      <AnomalyDetails {...categoryTabProps} />
+    );
+
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+  });
+
+  test('Renders only with regex when definition.terms is undefined', () => {
+    const categoryTabProps = {
+      ...props,
+      tabIndex: 1,
+      definition: {
+        regex: '.*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver'
+      }
+    };
+
+    const wrapper = mount(
+      <AnomalyDetails {...categoryTabProps} />
+    );
+
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
   });
 });
