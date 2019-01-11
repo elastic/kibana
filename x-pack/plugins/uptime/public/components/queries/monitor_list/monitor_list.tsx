@@ -64,33 +64,33 @@ const monitorListColumns = [
   },
   {
     field: 'ping.monitor.host',
-    name: i18n.translate('xpack.uptime.monitorList.columns.host.heading', {
+    name: i18n.translate('xpack.uptime.monitorList.hostColumnLabel', {
       defaultMessage: 'Host',
     }),
     render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
   },
   {
     field: 'key.port',
-    name: i18n.translate('xpack.uptime.monitorList.columns.port.heading', {
+    name: i18n.translate('xpack.uptime.monitorList.portColumnLabel', {
       defaultMessage: 'Port',
     }),
     sortable: true,
   },
   {
     field: 'ping.monitor.type',
-    name: i18n.translate('xpack.uptime.monitorList.columns.type.heading', {
+    name: i18n.translate('xpack.uptime.monitorList.typeColumnLabel', {
       defaultMessage: 'Type',
     }),
     sortable: true,
   },
   {
     field: 'ping.monitor.ip',
-    name: i18n.translate('xpack.uptime.monitorList.columns.ip.heading', { defaultMessage: 'IP' }),
+    name: i18n.translate('xpack.uptime.monitorList.ipColumnLabel', { defaultMessage: 'IP' }),
     sortable: true,
   },
   {
     field: 'upSeries',
-    name: i18n.translate('xpack.uptime.monitorList.columns.monitorHistory.heading', {
+    name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
       defaultMessage: 'Monitor History',
     }),
     // @ts-ignore TODO fix typing
