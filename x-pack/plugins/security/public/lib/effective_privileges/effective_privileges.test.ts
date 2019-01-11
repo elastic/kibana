@@ -87,6 +87,38 @@ describe('EffectivePrivileges', () => {
   // so these tests will assert that the results of the two functions are the same. The alternatives are to duplicate all of these tests,
   // or to create enough abstractions to make the bulk of this re-usable, which isn't very easy to understand.
 
+  describe('#getAssignedBasePrivilege', () => {
+    it('returns none when not assigned', () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.getAssignedBasePrivilege(0)).toEqual(NO_PRIVILEGE_VALUE);
+    });
+
+    it('returns the most permissive base privilege assigned', () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            base: ['read', 'all'],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.getAssignedBasePrivilege(0)).toEqual('all');
+    });
+  });
+
   describe('#getActualGlobalFeaturePrivilege', () => {
     it(`returns 'none' when no privileges are assigned`, () => {
       const role = buildRole({

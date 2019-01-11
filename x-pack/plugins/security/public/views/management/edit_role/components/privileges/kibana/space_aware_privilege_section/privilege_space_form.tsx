@@ -29,7 +29,11 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
 import { Role } from '../../../../../../../../common/model/role';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import {
+  EffectivePrivileges,
+  EffectivePrivilegesFactory,
+} from '../../../../../../../lib/effective_privileges';
+import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { copyRole } from '../../../../lib/copy_role';
 import { FeatureTable } from '../feature_table';
 import { SpaceSelector } from './space_selector';
@@ -379,8 +383,13 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private getDisplayedBasePrivilege = () => {
-    const form = this.state.role.kibana[this.state.editingIndex];
-    return form.base[0] || 'custom';
+    const effectivePrivileges = this.props.effectivePrivilegesFactory.getInstance(this.state.role);
+    const base = effectivePrivileges.getAssignedBasePrivilege(this.state.editingIndex);
+
+    if (base === NO_PRIVILEGE_VALUE) {
+      return 'custom';
+    }
+    return base;
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {

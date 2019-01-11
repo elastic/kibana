@@ -75,6 +75,15 @@ export class EffectivePrivileges {
   }
 
   /**
+   * Returns the assigned base privilege, without considering any effective privileges.
+   * @param spacesIndex
+   */
+  public getAssignedBasePrivilege(spacesIndex: number) {
+    const form = this.role.kibana[spacesIndex];
+    return form.base[0] || NO_PRIVILEGE_VALUE;
+  }
+
+  /**
    * Determines the actual global privilege assigned for a specific feature.
    *
    * @param featureId the feature id.
