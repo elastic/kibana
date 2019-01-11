@@ -8,61 +8,37 @@ import { ESResponse } from './fetcher';
 
 export interface MemoryChartAPIResponse {
   series: {
-    totalMemory: Coordinate[];
-    freeMemory: Coordinate[];
-    processMemorySize: Coordinate[];
-    processMemoryRss: Coordinate[];
-    averagePercentMemoryAvailable: Coordinate[];
-    minimumPercentMemoryAvailable: Coordinate[];
+    averagePercentMemoryUsed: Coordinate[];
+    maximumPercentMemoryUsed: Coordinate[];
   };
   // overall totals for the whole time range
   overallValues: {
-    totalMemory: number | null;
-    freeMemory: number | null;
-    processMemorySize: number | null;
-    processMemoryRss: number | null;
-    averagePercentMemoryAvailable: number | null;
-    minimumPercentMemoryAvailable: number | null;
+    averagePercentMemoryUsed: number | null;
+    maximumPercentMemoryUsed: number | null;
   };
   totalHits: number;
 }
 
 export type MemoryMetricName =
-  | 'totalMemory'
-  | 'freeMemory'
-  | 'processMemorySize'
-  | 'processMemoryRss'
-  | 'averagePercentMemoryAvailable'
-  | 'minimumPercentMemoryAvailable';
+  | 'averagePercentMemoryUsed'
+  | 'maximumPercentMemoryUsed';
 
 const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
-  'totalMemory',
-  'freeMemory',
-  'processMemorySize',
-  'processMemoryRss',
-  'averagePercentMemoryAvailable',
-  'minimumPercentMemoryAvailable'
+  'averagePercentMemoryUsed',
+  'maximumPercentMemoryUsed'
 ];
 
 export function transform(result: ESResponse): MemoryChartAPIResponse {
   const { aggregations, hits } = result;
   const {
     timeseriesData,
-    totalMemory,
-    freeMemory,
-    processMemorySize,
-    processMemoryRss,
-    averagePercentMemoryAvailable,
-    minimumPercentMemoryAvailable
+    averagePercentMemoryUsed,
+    maximumPercentMemoryUsed
   } = aggregations;
 
   const series: MemoryChartAPIResponse['series'] = {
-    totalMemory: [],
-    freeMemory: [],
-    processMemorySize: [],
-    processMemoryRss: [],
-    averagePercentMemoryAvailable: [],
-    minimumPercentMemoryAvailable: []
+    averagePercentMemoryUsed: [],
+    maximumPercentMemoryUsed: []
   };
 
   // using forEach here to avoid looping over the entire dataset
@@ -76,12 +52,8 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
   return {
     series,
     overallValues: {
-      totalMemory: totalMemory.value,
-      freeMemory: freeMemory.value,
-      processMemorySize: processMemorySize.value,
-      processMemoryRss: processMemoryRss.value,
-      averagePercentMemoryAvailable: averagePercentMemoryAvailable.value,
-      minimumPercentMemoryAvailable: minimumPercentMemoryAvailable.value
+      averagePercentMemoryUsed: averagePercentMemoryUsed.value,
+      maximumPercentMemoryUsed: maximumPercentMemoryUsed.value
     },
     totalHits: hits.total
   };

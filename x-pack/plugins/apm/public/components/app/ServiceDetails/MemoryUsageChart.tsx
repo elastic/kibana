@@ -22,7 +22,7 @@ export function MemoryUsageChart({ data, hoverXHandlers }: Props) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <span>Available system memory</span>
+        <span>Memory usage</span>
       </EuiTitle>
       <CustomPlot
         {...hoverXHandlers}

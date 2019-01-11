@@ -90,6 +90,8 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
           );
         }}
       />
+
+      <EuiSpacer size="xxl" />
     </React.Fragment>
   );
 };
