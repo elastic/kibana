@@ -19,7 +19,7 @@ kbn-agg-table-group {
   }
 
   tr:hover td,
-  .table-cell-filter {
+  .kbnTableCellFilter {
     background-color: $euiColorLightestShade;
   }
 }
@@ -42,7 +42,7 @@ kbn-agg-table-group {
 
   .kbnAggTable__paginated {
     tr:hover td,
-    .table-cell-filter {
+    .kbnTableCellFilter {
       background-color: $euiColorLightestShade;
     }
   }
