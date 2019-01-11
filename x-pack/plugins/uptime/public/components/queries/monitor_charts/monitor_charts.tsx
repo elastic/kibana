@@ -130,7 +130,7 @@ export const MonitorCharts = ({
                     curve="curveBasis"
                   />
                   <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.curveBasis', {
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.validateLabel', {
                       defaultMessage: 'Validate',
                     })}
                     data={rttValidateSeries}
