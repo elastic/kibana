@@ -19,7 +19,12 @@ export const TimePickerMini = ({ from, to, onSelect }) => {
   );
 
   return (
-    <Popover id="timefilter-popover-trigger-click" className="canvasTimePickerMini" button={button}>
+    <Popover
+      id="timefilter-popover-trigger-click"
+      className="canvasTimePickerMini"
+      anchorClassName="canvasTimePickerMini__anchor"
+      button={button}
+    >
       {() => <TimePicker from={from} to={to} onSelect={onSelect} />}
     </Popover>
   );

@@ -7,8 +7,9 @@
 import moment from 'moment';
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
-import chrome, { Breadcrumb } from 'ui/chrome';
+import chrome from 'ui/chrome';
 import { PLUGIN } from '../../../../common/constants';
+import { UMBreadcrumb } from '../../../breadcrumbs';
 import { UptimePersistedState } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
@@ -36,9 +37,9 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
         config.bindToScope($scope, 'k7design');
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeReactRoot');
-          let kibanaBreadcrumbs: Breadcrumb[] = [];
+          let kibanaBreadcrumbs: UMBreadcrumb[] = [];
           if ($scope.k7design) {
-            chrome.breadcrumbs.get$().subscribe((breadcrumbs: Breadcrumb[]) => {
+            chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
               kibanaBreadcrumbs = breadcrumbs;
             });
           }
