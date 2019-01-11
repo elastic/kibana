@@ -260,6 +260,7 @@ function discoverController(
         showSaveModal(saveModal);
       }
     };
+
     const openSearch = {
       key: 'open',
       label: i18n('kbn.discover.localMenu.openTitle', {
@@ -321,12 +322,13 @@ function discoverController(
       }
     };
 
-    const { showWriteControls } = uiCapabilities.discover;
-
-    if (showWriteControls) {
-      return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
-    }
-    return [newSearch, openSearch, shareSearch, inspectSearch];
+    return [
+      newSearch,
+      ...uiCapabilities.discover.save ? [saveSearch] : [],
+      openSearch,
+      shareSearch,
+      inspectSearch,
+    ];
   };
 
   $scope.topNavMenu = getTopNavLinks();
