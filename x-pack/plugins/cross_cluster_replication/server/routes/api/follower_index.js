@@ -98,4 +98,124 @@ export const registerFollowerIndexRoutes = (server) => {
       }
     },
   });
+
+
+  /**
+   * Pauses a follower index
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}/pause`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+      const ids = id.split(',');
+
+      const itemsPaused = [];
+      const errors = [];
+
+      await Promise.all(ids.map((_id) => (
+        callWithRequest('ccr.pauseFollowerIndex', { id: _id })
+          .then(() => itemsPaused.push(_id))
+          .catch(err => {
+            if (isEsError(err)) {
+              errors.push({ id: _id, error: wrapEsError(err) });
+            } else {
+              errors.push({ id: _id, error: wrapUnknownError(err) });
+            }
+          })
+      )));
+
+      return {
+        itemsPaused,
+        errors
+      };
+    },
+  });
+
+  /**
+   * Resumes a follower index
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}/resume`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+      const ids = id.split(',');
+
+      const itemsResumed = [];
+      const errors = [];
+
+      await Promise.all(ids.map((_id) => (
+        callWithRequest('ccr.resumeFollowerIndex', { id: _id })
+          .then(() => itemsResumed.push(_id))
+          .catch(err => {
+            if (isEsError(err)) {
+              errors.push({ id: _id, error: wrapEsError(err) });
+            } else {
+              errors.push({ id: _id, error: wrapUnknownError(err) });
+            }
+          })
+      )));
+
+      return {
+        itemsResumed,
+        errors
+      };
+    },
+  });
+
+  /**
+   * Unfollow follower index's leader index
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}/unfollow`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+      const ids = id.split(',');
+
+      const itemsUnfollowed = [];
+      const errors = [];
+
+      await Promise.all(ids.map(async (_id) => {
+        try {
+          // Pause follower
+          await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+
+          // Close index
+          await callWithRequest('indices.close', { index: _id });
+
+          // Unfollow leader
+          await callWithRequest('ccr.unfollowLeaderIndex', { id: _id });
+
+          // Push success
+          itemsUnfollowed.push(_id);
+        } catch (err) {
+          if (isEsError(err)) {
+            errors.push({ id: _id, error: wrapEsError(err) });
+          } else {
+            errors.push({ id: _id, error: wrapUnknownError(err) });
+          }
+        }
+      }));
+
+      return {
+        itemsUnfollowed,
+        errors
+      };
+    },
+  });
 };

@@ -32,9 +32,7 @@ import {
 
 import 'brace/theme/textmate';
 
-import {
-  FollowerIndexDeleteProvider,
-} from '../../../../../components';
+import { ContextMenu } from '../context_menu';
 
 import { API_STATUS } from '../../../../../constants';
 // import routing from '../../../../../services/routing';
@@ -238,20 +236,18 @@ export class DetailPanelUi extends Component {
 
           {followerIndex && (
             <EuiFlexItem grow={false}>
-              <FollowerIndexDeleteProvider>
-                {(deleteFollowerIndex) => (
-                  <EuiButtonEmpty
-                    color="danger"
-                    onClick={() => deleteFollowerIndex(followerIndex.name)}
-                  >
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexDetailPanel.deleteButtonLabel"
-                      defaultMessage="Delete"
-                    />
-                  </EuiButtonEmpty>
+              <ContextMenu
+                iconSide="left"
+                iconType="arrowUp"
+                anchorPosition="upRight"
+                label={(
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexDetailPanel.manageButtonLabel"
+                    defaultMessage="Manage"
+                  />
                 )}
-              </FollowerIndexDeleteProvider>
-
+                followerIndices={[followerIndex]}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

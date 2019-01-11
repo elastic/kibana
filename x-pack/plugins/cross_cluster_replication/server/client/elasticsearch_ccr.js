@@ -100,4 +100,46 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     needBody: true,
     method: 'PUT'
   });
+
+  ccr.pauseFollowerIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/pause_follow',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  ccr.resumeFollowerIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/resume_follow',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  ccr.unfollowLeaderIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/unfollow',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
 };
