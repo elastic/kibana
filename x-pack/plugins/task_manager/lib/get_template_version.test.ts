@@ -32,15 +32,12 @@ describe('getTemplateVersion', () => {
   });
 
   it('converts a snapshot build version string into an integer', () => {
-    const versionStr = '8.0.0-alpha1-snapshot';
-    expect(getTemplateVersion(versionStr)).toBe(8000001);
+    expect(getTemplateVersion('8.0.0-alpha1')).toBe(8000001);
+    expect(getTemplateVersion('8.0.0-alpha1-snapshot')).toBe(8000001);
   });
 
-  it('not intended to handle any version parts with 3-digits', () => {
-    const versionStr1 = '6.6.101';
-    expect(getTemplateVersion(versionStr1)).toBe(60610199);
-
-    const versionStr2 = '60.61.1';
-    expect(getTemplateVersion(versionStr2)).toBe(60610199);
+  it('not intended to handle any version parts with 3-digits: it will create malformed integer values', () => {
+    expect(getTemplateVersion('60.61.1') === getTemplateVersion('6.6.101')).toBe(true); // both produce 60610199
+    expect(getTemplateVersion('1.32.0') < getTemplateVersion('1.3.223423')).toBe(true);
   });
 });
