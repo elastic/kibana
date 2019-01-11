@@ -75,7 +75,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         spaceId =>
           displaySpaces.find(space => space.id === spaceId) || {
             id: spaceId,
-            name: '',
+            name: spaceId,
             disabledFeatures: [],
             deleted: true,
           }
@@ -95,7 +95,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     const getExtraBadgeProps = (space: TableSpace): EuiBadgeProps => {
       if (space.deleted) {
         return {
-          iconType: 'asterisk',
+          iconType: 'trash',
         };
       }
       return {};

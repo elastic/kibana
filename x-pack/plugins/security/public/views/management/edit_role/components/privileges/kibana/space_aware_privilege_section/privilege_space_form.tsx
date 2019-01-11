@@ -310,7 +310,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private getPrivilegeCallout = () => {
-    if (this.state.selectedSpaceIds.includes('*')) {
+    if (this.isDefiningGlobalPrivilege()) {
       return (
         <EuiFormRow fullWidth>
           <EuiCallOut
@@ -333,7 +333,18 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private onSaveClick = () => {
-    this.props.onChange(this.state.role);
+    const role = copyRole(this.state.role);
+
+    const form = role.kibana[this.state.editingIndex];
+
+    // remove any spaces that no longer exist
+    if (!this.isDefiningGlobalPrivilege()) {
+      form.spaces = form.spaces.filter(spaceId =>
+        this.props.spaces.find(space => space.id === spaceId)
+      );
+    }
+
+    this.props.onChange(role);
   };
 
   private onSelectedSpacesChange = (selectedSpaceIds: string[]) => {
@@ -426,4 +437,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     return true;
   };
+
+  private isDefiningGlobalPrivilege = () => this.state.selectedSpaceIds.includes('*');
 }
