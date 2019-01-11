@@ -129,7 +129,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
                 title={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipTitle', {
                   defaultMessage: 'Filter limitations',
                 })}
-                content={i18n.translate('xpack.uptime.filterBar.toolTip.content', {
+                content={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipText', {
                   values: { selectionLength: MAX_SELECTION_LENGTH },
                   defaultMessage:
                     'The top {selectionLength} filter options for each field are displayed, but you can modify the filters manually or search for additional values.',
