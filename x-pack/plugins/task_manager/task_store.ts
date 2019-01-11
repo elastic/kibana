@@ -8,8 +8,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
-import xPackage from '../../package.json';
-import { getTemplateVersion } from './lib/get_template_version';
+import { TASK_MANAGER_API_VERSION, TASK_MANAGER_TEMPLATE_VERSION } from './constants';
 import { Logger } from './lib/logger';
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
@@ -49,6 +48,10 @@ export interface RawTaskDoc {
   _version: number;
   _source: {
     type: string;
+    kibana: {
+      version: number;
+      apiVersion: number;
+    };
     task: {
       taskType: string;
       runAt: Date;
@@ -113,7 +116,6 @@ export class TaskStore {
 
     let existingVersion = -Infinity;
     const templateName = this.index;
-    const templateVersion = getTemplateVersion(xPackage.version);
 
     try {
       // check if template exists
@@ -129,22 +131,30 @@ export class TaskStore {
       }
     }
 
-    if (existingVersion > templateVersion) {
-      throw new Error(
-        `Template version ${templateVersion} could not be saved: existing template version ${existingVersion} is newer!`
+    if (existingVersion > TASK_MANAGER_TEMPLATE_VERSION) {
+      // Do not trample a newer version template
+      this.logger.warning(
+        `This Kibana instance defines an older template version (${TASK_MANAGER_TEMPLATE_VERSION}) than is currently in Elasticsearch (${existingVersion}). ` +
+          `Because of the potential for non-backwards compatible changes, this Kibana instance will only be able to claim scheduled tasks with ` +
+          `"kibana.apiVersion": ${TASK_MANAGER_API_VERSION} in the task metadata.`
       );
-    } else if (existingVersion === templateVersion) {
+      return;
+    } else if (existingVersion === TASK_MANAGER_TEMPLATE_VERSION) {
+      // The latest template is already saved, so just log a debug line.
       this.logger.debug(
-        `Not installing ${this.index} index template: version ${templateVersion} already exists.`
-      );
-      return; // the latest template is already saved. Nothing to do.
-    } else if (existingVersion < templateVersion) {
-      this.logger.info(
-        `Upgrading ${
+        `Not installing ${
           this.index
-        } index template. Old version: ${existingVersion}, New version: ${templateVersion}.`
+        } index template: version ${TASK_MANAGER_TEMPLATE_VERSION} already exists.`
       );
+      return;
     }
+
+    // Activate template creation / update
+    this.logger.info(
+      `Upgrading ${
+        this.index
+      } index template. Old version: ${existingVersion}, New version: ${TASK_MANAGER_TEMPLATE_VERSION}.`
+    );
 
     const templateResult = await this.callCluster('indices.putTemplate', {
       name: templateName,
@@ -175,12 +185,16 @@ export class TaskStore {
           number_of_shards: 1,
           auto_expand_replicas: '0-1',
         },
-        version: templateVersion,
+        version: TASK_MANAGER_TEMPLATE_VERSION,
       },
     });
 
     this._isInitialized = true;
-    this.logger.info(`Installed ${this.index} index template: version ${templateVersion}`);
+    this.logger.info(
+      `Installed ${
+        this.index
+      } index template: version ${TASK_MANAGER_TEMPLATE_VERSION} / API version ${TASK_MANAGER_API_VERSION}`
+    );
 
     return templateResult;
   }
@@ -384,16 +398,20 @@ function rawSource(doc: TaskInstance) {
     id,
     type: 'task',
     task: source,
+    kibana: {
+      version: TASK_MANAGER_TEMPLATE_VERSION,
+      apiVersion: TASK_MANAGER_API_VERSION,
+    },
   };
 }
 
 function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
-  const { type, task } = rawSource(doc);
+  const { type, task, kibana } = rawSource(doc);
 
   return {
     _id: doc.id,
     _index: index,
-    _source: { type, task },
+    _source: { type, task, kibana },
     _type: DOC_TYPE,
     _version: doc.version,
   };
