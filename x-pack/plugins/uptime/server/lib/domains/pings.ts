@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMGqlRange } from '../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../common/graphql/types';
 import { UMPingsAdapter } from '../adapters/pings';
 
@@ -44,10 +43,11 @@ export class UMPingsDomain {
 
   public async getPingHistogram(
     request: any,
-    range: UMGqlRange,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters?: string | null
   ): Promise<HistogramSeries[] | null> {
-    return this.adapter.getPingHistogram(request, range, filters);
+    return this.adapter.getPingHistogram(request, dateRangeStart, dateRangeEnd, filters);
   }
 
   public async getDocCount(request: any): Promise<DocCount> {

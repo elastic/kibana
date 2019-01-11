@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMGqlRange } from '../../../../common/domain_types';
-
 export interface UMMonitorsAdapter {
   getMonitorChartsData(
     request: any,
@@ -21,7 +19,8 @@ export interface UMMonitorsAdapter {
   ): Promise<any>;
   getSnapshotCount(
     request: any,
-    range: UMGqlRange,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     downCount: number,
     windowSize: number,
     filters?: string | null

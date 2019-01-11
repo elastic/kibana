@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import moment from 'moment';
-import { UMGqlRange } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -39,7 +37,8 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getSnapshotCount(
     request: any,
-    range: UMGqlRange,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     downCount: number,
     windowSize: number,
     filters?: string | null

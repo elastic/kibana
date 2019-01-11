@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMGqlRange } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 
 export interface UMPingsAdapter {
@@ -27,7 +26,8 @@ export interface UMPingsAdapter {
 
   getPingHistogram(
     request: any,
-    range: UMGqlRange,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters?: string | null
   ): Promise<HistogramSeries[] | null>;
 

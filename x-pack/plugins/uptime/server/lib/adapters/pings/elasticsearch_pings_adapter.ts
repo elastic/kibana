@@ -6,7 +6,6 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { UMGqlRange } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
@@ -151,10 +150,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getPingHistogram(
     request: any,
-    range: UMGqlRange,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters?: string | null
   ): Promise<HistogramSeries[] | null> {
-    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {

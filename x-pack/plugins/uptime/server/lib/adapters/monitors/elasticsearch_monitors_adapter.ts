@@ -6,7 +6,6 @@
 
 import { get, set } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { UMGqlRange } from '../../../../common/domain_types';
 import { ErrorListItem } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
@@ -145,12 +144,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getSnapshotCount(
     request: any,
-    range: UMGqlRange,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     downCount: number,
     windowSize: number,
     filters?: string | null
   ): Promise<any> {
-    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {

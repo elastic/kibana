@@ -55,7 +55,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
   // TODO: implement
   public getPingHistogram(
     request: any,
-    range: UMGqlRange,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     filters?: string | null | undefined
   ): Promise<HistogramSeries[] | null> {
     throw new Error('Method not implemented.');
