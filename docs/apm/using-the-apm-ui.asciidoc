@@ -71,7 +71,7 @@ refer to the documentation for each {apm-agents-ref}[APM Agent] you've implement
 ==== Transaction details
 
 Selecting a transaction group on the <<transactions,Transactions overview page>> will bring you to the Transaction detail page.
-The Transaction detail page shows a high level overview of the transaction group duration,
+The Transaction detail page shows a high-level overview of the transaction group duration,
 requests per minute, and transaction group duration distribution.
 It's important to note that all three of these graphs show data from every transaction within the selected transaction group. 
 
@@ -110,11 +110,11 @@ For a particular transaction sample, we can get even more information in the tab
 * *Process* - the process id that served up the request.
 * *User* - This requires additional configuration, but allows you to see which user experienced the current transaction.
 This can be extremely useful if it's determined that specific users are getting slow requests.
-* *Tags* - Useful if you want to start correlating transactions with log files or metrics from metricbeat.
+* *Tags* - Useful if you want to start correlating transactions with log files or metrics from Metricbeat.
 * *Custom* - You can configure your agent to add custom contextual information on transactions.
 
-TIP: All of this data is just documents in elasticsearch.
-This means we can click "Actions - View sample document" to see the actual elasticsearch document under the discover tab.
+TIP: All of this data is just documents in Elasticsearch.
+This means we can click "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.
 
 [[spans]]
 ==== Spans
@@ -123,7 +123,7 @@ TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is defined as the durat
 Spans are automatically captured by APM agents, and you can also define custom spans.
 Each span has a type and is defined by a different color in the timeline/waterfall visualization.
 
-The span timeline is essentially a timeline of wht the application was doing while it was trying to respond to the request that came in.
+The span timeline is essentially a timeline of what the application was doing while it was trying to respond to the request that came in.
 This makes it useful for visualizing where the selected transaction spent most of its time.
 
 You can view a span in detail by clicking on it in the timeline waterfall.
@@ -160,8 +160,8 @@ image::apm/images/apm-view-full-trace.png[Example of distributed trace colors in
 
 TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 
-The Errors overview page provides a high level view of the error message and culprit,
-number of occurrences, and the most recent occurrence.
+The Errors overview page provides a high-level view of the error message and culprit,
+the number of occurrences, and the most recent occurrence.
 Just like on the Transaction overview page, you'll notice we group together like errors.
 This makes it very easy to quickly see which errors are affecting your services,
 and to take actions to rectify them.
@@ -170,18 +170,18 @@ and to take actions to rectify them.
 image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM UI in Kibana]
 
 Selecting an error group ID or error message brings you to the error group page.
-At the top of this page you'll see the error message, culprit, and the number of occurrences over time.
+At the top of this page, you'll see the error message, culprit, and the number of occurrences over time.
 
-At the bottom of the page you'll see the Error occurrence table.
-Here, you can see details of a sampled error within this group.
+At the bottom of the page, you'll see the Error occurrence table.
+Here, you can see the details of a sampled error within this group.
 The error shown is always the most recent to occur.
 
-Each error occurrence features a breakdown of the exception, including the stacktrace from when the error occurred,
+Each error occurrence features a breakdown of the exception, including the stack trace from when the error occurred,
 and additional contextual information to help debug the issue.
 In some cases, you might also see a Transaction sample ID.
 This feature allows you to make a connection between the errors and transactions,
 by linking you to the specific transaction where the error occurred.
-This allows you see the whole trace, including which services the request went through. 
+This allows you to see the whole trace, including which services the request went through. 
 
 [role="screenshot"]
 image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
