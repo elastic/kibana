@@ -5,7 +5,7 @@
  */
 
 import { isString } from 'lodash';
-import { fromCallback, map } from 'bluebird';
+import { promisify } from 'util';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 import { CLOUD_METADATA_SERVICES } from '../../common/constants';
@@ -23,13 +23,19 @@ class GCPCloudService extends CloudService {
     // we need to call GCP individually for each field
     const fields = [ 'id', 'machine-type', 'zone' ];
 
-    return map(fields, field => fromCallback(callback => request(this._createRequestForField(field), callback), { multiArgs: true }))
+    const create = this._createRequestForField;
+    const allRequests = fields.map(field => promisify(request)(create(field)));
+    return Promise.all(allRequests)
     /*
       Note: there is no fallback option for GCP;
       responses are arrays containing [fullResponse, body];
       because GCP returns plaintext, we have no way of validating without using the response code
      */
-      .then(responses => responses.map(response => this._extractBody(...response)))
+      .then(responses => {
+        return responses.map(response => {
+          return this._extractBody(response, response.body);
+        });
+      })
       .then(([id, machineType, zone]) => this._combineResponses(id, machineType, zone));
   }
 

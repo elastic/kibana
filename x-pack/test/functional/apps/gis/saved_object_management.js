@@ -6,9 +6,11 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
 
   const PageObjects = getPageObjects(['gis', 'header']);
+  const queryBar = getService('queryBar');
+  const browser = getService('browser');
 
   describe('gis-map saved object management', () => {
 
@@ -41,6 +43,49 @@ export default function ({ getPageObjects }) {
       it('should load map layers stored with map', async () => {
         const layerExists = await PageObjects.gis.doesLayerExist('geo_shapes*');
         expect(layerExists).to.equal(true);
+      });
+
+      describe('mapState contains query', () => {
+        before(async () => {
+          await PageObjects.gis.loadSavedMap('document example with query');
+        });
+
+        it('should update query bar with query stored with map', async () => {
+          const query = await queryBar.getQueryString();
+          expect(query).to.equal('machine.os.raw : "ios"');
+        });
+
+        it('should update app state with query stored with map', async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const appState = currentUrl.substring(currentUrl.indexOf('_a='));
+          expect(appState).to.equal('_a=(query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))');
+        });
+
+        it('should apply query stored with map', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+          await PageObjects.gis.closeInspector();
+          expect(hits).to.equal('2');
+        });
+
+        it('should override query stored with map when query is provided in app state', async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+          const appState = `_a=(query:(language:kuery,query:'machine.os.raw%20:%20"win%208"'))`;
+          const urlWithQueryInAppState = `${kibanaBaseUrl}#/map/8eabdab0-144f-11e9-809f-ad25bb78262c?${appState}`;
+
+          await browser.get(urlWithQueryInAppState, true);
+
+          const query = await queryBar.getQueryString();
+          expect(query).to.equal('machine.os.raw : "win 8"');
+
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await PageObjects.gis.getInspectorTableData();
+          await PageObjects.gis.closeInspector();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+          expect(hits).to.equal('1');
+        });
       });
     });
 
