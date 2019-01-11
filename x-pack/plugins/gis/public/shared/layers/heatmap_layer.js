@@ -35,6 +35,10 @@ export class HeatmapLayer extends ALayer {
     return [HeatmapStyle];
   }
 
+  getIndexPatternIds() {
+    return this._source.getIndexPatternIds();
+  }
+
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
@@ -105,8 +109,14 @@ export class HeatmapLayer extends ALayer {
 
     const updateDueToExtent = this.updateDueToExtent(this._source, dataMeta, dataFilters);
 
+    const updateDueToQuery = dataFilters.query
+      && !_.isEqual(dataMeta.query, dataFilters.query);
 
-    if (isSamePrecision && isSameTime && !updateDueToExtent && !updateDueToRefreshTimer) {
+    if (isSamePrecision
+      && isSameTime
+      && !updateDueToExtent
+      && !updateDueToRefreshTimer
+      && !updateDueToQuery) {
       return;
     }
 
@@ -118,7 +128,7 @@ export class HeatmapLayer extends ALayer {
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
-    const { precision, timeFilters, buffer } = dataMeta;
+    const { precision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
     startLoading('source', requestToken, dataMeta);
     try {
@@ -128,6 +138,7 @@ export class HeatmapLayer extends ALayer {
         extent: buffer,
         timeFilters,
         layerName,
+        query,
       });
       stopLoading('source', requestToken, data);
     } catch (error) {

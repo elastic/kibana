@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import uuid from 'uuid/v4';
 
 import { VectorSource } from '../vector_source';
@@ -29,6 +29,10 @@ import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
+import {
+  EuiText,
+  EuiSpacer
+} from '@elastic/eui';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -80,6 +84,20 @@ export class ESGeohashGridSource extends VectorSource {
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
 
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{ESGeohashGridSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            Group geospatial data in grids with metrics for each gridded cell
+          </p>
+        </EuiText>
+      </Fragment>
+    );
+  }
+
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
@@ -114,6 +132,7 @@ export class ESGeohashGridSource extends VectorSource {
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
       layerName,
+      query: searchFilters.query,
     });
 
     if (this._descriptor.requestType === RENDER_AS.GRID) {
@@ -139,10 +158,18 @@ export class ESGeohashGridSource extends VectorSource {
     return true;
   }
 
+  isQueryAware() {
+    return true;
+  }
+
   getFieldNames() {
     return this.getMetricFields().map(({ propertyKey }) => {
       return propertyKey;
     });
+  }
+
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
   }
 
   async getNumberFields() {
@@ -151,7 +178,7 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
+  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
     try {
@@ -179,6 +206,7 @@ export class ESGeohashGridSource extends VectorSource {
         filters.push(timeService.createFilter(indexPattern, timeFilters));
         return filters;
       });
+      searchSource.setField('query', query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,

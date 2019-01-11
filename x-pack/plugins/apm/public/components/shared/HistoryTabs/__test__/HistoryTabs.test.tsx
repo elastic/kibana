@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTab'"
 import { EuiTab } from '@elastic/eui';
 import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
@@ -41,17 +40,17 @@ describe('HistoryTabs', () => {
       {
         name: 'One',
         path: '/one',
-        component: () => <Content name="one" />
+        render: props => <Content {...props} name="one" />
       },
       {
         name: 'Two',
         path: '/two',
-        component: () => <Content name="two" />
+        render: () => <Content name="two" />
       },
       {
         name: 'Three',
         path: '/three',
-        component: () => <Content name="three" />
+        render: () => <Content name="three" />
       }
     ];
 

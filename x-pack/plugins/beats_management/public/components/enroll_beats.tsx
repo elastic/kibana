@@ -190,7 +190,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                         .replace('{{beatType}}', this.state.beatType)
                         .replace('{{beatTypeInCaps}}', capitalize(this.state.beatType))} enroll ${
                         window.location.protocol
-                      }://${window.location.host} ${this.props.frameworkBasePath} ${
+                      }//${window.location.host}${this.props.frameworkBasePath} ${
                         this.props.enrollmentToken
                       }`}
                     </div>

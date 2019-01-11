@@ -16,6 +16,10 @@ export class ASource {
     throw new Error('Must implement Source.createDescriptor');
   }
 
+  static renderDropdownDisplayOption() {
+    throw new Error('Must implement Source.renderDropdownDisplayOption');
+  }
+
   constructor(descriptor) {
     this._descriptor = descriptor;
   }
@@ -47,6 +51,10 @@ export class ASource {
     return false;
   }
 
+  isQueryAware() {
+    return false;
+  }
+
   getFieldNames() {
     return [];
   }
@@ -57,6 +65,10 @@ export class ASource {
 
   renderSourceSettingsEditor() {
     return null;
+  }
+
+  getIndexPatternIds() {
+    return  [];
   }
 }
 
