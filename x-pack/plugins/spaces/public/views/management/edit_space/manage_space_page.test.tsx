@@ -192,16 +192,72 @@ describe('ManageSpacePage', () => {
 
     expect(spacesManager.updateSpace).toHaveBeenCalledTimes(1);
   });
+
+  it('does not warn when features are left alone in the active space', async () => {
+    const mockHttp = {
+      get: jest.fn(async () => {
+        return Promise.resolve({
+          data: {
+            id: 'my-space',
+            name: 'Existing Space',
+            description: 'hey an existing space',
+            color: '#aabbcc',
+            initials: 'AB',
+            disabledFeatures: [],
+          },
+        });
+      }),
+      delete: jest.fn(() => Promise.resolve()),
+    };
+    const mockChrome = buildMockChrome();
+
+    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
+    spacesManager.getSpace = jest.fn(spacesManager.getSpace);
+    spacesManager.updateSpace = jest.fn(spacesManager.updateSpace);
+
+    const spacesNavState: SpacesNavState = {
+      getActiveSpace: () => space,
+      refreshSpacesList: jest.fn(),
+    };
+    const wrapper = mountWithIntl(
+      <ManageSpacePage.WrappedComponent
+        spaceId={'my-space'}
+        spacesManager={spacesManager}
+        spacesNavState={spacesNavState}
+        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
+        intl={null as any}
+      />
+    );
+
+    await Promise.resolve();
+
+    expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/my-space');
+
+    await Promise.resolve();
+
+    wrapper.update();
+
+    updateSpace(wrapper, false);
+
+    await clickSaveButton(wrapper);
+
+    const warningDialog = wrapper.find(ConfirmAlterActiveSpaceModal);
+    expect(warningDialog).toHaveLength(0);
+
+    expect(spacesManager.updateSpace).toHaveBeenCalledTimes(1);
+  });
 });
 
-function updateSpace(wrapper: ReactWrapper<any, any>) {
+function updateSpace(wrapper: ReactWrapper<any, any>, updateFeature = true) {
   const nameInput = wrapper.find('input[name="name"]');
   const descriptionInput = wrapper.find('textarea[name="description"]');
 
   nameInput.simulate('change', { target: { value: 'New Space Name' } });
   descriptionInput.simulate('change', { target: { value: 'some description' } });
 
-  toggleFeature(wrapper);
+  if (updateFeature) {
+    toggleFeature(wrapper);
+  }
 }
 
 function toggleFeature(wrapper: ReactWrapper<any, any>) {
