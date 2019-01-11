@@ -28,7 +28,7 @@ export const secretstore = (kibana: any) => {
 
     init(server: any) {
       const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
-      warn('Checking for keystore...');
+
       if (!keystore.exists()) {
         warn('Keystore not found!');
         keystore.reset();
@@ -38,17 +38,13 @@ export const secretstore = (kibana: any) => {
 
       if (!keystore.has('xpack.secretstore.secret')) {
         keystore.add('xpack.secretstore.secret', crypto.randomBytes(128).toString('hex'));
-        warn(
-          'The keystore did not contain any secret used by the secretstore, one has been auto-generated for use.'
-        );
+        warn('Missing key - one has been auto-generated for use.');
       }
 
-      const so = new SecretStore(
-        server.savedObjects,
-        'secretType',
-        keystore.get('xpack.secretstore.secret')
+      server.expose(
+        'secretstore',
+        new SecretStore(server.savedObjects, 'secretType', keystore.get('xpack.secretstore.secret'))
       );
-      server.expose('secretstore', so);
     },
   });
 };
