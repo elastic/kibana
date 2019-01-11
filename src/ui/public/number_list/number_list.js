@@ -88,16 +88,21 @@ uiModules
             const list = self.getList();
             if (!list) return;
 
-            function getNext(last, max) {
-              const next = last + 1;
-              if (next < max) {
+            function getNext() {
+              if (list.length === 0) {
+                // returning NaN adds an empty input
+                return NaN;
+              }
+
+              const next = _.last(list) + 1;
+              if (next < self.range.max) {
                 return next;
               }
 
-              return max - 1;
+              return self.range.max - 1;
             }
 
-            const next = getNext(_.last(list), self.range.max);
+            const next = getNext();
             list.push(next);
           };
 
