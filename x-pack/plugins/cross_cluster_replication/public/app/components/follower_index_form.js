@@ -78,7 +78,7 @@ export const FollowerIndexForm = injectI18n(
       followerIndex: PropTypes.object,
       apiError: PropTypes.object,
       apiStatus: PropTypes.string.isRequired,
-      remoteClusters: PropTypes.array.isRequired,
+      remoteClusters: PropTypes.array,
     }
 
     constructor(props) {
@@ -98,7 +98,7 @@ export const FollowerIndexForm = injectI18n(
         followerIndex,
         fieldsErrors: {},
         areErrorsVisible: false,
-        areAdvancedSettingsVisible: false,
+        areAdvancedSettingsVisible: isNew ? false : true,
       };
 
       this.validateIndexName = debounce(this.validateIndexName, 500);
@@ -247,12 +247,14 @@ export const FollowerIndexForm = injectI18n(
        * Remote Cluster
        */
       const renderRemoteClusterField = () => {
-        const remoteClustersOptions = this.props.remoteClusters.map(({ name, isConnected }) => ({
-          value: name,
-          inputDisplay: isConnected ? name : `${name} (not connected)`,
-          disabled: !isConnected,
-          'data-test-subj': `option-${name}`
-        }));
+        const remoteClustersOptions = this.props.remoteClusters
+          ? this.props.remoteClusters.map(({ name, isConnected }) => ({
+            value: name,
+            inputDisplay: isConnected ? name : `${name} (not connected)`,
+            disabled: !isConnected,
+            'data-test-subj': `option-${name}`
+          }))
+          : {};
 
         return (
           <EuiDescribedFormGroup
@@ -325,14 +327,18 @@ export const FollowerIndexForm = injectI18n(
        */
       const renderAdvancedSettings = () => (
         <Fragment>
-          <EuiButtonEmpty
-            iconType={areAdvancedSettingsVisible ? "arrowUp" : "arrowDown"}
-            flush="left"
-            onClick={this.toggleAdvancedSettings}
-          >
-            { toggleAdvancedSettingButtonLabel }
-          </EuiButtonEmpty>
-          <EuiSpacer size="s" />
+          { isNew && (
+            <Fragment>
+              <EuiButtonEmpty
+                iconType={areAdvancedSettingsVisible ? "arrowUp" : "arrowDown"}
+                flush="left"
+                onClick={this.toggleAdvancedSettings}
+              >
+                { toggleAdvancedSettingButtonLabel }
+              </EuiButtonEmpty>
+              <EuiSpacer size="s" />
+            </Fragment>
+          ) }
           {areAdvancedSettingsVisible && (
             Object.entries(followerIndexFormSchema.advanced).map(([field, schema]) => (
               <FormEntryRow

@@ -8,3 +8,4 @@ export { CrossClusterReplicationHome } from './home';
 export { AutoFollowPatternAdd } from './auto_follow_pattern_add';
 export { AutoFollowPatternEdit } from './auto_follow_pattern_edit';
 export { FollowerIndexAdd } from './follower_index_add';
+export { FollowerIndexEdit } from './follower_index_edit';

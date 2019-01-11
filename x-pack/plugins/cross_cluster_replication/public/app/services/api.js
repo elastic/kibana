@@ -89,6 +89,10 @@ export const unfollowLeaderIndex = (id) => {
   return httpClient.put(`${apiPrefix}/follower_indices/${ids}/unfollow`).then(extractData);
 };
 
+export const updateFollowerIndex = (id, followerIndex) => (
+  httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`, followerIndex).then(extractData)
+);
+
 /* Stats */
 export const loadAutoFollowStats = () => (
   httpClient.get(`${apiPrefixIndexManagement}/stats/auto-follow`).then(extractData)

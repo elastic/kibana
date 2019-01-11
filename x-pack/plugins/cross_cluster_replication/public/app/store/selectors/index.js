@@ -6,10 +6,11 @@
 
 import { createSelector } from 'reselect';
 import { objectToArray } from '../../services/utils';
+import { API_STATUS } from '../../constants';
 
 // Api
 export const getApiState = (state) => state.api;
-export const getApiStatus = (scope) => createSelector(getApiState, (apiState) => apiState.status[scope]);
+export const getApiStatus = (scope) => createSelector(getApiState, (apiState) => apiState.status[scope] || API_STATUS.IDLE);
 export const getApiError = (scope) => createSelector(getApiState, (apiState) => apiState.error[scope]);
 export const isApiAuthorized = (scope) => createSelector(getApiError(scope), (error) => {
   if (!error) {

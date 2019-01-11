@@ -50,6 +50,7 @@ export const AutoFollowPatternEdit = injectI18n(
       if (lastAutoFollowPatternId !== autoFollowPatternId) {
         return { lastAutoFollowPatternId: autoFollowPatternId };
       }
+      return null;
     }
 
     state = { lastAutoFollowPatternId: undefined }

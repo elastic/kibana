@@ -32,6 +32,9 @@ export const reducer = (state = initialState, action) => {
     case t.FOLLOWER_INDEX_SELECT_DETAIL: {
       return { ...state, selectedDetailId: action.payload };
     }
+    case t.FOLLOWER_INDEX_SELECT_EDIT: {
+      return { ...state, selectedEditId: action.payload };
+    }
     case success(t.FOLLOWER_INDEX_UNFOLLOW): {
       const byId = { ...state.byId };
       const { itemsUnfollowed } = action.payload;

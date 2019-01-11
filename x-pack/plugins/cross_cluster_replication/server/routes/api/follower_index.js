@@ -11,6 +11,7 @@ import {
   deserializeFollowerIndex,
   deserializeListFollowerIndices,
   serializeFollowerIndex,
+  // serializeAdvancedSettings,
 } from '../../lib/follower_index_serialization';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -100,6 +101,34 @@ export const registerFollowerIndexRoutes = (server) => {
     },
   });
 
+  /**
+   * Edit a follower index
+   */
+  server.route({
+    path: `${API_BASE_PATH}/follower_indices/{id}`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (/*request*/) => {
+      // const callWithRequest = callWithRequestFactory(server, request);
+      // const { id: name } = request.params;
+      // const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
+
+      try {
+        /**
+         * We need to first pause the follower and then resume it passing the advanced settings
+         */
+        // TODO: Add this when pause/resume PR will be merged
+        return 'NOT_IMPLEMENTED';
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
 
   /**
    * Pauses a follower index
