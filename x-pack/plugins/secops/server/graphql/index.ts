@@ -9,7 +9,7 @@ import { sharedSchema } from '../../common/graphql/shared';
 import { getSourceQueryMock } from '../graphql/sources/source.mock';
 import { getAllSourcesQueryMock } from '../graphql/sources/sources.mock';
 import { Logger } from '../utils/logger';
-import { authorizationSchema } from './authorization/schema.gql';
+import { authorizationSchema } from './authorizations/schema.gql';
 import { eventsSchema } from './events/schema.gql';
 import { hostsSchema } from './hosts/schema.gql';
 import { sourceStatusSchema } from './source_status/schema.gql';

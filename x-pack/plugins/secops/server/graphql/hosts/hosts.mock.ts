@@ -8,45 +8,43 @@ import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
 
-/* tslint:disable */
 export const mockHostsData = {
   Hosts: {
     totalCount: 4,
     edges: [
-        {
+      {
         host: {
-            _id: '3PsyhGcB0WOhS6qy2LAB',
-            name: 'galadriel.elstc.co',
-            os: 'Ubuntu',
-            version: '18.04.1 LTS (Bionic Beaver)',
-            firstSeen: '2018-12-06T15:45:52.095Z'
+          _id: '3PsyhGcB0WOhS6qy2LAB',
+          name: 'galadriel.elstc.co',
+          os: 'Ubuntu',
+          version: '18.04.1 LTS (Bionic Beaver)',
+          firstSeen: '2018-12-06T15:45:52.095Z',
         },
         cursor: {
-            value: '6f7be6fb33e6c77f057266415c094408'
-        }
+          value: '6f7be6fb33e6c77f057266415c094408',
         },
-        {
+      },
+      {
         host: {
-            _id: 'cPsuhGcB0WOhS6qyTKC0',
-            name: 'elrond.elstc.co',
-            os: 'Ubuntu',
-            version: '18.04.1 LTS (Bionic Beaver)',
-            firstSeen: '2018-12-06T15:40:53.319Z'
+          _id: 'cPsuhGcB0WOhS6qyTKC0',
+          name: 'elrond.elstc.co',
+          os: 'Ubuntu',
+          version: '18.04.1 LTS (Bionic Beaver)',
+          firstSeen: '2018-12-06T15:40:53.319Z',
         },
         cursor: {
-            value: '98966fa2013c396155c460d35c0902be'
-        }
-        }
+          value: '98966fa2013c396155c460d35c0902be',
+        },
+      },
     ],
     pageInfo: {
-        endCursor: {
-        value: '98966fa2013c396155c460d35c0902be'
-        },
-        hasNextPage: true
-    }
-  }
+      endCursor: {
+        value: '98966fa2013c396155c460d35c0902be',
+      },
+      hasNextPage: true,
+    },
+  },
 };
-/* tslint:enable */
 
 export const getHostsQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SecOpsContext) => {

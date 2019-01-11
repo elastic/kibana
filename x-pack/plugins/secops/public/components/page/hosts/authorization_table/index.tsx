@@ -132,6 +132,14 @@ const getAuthorizedColumns = () => [
     ),
   },
   {
+    name: 'To',
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.to.name)}</>
+    ),
+  },
+  {
     name: 'Latest',
     truncateText: false,
     hideForMobile: false,

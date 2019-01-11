@@ -7,7 +7,7 @@
 import { addMockFunctionsToSchema, IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { createMocks, schemas } from './graphql';
-import { createAuthorizationResolvers } from './graphql/authorization';
+import { createAuthorizationResolvers } from './graphql/authorizations';
 import { createEventsResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
 import { createSourceStatusResolvers } from './graphql/source_status';

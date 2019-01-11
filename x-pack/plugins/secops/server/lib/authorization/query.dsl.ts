@@ -13,6 +13,8 @@ import { AuthorizationsRequestOptions } from './types';
 export const auditdMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
   from: 'source.ip',
+  'to.id': 'host.id',
+  'to.name': 'host.name',
 };
 
 export const buildQuery = (options: AuthorizationsRequestOptions) => {

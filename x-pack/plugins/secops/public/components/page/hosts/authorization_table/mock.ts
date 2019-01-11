@@ -18,6 +18,11 @@ export const mockData: { Authorizations: AuthorizationsData } = {
           user: 'Evan Hassanabad',
           from: '127.0.0.1',
           latest: '2019-01-11T06:18:30.745Z',
+          to: {
+            id: '123',
+            name: 'host-computer-1',
+            ip: '192.168.0.1',
+          },
         },
         cursor: {
           value: '98966fa2013c396155c460d35c0902be',
@@ -31,6 +36,11 @@ export const mockData: { Authorizations: AuthorizationsData } = {
           user: 'Braden Hassanabad',
           from: '127.0.0.1',
           latest: '2019-01-11T06:18:30.745Z',
+          to: {
+            id: '234',
+            name: 'host-computer-2',
+            ip: '192.168.0.1',
+          },
         },
         cursor: {
           value: 'aa7ca589f1b8220002f2fc61c64cfbf1',

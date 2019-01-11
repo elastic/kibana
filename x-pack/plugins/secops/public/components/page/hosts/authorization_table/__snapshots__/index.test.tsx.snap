@@ -11,6 +11,11 @@ exports[`Authorization Table Component rendering it renders the default Authoriz
           "from": "127.0.0.1",
           "latest": "2019-01-11T06:18:30.745Z",
           "successes": 0,
+          "to": Object {
+            "id": "123",
+            "ip": "192.168.0.1",
+            "name": "host-computer-1",
+          },
           "user": "Evan Hassanabad",
         },
         "cursor": Object {
@@ -24,6 +29,11 @@ exports[`Authorization Table Component rendering it renders the default Authoriz
           "from": "127.0.0.1",
           "latest": "2019-01-11T06:18:30.745Z",
           "successes": 0,
+          "to": Object {
+            "id": "234",
+            "ip": "192.168.0.1",
+            "name": "host-computer-2",
+          },
           "user": "Braden Hassanabad",
         },
         "cursor": Object {

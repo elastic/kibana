@@ -125,6 +125,16 @@ export interface AuthorizationItem {
   from: string;
 
   latest: string;
+
+  to: HostEcsFields;
+}
+
+export interface HostEcsFields {
+  id?: string | null;
+
+  ip?: string | null;
+
+  name?: string | null;
 }
 
 export interface CursorType {
@@ -205,14 +215,6 @@ export interface GeoEcsFields {
   country_iso_code?: string | null;
 
   region_name?: string | null;
-}
-
-export interface HostEcsFields {
-  id?: string | null;
-
-  ip?: string | null;
-
-  name?: string | null;
 }
 
 export interface SourceEcsFields {
@@ -450,7 +452,19 @@ export namespace GetAuthorizationQuery {
 
     from: string;
 
+    to: To;
+
     latest: string;
+  };
+
+  export type To = {
+    __typename?: 'HostEcsFields';
+
+    id?: string | null;
+
+    ip?: string | null;
+
+    name?: string | null;
   };
 
   export type Cursor = {

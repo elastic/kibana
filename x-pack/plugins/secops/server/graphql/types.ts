@@ -154,6 +154,16 @@ export interface AuthorizationItem {
   from: string;
 
   latest: string;
+
+  to: HostEcsFields;
+}
+
+export interface HostEcsFields {
+  id?: string | null;
+
+  ip?: string | null;
+
+  name?: string | null;
 }
 
 export interface CursorType {
@@ -234,14 +244,6 @@ export interface GeoEcsFields {
   country_iso_code?: string | null;
 
   region_name?: string | null;
-}
-
-export interface HostEcsFields {
-  id?: string | null;
-
-  ip?: string | null;
-
-  name?: string | null;
 }
 
 export interface SourceEcsFields {
@@ -803,6 +805,8 @@ export namespace AuthorizationItemResolvers {
     from?: FromResolver<string, TypeParent, Context>;
 
     latest?: LatestResolver<string, TypeParent, Context>;
+
+    to?: ToResolver<HostEcsFields, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -833,6 +837,37 @@ export namespace AuthorizationItemResolvers {
   export type LatestResolver<
     R = string,
     Parent = AuthorizationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ToResolver<
+    R = HostEcsFields,
+    Parent = AuthorizationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HostEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type IpResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1095,32 +1130,6 @@ export namespace GeoEcsFieldsResolvers {
   export type RegionNameResolver<
     R = string | null,
     Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace HostEcsFieldsResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
-    id?: IdResolver<string | null, TypeParent, Context>;
-
-    ip?: IpResolver<string | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = string | null,
-    Parent = HostEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type IpResolver<
-    R = string | null,
-    Parent = HostEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

@@ -14,6 +14,7 @@ export const authorizationSchema = gql`
     user: String!
     from: String!
     latest: String!
+    to: HostEcsFields!
   }
 
   type AuthorizationsEdges {

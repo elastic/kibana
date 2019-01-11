@@ -24,6 +24,10 @@ export const authorizationQuery = gql`
             successes
             user
             from
+            to {
+              id
+              name
+            }
             latest
           }
           cursor {

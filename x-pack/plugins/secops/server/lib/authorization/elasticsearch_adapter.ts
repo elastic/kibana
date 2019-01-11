@@ -75,6 +75,10 @@ export const formatAuthorizationData = (
       user: '',
       from: '',
       latest: '',
+      to: {
+        id: '',
+        name: '',
+      },
     },
     cursor: {
       value: '',
