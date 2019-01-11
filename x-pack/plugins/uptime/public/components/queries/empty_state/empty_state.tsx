@@ -29,7 +29,7 @@ export const EmptyState = ({
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.emptyState.loadingMessage', {
-          defaultMessage: 'Loading...',
+          defaultMessage: 'Loading…',
         });
       }
       if (error) {
