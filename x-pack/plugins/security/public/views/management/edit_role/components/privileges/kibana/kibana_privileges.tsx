@@ -7,9 +7,9 @@
 import { InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
-import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
+import { PrivilegeDefinition } from '../../../../../../../common/model/privileges/privilege_definition';
 import { Role } from '../../../../../../../common/model/role';
 import { EffectivePrivilegesFactory } from '../../../../../../lib/effective_privileges';
 import { RoleValidator } from '../../../lib/validate_role';

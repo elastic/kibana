@@ -13,13 +13,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
-import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges';
 import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
-import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
 import { Role } from '../../../../../../../../common/model/role';
+import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
 import { PrivilegeSpaceForm } from './privilege_space_form';

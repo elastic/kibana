@@ -24,12 +24,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { EffectivePrivilegesFactory } from 'plugins/security/lib/effective_privileges';
 import React, { Component } from 'react';
-import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
-import { Role } from 'x-pack/plugins/security/common/model/role';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
+import { Role } from '../../../../../../../../common/model/role';
+import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
 import { FeatureTable } from '../feature_table';
 import { SpaceSelector } from './space_selector';

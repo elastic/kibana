@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPrivilege } from 'x-pack/plugins/security/common/model/index_privilege';
-import { Role } from 'x-pack/plugins/security/common/model/role';
+import { IndexPrivilege } from '../../../../../common/model/index_privilege';
+import { Role } from '../../../../../common/model/role';
 
 export function transformRoleForSave(role: Role) {
   // Remove any placeholder index privileges

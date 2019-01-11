@@ -14,9 +14,9 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Role } from 'x-pack/plugins/security/common/model/role';
-import { getSpaceColor } from 'x-pack/plugins/spaces/common';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import { getSpaceColor } from '../../../../../../../../../spaces/common';
+import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { Role } from '../../../../../../../../common/model/role';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
 import { PrivilegeDisplay } from './privilege_display';

@@ -13,11 +13,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { EffectivePrivileges } from 'plugins/security/lib/effective_privileges';
 import React, { Component, Fragment } from 'react';
-import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
 import { Role } from '../../../../../../../../common/model/role';
+import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { copyRole } from '../../../../lib/copy_role';
 import { FeatureTable } from '../feature_table';
