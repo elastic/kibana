@@ -56,7 +56,7 @@ const monitorListColumns = [
   },
   {
     field: 'ping.timestamp',
-    name: i18n.translate('xpack.uptime.monitorList.columns.timestamp.heading', {
+    name: i18n.translate('xpack.uptime.monitorList.lastUpdatedColumnLabel', {
       defaultMessage: 'Last updated',
     }),
     render: (timestamp: string) => moment(timestamp).fromNow(),
