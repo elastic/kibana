@@ -86,12 +86,7 @@ export function getKibanaHref({
   pathname,
   hash,
   query
-}: {
-  location: Location;
-  pathname: string;
-  hash?: string;
-  query?: QueryParamsDecoded;
-}): string {
+}: KibanaHrefArgs): string {
   const queryWithRisonParams = getQueryWithRisonParams(location, query);
   const search = stringifyWithoutEncoding(queryWithRisonParams);
   const href = url.format({
