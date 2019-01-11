@@ -6,8 +6,8 @@
 
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../../common/constants';
 import { EventRoller } from './event_roller';
-import { getOSInfo } from './get_os_info';
 import { CloudDetector } from '../../../cloud';
+import { getOSInfo } from '../../../../../../../src/server/status/lib/get_os_info';
 
 /**
  * Manage the buffer of Kibana Ops events
