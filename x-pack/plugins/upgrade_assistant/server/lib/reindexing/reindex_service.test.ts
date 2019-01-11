@@ -61,13 +61,14 @@ describe('reindexService', () => {
 
   describe('createReindexOperation', () => {
     it('creates new reindex operation', async () => {
-      callCluster.mockResolvedValue(true);
-      savedObjectClient.find.mockResolvedValue({ total: 0 });
+      callCluster.mockResolvedValueOnce(true);
+      savedObjectClient.find.mockResolvedValueOnce({ total: 0 });
+      callCluster.mockResolvedValueOnce(false);
 
       await service.createReindexOperation('myIndex');
       expect(savedObjectClient.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
-        newIndexName: 'myIndex-updated',
+        newIndexName: 'myIndex-reindex-0',
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -78,14 +79,14 @@ describe('reindexService', () => {
     });
 
     it('fails if index does not exist', async () => {
-      callCluster.mockResolvedValue(false);
+      callCluster.mockResolvedValueOnce(false);
       expect(service.createReindexOperation('myIndex')).rejects.toThrow();
       expect(savedObjectClient.create).not.toHaveBeenCalled();
     });
 
     it('deletes existing operation if it failed', async () => {
-      callCluster.mockResolvedValue(true);
-      savedObjectClient.find.mockResolvedValue({
+      callCluster.mockResolvedValueOnce(true);
+      savedObjectClient.find.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.failed } }],
         total: 1,
       });
@@ -95,14 +96,45 @@ describe('reindexService', () => {
     });
 
     it('fails if existing operation did not fail', async () => {
-      callCluster.mockResolvedValue(true);
-      savedObjectClient.find.mockResolvedValue({
+      callCluster.mockResolvedValueOnce(true);
+      savedObjectClient.find.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.inProgress } }],
         total: 1,
       });
 
       expect(service.createReindexOperation('myIndex')).rejects.toThrow();
       expect(savedObjectClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('generates fallback newIndexName if already exists', async () => {
+      callCluster.mockResolvedValueOnce(true);
+      savedObjectClient.find.mockResolvedValueOnce({ total: 0 });
+      callCluster.mockResolvedValueOnce(true);
+      callCluster.mockResolvedValueOnce(false);
+
+      await service.createReindexOperation('myIndex');
+      expect(savedObjectClient.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
+        indexName: 'myIndex',
+        newIndexName: 'myIndex-reindex-1',
+        status: ReindexStatus.inProgress,
+        lastCompletedStep: ReindexStep.created,
+        locked: null,
+        reindexTaskId: null,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+      });
+    });
+
+    it('fails if it cannot find a newIndexName that does not already exist', () => {
+      callCluster.mockResolvedValueOnce(true);
+      savedObjectClient.find.mockResolvedValueOnce({
+        saved_objects: [{ id: 1, attributes: { status: ReindexStatus.inProgress } }],
+        total: 1,
+      });
+      callCluster.mockResolvedValue(true); // always return true
+
+      expect(service.createReindexOperation('myIndex')).rejects.toThrow();
+      expect(savedObjectClient.create).not.toHaveBeenCalled();
     });
   });
 
@@ -192,7 +224,7 @@ describe('reindexService', () => {
   describe('state machine, lastCompletedStep ===', () => {
     const defaultAttributes = {
       indexName: 'myIndex',
-      newIndexName: 'myIndex-updated',
+      newIndexName: 'myIndex-reindex-0',
     };
     const settingsMappings = {
       settings: { 'index.number_of_replicas': 7, 'index.blocks.write': true },
@@ -247,7 +279,7 @@ describe('reindexService', () => {
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
         expect(callCluster).toHaveBeenCalledWith('indices.create', {
-          index: 'myIndex-updated',
+          index: 'myIndex-reindex-0',
           body: {
             // index.blocks.write should be removed from the settings for the new index.
             settings: { 'index.number_of_replicas': 7 },
@@ -299,7 +331,7 @@ describe('reindexService', () => {
           waitForCompletion: false,
           body: {
             source: { index: 'myIndex' },
-            dest: { index: 'myIndex-updated' },
+            dest: { index: 'myIndex-reindex-0' },
           },
         });
       });
@@ -381,7 +413,7 @@ describe('reindexService', () => {
         expect(callCluster).toHaveBeenCalledWith('indices.updateAliases', {
           body: {
             actions: [
-              { add: { index: 'myIndex-updated', alias: 'myIndex' } },
+              { add: { index: 'myIndex-reindex-0', alias: 'myIndex' } },
               { remove_index: { index: 'myIndex' } },
             ],
           },

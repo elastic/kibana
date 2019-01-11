@@ -5,7 +5,9 @@
  */
 
 import Boom from 'boom';
+import { range } from 'lodash';
 import moment from 'moment';
+
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   FindResponse,
@@ -134,6 +136,24 @@ export const reindexServiceFactory = (
     }
 
     return flatSettings[indexName];
+  };
+
+  /**
+   * Generates a new index name for the new index. Iterates until it finds an index
+   * that doesn't already exist.
+   * @param indexName
+   */
+  const getNewIndexName = async (indexName: string, attempts = 100) => {
+    for (const i of range(0, attempts)) {
+      const newIndexName = `${indexName}-reindex-${i}`;
+      if (!(await callCluster('indices.exists', { index: newIndexName }))) {
+        return newIndexName;
+      }
+    }
+
+    throw new Error(
+      `Could not generate an indexName that does not already exist after ${attempts} attempts.`
+    );
   };
 
   // ------ Functions used to process the state machine
@@ -353,11 +373,9 @@ export const reindexServiceFactory = (
         }
       }
 
-      // TODO: make this smarter, be able to fallback if this name exists.
-      const newIndexName = `${indexName}-updated`;
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName,
+        newIndexName: await getNewIndexName(indexName),
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
