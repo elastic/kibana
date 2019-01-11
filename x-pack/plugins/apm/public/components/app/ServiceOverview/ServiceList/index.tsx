@@ -53,7 +53,7 @@ export const SERVICE_COLUMNS = [
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink pathname={'/app/apm'} hash={`/${serviceName}/transactions`}>
+        <AppLink hash={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>

@@ -51,9 +51,5 @@ export const TransactionLink: React.SFC<TransactionLinkProps> = ({
     return <React.Fragment>{children}</React.Fragment>;
   }
 
-  return (
-    <KibanaLink pathname="/app/apm" {...linkProps}>
-      {children}
-    </KibanaLink>
-  );
+  return <KibanaLink {...linkProps}>{children}</KibanaLink>;
 };

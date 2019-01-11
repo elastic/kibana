@@ -250,7 +250,6 @@ function getTransactionLink(error: APMError, transaction?: Transaction) {
 
   return (
     <KibanaLink
-      pathname={'/app/apm'}
       hash={path}
       query={{
         transactionId: transaction.transaction.id,

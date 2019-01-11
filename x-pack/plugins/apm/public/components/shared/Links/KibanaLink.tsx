@@ -26,7 +26,7 @@ export function UnconnectedKibanaLink({
   location,
   pathname,
   hash,
-  query = {},
+  query,
   ...props
 }: Props) {
   const href = getKibanaHref({

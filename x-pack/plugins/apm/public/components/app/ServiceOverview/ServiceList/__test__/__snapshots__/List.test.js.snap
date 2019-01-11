@@ -9,7 +9,6 @@ exports[`ErrorGroupOverview -> List should render columns correctly 1`] = `
 >
   <Styled(Connect(UnconnectedKibanaLink))
     hash="/opbeans-python/transactions"
-    pathname="/app/apm"
   >
     opbeans-python
   </Styled(Connect(UnconnectedKibanaLink))>

@@ -76,16 +76,16 @@ function getQueryWithRisonParams(location: Location, query: RisonDecoded = {}) {
 
 export interface KibanaHrefArgs {
   location: Location;
-  pathname: string;
+  pathname?: string;
   hash?: string;
   query?: QueryParamsDecoded;
 }
 
 export function getKibanaHref({
   location,
-  pathname,
+  pathname = '',
   hash,
-  query
+  query = {}
 }: KibanaHrefArgs): string {
   const queryWithRisonParams = getQueryWithRisonParams(location, query);
   const search = stringifyWithoutEncoding(queryWithRisonParams);
