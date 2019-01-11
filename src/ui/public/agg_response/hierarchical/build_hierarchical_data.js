@@ -17,58 +17,10 @@
  * under the License.
  */
 
-import { toArray } from 'lodash';
 import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { convertTableProvider } from './_convert_table';
 
 export function BuildHierarchicalDataProvider(Private) {
   const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
-
-  return function (table, { metric, buckets = [] }) {
-    let slices;
-    const names = {};
-    const metricColumn = table.columns[metric.accessor];
-    const metricFieldFormatter = getFormat(metric.format);
-    if (!buckets.length) {
-      slices = [{ name: metricColumn.name, size: table.rows[0][metricColumn.id].value, aggConfig: metricColumn.aggConfig }];
-      names[metricColumn.name] = metricColumn.name;
-    } else {
-
-      slices = [];
-      table.rows.forEach((row, rowIndex) => {
-        let parent;
-        let dataLevel = slices;
-        buckets.forEach(bucket => {
-          const bucketColumn = table.columns[bucket.accessor];
-          const bucketValueColumn = table.columns[bucket.accessor + 1];
-          const bucketFormatter = getFormat(bucket.format);
-          const name = bucketFormatter.convert(row[bucketColumn.id]);
-          const size = row[bucketValueColumn.id];
-
-
-          let slice  = dataLevel.find(slice => slice.name === name);
-          if (!slice) {
-            slice = { name, size, parent, children: [], aggConfig: bucketColumn.aggConfig, rawData: {
-              table, row: rowIndex, column: bucket.accessor, value: row[bucketColumn.id]
-            } };
-            dataLevel.push(slice);
-          }
-          parent = slice;
-          dataLevel = slice.children;
-        });
-      });
-    }
-
-    return {
-      hits: table.rows.length,
-      raw: table,
-      names: toArray(names),
-      tooltipFormatter: tooltipFormatter(metricFieldFormatter),
-      slices: {
-        children: [
-          ...slices
-        ]
-      }
-    };
-  };
+  return convertTableProvider(tooltipFormatter);
 }
