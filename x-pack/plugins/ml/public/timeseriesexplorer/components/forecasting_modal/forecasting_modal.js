@@ -467,5 +467,3 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     );
   }
 });
-
-// export { ForecastingModal };
