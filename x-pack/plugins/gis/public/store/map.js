@@ -20,6 +20,7 @@ import {
   MAP_READY,
   MAP_DESTROYED,
   SET_TIME_FILTERS,
+  SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
@@ -85,6 +86,7 @@ const INITIAL_STATE = {
     extent: null,
     mouseCoordinates: null,
     timeFilters: null,
+    query: null,
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
   },
@@ -162,6 +164,9 @@ export function map(state = INITIAL_STATE, action) {
     case SET_TIME_FILTERS:
       const { from, to } = action;
       return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
+    case SET_QUERY:
+      const { query } = action;
+      return { ...state, mapState: { ...state.mapState, query } };
     case SET_REFRESH_CONFIG:
       const { isPaused, interval } = action;
       return {

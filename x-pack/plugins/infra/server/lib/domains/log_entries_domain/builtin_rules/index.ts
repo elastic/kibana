@@ -5,6 +5,7 @@
  */
 
 import { filebeatApache2Rules } from './filebeat_apache2';
+import { filebeatAuditdRules } from './filebeat_auditd';
 import { filebeatMySQLRules } from './filebeat_mysql';
 import { filebeatNginxRules } from './filebeat_nginx';
 import { filebeatRedisRules } from './filebeat_redis';
@@ -18,6 +19,7 @@ export const builtinRules = [
   ...filebeatRedisRules,
   ...filebeatSystemRules,
   ...filebeatMySQLRules,
+  ...filebeatAuditdRules,
   ...genericRules,
   {
     when: {

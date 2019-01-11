@@ -79,7 +79,7 @@ exports[`DetailView should render StickyProperties 1`] = `
           pathname="/app/apm"
           query={
             Object {
-              "traceid": "traceId",
+              "traceId": "traceId",
               "transactionId": "myTransactionName",
             }
           }
@@ -101,7 +101,12 @@ exports[`DetailView should render StickyProperties 1`] = `
 
 exports[`DetailView should render TabContent 1`] = `
 <TabContent
-  currentTab="exception_stacktrace"
+  currentTab={
+    Object {
+      "key": "exception_stacktrace",
+      "label": "Exception stacktrace",
+    }
+  }
   error={
     Object {
       "@timestamp": "myTimestamp",
