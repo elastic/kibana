@@ -12,7 +12,7 @@ import {
 
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'uptime',
-  title: i18n.translate('uptimeFeatureCatalogueTitle', { defaultMessage: 'Uptime' }),
+  title: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', { defaultMessage: 'Uptime' }),
   description: i18n.translate('xpack.uptime.featureCatalogueDescription', {
     defaultMessage: 'Perform endpoint health checks and uptime monitoring.',
   }),
