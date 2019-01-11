@@ -7,17 +7,15 @@
 
 import expect from 'expect.js';
 
-import { ReindexStatus, REINDEX_OP_TYPE } from '../../../../plugins/upgrade_assistant/common/types';
+import { ReindexStatus, REINDEX_OP_TYPE, ReindexWarning } from '../../../../plugins/upgrade_assistant/common/types';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const archive = 'upgrade_assistant/reindex';
-  const indexName = 'dummydata';
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
-  const waitForReindexToComplete = async () => {
+  const waitForReindexToComplete = async (indexName) => {
     console.log(`Waiting for reindex to complete...`);
     let lastState;
 
@@ -33,66 +31,91 @@ export default function ({ getService }) {
     return lastState;
   };
 
-  const cleanup = async () => {
-    const lastState = await waitForReindexToComplete();
-
-    console.log(`Deleting reindex saved object...`);
-    await es.deleteByQuery({
-      index: '.kibana',
-      refresh: true,
-      body: {
-        query: {
-          "simple_query_string": {
-            query: REINDEX_OP_TYPE,
-            fields: ["type"]
+  describe('reindexing', () => {
+    after(() => {
+      // Cleanup saved objects
+      return es.deleteByQuery({
+        index: '.kibana',
+        refresh: true,
+        body: {
+          query: {
+            "simple_query_string": {
+              query: REINDEX_OP_TYPE,
+              fields: ["type"]
+            }
           }
         }
-      }
+      });
     });
 
-    if (lastState.status === ReindexStatus.completed) {
-      console.log(`Deleting ${lastState.newIndexName}...`);
-      await es.indices.delete({
-        index: lastState.newIndexName
-      });
-    }
-  };
-
-  describe('reindexing', () => {
-    beforeEach(() => esArchiver.load(archive));
-    // Wait for completion and cleanup data so tests don't collide.
-    afterEach(cleanup);
-
     it('should create a new index with the same documents', async () => {
-      // const originalMappings = await es.client.indices.getMapping({ index: indexName });
+      await esArchiver.load('upgrade_assistant/reindex');
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/${indexName}`)
+        .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body.indexName).to.equal(indexName);
+      expect(body.indexName).to.equal('dummydata');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
-      const lastState = await waitForReindexToComplete();
+      const lastState = await waitForReindexToComplete('dummydata');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
 
-      // const x = await es.indices.exists({ index: indexName });
-      // const y = await es.indices.exists({ index: lastState.newIndexName });
       const { newIndexName } = lastState;
-      const indexSummary = await es.indices.get({ index: indexName });
+      const indexSummary = await es.indices.get({ index: 'dummydata' });
 
       // The new index was created
       expect(indexSummary[newIndexName]).to.be.an('object');
       // The original index name is aliased to the new one
-      expect(indexSummary[newIndexName].aliases[indexName]).to.be.an('object');
+      expect(indexSummary[newIndexName].aliases.dummydata).to.be.an('object');
       // The number of documents in the new index matches what we expect
       expect(
         (await es.count({ index: lastState.newIndexName })).count
       ).to.be(3);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName
+      });
     });
 
-    it('handles indices with auto-fixable deprecated settings');
-    it('rejects indices using unfixable deprecated settings');
+    it('shows warnings for boolean fields', async () => {
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/boolean-test`);
+      expect(resp.body.warnings.includes(ReindexWarning.booleanFields)).to.be(true);
+    });
+
+    it('shows warnings for all meta field', async () => {
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/all-field-test`);
+      expect(resp.body.warnings.includes(ReindexWarning.allField)).to.be(true);
+    });
+
+    it('reindexes index with boolean fields', async () => {
+      const { body } = await supertest
+        .post(`/api/upgrade_assistant/reindex/boolean-test`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(body.indexName).to.equal('boolean-test');
+      expect(body.status).to.equal(ReindexStatus.inProgress);
+
+      const lastState = await waitForReindexToComplete('boolean-test');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+    });
+
+    it('reindexes index with _all field', async () => {
+      const { body } = await supertest
+        .post(`/api/upgrade_assistant/reindex/all-field-test`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(body.indexName).to.equal('all-field-test');
+      expect(body.status).to.equal(ReindexStatus.inProgress);
+
+      const lastState = await waitForReindexToComplete('all-field-test');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+    });
   });
 }
