@@ -8,8 +8,8 @@ import React, { ReactElement } from 'react';
 import {
   getAPMIndexPattern,
   ISavedObject
-} from '../../../services/rest/savedObjects';
-import { QueryParamsDecoded } from '../Links/url_helpers';
+} from 'x-pack/plugins/apm/public/services/rest/savedObjects';
+import { QueryParamsDecoded } from '../url_helpers';
 
 export function getQueryWithIndexPattern(
   query: QueryParamsDecoded,

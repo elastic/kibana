@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { KibanaLink } from '../Links/KibanaLink';
-import { QueryParamsDecoded } from '../Links/url_helpers';
+import { KibanaLink } from '../KibanaLink';
+import { QueryParamsDecoded } from '../url_helpers';
 import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {

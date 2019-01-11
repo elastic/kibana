@@ -12,9 +12,9 @@ import {
   history,
   fromQuery,
   toQuery,
-  legacyEncodeURIComponent,
-  KibanaLink
+  legacyEncodeURIComponent
 } from '../Links/url_helpers';
+import { KibanaLink } from '../Links/KibanaLink';
 import { Typeahead } from './Typeahead';
 import chrome from 'ui/chrome';
 import {
@@ -23,7 +23,6 @@ import {
   getAPMIndexPatternForKuery
 } from '../../../services/kuery';
 import styled from 'styled-components';
-
 import { getBoolFilter } from './get_bool_filter';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
