@@ -55,7 +55,7 @@ const getOptions = (
             defaultMessage: 'Host',
           }),
           type: InfraPathType.terms,
-          field: 'host.hostname',
+          field: 'host.name',
         },
         {
           text: intl.formatMessage({
