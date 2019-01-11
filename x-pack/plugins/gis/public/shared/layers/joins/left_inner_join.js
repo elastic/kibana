@@ -6,6 +6,7 @@
 
 
 import { ESJoinSource } from '../sources/es_join_source';
+import { VectorStyle } from '../styles/vector_style';
 
 export class LeftInnerJoin {
 
@@ -45,7 +46,15 @@ export class LeftInnerJoin {
   }
 
   joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
+    const joinFields = this.getJoinFields();
     featureCollection.features.forEach(feature => {
+      // Clean up old join property values
+      joinFields.forEach(({ name }) => {
+        delete feature.properties[name];
+        const stylePropertyName = VectorStyle.getComputedFieldName(name);
+        delete feature.properties[stylePropertyName];
+      });
+
       const joinKey = feature.properties[this._descriptor.leftField];
       if (propertiesMap.has(joinKey)) {
         feature.properties = {
@@ -82,6 +91,10 @@ export class LeftInnerJoin {
     });
 
     return tooltipProps;
+  }
+
+  getIndexPatternIds() {
+    return  this._rightSource.getIndexPatternIds();
   }
 
 }

@@ -17,7 +17,10 @@ import { getOSInfo } from '../../../../../../../src/server/status/lib/get_os_inf
 export function opsBuffer(server) {
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
-  cloudDetector.detectCloudService();
+
+  if(server.config().get('xpack.monitoring.tests.cloud_detector.enabled')) {
+    cloudDetector.detectCloudService();
+  }
 
   const eventRoller = new EventRoller();
 
