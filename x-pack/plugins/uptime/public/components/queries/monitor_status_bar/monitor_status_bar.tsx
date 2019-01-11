@@ -88,7 +88,7 @@ export const MonitorStatusBar = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatusMessage"
+                id="xpack.uptime.monitorStatusBar.healthStatus.lastUpdateMessage"
                 values={{ timeFromNow: moment(timestamp).fromNow() }}
                 defaultMessage="Last update: {timeFromNow}"
               />
