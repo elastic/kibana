@@ -126,7 +126,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="left"
-                title={i18n.translate('xpack.uptime.filterBar.toolTip.title', {
+                title={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipTitle', {
                   defaultMessage: 'Filter limitations',
                 })}
                 content={i18n.translate('xpack.uptime.filterBar.toolTip.content', {
