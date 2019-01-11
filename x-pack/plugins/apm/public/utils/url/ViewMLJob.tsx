@@ -22,15 +22,10 @@ export const ViewMLJob: React.SFC<Props> = ({
 }) => {
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
-  const jobId = `${serviceName}-${
-    transactionType ? transactionType + '-' : ''
-  }high_mean_response_time`;
+  const maybeTransactionType = transactionType ? transactionType + '-' : '';
+  const jobId = `${serviceName}-${maybeTransactionType}high_mean_response_time`;
   const query = {
-    _g: {
-      ml: {
-        jobIds: [jobId]
-      }
-    }
+    _g: { ml: { jobIds: [jobId] } }
   };
 
   const href = getKibanaHref({
