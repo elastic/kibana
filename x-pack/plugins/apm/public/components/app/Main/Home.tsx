@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   HistoryTabs,
@@ -19,13 +20,17 @@ import { TraceOverview } from '../TraceOverview';
 const homeTabs: IHistoryTab[] = [
   {
     path: '/services',
-    name: 'Services',
-    component: ServiceOverview
+    name: i18n.translate('xpack.apm.home.servicesTabLabel', {
+      defaultMessage: 'Services'
+    }),
+    render: props => <ServiceOverview {...props} />
   },
   {
     path: '/traces',
-    name: 'Traces',
-    component: TraceOverview
+    name: i18n.translate('xpack.apm.home.tracesTabLabel', {
+      defaultMessage: 'Traces'
+    }),
+    render: props => <TraceOverview {...props} />
   }
 ];
 

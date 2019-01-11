@@ -32,5 +32,6 @@ export function checkLicense(xPackInfo) {
 
   return {
     gis: true,
+    uid: xPackInfo.license.getUid(),
   };
 }

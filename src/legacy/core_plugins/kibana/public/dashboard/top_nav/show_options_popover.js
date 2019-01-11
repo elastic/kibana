@@ -56,7 +56,8 @@ export function showOptionsPopover({
   const element = (
     <I18nProvider>
       <EuiWrappingPopover
-        className="navbar__popover"
+        className="kuiLocalNav__popover"
+        anchorClassName="kuiLocalNav__popoverAnchor"
         id="popover"
         button={anchorElement}
         isOpen={true}
