@@ -18,6 +18,8 @@ interface Bucket extends TimeSeriesBucket {
   freeMemory: AggValue;
   processMemorySize: AggValue;
   processMemoryRss: AggValue;
+  averagePercentMemoryAvailable: AggValue;
+  minimumPercentMemoryAvailable: AggValue;
 }
 
 interface Aggs {
@@ -28,9 +30,30 @@ interface Aggs {
   freeMemory: AggValue;
   processMemorySize: AggValue;
   processMemoryRss: AggValue;
+  averagePercentMemoryAvailable: AggValue;
+  minimumPercentMemoryAvailable: AggValue;
 }
 
 export type ESResponse = AggregationSearchResponse<void, Aggs>;
+
+const percentMemoryScript = `doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`;
+const averageMemory = {
+  avg: {
+    script: {
+      lang: 'expression',
+      source: percentMemoryScript
+    }
+  }
+};
+
+const minMemory = {
+  min: {
+    script: {
+      lang: 'expression',
+      source: percentMemoryScript
+    }
+  }
+};
 
 export async function fetch(args: MetricsRequestArgs) {
   return fetchMetrics<Aggs>({
@@ -39,13 +62,17 @@ export async function fetch(args: MetricsRequestArgs) {
       freeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
       totalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
       processMemorySize: { avg: { field: METRIC_PROCESS_MEMORY_SIZE } },
-      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } }
+      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } },
+      averagePercentMemoryAvailable: averageMemory,
+      minimumPercentMemoryAvailable: minMemory
     },
     totalAggregations: {
       freeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
       totalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
       processMemorySize: { avg: { field: METRIC_PROCESS_MEMORY_SIZE } },
-      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } }
+      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } },
+      averagePercentMemoryAvailable: averageMemory,
+      minimumPercentMemoryAvailable: minMemory
     }
   });
 }

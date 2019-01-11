@@ -12,6 +12,8 @@ export interface MemoryChartAPIResponse {
     freeMemory: Coordinate[];
     processMemorySize: Coordinate[];
     processMemoryRss: Coordinate[];
+    averagePercentMemoryAvailable: Coordinate[];
+    minimumPercentMemoryAvailable: Coordinate[];
   };
   // overall totals for the whole time range
   overallValues: {
@@ -19,6 +21,8 @@ export interface MemoryChartAPIResponse {
     freeMemory: number | null;
     processMemorySize: number | null;
     processMemoryRss: number | null;
+    averagePercentMemoryAvailable: number | null;
+    minimumPercentMemoryAvailable: number | null;
   };
   totalHits: number;
 }
@@ -27,13 +31,17 @@ export type MemoryMetricName =
   | 'totalMemory'
   | 'freeMemory'
   | 'processMemorySize'
-  | 'processMemoryRss';
+  | 'processMemoryRss'
+  | 'averagePercentMemoryAvailable'
+  | 'minimumPercentMemoryAvailable';
 
 const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
   'totalMemory',
   'freeMemory',
   'processMemorySize',
-  'processMemoryRss'
+  'processMemoryRss',
+  'averagePercentMemoryAvailable',
+  'minimumPercentMemoryAvailable'
 ];
 
 export function transform(result: ESResponse): MemoryChartAPIResponse {
@@ -43,14 +51,18 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
     totalMemory,
     freeMemory,
     processMemorySize,
-    processMemoryRss
+    processMemoryRss,
+    averagePercentMemoryAvailable,
+    minimumPercentMemoryAvailable
   } = aggregations;
 
   const series: MemoryChartAPIResponse['series'] = {
     totalMemory: [],
     freeMemory: [],
     processMemorySize: [],
-    processMemoryRss: []
+    processMemoryRss: [],
+    averagePercentMemoryAvailable: [],
+    minimumPercentMemoryAvailable: []
   };
 
   // using forEach here to avoid looping over the entire dataset
@@ -67,7 +79,9 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
       totalMemory: totalMemory.value,
       freeMemory: freeMemory.value,
       processMemorySize: processMemorySize.value,
-      processMemoryRss: processMemoryRss.value
+      processMemoryRss: processMemoryRss.value,
+      averagePercentMemoryAvailable: averagePercentMemoryAvailable.value,
+      minimumPercentMemoryAvailable: minimumPercentMemoryAvailable.value
     },
     totalHits: hits.total
   };
