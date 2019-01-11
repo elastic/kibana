@@ -28,9 +28,8 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
-
 import routing from '../services/routing';
-import { API_STATUS, follwerIndexFormSchema } from '../constants';
+import { API_STATUS, followerIndexFormSchema } from '../constants';
 import { SectionError } from './section_error';
 import { loadIndices } from '../services/api';
 import { FormEntryRow } from './form_entry_row';
@@ -48,7 +47,7 @@ const getEmptyFollowerIndex = (remoteClusters) => ({
   name: '',
   remoteCluster: remoteClusters ? getFirstConnectedCluster(remoteClusters).name : '',
   leaderIndex: '',
-  ...Object.keys(follwerIndexFormSchema.advanced).reduce((acc, field) => ({ ...acc, [field]: '' }), {})
+  ...Object.keys(followerIndexFormSchema.advanced).reduce((acc, field) => ({ ...acc, [field]: '' }), {})
 });
 
 /**
@@ -219,12 +218,12 @@ export const FollowerIndexForm = injectI18n(
         ? (
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
-            defaultMessage="Hide advanced setting"
+            defaultMessage="Hide advanced settings"
           />
         ) : (
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
-            defaultMessage="Show advanced setting"
+            defaultMessage="Show advanced settings"
           />
         );
 
@@ -236,7 +235,7 @@ export const FollowerIndexForm = injectI18n(
           field="name"
           value={followerIndex.name}
           error={fieldsErrors.name}
-          schema={follwerIndexFormSchema.name}
+          schema={followerIndexFormSchema.name}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onIndexNameChange}
@@ -313,7 +312,7 @@ export const FollowerIndexForm = injectI18n(
           field="leaderIndex"
           value={followerIndex.leaderIndex}
           error={fieldsErrors.leaderIndex}
-          schema={follwerIndexFormSchema.leaderIndex}
+          schema={followerIndexFormSchema.leaderIndex}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onFieldsChange}
@@ -327,7 +326,7 @@ export const FollowerIndexForm = injectI18n(
       const renderAdvancedSettings = () => (
         <Fragment>
           <EuiButtonEmpty
-            iconType={areAdvancedSettingsVisible ? "minusInCircle" : "plusInCircle"}
+            iconType={areAdvancedSettingsVisible ? "arrowUp" : "arrowDown"}
             flush="left"
             onClick={this.toggleAdvancedSettings}
           >
@@ -335,7 +334,7 @@ export const FollowerIndexForm = injectI18n(
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
           {areAdvancedSettingsVisible && (
-            Object.entries(follwerIndexFormSchema.advanced).map(([field, schema]) => (
+            Object.entries(followerIndexFormSchema.advanced).map(([field, schema]) => (
               <FormEntryRow
                 key={field}
                 field={field}
@@ -345,7 +344,6 @@ export const FollowerIndexForm = injectI18n(
                 areErrorsVisible={areErrorsVisible}
                 onValueUpdate={this.onFieldsChange}
                 onErrorUpdate={this.onFieldsErrorChange}
-                onRemoveRow={this.unSelectSetting}
               />
             ))
           )}
