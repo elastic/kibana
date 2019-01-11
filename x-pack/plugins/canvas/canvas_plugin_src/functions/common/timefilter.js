@@ -50,7 +50,7 @@ export const timefilter = () => ({
 
       const moment = dateMath.parse(str);
       if (!moment || !moment.isValid()) {
-        throw new Error(`Invalid date/time string ${str}`);
+        throw new Error(`Invalid date/time string: '${str}'`);
       }
       return moment.toISOString();
     }

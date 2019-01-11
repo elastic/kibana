@@ -22,7 +22,6 @@ import {
   EuiHeaderSection,
   // @ts-ignore missing typings for EuiHeaderSectionItem
   EuiHeaderSectionItem,
-  EuiIcon,
   EuiPage,
   EuiPageContent,
   EuiPopover,
@@ -32,8 +31,7 @@ import moment, { Moment } from 'moment';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { Breadcrumb } from 'ui/chrome';
-import { overviewBreadcrumb } from './breadcrumbs';
+import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMUpdateBreadcrumbs, UptimeAppProps } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 
@@ -45,7 +43,7 @@ export interface UptimePersistedState {
 }
 
 interface UptimeAppState {
-  breadcrumbs: Breadcrumb[];
+  breadcrumbs: UMBreadcrumb[];
   autorefreshEnabled: boolean;
   popoverIsOpen: boolean;
   // TODO: these get passed as props to most components in this plugin,
@@ -71,7 +69,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       initialDateRangeEnd,
     } = props;
 
-    let initialBreadcrumbs: Breadcrumb[];
+    let initialBreadcrumbs: UMBreadcrumb[];
     const dateRangeStart =
       initialDateRangeStart ||
       moment()
@@ -90,7 +88,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       this.setBreadcrumbs = updateBreadcrumbs;
       initialBreadcrumbs = kibanaBreadcrumbs;
     } else {
-      this.setBreadcrumbs = (breadcrumbs: Breadcrumb[]) => this.setState({ breadcrumbs });
+      this.setBreadcrumbs = (breadcrumbs: UMBreadcrumb[]) => this.setState({ breadcrumbs });
       initialBreadcrumbs = [overviewBreadcrumb];
     }
 
@@ -141,7 +139,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     iconTitle="Uptime"
                   >
                     Uptime
-                    <EuiIcon style={{ paddingLeft: '8px' }} size="xl" type="beaker" />
                   </EuiHeaderLogo>
                 </EuiHeaderSectionItem>
                 {!isUsingK7Design && (
@@ -240,8 +237,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     <EuiHeaderLink
                       iconType="help"
                       href="https://discuss.elastic.co/c/beats/heartbeat"
+                      target="_blank"
                     >
-                      Help
+                      Discuss
                     </EuiHeaderLink>
                   </EuiHeaderLinks>
                 </EuiHeaderSection>
