@@ -480,7 +480,7 @@ module
         fields: numberFields
       })
         .then((resp) => {
-          const noDocumentCount = indexPattern.timeFieldName === undefined;
+          const noDocumentCount = (indexPattern.timeFieldName === undefined);
           let docCountCardIndex = undefined;
 
           // Add the metric stats to the existing stats in the corresponding card. [ {documentCounts:...}, {fieldName: ..} ]
