@@ -302,6 +302,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             }
           }
           onChange={[Function]}
+          onChangeAll={[Function]}
           privilegeDefinition={
             PrivilegeDefinition {
               "privilegeActionMap": Object {

@@ -102,6 +102,7 @@ describe('FeatureTable', () => {
         )}
         features={buildFeatures()}
         onChange={jest.fn()}
+        onChangeAll={jest.fn()}
         spacesIndex={0}
         intl={null as any}
       />
@@ -121,6 +122,7 @@ describe('FeatureTable', () => {
         )}
         features={buildFeatures()}
         onChange={jest.fn()}
+        onChangeAll={jest.fn()}
         spacesIndex={-1}
         intl={null as any}
       />

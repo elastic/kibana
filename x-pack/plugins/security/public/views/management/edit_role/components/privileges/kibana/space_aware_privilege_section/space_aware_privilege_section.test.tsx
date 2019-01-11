@@ -48,7 +48,12 @@ const buildProps = (customProps: any = {}) => {
     validator: new RoleValidator(),
     effectivePrivilegesFactory: new EffectivePrivilegesFactory(
       new PrivilegeDefinition({
-        features: {},
+        features: {
+          feature1: {
+            all: ['*'],
+            read: ['read'],
+          },
+        },
         global: {},
         space: {},
       })
@@ -57,7 +62,7 @@ const buildProps = (customProps: any = {}) => {
   };
 };
 
-describe('<SpaceAwarePrivilegeForm>', () => {
+describe('<SpaceAwarePrivilegeSection>', () => {
   it('shows the space table if exisitng space privileges are declared', () => {
     const props = buildProps({
       role: {

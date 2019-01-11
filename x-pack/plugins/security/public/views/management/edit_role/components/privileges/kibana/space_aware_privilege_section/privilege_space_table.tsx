@@ -7,10 +7,11 @@ import {
   EuiBadge,
   EuiBadgeProps,
   EuiButtonEmpty,
+  EuiButtonIcon,
   // @ts-ignore
   EuiInMemoryTable,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Role } from 'x-pack/plugins/security/common/model/role';
@@ -28,6 +29,8 @@ interface Props {
   onChange: (role: Role) => void;
   onEdit: (spacesIndex: number) => void;
   displaySpaces: Space[];
+  disabled?: boolean;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -61,7 +64,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
   }
 
   private renderKibanaPrivileges = () => {
-    const { effectivePrivilegesFactory, displaySpaces } = this.props;
+    const { effectivePrivilegesFactory, displaySpaces, intl } = this.props;
 
     const spacePrivileges = this.getSortedPrivileges();
 
@@ -98,7 +101,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       return {};
     };
 
-    const columns = [
+    const columns: Record<string, any> = [
       {
         field: 'spaces',
         name: 'Spaces',
@@ -167,37 +170,62 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           );
         },
       },
-      {
+    ];
+
+    if (!this.props.disabled) {
+      columns.push({
         name: 'Actions',
         actions: [
           {
-            name: 'Edit',
-            description: 'Edit these privileges',
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (item: TableRow) => {
-              this.props.onEdit(item.spacesIndex);
+            render: (record: TableRow) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'foo',
+                      defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
+                    },
+                    {
+                      spaceNames: record.spaces.map(s => s.name).join(', '),
+                    }
+                  )}
+                  color={'primary'}
+                  iconType={'pencil'}
+                  onClick={() => this.props.onEdit(record.spacesIndex)}
+                />
+              );
             },
           },
           {
-            name: 'Delete',
-            description: 'Delete these privileges',
-            icon: 'trash',
-            color: 'danger',
-            type: 'icon',
-            onClick: this.onDeleteSpacePrivilege,
+            render: (record: TableRow) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
+                      defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
+                    },
+                    {
+                      spaceNames: record.spaces.map(s => s.name).join(', '),
+                    }
+                  )}
+                  color={'danger'}
+                  iconType={'trash'}
+                  onClick={() => this.onDeleteSpacePrivilege(record)}
+                />
+              );
+            },
           },
         ],
-      },
-    ];
+      });
+    }
 
     return (
       <EuiInMemoryTable
         columns={columns}
         items={rows}
-        // TODO: FIX the ts-ignores
-        // @ts-ignore
-        rowProps={item => {
+        hasActions
+        rowProps={(item: TableRow) => {
           // TODO: Find the global space the right way
           return {
             className: item.spaces[0].id === '*' ? 'secPrivilegeTable__row--isGlobalSpace' : '',

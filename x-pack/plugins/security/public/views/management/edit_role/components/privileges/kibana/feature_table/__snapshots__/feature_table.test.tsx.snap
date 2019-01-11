@@ -11,7 +11,23 @@ exports[`FeatureTable can render without spaces 1`] = `
       },
       Object {
         "field": "role",
-        "name": "Privilege",
+        "name": <span>
+          <FormattedMessage
+            defaultMessage="Privilege"
+            id="xpack.roles.management.enabledRoleFeaturesEnabledColumnTitle"
+            values={Object {}}
+          />
+          <ChangeAllPrivilegesControl
+            onChange={[Function]}
+            privileges={
+              Array [
+                "all",
+                "read",
+                "none",
+              ]
+            }
+          />
+        </span>,
         "render": [Function],
       },
     ]

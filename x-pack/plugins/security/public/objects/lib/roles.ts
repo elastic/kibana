@@ -10,7 +10,13 @@ import { Role } from '../../../common/model/role';
 const apiBase = chrome.addBasePath(`/api/security/role`);
 
 export async function saveRole($http: any, role: Role) {
-  const data = omit(role, 'name', 'transient_metadata', '_unrecognized_applications');
+  const data = omit(
+    role,
+    'name',
+    'transient_metadata',
+    '_unrecognized_applications',
+    '_transform_error'
+  );
   return await $http.put(`${apiBase}/${role.name}`, data);
 }
 

@@ -215,7 +215,7 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceBasePrivilege(1)).toMatchObject({
         privilege: 'read',
-        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceBasePrivilege(1)).toEqual('read');
@@ -240,7 +240,8 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceBasePrivilege(1)).toMatchObject({
         privilege: 'all',
-        source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
+        overridesAssigned: true,
         supercededPrivilege: 'read',
         overrideSource: 'global base privilege',
         details: expect.any(String),
@@ -308,7 +309,7 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 0)).toMatchObject({
         privilege: 'read',
-        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_SPACE_BASE,
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 0)).toEqual('read');
@@ -332,7 +333,7 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'read',
-        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('read');
@@ -358,7 +359,7 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'read',
-        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_FEATURE,
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('read');
@@ -384,7 +385,7 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'all',
-        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
@@ -410,7 +411,7 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'all',
-        source: PRIVILEGE_SOURCE.EFFECTIVE,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_FEATURE,
         details: expect.any(String),
       });
       expect(effectivePrivileges.getActualSpaceFeaturePrivilege('feature1', 1)).toEqual('all');
@@ -436,7 +437,8 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'all',
-        source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
+        overridesAssigned: true,
         supercededPrivilege: 'read',
         overrideSource: 'global base privilege',
         details: expect.any(String),
@@ -466,7 +468,8 @@ describe('EffectivePrivileges', () => {
       const effectivePrivileges = buildEffectivePrivileges(role);
       expect(effectivePrivileges.explainActualSpaceFeaturePrivilege('feature1', 1)).toMatchObject({
         privilege: 'all',
-        source: PRIVILEGE_SOURCE.EFFECTIVE_OVERRIDES_ASSIGNED,
+        source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_FEATURE,
+        overridesAssigned: true,
         supercededPrivilege: 'read',
         overrideSource: 'global feature privilege',
         details: expect.any(String),

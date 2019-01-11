@@ -6,8 +6,8 @@
 import { EuiIcon, EuiIconTip, EuiText, EuiTextProps, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
-import { ExplanationResult, PRIVILEGE_SOURCE } from 'plugins/security/lib/effective_privileges';
 import React, { ReactNode, SFC } from 'react';
+import { ExplanationResult, PRIVILEGE_SOURCE } from '../../../../../../../lib/effective_privileges';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 
 interface Props extends EuiTextProps {

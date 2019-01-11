@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
@@ -159,6 +158,8 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           effectivePrivilegesFactory={this.props.effectivePrivilegesFactory}
           onChange={this.props.onChange}
           onEdit={this.onEditSpacesPrivileges}
+          intl={this.props.intl}
+          disabled={!this.props.editable}
         />
       );
 
@@ -205,7 +206,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         onClick={this.addSpacePrivilege}
         iconType={'plusInCircleFilled'}
         data-test-subj={'addSpacePrivilegeButton'}
-        isDisabled={!hasAvailableSpaces}
+        isDisabled={!hasAvailableSpaces || !this.props.editable}
       >
         Add space privilege
       </EuiButton>

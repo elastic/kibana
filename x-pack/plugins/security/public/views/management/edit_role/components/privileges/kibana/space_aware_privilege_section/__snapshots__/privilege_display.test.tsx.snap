@@ -105,16 +105,17 @@ exports[`SupercededPrivilegeDisplay renders a superceded privilege 1`] = `
       "timeZone": null,
     }
   }
+  overrideSource="my override source"
   privilege="all"
-  styleMissingPrivilege={true}
+  supercededPrivilege="read"
   tooltipContent={
     <FormattedMessage
       defaultMessage="Original privilege of {supercededPrivilege} has been overriden by {overrideSource}."
       id="foo"
       values={
         Object {
-          "overrideSource": "my override source",
-          "supercededPrivilege": "'read'",
+          "overrideSource": undefined,
+          "supercededPrivilege": "'undefined'",
         }
       }
     />
