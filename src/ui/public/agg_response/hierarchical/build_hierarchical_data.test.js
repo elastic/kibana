@@ -17,10 +17,21 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import expect from 'expect.js';
-import { convertTableProvider } from '../_convert_table';
-import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from '../../../vis/response_handlers/legacy';
+import { convertTableProvider } from './_convert_table';
+import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
+
+jest.mock('../../registry/field_formats', () => ({
+  fieldFormats: {
+    byId: {
+      '1': jest.fn(),
+      agg_1: jest.fn(),
+    }
+  }
+}));
+
+jest.mock('../../chrome', () => ({
+  getUiSettingsClient: jest.fn()
+}));
 
 describe('buildHierarchicalData convertTable', () => {
   const mockToolTipFormatter = () => ({});
@@ -56,16 +67,16 @@ describe('buildHierarchicalData convertTable', () => {
     it('should set the slices with one child to a consistent label', () => {
       const results = convertTable(table, dimensions);
       const checkLabel = 'Average bytes';
-      expect(results).to.have.property('names');
-      expect(results.names).to.eql([checkLabel]);
-      expect(results).to.have.property('raw');
-      expect(results.raw).to.have.property('rows');
-      expect(results.raw.rows).to.have.length(1);
-      expect(results).to.have.property('slices');
-      expect(results.slices).to.have.property('children');
-      expect(results.slices.children).to.have.length(1);
-      expect(results.slices.children[0]).to.have.property('name', checkLabel);
-      expect(results.slices.children[0]).to.have.property('size', 412032);
+      expect(results).toHaveProperty('names');
+      expect(results.names).toEqual([checkLabel]);
+      expect(results).toHaveProperty('raw');
+      expect(results.raw).toHaveProperty('rows');
+      expect(results.raw.rows).toHaveLength(1);
+      expect(results).toHaveProperty('slices');
+      expect(results.slices).toHaveProperty('children');
+      expect(results.slices.children).toHaveLength(1);
+      expect(results.slices.children[0]).toHaveProperty('name', checkLabel);
+      expect(results.slices.children[0]).toHaveProperty('size', 412032);
     });
   });
 
@@ -103,12 +114,12 @@ describe('buildHierarchicalData convertTable', () => {
 
     it('should set the rows', () => {
       const results = convertTable(table, dimensions);
-      expect(results).to.have.property('rows');
+      expect(results).toHaveProperty('rows');
     });
 
     it('should set the columns', () => {
       const results = convertTable(table, dimensions);
-      expect(results).to.have.property('columns');
+      expect(results).toHaveProperty('columns');
     });
 
   });
@@ -158,23 +169,23 @@ describe('buildHierarchicalData convertTable', () => {
 
     it('should set the hits attribute for the results', () => {
       const results = convertTable(table, dimensions);
-      expect(results).to.have.property('rows');
-      _.each(results.rows, function (item) {
-        expect(item).to.have.property('names');
-        expect(item).to.have.property('slices');
-        expect(item.slices).to.have.property('children');
+      expect(results).toHaveProperty('rows');
+      results.rows.forEach(item => {
+        expect(item).toHaveProperty('names');
+        expect(item).toHaveProperty('slices');
+        expect(item.slices).toHaveProperty('children');
       });
     });
 
     it('should set the parent of the first item in the split', () => {
       const results = convertTable(table, dimensions);
-      expect(results).to.have.property('rows');
-      expect(results.rows).to.have.length(3);
-      expect(results.rows[0]).to.have.property('slices');
-      expect(results.rows[0].slices).to.have.property('children');
-      expect(results.rows[0].slices.children).to.have.length(2);
-      expect(results.rows[0].slices.children[0]).to.have.property('aggConfigResult');
-      expect(results.rows[0].slices.children[0].aggConfigResult.$parent.$parent).to.have.property('key', 'png');
+      expect(results).toHaveProperty('rows');
+      expect(results.rows).toHaveLength(3);
+      expect(results.rows[0]).toHaveProperty('slices');
+      expect(results.rows[0].slices).toHaveProperty('children');
+      expect(results.rows[0].slices.children).toHaveLength(2);
+      expect(results.rows[0].slices.children[0]).toHaveProperty('aggConfigResult');
+      expect(results.rows[0].slices.children[0].aggConfigResult.$parent.$parent).toHaveProperty('key', 'png');
     });
 
   });
@@ -210,11 +221,11 @@ describe('buildHierarchicalData convertTable', () => {
 
     it('should set the hits attribute for the results', () => {
       const results = convertTable(table, dimensions);
-      expect(results).to.have.property('raw');
-      expect(results).to.have.property('slices');
-      expect(results.slices).to.property('children');
-      expect(results).to.have.property('names');
-      expect(results.names).to.have.length(6);
+      expect(results).toHaveProperty('raw');
+      expect(results).toHaveProperty('slices');
+      expect(results.slices).toHaveProperty('children');
+      expect(results).toHaveProperty('names');
+      expect(results.names).toHaveLength(6);
     });
   });
 
@@ -245,11 +256,11 @@ describe('buildHierarchicalData convertTable', () => {
 
     it('should set the hits attribute for the results', () => {
       const results = convertTable(table, dimensions);
-      expect(results).to.have.property('raw');
-      expect(results).to.have.property('slices');
-      expect(results.slices).to.property('children');
-      expect(results).to.have.property('names');
-      expect(results.names).to.have.length(2);
+      expect(results).toHaveProperty('raw');
+      expect(results).toHaveProperty('slices');
+      expect(results.slices).toHaveProperty('children');
+      expect(results).toHaveProperty('names');
+      expect(results.names).toHaveLength(2);
     });
   });
 
@@ -295,10 +306,10 @@ describe('buildHierarchicalData convertTable', () => {
 
     it('should set the hits attribute for the results', () => {
       const results = convertTable(table, dimensions);
-      expect(results).to.have.property('raw');
-      expect(results).to.have.property('slices');
-      expect(results).to.have.property('names');
-      expect(results.names).to.have.length(2);
+      expect(results).toHaveProperty('raw');
+      expect(results).toHaveProperty('slices');
+      expect(results).toHaveProperty('names');
+      expect(results.names).toHaveLength(2);
     });
   });
 });
