@@ -48,7 +48,7 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
               columns={[
                 {
                   field: 'type',
-                  name: i18n.translate('xpack.uptime.errorList.columns.type', {
+                  name: i18n.translate('xpack.uptime.errorList.errorTypeColumnLabel', {
                     defaultMessage: 'Error type',
                   }),
                   sortable: true,
