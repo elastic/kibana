@@ -14,7 +14,7 @@ exports[`FeatureTable can render without spaces 1`] = `
         "name": <span>
           <FormattedMessage
             defaultMessage="Privilege"
-            id="xpack.security.management.editRole.enabledRoleFeaturesEnabledColumnTitle"
+            id="xpack.security.management.editRole.featureTable.enabledRoleFeaturesEnabledColumnTitle"
             values={Object {}}
           />
           <ChangeAllPrivilegesControl
