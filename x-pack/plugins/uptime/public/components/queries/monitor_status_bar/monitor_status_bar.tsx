@@ -41,7 +41,7 @@ export const MonitorStatusBar = ({
       if (error) {
         return i18n.translate('xpack.uptime.monitorStatusBar.errorMessage', {
           values: { message: error.message },
-          defaultMessage: 'Error {error.message}',
+          defaultMessage: 'Error {message}',
         });
       }
       const { monitorStatus } = data;
