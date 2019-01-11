@@ -22,7 +22,6 @@ import {
   EuiHeaderSection,
   // @ts-ignore missing typings for EuiHeaderSectionItem
   EuiHeaderSectionItem,
-  EuiIcon,
   EuiPage,
   EuiPageContent,
   EuiPopover,
@@ -150,7 +149,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         id="xpack.uptime.appHeader.logo.text"
                         defaultMessage="Uptime"
                       />
-                      <EuiIcon style={{ paddingLeft: '8px' }} size="xl" type="beaker" />
                     </EuiHeaderLogo>
                   </EuiHeaderSectionItem>
                   {!isUsingK7Design && (
