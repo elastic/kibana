@@ -15,15 +15,16 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiButton,
-  EuiCallOut,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiOverlayMask,
+  EuiConfirmModal,
+
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
-import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
@@ -52,7 +53,10 @@ export const FollowerIndexEdit = injectI18n(
       return null;
     }
 
-    state = { lastFollowerIndexId: undefined }
+    state = {
+      lastFollowerIndexId: undefined,
+      showConfirmModal: false,
+    }
 
     componentDidMount() {
       const { match: { params: { id } }, selectFollowerIndex } = this.props;
@@ -74,6 +78,15 @@ export const FollowerIndexEdit = injectI18n(
     componentWillUnmount() {
       this.props.clearApiError();
     }
+
+    saveFollowerIndex = (name, followerIndex) => {
+      this.inflightPayload = { name, followerIndex };
+      this.showConfirmModal();
+    }
+
+    showConfirmModal = () => this.setState({ showConfirmModal: true });
+
+    closeConfirmModal = () => this.setState({ showConfirmModal: false });
 
     renderLoadingFollowerIndex() {
       return (
@@ -115,86 +128,55 @@ export const FollowerIndexEdit = injectI18n(
       );
     }
 
-    renderEmptyClusters() {
-      const { intl, match: { url: currentUrl } } = this.props;
+    renderConfirmModal = () => {
+      const { followerIndexId, intl } = this.props;
       const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.followerIndexEditForm.emptyRemoteClustersCallOutTitle',
-        defaultMessage: 'No remote cluster found'
-      });
+        id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
+        defaultMessage: 'Confirm update follower index \'{id}\'',
+      }, { id: followerIndexId });
+
+      const { name, followerIndex } = this.inflightPayload;
 
       return (
-        <Fragment>
-          <EuiCallOut
+        <EuiOverlayMask>
+          <EuiConfirmModal
             title={title}
-            color="warning"
-            iconType="cross"
+            onCancel={this.closeConfirmModal}
+            onConfirm={() => this.props.saveFollowerIndex(name, followerIndex)}
+            cancelButtonText={
+              intl.formatMessage({
+                id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.cancelButtonText',
+                defaultMessage: 'Cancel',
+              })
+            }
+            buttonColor="danger"
+            confirmButtonText={
+              intl.formatMessage({
+                id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText',
+                defaultMessage: 'Update',
+              })
+            }
           >
             <p>
               <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.emptyRemoteClustersCallOutDescription"
-                defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add
-                  a remote cluster."
+                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
+                defaultMessage="To update the follower index, it will first be paused and then resumed."
               />
             </p>
-
-            <EuiButton
-              {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
-              iconType="plusInCircle"
-              color="warning"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.addRemoteClusterButtonLabel"
-                defaultMessage="Add remote cluster"
-              />
-            </EuiButton>
-          </EuiCallOut>
-        </Fragment>
-      );
-    }
-
-    renderNoConnectedCluster() {
-      const { intl } = this.props;
-      const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.followerIndexEditForm.noRemoteClustersConnectedCallOutTitle',
-        defaultMessage: 'Remote cluster connection error'
-      });
-
-      return (
-        <Fragment>
-          <EuiCallOut
-            title={title}
-            color="warning"
-            iconType="cross"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.noRemoteClustersConnectedCallOutDescription"
-                defaultMessage="None of your clusters are connected. Verify your clusters settings
-                  and make sure at least one cluster is connected before creating an auto-follow pattern." //eslint-disable-line max-len
-              />
-            </p>
-            <EuiButton
-              {...routing.getRouterLinkProps('/', BASE_PATH_REMOTE_CLUSTERS)}
-              color="warning"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.viewRemoteClusterButtonLabel"
-                defaultMessage="View remote clusters"
-              />
-            </EuiButton>
-          </EuiCallOut>
-        </Fragment>
+          </EuiConfirmModal>
+        </EuiOverlayMask>
       );
     }
 
     render() {
       const {
-        saveFollowerIndex,
         clearApiError,
         apiStatus,
         apiError,
         followerIndex,
       } = this.props;
+
+      const { showConfirmModal } = this.state;
 
       /* remove non-editable properties */
       const { shards, ...rest } = followerIndex || {}; // eslint-disable-line no-unused-vars
@@ -224,10 +206,12 @@ export const FollowerIndexEdit = injectI18n(
                   followerIndex={rest}
                   apiStatus={apiStatus.save}
                   apiError={apiError.save}
-                  saveFollowerIndex={saveFollowerIndex}
+                  saveFollowerIndex={this.saveFollowerIndex}
                   clearApiError={clearApiError}
                 />
               ) }
+
+              { showConfirmModal && this.renderConfirmModal() }
             </EuiPageContent>
           </EuiPageBody>
         </EuiPage>
