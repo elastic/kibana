@@ -63,4 +63,8 @@ declare module '@elastic/elasticsearch' {
     };
     aggregations?: any;
   }
+
+  export interface MSearchResponse<T> {
+    responses?: Array<SearchResponse<T>>;
+  }
 }
