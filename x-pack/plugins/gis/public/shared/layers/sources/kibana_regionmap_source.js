@@ -16,7 +16,7 @@ import {
 export class KibanaRegionmapSource extends VectorSource {
 
   static type = 'REGIONMAP_FILE';
-  static typeDisplayName = 'Custom region boundaries';
+  static typeDisplayName = 'Custom vector shapes';
 
   constructor(descriptor, { ymlFileLayers }) {
     super(descriptor);
@@ -62,7 +62,7 @@ export class KibanaRegionmapSource extends VectorSource {
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
-            Region map boundary layers configured in your config/kibana.yml file.
+            Vector shapes from static files configured in kibana.yml.
           </p>
         </EuiText>
       </Fragment>

@@ -67,6 +67,9 @@ module.directive('mlJobGroupSelect', function () {
               .catch((error) => {
                 console.log('Could not load groups from calendars', error);
                 this.populateSelectedGroups(this.jobGroups);
+              })
+              .then(() => {
+                $scope.$applyAsync();
               });
           });
 
