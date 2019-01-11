@@ -205,17 +205,15 @@ class ColdPhaseUi extends PureComponent {
             fullWidth
             titleSize="xs"
           >
-            <Fragment>
-              <EuiSwitch
-                data-test-subj="freezeSwitch"
-                checked={phaseData[PHASE_FREEZE_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
-                }}
-                label={freezeLabel}
-                aria-label={freezeLabel}
-              />
-            </Fragment>
+            <EuiSwitch
+              data-test-subj="freezeSwitch"
+              checked={phaseData[PHASE_FREEZE_ENABLED]}
+              onChange={async e => {
+                await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
+              }}
+              label={freezeLabel}
+              aria-label={freezeLabel}
+            />
           </EuiDescribedFormGroup>
         ) : null }
       </Fragment>
