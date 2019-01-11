@@ -97,12 +97,22 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
+                <EuiButtonEmpty
+                  iconType="cross"
+                  onClick={this.closeFlyout}
+                  flush="left"
+                  data-test-subj={'cancelSpacePrivilegeButton'}
+                >
                   Cancel
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.onSaveClick} fill disabled={!this.canSave()}>
+                <EuiButton
+                  onClick={this.onSaveClick}
+                  fill
+                  disabled={!this.canSave()}
+                  data-test-subj={'createSpacePrivilegeButton'}
+                >
                   Create space privilege
                 </EuiButton>
               </EuiFlexItem>
@@ -132,11 +142,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           label={intl.formatMessage({ id: 'foo', defaultMessage: 'Privilege' })}
         >
           <EuiSuperSelect
+            data-test-subj={'basePrivilegeComboBox'}
             fullWidth
             onChange={this.onSpaceBasePrivilegeChange}
             options={[
               {
-                value: 'custom',
+                value: 'basePrivilege_custom',
                 inputDisplay: <EuiText>Custom</EuiText>,
                 dropdownDisplay: (
                   <EuiText>
@@ -149,7 +160,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                 ),
               },
               {
-                value: 'read',
+                value: 'basePrivilege_read',
                 disabled: false,
                 inputDisplay: <EuiText>Read</EuiText>,
                 dropdownDisplay: (
@@ -160,7 +171,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                 ),
               },
               {
-                value: 'all',
+                value: 'basePrivilege_all',
                 disabled: false,
                 inputDisplay: <EuiText>All</EuiText>,
                 dropdownDisplay: (
@@ -172,7 +183,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
             ]}
             hasDividers
-            valueOfSelected={this.getDisplayedBasePrivilege()}
+            valueOfSelected={`basePrivilege_${this.getDisplayedBasePrivilege()}`}
           />
         </EuiFormRow>
 
@@ -275,15 +286,17 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     const role = copyRole(this.state.role);
     const form = role.kibana[this.state.editingIndex];
 
-    if (basePrivilege === 'custom') {
+    const privilegeName = basePrivilege.split('basePrivilege_')[1];
+
+    if (privilegeName === 'custom') {
       form.base = [];
     } else {
-      form.base = [basePrivilege];
+      form.base = [privilegeName];
       form.feature = {};
     }
 
     this.setState({
-      selectedBasePrivilege: basePrivilege === 'custom' ? [] : [basePrivilege],
+      selectedBasePrivilege: privilegeName === 'custom' ? [] : [privilegeName],
       role,
     });
   };

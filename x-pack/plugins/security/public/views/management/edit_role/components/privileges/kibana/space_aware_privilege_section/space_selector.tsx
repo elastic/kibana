@@ -21,7 +21,7 @@ const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') =>
   }
 
   return {
-    id: space.id,
+    id: `spaceOption_${space.id}`,
     label: space.name,
     color: getSpaceColor(space),
     disabled:
@@ -31,7 +31,7 @@ const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') =>
 };
 
 const spaceIdToOption = (spaces: Space[]) => (s: string) =>
-  spaceToOption(spaces.find(space => space.id === s));
+  spaceToOption(spaces.find(space => `spaceOption_${space.id}` === s));
 
 interface Props {
   spaces: Space[];
@@ -55,6 +55,7 @@ export class SpaceSelector extends Component<Props, {}> {
 
     return (
       <EuiComboBox
+        data-test-subj={'spaceSelectorComboBox'}
         fullWidth
         options={this.props.spaces.map(space =>
           spaceToOption(
@@ -75,6 +76,6 @@ export class SpaceSelector extends Component<Props, {}> {
   }
 
   public onChange = (selectedSpaces: EuiComboBoxOptionProps[]) => {
-    this.props.onChange(selectedSpaces.map(s => s.id as string));
+    this.props.onChange(selectedSpaces.map(s => (s.id as string).split('spaceOption_')[1]));
   };
 }

@@ -103,11 +103,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.logout();
     });
 
-    it('rbac read only role can not  save a visualization', async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-      const vizName1 = 'Viz VerticalBarChart';
-
+    it('rbac read only role can not save a visualization', async function () {
       log.debug('log in as kibanareadonly with rbac_read role');
       await PageObjects.security.login('kibanareadonly', 'changeme');
       log.debug('navigateToApp visualize');
@@ -115,10 +111,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.waitForVisualization();
-      await PageObjects.visualize.saveVisualizationExpectFail(vizName1);
+      await PageObjects.visualize.expectNoSaveOption();
       await PageObjects.security.logout();
 
     });
