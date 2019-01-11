@@ -12,6 +12,7 @@ import { debounce } from 'lodash';
 import {
   EuiTitle,
   EuiFieldText,
+  EuiFieldNumber,
   EuiDescribedFormGroup,
   EuiFormRow,
 } from '@elastic/eui';
@@ -44,7 +45,10 @@ export class FormEntryRow extends PureComponent {
     onValueUpdate: PropTypes.func.isRequired,
     onErrorUpdate: PropTypes.func.isRequired,
     field: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]).isRequired,
     error: PropTypes.object,
     schema: PropTypes.object.isRequired,
     disabled: PropTypes.bool,
@@ -57,9 +61,9 @@ export class FormEntryRow extends PureComponent {
   }
 
   onFieldChange = (value) => {
-    const { field, onValueUpdate } = this.props;
-
-    onValueUpdate({ [field]: value });
+    const { field, onValueUpdate, schema: { validator } } = this.props;
+    const isNumber = validator._type === 'number';
+    onValueUpdate({ [field]: isNumber ? parseInt(value, 10) : value });
 
     this.validateField(value);
   }
@@ -72,8 +76,34 @@ export class FormEntryRow extends PureComponent {
     onErrorUpdate({ [field]: error });
   }
 
+  renderField = (isInvalid) => {
+    const { value, schema: { validator }, disabled } = this.props;
+    switch (validator._type) {
+      case "number":
+        return (
+          <EuiFieldNumber
+            isInvalid={isInvalid}
+            value={value}
+            onChange={e => this.onFieldChange(e.target.value)}
+            disabled={disabled === true}
+            fullWidth
+          />
+        );
+      default:
+        return (
+          <EuiFieldText
+            isInvalid={isInvalid}
+            value={value}
+            onChange={e => this.onFieldChange(e.target.value)}
+            disabled={disabled === true}
+            fullWidth
+          />
+        );
+    }
+  }
+
   render() {
-    const { field, value, error, schema, disabled, areErrorsVisible } = this.props;
+    const { field, error, schema, areErrorsVisible } = this.props;
 
     const hasError = !!error;
     const isInvalid = hasError && (error.alwaysVisible || areErrorsVisible);
@@ -96,13 +126,7 @@ export class FormEntryRow extends PureComponent {
           isInvalid={isInvalid}
           fullWidth
         >
-          <EuiFieldText
-            isInvalid={isInvalid}
-            value={value}
-            onChange={e => this.onFieldChange(e.target.value)}
-            disabled={disabled === true}
-            fullWidth
-          />
+          {this.renderField(isInvalid)}
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );

@@ -13,20 +13,20 @@ import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 export const i18nValidationErrorMessages = {
   'any.empty': ({ label }) => (
     i18n.translate('xpack.crossClusterReplication.formInputValidation.errorEmpty', {
-      defaultMessage: `'{label}' is required.`,
+      defaultMessage: `{label} is required.`,
       values: { label }
     })
   ),
   'number.base': ({ label }) => (
     i18n.translate('xpack.crossClusterReplication.formInputValidation.notNumberError', {
-      defaultMessage: `'{label}' must be a number.`,
+      defaultMessage: `{label} must be a number.`,
       values: { label }
     })
   ),
   'string.firstChar': ({ label, char }) => (
     <FormattedMessage
       id="xpack.crossClusterReplication.formInputValidation.indexNameValidation.errorFirstChar"
-      defaultMessage="'{label}' can't begin with a '{char}'."
+      defaultMessage="{label} can't begin with a '{char}'."
       values={{
         label,
         char: <strong>{char}</strong>
@@ -36,7 +36,7 @@ export const i18nValidationErrorMessages = {
   'string.illegalChars': ({ label, chars }) => (
     <FormattedMessage
       id="xpack.crossClusterReplication.formInputValidation.indexNameValidation.illegalCharacters"
-      defaultMessage="'{label}' can't contain the following character(s): {chars}."
+      defaultMessage="{label} can't contain the following character(s): {chars}."
       values={{
         label,
         chars: <strong>{chars}</strong>
@@ -59,7 +59,7 @@ const advancedStringValidation = (joi) => ({
   base: joi.string(),
   name: 'extendedString',
   language: {
-    firstCharNotAllowed: `can't begin with a period.`,
+    firstCharNotAllowed: `can't begin with a {{char}}.`,
     illegalChars: `can't contain the following character(s): {{illegalChars}}.`,
   },
   rules: [
@@ -93,6 +93,6 @@ const advancedStringValidation = (joi) => ({
   ]
 });
 
-export const customJoi = Joi.extend(advancedStringValidation); // Add extendsion for advanced string validations
+export const customJoi = Joi.extend(advancedStringValidation); // Add extension for advanced string validations
 
 export const indexNameValidator = customJoi.extendedString().firstCharNotAllowed('.').illegalChars(INDEX_ILLEGAL_CHARACTERS_VISIBLE);

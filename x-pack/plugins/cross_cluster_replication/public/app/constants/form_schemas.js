@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import Joi from 'joi';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
@@ -14,7 +15,7 @@ import { indexNameValidator } from '../services/input_validation';
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 /* eslint-disable max-len */
-export const follwerIndexFormSchema = {
+export const followerIndexFormSchema = {
   name: {
     label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
       defaultMessage: 'Name'
@@ -22,10 +23,13 @@ export const follwerIndexFormSchema = {
     description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
       defaultMessage: 'A name for the follower index.'
     }),
-    helpText: i18n.translate('xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel', {
-      defaultMessage: 'Spaces and the characters {characterList} are not allowed.',
-      values: { characterList: <strong>{indexNameIllegalCharacters}</strong> }
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+        defaultMessage="Spaces and the characters {characterList} are not allowed."
+        values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+      />
+    ),
     validator: indexNameValidator,
   },
   leaderIndex: {
@@ -35,10 +39,13 @@ export const follwerIndexFormSchema = {
     description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription', {
       defaultMessage: 'The leader index you want to replicate from the remote cluster.'
     }),
-    helpText: i18n.translate('xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel', {
-      defaultMessage: 'Spaces and the characters {characterList} are not allowed.',
-      values: { characterList: <strong>{indexNameIllegalCharacters}</strong> }
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+        defaultMessage="Spaces and the characters {characterList} are not allowed."
+        values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+      />
+    ),
     validator: indexNameValidator,
   },
   advanced: {
@@ -49,25 +56,25 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountDescription', {
         defaultMessage: 'The maximum number of operations to pull per read from the remote cluster.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.number().empty(''),
     },
     maxOutstandingReadRequests: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle', {
         defaultMessage: 'Max outstanding read requests'
       }),
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsDescription', {
-        defaultMessage: 'The maximum number of outstanding reads requests from the remote cluster.'
+        defaultMessage: 'The maximum number of outstanding read requests from the remote cluster.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.number().empty(''),
     },
     maxReadRequestSize: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle', {
         defaultMessage: 'Max read request size'
       }),
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeDescription', {
-        defaultMessage: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster (bye value).'
+        defaultMessage: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.string().empty(''),
     },
     maxWriteRequestOperationCount: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle', {
@@ -76,7 +83,7 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountDescription', {
         defaultMessage: 'The maximum number of operations per bulk write request executed on the follower.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.number().empty(''),
     },
     maxWriteRequestSize: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle', {
@@ -85,7 +92,7 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeDescription', {
         defaultMessage: 'The maximum total bytes of operations per bulk write request executed on the follower.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.string().empty(''),
     },
     maxOutstandingWriteRequests: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle', {
@@ -94,7 +101,7 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsDescription', {
         defaultMessage: 'The maximum number of outstanding write requests on the follower.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.number().empty(''),
     },
     maxWriteBufferCount: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle', {
@@ -103,7 +110,7 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountDescription', {
         defaultMessage: 'The maximum number of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the number of queued operations goes below the limit.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.number().empty(''),
     },
     maxWriteBufferSize: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle', {
@@ -112,7 +119,7 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeDescription', {
         defaultMessage: 'The maximum total bytes of operations that can be queued for writing; when this limit is reached, reads from the remote cluster will be deferred until the total bytes of queued operations goes below the limit.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.string().empty(''),
     },
     maxRetryDelay: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle', {
@@ -121,7 +128,7 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayDescription', {
         defaultMessage: 'The maximum time to wait before retrying an operation that failed exceptionally; an exponential backoff strategy is employed when retrying.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.string().empty(''),
     },
     readPollTimeout: {
       label: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle', {
@@ -130,7 +137,7 @@ export const follwerIndexFormSchema = {
       description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutDescription', {
         defaultMessage: 'The maximum time to wait for new operations on the remote cluster when the follower index is synchronized with the leader index; when the timeout has elapsed, the poll for operations will return to the follower so that it can update some statistics, and then the follower will immediately attempt to read from the leader again.'
       }),
-      validator: Joi.number().allow(''),
+      validator: Joi.string().empty(''),
     },
   }
 };
