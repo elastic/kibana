@@ -79,6 +79,12 @@ interface Referencable {
   references: SavedObjectReference[];
 }
 
+/**
+ * We want to have two types, one that guarantees a "references" attribute
+ * will exist and one that allows it to be null. Since we're not migrating
+ * all the saved objects to have a "references" array, we need to support
+ * the scenarios where it may be missing (ex migrations).
+ */
 export type RawSavedObjectDoc = SavedObjectDoc & Partial<Referencable>;
 export type SanitizedSavedObjectDoc = SavedObjectDoc & Referencable;
 
