@@ -103,7 +103,7 @@ const kibanaFeatures: Feature[] = [
     navLinkId: 'kibana:dev_tools',
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
-      all: {
+      read: {
         catalogue: ['console', 'searchprofiler', 'grokdebugger'],
         api: ['console/execute'],
         app: ['kibana'],

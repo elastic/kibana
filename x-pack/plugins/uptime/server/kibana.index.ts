@@ -39,7 +39,7 @@ export const initServerWithKibana = (server: KibanaServer) => {
     name: 'Uptime',
     navLinkId: PLUGIN.ID,
     privileges: {
-      all: {
+      read: {
         app: ['uptime', 'kibana'],
         savedObject: {
           all: [],
