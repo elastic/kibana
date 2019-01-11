@@ -20,7 +20,7 @@ export class XYZTMSSource extends TMSSource {
 
   static type = 'EMS_XYZ';
 
-  static typeDisplayName = 'TMS XYZ';
+  static typeDisplayName = 'Tile Map Service from URL';
 
   static createDescriptor(urlTemplate) {
     return {
@@ -44,7 +44,9 @@ export class XYZTMSSource extends TMSSource {
         <strong>{XYZTMSSource.typeDisplayName}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">Tile Map Service with XYZ url.</p>
+          <p className="euiTextColor--subdued">
+            Map tiles from a URL that includes the XYZ coordinates
+          </p>
         </EuiText>
       </Fragment>
     );
