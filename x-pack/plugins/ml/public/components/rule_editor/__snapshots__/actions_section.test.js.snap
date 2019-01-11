@@ -55,7 +55,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         content={
           <FormattedMessage
             defaultMessage="The result will not be created."
-            id="xpack.ml.ruleEditor.actionsSection.resultNotCreatedTooltip"
+            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
             values={Object {}}
           />
         }
@@ -106,7 +106,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         content={
           <FormattedMessage
             defaultMessage="The value for that series will not be used to update the model."
-            id="xpack.ml.ruleEditor.actionsSection.valueNotUsedToUpdateModelTooltip"
+            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
             values={Object {}}
           />
         }
@@ -174,7 +174,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         content={
           <FormattedMessage
             defaultMessage="The result will not be created."
-            id="xpack.ml.ruleEditor.actionsSection.resultNotCreatedTooltip"
+            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
             values={Object {}}
           />
         }
@@ -225,7 +225,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         content={
           <FormattedMessage
             defaultMessage="The value for that series will not be used to update the model."
-            id="xpack.ml.ruleEditor.actionsSection.valueNotUsedToUpdateModelTooltip"
+            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
             values={Object {}}
           />
         }
@@ -293,7 +293,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         content={
           <FormattedMessage
             defaultMessage="The result will not be created."
-            id="xpack.ml.ruleEditor.actionsSection.resultNotCreatedTooltip"
+            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
             values={Object {}}
           />
         }
@@ -344,7 +344,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         content={
           <FormattedMessage
             defaultMessage="The value for that series will not be used to update the model."
-            id="xpack.ml.ruleEditor.actionsSection.valueNotUsedToUpdateModelTooltip"
+            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
             values={Object {}}
           />
         }
