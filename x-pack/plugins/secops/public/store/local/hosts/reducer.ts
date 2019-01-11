@@ -20,10 +20,10 @@ export type HostsState = HostsModel;
 export const initialHostsState: HostsState = {
   query: {
     authorizations: {
-      limit: 2, // TODO: Change this default to a higher number
+      limit: 10,
     },
     hosts: {
-      limit: 1, // TODO: Put this back to 2
+      limit: 1,
     },
     events: {
       limit: 10,

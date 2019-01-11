@@ -62,7 +62,6 @@ export interface AuthorizationBucket {
   };
 }
 
-// TODO Use this or delete it
 export interface AuthorizationData extends SearchHit {
   sort: string[];
   aggregations: {
