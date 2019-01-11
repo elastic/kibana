@@ -55,7 +55,7 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
                 },
                 {
                   field: 'monitorId',
-                  name: i18n.translate('xpack.uptime.errorList.columns.monitorId', {
+                  name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
                     defaultMessage: 'Monitor ID',
                   }),
                   render: (id: string) => <Link to={`/monitor/${id}`}>{id}</Link>,
@@ -64,14 +64,14 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
                 },
                 {
                   field: 'count',
-                  name: i18n.translate('xpack.uptime.errorList.columns.count', {
+                  name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
                     defaultMessage: 'Count',
                   }),
                   sortable: true,
                 },
                 {
                   field: 'timestamp',
-                  name: i18n.translate('xpack.uptime.errorList.columns.latestError', {
+                  name: i18n.translate('xpack.uptime.errorList.latestErrorColumnLabel', {
                     defaultMessage: 'Latest error',
                   }),
                   sortable: true,
@@ -79,14 +79,14 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
                 },
                 {
                   field: 'statusCode',
-                  name: i18n.translate('xpack.uptime.errorList.columns.statusCode', {
+                  name: i18n.translate('xpack.uptime.errorList.statusCodeColumnLabel', {
                     defaultMessage: 'Status code',
                   }),
                   sortable: true,
                 },
                 {
                   field: 'latestMessage',
-                  name: i18n.translate('xpack.uptime.errorList.columns.latestMessage', {
+                  name: i18n.translate('xpack.uptime.errorList.latestMessageColumnLabel', {
                     defaultMessage: 'Latest message',
                   }),
                   sortable: true,
