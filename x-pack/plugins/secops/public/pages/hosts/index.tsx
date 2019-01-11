@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Redirect, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
@@ -15,7 +15,7 @@ import { Hosts } from './hosts';
 export const HostsContainer = pure<HostComponentProps>(({ match }) => (
   <div>
     <Switch>
-      <Route strict exact path={'/hosts'} component={Hosts} />
+      <Route strict exact path={match.url} component={Hosts} />
       <Route path={`${match.url}/:hostId`} component={HostDetails} />
       <Redirect from="/hosts/" to="/hosts" />
     </Switch>
