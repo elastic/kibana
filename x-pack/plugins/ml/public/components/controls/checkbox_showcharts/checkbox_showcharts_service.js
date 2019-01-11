@@ -12,7 +12,7 @@ import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { CheckboxShowCharts, mlCheckboxShowChartsService } from './checkbox_showcharts';
+import { mlCheckboxShowChartsService } from './checkbox_showcharts';
 
 module.service('mlCheckboxShowChartsService', function (Private) {
   const stateFactory = Private(stateFactoryProvider);
@@ -20,13 +20,4 @@ module.service('mlCheckboxShowChartsService', function (Private) {
     showCharts: true
   });
   mlCheckboxShowChartsService.initialized = true;
-})
-  .directive('mlCheckboxShowCharts', function ($injector) {
-    const reactDirective = $injector.get('reactDirective');
-
-    return reactDirective(
-      CheckboxShowCharts,
-      undefined,
-      { restrict: 'E' },
-    );
-  });
+});
