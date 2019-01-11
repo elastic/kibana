@@ -24,4 +24,5 @@ export interface Role {
   transient_metadata?: {
     [anyKey: string]: any;
   };
+  _transform_error?: string[];
 }

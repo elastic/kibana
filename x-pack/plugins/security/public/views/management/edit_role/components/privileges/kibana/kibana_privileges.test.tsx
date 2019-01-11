@@ -6,11 +6,13 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import { Role } from 'x-pack/plugins/security/common/model/role';
 import { PrivilegeDefinition } from '../../../../../../../common/model/privileges/privilege_definition';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
+import { TransformErrorSection } from './transform_error_section';
 
 const buildProps = (customProps = {}) => {
   return {
@@ -77,5 +79,15 @@ describe('<KibanaPrivileges>', () => {
     const wrapper = shallow(<KibanaPrivileges {...props} />);
     expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(0);
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+  });
+
+  it('renders the transform error section when the role has a transform error', () => {
+    const props = buildProps({ spacesEnabled: true });
+    (props.role as Role)._transform_error = ['kibana'];
+
+    const wrapper = shallow(<KibanaPrivileges {...props} />);
+    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(0);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
+    expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
   });
 });

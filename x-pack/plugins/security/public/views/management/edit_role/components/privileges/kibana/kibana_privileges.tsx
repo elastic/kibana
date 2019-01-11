@@ -16,6 +16,7 @@ import { RoleValidator } from '../../../lib/validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
+import { TransformErrorSection } from './transform_error_section';
 
 interface Props {
   role: Role;
@@ -51,6 +52,10 @@ export class KibanaPrivileges extends Component<Props, {}> {
       validator,
       features,
     } = this.props;
+
+    if (role._transform_error && role._transform_error.includes('kibana')) {
+      return <TransformErrorSection />;
+    }
 
     const effectivePrivilegesFactory = new EffectivePrivilegesFactory(privilegeDefinition);
 

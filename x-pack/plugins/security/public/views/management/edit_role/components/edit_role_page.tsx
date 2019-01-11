@@ -28,7 +28,7 @@ import { Space } from '../../../../../../spaces/common/model/space';
 import { PrivilegeMap } from '../../../../../common/model/kibana_privilege';
 import { PrivilegeDefinition } from '../../../../../common/model/privileges/privilege_definition';
 import { Role } from '../../../../../common/model/role';
-import { isReservedRole } from '../../../../lib/role';
+import { isReadOnlyRole, isReservedRole } from '../../../../lib/role';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
 import { copyRole } from '../lib/copy_role';
@@ -162,7 +162,7 @@ class EditRolePageUI extends Component<Props, State> {
   };
 
   public getActionButton = () => {
-    if (this.editingExistingRole() && !isReservedRole(this.props.role)) {
+    if (this.editingExistingRole() && !isReadOnlyRole(this.props.role)) {
       return (
         <EuiFlexItem grow={false}>
           <DeleteRoleButton canDelete={true} onDelete={this.handleDeleteRole} />
@@ -225,7 +225,7 @@ class EditRolePageUI extends Component<Props, State> {
         <EuiSpacer />
         <ElasticsearchPrivileges
           role={this.state.role}
-          editable={!isReservedRole(this.state.role)}
+          editable={!isReadOnlyRole(this.state.role)}
           httpClient={this.props.httpClient}
           onChange={this.onRoleChange}
           runAsUsers={this.props.runAsUsers}
@@ -254,7 +254,7 @@ class EditRolePageUI extends Component<Props, State> {
           spacesEnabled={this.props.spacesEnabled}
           features={this.props.features}
           uiCapabilities={this.props.uiCapabilities}
-          editable={!isReservedRole(this.state.role)}
+          editable={!isReadOnlyRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}
           validator={this.validator}
@@ -265,7 +265,7 @@ class EditRolePageUI extends Component<Props, State> {
   };
 
   public getFormButtons = () => {
-    if (isReservedRole(this.props.role)) {
+    if (isReadOnlyRole(this.props.role)) {
       return (
         <EuiButton onClick={this.backToRoleList}>
           <FormattedMessage

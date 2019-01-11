@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isReservedRole, isRoleEnabled } from './role';
+import { isReadOnlyRole, isReservedRole, isRoleEnabled } from './role';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {
@@ -54,6 +54,29 @@ describe('role', () => {
     test('should return false if role is NOT explicitly reserved or not reserved', () => {
       const testRole = {};
       expect(isReservedRole(testRole)).toBe(false);
+    });
+  });
+
+  describe('isReadOnlyRole', () => {
+    test('returns true for reserved roles', () => {
+      const testRole = {
+        metadata: {
+          _reserved: true,
+        },
+      };
+      expect(isReadOnlyRole(testRole)).toBe(true);
+    });
+
+    test('returns true for roles with transform errors', () => {
+      const testRole = {
+        _transform_error: ['kibana'],
+      };
+      expect(isReadOnlyRole(testRole)).toBe(true);
+    });
+
+    test('returns false for all other roles', () => {
+      const testRole = {};
+      expect(isReadOnlyRole(testRole)).toBe(false);
     });
   });
 });

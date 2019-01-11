@@ -32,7 +32,7 @@ interface Props {
   availableFields: string[];
   onChange: (indexPrivilege: IndexPrivilege) => void;
   onDelete: () => void;
-  isReservedRole: boolean;
+  isReadOnlyRole: boolean;
   allowDelete: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
@@ -103,7 +103,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
                 selectedOptions={this.props.indexPrivilege.names.map(toOption)}
                 onCreateOption={this.onCreateIndexPatternOption}
                 onChange={this.onIndexPatternsChange}
-                isDisabled={this.props.isReservedRole}
+                isDisabled={this.props.isReadOnlyRole}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -122,7 +122,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
                 options={getIndexPrivileges().map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
-                isDisabled={this.props.isReservedRole}
+                isDisabled={this.props.isReadOnlyRole}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -137,7 +137,12 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
   };
 
   public getGrantedFieldsControl = () => {
-    const { allowFieldLevelSecurity, availableFields, indexPrivilege, isReservedRole } = this.props;
+    const {
+      allowFieldLevelSecurity,
+      availableFields,
+      indexPrivilege,
+      isReadOnlyRole: isRoleReadOnly,
+    } = this.props;
 
     if (!allowFieldLevelSecurity) {
       return null;
@@ -158,7 +163,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
             fullWidth={true}
             className="indexPrivilegeForm__grantedFieldsRow"
             helpText={
-              !isReservedRole && grant.length === 0 ? (
+              !isRoleReadOnly && grant.length === 0 ? (
                 <FormattedMessage
                   id="xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowHelpText"
                   defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
@@ -175,7 +180,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
                 selectedOptions={grant.map(toOption)}
                 onCreateOption={this.onCreateGrantedField}
                 onChange={this.onGrantedFieldsChange}
-                isDisabled={this.props.isReservedRole}
+                isDisabled={this.props.isReadOnlyRole}
               />
             </Fragment>
           </EuiFormRow>
@@ -196,7 +201,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
     return (
       // @ts-ignore
       <EuiFlexGroup direction="column">
-        {!this.props.isReservedRole && (
+        {!this.props.isReadOnlyRole && (
           <EuiFlexItem>
             <EuiSwitch
               data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
@@ -230,7 +235,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
                 fullWidth={true}
                 value={indexPrivilege.query}
                 onChange={this.onQueryChange}
-                readOnly={this.props.isReservedRole}
+                readOnly={this.props.isReadOnlyRole}
               />
             </EuiFormRow>
           </EuiFlexItem>
