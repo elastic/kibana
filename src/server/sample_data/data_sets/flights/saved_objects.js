@@ -87,9 +87,16 @@ export const getSavedObjects = () => [
       ],
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
       }
-    }
+    },
+    "references": [
+      {
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
+      }
+    ]
   },
   {
     "id": "8f4d0c00-4c86-11e8-b3d7-01146121b73d",

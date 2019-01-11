@@ -18,11 +18,16 @@ export const search = {
     ],
     version: 1,
     kibanaSavedObjectMeta: {
-      searchSourceJSON: '{\'index\':\'logstash-*\',\'query\':{\'query_string\':{\'query\':\'geo.dest: IN\','
-      + '\'analyze_wildcard\':true}},\'filter\':[],\'highlight\':{\'pre_tags\':[\'@kibana-highlighted-field@\'],'
-      + '\'post_tags\':[\'@/kibana-highlighted-field@\'],\'fields\':{\'*\':{}},\'require_field_match\':false,'
-      + '\'fragment_size\':2147483647}}'
-    }
+      searchSourceJSON: '{\'index\':\'kibanaSavedObjectMeta.searchSourceJSON.index\',\'query\':{\'query_string\':'
+      + '{\'query\':\'geo.dest: IN\',\'analyze_wildcard\':true}},\'filter\':[],\'highlight\':{\'pre_tags\':'
+      + '[\'@kibana-highlighted-field@\'],\'post_tags\':[\'@/kibana-highlighted-field@\'],\'fields\':{\'*\':{}},'
+      + '\'require_field_match\':false,\'fragment_size\':2147483647}}'
+    },
+    references: [{
+      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+      type: 'index-pattern',
+      id: 'logstash-*',
+    }]
   }
 };
 

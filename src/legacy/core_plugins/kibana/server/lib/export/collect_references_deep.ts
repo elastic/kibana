@@ -83,12 +83,6 @@ function extractLegacyReferences(savedObject: SavedObject): ObjectsToCollect[] {
         legacyReferences.push(visIndexPattern);
       }
       break;
-    case 'search':
-      const searchIndexPattern = extractSearchSourceIndexPattern(savedObject);
-      if (searchIndexPattern) {
-        legacyReferences.push(searchIndexPattern);
-      }
-      break;
   }
   return legacyReferences;
 }

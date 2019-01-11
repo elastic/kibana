@@ -84,18 +84,6 @@ async function findVisualizationRelationships({ id, size, namespace, savedObject
 }
 
 async function findSavedSearchRelationships({ id, namespace, savedObjectsClient }) {
-  const search = await savedObjectsClient.get('search', id, { namespace });
-
-  const searchSourceJSON = JSON.parse(search.attributes.kibanaSavedObjectMeta.searchSourceJSON);
-
-  const indexPatterns = [];
-  try {
-    const indexPattern = await savedObjectsClient.get('index-pattern', searchSourceJSON.index, { namespace });
-    indexPatterns.push({ id: indexPattern.id, type: 'index-pattern', title: indexPattern.attributes.title });
-  } catch (err) {
-    // Do nothing
-  }
-
   const allVisualizationsResponse = await savedObjectsClient.find({
     namespace,
     type: 'visualization',
@@ -115,22 +103,14 @@ async function findSavedSearchRelationships({ id, namespace, savedObjectsClient 
     return accum;
   }, []);
 
-  return visualizations.concat(indexPatterns);
+  return visualizations;
 }
 
 async function findIndexPatternRelationships({ id, size, namespace, savedObjectsClient }) {
-  await savedObjectsClient.get('index-pattern', id, { namespace });
-  const [allVisualizationsResponse, savedSearchResponse] = await Promise.all([
+  const [allVisualizationsResponse] = await Promise.all([
     savedObjectsClient.find({
       namespace,
       type: 'visualization',
-      searchFields: ['kibanaSavedObjectMeta.searchSourceJSON'],
-      search: '*',
-      fields: [`title`, `kibanaSavedObjectMeta.searchSourceJSON`],
-    }),
-    savedObjectsClient.find({
-      namespace,
-      type: 'search',
       searchFields: ['kibanaSavedObjectMeta.searchSourceJSON'],
       search: '*',
       fields: [`title`, `kibanaSavedObjectMeta.searchSourceJSON`],
@@ -156,25 +136,7 @@ async function findIndexPatternRelationships({ id, size, namespace, savedObjects
     }
   }
 
-  const searches = [];
-  for (const search of savedSearchResponse.saved_objects) {
-    if (search.error) {
-      continue;
-    }
-    const searchSourceJSON = JSON.parse(search.attributes.kibanaSavedObjectMeta.searchSourceJSON);
-    if (searchSourceJSON && searchSourceJSON.index === id) {
-      searches.push({
-        id: search.id,
-        type: 'search',
-        title: search.attributes.title,
-      });
-    }
-
-    if (searches.length >= size) {
-      break;
-    }
-  }
-  return visualizations.concat(searches);
+  return visualizations;
 }
 
 export async function findRelationships({ type, id, namespace, size, savedObjectsClient }) {
