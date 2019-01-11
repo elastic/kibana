@@ -88,28 +88,28 @@ export const MonitorStatusBar = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatusMessage"
+                id="xpack.uptime.monitorStatusBar.healthStatus.lastUpdateMessage"
                 values={{ timeFromNow: moment(timestamp).fromNow() }}
                 defaultMessage="Last update: {timeFromNow}"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatusHostMessage"
+                id="xpack.uptime.monitorStatusBar.healthStatus.hostMessage"
                 values={{ host }}
                 defaultMessage="Host: {host}"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatusPortMessage"
+                id="xpack.uptime.monitorStatusBar.healthStatus.portMessage"
                 values={{ port }}
                 defaultMessage="Port: {port}"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.durationMilliseconds"
+                id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
                 // TODO: this should not be computed inline
                 values={{ duration: us / 1000 }}
                 defaultMessage="Duration: {duration} ms"
@@ -117,7 +117,7 @@ export const MonitorStatusBar = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.scheme"
+                id="xpack.uptime.monitorStatusBar.healthStatus.schemeMessage"
                 values={{ scheme }}
                 defaultMessage="Scheme: {scheme}"
               />

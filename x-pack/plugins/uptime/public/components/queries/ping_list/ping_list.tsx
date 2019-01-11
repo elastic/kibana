@@ -113,7 +113,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 title={
                   <h2>
                     <FormattedMessage
-                      id="xpack.uptime.pingList.emptyPrompt.title"
+                      id="xpack.uptime.pingList.loadingTitle"
                       defaultMessage="Loading Ping History"
                     />
                   </h2>
@@ -122,7 +122,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   <Fragment>
                     <p>
                       <FormattedMessage
-                        id="xpack.uptime.pingList.emptyPrompt.body"
+                        id="xpack.uptime.pingList.loadingDescription"
                         defaultMessage="Fetching the latest list of checks"
                       />
                     </p>
@@ -135,7 +135,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
           if (error) {
             return i18n.translate('xpack.uptime.pingList.errorMessage', {
               values: { message: error.message },
-              defaultMessage: `Error ${error.message}`,
+              defaultMessage: 'Error {message}',
             });
           }
           const {
@@ -239,7 +239,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   <EuiTitle size="xs">
                     <h4>
                       <FormattedMessage
-                        id="xpack.uptime.pingList.title"
+                        id="xpack.uptime.pingList.checkHistoryTitle"
                         defaultMessage="Check History"
                       />
                     </h4>
