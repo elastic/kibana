@@ -56,13 +56,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
     return (
       <Fragment>
         <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.uptime.monitorPage.title.id"
-              values={{ id }}
-              defaultMessage={id}
-            />
-          </h2>
+          <h2>{id}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
         <EuiFlexGroup>
