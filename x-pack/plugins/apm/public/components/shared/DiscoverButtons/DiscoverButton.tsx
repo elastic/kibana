@@ -11,6 +11,7 @@ import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
   query: QueryParamsDecoded;
+  children: React.ReactNode;
 }
 
 export function DiscoverButton({ query, ...rest }: Props) {

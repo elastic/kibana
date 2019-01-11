@@ -59,10 +59,7 @@ const DEFAULT_KIBANA_TIME_RANGE = {
   }
 };
 
-function getQueryWithRisonParams(
-  location: Location,
-  query: QueryParamsDecoded = {}
-) {
+function getQueryWithRisonParams(location: Location, query: RisonDecoded = {}) {
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
   const decodedG = risonSafeDecode(currentQuery._g);
@@ -104,7 +101,7 @@ export function getKibanaHref({
   return href;
 }
 
-export interface QueryParams {
+interface APMQueryParams {
   transactionId?: string;
   traceId?: string;
   detailTab?: string;
@@ -115,15 +112,20 @@ export interface QueryParams {
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
+}
+
+interface RisonEncoded {
   _g?: string;
   _a?: string;
 }
 
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-export interface QueryParamsDecoded extends Omit<QueryParams, '_g' | '_a'> {
+interface RisonDecoded {
   _g?: StringMap;
   _a?: StringMap;
 }
+
+export type QueryParams = APMQueryParams & RisonEncoded;
+export type QueryParamsDecoded = APMQueryParams & RisonDecoded;
 
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes the route to change.
