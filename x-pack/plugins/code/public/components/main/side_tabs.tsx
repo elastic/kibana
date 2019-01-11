@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { MainRouteParams, PathTypes } from '../../common/types';
 import { colors } from '../../style/variables';
 import { FileTree } from '../file_tree/file_tree';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
+import { StatusBar } from './status_bar';
 
 enum Tabs {
   file = 'file',
@@ -26,7 +27,7 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const FileTreeContainer = styled.div`
+const FileTreeContainer = styled(EuiFlexGroup)`
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
@@ -34,10 +35,20 @@ const FileTreeContainer = styled.div`
 `;
 
 class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRouteParams>> {
+  get repoUri() {
+    const { resource, org, repo } = this.props.match.params;
+    return `${resource}/${org}/${repo}`;
+  }
+
   public tabContentMap = {
     [Tabs.file]: (
-      <FileTreeContainer>
-        <FileTree />
+      <FileTreeContainer gutterSize="none" direction="column" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <FileTree />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <StatusBar repoUri={this.repoUri} />
+        </EuiFlexItem>
       </FileTreeContainer>
     ),
     [Tabs.structure]: <SymbolTree />,
