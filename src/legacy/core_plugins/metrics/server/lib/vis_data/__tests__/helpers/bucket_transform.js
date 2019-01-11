@@ -437,7 +437,7 @@ describe('bucketTransform', () => {
           },
           gap_policy: 'skip',
           script: {
-            source: 'params.value > 0 ? params.value : 0',
+            source: 'params.value > 0.0 ? params.value : 0.0',
             lang: 'painless'
           }
         }
