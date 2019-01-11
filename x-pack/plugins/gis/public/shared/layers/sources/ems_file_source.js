@@ -5,12 +5,13 @@
  */
 
 import { VectorSource } from './vector_source';
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiLink,
   EuiText,
   EuiSelect,
-  EuiFormRow
+  EuiFormRow,
+  EuiSpacer
 } from '@elastic/eui';
 
 import { GIS_API_PATH } from '../../../../common/constants';
@@ -19,7 +20,7 @@ import { emsServiceSettings } from '../../../kibana_services';
 export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
-  static typeDisplayName = 'Elastic Maps Service region boundaries';
+  static typeDisplayName = 'Elastic Maps Service vector shapes';
 
   static createDescriptor(id) {
     return {
@@ -53,9 +54,23 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  constructor(descriptor, emsFiles) {
+  static renderDropdownDisplayOption() {
+    return (
+      <Fragment>
+        <strong>{EMSFileSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            Vector shapes of administrative boundaries from Elastic Maps Service
+          </p>
+        </EuiText>
+      </Fragment>
+    );
+  }
+
+  constructor(descriptor, { emsFileLayers }) {
     super(descriptor);
-    this._emsFiles = emsFiles;
+    this._emsFiles = emsFileLayers;
   }
 
   async getGeoJsonWithMeta() {
@@ -93,10 +108,6 @@ export class EMSFileSource extends VectorSource {
       return { name: f.name, label: f.description };
     });
 
-  }
-
-  async isTimeAware() {
-    return false;
   }
 
   canFormatFeatureProperties() {

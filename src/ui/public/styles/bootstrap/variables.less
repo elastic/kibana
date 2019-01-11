@@ -13,6 +13,7 @@
 @gray:                   lighten(@gray-base, 33.5%); // #555
 @gray-light:             lighten(@gray-base, 46.7%); // #777
 @gray-lighter:           lighten(@gray-base, 93.5%); // #eee
+@gray-lightest:          lighten(@gray-base, 98%);
 
 @brand-primary:         darken(#428bca, 6.5%); // #337ab7
 @brand-success:         #5cb85c;
@@ -131,7 +132,7 @@
 //** Background color used for `.table-striped`.
 @table-bg-accent:               #f9f9f9;
 //** Background color used for `.table-hover`.
-@table-bg-hover:                #F5F7FA;
+@table-bg-hover:                @gray-lightest;
 @table-bg-active:               @table-bg-hover;
 
 //** Border color for table and cell borders.
@@ -244,7 +245,7 @@
 //** Hover color for dropdown links.
 @dropdown-link-hover-color:      darken(@gray-dark, 5%);
 //** Hover background for dropdown links.
-@dropdown-link-hover-bg:         #F5F7FA;
+@dropdown-link-hover-bg:         @gray-lightest;
 
 //** Active dropdown menu item text color.
 @dropdown-link-active-color:     @component-active-color;
@@ -645,7 +646,7 @@
 //##
 
 //** Background color of the whole progress component
-@progress-bg:                 #F5F7FA;
+@progress-bg:                 @gray-lightest;
 //** Progress bar text color
 @progress-bar-color:          #fff;
 //** Variable for setting rounded corners on progress bar.
@@ -675,7 +676,7 @@
 @list-group-border-radius:      @border-radius-base;
 
 //** Background color of single list items on hover
-@list-group-hover-bg:           #F5F7FA;
+@list-group-hover-bg:           @gray-lightest;
 //** Text color of active list items
 @list-group-active-color:       @component-active-color;
 //** Background color of active list items
@@ -709,11 +710,11 @@
 
 //** Border color for elements within panels
 @panel-inner-border:          #ddd;
-@panel-footer-bg:             #F5F7FA;
+@panel-footer-bg:             @gray-lightest;
 
 @panel-default-text:          @gray-dark;
 @panel-default-border:        #ddd;
-@panel-default-heading-bg:    #F5F7FA;
+@panel-default-heading-bg:    @gray-lightest;
 
 @panel-primary-text:          #fff;
 @panel-primary-border:        @brand-primary;
@@ -759,7 +760,7 @@
 //
 //##
 
-@well-bg:                     #F5F7FA;
+@well-bg:                     @gray-lightest;
 @well-border:                 darken(@well-bg, 7%);
 
 
@@ -789,7 +790,7 @@
 @breadcrumb-padding-vertical:   8px;
 @breadcrumb-padding-horizontal: 15px;
 //** Breadcrumb background color
-@breadcrumb-bg:                 #F5F7FA;
+@breadcrumb-bg:                 @gray-lightest;
 //** Breadcrumb text color
 @breadcrumb-color:              #ccc;
 //** Text color of current page in the breadcrumb
@@ -817,7 +818,7 @@
 @kbd-color:                   #fff;
 @kbd-bg:                      #333;
 
-@pre-bg:                      #F5F7FA;
+@pre-bg:                      @gray-lightest;
 @pre-color:                   @gray-dark;
 @pre-border-color:            #ccc;
 @pre-scrollable-max-height:   340px;
