@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore: EuiBreadcrumbs has no exported member
-import { EuiBreadcrumbs, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  // @ts-ignore: EuiBreadcrumbs has no exported member
+  EuiBreadcrumbs,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
