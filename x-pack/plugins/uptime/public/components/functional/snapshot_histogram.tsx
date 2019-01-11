@@ -22,7 +22,9 @@ export const SnapshotHistogram = ({ histogram }: SnapshotHistogramProps) => {
     <EuiSeriesChart width={600} height={107} stackBy="y" xType={EuiSeriesChartUtils.SCALE.TIME}>
       <EuiHistogramSeries
         data={upSeriesData}
-        name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', { defaultMessage: 'Up' })}
+        name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
+          defaultMessage: 'Up',
+        })}
         color="green"
       />
       <EuiHistogramSeries
