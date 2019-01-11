@@ -49,7 +49,7 @@ export const filebeatSystemRules = [
     },
     format: [
       {
-        constant: '[Syslog][auth][ssh]',
+        constant: '[System][auth][ssh]',
       },
       {
         constant: ' ',
