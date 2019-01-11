@@ -39,6 +39,7 @@ import {
 } from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
+import { IndexPatternInput } from 'ui/filter_bar/react/filter_editor/index_pattern_input';
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
 import { FieldFilter, MetaFilter } from '../../filters';
 import { FieldInput } from './field_input';
@@ -64,6 +65,7 @@ interface Props {
 }
 
 interface State {
+  selectedIndexPattern?: IndexPattern;
   selectedField?: IndexPatternField;
   selectedOperator?: Operator;
   params: any;
@@ -78,7 +80,8 @@ export class FilterEditor extends Component<Props, State> {
   public constructor(props: Props) {
     super(props);
     this.state = {
-      selectedField: this.getSelectedField(),
+      selectedIndexPattern: this.getIndexPatternFromFilter(),
+      selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
@@ -102,6 +105,8 @@ export class FilterEditor extends Component<Props, State> {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
+
+        {this.renderIndexPatternInput()}
 
         {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
 
@@ -141,6 +146,20 @@ export class FilterEditor extends Component<Props, State> {
           <EuiFlexItem />
         </EuiFlexGroup>
       </div>
+    );
+  }
+
+  private renderIndexPatternInput() {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <IndexPatternInput
+            options={this.props.indexPatterns}
+            value={this.state.selectedIndexPattern}
+            onChange={this.onIndexPatternChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -186,7 +205,7 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   private renderParamsEditor() {
-    const indexPattern = this.getSelectedIndexPattern();
+    const indexPattern = this.state.selectedIndexPattern;
     if (!indexPattern || !this.state.selectedOperator) {
       return '';
     }
@@ -234,21 +253,29 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   private getFieldOptions() {
-    return getFilterableFields(this.props.indexPatterns);
+    const indexPattern = this.state.selectedIndexPattern || this.props.indexPatterns[0];
+    return getFilterableFields([indexPattern]);
   }
 
-  private getSelectedIndexPattern() {
+  private getIndexPatternFromFilter() {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
-  private getSelectedField() {
-    const indexPattern = this.getSelectedIndexPattern();
+  private getFieldFromFilter() {
+    const indexPattern = this.getIndexPatternFromFilter();
     return indexPattern && getFieldFromFilter(this.props.filter as FieldFilter, indexPattern);
   }
 
   private getSelectedOperator() {
     return getOperatorFromFilter(this.props.filter);
   }
+
+  private onIndexPatternChange = (selectedIndexPattern?: IndexPattern) => {
+    const selectedField = undefined;
+    const selectedOperator = undefined;
+    const params = undefined;
+    this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
+  };
 
   private onFieldChange = (selectedField?: IndexPatternField) => {
     const selectedOperator = undefined;
@@ -305,23 +332,22 @@ export class FilterEditor extends Component<Props, State> {
   };
 
   private buildFilter(): MetaFilter | null {
-    const { selectedField, selectedOperator, params } = this.state;
-    const indexPattern = this.getSelectedIndexPattern();
-    if (!selectedField || !selectedOperator || !indexPattern) {
+    const { selectedIndexPattern, selectedField, selectedOperator, params } = this.state;
+    if (!selectedField || !selectedOperator || !selectedIndexPattern) {
       return null;
     }
     switch (selectedOperator.type) {
       case 'phrase':
-        return buildPhraseFilter(selectedField, params, indexPattern);
+        return buildPhraseFilter(selectedField, params, selectedIndexPattern);
       case 'phrases':
-        return buildPhrasesFilter(selectedField, params, indexPattern);
+        return buildPhrasesFilter(selectedField, params, selectedIndexPattern);
       case 'range':
         const newParams = { gte: params.from, lt: params.to };
-        return buildRangeFilter(selectedField, newParams, indexPattern);
+        return buildRangeFilter(selectedField, newParams, selectedIndexPattern);
       case 'exists':
-        return buildExistsFilter(selectedField, indexPattern);
+        return buildExistsFilter(selectedField, selectedIndexPattern);
       case 'query':
-        return buildQueryFilter(params.query, indexPattern.id);
+        return buildQueryFilter(params.query, selectedIndexPattern.id);
       default:
         throw new Error(`Unknown operator type: ${selectedOperator.type}`);
     }
