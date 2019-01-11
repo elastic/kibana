@@ -29,10 +29,7 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
 import { Role } from '../../../../../../../../common/model/role';
-import {
-  EffectivePrivileges,
-  EffectivePrivilegesFactory,
-} from '../../../../../../../lib/effective_privileges';
+import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { copyRole } from '../../../../lib/copy_role';
 import { FeatureTable } from '../feature_table';
