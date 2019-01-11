@@ -8,6 +8,9 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
+import hash from 'object-hash';
+import { TaskManagerLogger } from './lib/logger';
+import { templateProperties } from './lib/template_properties';
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
 const DOC_TYPE = '_doc';
@@ -17,6 +20,7 @@ export interface StoreOpts {
   index: string;
   maxAttempts: number;
   supportedTypes: string[];
+  logger: TaskManagerLogger;
 }
 
 export interface FetchOpts {
@@ -64,11 +68,15 @@ export interface RawTaskDoc {
  * interface into the index.
  */
 export class TaskStore {
+  get isInitialized() {
+    return this._isInitialized;
+  }
   public readonly maxAttempts: number;
   private callCluster: ElasticJs;
   private index: string;
   private supportedTypes: string[];
   private _isInitialized = false; // tslint:disable-line:variable-name
+  private logger: TaskManagerLogger;
 
   /**
    * Constructs a new TaskStore.
@@ -83,6 +91,7 @@ export class TaskStore {
     this.index = opts.index;
     this.maxAttempts = opts.maxAttempts;
     this.supportedTypes = opts.supportedTypes;
+    this.logger = opts.logger;
 
     this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
   }
@@ -103,51 +112,52 @@ export class TaskStore {
       throw new Error('TaskStore has already been initialized!');
     }
 
-    const properties = {
-      type: { type: 'keyword' },
-      task: {
-        properties: {
-          taskType: { type: 'keyword' },
-          runAt: { type: 'date' },
-          interval: { type: 'text' },
-          attempts: { type: 'integer' },
-          status: { type: 'keyword' },
-          params: { type: 'text' },
-          state: { type: 'text' },
-          user: { type: 'keyword' },
-          scope: { type: 'keyword' },
-        },
-      },
-    };
-
+    let shouldUpdate = true;
+    let existingTemplate;
     try {
-      const templateResult = await this.callCluster('indices.putTemplate', {
+      existingTemplate = await this.callCluster('indices.getTemplate', {
         name: this.index,
-        body: {
-          index_patterns: [this.index],
-          mappings: {
-            _doc: {
-              dynamic: 'strict',
-              properties,
-            },
-          },
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-        },
       });
-      this._isInitialized = true;
-      return templateResult;
-    } catch (err) {
-      throw err;
+
+      if (existingTemplate) {
+        shouldUpdate =
+          hash(existingTemplate[this.index].mappings._doc.properties) !== hash(templateProperties);
+        if (shouldUpdate) {
+          this.logger.info('Found different index template, it will be updated!');
+        }
+      }
+    } catch (e) {
+      if (e.message !== 'Not Found') {
+        this.logger.error(`Could not determine state of index template ${e.message}`);
+      }
     }
 
-    return;
-  }
+    if (shouldUpdate) {
+      try {
+        const templateResult = await this.callCluster('indices.putTemplate', {
+          name: this.index,
+          body: {
+            index_patterns: [this.index],
+            mappings: {
+              _doc: {
+                dynamic: 'strict',
+                templateProperties,
+              },
+            },
+            settings: {
+              number_of_shards: 1,
+              auto_expand_replicas: '0-1',
+            },
+          },
+        });
+        this._isInitialized = true;
+        return templateResult;
+      } catch (err) {
+        throw err;
+      }
+    }
 
-  get isInitialized() {
-    return this._isInitialized;
+    return existingTemplate;
   }
 
   /**

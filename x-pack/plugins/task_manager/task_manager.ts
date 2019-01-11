@@ -58,6 +58,7 @@ export class TaskManager {
       index: config.get('xpack.task_manager.index'),
       maxAttempts: config.get('xpack.task_manager.max_attempts'),
       supportedTypes: Object.keys(this.definitions),
+      logger,
     });
     const pool = new TaskPool({
       logger,
@@ -94,7 +95,7 @@ export class TaskManager {
             this.isInitialized = true;
           })
           .catch((err: Error) => {
-            logger.warning(err.message);
+            logger.warning('Poller: ' + err.message);
 
             // rety again to initialize store and poller, using the timing of
             // task_manager's configurable poll interval
