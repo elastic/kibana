@@ -104,33 +104,51 @@ export function getMemorySeries(
       ? getEmptySerie(start, end)
       : [
           {
-            title: 'System total mem.',
-            data: series.totalMemory,
-            type: 'area',
-            color: colors.apmPink,
-            legendValue: asGB(overallValues.totalMemory)
-          },
-          {
-            title: 'System avail. mem.',
-            data: series.freeMemory,
-            type: 'area',
-            color: colors.apmPurple,
-            legendValue: asGB(overallValues.freeMemory)
-          },
-          {
-            title: 'Process RSS',
-            data: series.processMemoryRss,
-            type: 'area',
+            title: 'System average',
+            data: series.averagePercentMemoryAvailable,
+            type: 'linemark',
             color: colors.apmGreen,
-            legendValue: asGB(overallValues.processMemoryRss)
+            legendValue: asPercent(
+              overallValues.averagePercentMemoryAvailable || 0
+            )
           },
           {
-            title: 'Process mem. size',
-            data: series.processMemorySize,
-            type: 'area',
+            title: 'System minimum',
+            data: series.minimumPercentMemoryAvailable,
+            type: 'linemark',
             color: colors.apmBlue,
-            legendValue: asGB(overallValues.freeMemory)
+            legendValue: asPercent(
+              overallValues.minimumPercentMemoryAvailable || 0
+            )
           }
+          // {
+          //   title: 'System total mem.',
+          //   data: series.totalMemory,
+          //   type: 'area',
+          //   color: colors.apmPink,
+          //   legendValue: asGB(overallValues.totalMemory)
+          // },
+          // {
+          //   title: 'System avail. mem.',
+          //   data: series.freeMemory,
+          //   type: 'area',
+          //   color: colors.apmPurple,
+          //   legendValue: asGB(overallValues.freeMemory)
+          // },
+          // {
+          //   title: 'Process RSS',
+          //   data: series.processMemoryRss,
+          //   type: 'area',
+          //   color: colors.apmGreen,
+          //   legendValue: asGB(overallValues.processMemoryRss)
+          // },
+          // {
+          //   title: 'Process mem. size',
+          //   data: series.processMemorySize,
+          //   type: 'area',
+          //   color: colors.apmBlue,
+          //   legendValue: asGB(overallValues.freeMemory)
+          // }
         ];
 
   return {
@@ -155,7 +173,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       legendValue: asPercent(overallValues.processCPUAverage || 0)
     },
     {
-      title: 'Process max',
+      title: 'Process maximum',
       data: series.processCPUMax,
       type: 'linemark',
       color: colors.apmPurple,
@@ -169,7 +187,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       legendValue: asPercent(overallValues.systemCPUAverage || 0)
     },
     {
-      title: 'System max',
+      title: 'System maximum',
       data: series.systemCPUMax,
       type: 'linemark',
       color: colors.apmBlue,
