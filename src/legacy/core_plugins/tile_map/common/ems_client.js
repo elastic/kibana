@@ -154,9 +154,15 @@ export class EMSClientV66 {
         );
         fetch(url)
           .then(
-            response => resolve(response),
-            err => reject(err)
-          ).finally(() => clearTimeout(timer));
+            response => {
+              clearTimeout(timer);
+              resolve(response);
+            },
+            err => {
+              clearTimeout(timer);
+              reject(err);
+            }
+          );
       });
   }
 

@@ -110,6 +110,8 @@ export const getMapColors = ({ map }) => {
 export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
   map.mapState.timeFilters : timefilter.getTime();
 
+export const getQuery = ({ map }) => map.mapState.query;
+
 export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
@@ -122,13 +124,15 @@ export const getDataFilters = createSelector(
   getMapZoom,
   getTimeFilters,
   getRefreshTimerLastTriggeredAt,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt) => {
+  getQuery,
+  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
       zoom: mapZoom,
       timeFilters,
       refreshTimerLastTriggeredAt,
+      query,
     };
   }
 );
@@ -138,8 +142,8 @@ export const getDataSources = createSelector(getMetadata, metadata => metadata ?
 export const getLayerList = createSelector(
   getLayerListRaw,
   getDataSources,
-  (layerList, dataSources) => {
-    return layerList.map(layerDescriptor =>
+  (layerDescriptorList, dataSources) => {
+    return layerDescriptorList.map(layerDescriptor =>
       createLayerInstance(layerDescriptor, dataSources));
   });
 
@@ -157,5 +161,16 @@ export const getSelectedLayerJoinDescriptors = createSelector(
       return join.toDescriptor();
     });
   });
+
+export const getUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  (layerList) => {
+    const indexPatternIds = [];
+    layerList.forEach(layer => {
+      indexPatternIds.push(...layer.getIndexPatternIds());
+    });
+    return _.uniq(indexPatternIds);
+  }
+);
 
 export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));
