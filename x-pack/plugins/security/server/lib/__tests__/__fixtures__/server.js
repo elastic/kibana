@@ -39,7 +39,7 @@ export function serverFixture() {
         deauthenticate: stub(),
         authorization: {
           mode: {
-            useRbacForRequest: stub(),
+            useRbac: stub(),
           },
           actions: {
             login: 'stub-login-action',
