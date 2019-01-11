@@ -256,7 +256,8 @@ export class LspTestRunner {
 
   private async launchJavaLanguageServer() {
     const launcher = new JavaLauncher('127.0.0.1', false, serverOptions, new ConsoleLoggerFactory());
-    const installManager = new InstallManager(serverOptions);
+    // @ts-ignore
+    const installManager = new InstallManager(null, serverOptions);
     return await launcher.launch(false, 1, installManager.installationPath(JAVA));
   }
 }

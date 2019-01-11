@@ -102,9 +102,9 @@ export class WorkspaceHandler {
   public async clearWorkspace(repoUri: string, revision?: string) {
     const workspaceDir = path.join(this.workspacePath, repoUri);
     if (revision) {
-      await del([path.join(workspaceDir, revision)]);
+      await del([path.join(workspaceDir, revision)], { force: true });
     } else {
-      await del([path.join(workspaceDir)]);
+      await del([path.join(workspaceDir)], { force: true });
     }
   }
 

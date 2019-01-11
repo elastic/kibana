@@ -17,6 +17,7 @@ export interface LanguageServerDefinition extends LanguageServer {
   installationFolderName?: string;
   downloadUrl?: (lang: LanguageServerDefinition) => string | string;
   embedPath?: string;
+  installationPluginName?: string;
 }
 
 export const TYPESCRIPT: LanguageServerDefinition = {
@@ -35,7 +36,8 @@ export const JAVA: LanguageServerDefinition = {
   builtinWorkspaceFolders: true,
   languages: ['java'],
   launcher: JavaLauncher,
-  installationType: InstallationType.Download,
+  installationType: InstallationType.Plugin,
+  installationPluginName: 'javaLanguageServer',
   installationFolderName: 'jdt',
   version: '1.0.0-SNAPSHOT',
   build: '201812040656',
