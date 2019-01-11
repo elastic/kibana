@@ -60,7 +60,7 @@ export const EmptyState = ({
                 <Fragment>
                   <p>
                     <FormattedMessage
-                      id="xpack.uptime.emptyState.bodyMessage"
+                      id="xpack.uptime.emptyState.noDataDescription"
                       defaultMessage="There is no uptime data available."
                     />
                   </p>
