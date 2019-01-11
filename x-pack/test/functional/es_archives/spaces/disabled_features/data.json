@@ -3,22 +3,6 @@
   "value": {
     "index": ".kibana",
     "type": "doc",
-    "id": "config:6.0.0-alpha1",
-    "source": {
-      "config": {
-        "buildNum": 8467,
-        "dateFormat:tz": "UTC"
-      },
-      "type": "config"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "space:default",
     "source": {
       "space": {
@@ -40,7 +24,7 @@
   "value": {
     "index": ".kibana",
     "type": "doc",
-    "id": "index-pattern:614bf6e0-04b9-11e9-aa9c-8deb1efef84d",
+    "id": "index-pattern:logstash-*",
     "source": {
       "index-pattern": {
         "title": "logstash-*",
@@ -61,27 +45,7 @@
   "value": {
     "index": ".kibana",
     "type": "doc",
-    "id": "config:7.0.0",
-    "source": {
-      "config": {
-        "buildNum": 9007199254740991,
-        "accessibility:disableAnimations": true,
-        "telemetry:optIn": false,
-        "defaultIndex": "614bf6e0-04b9-11e9-aa9c-8deb1efef84d",
-        "dateFormat:tz": "UTC"
-      },
-      "type": "config",
-      "updated_at": "2018-12-21T00:43:13.237Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "type": "doc",
-    "id": "custom_space:index-pattern:614bf6e0-04b9-11e9-aa9c-8deb1efef84d",
+    "id": "custom_space:index-pattern:logstash-*",
     "source": {
       "namespace": "custom_space",
       "index-pattern": {
@@ -94,26 +58,6 @@
         "index-pattern": "6.5.0"
       },
       "updated_at": "2018-12-21T00:43:07.096Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "type": "doc",
-    "id": "custom_space:config:7.0.0",
-    "source": {
-      "namespace": "custom_space",
-      "config": {
-        "buildNum": 9007199254740991,
-        "accessibility:disableAnimations": true,
-        "telemetry:optIn": false,
-        "dateFormat:tz": "UTC"
-      },
-      "type": "config",
-      "updated_at": "2018-12-21T00:43:13.237Z"
     }
   }
 }

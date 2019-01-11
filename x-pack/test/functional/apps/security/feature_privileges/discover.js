@@ -8,12 +8,18 @@ import expect from 'expect.js';
 export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
   describe('discover', () => {
     before(async () => {
       await esArchiver.load('security/feature_privileges');
+      await kibanaServer.uiSettings.replace({
+        "accessibility:disableAnimations": true,
+        "telemetry:optIn": false,
+        "defaultIndex": "logstash-*",
+      });
       await esArchiver.loadIfNeeded('logstash_functional');
     });
 

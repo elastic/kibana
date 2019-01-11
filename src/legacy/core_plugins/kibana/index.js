@@ -157,7 +157,7 @@ export default function (kibana) {
           uiCapabilities: {
             discover: {
               show: true,
-              showWriteControls: true
+              save: true
             },
             visualize: {
               showWriteControls: true
