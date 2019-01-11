@@ -196,8 +196,8 @@ class ColdPhaseUi extends PureComponent {
               <EuiTextColor color="subdued">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                  defaultMessage="A frozen index has almost no overhead on the cluster and is blocked for write operations.
-                    Frozen indices may be searched but are expected to execute slowly and are not designed for high query load."
+                  defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
+                    You can search a frozen index, but expect queries to be slower."
                 />{' '}
                 <LearnMoreLink docPath="frozen-indices.html" />
               </EuiTextColor>
