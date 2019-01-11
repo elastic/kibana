@@ -20,6 +20,12 @@ const TransactionNameLink = styled(RelativeLink)`
 `;
 
 export default function TransactionList({ items, serviceName, ...rest }) {
+  const notAvailableLabel = i18n.translate(
+    'xpack.apm.transactionsTable.notAvailableLabel',
+    {
+      defaultMessage: 'N/A'
+    }
+  );
   const columns = [
     {
       field: 'name',
@@ -36,9 +42,9 @@ export default function TransactionList({ items, serviceName, ...rest }) {
         const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
-          <TooltipOverlay content={transactionName || 'N/A'}>
+          <TooltipOverlay content={transactionName || notAvailableLabel}>
             <TransactionNameLink path={transactionPath}>
-              {transactionName || 'N/A'}
+              {transactionName || notAvailableLabel}
             </TransactionNameLink>
           </TooltipOverlay>
         );
