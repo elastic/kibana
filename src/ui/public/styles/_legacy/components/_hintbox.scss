@@ -1,0 +1,59 @@
+.hintbox {
+  padding: $euiSizeS $euiSizeM;
+  border-radius: $euiBorderRadius;
+  margin-bottom: $euiSizeS;
+  background-color: $euiColorLightShade;
+  line-height: $euiLineHeight;
+
+  a {
+    color: $euiLinkColor !important;
+
+    &:hover {
+      color: darken($euiLinkColor, 10%) !important;
+    }
+  }
+
+  pre {
+    background-color: $euiColorEmptyShade;
+  }
+
+  ul, ol {
+    padding-left: $euiSizeL;
+  }
+
+  // inspired by Bootstrap alerts component
+  // https://github.com/twbs/bootstrap/blob/063c1b0780ea0240e4adce4c88d57fc23e099475/less/alerts.less#L27-L35
+  > * {
+    margin: 0;
+  }
+
+  > * + * {
+    margin-top: $euiSizeS;
+  }
+
+  // https://github.com/twbs/bootstrap/blob/2aa102bfd40859d15790febed1939e0111a6fb1a/less/tables.less#L88-L106
+  .table-bordered {
+    border: $euiBorderThin;
+    > thead,
+    > tbody,
+    > tfoot {
+      > tr {
+        > th,
+        > td {
+          border: $euiBorderThin;
+        }
+      }
+    }
+    > thead > tr {
+      > th,
+      > td {
+        border-bottom-width: 2px;
+      }
+    }
+  }
+}
+
+  .hintbox-label,
+  .hintbox-label[ng-click] {
+    cursor: help;
+  }

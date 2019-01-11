@@ -1,0 +1,83 @@
+.table {
+  // Nesting
+  .table {
+    background-color: $euiColorEmptyShade;
+  }
+}
+
+kbn-table, .kbn-table, tbody[kbn-rows] {
+  // sub tables should not have a leading border
+  .table .table {
+    margin-bottom: 0;
+
+    tr:first-child > td {
+      border-top: none;
+    }
+
+    td.field-name {
+      font-weight: $euiFontWeightBold;
+    }
+  }
+
+  /**
+   * 1. Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
+   *    row in the Context Log.
+   */
+  dl.source {
+    margin-bottom: 0;
+    line-height:2em;
+    word-break: break-all;
+    word-break: break-word;
+
+    dt, dd {
+      display: inline;
+    }
+
+    dt {
+      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
+      color: $euiTextColor;
+      padding: ($euiSizeXS / 2) $euiSizeXS;
+      margin-right: $euiSizeXS;
+      font-family: $euiCodeFontFamily;
+      word-break: normal;
+      border-radius: $euiBorderRadius;
+    }
+  }
+
+}
+
+table {
+  th {
+    i.fa-sort {
+      color: $euiColorLightShade;
+    }
+
+    button.fa-sort-asc,
+    button.fa-sort-down,
+    i.fa-sort-asc,
+    i.fa-sort-down {
+      color: $euiColorLightShade;
+    }
+
+    button.fa-sort-desc,
+    button.fa-sort-up,
+    i.fa-sort-desc,
+    i.fa-sort-up {
+      color: $euiColorLightShade;
+    }
+  }
+}
+
+
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
+
+  kbn-table, .kbn-table, tbody[kbn-rows] {
+    dl.source {
+      dt {
+        background-color: transparentize(tint($euiColorPrimary, 60%), .8);
+        color: $euiTextColor;
+      }
+    }
+  }
+}

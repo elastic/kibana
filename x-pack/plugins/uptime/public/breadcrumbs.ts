@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Breadcrumb } from 'ui/chrome';
+export interface UMBreadcrumb {
+  text: string;
+  href?: string;
+}
 
-export const monitorBreadcrumb: Breadcrumb = {
+export const monitorBreadcrumb: UMBreadcrumb = {
   text: 'Monitor',
 };
 
-export const overviewBreadcrumb: Breadcrumb = {
+export const overviewBreadcrumb: UMBreadcrumb = {
   text: 'Overview',
   href: '#/',
 };
 
-export const getOverviewPageBreadcrumbs = (): Breadcrumb[] => [overviewBreadcrumb];
+export const getOverviewPageBreadcrumbs = (): UMBreadcrumb[] => [overviewBreadcrumb];
 
-export const getMonitorPageBreadcrumb = (): Breadcrumb[] => [overviewBreadcrumb, monitorBreadcrumb];
+export const getMonitorPageBreadcrumb = (): UMBreadcrumb[] => [
+  overviewBreadcrumb,
+  monitorBreadcrumb,
+];
