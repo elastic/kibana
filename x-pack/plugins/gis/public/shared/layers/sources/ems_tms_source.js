@@ -3,16 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
 import { TMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
-import { EuiText } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSelect,
+  EuiFormRow,
+  EuiSpacer
+} from '@elastic/eui';
+import _ from 'lodash';
+
 
 export class EMSTMSSource extends TMSSource {
 
   static type = 'EMS_TMS';
-
-  static typeDisplayName = 'TMS';
+  static typeDisplayName = 'Elastic Maps Service tiles';
 
   static createDescriptor(serviceId) {
     return {
@@ -21,9 +27,48 @@ export class EMSTMSSource extends TMSSource {
     };
   }
 
-  constructor(descriptor, emsTileServices) {
+  static renderEditor({ dataSourcesMeta, onPreviewSource }) {
+
+    const emsTmsOptionsRaw = _.get(dataSourcesMeta, "ems.tms", []);
+    const emsTileOptions = emsTmsOptionsRaw.map((service) => ({
+      value: service.id,
+      text: service.id //due to not having human readable names
+    }));
+
+    const onChange = ({ target }) => {
+      const selectedId = target.options[target.selectedIndex].value;
+      const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
+      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, emsTmsOptionsRaw);
+      onPreviewSource(emsTMSSource);
+    };
+    return (
+      <EuiFormRow label="Tile service">
+        <EuiSelect
+          hasNoInitialSelection
+          options={emsTileOptions}
+          onChange={onChange}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  static renderDropdownDisplayOption() {
+    return  (
+      <Fragment>
+        <strong>{EMSTMSSource.typeDisplayName}</strong>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            Map tiles from Elastic Maps Service
+          </p>
+        </EuiText>
+      </Fragment>
+    );
+  }
+
+  constructor(descriptor, { emsTmsServices }) {
     super(descriptor);
-    this._emsTileServices = emsTileServices;
+    this._emsTileServices = emsTmsServices;
   }
 
   renderDetails() {

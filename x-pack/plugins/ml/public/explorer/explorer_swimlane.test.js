@@ -7,7 +7,7 @@
 import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
 import moment from 'moment-timezone';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
@@ -69,7 +69,7 @@ describe('ExplorerSwimlane', () => {
   test('Minimal initialization', () => {
     const mocks = getExplorerSwimlaneMocks();
 
-    const wrapper = mount(<ExplorerSwimlane
+    const wrapper = mountWithIntl(<ExplorerSwimlane.WrappedComponent
       chartWidth={mockChartWidth}
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mocks.swimlaneData}
@@ -93,7 +93,7 @@ describe('ExplorerSwimlane', () => {
   test('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
 
-    const wrapper = mount(<ExplorerSwimlane
+    const wrapper = mountWithIntl(<ExplorerSwimlane.WrappedComponent
       chartWidth={mockChartWidth}
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mockOverallSwimlaneData}

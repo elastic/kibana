@@ -1658,12 +1658,18 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.3.tgz#bef071852dca2a2dbb65fecdb7bfb30cedae2de2"
   integrity sha512-sfjHrNF4zWRv3fJUGyZW46wVxhYJ/GeWIPdKxbnLIhY3bWR0Ncl2kIhZI7rpjY9KtUQAkDP8jWEmaGQGFFvruA==
 
-"@types/puppeteer@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.6.2.tgz#9b4ba40a67abad3c729a021ffd259d929d00c5e0"
-  integrity sha512-7dDV8LiOFwnvDnWhBA7KFmd/BWwP8c8ac3X7/OXst9Q5JXg0qGpmNkEKh24XOxUbtWtVUvma9ZCb6ZmVjvioJA==
+"@types/puppeteer-core@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer-core/-/puppeteer-core-1.9.0.tgz#5ceb397e3ff769081fb07d71289b5009392d24d3"
+  integrity sha512-YJwGTq0a8xZxN7/QDeW59XMdKTRNzDTc8ZVBPDB6J13GgXn1+QzgMA8pAq1/bj2FD0R7xj3nYoZra10b0HLzFw==
   dependencies:
-    "@types/events" "*"
+    "@types/puppeteer" "*"
+
+"@types/puppeteer@*":
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.11.1.tgz#f2fe2e08917af2b4dc4b03bd2b838c05cb9d8410"
+  integrity sha512-IvrvZfWjITUH7q4WrM25ul9xlIeLM3Oh+hV2FL7xQQSroVf8mX3lMZaN7XEsw6Bdfp99Qm7I4GcD+ak5+wIEfA==
+  dependencies:
     "@types/node" "*"
 
 "@types/react-datepicker@^1.1.5":
@@ -1756,6 +1762,14 @@
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.10.2.tgz#bd1740c4ad51966609b058803ee6874577848b37"
   integrity sha512-LqJkY4VQ7S09XhI7kA3ON71AxauROhSv74639VsNXC9ish4IWHnIi98if+nP1MxQV3RMPqXSCYgpPsDHjlg9UQ==
+
+"@types/rimraf@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@types/rimraf/-/rimraf-2.0.2.tgz#7f0fc3cf0ff0ad2a99bb723ae1764f30acaf8b6e"
+  integrity sha512-Hm/bnWq0TCy7jmjeN5bKYij9vw5GrDFWME4IuxV08278NtU/VdGbzsBohcCUJ7+QMqmUq5hpRKB39HeQWJjztQ==
+  dependencies:
+    "@types/glob" "*"
+    "@types/node" "*"
 
 "@types/semver@^5.5.0":
   version "5.5.0"
@@ -4162,16 +4176,6 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@2.9.34:
-  version "2.9.34"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-2.9.34.tgz#2f7b4ec80216328a9fddebdf69c8d4942feff7d8"
-  integrity sha1-L3tOyAIWMoqf3evfacjUlC/v99g=
-
-bluebird@3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.1.1.tgz#7e2e4318d62ae72a674f6aea6357bb4def1a6e41"
-  integrity sha1-fi5DGNYq5ypnT2rqY1e7Te8abkE=
-
 bluebird@3.4.6:
   version "3.4.6"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.4.6.tgz#01da8d821d87813d158967e743d5fe6c62cf8c0f"
@@ -4181,6 +4185,11 @@ bluebird@3.5.1, bluebird@^3.3.0, bluebird@^3.3.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
   integrity sha512-MKiLiV+I1AA596t9w1sQJ8jkiSr5+ZKi0WKrYGUn6d1Fx+Ij4tIj+m2WMQSGczs5jZVxV339chE8iwk6F64wjA==
+
+bluebird@3.5.3:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
+  integrity sha512-/qKPUQlaW1OyR51WeCPBvRnAlnZFUJkCSG5HzGnuIqhgyJtF+T94lFnn33eiazjRm2LAHVy2guNnaq48X9SJuw==
 
 bluebird@^2.10.0:
   version "2.11.0"
@@ -11157,6 +11166,11 @@ icss-utils@^2.1.0:
   integrity sha1-g/Cg7DeL8yRheLbCrZE28TWxyWI=
   dependencies:
     postcss "^6.0.1"
+
+idx@^2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/idx/-/idx-2.5.2.tgz#4b405c2e6d68d04136e0a368a7ab35b9caa0595f"
+  integrity sha512-MLoGF4lQU5q/RqJJjRsuid52emu7tPVtSSZaYXsqRvSjvXdBEmIwk2urvbNvPBRU9Ox9I4WYnxiz2GjhU34Lrw==
 
 ieee754@^1.1.4:
   version "1.1.8"
@@ -20317,10 +20331,10 @@ strong-log-transformer@^2.1.0:
     minimist "^1.2.0"
     through "^2.3.4"
 
-style-it@^1.6.12:
-  version "1.6.13"
-  resolved "https://registry.yarnpkg.com/style-it/-/style-it-1.6.13.tgz#b57f01e3fd15a6c39b8386793f604471b1b9c90d"
-  integrity sha1-tX8B4/0VpsObg4Z5P2BEcbG5yQ0=
+style-it@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/style-it/-/style-it-2.1.2.tgz#57f557d31d1f65f9b0b699341e197dc72d3d1124"
+  integrity sha512-MFmrF8uxXeHMWvJWxc7byY3wurOb8SrlZUPNMUd3uTXkjy5Of9jQY49E18uVOClihpCm4IiDwcZRApCqhColng==
   dependencies:
     react-lib-adler32 "^1.0.0"
 

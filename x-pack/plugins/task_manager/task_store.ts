@@ -68,7 +68,7 @@ export class TaskStore {
   private callCluster: ElasticJs;
   private index: string;
   private supportedTypes: string[];
-  private wasInitialized = false;
+  private _isInitialized = false; // tslint:disable-line:variable-name
 
   /**
    * Constructs a new TaskStore.
@@ -88,7 +88,7 @@ export class TaskStore {
   }
 
   public addSupportedTypes(types: string[]) {
-    if (!this.wasInitialized) {
+    if (!this._isInitialized) {
       this.supportedTypes = this.supportedTypes.concat(types);
     } else {
       throw new Error('Cannot add task types after initialization');
@@ -99,7 +99,7 @@ export class TaskStore {
    * Initializes the store, ensuring the task manager index is created and up to date.
    */
   public async init() {
-    if (this.wasInitialized) {
+    if (this._isInitialized) {
       throw new Error('TaskStore has already been initialized!');
     }
 
@@ -137,7 +137,7 @@ export class TaskStore {
           },
         },
       });
-      this.wasInitialized = true;
+      this._isInitialized = true;
       return templateResult;
     } catch (err) {
       throw err;
@@ -146,13 +146,17 @@ export class TaskStore {
     return;
   }
 
+  get isInitialized() {
+    return this._isInitialized;
+  }
+
   /**
    * Schedules a task.
    *
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
-    if (!this.wasInitialized) {
+    if (!this._isInitialized) {
       await this.init();
     }
 

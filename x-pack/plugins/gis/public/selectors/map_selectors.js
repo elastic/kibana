@@ -9,14 +9,7 @@ import _ from 'lodash';
 import { TileLayer } from '../shared/layers/tile_layer';
 import { VectorLayer } from '../shared/layers/vector_layer';
 import { HeatmapLayer } from '../shared/layers/heatmap_layer';
-import { EMSFileSource } from '../shared/layers/sources/ems_file_source';
-import { KibanaRegionmapSource } from '../shared/layers/sources/kibana_regionmap_source';
-import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
-import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
-import { WMSSource } from '../shared/layers/sources/wms_source';
-import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
-import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
-import { ESSearchSource } from '../shared/layers/sources/es_search_source';
+import { ALL_SOURCES } from '../shared/layers/sources/all_sources';
 import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 import { TileStyle } from '../shared/layers/styles/tile_style';
@@ -38,29 +31,20 @@ function createLayerInstance(layerDescriptor, dataSources) {
 }
 
 function createSourceInstance(sourceDescriptor, dataSources) {
-  switch (sourceDescriptor.type) {
-    case XYZTMSSource.type:
-      return new XYZTMSSource(sourceDescriptor);
-    case EMSTMSSource.type:
-      const emsTmsServices = _.get(dataSources, 'ems.tms', []);
-      return new EMSTMSSource(sourceDescriptor, emsTmsServices);
-    case KibanaTilemapSource.type:
-      return new KibanaTilemapSource(sourceDescriptor);
-    case EMSFileSource.type:
-      const emsregions = _.get(dataSources, 'ems.file', []);
-      return new EMSFileSource(sourceDescriptor, emsregions);
-    case KibanaRegionmapSource.type:
-      const regions = _.get(dataSources, 'kibana.regionmap', []);
-      return new KibanaRegionmapSource(sourceDescriptor, regions);
-    case ESGeohashGridSource.type:
-      return new ESGeohashGridSource(sourceDescriptor);
-    case ESSearchSource.type:
-      return new ESSearchSource(sourceDescriptor);
-    case WMSSource.type:
-      return new WMSSource(sourceDescriptor);
-    default:
-      throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
+
+  const dataMeta = {
+    emsTmsServices: _.get(dataSources, 'ems.tms', []),
+    emsFileLayers: _.get(dataSources, 'ems.file', []),
+    ymlFileLayers: _.get(dataSources, 'kibana.regionmap', [])
+  };
+
+  const Source = ALL_SOURCES.find(Source => {
+    return Source.type === sourceDescriptor.type;
+  });
+  if (!Source) {
+    throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
+  return new Source(sourceDescriptor, dataMeta);
 }
 
 
@@ -86,6 +70,7 @@ export const getMapState = ({ map }) => map && map.mapState;
 
 export const getMapReady = ({ map }) => map && map.ready;
 
+export const getGoto = ({ map }) => map && map.goto;
 
 const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
@@ -109,6 +94,8 @@ export const getMapZoom = ({ map }) => map.mapState.zoom ?
 export const getMapCenter = ({ map }) => map.mapState.center ?
   map.mapState.center : { lat: 0, lon: 0 };
 
+export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
+
 export const getMapColors = ({ map }) => {
   return map.layerList.reduce((accu, layer) => {
     // This will evolve as color options are expanded
@@ -123,6 +110,8 @@ export const getMapColors = ({ map }) => {
 export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
   map.mapState.timeFilters : timefilter.getTime();
 
+export const getQuery = ({ map }) => map.mapState.query;
+
 export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
@@ -135,34 +124,53 @@ export const getDataFilters = createSelector(
   getMapZoom,
   getTimeFilters,
   getRefreshTimerLastTriggeredAt,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt) => {
+  getQuery,
+  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
       zoom: mapZoom,
       timeFilters,
       refreshTimerLastTriggeredAt,
+      query,
     };
   }
 );
 
 export const getDataSources = createSelector(getMetadata, metadata => metadata ? metadata.data_sources : null);
 
-export const getSelectedLayer = createSelector(
-  getSelectedLayerId,
-  getLayerListRaw,
-  getDataSources,
-  (selectedLayerId, layerList, dataSources) => {
-    const selectedLayer = layerList.find(layerDescriptor => layerDescriptor.id === selectedLayerId);
-    return createLayerInstance(selectedLayer, dataSources);
-  });
-
 export const getLayerList = createSelector(
   getLayerListRaw,
   getDataSources,
-  (layerList, dataSources) => {
-    return layerList.map(layerDescriptor =>
+  (layerDescriptorList, dataSources) => {
+    return layerDescriptorList.map(layerDescriptor =>
       createLayerInstance(layerDescriptor, dataSources));
   });
+
+export const getSelectedLayer = createSelector(
+  getSelectedLayerId,
+  getLayerList,
+  (selectedLayerId, layerList) => {
+    return layerList.find(layer => layer.getId() === selectedLayerId);
+  });
+
+export const getSelectedLayerJoinDescriptors = createSelector(
+  getSelectedLayer,
+  (selectedLayer) => {
+    return selectedLayer.getJoins().map(join => {
+      return join.toDescriptor();
+    });
+  });
+
+export const getUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  (layerList) => {
+    const indexPatternIds = [];
+    layerList.forEach(layer => {
+      indexPatternIds.push(...layer.getIndexPatternIds());
+    });
+    return _.uniq(indexPatternIds);
+  }
+);
 
 export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));

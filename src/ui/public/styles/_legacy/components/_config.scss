@@ -1,0 +1,22 @@
+// SASSTODO: Selector is so generic it's hard to find if it's actually used
+.config {
+  @extend .navbar !optional;
+  @extend .navbar-default !optional;
+  border-bottom: 1px solid transparent;
+
+  .container-fluid {
+    background-color: $euiColorLightestShade;
+    padding: $euiSizeS;
+  }
+}
+
+// SASSTODO: Make sure these colors convert to theme variables
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
+
+  .config {
+    .container-fluid {
+      background-color: $euiColorLightestShade;
+    }
+  }
+}

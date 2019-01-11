@@ -380,7 +380,8 @@ function discoverController(
     }
 
     const timeFieldName = $scope.indexPattern.timeFieldName;
-    const fields = timeFieldName ? [timeFieldName, ...selectedFields] : selectedFields;
+    const hideTimeColumn = config.get('doc_table:hideTimeColumn');
+    const fields = (timeFieldName && !hideTimeColumn) ? [timeFieldName, ...selectedFields] : selectedFields;
     return {
       searchFields: fields,
       selectFields: fields
