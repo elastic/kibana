@@ -107,6 +107,7 @@ export const MonitorCharts = ({
                   <FormattedMessage
                     id="xpack.uptime.monitorCharts.rttBreakdownTitle"
                     defaultMessage="RTT Breakdown ms"
+                    description="The 'ms' is an abbreviation of milliseconds."
                   />
                 </h4>
               </EuiTitle>
@@ -119,9 +120,12 @@ export const MonitorCharts = ({
                   height={200}
                 >
                   <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.writeRequest', {
-                      defaultMessage: 'Write Request',
-                    })}
+                    name={i18n.translate(
+                      'xpack.uptime.monitorCharts.rtt.series.writeRequestLabel',
+                      {
+                        defaultMessage: 'Write request',
+                      }
+                    )}
                     data={rttWriteRequestSeries}
                     curve="curveBasis"
                   />
