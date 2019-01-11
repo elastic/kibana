@@ -72,7 +72,7 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
   }) => (
     <LoadMoreTable
       columns={getAuthorizedColumns()}
-      loadingTitle="Top Authentication Failures"
+      loadingTitle="Authentication Failures"
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
@@ -82,7 +82,7 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
       updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
       title={
         <h3>
-          Top Authentication Failures <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          Authentication Failures <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
