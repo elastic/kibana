@@ -3,14 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { Fragment } from 'react';
-import { render } from 'react-dom';
-import { capitalize, partial } from 'lodash';
+import React, { Fragment, Component } from 'react';
+import chrome from 'ui/chrome';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import { capitalize, partial } from 'lodash';
 import {
   EuiHealth,
   EuiLink,
@@ -18,7 +15,8 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiCallOut,
-  EuiSpacer
+  EuiSpacer,
+  EuiIcon
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
@@ -356,96 +354,102 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   });
 };
 
-const handleUnlinkedDeployment = (changeCluster) => {
-  return (
-    <div>
-      <EuiCallOut
-        color="warning"
-        title="Hey! It looks like you have instances that aren't connected to an Elasticsearch cluster."
-        iconType="link"
-      >
-        <p>
-          <EuiLink
-            onClick={() => changeCluster(UNLINKED_DEPLOYMENT_CLUSTER_UUID)}
-            data-test-subj="unlinkedDeploymentLink"
-          >
-            View these instances.
-          </EuiLink>
-        </p>
-      </EuiCallOut>
-      <EuiSpacer/>
-    </div>
-  );
-};
+const UNLINKED_DEPLOYMENT_STORAGE_KEY = 'viewedUnlinkedDeployments';
 
-const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringClusterListing', ($injector) => {
-  return {
-    restrict: 'E',
-    scope: {
-      clusters: '=',
-      sorting: '=',
-      filterText: '=',
-      paginationSettings: '=pagination',
-      onTableChange: '=',
-    },
-    link(scope, $el) {
-      const globalState = $injector.get('globalState');
-      const kbnUrl = $injector.get('kbnUrl');
-      const showLicenseExpiration = $injector.get('showLicenseExpiration');
+export class Listing extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      [UNLINKED_DEPLOYMENT_STORAGE_KEY]: false,
+    };
+  }
 
-      const _changeCluster = partial(changeCluster, scope, globalState, kbnUrl);
-      const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, scope);
-      const _handleClickInvalidLicense = partial(handleClickInvalidLicense, scope);
-
-      const { sorting, pagination, onTableChange } = scope;
-
-      scope.$watch('clusters', (_clusters = []) => {
-        const clusters = _clusters.filter(cluster => cluster.cluster_uuid !== UNLINKED_DEPLOYMENT_CLUSTER_UUID);
-        const clusterTable = (
-          <I18nProvider>
-            <EuiPage>
-              <EuiPageBody>
-                <EuiPageContent>
-                  {clusters.length !== _clusters.length ? handleUnlinkedDeployment(_changeCluster) : null}
-                  <EuiMonitoringTable
-                    className="clusterTable"
-                    rows={clusters}
-                    columns={getColumns(
-                      showLicenseExpiration,
-                      _changeCluster,
-                      _handleClickIncompatibleLicense,
-                      _handleClickInvalidLicense
-                    )}
-                    rowProps={item => {
-                      return {
-                        'data-test-subj': `clusterRow_${item.cluster_uuid}`
-                      };
-                    }}
-                    sorting={{
-                      ...sorting,
-                      sort: {
-                        ...sorting.sort,
-                        field: 'cluster_name'
-                      }
-                    }}
-                    pagination={pagination}
-                    search={{
-                      box: {
-                        incremental: true,
-                        placeholder: scope.filterText
-                      },
-                    }}
-                    onTableChange={onTableChange}
-                  />
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </I18nProvider>
-        );
-        render(clusterTable, $el[0]);
-      });
-
+  renderUnlinkedDeployment(changeCluster, storage) {
+    if (storage.get(UNLINKED_DEPLOYMENT_STORAGE_KEY)) {
+      return null;
     }
-  };
-});
+
+    return (
+      <div>
+        <EuiCallOut
+          color="warning"
+          title="It looks like you have instances that aren't connected to an Elasticsearch cluster."
+          iconType="link"
+        >
+          <p>
+            <EuiLink
+              onClick={() => changeCluster(UNLINKED_DEPLOYMENT_CLUSTER_UUID)}
+              data-test-subj="unlinkedDeploymentLink"
+            >
+              View these instances.
+            </EuiLink>
+            &nbsp;
+            You can also view these instances through the cluster name `Unlinked Cluster` in the table below.
+          </p>
+          <p>
+            <EuiLink onClick={() => {
+              storage.set(UNLINKED_DEPLOYMENT_STORAGE_KEY, true);
+              this.setState({ [UNLINKED_DEPLOYMENT_STORAGE_KEY]: true });
+            }}
+            >
+              <EuiIcon type="cross"/>
+              &nbsp;Dismiss
+            </EuiLink>
+          </p>
+        </EuiCallOut>
+        <EuiSpacer/>
+      </div>
+    );
+  }
+
+  render() {
+    const { angular, clusters, sorting, pagination, onTableChange } = this.props;
+
+    const _changeCluster = partial(changeCluster, angular.scope, angular.globalState, angular.kbnUrl);
+    const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
+    const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
+    const hasUnlinkedDeployment = !!clusters.find(cluster => cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID);
+
+    return (
+      <I18nProvider>
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageContent>
+              {hasUnlinkedDeployment ? this.renderUnlinkedDeployment(_changeCluster, angular.storage) : null}
+              <EuiMonitoringTable
+                className="clusterTable"
+                rows={clusters}
+                columns={getColumns(
+                  angular.showLicenseExpiration,
+                  _changeCluster,
+                  _handleClickIncompatibleLicense,
+                  _handleClickInvalidLicense
+                )}
+                rowProps={item => {
+                  return {
+                    'data-test-subj': `clusterRow_${item.cluster_uuid}`
+                  };
+                }}
+                sorting={{
+                  ...sorting,
+                  sort: {
+                    ...sorting.sort,
+                    field: 'cluster_name'
+                  }
+                }}
+                pagination={pagination}
+                search={{
+                  box: {
+                    incremental: true,
+                    placeholder: angular.scope.filterText
+                  },
+                }}
+                onTableChange={onTableChange}
+              />
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      </I18nProvider>
+    );
+  }
+}
