@@ -2,23 +2,27 @@
 [[apm-ui]]
 == Using the APM UI
 
-The APM UI is designed to be as intuitive as possible, but you might come across certain terms or concepts that don’t feel native to you. Not to worry, we've created this guide to help you get the most out of Elastic APM.
+The APM UI is designed to be as intuitive as possible,
+but you might come across certain terms or concepts that don’t feel native to you.
+Not to worry, we've created this guide to help you get the most out of Elastic APM.
 
 * <<services>>
 * <<transactions>>
-* <<spans>>
+** <<transaction-details>>
+** <<spans>>
 * <<errors>>
-* <<errors-alerts-with-watcher>>
+** <<errors-alerts-with-watcher>>
 * <<machine-learning-integration>>
+* <<metrics>>
 * <<query-bar>>
 
 [[services]]
 === Services
 
-The Services overview gives you a quick insight into the health and general performance of each service.
+The Services overview page gives you quick insights into the health and general performance of each service.
 The <<set-time-filter,global time range filter>> in {kib} defines which services are available.
 
-You can add services by setting the `service.name` configuration in each of the [APM agents] you’re instrumenting.
+You can add services by setting the `service.name` configuration in each of the {apm-agents-ref}[APM agents] you’re instrumenting.
 
 [role="screenshot"]
 image::apm/images/apm-services-overview.png[Example view of services table the APM UI in Kibana]
@@ -26,65 +30,158 @@ image::apm/images/apm-services-overview.png[Example view of services table the A
 [[transactions]]
 === Transactions
 
-Selecting a service on the Services overview page will bring you to the Transaction overview page. 
-A {apm-overview-ref-v}/transactions.html[Transaction] describes an event captured by an Elastic APM agent instrumenting a service.
+TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
-On this page, each `transaction.type` is displayed separately to make it easy for you to navigate to any transaction.
-By default, transactions are sorted by _Impact_. Impact helps show the most used and slowest endpoints in your service.
+Selecting a service on the <<services,Services overview page>> will bring you to the Transaction overview page.
+The dashboards on this page display the transaction duration, requests per minute, and transaction names for the selected service. 
+
+*Transaction duration* shows the response times for this service and is broken down into average, 95th, and 99th percentile.
+If there's a weird spike that you'd like to investigate,
+you can simply zoom in on the graph - this will adjust the specific time range,
+and all of the data on the page will update accordingly.
+
+*Requests per minute* is divided into response codes: 2xx, 3xx, 4xx, etc.,
+and is useful for determining if you're serving more of one code than you typically do.
+Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
+
+The table at the bottom shows the name of each *transaction* occurring in your service.
+Transactions with the same name are grouped together and only shown once in this table.
+By default, transactions are sorted by _Impact_.
+Impact helps show the most used and slowest endpoints in your service - in other words,
+it's the collective amount of pain a specific endpoint is causing your users.
+If there's a particular endpoint you're worried about, you can click on it to view the <<transaction-details, transaction details>>.
 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
 
 [IMPORTANT]
 ====
-The Kibana UI will only display helpful information when the transactions in your service are named correctly.
+The Transaction overview page will only display helpful information when the transactions in your service are named correctly.
 
-Elastic APM Agents come with built-in support for popular frameworks out-of-the-box. However, if you only see one route in the Transaction overview page, or have transactions named "unknown route", it could be a symptom that the agent either wasn't installed correctly, or doesn't support your framework. 
+Elastic APM Agents come with built-in support for popular frameworks out-of-the-box.
+However, if you only see one route in the Transaction overview page, or if you have transactions named "unknown route",
+it could be a symptom that the agent either wasn't installed correctly or doesn't support your framework. 
 
-For further details, other troubleshooting, and custom implementation instructions, refer to the documentation for each {apm-agents-ref}[APM Agent] you're instrumenting.
+For further details, including troubleshooting and custom implementation instructions,
+refer to the documentation for each {apm-agents-ref}[APM Agent] you've implemented.
 ====
 
-[[spans]]
-=== Spans
+[[transaction-details]]
+==== Transaction details
 
-Selecting a Transaction on the Transaction overview page will bring you to the Transaction detail page.
-The Transaction detail page shows a high level overview of the transaction duration, requests per minute, and response time distribution of transactions. 
+Selecting a transaction group on the <<transactions,Transactions overview page>> will bring you to the Transaction detail page.
+The Transaction detail page shows a high level overview of the transaction group duration,
+requests per minute, and transaction group duration distribution.
+It's important to note that all three of these graphs show data from every transaction within the selected transaction group. 
 
 [role="screenshot"]
 image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]
 
-This page also breaks each transaction down into it's spans and allows you to look at them. 
+This page also displays a single sampled transaction, which is based on your selection in the transactions duration distribution graph.
+You can update the sampled transaction by selecting a new _bucket_ in the transactions duration distribution graph.
+The number of requests per bucket is displayed when hovering over the graph, and the selected bucket is highlighted to stand out.
 
-A {apm-overview-ref-v}/transaction-spans.html[span] is defined as the duration of a single event.
-Spans are automatically captured by APM agents, and you can also define custom spans.
-Each span has a type and is defined by a different colour in the Timeline visualization (also known as the waterfall).
+//[role="screenshot"]
+//image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
 
-The waterfall shows a sample from the selected "Transactions duration distribution" bucket, and in the current time range.
-You can select a new bucket at any time by clicking on the waterfall.
-The transaction detail will update with a new sample from the new bucket.
-It is especially important to look at the buckets on the right hand side of the graph as these are the requests that took longest to serve.
+Let's look at an example.
+In the screenshot below,
+you'll notice most of our requests fall into buckets on the left side of the graph,
+with a long tail of smaller buckets to the right.
+This is a typical distribution, and indicates most of our requests were served quickly - awesome!
+It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
+By clicking on these buckets,
+we're presented with a span timeline waterfall showing what a typical request in that bucket was doing.
+By investigating this timeline waterfall, we can hopefully see why it was slow and implement a fix.
 
 [role="screenshot"]
-image::apm/images/apm-transaction-detail.png[Example view of transactions detail page in the APM UI in Kibana]
+image::apm/images/apm-transaction-sample.png[Example view of transactions sample]
 
-You can view a span in detail by clicking it in the Timeline. This displays the recorded SQL database query or source code (in-app frames) around the event that was captured.
+NOTE: More information on timeline waterfalls is available in the <<spans, Spans>> section.
+
+For a particular transaction sample, we can get even more information in the tabs:
+
+* *Timeline* - See the <<spans, Spans>> section for more information.
+* *Request* - the URL, headers, body, etc..
+* *Response* -
+* *System* - the system hostname, architecture, platform, etc..
+* *Service* - the service/application runtime, agent, name, etc..
+* *Process* - the process id that served up the request.
+* *User* - This requires additional configuration, but allows you to see which user experienced the current transaction.
+This can be extremely useful if it's determined that specific users are getting slow requests.
+* *Tags* - Useful if you want to start correlating transactions with log files or metrics from metricbeat.
+* *Custom* - You can configure your agent to add custom contextual information on transactions.
+
+TIP: All of this data is just documents in elasticsearch.
+This means we can click "Actions - View sample document" to see the actual elasticsearch document under the discover tab.
+
+[[spans]]
+==== Spans
+
+TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is defined as the duration of a single event.
+Spans are automatically captured by APM agents, and you can also define custom spans.
+Each span has a type and is defined by a different color in the timeline/waterfall visualization.
+
+The span timeline is essentially a timeline of wht the application was doing while it was trying to respond to the request that came in.
+This makes it useful for visualizing where the selected transaction spent most of its time.
+
+You can view a span in detail by clicking on it in the timeline waterfall.
+For example, in the below screenshot we've clicked on an SQL Select database query.
+The information displayed includes the actual SQL that was executed, how long it took,
+and the percentage of the trace's total time.
+You also get a stack trace, which shows where in your code you do the SQL query.
+Finally, APM knows which files are your code and which are just modules or libraries that you've installed.
+These library frames will be minimized by default in order to show you the most relevant stack trace. 
 
 [role="screenshot"]
 image::apm/images/apm-span-detail.png[Example view of a span detail in the APM UI in Kibana]
 
+If your span timeline is colorful, it's indicative of a distributed trace.
+Services in a distributed trace are separated by color and listed in the order they occur.
+
+[role="screenshot"]
+image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM UI in Kibana]
+
+A distributed trace includes more than one transaction.
+APM can show you the waterfall all the way through these transactions.
+This can be extremely useful for seeing how services are interacting with each other.
+
+If you select one of these sub-traces, the transaction link will be clickable.
+If you click on the transaction name, you will open a similar view,
+but just for the sub-trace you've selected.
+To return to the full trace, simply click "View full trace".
+
+[role="screenshot"]
+image::apm/images/apm-view-full-trace.png[Example of distributed trace colors in the APM UI in Kibana]
+
 [[errors]]
 === Errors
 
-{apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
+TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 
-The Errors overview page provides a high level view of the error message and culprit, number of occurrences, and the most recent occurrence.
+The Errors overview page provides a high level view of the error message and culprit,
+number of occurrences, and the most recent occurrence.
+Just like on the Transaction overview page, you'll notice we group together like errors.
+This makes it very easy to quickly see which errors are affecting your services,
+and to take actions to rectify them.
 
 [role="screenshot"]
 image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM UI in Kibana]
 
-Selecting an error brings you to the error group page.
-Each error group features a breakdown of the exception including the stackframes from when the error occurred and additional contextual information to help debug the issue.
+Selecting an error group ID or error message brings you to the error group page.
+At the top of this page you'll see the error message, culprit, and the number of occurrences over time.
+
+At the bottom of the page you'll see the Error occurrence table.
+Here, you can see details of a sampled error within this group.
+The error shown is always the most recent to occur.
+
+Each error occurrence features a breakdown of the exception, including the stacktrace from when the error occurred,
+and additional contextual information to help debug the issue.
+In some cases, you might also see a Transaction sample ID.
+This feature allows you to make a connection between the errors and transactions,
+by linking you to the specific transaction where the error occurred.
+This allows you see the whole trace, including which services the request went through. 
 
 [role="screenshot"]
 image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
@@ -107,7 +204,10 @@ image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher a
 [[metrics]]
 === Metrics
 
-//Todo: Add text...
+The metrics overview page shows a combination of transaction, error, CPU, and memory data.
+
+If you're experiencing a problem with your service, you can use this page to attempt to find the underlying cause.
+For example, you might be able to correlate a high number of errors with a long transaction duration, high CPU usage, or a memory leak.   
 
 [role="screenshot"]
 image::apm/images/apm-metrics.png[Example view of the Metrics overview in APM UI in Kibana]
@@ -129,9 +229,20 @@ It might take some time for results to appear on the graph.
 === Query bar
 
 The query bar is a powerful data query feature.
-Similar to the query bar in {kibana-ref}/discover.html[Discover], it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in.
+Similar to the query bar in {kibana-ref}/discover.html[Discover],
+it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in.
 It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include.
-The query bar is available on Services, Transaction, and Errors views, and any input will persist as you move between them.
+You can select the query bar and hit the down arrow on your keyboard to begin seeing recommendations.
+
+When querying, you're simply searching and selecting data from fields in Elasticsearch documents.
+It may be helpful to view some of your documents in {kibana-ref}/discover.html[Discover] to better understand how APM data is stored in Elasticsearch. 
+
+The query bar is available on Services, Transactions, and Errors views, and any input will persist as you move between pages.
+
+TIP: Interactions with the query bar change the URL of the page you're on.
+This means you can simply copy and paste the URL of your page to share a specific query or view with others.
+
+In the screenshot below, you can begin to see some of the transaction fields available for filtering on:  
 
 [role="screenshot"]
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in Kibana]
@@ -143,4 +254,4 @@ image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in
 * Filter by single user ID: `context.user.id : 12`
 * View _all_ transactions for an endpoint, instead of just a sample - `processor.event: "transaction" AND transaction.name: "<TRANSACTION_NAME_HERE>"`
 
-Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities in the {kib} query language.
+TIP: Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities of the {kib} query language.
