@@ -99,6 +99,7 @@ export class ESGeohashGridSource extends VectorSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
+    console.log('rener source setting editor');
     return (
       <UpdateSourceEditor
         indexPatternId={this._descriptor.indexPatternId}
@@ -127,7 +128,7 @@ export class ESGeohashGridSource extends VectorSource {
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
     let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
     targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
+    const featureCollection = await this.getGeoJsonPoints({
       precision: targetPrecision,
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
@@ -178,7 +179,7 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName, query }) {
+  async getGeoJsonPoints({ precision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
     try {
