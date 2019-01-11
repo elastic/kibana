@@ -67,7 +67,7 @@ export const Snapshot = ({
             <EuiTitle size="xs">
               <h5>
                 <FormattedMessage
-                  id="xpack.uptime.snapshot.title.text"
+                  id="xpack.uptime.snapshot.endpointStatusTitle"
                   defaultMessage="Endpoint status"
                 />
               </h5>
@@ -78,7 +78,7 @@ export const Snapshot = ({
                   {/* TODO: this is a UI hack that needs to be replaced */}
                   <EuiPanel>
                     <EuiStat
-                      description={i18n.translate('xpack.uptime.snapshot.stats.up.description', {
+                      description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
                         defaultMessage: 'Up',
                       })}
                       textAlign="center"
@@ -118,7 +118,7 @@ export const Snapshot = ({
             <EuiTitle size="xs">
               <h5>
                 <FormattedMessage
-                  id="xpack.uptime.snapshot.histogram.title"
+                  id="xpack.uptime.snapshot.statusOverTimeTitle"
                   defaultMessage="Status over time"
                 />
               </h5>
