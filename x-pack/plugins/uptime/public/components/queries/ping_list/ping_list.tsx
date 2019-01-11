@@ -53,19 +53,19 @@ export class Pings extends React.Component<PingListProps, PingListState> {
 
     const statusOptions = [
       {
-        label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatus', {
+        label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
           defaultMessage: 'All',
         }),
         value: '',
       },
       {
-        label: i18n.translate('xpack.uptime.pingList.statusOptions.upStatus', {
+        label: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
           defaultMessage: 'Up',
         }),
         value: 'up',
       },
       {
-        label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatus', {
+        label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
           defaultMessage: 'Down',
         }),
         value: 'down',
@@ -160,7 +160,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
             },
             {
               field: 'timestamp',
-              name: i18n.translate('xpack.uptime.pingList.columns.timestamp', {
+              name: i18n.translate('xpack.uptime.pingList.timestampColumnLabel', {
                 defaultMessage: 'Timestamp',
               }),
               sortable: true,
@@ -168,13 +168,13 @@ export class Pings extends React.Component<PingListProps, PingListState> {
             },
             {
               field: 'monitor.ip',
-              name: i18n.translate('xpack.uptime.pingList.columns.ipAddress', {
+              name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
                 defaultMessage: 'IP',
               }),
             },
             {
               field: 'monitor.id',
-              name: i18n.translate('xpack.uptime.pingList.columns.id', {
+              name: i18n.translate('xpack.uptime.pingList.idColumnLabel', {
                 defaultMessage: 'Id',
               }),
               dataType: 'string',
@@ -182,21 +182,22 @@ export class Pings extends React.Component<PingListProps, PingListState> {
             },
             {
               field: 'monitor.duration.us',
-              name: i18n.translate('xpack.uptime.pingList.columns.durationMs', {
+              name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
                 defaultMessage: 'Duration ms',
+                description: 'The "ms" in the default message is an abbreviation for milliseconds',
               }),
               render: (duration: number) => duration / 1000,
               sortable: true,
             },
             {
               field: 'error.type',
-              name: i18n.translate('xpack.uptime.pingList.columns.errorType', {
+              name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
                 defaultMessage: 'Error type',
               }),
             },
             {
               field: 'error.message',
-              name: i18n.translate('xpack.uptime.pingList.columns.errorMessage', {
+              name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
                 defaultMessage: 'Error message',
               }),
               render: (message: string) =>
@@ -226,7 +227,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
           if (hasStatus) {
             columns.push({
               field: 'http.response.status_code',
-              name: i18n.translate('xpack.uptime.pingList.columns.responseCode', {
+              name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
                 defaultMessage: 'Response code',
               }),
             });
