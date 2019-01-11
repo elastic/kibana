@@ -35,6 +35,7 @@ export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const SET_JOINS = 'SET_JOINS';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
+export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
@@ -400,6 +401,22 @@ export function setTimeFilters({ from, to }) {
     if ((to && to !== kbnTime.to) || (from && from !== kbnTime.from)) {
       timeService.setTime({ from, to });
     }
+
+    const dataFilters = getDataFilters(getState());
+    await syncDataForAllLayers(getState, dispatch, dataFilters);
+  };
+}
+
+export function setQuery({ query }) {
+  return async (dispatch, getState) => {
+    dispatch({
+      type: SET_QUERY,
+      query: {
+        ...query,
+        // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
+        queryLastTriggeredAt: (new Date()).toISOString(),
+      },
+    });
 
     const dataFilters = getDataFilters(getState());
     await syncDataForAllLayers(getState, dispatch, dataFilters);
