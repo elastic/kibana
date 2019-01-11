@@ -52,16 +52,20 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
  * with the pseudo localization function.
  * @param child I18nProvider child component.
  */
-function wrapIntlFormatMessage(child: React.ReactNode) {
-  return React.createElement(
-    injectI18n(({ intl }) => {
+function wrapIntlFormatMessage() {
+  let isIntlOverridden = false;
+
+  return injectI18n(({ intl, children }: any) => {
+    if (!isIntlOverridden) {
       const formatMessage = intl.formatMessage;
-      intl.formatMessage = (...args) =>
+      intl.formatMessage = (...args: any[]) =>
         translateFormattedMessageUsingPseudoLocale(formatMessage(...args));
 
-      return React.Children.only(child);
-    })
-  );
+      isIntlOverridden = true;
+    }
+
+    return children;
+  });
 }
 
 /**
@@ -71,8 +75,19 @@ function wrapIntlFormatMessage(child: React.ReactNode) {
  */
 export class I18nProvider extends React.PureComponent {
   public static propTypes = { children: PropTypes.element.isRequired };
+  public WrapedIntlFormatMessage: any;
+
+  public constructor(props: any) {
+    super(props);
+
+    if (isPseudoLocale(i18n.getLocale())) {
+      this.WrapedIntlFormatMessage = wrapIntlFormatMessage();
+    }
+  }
 
   public render() {
+    const WrapedIntlFormatMessage = this.WrapedIntlFormatMessage;
+
     return (
       <IntlProvider
         locale={i18n.getLocale()}
@@ -81,9 +96,11 @@ export class I18nProvider extends React.PureComponent {
         formats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {isPseudoLocale(i18n.getLocale())
-          ? wrapIntlFormatMessage(this.props.children)
-          : this.props.children}
+        {WrapedIntlFormatMessage ? (
+          <WrapedIntlFormatMessage>{this.props.children}</WrapedIntlFormatMessage>
+        ) : (
+          this.props.children
+        )}
       </IntlProvider>
     );
   }
