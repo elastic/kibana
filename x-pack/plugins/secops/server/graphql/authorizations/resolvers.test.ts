@@ -7,8 +7,8 @@ import { GraphQLResolveInfo } from 'graphql';
 import { omit } from 'lodash/fp';
 
 import { Source } from '../../graphql/types';
-import { Authorizations } from '../../lib/authorization';
-import { AuthorizationsAdapter } from '../../lib/authorization/types';
+import { Authorizations } from '../../lib/authorizations';
+import { AuthorizationsAdapter } from '../../lib/authorizations/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
@@ -16,7 +16,7 @@ import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
 import { mockAuthorizationsData, mockAuthorizationsFields } from './authorizations.mock';
-import { AuthorizationResolversDeps, createAuthorizationResolvers } from './resolvers';
+import { AuthorizationsResolversDeps, createAuthorizationsResolvers } from './resolvers';
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockAuthorizationsFields] });
@@ -34,7 +34,7 @@ const mockAuthorizationsAdapter: AuthorizationsAdapter = {
   getAuthorizations: mockGetAuthorizations,
 };
 
-const mockAuthorizationsLibs: AuthorizationResolversDeps = {
+const mockAuthorizationsLibs: AuthorizationsResolversDeps = {
   authorizations: new Authorizations(mockAuthorizationsAdapter),
 };
 
@@ -68,7 +68,7 @@ describe('Test Source Resolvers', () => {
       context,
       {} as GraphQLResolveInfo
     );
-    const data = await createAuthorizationResolvers(mockAuthorizationsLibs).Source.Authorizations(
+    const data = await createAuthorizationsResolvers(mockAuthorizationsLibs).Source.Authorizations(
       source as Source,
       {
         timerange: {

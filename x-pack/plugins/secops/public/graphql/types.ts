@@ -462,8 +462,6 @@ export namespace GetAuthorizationQuery {
 
     id?: string | null;
 
-    ip?: string | null;
-
     name?: string | null;
   };
 

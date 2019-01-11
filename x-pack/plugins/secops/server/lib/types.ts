@@ -5,7 +5,7 @@
  */
 
 import { JsonObject } from '../../common/typed_json';
-import { Authorizations } from './authorization';
+import { Authorizations } from './authorizations';
 import { ConfigurationAdapter } from './configuration';
 import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';

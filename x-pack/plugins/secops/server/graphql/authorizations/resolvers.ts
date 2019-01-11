@@ -7,27 +7,27 @@
 import { getOr } from 'lodash/fp';
 
 import { SourceResolvers } from '../../graphql/types';
-import { Authorizations } from '../../lib/authorization';
-import { AuthorizationsRequestOptions } from '../../lib/authorization/types';
+import { Authorizations } from '../../lib/authorizations';
+import { AuthorizationsRequestOptions } from '../../lib/authorizations/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { getFields } from '../../utils/build_query/fields';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type QueryAuthorizationResolver = ChildResolverOf<
+type QueryAuthorizationsResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.AuthorizationsResolver>,
   QuerySourceResolver
 >;
 
-export interface AuthorizationResolversDeps {
+export interface AuthorizationsResolversDeps {
   authorizations: Authorizations;
 }
 
-export const createAuthorizationResolvers = (
-  libs: AuthorizationResolversDeps
+export const createAuthorizationsResolvers = (
+  libs: AuthorizationsResolversDeps
 ): {
   Source: {
-    Authorizations: QueryAuthorizationResolver;
+    Authorizations: QueryAuthorizationsResolver;
   };
 } => ({
   Source: {

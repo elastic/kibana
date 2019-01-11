@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createAuthorizationResolvers } from './resolvers';
+export { createAuthorizationsResolvers } from './resolvers';
 export { authorizationSchema } from './schema.gql';

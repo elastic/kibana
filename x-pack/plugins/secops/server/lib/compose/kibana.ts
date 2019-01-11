@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 
-import { Authorizations, ElasticsearchAuthorizationAdapter } from '../authorization';
+import { Authorizations, ElasticsearchAuthorizationAdapter } from '../authorizations';
 import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
 import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
