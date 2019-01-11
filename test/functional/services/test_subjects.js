@@ -35,23 +35,27 @@ export function TestSubjectsProvider({ getService }) {
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
   class TestSubjects {
-    async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
+    async exists(selector, options = {}) {
+      const {
+        timeout = WAIT_FOR_EXISTS_TIME,
+      } = options;
+
       log.debug(`TestSubjects.exists(${selector})`);
       return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
-    async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
+    async existOrFail(selector, existsOptions) {
       await retry.try(async () => {
         log.debug(`TestSubjects.existOrFail(${selector})`);
-        const doesExist = await this.exists(selector, timeout);
+        const doesExist = await this.exists(selector, existsOptions);
         // Verify element exists, or else fail the test consuming this.
         expect(doesExist).to.be(true);
       });
     }
 
-    async missingOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
+    async missingOrFail(selector, existsOptions) {
       log.debug(`TestSubjects.missingOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
+      const doesExist = await this.exists(selector, existsOptions);
       // Verify element is missing, or else fail the test consuming this.
       expect(doesExist).to.be(false);
     }
