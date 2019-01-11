@@ -17,25 +17,9 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-
-// Kibana UI Framework
-import '@kbn/ui-framework/dist/kui_light.css';
-
-// EUI Light/Dark theme
-import lightTheme from '!!raw-loader!@elastic/eui/dist/eui_theme_k6_light.css';
-import darkTheme from '!!raw-loader!@elastic/eui/dist/eui_theme_k6_dark.css';
-
-const styleNode = document.getElementById('themeCss');
-if (styleNode) {
-  styleNode.textContent = chrome.getUiSettingsClient().get('theme:darkMode')
-    ? darkTheme
-    : lightTheme;
-}
-
 // All Kibana styles inside of the /styles dir
-const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.)[^\/\\]+\.less/);
+const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/);
 context.keys().forEach(key => context(key));
 
 // manually require non-less files
-require('../styles/disable_animations');
+import '../styles/disable_animations';

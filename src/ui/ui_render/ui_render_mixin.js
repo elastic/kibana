@@ -54,6 +54,8 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   // expose built css
   server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
+  server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
+  server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
 
   server.route({
     path: '/bundles/app/{id}/bootstrap.js',
@@ -74,6 +76,17 @@ export function uiRenderMixin(kbnServer, server, config) {
       const dllBundlePath = `${basePath}/built_assets/dlls`;
       const styleSheetPaths = [
         `${dllBundlePath}/vendors.style.dll.css`,
+        ...(
+          darkMode ?
+            [
+              `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_dark.css`,
+              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+            ] : [
+              `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_light.css`,
+              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+            ]
+        ),
+        `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
         `${regularBundlePath}/commons.style.css`,
         `${regularBundlePath}/${app.getId()}.style.css`,
         ...kbnServer.uiExports.styleSheetPaths
