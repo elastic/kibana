@@ -120,6 +120,10 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
       if (uptimeConfigurationData) {
         const parsed = JSON.parse(uptimeConfigurationData) || {};
         const { dateRangeStart, dateRangeEnd } = parsed;
+        // TODO: this is defensive code to ensure we don't encounter problems
+        // when encountering older versions of the localStorage values.
+        // The old code has never been released, so users don't need it, and this
+        // code should be removed eventually.
         if (
           (dateRangeEnd && typeof dateRangeEnd === 'number') ||
           (dateRangeStart && typeof dateRangeStart === 'number')
