@@ -52,7 +52,7 @@ export const Snapshot = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return 'Loading…';
       }
       if (error) {
         return `Error ${error.message}`;

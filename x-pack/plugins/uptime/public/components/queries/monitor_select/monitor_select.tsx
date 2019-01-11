@@ -37,7 +37,7 @@ export const MonitorSelect = ({
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.monitorSelect.loadingMessage', {
-          defaultMessage: 'Loading...',
+          defaultMessage: 'Loading…',
         });
       }
       if (error) {

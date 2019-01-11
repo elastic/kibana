@@ -211,7 +211,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                     )}
                     content={<p>{message}</p>}
                   >
-                    <div>{message.slice(0, 24)}...</div>
+                    <div>{message.slice(0, 24)}…</div>
                   </EuiToolTip>
                 ) : (
                   message

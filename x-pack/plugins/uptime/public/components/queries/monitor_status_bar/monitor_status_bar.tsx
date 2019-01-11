@@ -35,7 +35,7 @@ export const MonitorStatusBar = ({
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
-          defaultMessage: 'Loading...',
+          defaultMessage: 'Loading…',
         });
       }
       if (error) {

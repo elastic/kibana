@@ -50,7 +50,7 @@ export const MonitorCharts = ({
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
-          defaultMessage: 'Loading...',
+          defaultMessage: 'Loading…',
         });
       }
       if (error) {

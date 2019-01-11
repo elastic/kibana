@@ -145,7 +145,7 @@ export const MonitorList = ({
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.monitorList.loadingMessage', {
-          defaultMessage: 'Loading...',
+          defaultMessage: 'Loading…',
         });
       }
       if (error) {

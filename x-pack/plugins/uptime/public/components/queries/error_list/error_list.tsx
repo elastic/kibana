@@ -25,7 +25,7 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.errorList.loadingMessage', {
-          defaultMessage: 'Loading...',
+          defaultMessage: 'Loading…',
         });
       }
       if (error) {

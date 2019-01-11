@@ -27,7 +27,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.filterBar.loadingMessage', {
-          defaultMessage: 'Loading...',
+          defaultMessage: 'Loading…',
         });
       }
       if (error) {
