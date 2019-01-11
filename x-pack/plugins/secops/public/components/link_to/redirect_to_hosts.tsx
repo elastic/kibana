@@ -11,15 +11,13 @@ interface HostMatchParams {
   hostId?: string;
 }
 
-export interface HostComponentProps extends RouteComponentProps<HostMatchParams> {}
+export type HostComponentProps = RouteComponentProps<HostMatchParams>;
 
 export const RedirectToHostsPage = ({
   match: {
     params: { hostId },
   },
-}: HostComponentProps) => {
-  return <Redirect to={hostId ? `/hosts/${hostId}` : '/hosts'} />;
-};
+}: HostComponentProps) => <Redirect to={hostId ? `/hosts/${hostId}` : '/hosts'} />;
 
 export const getHostsUrl = () => {
   return '#/link-to/hosts';

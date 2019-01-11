@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 
 export const HostDetails = pure<HostComponentProps>(({ match }) => (
-  <div>
+  <>
     <HostBreadcrumbWrapper breadcrumbs={getBreadcrumbs(match.params.hostId!)} />
     <EuiPanel>
       <EuiTitle>
@@ -22,7 +22,7 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
         Match Params: <pre>{JSON.stringify(match, null, 2)}</pre>
       </div>
     </EuiPanel>
-  </div>
+  </>
 ));
 
 const getBreadcrumbs = (hostId: string) => [
