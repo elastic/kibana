@@ -6,8 +6,8 @@
 
 import gql from 'graphql-tag';
 
-export const authorizationQuery = gql`
-  query GetAuthorizationQuery(
+export const authorizationsQuery = gql`
+  query GetAuthorizationsQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
     $pagination: PaginationInput!

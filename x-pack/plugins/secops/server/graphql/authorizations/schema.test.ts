@@ -14,7 +14,7 @@ import { eventsSchema } from '../events';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 import { getAuthorizationsQueryMock, mockAuthorizationsData } from './authorizations.mock';
-import { authorizationSchema } from './schema.gql';
+import { authorizationsSchema } from './schema.gql';
 
 const testCaseSource = {
   id: 'Test case to query Authorizations',
@@ -87,7 +87,7 @@ describe('Test Source Schema', () => {
     sourcesSchema,
     sourceStatusSchema,
     eventsSchema,
-    authorizationSchema,
+    authorizationsSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });
 

@@ -9,12 +9,12 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { AuthorizationsEdges, GetAuthorizationQuery, PageInfo } from '../../graphql/types';
+import { AuthorizationsEdges, GetAuthorizationsQuery, PageInfo } from '../../graphql/types';
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
 import { authorizationsLimitSelector } from '../../store';
-import { authorizationQuery } from './index.gql_query';
+import { authorizationsQuery } from './index.gql_query';
 
 export interface AuthorizationArgs {
   id: string;
@@ -53,8 +53,8 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
     limit,
     poll,
   }) => (
-    <Query<GetAuthorizationQuery.Query, GetAuthorizationQuery.Variables>
-      query={authorizationQuery}
+    <Query<GetAuthorizationsQuery.Query, GetAuthorizationsQuery.Variables>
+      query={authorizationsQuery}
       fetchPolicy="cache-and-network"
       pollInterval={poll}
       notifyOnNetworkStatusChange
@@ -117,4 +117,4 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
 
 const mapStateToProps = (state: State) => authorizationsLimitSelector(state);
 
-export const AuthorizationQuery = connect(mapStateToProps)(AuthorizationsComponentQuery);
+export const AuthorizationsQuery = connect(mapStateToProps)(AuthorizationsComponentQuery);

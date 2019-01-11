@@ -399,7 +399,7 @@ export enum Direction {
 // Documents
 // ====================================================
 
-export namespace GetAuthorizationQuery {
+export namespace GetAuthorizationsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;

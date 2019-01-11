@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const authorizationSchema = gql`
+export const authorizationsSchema = gql`
   type AuthorizationItem {
     _id: String!
     failures: Int!

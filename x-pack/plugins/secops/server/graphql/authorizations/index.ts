@@ -5,4 +5,4 @@
  */
 
 export { createAuthorizationsResolvers } from './resolvers';
-export { authorizationSchema } from './schema.gql';
+export { authorizationsSchema } from './schema.gql';
