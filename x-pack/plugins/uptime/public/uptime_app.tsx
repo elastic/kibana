@@ -167,7 +167,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           <EuiDatePicker
                             selected={moment(this.state.dateRangeStart)}
                             isInvalid={dateRangeIsInvalid()}
-                            aria-label="Start Date"
+                            aria-label={i18n.translate('xpack.uptime.startDateRangeAriaLabel', {
+                              defaultMessage: 'Start date',
+                            })}
                             onChange={(e: Moment | null) => {
                               if (e && e.valueOf() < this.state.dateRangeEnd) {
                                 this.setState({ dateRangeStart: e.valueOf() }, this.persistState);
@@ -180,7 +182,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           <EuiDatePicker
                             selected={moment(this.state.dateRangeEnd)}
                             isInvalid={dateRangeIsInvalid()}
-                            aria-label="End Date"
+                            aria-label={i18n.translate('xpack.uptime.endDateRangeAriaLabel', {
+                              defaultMessage: 'End date',
+                            })}
                             onChange={(e: Moment | null) => {
                               if (e && this.state.dateRangeStart < e.valueOf()) {
                                 this.setState({ dateRangeEnd: e.valueOf() }, this.persistState);
@@ -202,8 +206,13 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           onClick={() => this.setState({ popoverIsOpen: true })}
                         >
                           {this.state.autorefreshEnabled
-                            ? 'Autorefresh every ' + this.state.selectedAutorefresh.label
-                            : 'Autorefresh Disabled'}
+                            ? i18n.translate('xpack.uptime.autorefreshIntervalSelectedLabel', {
+                                values: { selectedValue: this.state.selectedAutorefresh.label },
+                                defaultMessage: 'Autorefresh every {selectedValue}',
+                              })
+                            : i18n.translate('xpack.uptime.autorefreshIntervalDisabledLabel', {
+                                defaultMessage: 'Autorefresh Disabled',
+                              })}
                         </EuiButton>
                       }
                       closePopover={() => this.setState({ popoverIsOpen: false })}
@@ -213,7 +222,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       <EuiFlexGroup direction="column">
                         <EuiFlexItem>
                           <EuiSwitch
-                            label="Auto-refresh"
+                            label={i18n.translate('xpack.uptime.autoRefreshSwitchLabel', {
+                              defaultMessage: 'Auto-refresh',
+                            })}
                             checked={this.state.autorefreshEnabled}
                             onChange={e => {
                               this.setState(
@@ -253,8 +264,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         target="_blank"
                       >
                         <FormattedMessage
-                          id="xpack.uptime.header.helpLink.text"
+                          id="xpack.uptime.header.helpLinkText"
                           defaultMessage="Discuss"
+                          description="The link is to a support form called 'Discuss', where users can submit feedback."
                         />
                       </EuiHeaderLink>
                     </EuiHeaderLinks>
