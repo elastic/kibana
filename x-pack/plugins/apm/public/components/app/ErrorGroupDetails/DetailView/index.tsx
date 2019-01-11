@@ -49,7 +49,7 @@ import {
   unit,
   units
 } from '../../../../style/variables';
-import { DiscoverErrorLink } from '../../../shared/DiscoverLinks/DiscoverErrorLink';
+import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
   PropertiesTable,

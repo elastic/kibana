@@ -23,8 +23,8 @@ import {
   Transaction,
   TransactionV2
 } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { getDiscoverQuery } from '../DiscoverLinks/DiscoverTransactionLink';
-import { QueryWithIndexPattern } from '../DiscoverLinks/QueryWithIndexPattern';
+import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
+import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
