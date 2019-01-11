@@ -21,13 +21,12 @@ export default function ({ getService }) {
 
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
-        )
+        .get(`/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`)
         .expect(200);
 
-      expect(apiResponse.length).to.be(2);
-      expect(apiResponse[0].monitor.id).to.be('http@https://www.github.com/');
+      expect(apiResponse.total).to.be(2);
+      expect(apiResponse.pings.length).to.be(2);
+      expect(apiResponse.pings[0].monitor.id).to.be('http@https://www.github.com/');
     });
 
     it('should sort pings according to timestamp', async () => {
@@ -36,9 +35,11 @@ export default function ({ getService }) {
           `/api/uptime/pings?sort=asc&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         )
         .expect(200);
-      expect(apiResponse.length).to.be(2);
-      expect(apiResponse[0].timestamp).to.be('2018-10-30T14:49:23.889Z');
-      expect(apiResponse[1].timestamp).to.be('2018-10-30T18:51:56.792Z');
+
+      expect(apiResponse.total).to.be(2);
+      expect(apiResponse.pings.length).to.be(2);
+      expect(apiResponse.pings[0].timestamp).to.be('2018-10-30T14:49:23.889Z');
+      expect(apiResponse.pings[1].timestamp).to.be('2018-10-30T18:51:56.792Z');
     });
 
     it('should return results of n length', async () => {
@@ -48,20 +49,20 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      expect(apiResponse.length).to.be(1);
-      expect(apiResponse[0].monitor.id).to.be('http@https://www.github.com/');
+      expect(apiResponse.total).to.be(2);
+      expect(apiResponse.pings.length).to.be(1);
+      expect(apiResponse.pings[0].monitor.id).to.be('http@https://www.github.com/');
     });
 
     it('should miss pings outside of date range', async () => {
       dateRangeStart = moment('2002-01-01').valueOf();
       dateRangeEnd = moment('2002-01-02').valueOf();
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
-        )
+        .get(`/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`)
         .expect(200);
 
-      expect(apiResponse.length).to.be(0);
+      expect(apiResponse.total).to.be(0);
+      expect(apiResponse.pings.length).to.be(0);
     });
   });
 }
