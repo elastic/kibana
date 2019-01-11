@@ -12,8 +12,8 @@ const basePath = chrome.addBasePath('/api/ml');
 
 export const fileDatavisualizer = {
 
-  analyzeFile(obj, params) {
-    let paramString = '?';
+  analyzeFile(obj, params = {}) {
+    let paramString = Object.keys(params).length ? '?' : '';
     for (const p in params) {
       if (params.hasOwnProperty(p)) {
         paramString += `&${p}=${params[p]}`;
