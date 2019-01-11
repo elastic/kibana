@@ -65,20 +65,22 @@ export const EmptyState = ({
                     />
                   </p>
                   <p>
-                    {
-                      <EuiLink
-                        target="_blank"
-                        href="https://www.elastic.co/guide/en/beats/heartbeat/6.5/configuring-howto-heartbeat.html"
-                      >
-                        <FormattedMessage
-                          id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                          defaultMessage="Configure Heartbeat"
-                        />
-                      </EuiLink>
-                    }
                     <FormattedMessage
-                      id="xpack.uptime.emptyState.bodyLinkPredicateText"
-                      defaultMessage=" to start logging uptime data"
+                      id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                      defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                      values={{
+                        configureHeartbeatLink: (
+                          <EuiLink
+                            target="_blank"
+                            href="https://www.elastic.co/guide/en/beats/heartbeat/6.5/configuring-howto-heartbeat.html"
+                          >
+                            <FormattedMessage
+                              id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                              defaultMessage="Configure Heartbeat"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
                     />
                   </p>
                 </Fragment>
