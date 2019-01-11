@@ -60,7 +60,7 @@ export const EmptyState = ({
                 <Fragment>
                   <p>
                     <FormattedMessage
-                      id="xpack.uptime.emptyState.bodyMessage"
+                      id="xpack.uptime.emptyState.noDataDescription"
                       defaultMessage="There is no uptime data available."
                     />
                   </p>
@@ -71,7 +71,7 @@ export const EmptyState = ({
                         href="https://www.elastic.co/guide/en/beats/heartbeat/6.5/configuring-howto-heartbeat.html"
                       >
                         <FormattedMessage
-                          id="xpack.uptime.emptyState.bodyLink"
+                          id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                           defaultMessage="Configure Heartbeat"
                         />
                       </EuiLink>
