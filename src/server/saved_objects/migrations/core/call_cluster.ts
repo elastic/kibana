@@ -30,7 +30,7 @@ export interface CallCluster {
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
   (path: 'indices.existsAlias', opts: { name: string }): Promise<boolean>;
-  (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<IndicesInfo | NotFound>;
+  (path: 'indices.get', opts: IndicesGetOptions): Promise<IndicesInfo | NotFound>;
   (path: 'indices.getAlias', opts: { name: string } & Ignorable): Promise<AliasResult | NotFound>;
   (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
   (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
@@ -125,6 +125,10 @@ export interface SearchOpts {
 export interface ScrollOpts {
   scroll: string;
   scrollId: string;
+}
+
+export interface IndicesGetOptions extends IndexOpts, Ignorable {
+  include_type_name?: boolean;
 }
 
 ///////////////////////////////////////////////////////////////////

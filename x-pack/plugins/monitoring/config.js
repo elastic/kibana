@@ -82,6 +82,11 @@ export const config = (Joi) => {
         alwaysPresentCertificate: Joi.boolean().default(false),
       }).default(),
       apiVersion: Joi.string().default('master')
-    }).default()
+    }).default(),
+    tests: Joi.object({
+      cloud_detector: Joi.object({
+        enabled: Joi.boolean().default(true)
+      }).default()
+    }).default(),
   }).default();
 };
