@@ -19,13 +19,19 @@
 
 import { get } from 'lodash';
 import chrome from 'ui/chrome';
+import uiRoutes from 'ui/routes';
 import { UICapabilities } from './ui_capabilities';
 
-export const uiCapabilityRouteSetup = (uiCapability: string) => {
-  return (uiCapabilities: UICapabilities, kbnBaseUrl: string) => {
-    if (!get(uiCapabilities, uiCapability)) {
-      const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
-      window.location.href = url;
-    }
-  };
-};
+uiRoutes.addSetupWork((uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any) => {
+  const route = _.get($route, 'current.$$route') as any;
+  if (!route.requireUICapabilities) {
+    return;
+  }
+
+  if (!get(uiCapabilities, route.requireUICapabilities)) {
+    const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
+    window.location.href = url;
+  }
+
+  return undefined;
+});

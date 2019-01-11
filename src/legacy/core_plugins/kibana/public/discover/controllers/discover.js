@@ -65,7 +65,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { uiCapabilityRouteSetup } from 'ui/capabilities';
+import 'ui/capabilities/route_setup';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -77,6 +77,7 @@ const app = uiModules.get('apps/discover', [
 uiRoutes
   .defaults(/^\/discover(\/|$)/, {
     requireDefaultIndex: true,
+    requireUICapabilities: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke(
         $route.current.params.id
@@ -84,7 +85,6 @@ uiRoutes
           : getRootBreadcrumbs
       ),
   })
-  .addSetupWork(uiCapabilityRouteSetup('discover.show'))
   .when('/discover/:id?', {
     template: indexTemplate,
     reloadOnSearch: false,

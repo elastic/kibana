@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { uiCapabilityRouteSetup } from './route_setup';
 export { uiCapabilities, UICapabilities } from './ui_capabilities';

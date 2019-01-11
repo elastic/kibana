@@ -36,6 +36,7 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
+import 'ui/capabilities/route_setup';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -54,7 +55,8 @@ function createNewDashboardCtrl($scope, i18n) {
 
 uiRoutes
   .defaults(/dashboard/, {
-    requireDefaultIndex: true
+    requireDefaultIndex: true,
+    requireUICapabilities: 'dashboard.show'
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
