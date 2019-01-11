@@ -15,7 +15,7 @@ import { resolve } from 'path';
  */
 export const getUiExports = () => ({
   app: {
-    title: i18n.translate('xpack.monitoring.monitoringTitle', { defaultMessage: 'Monitoring' }),
+    title: i18n.translate('xpack.monitoring.stackMonitoringTitle', { defaultMessage: 'Stack Monitoring' }),
     order: 9002,
     description: i18n.translate('xpack.monitoring.uiExportsDescription', {
       defaultMessage: 'Monitoring for Elastic Stack',

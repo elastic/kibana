@@ -5,6 +5,7 @@
  */
 
 import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
@@ -48,10 +49,17 @@ export class TransactionOverviewView extends React.Component<
     return (
       <React.Fragment>
         {serviceTransactionTypes.length > 1 ? (
-          <EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.apm.transactionsTable.filterByTypeLabel',
+              {
+                defaultMessage: 'Filter by type'
+              }
+            )}
+          >
             <EuiSelect
               options={serviceTransactionTypes.map(type => ({
-                text: `Filter by type: ${type}`,
+                text: `${type}`,
                 value: type
               }))}
               value={transactionType}

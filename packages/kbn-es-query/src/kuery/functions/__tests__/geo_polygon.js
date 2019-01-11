@@ -91,6 +91,17 @@ describe('kuery functions', function () {
         });
       });
 
+      it('should return an ES geo_polygon query without an index pattern', function () {
+        const node = nodeTypes.function.buildNode('geoPolygon', 'geo', points);
+        const result = geoPolygon.toElasticsearchQuery(node);
+        expect(result).to.have.property('geo_polygon');
+        expect(result.geo_polygon.geo).to.have.property('points');
+
+        result.geo_polygon.geo.points.forEach((point, index) => {
+          const expectedLatLon = `${points[index].lat}, ${points[index].lon}`;
+          expect(point).to.be(expectedLatLon);
+        });
+      });
 
       it('should use the ignore_unmapped parameter', function () {
         const node = nodeTypes.function.buildNode('geoPolygon', 'geo', points);

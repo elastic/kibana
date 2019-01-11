@@ -1,0 +1,122 @@
+.sidebar-container {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  background-color: $euiColorLightestShade;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+
+  .sidebar-well {
+    background-color: tint($euiColorPrimary, 90%);
+  }
+
+  .sidebar-list {
+    .sidebar-controls {
+      border-radius: $euiBorderRadius;
+      margin-right: -13px;
+      margin-top: $euiSizeXS / 2;
+
+      .navbar-btn-link {
+        padding-left: $euiSizeS;
+        padding-right: $euiSizeS;
+      }
+
+      .sidebar-controls-error {
+        cursor: default;
+      }
+    }
+
+    ul {
+      list-style: none;
+      margin-bottom: 0;
+    }
+
+    .sidebar-item {
+      border-top-color: transparent;
+      font-size: $euiFontSizeXS;
+      border-top: solid 1px transparent;
+      border-bottom: solid 1px transparent;
+      line-height: normal;
+
+      label {
+        margin-bottom: $euiSizeXS;
+        font-weight: $euiFontWeightBold;
+        display: block;
+      }
+
+      label[for] {
+        cursor: pointer;
+      }
+
+      &.active {
+        background-color: shade($euiColorLightestShade, 10%);
+        color: $euiColorDarkestShade;
+        border-color: $euiColorLightShade;
+      }
+    }
+
+      .sidebar-item-title,
+      .sidebar-item-text {
+        margin: 0;
+        padding: $euiSizeXS $euiSizeS;
+        text-align: center;
+        width: 100%;
+        border: none;
+        border-radius: 0;
+      }
+
+      .sidebar-item-title {
+        @include euiTextTruncate;
+        text-align: left;
+
+        &.full-title {
+          white-space: normal;
+        }
+      }
+
+      .sidebar-item-text {
+        background: $euiColorEmptyShade;
+      }
+  }
+
+    .sidebar-list-header {
+      padding-left: $euiSizeS;
+      padding-right: $euiSizeS;
+      color: $euiColorDarkShade;
+      border: 1px solid transparent;
+
+      .sidebar-list-header-label {
+        font-size: $euiFontSizeS;
+        line-height: $euiLineHeight;
+      }
+    }
+
+  .index-pattern {
+    font-weight: $euiFontWeightBold;
+    padding: $euiSizeXS $euiSizeS;
+    display: flex;
+    justify-content: space-between;
+    background-color: shade($euiColorPrimary, 60%);
+    color: $euiColorEmptyShade;
+    line-height: $euiSizeL;
+
+    .index-pattern-label {
+      font-size: $euiFontSizeS;
+      font-weight: $euiFontWeightBold;
+      margin: 0;
+    }
+
+    > * {
+      flex: 0 1 auto;
+      align-self: center;
+    }
+  }
+
+  .index-pattern-selection .ui-select-toggle {
+    border-radius: 0;
+  }
+
+  .index-pattern-selection .ui-select-choices {
+    width: auto;
+    max-height: 300px;
+  }
+}

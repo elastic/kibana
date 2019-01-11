@@ -20,7 +20,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.jobs = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>',
         req: {
           jobId: {
             type: 'list'
@@ -28,7 +28,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/anomaly_detectors/',
+        fmt: '/_ml/anomaly_detectors/',
       }
     ],
     method: 'GET'
@@ -37,7 +37,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.jobStats = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/_stats',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_stats',
         req: {
           jobId: {
             type: 'list'
@@ -45,7 +45,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/anomaly_detectors/_stats',
+        fmt: '/_ml/anomaly_detectors/_stats',
       }
     ],
     method: 'GET'
@@ -54,7 +54,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.addJob = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>',
         req: {
           jobId: {
             type: 'string'
@@ -69,7 +69,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.openJob = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/_open',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_open',
         req: {
           jobId: {
             type: 'string'
@@ -83,7 +83,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.closeJob = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/_close',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close',
         req: {
           jobId: {
             type: 'string'
@@ -91,7 +91,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/_close?force=true',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=true',
         req: {
           jobId: {
             type: 'string'
@@ -107,14 +107,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.deleteJob = ca({
     urls: [{
-      fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>',
+      fmt: '/_ml/anomaly_detectors/<%=jobId%>',
       req: {
         jobId: {
           type: 'string'
         }
       }
     }, {
-      fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>?force=true',
+      fmt: '/_ml/anomaly_detectors/<%=jobId%>?force=true',
       req: {
         jobId: {
           type: 'string'
@@ -130,7 +130,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.updateJob = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/_update',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_update',
         req: {
           jobId: {
             type: 'string'
@@ -145,7 +145,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.datafeeds = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>',
         req: {
           datafeedId: {
             type: 'list'
@@ -153,7 +153,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/datafeeds/',
+        fmt: '/_ml/datafeeds/',
       }
     ],
     method: 'GET'
@@ -162,7 +162,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.datafeedStats = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_stats',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>/_stats',
         req: {
           datafeedId: {
             type: 'list'
@@ -170,7 +170,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/datafeeds/_stats',
+        fmt: '/_ml/datafeeds/_stats',
       }
     ],
     method: 'GET'
@@ -179,7 +179,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.addDatafeed = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>',
         req: {
           datafeedId: {
             type: 'string'
@@ -194,7 +194,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.updateDatafeed = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_update',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>/_update',
         req: {
           datafeedId: {
             type: 'string'
@@ -208,14 +208,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.deleteDatafeed = ca({
     urls: [{
-      fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>',
+      fmt: '/_ml/datafeeds/<%=datafeedId%>',
       req: {
         datafeedId: {
           type: 'string'
         }
       }
     }, {
-      fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>?force=true',
+      fmt: '/_ml/datafeeds/<%=datafeedId%>?force=true',
       req: {
         datafeedId: {
           type: 'string'
@@ -231,7 +231,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.startDatafeed = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_start?&start=<%=start%>&end=<%=end%>',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>/_start?&start=<%=start%>&end=<%=end%>',
         req: {
           datafeedId: {
             type: 'string'
@@ -245,7 +245,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_start?&start=<%=start%>',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>/_start?&start=<%=start%>',
         req: {
           datafeedId: {
             type: 'string'
@@ -256,7 +256,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_start',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>/_start',
         req: {
           datafeedId: {
             type: 'string'
@@ -270,7 +270,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.stopDatafeed = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_stop',
+        fmt: '/_ml/datafeeds/<%=datafeedId%>/_stop',
         req: {
           datafeedId: {
             type: 'string'
@@ -283,7 +283,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.validateDetector = ca({
     url: {
-      fmt: '/_xpack/ml/anomaly_detectors/_validate/detector'
+      fmt: '/_ml/anomaly_detectors/_validate/detector'
     },
     needBody: true,
     method: 'POST'
@@ -291,7 +291,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.datafeedPreview = ca({
     url: {
-      fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_preview',
+      fmt: '/_ml/datafeeds/<%=datafeedId%>/_preview',
       req: {
         datafeedId: {
           type: 'string'
@@ -304,7 +304,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.forecast = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/_forecast?&duration=<%=duration%>',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_forecast?&duration=<%=duration%>',
         req: {
           jobId: {
             type: 'string'
@@ -315,7 +315,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/_forecast',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_forecast',
         req: {
           jobId: {
             type: 'string'
@@ -328,7 +328,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.overallBuckets = ca({
     url: {
-      fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/results/overall_buckets',
+      fmt: '/_ml/anomaly_detectors/<%=jobId%>/results/overall_buckets',
       req: {
         jobId: {
           type: 'string'
@@ -340,7 +340,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.privilegeCheck = ca({
     url: {
-      fmt: '/_xpack/security/user/_has_privileges'
+      fmt: '/_security/user/_has_privileges'
     },
     needBody: true,
     method: 'POST'
@@ -349,7 +349,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.calendars = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/calendars/<%=calendarId%>',
+        fmt: '/_ml/calendars/<%=calendarId%>',
         req: {
           calendarId: {
             type: 'string'
@@ -357,7 +357,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/calendars/',
+        fmt: '/_ml/calendars/',
       }
     ],
     method: 'GET'
@@ -365,7 +365,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.deleteCalendar = ca({
     url: {
-      fmt: '/_xpack/ml/calendars/<%=calendarId%>',
+      fmt: '/_ml/calendars/<%=calendarId%>',
       req: {
         calendarId: {
           type: 'string'
@@ -377,7 +377,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.addCalendar = ca({
     url: {
-      fmt: '/_xpack/ml/calendars/<%=calendarId%>',
+      fmt: '/_ml/calendars/<%=calendarId%>',
       req: {
         calendarId: {
           type: 'string'
@@ -390,7 +390,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.addJobToCalendar = ca({
     url: {
-      fmt: '/_xpack/ml/calendars/<%=calendarId%>/jobs/<%=jobId%>',
+      fmt: '/_ml/calendars/<%=calendarId%>/jobs/<%=jobId%>',
       req: {
         calendarId: {
           type: 'string'
@@ -405,7 +405,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.removeJobFromCalendar = ca({
     url: {
-      fmt: '/_xpack/ml/calendars/<%=calendarId%>/jobs/<%=jobId%>',
+      fmt: '/_ml/calendars/<%=calendarId%>/jobs/<%=jobId%>',
       req: {
         calendarId: {
           type: 'string'
@@ -421,7 +421,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.events = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/calendars/<%=calendarId%>/events',
+        fmt: '/_ml/calendars/<%=calendarId%>/events',
         req: {
           calendarId: {
             type: 'string'
@@ -429,7 +429,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/calendars/<%=calendarId%>/events?&job_id=<%=jobId%>',
+        fmt: '/_ml/calendars/<%=calendarId%>/events?&job_id=<%=jobId%>',
         req: {
           calendarId: {
             type: 'string'
@@ -440,7 +440,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/calendars/<%=calendarId%>/events?&after=<%=start%>&before=<%=end%>',
+        fmt: '/_ml/calendars/<%=calendarId%>/events?&after=<%=start%>&before=<%=end%>',
         req: {
           calendarId: {
             type: 'string'
@@ -454,7 +454,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/calendars/<%=calendarId%>/events?&after=<%=start%>&before=<%=end%>&job_id=<%=jobId%>',
+        fmt: '/_ml/calendars/<%=calendarId%>/events?&after=<%=start%>&before=<%=end%>&job_id=<%=jobId%>',
         req: {
           calendarId: {
             type: 'string'
@@ -476,7 +476,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.addEvent = ca({
     url: {
-      fmt: '/_xpack/ml/calendars/<%=calendarId%>/events',
+      fmt: '/_ml/calendars/<%=calendarId%>/events',
       req: {
         calendarId: {
           type: 'string'
@@ -489,7 +489,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.deleteEvent = ca({
     url: {
-      fmt: '/_xpack/ml/calendars/<%=calendarId%>/events/<%=eventId%>',
+      fmt: '/_ml/calendars/<%=calendarId%>/events/<%=eventId%>',
       req: {
         calendarId: {
           type: 'string'
@@ -505,7 +505,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.filters = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/filters/<%=filterId%>',
+        fmt: '/_ml/filters/<%=filterId%>',
         req: {
           filterId: {
             type: 'string'
@@ -513,7 +513,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/filters/',
+        fmt: '/_ml/filters/',
       }
     ],
     method: 'GET'
@@ -521,7 +521,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.addFilter = ca({
     url: {
-      fmt: '/_xpack/ml/filters/<%=filterId%>',
+      fmt: '/_ml/filters/<%=filterId%>',
       req: {
         filterId: {
           type: 'string'
@@ -535,7 +535,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.updateFilter = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/filters/<%=filterId%>/_update',
+        fmt: '/_ml/filters/<%=filterId%>/_update',
         req: {
           filterId: {
             type: 'string'
@@ -549,7 +549,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.deleteFilter = ca({
     url: {
-      fmt: '/_xpack/ml/filters/<%=filterId%>',
+      fmt: '/_ml/filters/<%=filterId%>',
       req: {
         filterId: {
           type: 'string'
@@ -561,7 +561,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
 
   ml.info = ca({
     url: {
-      fmt: '/_xpack/ml/info'
+      fmt: '/_ml/info'
     },
     method: 'GET'
   });
@@ -570,7 +570,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     urls: [
       {
         // eslint-disable-next-line max-len
-        fmt: '/_xpack/ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>',
+        fmt: '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>',
         req: {
           charset: {
             type: 'string'
@@ -605,7 +605,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_xpack/ml/find_file_structure'
+        fmt: '/_ml/find_file_structure'
       }
     ],
     needBody: true,
