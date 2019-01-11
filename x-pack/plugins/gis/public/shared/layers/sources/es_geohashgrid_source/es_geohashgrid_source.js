@@ -99,7 +99,6 @@ export class ESGeohashGridSource extends VectorSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
-    console.log('rener source setting editor');
     return (
       <UpdateSourceEditor
         indexPatternId={this._descriptor.indexPatternId}

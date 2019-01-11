@@ -57,8 +57,6 @@ export class UpdateSourceEditor extends Component {
     }) : (() => true);
     const allowMultipleMetrics = (this.props.renderAs === RENDER_AS.HEATMAP) ? false : true;
 
-    console.log('props metrics', this.props.metrics);
-
     return (
       <MetricsEditor
         allowMultipleMetrics={allowMultipleMetrics}
