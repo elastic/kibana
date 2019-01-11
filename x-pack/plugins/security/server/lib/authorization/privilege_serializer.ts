@@ -6,9 +6,9 @@
 
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
-const minimumPrivilegeNames = ['all', 'read'];
-const globalMinimumPrivileges = [...minimumPrivilegeNames];
-const spaceMinimumPrivileges = minimumPrivilegeNames.map(
+const basePrivilegeNames = ['all', 'read'];
+const globalBasePrivileges = [...basePrivilegeNames];
+const spaceBasePrivileges = basePrivilegeNames.map(
   privilegeName => `${spacePrefix}${privilegeName}`
 );
 const deserializeFeaturePrivilegeRegexp = new RegExp(
@@ -21,25 +21,25 @@ interface FeaturePrivilege {
 }
 
 export class PrivilegeSerializer {
-  public static isSerializedGlobalMinimumPrivilege(privilegeName: string) {
-    return globalMinimumPrivileges.includes(privilegeName);
+  public static isSerializedGlobalBasePrivilege(privilegeName: string) {
+    return globalBasePrivileges.includes(privilegeName);
   }
 
-  public static isSerializedSpaceMinimumPrivilege(privilegeName: string) {
-    return spaceMinimumPrivileges.includes(privilegeName);
+  public static isSerializedSpaceBasePrivilege(privilegeName: string) {
+    return spaceBasePrivileges.includes(privilegeName);
   }
 
-  public static serializeGlobalMinimumPrivilege(privilegeName: string) {
-    if (!minimumPrivilegeNames.includes(privilegeName)) {
-      throw new Error('Unrecognized global minimum privilege');
+  public static serializeGlobalBasePrivilege(privilegeName: string) {
+    if (!basePrivilegeNames.includes(privilegeName)) {
+      throw new Error('Unrecognized global base privilege');
     }
 
     return privilegeName;
   }
 
-  public static serializeSpaceMinimumPrivilege(privilegeName: string) {
-    if (!minimumPrivilegeNames.includes(privilegeName)) {
-      throw new Error('Unrecognized space minimum privilege');
+  public static serializeSpaceBasePrivilege(privilegeName: string) {
+    if (!basePrivilegeNames.includes(privilegeName)) {
+      throw new Error('Unrecognized space base privilege');
     }
 
     return `${spacePrefix}${privilegeName}`;
@@ -61,17 +61,17 @@ export class PrivilegeSerializer {
     };
   }
 
-  public static deserializeGlobalMinimumPrivilege(privilege: string) {
-    if (PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege)) {
+  public static deserializeGlobalBasePrivilege(privilege: string) {
+    if (PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege)) {
       return privilege;
     }
 
-    throw new Error('Unrecognized global minimum privilege');
+    throw new Error('Unrecognized global base privilege');
   }
 
-  public static deserializeSpaceMinimumPrivilege(privilege: string) {
-    if (!PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege)) {
-      throw new Error('Unrecognized space minimum privilege');
+  public static deserializeSpaceBasePrivilege(privilege: string) {
+    if (!PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege)) {
+      throw new Error('Unrecognized space base privilege');
     }
 
     return privilege.slice(spacePrefix.length);

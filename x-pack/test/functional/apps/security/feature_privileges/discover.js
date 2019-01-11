@@ -29,13 +29,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 discover: ['all']
               },
+              spaces: ['*']
             }
-          }
+          ]
         });
 
         await security.user.create('global_discover_all_user', {
@@ -76,13 +77,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 discover: ['read']
               },
+              spaces: ['*']
             }
-          }
+          ]
         });
 
         await security.user.create('global_discover_read_user', {
@@ -124,13 +126,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 dashboard: ['all']
-              }
+              },
+              spaces: ['*']
             }
-          }
+          ],
         });
 
         await security.user.create('no_discover_privileges_user', {

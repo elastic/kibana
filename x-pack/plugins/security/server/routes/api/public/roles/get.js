@@ -15,20 +15,56 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
     const roleKibanaApplications = roleApplications
       .filter(roleApplication => roleApplication.application === application);
 
-    const resourcePrivileges = _.flatten(roleKibanaApplications
-      .map(({ resources, privileges }) => resources.map(resource => ({ resource, privileges })))
-    );
+    // if any application entry contains the '*' resource in addition to another resource, we can't transform these
+    if (roleKibanaApplications.some(entry => entry.resources.includes(GLOBAL_RESOURCE) && entry.resources.length > 1)) {
+      return {
+        success: false
+      };
+    }
 
-    return resourcePrivileges.reduce((result, { resource, privileges }) => {
-      if (resource === GLOBAL_RESOURCE) {
-        const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
-        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
+    const allResources = _.flatten(roleKibanaApplications.map(entry => entry.resources));
+    // if we have improperly formatted resource entries, we can't transform these
+    if (allResources.some(resource => resource !== GLOBAL_RESOURCE && !ResourceSerializer.isSerializedSpaceResource(resource))) {
+      return {
+        success: false
+      };
+    }
 
-        result.global = {
-          minimum: _.uniq([
-            ...result.global.minimum,
-            ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeGlobalMinimumPrivilege(privilege))
-          ]),
+    // if we have resources duplicated in entries, we won't transform these
+    if (allResources.length !== _.uniq(allResources).length) {
+      return {
+        success: false
+      };
+    }
+
+    return {
+      success: true,
+      value: roleKibanaApplications.map(({ resources, privileges }) => {
+      // if we're dealing with a global entry, which we've ensured above is only possible if it's the only item in the array
+        if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
+          const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
+          const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
+
+          return {
+            base: basePrivileges.map(privilege => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)),
+            feature: featurePrivileges.reduce((acc, privilege) => {
+              const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
+              return {
+                ...acc,
+                [featurePrivilege.featureId]: _.uniq([
+                  ...acc[featurePrivilege.featureId] || [],
+                  featurePrivilege.privilege
+                ])
+              };
+            }, {}),
+            spaces: ['*']
+          };
+        }
+
+        const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege));
+        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege));
+        return {
+          base: basePrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceBasePrivilege(privilege)),
           feature: featurePrivileges.reduce((acc, privilege) => {
             const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
             return {
@@ -38,38 +74,11 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
                 featurePrivilege.privilege
               ])
             };
-          }, result.global.feature)
+          }, {}),
+          spaces: resources.map(resource => ResourceSerializer.deserializeSpaceResource(resource))
         };
-        return result;
-      }
-
-      const spaceId = ResourceSerializer.deserializeSpaceResource(resource);
-      const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
-      const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
-      result.space[spaceId] = {
-        minimum: _.uniq([
-          ...result.space[spaceId] ? result.space[spaceId].minimum || [] : [],
-          ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceMinimumPrivilege(privilege))
-        ]),
-        feature: featurePrivileges.reduce((acc, privilege) => {
-          const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
-          return {
-            ...acc,
-            [featurePrivilege.featureId]: _.uniq([
-              ...acc[featurePrivilege.featureId] || [],
-              featurePrivilege.privilege
-            ])
-          };
-        }, result.space[spaceId] ? result.space[spaceId].feature || {} : {})
-      };
-      return result;
-    }, {
-      global: {
-        minimum: [],
-        feature: {},
-      },
-      space: {},
-    });
+      })
+    };
   };
 
   const transformUnrecognizedApplicationsFromEs = (roleApplications) => {
@@ -79,6 +88,8 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
   };
 
   const transformRoleFromEs = (role, name) => {
+    const kibanaTransformResult = transformKibanaApplicationsFromEs(role.applications);
+
     return {
       name,
       metadata: role.metadata,
@@ -88,7 +99,10 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
         indices: role.indices,
         run_as: role.run_as,
       },
-      kibana: transformKibanaApplicationsFromEs(role.applications),
+      kibana: kibanaTransformResult.success ? kibanaTransformResult.value : [],
+      _transform_error: [
+        ...(kibanaTransformResult.success ? [] : ['kibana'])
+      ],
       _unrecognized_applications: transformUnrecognizedApplicationsFromEs(role.applications),
     };
   };
