@@ -141,7 +141,7 @@ export class TaskStore {
             mappings: {
               _doc: {
                 dynamic: 'strict',
-                templateProperties,
+                properties: templateProperties,
               },
             },
             settings: {
