@@ -283,6 +283,8 @@ export const phaseToES = (phase, originalEsPhase) => {
 
   if (phase[PHASE_FREEZE_ENABLED]) {
     esPhase.actions.freeze = {};
+  } else {
+    delete esPhase.actions.freeze;
   }
   return esPhase;
 };
