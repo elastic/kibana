@@ -31,12 +31,13 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'ml_disabled_space':
           case 'monitoring_disabled_space':
           case 'timelion_disabled_space':
+          case 'uptime_disabled_space':
           case 'visualize_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('discover');
             expect(uiCapabilities.value!.discover).to.eql({
               show: true,
-              showWriteControls: true,
+              save: true,
             });
             break;
           case 'nothing_space':
@@ -45,7 +46,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.value).to.have.property('discover');
             expect(uiCapabilities.value!.discover).to.eql({
               show: false,
-              showWriteControls: false,
+              save: false,
             });
             break;
           default:

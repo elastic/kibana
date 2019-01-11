@@ -67,6 +67,7 @@ global monitoring all
 global monitoring read
 global timelion all
 global timelion read
+global uptime all
 global visualize all
 global visualize read
 
@@ -89,4 +90,5 @@ logs disabled
 ml disabled
 monitoring disabled
 timelion disabled
+uptime disabled
 visualize disabled

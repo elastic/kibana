@@ -146,6 +146,15 @@ const TimelionDisabledSpace: TimelionDisabledSpace = {
   disabledFeatures: ['timelion'],
 };
 
+interface UptimeDisabledSpace extends Space {
+  id: 'uptime_disabled_space';
+}
+const UptimeDisabledSpace: UptimeDisabledSpace = {
+  id: 'uptime_disabled_space',
+  name: 'uptime_disabled_space',
+  disabledFeatures: ['uptime'],
+};
+
 interface VisualizeDisabledSpace extends Space {
   id: 'visualize_disabled_space';
 }
@@ -171,6 +180,7 @@ export type SpaceScenarios =
   | MlDisabledSpace
   | MonitoringDisabledSpace
   | TimelionDisabledSpace
+  | UptimeDisabledSpace
   | VisualizeDisabledSpace;
 export const SpaceScenarios: SpaceScenarios[] = [
   EverythingSpace,
@@ -188,5 +198,6 @@ export const SpaceScenarios: SpaceScenarios[] = [
   MlDisabledSpace,
   MonitoringDisabledSpace,
   TimelionDisabledSpace,
+  UptimeDisabledSpace,
   VisualizeDisabledSpace,
 ];

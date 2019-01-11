@@ -86,37 +86,6 @@ describe('GET roles', () => {
         },
       },
     });
-
-    getRolesTest(`throws error if resource isn't * and doesn't have the space: prefix`, {
-      callWithRequestImpl: async () => ({
-        first_role: {
-          cluster: [],
-          indices: [],
-          applications: [
-            {
-              application,
-              privileges: ['read'],
-              resources: ['default'],
-            },
-          ],
-          run_as: [],
-          metadata: {
-            _reserved: true,
-          },
-          transient_metadata: {
-            enabled: true,
-          },
-        },
-      }),
-      asserts: {
-        statusCode: 500,
-        result: {
-          error: 'Internal Server Error',
-          message: 'An internal server error occurred',
-          statusCode: 500
-        }
-      },
-    });
   });
 
   describe('success', () => {
@@ -161,13 +130,8 @@ describe('GET roles', () => {
               ],
               run_as: ['other_user'],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {},
-              },
-              space: {},
-            },
+            kibana: [],
+            _transform_error: [],
             _unrecognized_applications: [],
           },
         ],
@@ -175,77 +139,17 @@ describe('GET roles', () => {
     });
 
     describe('global', () => {
-      getRolesTest(`transforms matching applications with * resource to kibana global minimum privileges`, {
+      getRolesTest(`transforms matching applications with * resource to kibana global base privileges`, {
         callWithRequestImpl: async () => ({
           first_role: {
             cluster: [],
             indices: [],
             applications: [
-              {
-                application,
-                privileges: ['read'],
-                resources: ['*'],
-              },
-              {
-                application,
-                privileges: ['all'],
-                resources: ['*'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: [
-            {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: {
-                global: {
-                  minimum: ['read', 'all'],
-                  feature: {}
-                },
-                space: {},
-              },
-              _unrecognized_applications: [],
-            },
-          ],
-        },
-      });
-
-      getRolesTest(`transforms matching applications with * resource to kibana global minimum privileges, eliminating duplicates`, {
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['read'],
-                resources: ['*'],
-              },
               {
                 application,
                 privileges: ['all', 'read'],
                 resources: ['*'],
-              },
+              }
             ],
             run_as: [],
             metadata: {
@@ -272,13 +176,14 @@ describe('GET roles', () => {
                 indices: [],
                 run_as: [],
               },
-              kibana: {
-                global: {
-                  minimum: ['read', 'all'],
-                  feature: {}
-                },
-                space: {},
-              },
+              kibana: [
+                {
+                  base: ['all', 'read'],
+                  feature: {},
+                  spaces: ['*']
+                }
+              ],
+              _transform_error: [],
               _unrecognized_applications: [],
             },
           ],
@@ -295,12 +200,7 @@ describe('GET roles', () => {
                 application,
                 privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
                 resources: ['*'],
-              },
-              {
-                application,
-                privileges: [ 'feature_foo.foo-privilege-3'],
-                resources: ['*'],
-              },
+              }
             ],
             run_as: [],
             metadata: {
@@ -327,74 +227,17 @@ describe('GET roles', () => {
                 indices: [],
                 run_as: [],
               },
-              kibana: {
-                global: {
-                  minimum: [],
+              kibana: [
+                {
+                  base: [],
                   feature: {
-                    foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
+                    foo: ['foo-privilege-1', 'foo-privilege-2'],
                     bar: ['bar-privilege-1']
-                  }
-                },
-                space: {},
-              },
-              _unrecognized_applications: [],
-            },
-          ],
-        },
-      });
-
-      getRolesTest(`transforms matching applications with * resource to kibana global feature privileges, eliminating duplicates`, {
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
-                resources: ['*'],
-              },
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-3'],
-                resources: ['*'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: [
-            {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: {
-                global: {
-                  minimum: [],
-                  feature: {
-                    foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
-                    bar: ['bar-privilege-1']
-                  }
-                },
-                space: {},
-              },
+                  },
+                  spaces: ['*']
+                }
+              ],
+              _transform_error: [],
               _unrecognized_applications: [],
             },
           ],
@@ -403,7 +246,7 @@ describe('GET roles', () => {
     });
 
     describe('space', () => {
-      getRolesTest(`transforms matching applications with space resources to kibana space minimum privileges`, {
+      getRolesTest(`transforms matching applications with space resources to kibana space base privileges`, {
         callWithRequestImpl: async () => ({
           first_role: {
             cluster: [],
@@ -411,13 +254,8 @@ describe('GET roles', () => {
             applications: [
               {
                 application,
-                privileges: ['space_read'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: ['space_all'],
-                resources: ['space:marketing'],
+                privileges: ['space_all', 'space_read'],
+                resources: ['space:marketing', 'space:sales'],
               },
               {
                 application,
@@ -450,91 +288,19 @@ describe('GET roles', () => {
                 indices: [],
                 run_as: [],
               },
-              kibana: {
-                global: {
-                  minimum: [],
-                  feature: {}
+              kibana: [
+                {
+                  base: ['all', 'read'],
+                  feature: {},
+                  spaces: ['marketing', 'sales'],
                 },
-                space: {
-                  marketing: {
-                    minimum: ['read', 'all'],
-                    feature: {}
-                  },
-                  engineering: {
-                    minimum: ['read'],
-                    feature: {}
-                  }
-                }
-              },
-              _unrecognized_applications: [],
-            },
-          ],
-        },
-      });
-
-      getRolesTest(`transforms matching applications with space resources to kibana space minimum privileges, eliminating duplicates`, {
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['space_read', 'space_all'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: ['space_all'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: ['space_read'],
-                resources: ['space:engineering'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: [
-            {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: {
-                global: {
-                  minimum: [],
-                  feature: {}
+                {
+                  base: ['read'],
+                  feature: {},
+                  spaces: ['engineering'],
                 },
-                space: {
-                  marketing: {
-                    minimum: ['read', 'all'],
-                    feature: {}
-                  },
-                  engineering: {
-                    minimum: ['read'],
-                    feature: {}
-                  }
-                }
-              },
+              ],
+              _transform_error: [],
               _unrecognized_applications: [],
             },
           ],
@@ -550,16 +316,11 @@ describe('GET roles', () => {
               {
                 application,
                 privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
-                resources: ['space:marketing'],
+                resources: ['space:marketing', 'space:sales'],
               },
               {
                 application,
-                privileges: [ 'feature_foo.foo-privilege-3'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: [ 'feature_foo.foo-privilege-1'],
+                privileges: ['feature_foo.foo-privilege-1'],
                 resources: ['space:engineering'],
               },
             ],
@@ -588,101 +349,24 @@ describe('GET roles', () => {
                 indices: [],
                 run_as: [],
               },
-              kibana: {
-                global: {
-                  minimum: [],
-                  feature: {}
-                },
-                space: {
-                  marketing: {
-                    minimum: [],
-                    feature: {
-                      foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
-                      bar: ['bar-privilege-1']
-                    }
+              kibana: [
+                {
+                  base: [],
+                  feature: {
+                    foo: ['foo-privilege-1', 'foo-privilege-2'],
+                    bar: ['bar-privilege-1']
                   },
-                  engineering: {
-                    minimum: [],
-                    feature: {
-                      foo: ['foo-privilege-1']
-                    }
-                  }
-                }
-              },
-              _unrecognized_applications: [],
-            },
-          ],
-        },
-      });
-
-      getRolesTest(`transforms matching applications with space resources to kibana space feature privileges, eliminating duplcates`, {
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-3'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: [ 'feature_foo.foo-privilege-1'],
-                resources: ['space:engineering'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: [
-            {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: {
-                global: {
-                  minimum: [],
-                  feature: {}
+                  spaces: ['marketing', 'sales'],
                 },
-                space: {
-                  marketing: {
-                    minimum: [],
-                    feature: {
-                      foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
-                      bar: ['bar-privilege-1']
-                    }
+                {
+                  base: [],
+                  feature: {
+                    foo: ['foo-privilege-1'],
                   },
-                  engineering: {
-                    minimum: [],
-                    feature: {
-                      foo: ['foo-privilege-1']
-                    }
-                  }
+                  spaces: ['engineering']
                 }
-              },
+              ],
+              _transform_error: [],
               _unrecognized_applications: [],
             },
           ],
@@ -690,7 +374,7 @@ describe('GET roles', () => {
       });
     });
 
-    getRolesTest(`ignores empty resources even though this shouldn't happen`, {
+    getRolesTest(`return error if we have empty resources`, {
       callWithRequestImpl: async () => ({
         first_role: {
           cluster: [],
@@ -700,6 +384,37 @@ describe('GET roles', () => {
               application,
               privileges: ['read'],
               resources: [],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 500,
+        result: {
+          error: 'Internal Server Error',
+          statusCode: 500,
+          message: 'An internal server error occurred',
+        },
+      },
+    });
+
+    getRolesTest(`resource not * without space: prefix returns empty kibana section with _transform_error set to ['kibana']`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['read'],
+              resources: ['default'],
             },
           ],
           run_as: [],
@@ -727,13 +442,153 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {},
-              },
-              space: {}
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
+    });
+
+    getRolesTest(`* and a space in the same entry returns empty kibana section with _transform_error set to ['kibana']`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['all'],
+              resources: ['*', 'space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
+    });
+
+    getRolesTest(`* appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['all'],
+              resources: ['*'],
+            },
+            {
+              application,
+              privileges: ['read'],
+              resources: ['*'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
+    });
+
+    getRolesTest(`space appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all'],
+              resources: ['space:engineering'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
             _unrecognized_applications: [],
           },
         ],
@@ -777,13 +632,8 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {},
-            },
+            kibana: [],
+            _transform_error: [],
             _unrecognized_applications: ['kibana-.another-kibana']
           },
         ],
@@ -863,13 +713,8 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {},
-            },
+            kibana: [],
+            _transform_error: [],
             _unrecognized_applications: ['kibana-.another-kibana']
           },
           {
@@ -885,13 +730,8 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {},
-            },
+            kibana: [],
+            _transform_error: [],
             _unrecognized_applications: ['kibana-.another-kibana']
           },
           {
@@ -907,13 +747,8 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {},
-            },
+            kibana: [],
+            _transform_error: [],
             _unrecognized_applications: ['kibana-.another-kibana']
           },
         ],
@@ -998,7 +833,7 @@ describe('GET role', () => {
       },
     });
 
-    getRoleTest(`throws error if resource isn't * and doesn't have the space: prefix`, {
+    getRoleTest(`return error if we have empty resources`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
@@ -1008,7 +843,7 @@ describe('GET role', () => {
             {
               application,
               privileges: ['read'],
-              resources: ['default'],
+              resources: [],
             },
           ],
           run_as: [],
@@ -1024,9 +859,9 @@ describe('GET role', () => {
         statusCode: 500,
         result: {
           error: 'Internal Server Error',
+          statusCode: 500,
           message: 'An internal server error occurred',
-          statusCode: 500
-        }
+        },
       },
     });
   });
@@ -1073,90 +908,26 @@ describe('GET role', () => {
             ],
             run_as: ['other_user'],
           },
-          kibana: {
-            global: {
-              minimum: [],
-              feature: {},
-            },
-            space: {},
-          },
+          kibana: [],
+          _transform_error: [],
           _unrecognized_applications: [],
         },
       },
     });
 
     describe('global', () => {
-      getRoleTest(`transforms matching applications with * resource to kibana global minimum privileges`, {
+      getRoleTest(`transforms matching applications with * resource to kibana global base privileges`, {
         name: 'first_role',
         callWithRequestImpl: async () => ({
           first_role: {
             cluster: [],
             indices: [],
             applications: [
-              {
-                application,
-                privileges: ['read'],
-                resources: ['*'],
-              },
-              {
-                application,
-                privileges: ['all'],
-                resources: ['*'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: {
-            name: 'first_role',
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-            elasticsearch: {
-              cluster: [],
-              indices: [],
-              run_as: [],
-            },
-            kibana: {
-              global: {
-                minimum: ['read', 'all'],
-                feature: {}
-              },
-              space: {},
-            },
-            _unrecognized_applications: [],
-          },
-        },
-      });
-
-      getRoleTest(`transforms matching applications with * resource to kibana global minimum privileges, eliminating duplicates`, {
-        name: 'first_role',
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['read'],
-                resources: ['*'],
-              },
               {
                 application,
                 privileges: ['all', 'read'],
                 resources: ['*'],
-              },
+              }
             ],
             run_as: [],
             metadata: {
@@ -1182,13 +953,14 @@ describe('GET role', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: ['read', 'all'],
-                feature: {}
-              },
-              space: {},
-            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                feature: {},
+                spaces: ['*']
+              }
+            ],
+            _transform_error: [],
             _unrecognized_applications: [],
           },
         },
@@ -1205,12 +977,7 @@ describe('GET role', () => {
                 application,
                 privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
                 resources: ['*'],
-              },
-              {
-                application,
-                privileges: [ 'feature_foo.foo-privilege-3'],
-                resources: ['*'],
-              },
+              }
             ],
             run_as: [],
             metadata: {
@@ -1236,73 +1003,17 @@ describe('GET role', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
+            kibana: [
+              {
+                base: [],
                 feature: {
-                  foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
+                  foo: ['foo-privilege-1', 'foo-privilege-2'],
                   bar: ['bar-privilege-1']
-                }
-              },
-              space: {},
-            },
-            _unrecognized_applications: [],
-          },
-        },
-      });
-
-      getRoleTest(`transforms matching applications with * resource to kibana global feature privileges, eliminating duplicates`, {
-        name: 'first_role',
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
-                resources: ['*'],
-              },
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-3'],
-                resources: ['*'],
-              },
+                },
+                spaces: ['*']
+              }
             ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: {
-            name: 'first_role',
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-            elasticsearch: {
-              cluster: [],
-              indices: [],
-              run_as: [],
-            },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {
-                  foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
-                  bar: ['bar-privilege-1']
-                }
-              },
-              space: {},
-            },
+            _transform_error: [],
             _unrecognized_applications: [],
           },
         },
@@ -1310,7 +1021,7 @@ describe('GET role', () => {
     });
 
     describe('space', () => {
-      getRoleTest(`transforms matching applications with space resources to kibana space minimum privileges`, {
+      getRoleTest(`transforms matching applications with space resources to kibana space base privileges`, {
         name: 'first_role',
         callWithRequestImpl: async () => ({
           first_role: {
@@ -1319,13 +1030,8 @@ describe('GET role', () => {
             applications: [
               {
                 application,
-                privileges: ['space_read'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: ['space_all'],
-                resources: ['space:marketing'],
+                privileges: ['space_all', 'space_read'],
+                resources: ['space:marketing', 'space:sales'],
               },
               {
                 application,
@@ -1357,90 +1063,19 @@ describe('GET role', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {
-                marketing: {
-                  minimum: ['read', 'all'],
-                  feature: {}
-                },
-                engineering: {
-                  minimum: ['read'],
-                  feature: {}
-                }
-              }
-            },
-            _unrecognized_applications: [],
-          },
-        },
-      });
-
-      getRoleTest(`transforms matching applications with space resources to kibana space minimum privileges, eliminating duplicates`, {
-        name: 'first_role',
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
+            kibana: [
               {
-                application,
-                privileges: ['space_read', 'space_all'],
-                resources: ['space:marketing'],
+                base: ['all', 'read'],
+                feature: {},
+                spaces: ['marketing', 'sales'],
               },
               {
-                application,
-                privileges: ['space_all'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: ['space_read'],
-                resources: ['space:engineering'],
+                base: ['read'],
+                feature: {},
+                spaces: ['engineering'],
               },
             ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: {
-            name: 'first_role',
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-            elasticsearch: {
-              cluster: [],
-              indices: [],
-              run_as: [],
-            },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {
-                marketing: {
-                  minimum: ['read', 'all'],
-                  feature: {}
-                },
-                engineering: {
-                  minimum: ['read'],
-                  feature: {}
-                }
-              }
-            },
+            _transform_error: [],
             _unrecognized_applications: [],
           },
         },
@@ -1456,16 +1091,11 @@ describe('GET role', () => {
               {
                 application,
                 privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
-                resources: ['space:marketing'],
+                resources: ['space:marketing', 'space:sales'],
               },
               {
                 application,
-                privileges: [ 'feature_foo.foo-privilege-3'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: [ 'feature_foo.foo-privilege-1'],
+                privileges: ['feature_foo.foo-privilege-1'],
                 resources: ['space:engineering'],
               },
             ],
@@ -1493,107 +1123,31 @@ describe('GET role', () => {
               indices: [],
               run_as: [],
             },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {
-                marketing: {
-                  minimum: [],
-                  feature: {
-                    foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
-                    bar: ['bar-privilege-1']
-                  }
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  foo: ['foo-privilege-1', 'foo-privilege-2'],
+                  bar: ['bar-privilege-1']
                 },
-                engineering: {
-                  minimum: [],
-                  feature: {
-                    foo: ['foo-privilege-1']
-                  }
-                }
+                spaces: ['marketing', 'sales'],
+              },
+              {
+                base: [],
+                feature: {
+                  foo: ['foo-privilege-1'],
+                },
+                spaces: ['engineering']
               }
-            },
-            _unrecognized_applications: [],
-          },
-        },
-      });
-
-      getRoleTest(`transforms matching applications with space resources to kibana space feature privileges, eliminating duplcates`, {
-        name: 'first_role',
-        callWithRequestImpl: async () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2', 'feature_bar.bar-privilege-1'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-3'],
-                resources: ['space:marketing'],
-              },
-              {
-                application,
-                privileges: [ 'feature_foo.foo-privilege-1'],
-                resources: ['space:engineering'],
-              },
             ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: {
-            name: 'first_role',
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-            elasticsearch: {
-              cluster: [],
-              indices: [],
-              run_as: [],
-            },
-            kibana: {
-              global: {
-                minimum: [],
-                feature: {}
-              },
-              space: {
-                marketing: {
-                  minimum: [],
-                  feature: {
-                    foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
-                    bar: ['bar-privilege-1']
-                  }
-                },
-                engineering: {
-                  minimum: [],
-                  feature: {
-                    foo: ['foo-privilege-1']
-                  }
-                }
-              }
-            },
+            _transform_error: [],
             _unrecognized_applications: [],
           },
         },
       });
     });
 
-    getRoleTest(`ignores empty resources even though this shouldn't happen`, {
+    getRoleTest(`resource not * without space: prefix returns empty kibana section with _transform_error set to ['kibana']`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
@@ -1603,7 +1157,7 @@ describe('GET role', () => {
             {
               application,
               privileges: ['read'],
-              resources: [],
+              resources: ['default'],
             },
           ],
           run_as: [],
@@ -1630,13 +1184,101 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: {
-            global: {
-              minimum: [],
-              feature: {},
+          kibana: [],
+          _transform_error: ['kibana'],
+          _unrecognized_applications: [],
+        },
+      }
+    });
+
+    getRoleTest(`* and a space in the same entry returns empty kibana section with _transform_error set to ['kibana']`, {
+      name: 'first_role',
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['read'],
+              resources: ['default'],
             },
-            space: {}
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
           },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          name: 'first_role',
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _transform_error: ['kibana'],
+          _unrecognized_applications: [],
+        },
+      },
+    });
+
+    getRoleTest(`* appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`, {
+      name: 'first_role',
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all'],
+              resources: ['space:engineering'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          name: 'first_role',
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _transform_error: ['kibana'],
           _unrecognized_applications: [],
         },
       },
@@ -1679,13 +1321,8 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: {
-            global: {
-              minimum: [],
-              feature: {}
-            },
-            space: {},
-          },
+          kibana: [],
+          _transform_error: [],
           _unrecognized_applications: ['kibana-.another-kibana']
         },
       },

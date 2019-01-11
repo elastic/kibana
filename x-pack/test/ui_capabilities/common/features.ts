@@ -49,6 +49,9 @@ export class Features {
   public timelion: Feature = {
     navLinkId: 'timelion',
   };
+  public uptime: Feature = {
+    navLinkId: 'uptime',
+  };
   public visualize: Feature = {
     navLinkId: 'kibana:visualize',
   };
