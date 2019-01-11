@@ -1,0 +1,21 @@
+.kuiFormSection {
+  margin-bottom: $euiSize;
+}
+
+.kuiFormLabel {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.kuiInputNote {
+  margin: $euiSizeXS 0 $euiSizeS;
+}
+
+.kuiInputNote--danger {
+  color: $euiColorDanger;
+}
+
+.kuiInputNote--warning {
+  color: $euiColorWarning;
+}

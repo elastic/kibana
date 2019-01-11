@@ -51,6 +51,10 @@ export class ASource {
     return false;
   }
 
+  isQueryAware() {
+    return false;
+  }
+
   getFieldNames() {
     return [];
   }
@@ -61,6 +65,10 @@ export class ASource {
 
   renderSourceSettingsEditor() {
     return null;
+  }
+
+  getIndexPatternIds() {
+    return  [];
   }
 }
 
