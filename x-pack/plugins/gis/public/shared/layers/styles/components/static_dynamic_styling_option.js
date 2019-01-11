@@ -11,9 +11,9 @@ import _ from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiFormLabel,
-  EuiSpacer
+  EuiToolTip,
+  EuiFormRow,
+  EuiButtonToggle
 } from '@elastic/eui';
 
 
@@ -27,6 +27,12 @@ export class StaticDynamicStyleSelector extends React.Component {
       isDynamic: false,
       styleDescriptor: VectorStyle.STYLE_TYPE.STATIC
     };
+  }
+
+  _canBeDynamic() {
+    // TODO FIX: This isn't quite right because it doesn't equate to true after creating a join
+    // It also doesn't update to the correct state when switching layers without closing the panel first
+    return this.state.ordinalFields && !!this.state.ordinalFields.length;
   }
 
   _isDynamic() {
@@ -133,26 +139,36 @@ export class StaticDynamicStyleSelector extends React.Component {
 
   _renderStaticAndDynamicStyles = () => {
     const currentOptions = _.get(this.props, 'styleDescriptor.options');
-    return (
-      <div>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <EuiFormLabel style={{ marginBottom: 0 }}>
-              {this.props.name}
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={'Dynamic'}
-              checked={this.state.isDynamic}
-              onChange={e => this._onTypeToggle(e, currentOptions)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+    const dynamicTooltipContent =
+      this.state.isDynamic ? "Unlink to revert to static styling" : "Link to a property value to create dynamic styling";
 
-        <EuiSpacer size="m" />
-        {this._renderStyleSelector(currentOptions)}
-      </div>
+    return (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow label={this.props.name}>
+            {this._renderStyleSelector(currentOptions)}
+          </EuiFormRow>
+        </EuiFlexItem>
+        {this._canBeDynamic() &&
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiToolTip
+                content={dynamicTooltipContent}
+                delay="long"
+              >
+                <EuiButtonToggle
+                  label="Make dynamic"
+                  iconType="link"
+                  onChange={e => this._onTypeToggle(e, currentOptions)}
+                  isEmpty={!this.state.isDynamic}
+                  fill={this.state.isDynamic}
+                  isIconOnly
+                />
+              </EuiToolTip>
+            </EuiFormRow>
+          </EuiFlexItem>
+        }
+      </EuiFlexGroup>
     );
   };
 

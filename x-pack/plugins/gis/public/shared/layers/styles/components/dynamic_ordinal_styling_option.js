@@ -64,6 +64,7 @@ export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, t
 
   const renderAdditionalOptions = () => {
     if (!_.has(selectedOptions, 'field')) {
+      // TODO: Don't hide the component
       return;
     }
 
@@ -74,18 +75,23 @@ export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, t
     switch (type) {
       case styleTypes.COLOR_RAMP:
         return (
-          <ColorRampSelector
-            onChange={onAdditionalOptionsChange}
-            color={_.get(selectedOptions, 'color')}
-          />
+          <Fragment>
+            <ColorRampSelector
+              onChange={onAdditionalOptionsChange}
+              color={_.get(selectedOptions, 'color')}
+            />
+            <EuiSpacer size="s" />
+          </Fragment>
         );
       case styleTypes.SIZE_RANGE:
         return (
-          <SizeRangeSelector
-            onChange={onAdditionalOptionsChange}
-            minSize={_.get(selectedOptions, 'minSize')}
-            maxSize={_.get(selectedOptions, 'maxSize')}
-          />
+          <Fragment>
+            <SizeRangeSelector
+              onChange={onAdditionalOptionsChange}
+              minSize={_.get(selectedOptions, 'minSize')}
+              maxSize={_.get(selectedOptions, 'maxSize')}
+            />
+          </Fragment>
         );
       default:
         throw new Error(`Unhandled type ${type}`);
@@ -94,6 +100,8 @@ export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, t
 
   return (
     <Fragment>
+      {renderAdditionalOptions()}
+
       <EuiComboBox
         selectedOptions={
           _.has(selectedOptions, 'field')
@@ -102,15 +110,11 @@ export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, t
         }
         options={groupFieldsByOrigin()}
         onChange={onFieldChange}
-        singleSelection={true}
+        singleSelection={{ asPlainText: true }}
         isClearable={false}
         fullWidth
+        placeholder="Select a field"
       />
-
-      <EuiSpacer size="m" />
-
-      {renderAdditionalOptions()}
-
     </Fragment>
   );
 }
