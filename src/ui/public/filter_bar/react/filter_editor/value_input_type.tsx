@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import dateMath from '@elastic/datemath';
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import Ipv4Address from 'ui/utils/ipv4_address';
+import { validateParams } from 'ui/filter_bar/react/filter_editor/lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
   type: string;
-  onChange: (value: string | number | boolean) => void;
+  onChange: (value: string | number | boolean, isInvalid: boolean) => void;
   placeholder: string;
 }
 
@@ -53,13 +53,12 @@ export class ValueInputType extends Component<Props> {
         );
         break;
       case 'date':
-        const moment = typeof value === 'string' ? dateMath.parse(value) : null;
         inputElement = (
           <EuiFieldText
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={typeof value === 'string' && (!moment || !moment.isValid())}
+            isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
           />
         );
         break;
@@ -69,7 +68,7 @@ export class ValueInputType extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={typeof value === 'string' && !this.validateIp(value)}
+            isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
           />
         );
         break;
@@ -95,24 +94,11 @@ export class ValueInputType extends Component<Props> {
 
   private onBoolChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const boolValue = event.target.value === 'true';
-    this.props.onChange(boolValue);
+    this.props.onChange(boolValue, true);
   };
 
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.props.onChange(event.target.value);
-  };
-
-  private validateIp = (ipAddress: string) => {
-    if (ipAddress == null || ipAddress === '') {
-      return true;
-    }
-
-    try {
-      // @ts-ignore
-      const ipOjbect = new Ipv4Address(ipAddress);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    const params = event.target.value;
+    this.props.onChange(params, !validateParams(params, this.props.type));
   };
 }

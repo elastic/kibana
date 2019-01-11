@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
 import { omit } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import Ipv4Address from 'ui/utils/ipv4_address';
 import {
   FieldFilter,
   MetaFilter,
@@ -73,5 +75,23 @@ export function getFilterParams(filter: MetaFilter): any {
         from: (filter as RangeFilter).meta.params.gte,
         to: (filter as RangeFilter).meta.params.lt,
       };
+  }
+}
+
+export function validateParams(params: any, type: string) {
+  switch (type) {
+    case 'date':
+      const moment = typeof params === 'string' ? dateMath.parse(params) : null;
+      return typeof params === 'string' && (!moment || !moment.isValid());
+    case 'ip':
+      try {
+        // @ts-ignore
+        const ipOjbect = new Ipv4Address(params);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    default:
+      return true;
   }
 }

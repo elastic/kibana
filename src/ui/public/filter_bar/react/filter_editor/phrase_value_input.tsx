@@ -25,7 +25,7 @@ import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
-  onChange: (value: string | number | boolean) => void;
+  onChange: (value: string | number | boolean, isInvalid: boolean) => void;
 }
 
 export class PhraseValueInput extends PhraseSuggestor<Props> {
@@ -65,10 +65,10 @@ export class PhraseValueInput extends PhraseSuggestor<Props> {
 
   private onComboBoxChange = (selectedOptions: EuiComboBoxOptionProps[]): void => {
     if (selectedOptions.length === 0) {
-      return this.props.onChange('');
+      return this.props.onChange('', true);
     }
     const [selectedOption] = selectedOptions;
-    this.props.onChange(selectedOption.label);
+    this.props.onChange(selectedOption.label, false);
   };
 
   private getOptions() {

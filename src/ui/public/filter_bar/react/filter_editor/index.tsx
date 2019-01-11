@@ -71,6 +71,7 @@ interface State {
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
+  isInvalid: boolean;
 }
 
 export class FilterEditor extends Component<Props, State> {
@@ -84,6 +85,7 @@ export class FilterEditor extends Component<Props, State> {
       customLabel: props.filter.meta.alias,
       queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
+      isInvalid: true,
     };
   }
 
@@ -127,7 +129,7 @@ export class FilterEditor extends Component<Props, State> {
 
         <EuiFlexGroup direction="rowReverse" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={this.onSubmit}>
+            <EuiButton fill onClick={this.onSubmit} isDisabled={this.state.isInvalid}>
               Save
             </EuiButton>
           </EuiFlexItem>
@@ -274,8 +276,8 @@ export class FilterEditor extends Component<Props, State> {
     this.setState({ customLabel });
   };
 
-  private onParamsChange = (params: any) => {
-    this.setState({ params });
+  private onParamsChange = (params: any, isInvalid: boolean) => {
+    this.setState({ params, isInvalid });
   };
 
   private onQueryDslChange = (queryDsl: string) => {
