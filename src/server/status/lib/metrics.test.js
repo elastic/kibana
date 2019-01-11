@@ -24,7 +24,9 @@ jest.mock('fs', () => ({
 jest.mock('os', () => ({
   freemem: jest.fn(),
   totalmem: jest.fn(),
-  uptime: jest.fn()
+  uptime: jest.fn(),
+  platform: jest.fn(),
+  release: jest.fn()
 }));
 
 jest.mock('process', () => ({
@@ -81,7 +83,7 @@ describe('Metrics', function () {
   });
 
   describe('captureEvent', () => {
-    it('parses the hapi event', () => {
+    it('parses the hapi event', async () => {
       sinon.stub(os, 'uptime').returns(12000);
       sinon.stub(process, 'uptime').returns(5000);
 
@@ -105,7 +107,7 @@ describe('Metrics', function () {
         'host': 'blahblah.local'
       };
 
-      expect(metrics.captureEvent(hapiEvent)).toMatchObject({
+      expect(await metrics.captureEvent(hapiEvent)).toMatchObject({
         'concurrent_connections': 0,
         'os': {
           'load': {
@@ -140,7 +142,7 @@ describe('Metrics', function () {
       });
     });
 
-    it('parses event with missing fields / NaN for responseTimes.avg', () => {
+    it('parses event with missing fields / NaN for responseTimes.avg', async () => {
       const hapiEvent = {
         requests: {
           '5603': { total: 22, disconnects: 0, statusCodes: { '200': 22 } },
@@ -149,7 +151,7 @@ describe('Metrics', function () {
         host: 'blahblah.local',
       };
 
-      expect(metrics.captureEvent(hapiEvent)).toMatchObject({
+      expect(await metrics.captureEvent(hapiEvent)).toMatchObject({
         process: { memory: { heap: {} }, pid: 8675309, uptime_in_millis: 5000000 },
         os: {
           load: {},
