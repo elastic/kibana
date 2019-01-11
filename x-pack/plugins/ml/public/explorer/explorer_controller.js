@@ -23,10 +23,14 @@ import 'plugins/ml/components/controls';
 import 'plugins/ml/components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { parseInterval } from 'ui/utils/parse_interval';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
+import {
+  createJobs,
+  getDefaultViewBySwimlaneData,
+  getSelectedJobIds,
+} from './explorer_utils';
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
@@ -69,15 +73,6 @@ uiRoutes
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
-
-function getDefaultViewBySwimlaneData() {
-  return {
-    fieldName: '',
-    laneLabels: [],
-    points: [],
-    interval: 3600
-  };
-}
 
 module.controller('MlExplorerController', function (
   $scope,
@@ -167,11 +162,6 @@ module.controller('MlExplorerController', function (
 
   $scope.selectedJobs = null;
 
-  $scope.getSelectedJobIds = function () {
-    const selectedJobs = _.filter($scope.jobs, job => job.selected);
-    return _.map(selectedJobs, job => job.id);
-  };
-
   $scope.viewBySwimlaneOptions = [];
   $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
   $scope.viewBySwimlaneDataLoading = false;
@@ -205,15 +195,6 @@ module.controller('MlExplorerController', function (
 
     mlExplorerDashboardService.init();
   };
-
-  // create new job objects based on standard job config objects
-  // new job objects just contain job id, bucket span in seconds and a selected flag.
-  function createJobs(jobs) {
-    return jobs.map(job => {
-      const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-      return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan.asSeconds() };
-    });
-  }
 
   function restoreCellDataFromAppState() {
     // restore cellData from AppState
@@ -635,7 +616,7 @@ module.controller('MlExplorerController', function (
     $scope.swimlaneViewByFieldName = null;
     let viewByOptions = [];   // Unique influencers for the selected job(s).
 
-    const selectedJobIds = $scope.getSelectedJobIds();
+    const selectedJobIds = getSelectedJobIds($scope.jobs);
     const fieldsByJob = { '*': [] };
     _.each(mlJobService.jobs, (job) => {
       // Add the list of distinct by, over, partition and influencer fields for each job.
@@ -747,7 +728,7 @@ module.controller('MlExplorerController', function (
     // that the first and last buckets are complete.
     const bounds = timefilter.getActiveBounds();
     const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
-    const selectedJobIds = $scope.getSelectedJobIds();
+    const selectedJobIds = getSelectedJobIds($scope.jobs);
 
     // Load the overall bucket scores by time.
     // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
@@ -862,7 +843,7 @@ module.controller('MlExplorerController', function (
       // that the first and last buckets are complete.
       const bounds = timefilter.getActiveBounds();
       const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
-      const selectedJobIds = $scope.getSelectedJobIds();
+      const selectedJobIds = getSelectedJobIds($scope.jobs);
       const limit = mlSelectLimitService.state.get('limit');
       const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
@@ -894,7 +875,7 @@ module.controller('MlExplorerController', function (
   }
 
   function loadViewBySwimlaneForSelectedTime(earliestMs, latestMs) {
-    const selectedJobIds = $scope.getSelectedJobIds();
+    const selectedJobIds = getSelectedJobIds($scope.jobs);
     const limit = mlSelectLimitService.state.get('limit');
     const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
@@ -934,7 +915,7 @@ module.controller('MlExplorerController', function (
 
     const cellData = $scope.cellData;
     const jobIds = ($scope.cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ?
-      cellData.lanes : $scope.getSelectedJobIds();
+      cellData.lanes : getSelectedJobIds($scope.jobs);
     const timeRange = getSelectionTimeRange(cellData);
 
     if (mlAnnotationsEnabled) {
@@ -969,7 +950,7 @@ module.controller('MlExplorerController', function (
   function loadAnomaliesTableData() {
     const cellData = $scope.cellData;
     const jobIds = ($scope.cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ?
-      cellData.lanes : $scope.getSelectedJobIds();
+      cellData.lanes : getSelectedJobIds($scope.jobs);
     const influencers = getSelectionInfluencers(cellData);
     const timeRange = getSelectionTimeRange(cellData);
 
@@ -1029,7 +1010,7 @@ module.controller('MlExplorerController', function (
   function updateExplorer() {
     const cellData = $scope.cellData;
 
-    const jobIds = (cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.lanes : $scope.getSelectedJobIds();
+    const jobIds = (cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.lanes : getSelectedJobIds($scope.jobs);
     const timerange = getSelectionTimeRange(cellData);
     const influencers = getSelectionInfluencers(cellData);
 

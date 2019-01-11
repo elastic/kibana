@@ -69,6 +69,14 @@ export const Explorer = injectI18n(
       viewBySwimlaneOptions: PropTypes.array,
     };
 
+    constructor(props) {
+      super(props);
+
+      this.state = {
+        annotationsData: []
+      };
+    }
+
     viewByChangeHandler = e => this.props.setSwimlaneViewBy(e.target.value);
 
     onSwimlaneEnterHandler = () => this.props.setSwimlaneSelectActive(true);
