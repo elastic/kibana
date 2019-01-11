@@ -16,6 +16,7 @@ import {
 } from './editor';
 import { watchFetchBranchesAndCommits, watchFetchRepoTree, watchRepoRouteChange } from './file';
 import { watchInstallLanguageServer, watchLoadLanguageServers } from './language_server';
+import { watchLoadConfigs, watchSwitchProjectLanguageServer } from './project_config';
 import {
   watchAdminRouteChange,
   watchDeleteRepo,
@@ -60,4 +61,6 @@ export function* rootSaga() {
   yield fork(watchRepoDeleteFinished);
   yield fork(watchLoadLanguageServers);
   yield fork(watchInstallLanguageServer);
+  yield fork(watchSwitchProjectLanguageServer);
+  yield fork(watchLoadConfigs);
 }

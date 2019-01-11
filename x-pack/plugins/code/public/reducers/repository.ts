@@ -6,7 +6,7 @@
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
-import { Repository } from '../../model';
+import { Repository, RepositoryConfig } from '../../model';
 
 import { RepoConfigs } from '../../model/workspace';
 import {
@@ -19,6 +19,7 @@ import {
   importRepo,
   importRepoFailed,
   importRepoSuccess,
+  loadConfigsSuccess,
 } from '../actions';
 
 export enum CallOutType {
@@ -36,6 +37,7 @@ export interface RepositoryState {
   showCallOut: boolean;
   callOutMessage?: string;
   callOutType?: CallOutType;
+  projectConfigs: { [key: string]: RepositoryConfig };
 }
 
 const initialState: RepositoryState = {
@@ -43,6 +45,7 @@ const initialState: RepositoryState = {
   loading: false,
   importLoading: false,
   showCallOut: false,
+  projectConfigs: {},
 };
 
 export const repository = handleActions(
@@ -105,6 +108,10 @@ export const repository = handleActions(
     [String(fetchRepoConfigSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         draft.repoConfigs = action.payload;
+      }),
+    [String(loadConfigsSuccess)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.projectConfigs = action.payload;
       }),
   },
   initialState
