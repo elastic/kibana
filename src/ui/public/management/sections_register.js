@@ -34,19 +34,25 @@ management.register('data', {
 });
 
 management.register('elasticsearch', {
-  display: 'Elasticsearch',
+  display: i18n.translate('common.ui.management.elasticsearchDisplayName', {
+    defaultMessage: 'Elasticsearch'
+  }),
   order: 20,
   icon: 'logoElasticsearch',
 });
 
 management.register('kibana', {
-  display: 'Kibana',
+  display: i18n.translate('common.ui.management.kibanaDisplayName', {
+    defaultMessage: 'Kibana'
+  }),
   order: 30,
   icon: 'logoKibana',
 });
 
 management.register('logstash', {
-  display: 'Logstash',
+  display: i18n.translate('common.ui.management.logstashDisplayName', {
+    defaultMessage: 'Logstash'
+  }),
   order: 30,
   icon: 'logoLogstash',
 });
