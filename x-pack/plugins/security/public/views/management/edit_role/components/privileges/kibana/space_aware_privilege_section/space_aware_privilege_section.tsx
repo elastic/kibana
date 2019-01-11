@@ -74,7 +74,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           title={
             <p>
               <FormattedMessage
-                id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+                id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
                 defaultMessage="Insufficient Privileges"
               />
             </p>
@@ -84,20 +84,20 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         >
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
               defaultMessage="You are not authorized to view all available spaces."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
               defaultMessage="Please ensure your account has all privileges granted by the
               {kibanaUser} role, and try again."
               values={{
                 kibanaUser: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.kibanaUserTitle"
+                      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaUserTitle"
                       defaultMessage="kibana_user"
                     />
                   </strong>
@@ -175,13 +175,20 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     return (
       <EuiEmptyPrompt
         iconType="lock"
-        title={<h2>No access to Kibana</h2>}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.security.management.editRole.spacePrivilegeSection.noAccessToKibanaTitle"
+              defaultMessage="No access to Kibana"
+            />
+          </h2>
+        }
         titleSize={'s'}
         body={
           <Fragment>
             <p>
               <FormattedMessage
-                id="foo"
+                id="xpack.security.management.editRole.spacePrivilegeSection.noAccessToKibanaDescription"
                 defaultMessage="This role does not grant any access to Kibana. Add privileges to existing spaces or groups of existing spaces using the button below."
               />
             </p>

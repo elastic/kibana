@@ -140,7 +140,10 @@ export class EffectivePrivileges {
 
     if (hasAssignedFeaturePrivilege) {
       spaceFeaturePrivilegeScenario = {
-        name: i18n.translate('foo', { defaultMessage: 'space feature privilege' }),
+        name: i18n.translate(
+          'xpack.security.management.editRole.effectivePrivileges.spaceFeaturePrivilegeScenario',
+          { defaultMessage: 'space feature privilege' }
+        ),
         source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
         actions: this.privilegeDefinition
           .getFeaturePrivileges()
@@ -151,12 +154,17 @@ export class EffectivePrivileges {
 
     scenarios.push(
       {
-        name: i18n.translate('foo', { defaultMessage: 'space base privilege' }),
+        name: i18n.translate(
+          'xpack.security.management.editRole.effectivePrivileges.spaceBasePrivilegeScenario',
+          { defaultMessage: 'space base privilege' }
+        ),
         source: PRIVILEGE_SOURCE.EFFECTIVE_SPACE_BASE,
         actions: this.privilegeDefinition.getSpacesPrivileges().getActions(base[0]),
       },
       {
-        name: i18n.translate('foo', { defaultMessage: 'global base privilege' }),
+        name: i18n.translate('xpack.security.management.editRole.globalBasePrivilegeScenario', {
+          defaultMessage: 'global base privilege',
+        }),
         source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
         actions: this.assignedGlobalBaseActions,
       }
@@ -164,7 +172,10 @@ export class EffectivePrivileges {
 
     if (globalFeaturePrivileges.length > 0 && !spaces.includes('*')) {
       scenarios.push({
-        name: i18n.translate('foo', { defaultMessage: 'global feature privilege' }),
+        name: i18n.translate(
+          'xpack.security.management.editRole.effectivePrivileges.globalFeaturePrivilegeScenario',
+          { defaultMessage: 'global feature privilege' }
+        ),
         source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_FEATURE,
         actions: this.privilegeDefinition
           .getFeaturePrivileges()
@@ -177,7 +188,10 @@ export class EffectivePrivileges {
       return {
         privilege: NO_PRIVILEGE_VALUE,
         source: PRIVILEGE_SOURCE.NONE,
-        details: i18n.translate('foo', { defaultMessage: 'No feature privilege assigned' }),
+        details: i18n.translate(
+          'xpack.security.management.editRole.effectivePrivileges.noFeaturePrivilegeAssigned',
+          { defaultMessage: 'No feature privilege assigned' }
+        ),
       };
     }
 
@@ -188,7 +202,10 @@ export class EffectivePrivileges {
       return {
         privilege: assignedFeaturePrivilege,
         source: winningScenario.scenario.source,
-        details: i18n.translate('foo', { defaultMessage: 'Assigned directly' }),
+        details: i18n.translate(
+          'xpack.security.management.editRole.effectivePrivileges.featurePrivilegeAssignedDirectly',
+          { defaultMessage: 'Assigned directly' }
+        ),
       };
     }
 
@@ -198,10 +215,13 @@ export class EffectivePrivileges {
       overrideSource: hasAssignedFeaturePrivilege ? winningScenario.scenario.name : undefined,
       source: winningScenario.scenario.source,
       overridesAssigned: hasAssignedFeaturePrivilege,
-      details: i18n.translate('foo', {
-        defaultMessage: 'Granted via {source}',
-        values: { source: winningScenario.scenario.name },
-      }),
+      details: i18n.translate(
+        'xpack.security.management.editRole.effectivePrivileges.featurePrivilegeGrantedViaSource',
+        {
+          defaultMessage: 'Granted via {source}',
+          values: { source: winningScenario.scenario.name },
+        }
+      ),
     };
   }
 
@@ -238,8 +258,14 @@ export class EffectivePrivileges {
         privilege: isSet ? globalBasePrivilege[0] : NO_PRIVILEGE_VALUE,
         source: isSet ? PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE : PRIVILEGE_SOURCE.NONE,
         details: isSet
-          ? i18n.translate('foo', { defaultMessage: 'Granted via global base privilege' })
-          : i18n.translate('foo', { defaultMessage: 'Not assigned' }),
+          ? i18n.translate(
+              'xpack.security.management.editRole.effectivePrivileges.basePrivilegeGrantedViaGlobal',
+              { defaultMessage: 'Granted via global base privilege' }
+            )
+          : i18n.translate(
+              'xpack.security.management.editRole.effectivePrivileges.spaceBasePrivilegeNotAssigned',
+              { defaultMessage: 'Not assigned' }
+            ),
       };
     }
     const allowsAssigned = this.validateSpaceBasePrivilege(base[0]);
@@ -247,14 +273,20 @@ export class EffectivePrivileges {
       return {
         privilege: base[0],
         source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
-        details: i18n.translate('foo', { defaultMessage: 'Assigned directly' }),
+        details: i18n.translate(
+          'xpack.security.management.editRole.effectivePrivileges.basePrivilegeAssignedDirectly',
+          { defaultMessage: 'Assigned directly' }
+        ),
       };
     }
 
     return {
       privilege: globalBasePrivilege[0],
       supercededPrivilege: base[0],
-      overrideSource: i18n.translate('foo', { defaultMessage: 'global base privilege' }),
+      overrideSource: i18n.translate(
+        'xpack.security.management.editRole.effectivePrivileges.basePrivilegeOverridedViaGlobal',
+        { defaultMessage: 'global base privilege' }
+      ),
       source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
       overridesAssigned: true,
       details: allowsAssigned.details,

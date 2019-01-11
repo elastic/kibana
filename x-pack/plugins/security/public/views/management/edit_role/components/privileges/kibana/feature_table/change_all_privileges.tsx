@@ -26,7 +26,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     const button = (
       <EuiLink onClick={this.onButtonClick} className={'secPrivilegeFeatureChangeAllLink'}>
         <FormattedMessage
-          id="xpack.roles.management.changeAllPrivilegesLink"
+          id="xpack.security.management.editRole.changeAllPrivilegesLink"
           defaultMessage="(change all)"
         />
       </EuiLink>

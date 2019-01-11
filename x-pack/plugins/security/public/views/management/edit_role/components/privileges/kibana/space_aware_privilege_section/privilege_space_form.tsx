@@ -89,7 +89,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
-                <FormattedMessage id="foo" defaultMessage="Spaces privileges" />
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
+                  defaultMessage="Spaces privileges"
+                />
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -127,7 +130,13 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     const { intl, spaces } = this.props;
     return (
       <EuiForm>
-        <EuiFormRow fullWidth label={intl.formatMessage({ id: 'foo', defaultMessage: 'Spaces' })}>
+        <EuiFormRow
+          fullWidth
+          label={intl.formatMessage({
+            id: 'xpack.security.management.editRole.spacePrivilegeForm.spaceSelectorFormLabel',
+            defaultMessage: 'Spaces',
+          })}
+        >
           <SpaceSelector
             selectedSpaceIds={this.state.selectedSpaceIds}
             onChange={this.onSelectedSpacesChange}
@@ -139,7 +148,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <EuiFormRow
           fullWidth
-          label={intl.formatMessage({ id: 'foo', defaultMessage: 'Privilege' })}
+          label={intl.formatMessage({
+            id: 'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel',
+            defaultMessage: 'Privilege',
+          })}
         >
           <EuiSuperSelect
             data-test-subj={'basePrivilegeComboBox'}
@@ -148,13 +160,28 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             options={[
               {
                 value: 'basePrivilege_custom',
-                inputDisplay: <EuiText>Custom</EuiText>,
+                inputDisplay: (
+                  <EuiText>
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDisplay"
+                      defaultMessage="Custom"
+                    />
+                  </EuiText>
+                ),
                 dropdownDisplay: (
                   <EuiText>
-                    <strong>Custom</strong>
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDropdownDisplay"
+                        defaultMessage="Custom"
+                      />
+                    </strong>
                     <p>
-                      Customize access by feature. Defaults to none for features not listed in the
-                      table below.
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
+                        defaultMessage="Customize access by feature. Defaults to none for features not listed in the
+                      table below."
+                      />
                     </p>
                   </EuiText>
                 ),
@@ -162,22 +189,56 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               {
                 value: 'basePrivilege_read',
                 disabled: false,
-                inputDisplay: <EuiText>Read</EuiText>,
+                inputDisplay: (
+                  <EuiText>
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay"
+                      defaultMessage="Read"
+                    />
+                  </EuiText>
+                ),
                 dropdownDisplay: (
                   <EuiText>
-                    <strong>Read</strong>
-                    <p>Grants read-only access to all features in selected spaces</p>
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDropdownDisplay"
+                        defaultMessage="Read"
+                      />
+                    </strong>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
+                        defaultMessage="Grants read-only access to all features in selected spaces"
+                      />
+                    </p>
                   </EuiText>
                 ),
               },
               {
                 value: 'basePrivilege_all',
                 disabled: false,
-                inputDisplay: <EuiText>All</EuiText>,
+                inputDisplay: (
+                  <EuiText>
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay"
+                      defaultMessage="All"
+                    />
+                  </EuiText>
+                ),
                 dropdownDisplay: (
                   <EuiText>
-                    <strong>All</strong>
-                    <p>Grants full access to all features in selected spaces</p>
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay"
+                        defaultMessage="All"
+                      />
+                    </strong>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
+                        defaultMessage="Grants full access to all features in selected spaces"
+                      />
+                    </p>
                   </EuiText>
                 ),
               },
@@ -219,12 +280,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   private getFeatureListLabel = (disabled: boolean) => {
     if (disabled) {
       return this.props.intl.formatMessage({
-        id: 'foo',
+        id: 'xpack.security.management.editRole.spacePrivilegeForm.summaryOfFeaturePrivileges',
         defaultMessage: 'Summary of feature privileges',
       });
     } else {
       return this.props.intl.formatMessage({
-        id: 'foo',
+        id: 'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivileges',
         defaultMessage: 'Customize by feature',
       });
     }
@@ -233,13 +294,15 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   private getFeatureListDescription = (disabled: boolean) => {
     if (disabled) {
       return this.props.intl.formatMessage({
-        id: 'foo',
+        id:
+          'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
         defaultMessage:
           'Showing privilege levels on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.',
       });
     } else {
       return this.props.intl.formatMessage({
-        id: 'foo',
+        id:
+          'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivilegeDescription',
         defaultMessage:
           'Increase privilege levels from base privilege on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.',
       });
@@ -253,7 +316,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           <EuiCallOut
             color="primary"
             iconType="iInCircle"
-            title={'These privileges will apply to all current and future spaces'}
+            title={this.props.intl.formatMessage({
+              id: 'xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice',
+              defaultMessage: 'These privileges will apply to all current and future spaces',
+            })}
           />
         </EuiFormRow>
       );

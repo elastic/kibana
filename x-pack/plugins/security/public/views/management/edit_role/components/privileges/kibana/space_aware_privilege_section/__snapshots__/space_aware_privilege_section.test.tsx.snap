@@ -11,7 +11,7 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
     <p>
       <FormattedMessage
         defaultMessage="Insufficient Privileges"
-        id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+        id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
         values={Object {}}
       />
     </p>
@@ -20,7 +20,7 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
   <p>
     <FormattedMessage
       defaultMessage="You are not authorized to view all available spaces."
-      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
+      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
       values={Object {}}
     />
   </p>
@@ -28,13 +28,13 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
     <FormattedMessage
       defaultMessage="Please ensure your account has all privileges granted by the
               {kibanaUser} role, and try again."
-      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
+      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
       values={
         Object {
           "kibanaUser": <strong>
             <FormattedMessage
               defaultMessage="kibana_user"
-              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.kibanaUserTitle"
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaUserTitle"
               values={Object {}}
             />
           </strong>,

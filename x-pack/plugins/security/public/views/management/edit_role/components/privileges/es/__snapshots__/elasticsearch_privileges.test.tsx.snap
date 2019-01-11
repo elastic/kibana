@@ -12,7 +12,7 @@ exports[`it renders without crashing 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Manage the actions this role can perform against your cluster. "
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.manageRoleActionsDescription"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
               values={Object {}}
             />
             <EuiLink
@@ -24,7 +24,7 @@ exports[`it renders without crashing 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Learn more"
-                id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+                id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
                 values={Object {}}
               />
             </EuiLink>
@@ -36,7 +36,7 @@ exports[`it renders without crashing 1`] = `
           <h3>
             <FormattedMessage
               defaultMessage="Cluster privileges"
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.clusterPrivilegesTitle"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.clusterPrivilegesTitle"
               values={Object {}}
             />
           </h3>
@@ -72,7 +72,7 @@ exports[`it renders without crashing 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Allow requests to be submitted on the behalf of other users. "
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
               values={Object {}}
             />
             <EuiLink
@@ -84,7 +84,7 @@ exports[`it renders without crashing 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Learn more"
-                id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+                id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
                 values={Object {}}
               />
             </EuiLink>
@@ -96,7 +96,7 @@ exports[`it renders without crashing 1`] = `
           <h3>
             <FormattedMessage
               defaultMessage="Run As privileges"
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.runAsPrivilegesTitle"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
               values={Object {}}
             />
           </h3>
@@ -131,7 +131,7 @@ exports[`it renders without crashing 1`] = `
         <h3>
           <FormattedMessage
             defaultMessage="Index privileges"
-            id="xpack.security.management.editRoles.elasticSearchPrivileges.indexPrivilegesTitle"
+            id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
             values={Object {}}
           />
         </h3>
@@ -147,7 +147,7 @@ exports[`it renders without crashing 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="Control access to the data in your cluster. "
-            id="xpack.security.management.editRoles.elasticSearchPrivileges.controlAccessToClusterDataDescription"
+            id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
             values={Object {}}
           />
           <EuiLink
@@ -159,7 +159,7 @@ exports[`it renders without crashing 1`] = `
           >
             <FormattedMessage
               defaultMessage="Learn more"
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
               values={Object {}}
             />
           </EuiLink>
@@ -202,7 +202,7 @@ exports[`it renders without crashing 1`] = `
       >
         <FormattedMessage
           defaultMessage="Add index privilege"
-          id="xpack.security.management.editRoles.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
           values={Object {}}
         />
       </EuiButton>

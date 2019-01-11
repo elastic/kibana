@@ -23,7 +23,7 @@ export const ReservedRoleBadge = (props: Props) => {
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.security.management.editRoles.reversedRoleBadget.reversedRolesCanNotBeRemovedTooltip"
+            id="xpack.security.management.editRole.reversedRoleBadget.reversedRolesCanNotBeRemovedTooltip"
             defaultMessage="Reserved roles are built-in and cannot be removed or modified."
           />
         }

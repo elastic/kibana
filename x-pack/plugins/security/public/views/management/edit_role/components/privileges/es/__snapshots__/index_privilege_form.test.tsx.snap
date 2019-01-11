@@ -42,7 +42,7 @@ exports[`it renders without crashing 1`] = `
               label={
                 <FormattedMessage
                   defaultMessage="Indices"
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.indicesFormRowLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
                   values={Object {}}
                 />
               }
@@ -72,7 +72,7 @@ exports[`it renders without crashing 1`] = `
               label={
                 <FormattedMessage
                   defaultMessage="Privileges"
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.privilegesFormRowLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel"
                   values={Object {}}
                 />
               }
@@ -161,14 +161,14 @@ exports[`it renders without crashing 1`] = `
               helpText={
                 <FormattedMessage
                   defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowHelpText"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowHelpText"
                   values={Object {}}
                 />
               }
               label={
                 <FormattedMessage
                   defaultMessage="Granted fields (optional)"
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowLabel"
                   values={Object {}}
                 />
               }
@@ -213,7 +213,7 @@ exports[`it renders without crashing 1`] = `
               label={
                 <FormattedMessage
                   defaultMessage="Grant read privileges to specific documents"
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantReadPrivilegesLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
                   values={Object {}}
                 />
               }

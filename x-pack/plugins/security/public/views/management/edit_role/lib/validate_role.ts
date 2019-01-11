@@ -52,7 +52,7 @@ export class RoleValidator {
     if (!role.name) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRoles.validateRole.provideRoleNameWarningMessage',
+          'xpack.security.management.editRole.validateRole.provideRoleNameWarningMessage',
           {
             defaultMessage: 'Please provide a role name',
           }
@@ -61,18 +61,15 @@ export class RoleValidator {
     }
     if (role.name.length > 1024) {
       return invalid(
-        i18n.translate(
-          'xpack.security.management.editRoles.validateRole.nameLengthWarningMessage',
-          {
-            defaultMessage: 'Name must not exceed 1024 characters',
-          }
-        )
+        i18n.translate('xpack.security.management.editRole.validateRole.nameLengthWarningMessage', {
+          defaultMessage: 'Name must not exceed 1024 characters',
+        })
       );
     }
     if (!role.name.match(/^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*$/)) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRoles.validateRole.nameAllowedCharactersWarningMessage',
+          'xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage',
           {
             defaultMessage:
               'Name must begin with a letter or underscore and contain only letters, underscores, and numbers.',
@@ -90,7 +87,7 @@ export class RoleValidator {
 
     if (!Array.isArray(role.elasticsearch.indices)) {
       throw new TypeError(
-        i18n.translate('xpack.security.management.editRoles.validateRole.indicesTypeErrorMessage', {
+        i18n.translate('xpack.security.management.editRole.validateRole.indicesTypeErrorMessage', {
           defaultMessage: 'Expected {elasticIndices} to be an array',
           values: {
             elasticIndices: '"role.elasticsearch.indices"',
@@ -118,7 +115,7 @@ export class RoleValidator {
     if (indexPrivilege.names.length && !indexPrivilege.privileges.length) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRoles.validateRole.onePrivilegeRequiredWarningMessage',
+          'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
           {
             defaultMessage: 'At least one privilege is required',
           }
@@ -146,7 +143,7 @@ export class RoleValidator {
     }
     return invalid(
       i18n.translate(
-        'xpack.security.management.editRoles.validateRole.oneSpaceRequiredWarningMessage',
+        'xpack.security.management.editRole.validateRole.oneSpaceRequiredWarningMessage',
         {
           defaultMessage: 'At least one space is required',
         }
@@ -172,7 +169,7 @@ export class RoleValidator {
     }
     return invalid(
       i18n.translate(
-        'xpack.security.management.editRoles.validateRole.privilegeRequiredWarningMessage',
+        'xpack.security.management.editRole.validateRole.privilegeRequiredWarningMessage',
         {
           defaultMessage: 'Privilege is required',
         }

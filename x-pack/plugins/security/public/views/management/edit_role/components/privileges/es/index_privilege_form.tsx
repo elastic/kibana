@@ -67,7 +67,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
                 <EuiButtonIcon
                   aria-label={intl.formatMessage({
                     id:
-                      'xpack.security.management.editRoles.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
+                      'xpack.security.management.editRole.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
                     defaultMessage: 'Delete index privilege',
                   })}
                   color={'danger'}
@@ -90,7 +90,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.indicesFormRowLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
                   defaultMessage="Indices"
                 />
               }
@@ -111,7 +111,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.privilegesFormRowLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel"
                   defaultMessage="Privileges"
                 />
               }
@@ -151,7 +151,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowLabel"
+                id="xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowLabel"
                 defaultMessage="Granted fields (optional)"
               />
             }
@@ -160,7 +160,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
             helpText={
               !isReservedRole && grant.length === 0 ? (
                 <FormattedMessage
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowHelpText"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowHelpText"
                   defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
                 />
               ) : (
@@ -202,7 +202,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
               data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
               label={
                 <FormattedMessage
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantReadPrivilegesLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
                   defaultMessage="Grant read privileges to specific documents"
                 />
               }
@@ -218,7 +218,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
                   defaultMessage="Granted documents query"
                 />
               }

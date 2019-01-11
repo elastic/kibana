@@ -68,7 +68,7 @@ export class SpacesPopoverList extends Component<Props, State> {
     const panelProps = {
       className: 'spcMenu',
       title: intl.formatMessage({
-        id: 'foo',
+        id: 'xpack.security.management.editRole.spacesPopoverList.popoverTitle',
         defaultMessage: 'Spaces',
       }),
       watchedItemProps: ['data-search-term'],
@@ -122,7 +122,7 @@ export class SpacesPopoverList extends Component<Props, State> {
       return (
         <EuiText color="subdued" className="eui-textCenter">
           <FormattedMessage
-            id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
+            id="xpack.security.management.editRole.spacesPopoverList.noSpacesFoundTitle"
             defaultMessage=" no spaces found "
           />
         </EuiText>
@@ -147,7 +147,7 @@ export class SpacesPopoverList extends Component<Props, State> {
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         <EuiFieldSearch
           placeholder={intl.formatMessage({
-            id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
+            id: 'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
             defaultMessage: 'Find a space',
           })}
           incremental={true}

@@ -157,7 +157,7 @@ export class FeatureTable extends Component<Props, {}> {
       name: (
         <span>
           <FormattedMessage
-            id="xpack.roles.management.enabledRoleFeaturesEnabledColumnTitle"
+            id="xpack.security.management.editRole.enabledRoleFeaturesEnabledColumnTitle"
             defaultMessage="Privilege"
           />
           <ChangeAllPrivilegesControl

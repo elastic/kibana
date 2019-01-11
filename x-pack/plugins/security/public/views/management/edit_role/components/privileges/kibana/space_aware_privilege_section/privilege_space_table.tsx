@@ -118,7 +118,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                 onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
               >
                 <FormattedMessage
-                  id="foo"
+                  id="xpack.security.management.editRole.spacePrivilegeTable.showNMoreSpacesLink"
                   defaultMessage="+{count} more"
                   values={{ count: spaces.length - displayedSpaces.length }}
                 />
@@ -130,7 +130,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                 size="xs"
                 onClick={() => this.toggleExpandSpacesGroup(record.spacesIndex)}
               >
-                <FormattedMessage id="foo" defaultMessage="show less" />
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeTable.showLessSpacesLink"
+                  defaultMessage="show less"
+                />
               </EuiButtonEmpty>
             );
           }
@@ -182,7 +185,8 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                 <EuiButtonIcon
                   aria-label={intl.formatMessage(
                     {
-                      id: 'foo',
+                      id:
+                        'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
                       defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
                     },
                     {
@@ -202,7 +206,8 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                 <EuiButtonIcon
                   aria-label={intl.formatMessage(
                     {
-                      id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
+                      id:
+                        'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
                       defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
                     },
                     {

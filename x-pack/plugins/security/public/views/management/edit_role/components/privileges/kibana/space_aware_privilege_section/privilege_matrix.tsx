@@ -75,13 +75,19 @@ export class PrivilegeMatrix extends Component<Props, State> {
           <EuiModal onClose={this.hideModal}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                <FormattedMessage id="foo" defaultMessage="Privilege summary matrix" />
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeMatrix.modalTitle"
+                  defaultMessage="Privilege summary matrix"
+                />
               </EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>{this.renderTable()}</EuiModalBody>
             <EuiModalFooter>
               <EuiButton onClick={this.hideModal} fill>
-                <FormattedMessage id="foo" defaultMessage="Close" />
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeMatrix.closeButton"
+                  defaultMessage="Close"
+                />
               </EuiButton>
             </EuiModalFooter>
           </EuiModal>
@@ -92,7 +98,10 @@ export class PrivilegeMatrix extends Component<Props, State> {
     return (
       <Fragment>
         <EuiButtonEmpty onClick={this.showModal}>
-          <FormattedMessage id="foo" defaultMessage="Show privilege summary" />
+          <FormattedMessage
+            id="xpack.security.management.editRole.spacePrivilegeMatrix.showSummaryText"
+            defaultMessage="Show privilege summary"
+          />
         </EuiButtonEmpty>
         {modal}
       </Fragment>
@@ -127,10 +136,12 @@ export class PrivilegeMatrix extends Component<Props, State> {
         feature: {
           id: '*base*',
           isBase: true,
-          name: intl.formatMessage({ id: 'foo', defaultMessage: 'Base privilege' }),
+          name: intl.formatMessage({
+            id: 'xpack.security.management.editRole.spacePrivilegeMatrix.basePrivilegeText',
+            defaultMessage: 'Base privilege',
+          }),
           privileges: {},
         },
-        tooltip: intl.formatMessage({ id: 'foo', defaultMessage: 'something goes here' }),
         role,
       },
       ...features.map(feature => ({
@@ -145,7 +156,10 @@ export class PrivilegeMatrix extends Component<Props, State> {
     const columns = [
       {
         field: 'feature',
-        name: intl.formatMessage({ id: 'foo', defaultMessage: 'Feature' }),
+        name: intl.formatMessage({
+          id: 'xpack.security.management.editRole.spacePrivilegeMatrix.featureColumnTitle',
+          defaultMessage: 'Feature',
+        }),
         render: (feature: Feature & { isBase: boolean }) => {
           return feature.isBase ? (
             <Fragment>
@@ -157,7 +171,8 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 // }}
                 type="questionInCircle"
                 content={intl.formatMessage({
-                  id: 'foo',
+                  id:
+                    'xpack.security.management.editRole.spacePrivilegeMatrix.basePrivilegeTooltip',
                   defaultMessage: 'Lowest privilege level allowed',
                 })}
                 color="subdued"
@@ -195,7 +210,8 @@ export class PrivilegeMatrix extends Component<Props, State> {
                   intl={this.props.intl}
                   buttonText={this.props.intl.formatMessage(
                     {
-                      id: 'foo',
+                      id:
+                        'xpack.security.management.editRole.spacePrivilegeMatrix.showNMoreSpacesLink',
                       defaultMessage: '+{count} more',
                     },
                     { count: item.spaces.length - SPACES_DISPLAY_COUNT }

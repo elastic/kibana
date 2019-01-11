@@ -20,7 +20,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         <h2>
           <FormattedMessage
             defaultMessage="Spaces privileges"
-            id="foo"
+            id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
             values={Object {}}
           />
         </h2>
@@ -76,17 +76,30 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     size="m"
                   >
                     <strong>
-                      Custom
+                      <FormattedMessage
+                        defaultMessage="Custom"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDropdownDisplay"
+                        values={Object {}}
+                      />
                     </strong>
                     <p>
-                      Customize access by feature. Defaults to none for features not listed in the table below.
+                      <FormattedMessage
+                        defaultMessage="Customize access by feature. Defaults to none for features not listed in the
+                      table below."
+                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
+                        values={Object {}}
+                      />
                     </p>
                   </EuiText>,
                   "inputDisplay": <EuiText
                     grow={true}
                     size="m"
                   >
-                    Custom
+                    <FormattedMessage
+                      defaultMessage="Custom"
+                      id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDisplay"
+                      values={Object {}}
+                    />
                   </EuiText>,
                   "value": "basePrivilege_custom",
                 },
@@ -97,17 +110,29 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     size="m"
                   >
                     <strong>
-                      Read
+                      <FormattedMessage
+                        defaultMessage="Read"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDropdownDisplay"
+                        values={Object {}}
+                      />
                     </strong>
                     <p>
-                      Grants read-only access to all features in selected spaces
+                      <FormattedMessage
+                        defaultMessage="Grants read-only access to all features in selected spaces"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
+                        values={Object {}}
+                      />
                     </p>
                   </EuiText>,
                   "inputDisplay": <EuiText
                     grow={true}
                     size="m"
                   >
-                    Read
+                    <FormattedMessage
+                      defaultMessage="Read"
+                      id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay"
+                      values={Object {}}
+                    />
                   </EuiText>,
                   "value": "basePrivilege_read",
                 },
@@ -118,17 +143,29 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     size="m"
                   >
                     <strong>
-                      All
+                      <FormattedMessage
+                        defaultMessage="All"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay"
+                        values={Object {}}
+                      />
                     </strong>
                     <p>
-                      Grants full access to all features in selected spaces
+                      <FormattedMessage
+                        defaultMessage="Grants full access to all features in selected spaces"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
+                        values={Object {}}
+                      />
                     </p>
                   </EuiText>,
                   "inputDisplay": <EuiText
                     grow={true}
                     size="m"
                   >
-                    All
+                    <FormattedMessage
+                      defaultMessage="All"
+                      id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay"
+                      values={Object {}}
+                    />
                   </EuiText>,
                   "value": "basePrivilege_all",
                 },
