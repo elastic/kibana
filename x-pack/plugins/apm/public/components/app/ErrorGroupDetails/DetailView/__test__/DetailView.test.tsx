@@ -55,7 +55,7 @@ describe('DetailView', () => {
         urlParams={{}}
         location={{ state: '' }}
       />
-    ).find('DiscoverErrorButton');
+    ).find('DiscoverErrorLink');
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();

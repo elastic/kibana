@@ -21,8 +21,14 @@ import {
   ERROR_EXC_STACKTRACE,
   ERROR_LOG_STACKTRACE
 } from 'x-pack/plugins/apm/common/constants';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url/KibanaLink';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
@@ -43,9 +49,7 @@ import {
   unit,
   units
 } from '../../../../style/variables';
-import { legacyEncodeURIComponent } from '../../../../utils/url/url_helpers';
-import { fromQuery, history, toQuery } from '../../../../utils/url/url_helpers';
-import { DiscoverErrorButton } from '../../../shared/DiscoverButtons/DiscoverErrorButton';
+import { DiscoverErrorLink } from '../../../shared/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
   PropertiesTable,
@@ -184,7 +188,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
             )}
           </h3>
         </EuiTitle>
-        <DiscoverErrorButton error={error} kuery={urlParams.kuery}>
+        <DiscoverErrorLink error={error} kuery={urlParams.kuery}>
           <EuiButtonEmpty iconType="discoverApp">
             {i18n.translate(
               'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
@@ -195,7 +199,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               }
             )}
           </EuiButtonEmpty>
-        </DiscoverErrorButton>
+        </DiscoverErrorLink>
       </HeaderContainer>
 
       <PaddedContainer>

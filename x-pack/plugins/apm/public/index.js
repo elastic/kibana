@@ -25,7 +25,7 @@ import configureStore from './store/config/configureStore';
 import GlobalProgress from './components/app/Main/GlobalProgress';
 import LicenseChecker from './components/app/Main/LicenseChecker';
 
-import { history } from './utils/url/url_helpers';
+import { history } from './components/shared/Links/url_helpers';
 
 import { I18nProvider } from '@kbn/i18n/react';
 

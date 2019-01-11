@@ -9,9 +9,9 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME
 } from 'x-pack/plugins/apm/common/constants';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
 import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
-import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url/KibanaLink';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 interface Props {

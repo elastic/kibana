@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiBasicTable, EuiBadge } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
-import { toQuery, fromQuery, history } from '../../../../utils/url/url_helpers';
-import { KibanaLink } from '../../../../utils/url/KibanaLink';
+import { toQuery, fromQuery, history } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
 import styled from 'styled-components';
 import {

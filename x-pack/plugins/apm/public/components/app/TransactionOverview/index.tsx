@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { TransactionListRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionList';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/utils/url/url_helpers';
 // @ts-ignore
 import List from './List';
 

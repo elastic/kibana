@@ -14,7 +14,7 @@ import {
   toQuery,
   legacyEncodeURIComponent,
   KibanaLink
-} from '../../../utils/url/url_helpers';
+} from '../Links/url_helpers';
 import { Typeahead } from './Typeahead';
 import chrome from 'ui/chrome';
 import {

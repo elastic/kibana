@@ -9,7 +9,7 @@ import {
   getAPMIndexPattern,
   ISavedObject
 } from '../../../services/rest/savedObjects';
-import { QueryParamsDecoded } from '../../../utils/url/url_helpers';
+import { QueryParamsDecoded } from '../Links/url_helpers';
 
 export function getQueryWithIndexPattern(
   query: QueryParamsDecoded,

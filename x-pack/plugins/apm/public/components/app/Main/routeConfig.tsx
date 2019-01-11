@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
+import { legacyDecodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { StringMap } from '../../../../typings/common';
-import { legacyDecodeURIComponent } from '../../../utils/url/url_helpers';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
 import { ServiceDetails } from '../ServiceDetails';

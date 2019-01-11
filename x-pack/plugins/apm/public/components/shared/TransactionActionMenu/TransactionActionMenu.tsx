@@ -17,14 +17,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import idx from 'idx';
 import React from 'react';
-import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url/url_helpers';
+import { getKibanaHref } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   Transaction,
   TransactionV2
 } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { getDiscoverQuery } from '../DiscoverButtons/DiscoverTransactionButton';
-import { QueryWithIndexPattern } from '../DiscoverButtons/QueryWithIndexPattern';
+import { getDiscoverQuery } from '../DiscoverLinks/DiscoverTransactionLink';
+import { QueryWithIndexPattern } from '../DiscoverLinks/QueryWithIndexPattern';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);

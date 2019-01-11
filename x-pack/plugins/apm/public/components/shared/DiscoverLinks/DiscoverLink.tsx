@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { KibanaLink } from '../../../utils/url/KibanaLink';
-import { QueryParamsDecoded } from '../../../utils/url/url_helpers';
+import { KibanaLink } from '../Links/KibanaLink';
+import { QueryParamsDecoded } from '../Links/url_helpers';
 import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export function DiscoverButton({ query, ...rest }: Props) {
+export function DiscoverLink({ query, ...rest }: Props) {
   return (
     <QueryWithIndexPattern query={query}>
       {queryWithIndexPattern => (

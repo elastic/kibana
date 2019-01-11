@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Transaction } from '../../../typings/es_schemas/Transaction';
-import { KibanaLink } from '../../utils/url/KibanaLink';
-import { legacyEncodeURIComponent } from '../../utils/url/url_helpers';
+import { KibanaLink } from './Links/KibanaLink';
+import { legacyEncodeURIComponent } from './Links/url_helpers';
 
 interface TransactionLinkProps {
   transaction?: Transaction;

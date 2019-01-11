@@ -11,7 +11,7 @@ import {
   TRANSACTION_ID
 } from 'x-pack/plugins/apm/common/constants';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { DiscoverButton } from './DiscoverButton';
+import { DiscoverLink } from './DiscoverLink';
 
 export function getDiscoverQuery(transaction: Transaction) {
   const transactionId = transaction.transaction.id;
@@ -33,10 +33,10 @@ export function getDiscoverQuery(transaction: Transaction) {
   };
 }
 
-export const DiscoverTransactionButton: React.SFC<{
+export const DiscoverTransactionLink: React.SFC<{
   readonly transaction: Transaction;
 }> = ({ transaction, children }) => {
   return (
-    <DiscoverButton query={getDiscoverQuery(transaction)} children={children} />
+    <DiscoverLink query={getDiscoverQuery(transaction)} children={children} />
   );
 };

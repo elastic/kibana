@@ -9,10 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { first, get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
-import { fromQuery, history, toQuery } from '../../../../utils/url/url_helpers';
 import {
   getPropertyTabNames,
   PropertiesTable,

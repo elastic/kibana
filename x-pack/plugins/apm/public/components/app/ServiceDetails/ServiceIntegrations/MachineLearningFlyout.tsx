@@ -22,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import { ViewMLJob } from 'x-pack/plugins/apm/public/components/shared/Links/ViewMLJob';
 import {
   getMlPrefix,
   startMLJob
@@ -29,8 +31,6 @@ import {
 import { getAPMIndexPattern } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
 import { MLJobsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/machineLearningJobs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url/KibanaLink';
-import { ViewMLJob } from 'x-pack/plugins/apm/public/utils/url/ViewMLJob';
 import { TransactionSelect } from './TransactionSelect';
 
 interface FlyoutProps {

@@ -15,9 +15,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { ViewMLJob } from 'x-pack/plugins/apm/public/components/shared/Links/ViewMLJob';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ViewMLJob } from 'x-pack/plugins/apm/public/utils/url/ViewMLJob';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 // @ts-ignore

@@ -8,7 +8,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url/KibanaLink';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';

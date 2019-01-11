@@ -12,8 +12,8 @@ import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
-import { legacyEncodeURIComponent } from '../../../../utils/url/url_helpers';
-import { KibanaLink } from '../../../../utils/url/KibanaLink';
+import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 
 const TransactionNameLink = styled(KibanaLink)`
   ${truncate('100%')};
