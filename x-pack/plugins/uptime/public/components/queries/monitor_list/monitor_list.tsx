@@ -43,11 +43,13 @@ const monitorListColumns = [
     }),
     render: (status: string) => (
       <EuiHealth color={status === 'up' ? 'success' : 'danger'}>
-        <FormattedMessage
-          id="xpack.uptime.monitorList.columns.status.body"
-          values={{ status: status === 'up' ? 'Up' : 'Down' }}
-          defaultMessage="{status}"
-        />
+        {status === 'up'
+          ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
+              defaultMessage: 'Up',
+            })
+          : i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
+              defaultMessage: 'Down',
+            })}
       </EuiHealth>
     ),
     sortable: true,
