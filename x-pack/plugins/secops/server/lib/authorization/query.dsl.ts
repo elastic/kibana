@@ -10,25 +10,16 @@ import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { FilterQuery } from '../types';
 import { AuthorizationsRequestOptions } from './types';
 
-export const processFieldsMap: Readonly<Record<string, string>> = {
-  name: 'process.name',
-  title: 'process.title',
-};
-
-export const hostFieldsMap: Readonly<Record<string, string>> = {
-  'hosts.id': 'host.id',
-  'hosts.name': 'host.name',
+export const auditdMap: Readonly<Record<string, string>> = {
+  latest: '@timestamp',
+  from: 'source.ip',
 };
 
 export const buildQuery = (options: AuthorizationsRequestOptions) => {
   const { to, from } = options.timerange;
   const { limit, cursor } = options.pagination;
   const { fields, filterQuery } = options;
-  const processFields = reduceFields(fields, processFieldsMap);
-  const hostFields = reduceFields(fields, hostFieldsMap);
-
-  console.log('----> authorization from:', to);
-  console.log('----> authorization to:', to);
+  const esFields = reduceFields(fields, auditdMap);
 
   const filter = [
     ...createQueryFilterClauses(filterQuery as FilterQuery),
@@ -60,12 +51,12 @@ export const buildQuery = (options: AuthorizationsRequestOptions) => {
     body: {
       aggregations: {
         ...agg,
-        users: {
-          terms: {
-            field: 'auditd.data.acct',
-            order: { 'failures.doc_count': 'desc' },
+        group_by_users: {
+          composite: {
+            size: limit + 1,
+            sources: [{ user_uid: { terms: { field: 'auditd.data.acct' } } }],
           },
-          aggregations: {
+          aggs: {
             failures: {
               filter: {
                 term: {
@@ -73,18 +64,18 @@ export const buildQuery = (options: AuthorizationsRequestOptions) => {
                 },
               },
             },
-            login_result: {
-              terms: {
-                field: 'auditd.result',
-              },
-              aggregations: {
-                success_failure: {
-                  top_hits: {
-                    size: 1,
-                    _source: ['@timestamp', 'source.ip'], // TODO: Make this like esFields from hosts
-                    sort: [{ '@timestamp': { order: 'desc' } }],
-                  },
+            successes: {
+              filter: {
+                term: {
+                  'auditd.result': 'success',
                 },
+              },
+            },
+            authorization: {
+              top_hits: {
+                size: 1,
+                _source: esFields,
+                sort: [{ '@timestamp': { order: 'desc' } }],
               },
             },
           },
@@ -104,10 +95,10 @@ export const buildQuery = (options: AuthorizationsRequestOptions) => {
     return merge(dslQuery, {
       body: {
         aggregations: {
-          group_by_host: {
+          group_by_users: {
             composite: {
               after: {
-                host_name: cursor,
+                user_uid: cursor,
               },
             },
           },

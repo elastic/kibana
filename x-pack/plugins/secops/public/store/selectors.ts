@@ -5,6 +5,7 @@
  */
 
 export {
+  authorizationsLimitSelector,
   dataProvidersSelector,
   hostsLimitSelector,
   eventsLimitSelector,

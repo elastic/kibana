@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEmpty, set } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
@@ -13,10 +13,7 @@ import { AuthorizationsEdges, GetAuthorizationQuery, PageInfo } from '../../grap
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
-
-// TODO: Change this out for unauthorized selector
-import { uncommonProcessesLimitSelector } from '../../store';
-
+import { authorizationsLimitSelector } from '../../store';
 import { authorizationQuery } from './index.gql_query';
 
 export interface AuthorizationArgs {
@@ -36,13 +33,11 @@ export interface OwnProps {
   startDate: number;
   endDate: number;
   filterQuery?: string;
-  cursor: string | null;
   poll: number;
 }
 
 export interface AuthorizationsComponentReduxProps {
   limit: number;
-  upperLimit: number;
 }
 
 type AuthorizationsProps = OwnProps & AuthorizationsComponentReduxProps;
@@ -56,8 +51,6 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
     startDate,
     endDate,
     limit,
-    upperLimit,
-    cursor,
     poll,
   }) => (
     <Query<GetAuthorizationQuery.Query, GetAuthorizationQuery.Variables>
@@ -73,18 +66,15 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
           to: endDate,
         },
         pagination: {
-          limit: upperLimit,
-          cursor,
+          limit,
+          cursor: null,
           tiebreaker: null,
         },
         filterQuery,
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {
-        console.log('The data is:', data);
-
         const authorizations = getOr([], 'source.Authorizations.edges', data);
-        console.log('The authorizations are', authorizations);
         return children({
           id,
           refetch,
@@ -108,7 +98,7 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
                   ...fetchMoreResult,
                   source: {
                     ...fetchMoreResult.source,
-                    Hosts: {
+                    Authorizations: {
                       ...fetchMoreResult.source.Authorizations,
                       edges: [
                         ...prev.source.Authorizations.edges,
@@ -125,13 +115,6 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
   )
 );
 
-export const hasMoreData = (
-  limit: number,
-  upperLimit: number,
-  data: AuthorizationsEdges[]
-): boolean => limit < upperLimit && limit < data.length;
-
-// TODO: Change this out for authorization
-const mapStateToProps = (state: State) => uncommonProcessesLimitSelector(state);
+const mapStateToProps = (state: State) => authorizationsLimitSelector(state);
 
 export const AuthorizationQuery = connect(mapStateToProps)(AuthorizationsComponentQuery);

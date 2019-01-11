@@ -11,7 +11,7 @@ import {
   TimerangeInput,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { ESQuery, Hit, Hits, HostHits, SearchHit, TotalHit } from '../types';
+import { ESQuery, Hit, SearchHit, TotalHit } from '../types';
 
 export interface AuthorizationsAdapter {
   getAuthorizations(
@@ -30,29 +30,39 @@ export interface AuthorizationsRequestOptions {
 
 type StringOrNumber = string | number;
 export interface AuthorizationHit extends Hit {
-  total: TotalHit;
-  hosts: Array<{ id: string; name: string }>;
   _source: {
     '@timestamp': string;
-    process: {
-      name: string;
-      title: string;
+    source: {
+      ip: string;
     };
   };
-  cursor: string;
+  user: string;
+  failures: number;
+  successes: number;
+  cursor?: string;
   sort: StringOrNumber[];
 }
 
-export type AuthorizationHits = Hits<TotalHit, AuthorizationHit>;
-
 export interface AuthorizationBucket {
-  key: string;
-  hosts: {
-    buckets: Array<{ key: string; host: HostHits }>;
+  key: {
+    user_uid: string;
   };
-  process: AuthorizationHits;
+  doc_count: number;
+  failures: {
+    doc_count: number;
+  };
+  successes: {
+    doc_count: number;
+  };
+  authorization: {
+    hits: {
+      total: TotalHit;
+      hits: ArrayLike<AuthorizationHit>;
+    };
+  };
 }
 
+// TODO Use this or delete it
 export interface AuthorizationData extends SearchHit {
   sort: string[];
   aggregations: {

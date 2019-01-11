@@ -5,6 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
+
 import { SourceResolvers } from '../../graphql/types';
 import { Authorizations } from '../../lib/authorization';
 import { AuthorizationsRequestOptions } from '../../lib/authorization/types';
@@ -31,7 +32,6 @@ export const createAuthorizationResolvers = (
 } => ({
   Source: {
     async Authorizations(source, args, { req }, info) {
-      console.log('---> Authorization Resolver');
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
       const options: AuthorizationsRequestOptions = {
         sourceConfiguration: source.configuration,
@@ -40,9 +40,7 @@ export const createAuthorizationResolvers = (
         filterQuery: parseFilterQuery(args.filterQuery || ''),
         fields: fields.map(field => field.replace('edges.authorization.', '')),
       };
-      const x = libs.authorizations.getAuthorizations(req, options);
-      console.log('---> Authorization Resolver returning', x);
-      return x;
+      return libs.authorizations.getAuthorizations(req, options);
     },
   },
 });

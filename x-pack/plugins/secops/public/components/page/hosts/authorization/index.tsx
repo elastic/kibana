@@ -11,9 +11,8 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import moment from 'moment';
-import { AuthorizationItem, AuthorizationsEdges, HostEcsFields } from '../../../../graphql/types';
-// TODO: Change out uncommonProcessLimitSelector for AuthorizedLimitSelector
-import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
+import { AuthorizationItem, AuthorizationsEdges } from '../../../../graphql/types';
+import { authorizationsLimitSelector, hostsActions, State } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 interface OwnProps {
@@ -90,13 +89,12 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => uncommonProcessesLimitSelector(state);
+const mapStateToProps = (state: State) => authorizationsLimitSelector(state);
 
-// TODO: Change this action to be updateAuthorizationLimit
 export const AuthorizationTable = connect(
   mapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
+    updateLimitPagination: hostsActions.updateAuthorizationsLimit,
   }
 )(AuthorizationTableComponent);
 

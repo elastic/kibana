@@ -16,6 +16,9 @@ export const mockGlobalState: State = {
     },
     hosts: {
       query: {
+        authorizations: {
+          limit: 10,
+        },
         hosts: {
           limit: 2,
         },

@@ -8,6 +8,10 @@ import actionCreatorFactory from 'typescript-fsa';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/hosts');
 
+export const updateAuthorizationsLimit = actionCreator<{ limit: number }>(
+  'UPDATE_AUTHORIZATIONS_LIMIT'
+);
+
 export const updateHostsLimit = actionCreator<{ limit: number }>('UPDATE_HOSTS_LIMIT');
 
 export const updateEventsLimit = actionCreator<{ limit: number }>('UPDATE_EVENTS_LIMIT');
