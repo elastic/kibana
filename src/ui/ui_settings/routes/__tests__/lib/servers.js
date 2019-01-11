@@ -27,12 +27,14 @@ export async function startServers() {
   servers = await startTestServers({
     adjustTimeout: (t) => this.timeout(t),
     settings: {
-      uiSettings: {
-        overrides: {
-          foo: 'bar',
-        }
+      kbn: {
+        uiSettings: {
+          overrides: {
+            foo: 'bar',
+          }
+        },
       },
-    }
+    },
   });
   kbnServer = servers.kbnServer;
 }

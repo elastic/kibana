@@ -1,0 +1,47 @@
+.list-group-menu {
+  &.select-mode a {
+     outline: none;
+     color: tint($euiColorPrimary, 10%);
+  }
+
+  .list-group-menu-item {
+    list-style: none;
+    color: tint($euiColorPrimary, 10%);
+
+    &.active {
+      font-weight: bold;
+      background-color: $euiColorLightShade;
+    }
+    &:hover {
+      background-color: tint($euiColorPrimary, 90%);
+    }
+    li {
+      list-style: none;
+      color: tint($euiColorPrimary, 10%);
+    }
+  }
+}
+
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
+
+  .list-group-menu {
+    &.select-mode a{
+        color: shade($euiColorPrimary, 10%);
+    }
+
+    .list-group-menu-item {
+      color: shade($euiColorPrimary, 10%);
+
+      &.active {
+        background-color: $euiColorLightShade;
+      }
+      &:hover {
+        background-color: shade($euiColorPrimary, 90%);
+      }
+      li {
+        color: shade($euiColorPrimary, 10%);
+      }
+    }
+  }
+}

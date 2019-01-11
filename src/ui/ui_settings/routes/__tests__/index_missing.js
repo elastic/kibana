@@ -41,7 +41,8 @@ export function indexMissingSuite() {
       // but automatically by writing to es when index didn't exist
       async assertValidKibanaIndex() {
         const resp = await callCluster('indices.get', {
-          index: indexName
+          index: indexName,
+          include_type_name: true,
         });
 
         expect(resp[indexName].mappings).to.have.property('doc');

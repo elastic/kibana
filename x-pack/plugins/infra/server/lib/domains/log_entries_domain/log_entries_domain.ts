@@ -164,7 +164,7 @@ export interface LogEntryDocument {
 }
 
 export interface LogEntryDocumentFields {
-  [fieldName: string]: string | number | null;
+  [fieldName: string]: string | number | boolean | null;
 }
 
 const convertLogDocumentToEntry = (

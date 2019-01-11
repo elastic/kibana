@@ -80,9 +80,14 @@ export interface TransactionV2 extends APMDocV2 {
     };
     type: string;
   };
-  kubernetes: {
+  kubernetes?: {
     pod: {
       uid: string;
+    };
+  };
+  docker?: {
+    container: {
+      id: string;
     };
   };
   container: {

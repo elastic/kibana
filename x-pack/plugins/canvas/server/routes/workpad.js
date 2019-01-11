@@ -41,7 +41,7 @@ export function workpad(server) {
     const savedObjectsClient = req.getSavedObjectsClient();
 
     if (!req.payload) {
-      return Promise.resolve(boom.badRequest('A workpad payload is required'));
+      return Promise.reject(boom.badRequest('A workpad payload is required'));
     }
 
     const now = new Date().toISOString();
