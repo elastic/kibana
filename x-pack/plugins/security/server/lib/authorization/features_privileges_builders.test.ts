@@ -330,6 +330,57 @@ describe('#getApiReadActions', () => {
     const result = builder.getApiReadActions(features);
     expect(result).toEqual([actions.api.get('foo/api')]);
   });
+
+  test(`includes api actions from other privileges when "grantWithBaseRead" is true`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          bar: {
+            app: [],
+            // This should show up in the results
+            grantWithBaseRead: true,
+            api: ['bar/api'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no api read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        privileges: {
+          // this one should show up in the results
+          read: {
+            app: [],
+            api: ['foo/api'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getApiReadActions(features);
+    expect(result).toEqual([actions.api.get('bar/api'), actions.api.get('foo/api')]);
+  });
 });
 
 describe('#getUIReadActions', () => {
@@ -348,7 +399,7 @@ describe('#getUIReadActions', () => {
               all: [],
               read: [],
             },
-            ui: [],
+            ui: ['foo'],
           },
           // no ui read privileges
           read: {
@@ -379,6 +430,58 @@ describe('#getUIReadActions', () => {
     ];
     const result = builder.getUIReadActions(features);
     expect(result).toEqual([actions.ui.get('bar', 'bar-ui-capability')]);
+  });
+
+  test(`includes ui actions from other privileges when "grantWithBaseRead" is true`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // this should show up in the results
+          bar: {
+            grantWithBaseRead: true,
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['foo-ui-capability'],
+          },
+          // no ui read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        privileges: {
+          // this ui capability should show up in the results
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['bar-ui-capability'],
+          },
+        },
+      },
+    ];
+    const result = builder.getUIReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('foo', 'foo-ui-capability'),
+      actions.ui.get('bar', 'bar-ui-capability'),
+    ]);
   });
 });
 
@@ -442,6 +545,74 @@ describe('#getManagementReadActions', () => {
       actions.ui.get('management', 'es', 'bazManagementLink'),
     ]);
   });
+
+  test(`includes management actions from other privileges when "grantWithBaseRead" is true`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        management: {
+          foo: ['bar'],
+        },
+        privileges: {
+          // this management capability should show up in the results
+          bar: {
+            grantWithBaseRead: true,
+            app: [],
+            management: {
+              foo: ['bar'],
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no management read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        management: {
+          kibana: ['fooManagementLink', 'otherManagementLink'],
+          es: ['barManagementLink', 'bazManagementLink'],
+        },
+        privileges: {
+          // this management capability should show up in the results
+          read: {
+            app: [],
+            management: {
+              kibana: ['fooManagementLink'],
+              es: ['barManagementLink', 'bazManagementLink'],
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getManagementReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('management', 'foo', 'bar'),
+      actions.ui.get('management', 'kibana', 'fooManagementLink'),
+      actions.ui.get('management', 'es', 'barManagementLink'),
+      actions.ui.get('management', 'es', 'bazManagementLink'),
+    ]);
+  });
 });
 
 describe('#getCatalogueReadActions', () => {
@@ -494,6 +665,63 @@ describe('#getCatalogueReadActions', () => {
     ];
     const result = builder.getCatalogueReadActions(features);
     expect(result).toEqual([
+      actions.ui.get('catalogue', 'barCatalogueLink'),
+      actions.ui.get('catalogue', 'bazCatalogueLink'),
+    ]);
+  });
+
+  test(`includes catalogue actions from other privileges when "grantWithBaseRead" is true`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        catalogue: ['fooCatalogueLink'],
+        privileges: {
+          // this catalogue capability should show up in the results
+          bar: {
+            catalogue: ['fooCatalogueLink'],
+            grantWithBaseRead: true,
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no catalogue read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        catalogue: ['barCatalogueLink', 'bazCatalogueLink', 'anotherCatalogueLink'],
+        privileges: {
+          // this catalogue capability should show up in the results
+          read: {
+            app: [],
+            catalogue: ['barCatalogueLink', 'bazCatalogueLink'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getCatalogueReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('catalogue', 'fooCatalogueLink'),
       actions.ui.get('catalogue', 'barCatalogueLink'),
       actions.ui.get('catalogue', 'bazCatalogueLink'),
     ]);

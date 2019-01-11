@@ -13,6 +13,7 @@ export interface FeaturePrivilegeDefinition {
   metadata?: {
     tooltip?: string;
   };
+  grantWithBaseRead?: boolean;
   management?: {
     [sectionId: string]: string[];
   };
@@ -75,6 +76,7 @@ const schema = Joi.object({
         metadata: Joi.object({
           tooltip: Joi.string(),
         }),
+        grantWithBaseRead: Joi.bool(),
         management: managementSchema,
         catalogue: catalogueSchema,
         api: Joi.array().items(Joi.string()),

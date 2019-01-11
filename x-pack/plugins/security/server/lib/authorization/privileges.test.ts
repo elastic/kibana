@@ -84,6 +84,31 @@ test(`builds privileges correctly`, () => {
         },
       },
     },
+    {
+      id: 'baz-feature',
+      name: 'Baz Feature',
+      icon: 'arrowUp',
+      catalogue: ['bazCatalogue'],
+      management: {
+        kibana: ['bazKibana'],
+      },
+      privileges: {
+        all: {
+          grantWithBaseRead: true,
+          catalogue: ['bazCatalogue'],
+          management: {
+            kibana: ['bazKibana'],
+          },
+          app: ['bar-app'],
+          api: ['bar/read/api'],
+          savedObject: {
+            all: [],
+            read: ['foo-saved-object-type', 'bar-saved-object-type'],
+          },
+          ui: ['show'],
+        },
+      },
+    },
   ];
 
   const mockXPackMainPlugin = {
@@ -129,6 +154,23 @@ test(`builds privileges correctly`, () => {
           'saved_object:bar-saved-object-type/find',
           'ui:bar-feature/show',
           'ui:management/kibana/yeppers',
+        ],
+      },
+      'baz-feature': {
+        all: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'api:bar/read/api',
+          'app:bar-app',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'ui:baz-feature/show',
+          'ui:catalogue/bazCatalogue',
+          'ui:management/kibana/bazKibana',
         ],
       },
       'foo-feature': {
@@ -197,9 +239,12 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:baz-feature/show',
         'ui:management/foo/anotherFooManagementLink',
         'ui:management/kibana/yeppers',
+        'ui:management/kibana/bazKibana',
         'ui:catalogue/fooReadEntry',
+        'ui:catalogue/bazCatalogue',
         'ui:navLinks/*',
       ],
     },
@@ -239,9 +284,12 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:baz-feature/show',
         'ui:management/foo/anotherFooManagementLink',
         'ui:management/kibana/yeppers',
+        'ui:management/kibana/bazKibana',
         'ui:catalogue/fooReadEntry',
+        'ui:catalogue/bazCatalogue',
         'ui:navLinks/*',
       ],
     },

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import _ from 'lodash';
 import { Dictionary, flatten, mapValues } from 'lodash';
 import { FeaturePrivilegeDefinition } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { Feature } from '../../../../xpack_main/types';
@@ -26,57 +26,107 @@ export class FeaturesPrivilegesBuilder {
   }
 
   public getApiReadActions(features: Feature[]): string[] {
-    return flatten(
+    const allApiReadActions = flatten(
       features.map(feature => {
         const { privileges } = feature;
-        if (!privileges || !privileges.read || !privileges.read.api) {
+        if (!privileges) {
           return [];
         }
 
-        return feature.privileges.read.api!.map(api => this.actions.api.get(api));
+        const apiPrivileges = Object.entries(privileges).reduce<string[]>(
+          (acc, [privilegeId, privilege]) => {
+            if (this.includeInBaseRead(privilegeId, privilege)) {
+              return [...acc, ...(privilege.api || [])];
+            }
+            return acc;
+          },
+          []
+        );
+
+        return apiPrivileges.map(api => this.actions.api.get(api));
       })
     );
+
+    return _.uniq(allApiReadActions);
   }
 
   public getUIReadActions(features: Feature[]): string[] {
-    return flatten(
+    const allUIReadActions = flatten(
       features.map(feature => {
         const { privileges } = feature;
-        if (!privileges || !privileges.read || !privileges.read.ui) {
+        if (!privileges) {
           return [];
         }
 
-        return feature.privileges.read.ui!.map(uiCapability =>
-          this.actions.ui.get(feature.id, uiCapability)
+        const readPrivileges = Object.entries(privileges).reduce<string[]>(
+          (acc, [privilegeId, privilege]) => {
+            if (this.includeInBaseRead(privilegeId, privilege)) {
+              return [...acc, ...(privilege.ui || [])];
+            }
+            return acc;
+          },
+          []
         );
+
+        return readPrivileges.map(uiCapability => this.actions.ui.get(feature.id, uiCapability));
       })
     );
+
+    return _.uniq(allUIReadActions);
   }
 
   public getCatalogueReadActions(features: Feature[]): string[] {
-    return flatten(
+    const allCatalogueReadActions = flatten(
       features.map(feature => {
         const { privileges } = feature;
-        if (!privileges || !privileges.read || !privileges.read.catalogue) {
+        if (!privileges) {
           return [];
         }
 
-        return this.buildCatalogueFeaturePrivileges(privileges.read);
+        const catalogueReadActions = Object.entries(privileges).reduce<string[]>(
+          (acc, [privilegeId, privilege]) => {
+            if (this.includeInBaseRead(privilegeId, privilege)) {
+              return [...acc, ...this.buildCatalogueFeaturePrivileges(privilege)];
+            }
+            return acc;
+          },
+          []
+        );
+
+        return catalogueReadActions;
       })
     );
+
+    return _.uniq(allCatalogueReadActions);
   }
 
   public getManagementReadActions(features: Feature[]): string[] {
-    return flatten(
+    const allManagementReadActions = flatten(
       features.map(feature => {
         const { privileges } = feature;
-        if (!privileges || !privileges.read || !privileges.read.management) {
+        if (!privileges) {
           return [];
         }
 
-        return this.buildManagementFeaturePrivileges(privileges.read);
+        const managementReadActions = Object.entries(privileges).reduce<string[]>(
+          (acc, [privilegeId, privilege]) => {
+            if (this.includeInBaseRead(privilegeId, privilege)) {
+              return [...acc, ...this.buildManagementFeaturePrivileges(privilege)];
+            }
+            return acc;
+          },
+          []
+        );
+
+        return managementReadActions;
       })
     );
+
+    return _.uniq(allManagementReadActions);
+  }
+
+  private includeInBaseRead(privilegeId: string, privilege: FeaturePrivilegeDefinition): boolean {
+    return privilegeId === 'read' || !!privilege.grantWithBaseRead;
   }
 
   private buildFeaturePrivileges(feature: Feature): Dictionary<string[]> {

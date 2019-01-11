@@ -46,6 +46,7 @@ describe('registerFeature', () => {
           metadata: {
             tooltip: 'some fancy tooltip',
           },
+          grantWithBaseRead: true,
           catalogue: ['foo'],
           management: {
             foo: ['bar'],

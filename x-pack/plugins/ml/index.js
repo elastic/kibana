@@ -83,6 +83,7 @@ export const ml = (kibana) => {
                 defaultMessage: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
               })
             },
+            grantWithBaseRead: true,
             catalogue: ['ml'],
             app: ['ml', 'kibana'],
             savedObject: {

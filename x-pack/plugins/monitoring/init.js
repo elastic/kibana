@@ -68,6 +68,7 @@ export const init = (monitoringPlugin, server) => {
             defaultMessage: 'The monitoring_user role should be assigned to grant access'
           })
         },
+        grantWithBaseRead: true,
         catalogue: ['monitoring'],
         app: ['monitoring', 'kibana'],
         savedObject: {
