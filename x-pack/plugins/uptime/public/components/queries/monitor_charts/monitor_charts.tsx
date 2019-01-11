@@ -105,7 +105,7 @@ export const MonitorCharts = ({
               <EuiTitle size="xs">
                 <h4>
                   <FormattedMessage
-                    id="xpack.uptime.monitorCharts.rtt.title"
+                    id="xpack.uptime.monitorCharts.rttBreakdownTitle"
                     defaultMessage="RTT Breakdown ms"
                   />
                 </h4>
