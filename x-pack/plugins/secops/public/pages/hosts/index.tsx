@@ -8,10 +8,11 @@ import React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
+import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { HostDetails } from './host_details';
 import { Hosts } from './hosts';
 
-export const HostsContainer = pure<RouteComponentProps>(({ match }) => (
+export const HostsContainer = pure<HostComponentProps>(({ match }) => (
   <div>
     <Switch>
       <Route strict exact path={'/hosts'} component={Hosts} />

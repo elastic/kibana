@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { defaultTo, noop } from 'lodash/fp';
+import { EuiBadge, EuiLink } from '@elastic/eui';
+import { defaultTo, isNil, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -132,8 +132,12 @@ const getHostsColumns = () => [
                     onToggleDataProviderEnabled={noop}
                   />
                 </DragEffects>
+              ) : isNil(host.hostId) ? (
+                { hostName }
               ) : (
-                <Link to={`hosts/${host.hostId}`}>{hostName}</Link> // TODO: Does this need escapeQueryValue() or encodeURIComponent()?
+                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(host.hostId)}`}>
+                  {hostName}
+                </EuiLink>
               )
             }
           />

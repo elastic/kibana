@@ -7,11 +7,9 @@
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-interface HostMatchParams {
-  hostId?: string;
-}
-
-export type HostComponentProps = RouteComponentProps<HostMatchParams>;
+export type HostComponentProps = RouteComponentProps<{
+  hostId: string;
+}>;
 
 export const RedirectToHostsPage = ({
   match: {
