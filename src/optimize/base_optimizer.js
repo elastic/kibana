@@ -201,14 +201,15 @@ export default class BaseOptimizer {
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (IS_KIBANA_DISTRIBUTABLE) {
-        return loaders;
-      }
+      // if (IS_KIBANA_DISTRIBUTABLE) {
+      //   return loaders;
+      // }
 
       return [
         {
           loader: 'cache-loader',
           options: {
+            cacheContext: fromRoot('.'),
             cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
           }
         },
