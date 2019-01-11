@@ -57,7 +57,7 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
                   <EuiTitle size="s">
                     <span>
                       {i18n.translate(
-                        'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
+                        'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
                         {
                           defaultMessage: 'Error occurrences'
                         }
