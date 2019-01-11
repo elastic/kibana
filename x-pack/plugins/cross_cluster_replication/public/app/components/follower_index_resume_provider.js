@@ -83,7 +83,7 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
-                  defaultMessage="These follower indices will resumed:"
+                  defaultMessage="These follower indices will be resumed:"
                 />
               </p>
               <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>

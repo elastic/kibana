@@ -12,7 +12,7 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
-import { unfollowFollowerIndex } from '../store/actions';
+import { unfollowLeaderIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
 
 class Provider extends PureComponent {
@@ -27,12 +27,12 @@ class Provider extends PureComponent {
     event.stopPropagation();
   };
 
-  unfollowFollowerIndex = (id) => {
+  unfollowLeaderIndex = (id) => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
   onConfirm = () => {
-    this.props.unfollowFollowerIndex(this.state.ids);
+    this.props.unfollowLeaderIndex(this.state.ids);
     this.setState({ isModalOpen: false, ids: null });
   }
 
@@ -48,11 +48,11 @@ class Provider extends PureComponent {
     const isSingle = ids.length === 1;
     const title = isSingle
       ? intl.formatMessage({
-        id: 'xpack.crossClusterReplication.unfollowFollowerIndex.confirmModal.unfollowSingleTitle',
+        id: 'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowSingleTitle',
         defaultMessage: 'Unfollow leader index of follower index \'{name}\'?',
       }, { name: ids[0] })
       : intl.formatMessage({
-        id: 'xpack.crossClusterReplication.unfollowFollowerIndex.confirmModal.unfollowMultipleTitle',
+        id: 'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowMultipleTitle',
         defaultMessage: 'Unfollow leader indices of {count} follower indices?',
       }, { count: ids.length });
 
@@ -65,14 +65,14 @@ class Provider extends PureComponent {
           onConfirm={this.onConfirm}
           cancelButtonText={
             intl.formatMessage({
-              id: 'xpack.crossClusterReplication.unfollowFollowerIndex.confirmModal.cancelButtonText',
+              id: 'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.cancelButtonText',
               defaultMessage: 'Cancel',
             })
           }
           buttonColor="danger"
           confirmButtonText={
             intl.formatMessage({
-              id: 'xpack.crossClusterReplication.unfollowFollowerIndex.confirmModal.confirmButtonText',
+              id: 'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.confirmButtonText',
               defaultMessage: 'Unfollow',
             })
           }
@@ -82,7 +82,7 @@ class Provider extends PureComponent {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.unfollowFollowerIndex.confirmModal.singleUnfollowDescription"
+                  id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.singleUnfollowDescription"
                   defaultMessage="This follower index will be paused, closed, and converted into a regular index."
                 />
               </p>
@@ -91,7 +91,7 @@ class Provider extends PureComponent {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.unfollowFollowerIndex.confirmModal.multipleUnfollowDescription"
+                  id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.multipleUnfollowDescription"
                   defaultMessage="These follower indices will be paused, closed, and converted into regular indices:"
                 />
               </p>
@@ -109,7 +109,7 @@ class Provider extends PureComponent {
 
     return (
       <Fragment>
-        {children(this.unfollowFollowerIndex)}
+        {children(this.unfollowLeaderIndex)}
         {isModalOpen && this.renderModal()}
       </Fragment>
     );
@@ -117,7 +117,7 @@ class Provider extends PureComponent {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  unfollowFollowerIndex: (id) => dispatch(unfollowFollowerIndex(id)),
+  unfollowLeaderIndex: (id) => dispatch(unfollowLeaderIndex(id)),
 });
 
 export const FollowerIndexUnfollowProvider = connect(

@@ -76,17 +76,17 @@ export const createFollowerIndex = (followerIndex) => (
 
 export const pauseFollowerIndex = (id) => {
   const ids = arrify(id).map(_id => encodeURIComponent(_id)).join(',');
-  return httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(ids)}/pause`).then(extractData);
+  return httpClient.put(`${apiPrefix}/follower_indices/${ids}/pause`).then(extractData);
 };
 
 export const resumeFollowerIndex = (id) => {
   const ids = arrify(id).map(_id => encodeURIComponent(_id)).join(',');
-  return httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(ids)}/resume`).then(extractData);
+  return httpClient.put(`${apiPrefix}/follower_indices/${ids}/resume`).then(extractData);
 };
 
-export const unfollowFollowerIndex = (id) => {
+export const unfollowLeaderIndex = (id) => {
   const ids = arrify(id).map(_id => encodeURIComponent(_id)).join(',');
-  return httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(ids)}/unfollow`).then(extractData);
+  return httpClient.put(`${apiPrefix}/follower_indices/${ids}/unfollow`).then(extractData);
 };
 
 /* Stats */

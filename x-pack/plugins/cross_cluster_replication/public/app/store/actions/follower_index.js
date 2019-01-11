@@ -13,7 +13,7 @@ import {
   createFollowerIndex as createFollowerIndexRequest,
   pauseFollowerIndex as pauseFollowerIndexRequest,
   resumeFollowerIndex as resumeFollowerIndexRequest,
-  unfollowFollowerIndex as unfollowFollowerIndexRequest,
+  unfollowLeaderIndex as unfollowLeaderIndexRequest,
 } from '../../services/api';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
@@ -175,13 +175,13 @@ export const resumeFollowerIndex = (id) => (
   })
 );
 
-export const unfollowFollowerIndex = (id) => (
+export const unfollowLeaderIndex = (id) => (
   sendApiRequest({
     label: t.FOLLOWER_INDEX_UNFOLLOW,
     status: API_STATUS.DELETING,
     scope: `${scope}-delete`,
     handler: async () => (
-      unfollowFollowerIndexRequest(id)
+      unfollowLeaderIndexRequest(id)
     ),
     onSuccess(response, dispatch, getState) {
       /**

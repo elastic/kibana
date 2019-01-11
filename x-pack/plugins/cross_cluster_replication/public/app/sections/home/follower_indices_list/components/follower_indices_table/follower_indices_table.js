@@ -187,12 +187,12 @@ export const FollowerIndicesTable = injectI18n(
                   delay="long"
                 >
                   <FollowerIndexUnfollowProvider>
-                    {(unfollowFollowerIndex) => (
+                    {(unfollowLeaderIndex) => (
                       <EuiButtonIcon
                         aria-label={label}
                         iconType="indexFlush"
                         color="danger"
-                        onClick={() => unfollowFollowerIndex(name)}
+                        onClick={() => unfollowLeaderIndex(name)}
                       />
                     )}
                   </FollowerIndexUnfollowProvider>

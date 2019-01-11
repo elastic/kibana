@@ -126,11 +126,10 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       }
     ],
-    needBody: true,
     method: 'POST'
   });
 
-  ccr.unfollowFollowerIndex = ca({
+  ccr.unfollowLeaderIndex = ca({
     urls: [
       {
         fmt: '/<%=id%>/_ccr/unfollow',

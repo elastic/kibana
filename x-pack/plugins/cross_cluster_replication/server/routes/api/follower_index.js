@@ -154,8 +154,7 @@ export const registerFollowerIndexRoutes = (server) => {
       const errors = [];
 
       await Promise.all(ids.map((_id) => (
-        // TODO: Remove empty body when fixed in ES: https://github.com/elastic/elasticsearch/issues/37022
-        callWithRequest('ccr.resumeFollowerIndex', { id: _id, body: {} })
+        callWithRequest('ccr.resumeFollowerIndex', { id: _id })
           .then(() => itemsResumed.push(_id))
           .catch(err => {
             if (isEsError(err)) {
@@ -200,7 +199,7 @@ export const registerFollowerIndexRoutes = (server) => {
           await callWithRequest('indices.close', { index: _id });
 
           // Unfollow leader
-          await callWithRequest('ccr.unfollowFollowerIndex', { id: _id });
+          await callWithRequest('ccr.unfollowLeaderIndex', { id: _id });
 
           // Push success
           itemsUnfollowed.push(_id);

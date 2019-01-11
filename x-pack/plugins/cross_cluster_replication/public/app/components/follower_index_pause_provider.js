@@ -83,7 +83,7 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription"
-                  defaultMessage="These follower indices will paused:"
+                  defaultMessage="These follower indices will be paused:"
                 />
               </p>
               <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>

@@ -32,12 +32,8 @@ export class ContextMenuUi extends Component {
     followerIndices: PropTypes.array.isRequired,
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isPopoverOpen: false,
-    };
+  state = {
+    isPopoverOpen: false,
   }
 
   onButtonClick = () => {
@@ -74,7 +70,6 @@ export class ContextMenuUi extends Component {
       <EuiButton
         data-test-subj="followerIndexContextMenuButton"
         iconSide={iconSide}
-        // aria-label={`${entity} options`}
         onClick={this.onButtonClick}
         iconType={iconType}
         fill
@@ -108,7 +103,7 @@ export class ContextMenuUi extends Component {
         <EuiContextMenuPanel>
 
           {
-            activeFollowerIndexNames ? (
+            activeFollowerIndexNames.length ? (
               <FollowerIndexPauseProvider>
                 {(pauseFollowerIndex) => (
                   <EuiContextMenuItem
@@ -146,10 +141,10 @@ export class ContextMenuUi extends Component {
           }
 
           <FollowerIndexUnfollowProvider>
-            {(unfollowFollowerIndex) => (
+            {(unfollowLeaderIndex) => (
               <EuiContextMenuItem
                 icon="indexFlush"
-                onClick={() => unfollowFollowerIndex(followerIndexNames)}
+                onClick={() => unfollowLeaderIndex(followerIndexNames)}
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.unfollowLabel"
