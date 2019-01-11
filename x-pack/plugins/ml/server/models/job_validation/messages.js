@@ -109,7 +109,9 @@ export const getMessages = () => {
     },
     bucket_span_estimation_mismatch: {
       status: 'INFO',
-      heading: 'Bucket span',
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanEstimationMismatchHeading', {
+        defaultMessage: 'Bucket span',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanEstimationMismatchMessage', {
         defaultMessage: 'Current bucket span is {currentBucketSpan}, but bucket span estimation returned {estimateBucketSpan}.',
         values: {
@@ -121,7 +123,9 @@ export const getMessages = () => {
     },
     bucket_span_high: {
       status: 'INFO',
-      heading: 'Bucket span',
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanHighHeading', {
+        defaultMessage: 'Bucket span',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanHighMessage', {
         defaultMessage: 'Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.',
       }),
@@ -129,7 +133,9 @@ export const getMessages = () => {
     },
     bucket_span_valid: {
       status: 'SUCCESS',
-      heading: 'Bucket span',
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanValidHeading', {
+        defaultMessage: 'Bucket span',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanValidMessage', {
         defaultMessage: 'Format of {bucketSpan} is valid.',
         values: {
@@ -140,7 +146,9 @@ export const getMessages = () => {
     },
     bucket_span_invalid: {
       status: 'ERROR',
-      heading: 'Bucket span',
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanInvalidHeading', {
+        defaultMessage: 'Bucket span',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanInvalidMessage', {
         defaultMessage: 'The specified bucket span is not a valid time interval format e.g. 10m, 1h. It also needs to be higher than zero.',
       }),
@@ -178,7 +186,9 @@ export const getMessages = () => {
     },
     detectors_function_not_empty: {
       status: 'SUCCESS',
-      heading: 'Detector functions',
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsFunctionNotEmptyHeading', {
+        defaultMessage: 'Detector functions',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsFunctionNotEmptyMessage', {
         defaultMessage: 'Presence of detector functions validated in all detectors.',
       }),
@@ -290,7 +300,9 @@ export const getMessages = () => {
     },
     success_bucket_span: {
       status: 'SUCCESS',
-      heading: 'Bucket span',
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.successBucketSpanHeading', {
+        defaultMessage: 'Bucket span',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successBucketSpanMessage', {
         defaultMessage: 'Format of {bucketSpan} is valid and passed validation checks.',
         values: { bucketSpan: '"{{bucketSpan}}"' },
