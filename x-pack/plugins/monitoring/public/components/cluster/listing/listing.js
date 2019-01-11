@@ -384,7 +384,7 @@ export class Listing extends Component {
               View these instances.
             </EuiLink>
             &nbsp;
-            You can also view these instances through the cluster name `Unlinked Cluster` in the table below.
+            Or, click Unlinked Cluster in the table below
           </p>
           <p>
             <EuiLink onClick={() => {
