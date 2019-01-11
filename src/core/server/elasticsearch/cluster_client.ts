@@ -17,147 +17,88 @@
  * under the License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { ConfigOptions } from 'elasticsearch';
-import { readFileSync } from 'fs';
-import { pick } from 'lodash';
-import { checkServerIdentity } from 'tls';
-import url from 'url';
-import util from 'util';
+import Boom from 'boom';
+import { Client } from 'elasticsearch';
+import { get } from 'lodash';
+import { filterHeaders } from '../http/router/headers';
 import { Logger } from '../logging';
-import { ElasticsearchConfig } from './elasticsearch_config';
+import {
+  ElasticsearchClientConfig,
+  parseElasticsearchClientConfig,
+} from './elasticsearch_client_config';
 
-const readFile = (file: string) => readFileSync(file, 'utf8');
-
-export type ClusterClientConfigOptions = Partial<
-  // We don't extract timeout types from config schema as they are `Duration`, but
-  // Elasticsearch client expects numbers so we need a conversion step.
-  Pick<
-    TypeOf<typeof ElasticsearchConfig.schema>,
-    | 'apiVersion'
-    | 'customHeaders'
-    | 'logQueries'
-    | 'hosts'
-    | 'ssl'
-    | 'sniffOnStart'
-    | 'sniffOnConnectionFault'
-    | 'username'
-    | 'password'
-  >
-> &
-  Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins' | 'pingTimeout' | 'requestTimeout'> &
-  // We don't extract `sniffInterval` from `ConfigOptions` since it's defined there as `number`,
-  // but it can be `false` per config schema and still processed correctly by Elasticsearch client.
-  Partial<{ auth: boolean; sniffInterval: false | number }>;
-
-// Original `ConfigOptions` defines `ssl: object` so we need something more
-// specific.
-export type ExtendedConfigOptions = ConfigOptions & {
-  ssl: {
-    rejectUnauthorized?: boolean;
-    checkServerIdentity?: typeof checkServerIdentity;
-    ca?: string[];
-    cert?: string;
-    key?: string;
-    passphrase?: string;
-  };
-};
-
-export function getClusterClientConfig(
-  serverConfig: ClusterClientConfigOptions,
-  { ignoreCertAndKey = false } = {}
-) {
-  const configKeysToPassAsIs: Array<keyof ClusterClientConfigOptions> = [
-    'plugins',
-    'apiVersion',
-    'keepAlive',
-    'pingTimeout',
-    'requestTimeout',
-    'log',
-    'logQueries',
-    'sniffOnStart',
-    'sniffInterval',
-    'sniffOnConnectionFault',
-  ];
-
-  const config: ExtendedConfigOptions = {
-    keepAlive: true,
-    ...pick(serverConfig, configKeysToPassAsIs),
-  };
-
-  if (Array.isArray(serverConfig.hosts)) {
-    const needsAuth = serverConfig.auth !== false && serverConfig.username && serverConfig.password;
-    config.hosts = serverConfig.hosts.map((nodeUrl: string) => {
-      const uri = url.parse(nodeUrl);
-
-      const httpsURI = uri.protocol === 'https:';
-      const httpURI = uri.protocol === 'http:';
-      const protocolPort = (httpsURI && '443') || (httpURI && '80');
-
-      const host: Record<string, unknown> = {
-        host: uri.hostname,
-        port: uri.port || protocolPort,
-        protocol: uri.protocol,
-        path: uri.pathname,
-        query: uri.query,
-        headers: serverConfig.customHeaders,
-      };
-
-      if (needsAuth) {
-        host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
-      }
-    });
-  }
-
-  if (serverConfig.ssl === undefined) {
-    return config;
-  }
-
-  config.ssl = {};
-
-  const verificationMode = serverConfig.ssl.verificationMode;
-  switch (verificationMode) {
-    case 'none':
-      config.ssl.rejectUnauthorized = false;
-      break;
-    case 'certificate':
-      config.ssl.rejectUnauthorized = true;
-
-      // by default, NodeJS is checking the server identify
-      config.ssl.checkServerIdentity = () => undefined;
-      break;
-    case 'full':
-      config.ssl.rejectUnauthorized = true;
-      break;
-    default:
-      throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
-  }
-
-  if (
-    Array.isArray(serverConfig.ssl.certificateAuthorities) &&
-    serverConfig.ssl.certificateAuthorities.length > 0
-  ) {
-    config.ssl.ca = serverConfig.ssl.certificateAuthorities.map(readFile);
-  }
-
-  // Add client certificate and key if required by elasticsearch
-  if (!ignoreCertAndKey && serverConfig.ssl.certificate && serverConfig.ssl.key) {
-    config.ssl.cert = readFile(serverConfig.ssl.certificate);
-    config.ssl.key = readFile(serverConfig.ssl.key);
-    config.ssl.passphrase = serverConfig.ssl.keyPassphrase;
-  }
-
-  return config;
+/* @internal */
+interface CallAPIOptions {
+  wrap401Errors: boolean;
 }
 
 export class ClusterClient {
-  constructor(private readonly config: ExtendedConfigOptions, private readonly log: Logger) {}
+  private static async callAPI(
+    client: Client,
+    endpoint: string,
+    clientParams: Record<string, unknown> = {},
+    options: CallAPIOptions = { wrap401Errors: true }
+  ) {
+    const clientPath = endpoint.split('.');
+    const api: any = get(client, clientPath);
+    if (!api) {
+      throw new Error(`called with an invalid endpoint: ${endpoint}`);
+    }
 
-  public callAsInternalUser() {
-    // noop
+    const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
+    try {
+      return await api.call(apiContext, clientParams);
+    } catch (err) {
+      if (!options.wrap401Errors || err.statusCode !== 401) {
+        throw err;
+      }
+
+      const boomError = Boom.boomify(err, { statusCode: err.statusCode });
+      const wwwAuthHeader: string = get(err, 'body.error.header[WWW-Authenticate]');
+      boomError.output.headers['WWW-Authenticate'] =
+        wwwAuthHeader || 'Basic realm="Authorization Required"';
+
+      throw boomError;
+    }
   }
 
+  private readonly client: Client;
+  private readonly noAuthClient: Client;
+
+  constructor(private readonly config: ElasticsearchClientConfig, log: Logger) {
+    this.client = new Client(parseElasticsearchClientConfig(config, log));
+
+    this.noAuthClient = new Client(
+      parseElasticsearchClientConfig(config, log, {
+        auth: false,
+        ignoreCertAndKey: !config.ssl || !config.ssl.alwaysPresentCertificate,
+      })
+    );
+  }
+
+  public callWithInternalUser = (
+    endpoint: string,
+    clientParams: Record<string, unknown> = {},
+    options: CallAPIOptions
+  ) => {
+    return ClusterClient.callAPI(this.client, endpoint, clientParams, options);
+  };
+
+  public callWithRequest = (
+    req: { headers?: Record<string, string> } = {},
+    endpoint: string,
+    clientParams: Record<string, unknown> = {},
+    options?: CallAPIOptions
+  ) => {
+    if (req.headers) {
+      clientParams.headers = filterHeaders(req.headers, this.config.requestHeadersWhitelist);
+    }
+
+    return ClusterClient.callAPI(this.noAuthClient, endpoint, clientParams, options);
+  };
+
   public close() {
-    // noop
+    this.client.close();
+    this.noAuthClient.close();
   }
 }

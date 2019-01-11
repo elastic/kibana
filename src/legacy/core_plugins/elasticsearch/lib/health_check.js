@@ -25,9 +25,8 @@ import { ensureEsVersion } from './ensure_es_version';
 const NoConnections = elasticsearch.errors.NoConnections;
 
 export default function (plugin, server) {
-  const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
+  const REQUEST_DELAY = server.core.es.bwc.config.healthCheckDelay.asMilliseconds();
 
   plugin.status.yellow('Waiting for Elasticsearch');
   function waitForPong(callWithInternalUser) {

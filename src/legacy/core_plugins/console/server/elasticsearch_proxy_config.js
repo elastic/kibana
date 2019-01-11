@@ -28,7 +28,7 @@ const readFile = (file) => readFileSync(file, 'utf8');
 const createAgent = (server) => {
   const config = server.config();
   const target = url.parse(
-    _.head(config.get('elasticsearch.hosts'))
+    _.head(server.core.es.bwc.config.hosts)
   );
   if (!/^https/.test(target.protocol)) return new http.Agent();
 

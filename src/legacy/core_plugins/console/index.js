@@ -91,7 +91,7 @@ export default function (kibana) {
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
       server.route(createProxyRoute({
-        baseUrl: head(config.get('elasticsearch.hosts')),
+        baseUrl: head(server.core.es.bwc.config.hosts),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
           const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
@@ -136,11 +136,7 @@ export default function (kibana) {
         return {
           elasticsearchUrl: url.format(
             Object.assign(
-              url.parse(
-                head(
-                  server.config().get('elasticsearch.hosts')
-                )
-              ),
+              url.parse(head(server.core.es.bwc.config.hosts)),
               { auth: false }
             )
           )

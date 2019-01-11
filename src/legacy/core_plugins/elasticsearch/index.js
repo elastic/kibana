@@ -17,108 +17,23 @@
  * under the License.
  */
 
-import { compact, get, has, set } from 'lodash';
-import { unset } from '../../../utils';
-
 import healthCheck from './lib/health_check';
-import { createDataCluster } from './lib/create_data_cluster';
-import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
 import { createProxy } from './lib/create_proxy';
 import filterHeaders from './lib/filter_headers';
 
-const DEFAULT_REQUEST_HEADERS = ['authorization'];
-
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana'],
-    config(Joi) {
-      const sslSchema = Joi.object({
-        verificationMode: Joi.string().valid('none', 'certificate', 'full').default('full'),
-        certificateAuthorities: Joi.array().single().items(Joi.string()),
-        certificate: Joi.string(),
-        key: Joi.string(),
-        keyPassphrase: Joi.string(),
-        alwaysPresentCertificate: Joi.boolean().default(false),
-      }).default();
-
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        sniffOnStart: Joi.boolean().default(false),
-        sniffInterval: Joi.number().allow(false).default(false),
-        sniffOnConnectionFault: Joi.boolean().default(false),
-        hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single().default('http://localhost:9200'),
-        preserveHost: Joi.boolean().default(true),
-        username: Joi.string(),
-        password: Joi.string(),
-        shardTimeout: Joi.number().default(30000),
-        requestTimeout: Joi.number().default(30000),
-        requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
-        customHeaders: Joi.object().default({}),
-        pingTimeout: Joi.number().default(Joi.ref('requestTimeout')),
-        startupTimeout: Joi.number().default(5000),
-        logQueries: Joi.boolean().default(false),
-        ssl: sslSchema,
-        apiVersion: Joi.string().default('master'),
-        healthCheck: Joi.object({
-          delay: Joi.number().default(2500)
-        }).default(),
-      }).default();
-    },
-
-    deprecations({ rename }) {
-      const sslVerify = (basePath) => {
-        const getKey = (path) => {
-          return compact([basePath, path]).join('.');
-        };
-
-        return (settings, log) => {
-          const sslSettings = get(settings, getKey('ssl'));
-
-          if (!has(sslSettings, 'verify')) {
-            return;
-          }
-
-          const verificationMode = get(sslSettings, 'verify') ? 'full' : 'none';
-          set(sslSettings, 'verificationMode', verificationMode);
-          unset(sslSettings, 'verify');
-
-          log(`Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with "${getKey('ssl.verificationMode')}"`);
-        };
-      };
-
-      const url = () => {
-        return (settings, log) => {
-          const deprecatedUrl = get(settings, 'url');
-          const hosts = get(settings, 'hosts.length');
-          if (!deprecatedUrl) {
-            return;
-          }
-          if (hosts) {
-            log('Deprecated config key "elasticsearch.url" conflicts with "elasticsearch.hosts".  Ignoring "elasticsearch.url"');
-          } else {
-            set(settings, 'hosts', [deprecatedUrl]);
-            log('Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"');
-          }
-          unset(settings, 'url');
-        };
-      };
-
-      return [
-        rename('ssl.ca', 'ssl.certificateAuthorities'),
-        rename('ssl.cert', 'ssl.certificate'),
-        url(),
-        sslVerify(),
-      ];
-    },
 
     uiExports: {
-      injectDefaultVars(server, options) {
+      injectDefaultVars(server) {
+        const bwcConfig = server.core.es.bwc.config;
         return {
-          esRequestTimeout: options.requestTimeout,
-          esShardTimeout: options.shardTimeout,
-          esApiVersion: options.apiVersion,
+          esRequestTimeout: bwcConfig.requestTimeout.asMilliseconds(),
+          esShardTimeout: bwcConfig.shardTimeout.asMilliseconds(),
+          esApiVersion: bwcConfig.apiVersion,
         };
       }
     },
@@ -131,9 +46,6 @@ export default function (kibana) {
 
       server.expose('filterHeaders', filterHeaders);
       server.expose('ElasticsearchClientLogging', clientLogger(server));
-
-      createDataCluster(server);
-      createAdminCluster(server);
 
       createProxy(server);
 

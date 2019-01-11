@@ -18,11 +18,8 @@
  */
 
 import elasticsearch from 'elasticsearch';
-import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
-import toPath from 'lodash/internal/toPath';
-import Boom from 'boom';
+import { cloneDeep, pick } from 'lodash';
 
-import filterHeaders from './filter_headers';
 import { parseConfig } from './parse_config';
 
 export class Cluster {
@@ -34,36 +31,9 @@ export class Cluster {
 
     this._clients = new Set();
     this._client = this.createClient();
-    this._noAuthClient = this.createClient(
-      { auth: false },
-      { ignoreCertAndKey: !this.getSsl().alwaysPresentCertificate }
-    );
 
     return this;
   }
-
-  callWithRequest = (req = {}, endpoint, clientParams = {}, options = {}) => {
-    if (req.headers) {
-      const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());
-      set(clientParams, 'headers', filteredHeaders);
-    }
-
-    return callAPI(this._noAuthClient, endpoint, clientParams, options);
-  }
-
-  callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
-    return callAPI(this._client, endpoint, clientParams, options);
-  }
-
-  getRequestHeadersWhitelist = () => getClonedProperty(this._config, 'requestHeadersWhitelist');
-
-  getCustomHeaders = () => getClonedProperty(this._config, 'customHeaders');
-
-  getRequestTimeout = () => getClonedProperty(this._config, 'requestTimeout');
-
-  getHosts = () => getClonedProperty(this._config, 'hosts');
-
-  getSsl = () => getClonedProperty(this._config, 'ssl');
 
   getClient = () => this._client;
 
@@ -106,37 +76,6 @@ export class Cluster {
   }
 }
 
-function callAPI(client, endpoint, clientParams = {}, options = {}) {
-  const wrap401Errors = options.wrap401Errors !== false;
-  const clientPath = toPath(endpoint);
-  const api = get(client, clientPath);
-
-  let apiContext = get(client, clientPath.slice(0, -1));
-  if (isEmpty(apiContext)) {
-    apiContext = client;
-  }
-
-  if (!api) {
-    throw new Error(`called with an invalid endpoint: ${endpoint}`);
-  }
-
-  return api.call(apiContext, clientParams).catch((err) => {
-    if (!wrap401Errors || err.statusCode !== 401) {
-      return Promise.reject(err);
-    }
-
-    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-    const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
-    boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
-
-    throw boomError;
-  });
-}
-
 function getClonedProperties(config, paths) {
   return cloneDeep(paths ? pick(config, paths) : config);
-}
-
-function getClonedProperty(config, path) {
-  return cloneDeep(path ? get(config, path) : config);
 }

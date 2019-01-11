@@ -21,25 +21,29 @@ import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
 import { CoreContext, CoreService } from '../../types';
 import { Logger } from '../logging';
-import {
-  ClusterClient,
-  ClusterClientConfigOptions,
-  getClusterClientConfig,
-} from './cluster_client';
+import { ClusterClient } from './cluster_client';
+import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
 
 interface CoreClusterClients {
   config: ElasticsearchConfig;
-  admin: ClusterClient;
-  data: ClusterClient;
+  adminClient: ClusterClient;
+  dataClient: ClusterClient;
 }
 
 /** @internal */
 export interface ElasticsearchServiceStartContract {
-  // Required by the BWC only.
-  readonly bwcConfig: ElasticsearchConfig;
+  // Required for the BWC only.
+  readonly bwc: {
+    readonly config: ElasticsearchConfig;
+    readonly adminClient: ClusterClient;
+    readonly dataClient: ClusterClient;
+  };
 
-  readonly createClient: ElasticsearchService['createClient'];
+  readonly createClient: (
+    type: string,
+    config?: Partial<ElasticsearchClientConfig>
+  ) => ClusterClient;
   readonly adminClient$: Observable<ClusterClient>;
   readonly dataClient$: Observable<ClusterClient>;
 }
@@ -74,8 +78,8 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
 
               const coreClients = {
                 config,
-                admin: this.createClient('admin', config.toClientConfig()),
-                data: this.createClient('data', config.toClientConfig()),
+                adminClient: this.createClusterClient('admin', config),
+                dataClient: this.createClusterClient('data', config),
               };
 
               subscriber.next(coreClients);
@@ -83,8 +87,8 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
               return () => {
                 this.log.debug(`Closing elasticsearch clients`);
 
-                coreClients.admin.close();
-                coreClients.data.close();
+                coreClients.adminClient.close();
+                coreClients.dataClient.close();
               };
             })
         ),
@@ -93,16 +97,16 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
 
     this.subscription = clients$.connect();
 
+    const bwc = await clients$.pipe(first()).toPromise();
+
     return {
-      bwcConfig: await clients$
-        .pipe(
-          first(),
-          map(clients => clients.config)
-        )
-        .toPromise(),
-      createClient: this.createClient.bind(this),
-      adminClient$: clients$.pipe(map(clients => clients.admin)),
-      dataClient$: clients$.pipe(map(clients => clients.data)),
+      bwc,
+      createClient: (type: string, config: Partial<ElasticsearchClientConfig> = {}) => {
+        const defaultConfig: ElasticsearchClientConfig = bwc.config;
+        return this.createClusterClient(type, { ...defaultConfig, ...config });
+      },
+      adminClient$: clients$.pipe(map(clients => clients.adminClient)),
+      dataClient$: clients$.pipe(map(clients => clients.dataClient)),
     };
   }
 
@@ -115,10 +119,7 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
     }
   }
 
-  private createClient(type: string, config: ClusterClientConfigOptions) {
-    return new ClusterClient(
-      getClusterClientConfig(config),
-      this.coreContext.logger.get('elasticsearch', type)
-    );
+  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
+    return new ClusterClient(config, this.coreContext.logger.get('elasticsearch', type));
   }
 }

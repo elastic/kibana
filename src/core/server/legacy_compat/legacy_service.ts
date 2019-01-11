@@ -42,6 +42,18 @@ interface Deps {
   plugins: PluginsServiceStartContract;
 }
 
+function getLegacyRawConfig(config: Config) {
+  const rawConfig = config.toRaw();
+
+  // Elasticsearch config is solely handled by the core and legacy platform
+  // shouldn't have direct access to it.
+  if (rawConfig.elasticsearch !== undefined) {
+    delete rawConfig.elasticsearch;
+  }
+
+  return rawConfig;
+}
+
 /** @internal */
 export class LegacyService implements CoreService {
   private readonly log: Logger;
@@ -120,7 +132,7 @@ export class LegacyService implements CoreService {
 
   private async createKbnServer(config: Config, deps: Deps) {
     const KbnServer = require('../../../server/kbn_server');
-    const kbnServer: LegacyKbnServer = new KbnServer(config.toRaw(), {
+    const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
       // If core HTTP service is run we'll receive internal server reference and
       // options that were used to create that server so that we can properly
       // bridge with the "legacy" Kibana. If server isn't run (e.g. if process is

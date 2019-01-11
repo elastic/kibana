@@ -19,8 +19,8 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { get, has, set } from 'lodash';
+import { Duration } from 'moment';
 import { DeprecationHelpers } from '../config/config_with_schema';
-import { ClusterClientConfigOptions } from './cluster_client';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -108,28 +108,39 @@ export class ElasticsearchConfig {
     ];
   }
 
-  constructor(private readonly config: TypeOf<typeof configSchema>) {}
+  public readonly healthCheckDelay: Duration;
+  public readonly apiVersion: string;
+  public readonly logQueries: boolean;
+  public readonly hosts: string[];
+  public readonly requestHeadersWhitelist: string[];
+  public readonly pingTimeout: Duration;
+  public readonly requestTimeout: Duration;
+  public readonly shardTimeout: Duration;
+  public readonly sniffOnStart: boolean;
+  public readonly sniffInterval: false | Duration;
+  public readonly sniffOnConnectionFault: boolean;
+  public readonly username?: string;
+  public readonly password?: string;
+  public readonly ssl: TypeOf<typeof configSchema>['ssl'];
+  public readonly customHeaders: TypeOf<typeof configSchema>['customHeaders'];
 
-  /**
-   * Config tailored for Elasticsearch client.
-   */
-  public toClientConfig(): ClusterClientConfigOptions {
-    return {
-      apiVersion: this.config.apiVersion,
-      customHeaders: this.config.customHeaders,
-      logQueries: this.config.logQueries,
-      hosts: Array.isArray(this.config.hosts) ? this.config.hosts : [this.config.hosts],
-      ssl: this.config.ssl,
-      sniffInterval:
-        this.config.sniffInterval === false
-          ? this.config.sniffInterval
-          : this.config.sniffInterval.asMilliseconds(),
-      sniffOnStart: this.config.sniffOnStart,
-      sniffOnConnectionFault: this.config.sniffOnConnectionFault,
-      username: this.config.username,
-      password: this.config.password,
-      pingTimeout: this.config.pingTimeout.asMilliseconds(),
-      requestTimeout: this.config.requestTimeout.asMilliseconds(),
-    };
+  constructor(config: TypeOf<typeof configSchema>) {
+    this.apiVersion = config.apiVersion;
+    this.logQueries = config.logQueries;
+    this.hosts = Array.isArray(config.hosts) ? config.hosts : [config.hosts];
+    this.requestHeadersWhitelist = Array.isArray(config.requestHeadersWhitelist)
+      ? config.requestHeadersWhitelist
+      : [config.requestHeadersWhitelist];
+    this.pingTimeout = config.pingTimeout;
+    this.requestTimeout = config.requestTimeout;
+    this.shardTimeout = config.shardTimeout;
+    this.sniffOnStart = config.sniffOnStart;
+    this.sniffOnConnectionFault = config.sniffOnConnectionFault;
+    this.sniffInterval = config.sniffInterval;
+    this.healthCheckDelay = config.healthCheck.delay;
+    this.username = config.username;
+    this.password = config.password;
+    this.customHeaders = config.customHeaders;
+    this.ssl = config.ssl;
   }
 }

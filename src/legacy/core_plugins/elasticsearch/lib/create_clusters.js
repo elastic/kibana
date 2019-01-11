@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { Cluster } from './cluster';
-
 export function createClusters(server) {
-  const clusters = new Map();
+  const clusters = new Map([
+    ['admin', server.core.es.bwc.adminClient],
+    ['data', server.core.es.bwc.dataClient]
+  ]);
 
   server.events.on('stop', () => {
     for (const [name, cluster] of clusters) {
-      cluster.close();
+      // Lifecycle of admin and data clusters is managed by the core.
+      if (name !== 'admin' && name !== 'data') {
+        cluster.close();
+      }
+
       clusters.delete(name);
     }
   });
@@ -35,12 +40,11 @@ export function createClusters(server) {
     },
 
     create(name, config) {
-      const cluster = new Cluster(config);
-
       if (clusters.has(name)) {
         throw new Error(`cluster '${name}' already exists`);
       }
 
+      const cluster = server.core.es.createClient(name, config);
       clusters.set(name, cluster);
 
       return cluster;
