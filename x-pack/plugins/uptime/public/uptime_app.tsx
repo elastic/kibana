@@ -136,17 +136,17 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 <EuiHeaderSection grow={true}>
                   <EuiHeaderSectionItem border="right">
                     <EuiHeaderLogo
-                      aria-label={i18n.translate('xpack.uptime.appHeader.icon.ariaLabel', {
+                      aria-label={i18n.translate('xpack.uptime.appHeader.uptimeLogoAriaLabel', {
                         defaultMessage: 'Go to Uptime home page',
                       })}
                       href="#/"
                       iconType="heartbeatApp"
-                      iconTitle={i18n.translate('xpack.uptime.appHeader.icon.title', {
+                      iconTitle={i18n.translate('xpack.uptime.appHeader.uptimeLogoTitle', {
                         defaultMessage: 'Uptime',
                       })}
                     >
                       <FormattedMessage
-                        id="xpack.uptime.appHeader.logo.text"
+                        id="xpack.uptime.appHeader.uptimeLogoText"
                         defaultMessage="Uptime"
                       />
                     </EuiHeaderLogo>
