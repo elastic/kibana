@@ -50,7 +50,7 @@ export const EmptyState = ({
                 <EuiTitle size="l">
                   <h3>
                     <FormattedMessage
-                      id="xpack.uptime.emptyState.title"
+                      id="xpack.uptime.emptyState.noDataTitle"
                       defaultMessage="No Uptime Data"
                     />
                   </h3>
