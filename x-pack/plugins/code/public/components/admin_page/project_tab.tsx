@@ -22,6 +22,7 @@ import { Repository } from 'x-pack/plugins/code/model';
 import { RootState } from '../../reducers';
 import { ImportProject } from './import_project';
 import { ProjectItem } from './project_item';
+import { ProjectSettings } from './project_settings';
 
 const NewProjectButton = styled(EuiButton)`
   margin-top: 1.5rem;
@@ -36,13 +37,24 @@ const sortOptions = [
   { value: 'recently_added', text: 'Recently Added' },
 ];
 
-class CodeProjectTab extends React.PureComponent<
-  { projects: Repository[]; status: any; isAdmin: boolean },
-  { showImportProjectModal: boolean }
-> {
-  public state = {
-    showImportProjectModal: false,
-  };
+interface Props {
+  projects: Repository[];
+  status: any;
+  isAdmin: boolean;
+}
+interface State {
+  showImportProjectModal: boolean;
+  settingModal: { url?: string; uri?: string; show: boolean };
+}
+
+class CodeProjectTab extends React.PureComponent<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      showImportProjectModal: false,
+      settingModal: { show: false },
+    };
+  }
 
   public closeModal = () => {
     this.setState({ showImportProjectModal: false });
@@ -50,6 +62,14 @@ class CodeProjectTab extends React.PureComponent<
 
   public openModal = () => {
     this.setState({ showImportProjectModal: true });
+  };
+
+  public openSettingModal = (uri: string, url: string) => {
+    this.setState({ settingModal: { uri, url, show: true } });
+  };
+
+  public closeSettingModal = () => {
+    this.setState({ settingModal: { show: false } });
   };
 
   public render() {
@@ -62,8 +82,25 @@ class CodeProjectTab extends React.PureComponent<
     );
 
     const repoList = projects.map((repo: any) => (
-      <ProjectItem key={repo.uri} project={repo} status={status[repo.uri]} isAdmin={isAdmin} />
+      <ProjectItem
+        openSettings={this.openSettingModal}
+        key={repo.uri}
+        project={repo}
+        status={status[repo.uri]}
+        isAdmin={isAdmin}
+      />
     ));
+
+    let settings = null;
+    if (this.state.settingModal.show) {
+      settings = (
+        <ProjectSettings
+          onClose={this.closeSettingModal}
+          repoUri={this.state.settingModal.uri}
+          url={this.state.settingModal.url}
+        />
+      );
+    }
 
     return (
       <div className="code-sidebar" data-test-subj="codeRepositoryList">
@@ -98,6 +135,7 @@ class CodeProjectTab extends React.PureComponent<
         <EuiSpacer />
         {repoList}
         {modal}
+        {settings}
       </div>
     );
   }

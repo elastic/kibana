@@ -173,7 +173,7 @@ export function repositoryRoute(
   });
 
   // Issue a repository index task.
-  // TODO(mengwei): This is just temprorary API stub to trigger the index job. Eventually in the near
+  // TODO(mengwei): This is just temporary API stub to trigger the index job. Eventually in the near
   // future, this route will be removed. The scheduling strategy is still in discussion.
   server.route({
     path: '/api/code/repo/index/{uri*3}',
