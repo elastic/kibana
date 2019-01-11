@@ -51,7 +51,16 @@ export const MonitorStatusBar = ({
           defaultMessage: 'No data found for monitor id {monitorId}',
         });
       }
-      const { monitor, tcp } = monitorStatus[0];
+      const {
+        monitor: {
+          status,
+          timestamp,
+          host,
+          duration: { us },
+          scheme,
+        },
+        tcp: { port },
+      } = monitorStatus[0];
 
       return (
         <EuiPanel>
@@ -61,14 +70,18 @@ export const MonitorStatusBar = ({
                 <EuiFlexItem>Status&#58;</EuiFlexItem>
                 <EuiFlexItem>
                   <EuiHealth
-                    color={monitor.status === 'up' ? 'success' : 'danger'}
+                    color={status === 'up' ? 'success' : 'danger'}
                     style={{ lineHeight: 'inherit' }}
                   >
-                    <FormattedMessage
-                      id="xpack.uptime.monitorStatusBar.healthStatusMessage"
-                      values={{ status: monitor.status === 'up' ? 'Up' : 'Down' }}
-                      defaultMessage="{status}"
-                    />
+                    {status === 'up'
+                      ? i18n.translate(
+                          'xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel',
+                          { defaultMessage: 'Up' }
+                        )
+                      : i18n.translate(
+                          'xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel',
+                          { defaultMessage: 'Down' }
+                        )}
                   </EuiHealth>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -76,21 +89,21 @@ export const MonitorStatusBar = ({
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatusMessage"
-                values={{ timeFromNow: moment(monitor.timestamp).fromNow() }}
+                values={{ timeFromNow: moment(timestamp).fromNow() }}
                 defaultMessage="Last update: {timeFromNow}"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatusHostMessage"
-                values={{ hostname: monitor.host }}
-                defaultMessage="Host: {hostname}"
+                values={{ host }}
+                defaultMessage="Host: {host}"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatusPortMessage"
-                values={{ port: tcp.port }}
+                values={{ port }}
                 defaultMessage="Port: {port}"
               />
             </EuiFlexItem>
@@ -98,14 +111,14 @@ export const MonitorStatusBar = ({
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.durationMilliseconds"
                 // TODO: this should not be computed inline
-                values={{ duration: monitor.duration.us / 1000 }}
+                values={{ duration: us / 1000 }}
                 defaultMessage="Duration: {duration} ms"
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.scheme"
-                values={{ scheme: monitor.scheme }}
+                values={{ scheme }}
                 defaultMessage="Scheme: {scheme}"
               />
             </EuiFlexItem>
