@@ -13,7 +13,7 @@ import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
-import { uncommonProcessesLimitSelector } from '../../store';
+import { uncommonProcessesSelector } from '../../store';
 import { uncommonProcessesQuery } from './index.gql_query';
 
 export interface UncommonProcessesArgs {
@@ -115,6 +115,6 @@ export const hasMoreData = (
   data: UncommonProcessesEdges[]
 ): boolean => limit < upperLimit && limit < data.length;
 
-const mapStateToProps = (state: State) => uncommonProcessesLimitSelector(state);
+const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
 
 export const UncommonProcessesQuery = connect(mapStateToProps)(UncommonProcessesComponentQuery);

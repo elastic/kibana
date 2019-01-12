@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export default function ({ loadTestFile }) {
   describe('SecOps GraphQL Endpoints', () => {
+    loadTestFile(require.resolve('./authorizations'));
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./kpi_events'));

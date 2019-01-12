@@ -6,24 +6,20 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { defaultTo, noop } from 'lodash/fp';
-import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import {
-  HostEcsFields,
-  UncommonProcessesEdges,
-  UncommonProcessItem,
-} from '../../../../graphql/types';
+import moment from 'moment';
+import { AuthorizationItem, AuthorizationsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
-import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
+import { authorizationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 interface OwnProps {
-  data: UncommonProcessesEdges[];
+  data: AuthorizationsEdges[];
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
@@ -32,23 +28,19 @@ interface OwnProps {
   startDate: number;
 }
 
-interface UncommonProcessTableReduxProps {
+interface AuthorizationTableReduxProps {
   limit: number;
 }
 
-interface UncommonProcessTableDispatchProps {
+interface AuthorizationTableDispatchProps {
   updateLimitPagination: (param: { limit: number }) => void;
 }
 
-type UncommonProcessTableProps = OwnProps &
-  UncommonProcessTableReduxProps &
-  UncommonProcessTableDispatchProps;
+type AuthorizationTableProps = OwnProps &
+  AuthorizationTableReduxProps &
+  AuthorizationTableDispatchProps;
 
 const rowItems: ItemsPerRow[] = [
-  {
-    text: '2 rows',
-    numberOfRow: 2,
-  },
   {
     text: '5 rows',
     numberOfRow: 5,
@@ -67,7 +59,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
+const AuthorizationTableComponent = pure<AuthorizationTableProps>(
   ({
     data,
     hasNextPage,
@@ -80,8 +72,8 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     startDate,
   }) => (
     <LoadMoreTable
-      columns={getUncommonColumns(startDate)}
-      loadingTitle="Uncommon Processes"
+      columns={getAuthorizationColumns(startDate)}
+      loadingTitle="Authentication Failures"
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
@@ -91,41 +83,39 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
       title={
         <h3>
-          Uncommon Processes <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          Authentication Failures <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
   )
 );
 
-const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
+const mapStateToProps = (state: State) => authorizationsSelector(state);
 
-export const UncommonProcessTable = connect(
+export const AuthorizationTable = connect(
   mapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
+    updateLimitPagination: hostsActions.updateAuthorizationsLimit,
   }
-)(UncommonProcessTableComponent);
+)(AuthorizationTableComponent);
 
-const extractHostNames = (hosts: HostEcsFields[]) => hosts.map(host => host.name).join(', ');
-
-const getUncommonColumns = (startDate: number) => [
+const getAuthorizationColumns = (startDate: number) => [
   {
-    name: 'Name',
+    name: 'User',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => {
-      const processName = defaultTo('--', uncommonProcess.name);
+    render: ({ authorization }: { authorization: AuthorizationItem }) => {
+      const user = defaultTo('--', authorization.user);
       return (
         <>
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: uncommonProcess._id,
-              name: processName,
+              id: authorization._id,
+              name: user,
               negated: false,
-              queryMatch: `process.name: "${escapeQueryValue(processName)}"`,
+              queryMatch: `auditd.data.acct: "${escapeQueryValue(authorization.user)}"`,
               queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>
@@ -138,7 +128,7 @@ const getUncommonColumns = (startDate: number) => [
                   />
                 </DragEffects>
               ) : (
-                processName
+                user
               )
             }
           />
@@ -147,35 +137,43 @@ const getUncommonColumns = (startDate: number) => [
     },
   },
   {
-    name: 'Command Line',
+    name: 'Failures',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultTo('--', uncommonProcess.title)}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.failures)}</>
     ),
   },
   {
-    name: 'Number of Instances',
+    name: 'Successes',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultTo('--', uncommonProcess.instances)}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.successes)}</>
     ),
   },
   {
-    name: 'Number of Hosts',
+    name: 'From',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{uncommonProcess.hosts != null ? uncommonProcess.hosts.length : '--'}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.from)}</>
     ),
   },
   {
-    name: 'Hosts',
+    name: 'To',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{uncommonProcess.hosts != null ? extractHostNames(uncommonProcess.hosts) : '--'}</>
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', authorization.to.name)}</>
+    ),
+  },
+  {
+    name: 'Latest',
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ authorization }: { authorization: AuthorizationItem }) => (
+      <>{defaultTo('--', moment(authorization.latest).fromNow())}</>
     ),
   },
 ];

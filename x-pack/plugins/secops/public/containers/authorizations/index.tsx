@@ -9,15 +9,16 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
+import { AuthorizationsEdges, GetAuthorizationsQuery, PageInfo } from '../../graphql/types';
 
 import { connect } from 'react-redux';
-import { hostsSelector, inputsModel, State } from '../../store';
-import { hostsQuery } from './index.gql_query';
+import { inputsModel, State } from '../../store';
+import { authorizationsSelector } from '../../store';
+import { authorizationsQuery } from './index.gql_query';
 
-export interface HostsArgs {
+export interface AuthorizationArgs {
   id: string;
-  hosts: HostsEdges[];
+  authorizations: AuthorizationsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
@@ -27,7 +28,7 @@ export interface HostsArgs {
 
 export interface OwnProps {
   id?: string;
-  children: (args: HostsArgs) => React.ReactNode;
+  children: (args: AuthorizationArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
@@ -35,16 +36,25 @@ export interface OwnProps {
   poll: number;
 }
 
-export interface HostsComponentReduxProps {
+export interface AuthorizationsComponentReduxProps {
   limit: number;
 }
 
-type HostsProps = OwnProps & HostsComponentReduxProps;
+type AuthorizationsProps = OwnProps & AuthorizationsComponentReduxProps;
 
-const HostsComponentQuery = pure<HostsProps>(
-  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit, poll }) => (
-    <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
-      query={hostsQuery}
+const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
+  ({
+    id = 'authorizationQuery',
+    children,
+    filterQuery,
+    sourceId,
+    startDate,
+    endDate,
+    limit,
+    poll,
+  }) => (
+    <Query<GetAuthorizationsQuery.Query, GetAuthorizationsQuery.Variables>
+      query={authorizationsQuery}
       fetchPolicy="cache-and-network"
       pollInterval={poll}
       notifyOnNetworkStatusChange
@@ -64,14 +74,14 @@ const HostsComponentQuery = pure<HostsProps>(
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {
-        const hosts = getOr([], 'source.Hosts.edges', data);
+        const authorizations = getOr([], 'source.Authorizations.edges', data);
         return children({
           id,
           refetch,
           loading,
-          totalCount: getOr(0, 'source.Hosts.totalCount', data),
-          hosts,
-          pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
+          totalCount: getOr(0, 'source.Authorizations.totalCount', data),
+          authorizations,
+          pageInfo: getOr({}, 'source.Authorizations.pageInfo', data),
           loadMore: (newCursor: string) =>
             fetchMore({
               variables: {
@@ -88,9 +98,12 @@ const HostsComponentQuery = pure<HostsProps>(
                   ...fetchMoreResult,
                   source: {
                     ...fetchMoreResult.source,
-                    Hosts: {
-                      ...fetchMoreResult.source.Hosts,
-                      edges: [...prev.source.Hosts.edges, ...fetchMoreResult.source.Hosts.edges],
+                    Authorizations: {
+                      ...fetchMoreResult.source.Authorizations,
+                      edges: [
+                        ...prev.source.Authorizations.edges,
+                        ...fetchMoreResult.source.Authorizations.edges,
+                      ],
                     },
                   },
                 };
@@ -102,6 +115,6 @@ const HostsComponentQuery = pure<HostsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelector(state);
+const mapStateToProps = (state: State) => authorizationsSelector(state);
 
-export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);
+export const AuthorizationsQuery = connect(mapStateToProps)(AuthorizationsComponentQuery);

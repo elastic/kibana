@@ -4,13 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  authorizationsSelector,
-  dataProvidersSelector,
-  hostsSelector,
-  eventsSelector,
-  uncommonProcessesSelector,
-  timelineByIdSelector,
-  globalTimeRangeSelector,
-  globalPolicySelector,
-} from './local';
+export { createAuthorizationsResolvers } from './resolvers';
+export { authorizationsSchema } from './schema.gql';

@@ -7,53 +7,66 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
+import { AuthorizationsData } from '../types';
 
-export const mockUncommonProcessesData = {
-  UncommonProcesses: {
+export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
+  Authorizations: {
     totalCount: 4,
     edges: [
       {
-        uncommonProcess: {
-          _id: '3PsyhGcB0WOhS6qy2LAB',
-          hosts: [{ id: 'Hello World', name: 'Hello World' }],
-          instances: 93,
-          name: 'galadriel.elstc.co',
-          title: 'Hello World',
-        },
-        cursor: {
-          value: '6f7be6fb33e6c77f057266415c094408',
-        },
-      },
-      {
-        uncommonProcess: {
+        authorization: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
-          hosts: [{ id: 'Hello World', name: 'Hello World' }],
-          instances: 97,
-          name: 'elrond.elstc.co',
-          title: 'Hello World',
+          failures: 10,
+          successes: 0,
+          user: 'Evan Hassanabad',
+          from: '127.0.0.1',
+          latest: '2019-01-11T06:18:30.745Z',
+          to: {
+            id: '123',
+            name: 'host-computer-1',
+            ip: '192.168.0.1',
+          },
         },
         cursor: {
           value: '98966fa2013c396155c460d35c0902be',
         },
       },
+      {
+        authorization: {
+          _id: 'KwQDiWcB0WOhS6qyXmrW',
+          failures: 10,
+          successes: 0,
+          user: 'Braden Hassanabad',
+          from: '127.0.0.1',
+          latest: '2019-01-11T06:18:30.745Z',
+          to: {
+            id: '234',
+            name: 'host-computer-2',
+            ip: '192.168.0.1',
+          },
+        },
+        cursor: {
+          value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
+        },
+      },
     ],
     pageInfo: {
       endCursor: {
-        value: '98966fa2013c396155c460d35c0902be',
+        value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
       },
       hasNextPage: true,
     },
   },
 };
 
-export const getUncommonProcessesQueryMock = (logger: Logger) => ({
+export const getAuthorizationsQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SecOpsContext) => {
     logger.info('Mock source');
     const operationName = context.req.payload.operationName.toLowerCase();
     switch (operationName) {
       case 'test': {
-        logger.info(`Using mock for test ${mockUncommonProcessesData}`);
-        return mockUncommonProcessesData;
+        logger.info(`Using mock for test ${mockAuthorizationsData}`);
+        return mockAuthorizationsData;
       }
       default: {
         return {};
@@ -62,11 +75,11 @@ export const getUncommonProcessesQueryMock = (logger: Logger) => ({
   },
 });
 
-export const mockUncommonProcessesFields: FieldNode = {
+export const mockAuthorizationsFields: FieldNode = {
   kind: 'Field',
   name: {
     kind: 'Name',
-    value: 'UncommonProcess',
+    value: 'Authorizations',
   },
   selectionSet: {
     kind: 'SelectionSet',
@@ -95,7 +108,7 @@ export const mockUncommonProcessesFields: FieldNode = {
               kind: 'Field',
               name: {
                 kind: 'Name',
-                value: 'uncommonProcesses',
+                value: 'authorization',
               },
               arguments: [],
               directives: [],
@@ -115,7 +128,7 @@ export const mockUncommonProcessesFields: FieldNode = {
                     kind: 'Field',
                     name: {
                       kind: 'Name',
-                      value: 'name',
+                      value: 'failures',
                     },
                     arguments: [],
                     directives: [],
@@ -124,7 +137,7 @@ export const mockUncommonProcessesFields: FieldNode = {
                     kind: 'Field',
                     name: {
                       kind: 'Name',
-                      value: 'instances',
+                      value: 'successes',
                     },
                     arguments: [],
                     directives: [],
@@ -133,10 +146,60 @@ export const mockUncommonProcessesFields: FieldNode = {
                     kind: 'Field',
                     name: {
                       kind: 'Name',
-                      value: 'title',
+                      value: 'user',
                     },
                     arguments: [],
                     directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'from',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'to',
+                    },
+                    arguments: [],
+                    directives: [],
+                    selectionSet: {
+                      kind: 'SelectionSet',
+                      selections: [
+                        {
+                          kind: 'Field',
+                          name: {
+                            kind: 'Name',
+                            value: 'id',
+                          },
+                          arguments: [],
+                          directives: [],
+                        },
+                        {
+                          kind: 'Field',
+                          name: {
+                            kind: 'Name',
+                            value: 'name',
+                          },
+                          arguments: [],
+                          directives: [],
+                        },
+                        {
+                          kind: 'Field',
+                          name: {
+                            kind: 'Name',
+                            value: 'ip',
+                          },
+                          arguments: [],
+                          directives: [],
+                        },
+                      ],
+                    },
                   },
                 ],
               },

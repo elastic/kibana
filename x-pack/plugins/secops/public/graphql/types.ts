@@ -27,6 +27,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
+  /** Gets Authorization success and failures based on a timerange */
+  Authorizations: AuthorizationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -97,6 +99,56 @@ export interface IndexField {
   aggregatable: boolean;
 }
 
+export interface AuthorizationsData {
+  edges: AuthorizationsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface AuthorizationsEdges {
+  authorization: AuthorizationItem;
+
+  cursor: CursorType;
+}
+
+export interface AuthorizationItem {
+  _id: string;
+
+  failures: number;
+
+  successes: number;
+
+  user: string;
+
+  from: string;
+
+  latest: string;
+
+  to: HostEcsFields;
+}
+
+export interface HostEcsFields {
+  id?: string | null;
+
+  ip?: string | null;
+
+  name?: string | null;
+}
+
+export interface CursorType {
+  value: string;
+
+  tiebreaker?: string | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
+}
+
 export interface EventsData {
   kpiEventType?: KpiItem[] | null;
 
@@ -165,14 +217,6 @@ export interface GeoEcsFields {
   region_name?: string | null;
 }
 
-export interface HostEcsFields {
-  id?: string | null;
-
-  ip?: string | null;
-
-  name?: string | null;
-}
-
 export interface SourceEcsFields {
   ip?: string | null;
 
@@ -201,18 +245,6 @@ export interface UserEcsFields {
   id?: number | null;
 
   name?: string | null;
-}
-
-export interface CursorType {
-  value: string;
-
-  tiebreaker?: string | null;
-}
-
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
 }
 
 export interface HostsData {
@@ -278,6 +310,15 @@ export interface SayMyName {
 // InputTypes
 // ====================================================
 
+export interface TimerangeInput {
+  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
+  interval: string;
+  /** The end of the timerange */
+  to: number;
+  /** The beginning of the timerange */
+  from: number;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -293,15 +334,6 @@ export interface SortField {
   direction?: Direction | null;
 }
 
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: number;
-  /** The beginning of the timerange */
-  from: number;
-}
-
 // ====================================================
 // Arguments
 // ====================================================
@@ -309,6 +341,13 @@ export interface TimerangeInput {
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
+}
+export interface AuthorizationsSourceArgs {
+  timerange: TimerangeInput;
+
+  pagination: PaginationInput;
+
+  filterQuery?: string | null;
 }
 export interface EventsSourceArgs {
   pagination: PaginationInput;
@@ -359,6 +398,93 @@ export enum Direction {
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAuthorizationsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Authorizations: Authorizations;
+  };
+
+  export type Authorizations = {
+    __typename?: 'AuthorizationsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'AuthorizationsEdges';
+
+    authorization: Authorization;
+
+    cursor: Cursor;
+  };
+
+  export type Authorization = {
+    __typename?: 'AuthorizationItem';
+
+    _id: string;
+
+    failures: number;
+
+    successes: number;
+
+    user: string;
+
+    from: string;
+
+    to: To;
+
+    latest: string;
+  };
+
+  export type To = {
+    __typename?: 'HostEcsFields';
+
+    id?: string | null;
+
+    name?: string | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
 
 export namespace GetEventsQuery {
   export type Variables = {

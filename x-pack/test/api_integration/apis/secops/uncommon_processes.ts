@@ -10,7 +10,7 @@ import { GetUncommonProcessesQuery } from '../../../../plugins/secops/public/gra
 
 import { KbnTestProvider } from './types';
 
-const hostsTests: KbnTestProvider = ({ getService }) => {
+const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
 
@@ -122,4 +122,4 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 };
 
 // tslint:disable-next-line no-default-export
-export default hostsTests;
+export default uncommonProcessesTests;
