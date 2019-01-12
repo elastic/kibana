@@ -55,8 +55,9 @@ More detail and specific examples can be found in the included HTML file.
 
 */
 
-(function($) {
+import { i18n } from '@kbn/i18n';
 
+(function($) {
 	// Maximum redraw attempts when fitting labels within the plot
 
 	var REDRAW_ATTEMPTS = 10;
