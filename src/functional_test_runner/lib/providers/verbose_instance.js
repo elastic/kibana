@@ -17,6 +17,22 @@
  * under the License.
  */
 
+import { inspect } from 'util';
+
+function printArgs(args) {
+  return args.map((arg) => {
+    if (typeof arg === 'string' || typeof arg === 'number' || arg instanceof Date) {
+      return inspect(arg);
+    }
+
+    if (Array.isArray(arg)) {
+      return `[${printArgs(arg)}]`;
+    }
+
+    return Object.prototype.toString.call(arg);
+  }).join(', ');
+}
+
 export function createVerboseInstance(log, name, instance) {
   if (!log.getWriters().some(l => l.level.flags.verbose)) {
     return instance;
@@ -26,18 +42,18 @@ export function createVerboseInstance(log, name, instance) {
     get(_, prop) {
       const value = instance[prop];
 
-      if (typeof value !== 'function') {
+      if (typeof value !== 'function' || prop === 'init') {
         return value;
       }
 
       return function (...args) {
-        log.verbose(`${name}.${prop}()`);
+        log.verbose(`${name}.${prop}(${printArgs(args)})`);
         log.indent(2);
 
         let result;
         try {
           result = {
-            returned: value.apply(prop === 'then' ? instance : this, args)
+            returned: value.apply(this, args)
           };
         } catch (error) {
           result = {

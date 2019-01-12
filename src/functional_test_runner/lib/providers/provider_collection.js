@@ -101,12 +101,16 @@ export class ProviderCollection {
           getPageObjects: this.getPageObjects,
         });
 
-        if (name !== 'log' && name !== 'config' && instance && typeof instance === 'object') {
-          instance = createVerboseInstance(this._log, name, instance);
-        }
-
         if (instance && typeof instance.then === 'function') {
           instance = createAsyncInstance(type, name, instance);
+        }
+
+        if (name !== '__leadfoot__' && name !== 'log' && name !== 'config' && instance && typeof instance === 'object') {
+          instance = createVerboseInstance(
+            this._log,
+            type === 'PageObject' ? `PageObjects.${name}` : name,
+            instance
+          );
         }
 
         instances.set(provider, instance);
