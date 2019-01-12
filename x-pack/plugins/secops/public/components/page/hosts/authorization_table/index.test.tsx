@@ -37,6 +37,7 @@ describe('Authorization Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.Authorizations.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.Authorizations.pageInfo)!}
             loadMore={loadMore}
+            startDate={1546965070707}
           />
         </ReduxStoreProvider>
       );

@@ -46,6 +46,7 @@ exports[`Authorization Table Component rendering it renders the default Authoriz
   loadMore={[MockFunction]}
   loading={false}
   nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+  startDate={1546965070707}
   totalCount={4}
 />
 `;

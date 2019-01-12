@@ -101,6 +101,7 @@ export const Hosts = pure(() => (
                     refetch={refetch}
                     setQuery={setQuery}
                     loading={loading}
+                    startDate={from}
                     data={authorizations}
                     totalCount={totalCount}
                     nextCursor={getOr(null, 'endCursor.value', pageInfo)!}

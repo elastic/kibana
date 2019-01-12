@@ -5,15 +5,18 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo } from 'lodash/fp';
+import { defaultTo, noop } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import moment from 'moment';
 import { AuthorizationItem, AuthorizationsEdges } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { authorizationsSelector, hostsActions, State } from '../../../../store';
+import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Provider } from '../../../timeline/data_providers/provider';
 
 interface OwnProps {
   data: AuthorizationsEdges[];
@@ -22,6 +25,7 @@ interface OwnProps {
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
+  startDate: number;
 }
 
 interface AuthorizationTableReduxProps {
@@ -65,9 +69,10 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
+    startDate,
   }) => (
     <LoadMoreTable
-      columns={getAuthorizedColumns()}
+      columns={getAuthorizationColumns(startDate)}
       loadingTitle="Authentication Failures"
       loading={loading}
       pageOfItems={data}
@@ -94,7 +99,43 @@ export const AuthorizationTable = connect(
   }
 )(AuthorizationTableComponent);
 
-const getAuthorizedColumns = () => [
+const getAuthorizationColumns = (startDate: number) => [
+  {
+    name: 'User',
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ authorization }: { authorization: AuthorizationItem }) => {
+      const user = defaultTo('--', authorization.user);
+      return (
+        <>
+          <DraggableWrapper
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id: authorization._id,
+              name: user,
+              negated: false,
+              queryMatch: `auditd.data.acct: "${escapeQueryValue(authorization.user)}"`,
+              queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider
+                    dataProvider={dataProvider}
+                    onDataProviderRemoved={noop}
+                    onToggleDataProviderEnabled={noop}
+                  />
+                </DragEffects>
+              ) : (
+                user
+              )
+            }
+          />
+        </>
+      );
+    },
+  },
   {
     name: 'Failures',
     truncateText: false,
@@ -109,14 +150,6 @@ const getAuthorizedColumns = () => [
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
       <>{defaultTo('--', authorization.successes)}</>
-    ),
-  },
-  {
-    name: 'User',
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultTo('--', authorization.user)}</>
     ),
   },
   {
