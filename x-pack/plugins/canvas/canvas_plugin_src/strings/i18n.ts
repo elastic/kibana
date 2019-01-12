@@ -6,22 +6,11 @@
 
 /* eslint-disable */
 
-const noopI18N = {
-  translate: content => {
-    /* tslint:disable */
-    console.error(
-      'Canvas was started without an i18n configuration from Kibana.  This string is not translated and will simply be returned: ' +
-        content
-    );
-    /* tslint:enable */
-
-    return content;
-  },
-};
+import { i18n as i18nCore } from '@kbn/i18n';
 
 export const i18n =
   typeof STUB_CANVAS_I18N !== 'undefined'
     ? STUB_CANVAS_I18N
     : typeof canvas !== 'undefined'
     ? canvas.i18n
-    : noopI18N;
+    : i18nCore;
