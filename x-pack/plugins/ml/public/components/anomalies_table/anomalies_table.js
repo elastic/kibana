@@ -29,9 +29,11 @@ import { AnomalyDetails } from './anomaly_details';
 
 import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../../components/rule_editor';
+import { ml } from '../../services/ml_api_service';
 import {
   INFLUENCERS_LIMIT,
-  ANOMALIES_TABLE_TABS
+  ANOMALIES_TABLE_TABS,
+  MAX_CHARS
 } from './anomalies_table_constants';
 
 class AnomaliesTable extends Component {
@@ -71,18 +73,36 @@ class AnomaliesTable extends Component {
     return null;
   }
 
-  toggleRow = (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
+  toggleRow = async (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
     } else {
       const examples = (item.entityName === 'mlcategory') ?
         _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue]) : undefined;
+      let definition = undefined;
+
+      if (examples !== undefined) {
+        try {
+          definition = await ml.results.getCategoryDefinition(item.jobId, item.source.mlcategory[0]);
+
+          if (definition.terms && definition.terms.length > MAX_CHARS) {
+            definition.terms = `${definition.terms.substring(0, MAX_CHARS)}...`;
+          }
+          if (definition.regex && definition.regex.length > MAX_CHARS) {
+            definition.terms = `${definition.regex.substring(0, MAX_CHARS)}...`;
+          }
+        } catch(error) {
+          console.log('Error fetching category definition for row item.', error);
+        }
+      }
+
       itemIdToExpandedRowMap[item.rowId] = (
         <AnomalyDetails
           tabIndex={tab}
           anomaly={item}
           examples={examples}
+          definition={definition}
           isAggregatedData={this.isShowingAggregatedData()}
           filter={this.props.filter}
           influencersLimit={INFLUENCERS_LIMIT}

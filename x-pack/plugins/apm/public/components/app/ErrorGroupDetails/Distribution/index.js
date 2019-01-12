@@ -5,6 +5,7 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -23,7 +24,12 @@ export function getFormattedBuckets(buckets, bucketSize) {
   });
 }
 
-function Distribution({ distribution, title = 'Occurrences' }) {
+function Distribution({
+  distribution,
+  title = i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
+    defaultMessage: 'Occurrences'
+  })
+}) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
@@ -32,7 +38,13 @@ function Distribution({ distribution, title = 'Occurrences' }) {
   const isEmpty = distribution.totalHits === 0;
 
   if (isEmpty) {
-    return <EmptyMessage heading="No errors were found" />;
+    return (
+      <EmptyMessage
+        heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
+          defaultMessage: 'No errors were found'
+        })}
+      />
+    );
   }
 
   return (
@@ -45,8 +57,18 @@ function Distribution({ distribution, title = 'Occurrences' }) {
         xType="time"
         buckets={buckets}
         bucketSize={distribution.bucketSize}
-        formatYShort={value => `${value} occ.`}
-        formatYLong={value => `${value} occurrences`}
+        formatYShort={value =>
+          i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
+            defaultMessage: '{occCount} occ.',
+            values: { occCount: value }
+          })
+        }
+        formatYLong={value =>
+          i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
+            defaultMessage: '{occCount} occurrences',
+            values: { occCount: value }
+          })
+        }
       />
     </div>
   );

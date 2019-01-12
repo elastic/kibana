@@ -22,17 +22,17 @@ jest.mock('../../services/field_format_service', () => ({
     getFieldFormat: jest.fn()
   }
 }));
-jest.mock('ui/chrome', () => ({
-  getBasePath: (path) => path,
-  getUiSettingsClient: () => ({
-    get: () => null
-  }),
+jest.mock('../../services/job_service', () => ({
+  mlJobService: {
+    getJob: jest.fn()
+  }
 }));
 
 // The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
 // TODO: Refactor the involved tests to avoid this duplication
 jest.mock('ui/chrome',
   () => ({
+    addBasePath: () => '/api/ml',
     getBasePath: () => {
       return '<basepath>';
     },
@@ -66,19 +66,11 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { chartLimits } from '../../util/chart_utils';
-import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+import { getDefaultChartsData } from './explorer_charts_container_service';
 
 import { ExplorerChartsContainer } from './explorer_charts_container';
 
 describe('ExplorerChartsContainer', () => {
-  const mlSelectSeverityServiceMock = {
-    state: {
-      get: () => ({
-        val: ''
-      })
-    }
-  };
-
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
   const rareChartUniqueString = 'y-axis event distribution split by';
@@ -86,29 +78,23 @@ describe('ExplorerChartsContainer', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Minimal Initialization', () => {
-    const wrapper = shallowWithIntl(<ExplorerChartsContainer
-      seriesToPlot={[]}
-      chartsPerRow={1}
-      tooManyBuckets={false}
-      mlSelectSeverityService={mlSelectSeverityServiceMock}
-      mlChartTooltipService={mlChartTooltipService}
-    />);
+    const wrapper = shallowWithIntl(<ExplorerChartsContainer {...getDefaultChartsData()} />);
 
     expect(wrapper.html()).toBe('<div class=\"euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive\"></div>');
   });
 
   test('Initialization with chart data', () => {
-    const wrapper = mountWithIntl(<ExplorerChartsContainer
-      seriesToPlot={[{
+    const props = {
+      ...getDefaultChartsData(),
+      seriesToPlot: [{
         ...seriesConfig,
         chartData,
         chartLimits: chartLimits(chartData)
-      }]}
-      chartsPerRow={1}
-      tooManyBuckets={false}
-      mlSelectSeverityService={mlSelectSeverityServiceMock}
-      mlChartTooltipService={mlChartTooltipService}
-    />);
+      }],
+      chartsPerRow: 1,
+      tooManyBuckets: false
+    };
+    const wrapper = mountWithIntl(<ExplorerChartsContainer {...props} />);
 
     // We test child components with snapshots separately
     // so we just do some high level sanity check here.
@@ -119,17 +105,17 @@ describe('ExplorerChartsContainer', () => {
   });
 
   test('Initialization with rare detector', () => {
-    const wrapper = mountWithIntl(<ExplorerChartsContainer
-      seriesToPlot={[{
+    const props = {
+      ...getDefaultChartsData(),
+      seriesToPlot: [{
         ...seriesConfigRare,
         chartData,
         chartLimits: chartLimits(chartData)
-      }]}
-      chartsPerRow={1}
-      tooManyBuckets={false}
-      mlSelectSeverityService={mlSelectSeverityServiceMock}
-      mlChartTooltipService={mlChartTooltipService}
-    />);
+      }],
+      chartsPerRow: 1,
+      tooManyBuckets: false
+    };
+    const wrapper = mountWithIntl(<ExplorerChartsContainer {...props} />);
 
     // We test child components with snapshots separately
     // so we just do some high level sanity check here.
