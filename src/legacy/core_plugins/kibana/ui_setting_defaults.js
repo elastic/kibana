@@ -770,6 +770,7 @@ export function getUiSettingDefaults() {
       }),
       value: JSON.stringify([
         { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
+        { from: 'now/d-1',  to: 'now/d-1',  display: 'Yesterday',             section: 0 },
         { from: 'now/w',    to: 'now/w',    display: 'This week',             section: 0 },
         { from: 'now/M',    to: 'now/M',    display: 'This month',            section: 0 },
         { from: 'now/y',    to: 'now/y',    display: 'This year',             section: 0 },
