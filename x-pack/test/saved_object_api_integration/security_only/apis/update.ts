@@ -16,7 +16,6 @@ export default function({ getService }: TestInvoker) {
   describe('update', () => {
     const {
       createExpectDoesntExistNotFound,
-      createExpectLegacyForbidden,
       expectDoesntExistRbacForbidden,
       expectNotSpaceAwareResults,
       expectNotSpaceAwareRbacForbidden,
@@ -30,15 +29,15 @@ export default function({ getService }: TestInvoker) {
       tests: {
         spaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectSpaceAwareRbacForbidden,
         },
         notSpaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectNotSpaceAwareRbacForbidden,
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectDoesntExistRbacForbidden,
         },
       },
     });
@@ -65,40 +64,16 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         spaceAware: {
-          statusCode: 200,
-          response: expectSpaceAwareResults,
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
-        },
-      },
-    });
-
-    updateTest(`legacy readonly user`, {
-      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
-          ),
+          response: expectSpaceAwareRbacForbidden,
         },
         notSpaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
-          ),
+          response: expectNotSpaceAwareRbacForbidden,
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
-          ),
+          response: expectDoesntExistRbacForbidden,
         },
       },
     });

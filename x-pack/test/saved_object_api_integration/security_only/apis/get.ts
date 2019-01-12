@@ -30,15 +30,15 @@ export default function({ getService }: TestInvoker) {
       tests: {
         spaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectSpaceAwareRbacForbidden,
         },
         notSpaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectNotSpaceAwareRbacForbidden,
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectDoesntExistRbacForbidden,
         },
       },
     });
@@ -65,34 +65,16 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(),
+          statusCode: 403,
+          response: expectSpaceAwareRbacForbidden,
         },
         notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(),
+          statusCode: 403,
+          response: expectNotSpaceAwareRbacForbidden,
         },
         doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
-        },
-      },
-    });
-
-    getTest(`legacy readonly user`, {
-      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
+          statusCode: 403,
+          response: expectDoesntExistRbacForbidden,
         },
       },
     });
