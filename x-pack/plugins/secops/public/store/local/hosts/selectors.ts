@@ -11,22 +11,22 @@ import { HostsModel } from './model';
 
 const hostsQuery = (state: State): HostsModel => state.local.hosts;
 
-export const authorizationsLimitSelector = createSelector(
+export const authorizationsSelector = createSelector(
   hostsQuery,
   hosts => hosts.query.authorizations
 );
 
-export const hostsLimitSelector = createSelector(
+export const hostsSelector = createSelector(
   hostsQuery,
   hosts => hosts.query.hosts
 );
 
-export const eventsLimitSelector = createSelector(
+export const eventsSelector = createSelector(
   hostsQuery,
   hosts => hosts.query.events
 );
 
-export const uncommonProcessesLimitSelector = createSelector(
+export const uncommonProcessesSelector = createSelector(
   hostsQuery,
   hosts => hosts.query.uncommonProcesses
 );

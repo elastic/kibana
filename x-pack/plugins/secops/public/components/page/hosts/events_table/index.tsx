@@ -13,7 +13,7 @@ import { pure } from 'recompose';
 
 import { Ecs } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
-import { eventsLimitSelector, hostsActions, State } from '../../../../store';
+import { eventsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -92,7 +92,7 @@ const EventsTableComponent = pure<EventsTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => eventsLimitSelector(state);
+const mapStateToProps = (state: State) => eventsSelector(state);
 
 export const EventsTable = connect(
   mapStateToProps,

@@ -5,11 +5,11 @@
  */
 
 export {
-  authorizationsLimitSelector,
+  authorizationsSelector,
   dataProvidersSelector,
-  hostsLimitSelector,
-  eventsLimitSelector,
-  uncommonProcessesLimitSelector,
+  hostsSelector,
+  eventsSelector,
+  uncommonProcessesSelector,
   timelineByIdSelector,
   globalTimeRangeSelector,
   globalPolicySelector,

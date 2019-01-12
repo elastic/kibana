@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
-import { eventsLimitSelector, inputsModel, State } from '../../store';
+import { eventsSelector, inputsModel, State } from '../../store';
 import { eventsQuery } from './index.gql_query';
 
 export interface EventsArgs {
@@ -106,6 +106,6 @@ const EventsComponentQuery = pure<EventsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => eventsLimitSelector(state);
+const mapStateToProps = (state: State) => eventsSelector(state);
 
 export const EventsQuery = connect(mapStateToProps)(EventsComponentQuery);

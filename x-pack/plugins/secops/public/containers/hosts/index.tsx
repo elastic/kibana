@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
 
 import { connect } from 'react-redux';
-import { hostsLimitSelector, inputsModel, State } from '../../store';
+import { hostsSelector, inputsModel, State } from '../../store';
 import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
@@ -102,6 +102,6 @@ const HostsComponentQuery = pure<HostsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsLimitSelector(state);
+const mapStateToProps = (state: State) => hostsSelector(state);
 
 export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);

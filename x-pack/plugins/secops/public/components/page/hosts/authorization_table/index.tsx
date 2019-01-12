@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 
 import moment from 'moment';
 import { AuthorizationItem, AuthorizationsEdges } from '../../../../graphql/types';
-import { authorizationsLimitSelector, hostsActions, State } from '../../../../store';
+import { authorizationsSelector, hostsActions, State } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 interface OwnProps {
@@ -37,10 +37,6 @@ type AuthorizationTableProps = OwnProps &
   AuthorizationTableDispatchProps;
 
 const rowItems: ItemsPerRow[] = [
-  {
-    text: '2 rows',
-    numberOfRow: 2,
-  },
   {
     text: '5 rows',
     numberOfRow: 5,
@@ -89,7 +85,7 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => authorizationsLimitSelector(state);
+const mapStateToProps = (state: State) => authorizationsSelector(state);
 
 export const AuthorizationTable = connect(
   mapStateToProps,

@@ -17,19 +17,21 @@ import { HostsModel } from './model';
 
 export type HostsState = HostsModel;
 
+export const DEFAULT_LIMIT = 10;
+
 export const initialHostsState: HostsState = {
   query: {
     authorizations: {
-      limit: 10,
+      limit: DEFAULT_LIMIT,
     },
     hosts: {
-      limit: 1,
+      limit: DEFAULT_LIMIT,
     },
     events: {
-      limit: 10,
+      limit: DEFAULT_LIMIT,
     },
     uncommonProcesses: {
-      limit: 10,
+      limit: DEFAULT_LIMIT,
       upperLimit: 100,
     },
   },

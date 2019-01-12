@@ -17,7 +17,7 @@ import {
   UncommonProcessItem,
 } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
-import { hostsActions, State, uncommonProcessesLimitSelector } from '../../../../store';
+import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -98,7 +98,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => uncommonProcessesLimitSelector(state);
+const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
 
 export const UncommonProcessTable = connect(
   mapStateToProps,

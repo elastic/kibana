@@ -13,7 +13,7 @@ import { AuthorizationsEdges, GetAuthorizationsQuery, PageInfo } from '../../gra
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
-import { authorizationsLimitSelector } from '../../store';
+import { authorizationsSelector } from '../../store';
 import { authorizationsQuery } from './index.gql_query';
 
 export interface AuthorizationArgs {
@@ -115,6 +115,6 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => authorizationsLimitSelector(state);
+const mapStateToProps = (state: State) => authorizationsSelector(state);
 
 export const AuthorizationsQuery = connect(mapStateToProps)(AuthorizationsComponentQuery);
