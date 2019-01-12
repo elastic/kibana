@@ -39,9 +39,7 @@ const authorizationsTests: KbnTestProvider = ({ getService }) => {
           const authorizations = resp.data.source.Authorizations;
           expect(authorizations.edges.length).to.be(1);
           expect(authorizations.totalCount).to.be(2);
-          expect(authorizations.pageInfo.endCursor!.value).to.equal(
-            'aa7ca589f1b8220002f2fc61c64cfbf1'
-          );
+          expect(authorizations.pageInfo.endCursor!.value).to.equal('(invalid user)');
         });
     });
 
@@ -58,7 +56,7 @@ const authorizationsTests: KbnTestProvider = ({ getService }) => {
             },
             pagination: {
               limit: 2,
-              cursor: 'aa7ca589f1b8220002f2fc61c64cfbf1',
+              cursor: '(invalid user)',
             },
           },
         })
@@ -67,7 +65,7 @@ const authorizationsTests: KbnTestProvider = ({ getService }) => {
 
           expect(authorizations.edges.length).to.be(1);
           expect(authorizations.totalCount).to.be(2);
-          expect(authorizations.edges[0]!.authorization.to.name).to.be('siem-general');
+          expect(authorizations.edges[0]!.authorization.to.name).to.be('siem-kibana');
         });
     });
   });
