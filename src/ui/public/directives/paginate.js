@@ -22,7 +22,7 @@ import { uiModules } from '../modules';
 import paginateControlsTemplate from '../partials/paginate_controls.html';
 
 uiModules.get('kibana')
-  .directive('paginate', function ($parse, $compile) {
+  .directive('paginate', function ($parse, $compile, i18n) {
     return {
       restrict: 'E',
       scope: true,
@@ -61,12 +61,15 @@ uiModules.get('kibana')
       controller: function ($scope, $document) {
         const self = this;
         const ALL = 0;
+        const allSizeTitle = i18n('common.ui.directives.paginate.size.allDropDownOptionLabel', {
+          defaultMessage: 'All',
+        });
 
         self.sizeOptions = [
           { title: '10', value: 10 },
           { title: '25', value: 25 },
           { title: '100', value: 100 },
-          { title: 'All', value: ALL }
+          { title: allSizeTitle, value: ALL }
         ];
 
         // setup the watchers, called in the post-link function

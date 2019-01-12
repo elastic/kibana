@@ -25,7 +25,7 @@ import 'angular-sanitize';
 
 const module = uiModules.get('kibana', ['ngSanitize']);
 
-module.directive('kbnTruncated', function () {
+module.directive('kbnTruncated', function (i18n) {
   return {
     restrict: 'E',
     scope: {
@@ -48,11 +48,17 @@ module.directive('kbnTruncated', function () {
       }
       $scope.truncated = true;
       $scope.expanded = false;
-      $scope.action = 'more';
+      const showLessText = i18n('common.ui.directives.truncated.showLessLinkText', {
+        defaultMessage: 'less'
+      });
+      const showMoreText = i18n('common.ui.directives.truncated.showMoreLinkText', {
+        defaultMessage: 'more'
+      });
+      $scope.action = showMoreText;
       $scope.toggle = () => {
         $scope.expanded = !$scope.expanded;
         $scope.content = $scope.expanded ? source : truncated;
-        $scope.action = $scope.expanded ? 'less' : 'more';
+        $scope.action = $scope.expanded ? showLessText : showMoreText;
       };
     }
   };
