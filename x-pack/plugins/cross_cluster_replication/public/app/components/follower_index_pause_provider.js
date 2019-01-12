@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -13,7 +12,7 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
-// import { deleteFollowerIndex } from '../store/actions';
+import { pauseFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
 
 class Provider extends PureComponent {
@@ -28,12 +27,12 @@ class Provider extends PureComponent {
     event.stopPropagation();
   };
 
-  deleteFollowerIndex = (id) => {
+  pauseFollowerIndex = (id) => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
   onConfirm = () => {
-    // this.props.deleteFollowerIndex(this.state.ids);
+    this.props.pauseFollowerIndex(this.state.ids);
     this.setState({ isModalOpen: false, ids: null });
   }
 
@@ -49,12 +48,12 @@ class Provider extends PureComponent {
     const isSingle = ids.length === 1;
     const title = isSingle
       ? intl.formatMessage({
-        id: 'xpack.crossClusterReplication.deleteFollowerIndex.confirmModal.deleteSingleTitle',
-        defaultMessage: 'Remove follower index \'{name}\'?',
+        id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle',
+        defaultMessage: 'Pause follower index \'{name}\'?',
       }, { name: ids[0] })
       : intl.formatMessage({
-        id: 'xpack.crossClusterReplication.deleteFollowerIndex.confirmModal.deleteMultipleTitle',
-        defaultMessage: 'Remove {count} follower indices?',
+        id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle',
+        defaultMessage: 'Pause {count} follower indices?',
       }, { count: ids.length });
 
     return (
@@ -66,15 +65,15 @@ class Provider extends PureComponent {
           onConfirm={this.onConfirm}
           cancelButtonText={
             intl.formatMessage({
-              id: 'xpack.crossClusterReplication.deleteFollowerIndex.confirmModal.cancelButtonText',
+              id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText',
               defaultMessage: 'Cancel',
             })
           }
-          buttonColor="danger"
+          buttonColor="primary"
           confirmButtonText={
             intl.formatMessage({
-              id: 'xpack.crossClusterReplication.deleteFollowerIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Remove',
+              id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText',
+              defaultMessage: 'Pause',
             })
           }
           onMouseOver={this.onMouseOverModal}
@@ -83,8 +82,8 @@ class Provider extends PureComponent {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.deleteFollowerIndex.confirmModal.multipleDeletionDescription"
-                  defaultMessage="You are about to remove these follower indices:"
+                  id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription"
+                  defaultMessage="These follower indices will be paused:"
                 />
               </p>
               <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>
@@ -101,18 +100,18 @@ class Provider extends PureComponent {
 
     return (
       <Fragment>
-        {children(this.deleteFollowerIndex)}
+        {children(this.pauseFollowerIndex)}
         {isModalOpen && this.renderModal()}
       </Fragment>
     );
   }
 }
 
-const mapDispatchToProps = (/*dispatch*/) => ({
-  // deleteFollowerIndex: (id) => dispatch(deleteFollowerIndex(id)),
+const mapDispatchToProps = (dispatch) => ({
+  pauseFollowerIndex: (id) => dispatch(pauseFollowerIndex(id)),
 });
 
-export const FollowerIndexDeleteProvider = connect(
+export const FollowerIndexPauseProvider = connect(
   undefined,
   mapDispatchToProps
 )(injectI18n(Provider));

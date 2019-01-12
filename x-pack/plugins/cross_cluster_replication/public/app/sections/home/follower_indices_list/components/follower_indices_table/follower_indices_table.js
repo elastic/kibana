@@ -6,19 +6,22 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
-  // EuiLoadingKibana,
+  EuiLoadingKibana,
   EuiToolTip,
-  // EuiOverlayMask,
+  EuiOverlayMask,
 } from '@elastic/eui';
-// import { API_STATUS } from '../../../../../constants';
-import { FollowerIndexDeleteProvider } from '../../../../../components';
+import { API_STATUS } from '../../../../../constants';
+import {
+  FollowerIndexPauseProvider,
+  FollowerIndexResumeProvider,
+  FollowerIndexUnfollowProvider
+} from '../../../../../components';
+import { ContextMenu } from '../context_menu';
 
 export const FollowerIndicesTable = injectI18n(
   class extends PureComponent {
@@ -77,6 +80,27 @@ export const FollowerIndicesTable = injectI18n(
           );
         }
       }, {
+        field: 'shards',
+        name: intl.formatMessage({
+          id: 'xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle',
+          defaultMessage: 'Status',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (shards) => {
+          return shards && shards.length ? (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.table.activeStatus"
+              defaultMessage="Active"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.table.pausedStatus"
+              defaultMessage="Paused"
+            />
+          );
+        }
+      }, {
         field: 'remoteCluster',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
@@ -99,12 +123,62 @@ export const FollowerIndicesTable = injectI18n(
         }),
         actions: [
           {
+            render: ({ name, shards }) => {
+              const isPaused = !shards || !shards.length;
+              const label = isPaused ? (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription"
+                  defaultMessage="Resume follower index"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription"
+                  defaultMessage="Pause follower index"
+                />
+              );
+
+              return isPaused ? (
+                <EuiToolTip
+                  content={label}
+                  delay="long"
+                >
+                  <FollowerIndexResumeProvider>
+                    {(resumeFollowerIndex) => (
+                      <EuiButtonIcon
+                        aria-label={label}
+                        iconType="play"
+                        color="primary"
+                        onClick={() => resumeFollowerIndex(name)}
+                      />
+                    )}
+                  </FollowerIndexResumeProvider>
+                </EuiToolTip>
+              ) : (
+                <EuiToolTip
+                  content={label}
+                  delay="long"
+                >
+                  <FollowerIndexPauseProvider>
+                    {(pauseFollowerIndex) => (
+                      <EuiButtonIcon
+                        aria-label={label}
+                        iconType="pause"
+                        color="primary"
+                        onClick={() => pauseFollowerIndex(name)}
+                      />
+                    )}
+                  </FollowerIndexPauseProvider>
+                </EuiToolTip>
+              );
+            },
+          },
+          {
             render: ({ name }) => {
-              const label = i18n.translate(
-                'xpack.crossClusterReplication.followerIndexList.table.actionDeleteDescription',
-                {
-                  defaultMessage: 'Delete follower index',
-                }
+              const label = (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription"
+                  defaultMessage="Unfollow leader index"
+                />
               );
 
               return (
@@ -112,34 +186,35 @@ export const FollowerIndicesTable = injectI18n(
                   content={label}
                   delay="long"
                 >
-                  <FollowerIndexDeleteProvider>
-                    {(deleteFollowerIndex) => (
+                  <FollowerIndexUnfollowProvider>
+                    {(unfollowLeaderIndex) => (
                       <EuiButtonIcon
                         aria-label={label}
-                        iconType="trash"
+                        iconType="indexFlush"
                         color="danger"
-                        onClick={() => deleteFollowerIndex(name)}
+                        onClick={() => unfollowLeaderIndex(name)}
                       />
                     )}
-                  </FollowerIndexDeleteProvider>
+                  </FollowerIndexUnfollowProvider>
                 </EuiToolTip>
               );
             },
-          }],
+          },
+        ],
         width: '100px',
       }];
     }
 
     renderLoading = () => {
-      // const { apiStatusDelete } = this.props;
-      //
-      // if (apiStatusDelete === API_STATUS.DELETING) {
-      //   return (
-      //     <EuiOverlayMask>
-      //       <EuiLoadingKibana size="xl"/>
-      //     </EuiOverlayMask>
-      //   );
-      // }
+      const { apiStatusDelete } = this.props;
+
+      if (apiStatusDelete === API_STATUS.DELETING) {
+        return (
+          <EuiOverlayMask>
+            <EuiLoadingKibana size="xl"/>
+          </EuiOverlayMask>
+        );
+      }
       return null;
     };
 
@@ -166,23 +241,9 @@ export const FollowerIndicesTable = injectI18n(
 
       const search = {
         toolsLeft: selectedItems.length ? (
-          <FollowerIndexDeleteProvider>
-            {(deleteFollowerIndex) => (
-              <EuiButton
-                iconType="trash"
-                color="danger"
-                onClick={() => deleteFollowerIndex(selectedItems.map(({ name }) => name))}
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.deleteFollowerIndexButtonLabel"
-                  defaultMessage="Delete follower {total, plural, one {index} other {indices}}"
-                  values={{
-                    total: selectedItems.length
-                  }}
-                />
-              </EuiButton>
-            )}
-          </FollowerIndexDeleteProvider>
+          <ContextMenu
+            followerIndices={selectedItems}
+          />
         ) : undefined,
         onChange: this.onSearch,
         box: {
