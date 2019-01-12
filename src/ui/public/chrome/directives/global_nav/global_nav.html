@@ -15,30 +15,21 @@
       <ul>
         <li
           ng-if="!logoBrand && !smallLogoBrand"
-          aria-label="{{ ::'common.ui.chrome.globalNav.logo.logoAriaLabel' | i18n: {
-            defaultMessage: '{appTitle} home',
-            values: {appTitle: appTitle}
-          } }}"
+          aria-label="{{ appTitle }} home"
           class="kbnGlobalNav__logoBrand kibana"
         ></li>
 
         <li
           ng-if="logoBrand"
           ng-style="{ 'background': logoBrand }"
-          aria-label="{{ ::'common.ui.chrome.globalNav.logo.logoAriaLabel' | i18n: {
-            defaultMessage: '{appTitle} home',
-            values: {appTitle: appTitle}
-          } }}"
+          aria-label="{{ appTitle }} home"
           class="kbnGlobalNav__logoBrand hidden-sm"
         ></li>
 
         <li
           ng-if="smallLogoBrand"
           ng-style="{ 'background': smallLogoBrand }"
-          aria-label="{{ ::'common.ui.chrome.globalNav.logo.logoAriaLabel' | i18n: {
-            defaultMessage: '{appTitle} home',
-            values: {appTitle: appTitle}
-          } }}"
+          aria-label="{{ appTitle }} home"
           class="kbnGlobalNav__smallLogoBrand visible-sm hidden-xs"
         ></li>
       </ul>
