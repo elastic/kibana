@@ -1,0 +1,23 @@
+.licFeature {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  background: #F5F5F5;
+  min-height: 100vh; }
+
+.licManagement__pageBody {
+  padding-top: 24px;
+  min-height: auto; }
+
+.licManagement__modal {
+  width: 70vw; }
+
+.licManagement__narrowText {
+  width: 240px; }
+
+.licManagement__ieFlex {
+  -webkit-flex-shrink: 0;
+      -ms-flex-negative: 0;
+          flex-shrink: 0; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIl9saWNlbnNlX21hbmFnZW1lbnQuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL3ZhcmlhYmxlcy9fY29sb3JzLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX3NpemUuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFLG9CQUFZO0VBQVoscUJBQVk7TUFBWixxQkFBWTtVQUFaLGFBQVk7RUFDWixvQkNhNkI7RURaN0Isa0JBQWlCLEVBQ2xCOztBQUVEO0VBQ0Usa0JFRjBCO0VGRzFCLGlCQUFnQixFQUNqQjs7QUFHRDtFQUNFLFlBQVcsRUFDWjs7QUFFRDtFQUNFLGFBQVksRUFDYjs7QUFFRDtFQUNFLHVCQUFjO01BQWQscUJBQWM7VUFBZCxlQUFjLEVBQ2YiLCJmaWxlIjoidG8uY3NzIn0= */

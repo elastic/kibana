@@ -1,0 +1,80 @@
+.loginWelcome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: inherit;
+  background-image: -webkit-gradient(linear, left bottom, left top, from(#F5F5F5), to(#FFF));
+  background-image: linear-gradient(0deg, #F5F5F5 0%, #FFF 100%);
+  opacity: 0;
+  overflow: auto;
+  -webkit-animation: loginWelcome_FadeIn 500ms cubic-bezier(0.694, 0.0482, 0.335, 1) 0s forwards;
+          animation: loginWelcome_FadeIn 500ms cubic-bezier(0.694, 0.0482, 0.335, 1) 0s forwards; }
+
+.loginWelcome::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1; }
+
+.loginWelcome::after {
+  position: fixed;
+  bottom: -2px;
+  left: 0;
+  z-index: 1; }
+
+.loginWelcome__header {
+  position: relative;
+  padding: 32px;
+  z-index: 10; }
+
+.loginWelcome__logo {
+  margin-bottom: 32px;
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  text-align: center;
+  background-color: #FFF;
+  border-radius: 100%;
+  padding: 16px;
+  -webkit-box-shadow: 0 6px 12px -1px rgba(153, 153, 153, 0.2), 0 4px 4px -1px rgba(153, 153, 153, 0.2), 0 2px 2px 0 rgba(153, 153, 153, 0.2);
+          box-shadow: 0 6px 12px -1px rgba(153, 153, 153, 0.2), 0 4px 4px -1px rgba(153, 153, 153, 0.2), 0 2px 2px 0 rgba(153, 153, 153, 0.2); }
+  .loginWelcome__logo .euiIcon {
+    vertical-align: baseline; }
+
+.loginWelcome__footerAction {
+  margin-right: 8px; }
+
+.loginWelcome__content {
+  position: relative;
+  margin: auto;
+  max-width: 460px;
+  padding-left: 32px;
+  padding-right: 32px;
+  z-index: 10; }
+  .loginWelcome__content.loginWelcome__contentDisabledForm {
+    max-width: 700px; }
+
+@-webkit-keyframes loginWelcome_FadeIn {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(200px), scale(0.75);
+            transform: translateY(200px), scale(0.75); }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0), scale(1);
+            transform: translateY(0), scale(1); } }
+
+@keyframes loginWelcome_FadeIn {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(200px), scale(0.75);
+            transform: translateY(200px), scale(0.75); }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0), scale(1);
+            transform: translateY(0), scale(1); } }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInZpZXdzL2xvZ2luL19sb2dpbi5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvdmFyaWFibGVzL196X2luZGV4LnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX3NpemUuc2NzcyIsIi4uLy4uLy4uLy4uL3NyYy91aS9wdWJsaWMvc3R5bGVzL19taXhpbnMuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL21peGlucy9fc2l6ZS5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvdmFyaWFibGVzL19jb2xvcnMuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL21peGlucy9fc2hhZG93LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQ0E7RUFDRSxnQkFBZTtFQUNmLE9BQU07RUFDTixRQUFPO0VBQ1AsU0FBUTtFQUNSLFVBQVM7RUFDVCxlQ2lCd0I7RURoQnhCLG9CQUFtQjtFQUNuQiwyRkFBNEY7RUFBNUYsK0RBQTRGO0VBQzVGLFdBQVU7RUFDVixlQUFjO0VBQ2QsK0ZBQTBGO1VBQTFGLHVGQUEwRixFQUMzRjs7QUFFRDtFQUdFLG1CQUFrQjtFQUNsQixPQUFNO0VBQ04sU0FBUTtFQUNSLFdBQVUsRUFDWDs7QUFFRDtFQUdFLGdCQUFlO0VBQ2YsYUFBWTtFQUNaLFFBQU87RUFDUCxXQUFVLEVBQ1g7O0FBRUQ7RUFDRSxtQkFBa0I7RUFDbEIsY0U3QndCO0VGOEJ4QixZQUFXLEVBQ1o7O0FBRUQ7RUFDRSxvQkVsQ3dCO0VDTXhCLHNCQUFxQjtFQ1hyQixZRFk2QjtFQ1g3QixhRFc2QjtFQUM3QixrQkFBNEI7RUFDNUIsbUJBQWtCO0VBQ2xCLHVCRUZ1QjtFRkd2QixvQkFBbUI7RUFDbkIsY0RsQmdCO0VJV2hCLDRJRE13QjtVQ054QixvSURNd0IsRUwwQnpCO0VHdkJDO0lBQ0UseUJBQXdCLEVBQ3pCOztBSHVCSDtFQUNFLGtCRTNDeUIsRUY0QzFCOztBQUVEO0VBQ0UsbUJBQWtCO0VBQ2xCLGFBQVk7RUFDWixpQkFBZ0I7RUFDaEIsbUJFL0N3QjtFRmdEeEIsb0JFaER3QjtFRmlEeEIsWUFBVyxFQUtaO0VBWEQ7SUFTSSxpQkFBZ0IsRUFDakI7O0FBS0g7RUFDRTtJQUNFLFdBQVU7SUFDVixrREFBeUM7WUFBekMsMENBQXlDLEVBQUE7RUFFM0M7SUFDRSxXQUFVO0lBQ1YsMkNBQWtDO1lBQWxDLG1DQUFrQyxFQUFBLEVBQUE7O0FBUHRDO0VBQ0U7SUFDRSxXQUFVO0lBQ1Ysa0RBQXlDO1lBQXpDLDBDQUF5QyxFQUFBO0VBRTNDO0lBQ0UsV0FBVTtJQUNWLDJDQUFrQztZQUFsQyxtQ0FBa0MsRUFBQSxFQUFBIiwiZmlsZSI6InRvLmNzcyJ9 */

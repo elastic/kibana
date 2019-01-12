@@ -1,0 +1,15 @@
+#indReactRoot {
+  background-color: #F5F5F5; }
+
+.indTable__link {
+  text-align: left; }
+
+.indTable__horizontalScrollContainer {
+  overflow-x: auto;
+  max-width: 100%;
+  height: 100vh; }
+
+.indTable__horizontalScroll {
+  min-width: 800px;
+  width: 100%; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIl9pbmRleF9tYW5hZ2VtZW50LnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX2NvbG9ycy5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0UsMEJDYzZCLEVEYjlCOztBQUVEO0VBQ0UsaUJBQWdCLEVBQ2pCOztBQUVEO0VBQ0UsaUJBQWdCO0VBQ2hCLGdCQUFlO0VBQ2YsY0FBYSxFQUNkOztBQUNEO0VBQ0UsaUJBQWdCO0VBQ2hCLFlBQVcsRUFDWiIsImZpbGUiOiJ0by5jc3MifQ== */
