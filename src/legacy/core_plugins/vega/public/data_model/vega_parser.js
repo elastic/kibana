@@ -185,7 +185,7 @@ export class VegaParser {
         delete this.spec.width;
         delete this.spec.height;
       } else {
-        this._onWarning(i18n.translate('vega.vegaParser.widthAndHeightParamsAreIngroredWithAutosizeFitWarningMessage', {
+        this._onWarning(i18n.translate('vega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage', {
           defaultMessage: 'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
           values: {
             autosizeParam: 'autosize=fit',

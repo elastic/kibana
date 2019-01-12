@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiToolTip
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { MLJobApiResponse } from 'x-pack/plugins/apm/public/services/rest/ml';
 
@@ -31,7 +32,14 @@ export const TransactionSelect: React.SFC<TransactionSelectProps> = ({
   onChange
 }) => {
   return (
-    <EuiFormRow label="Select a transaction type for this job">
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.selectTransactionTypeLabel',
+        {
+          defaultMessage: 'Select a transaction type for this job'
+        }
+      )}
+    >
       <EuiSuperSelect
         valueOfSelected={selected}
         onChange={onChange}
@@ -49,7 +57,14 @@ export const TransactionSelect: React.SFC<TransactionSelectProps> = ({
                     job => job.jobId && job.jobId.includes(type)
                   )
                 ) ? (
-                  <EuiToolTip content="ML job exists for this type">
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.existedJobTooltip',
+                      {
+                        defaultMessage: 'ML job exists for this type'
+                      }
+                    )}
+                  >
                     <EuiIcon type="machineLearningApp" />
                   </EuiToolTip>
                 ) : (
