@@ -13,11 +13,13 @@ import path from 'path';
 import tar from 'tar-fs';
 import URL from 'url';
 import zlib from 'zlib';
-import { LanguageServers } from './language_servers';
-import { InstallManager } from "./install_manager";
-import { ServerOptions } from "../server_options";
+import {LanguageServers} from './language_servers';
+import {InstallManager} from "./install_manager";
+import {ServerOptions} from "../server_options";
 import rimraf from 'rimraf';
-import { LanguageServerStatus } from '../../common/language_server';
+import {LanguageServerStatus} from '../../common/language_server';
+import {Server} from 'hapi';
+import {InstallationType} from "../../common/installation";
 
 const LANG_SERVER_NAME = 'Java';
 const langSrvDef = LanguageServers.find(l => l.name === LANG_SERVER_NAME)!;
@@ -31,7 +33,9 @@ const options: ServerOptions = {
   langServerPath: fakeTestDir
 } as ServerOptions;
 
-const manager = new InstallManager(options);
+const server = new Server();
+
+const manager = new InstallManager(server, options);
 
 beforeAll(async () => {
   console.log('test folder is: ' + fakeTestDir);
@@ -65,7 +69,9 @@ beforeEach(() => {
     });
 });
 afterEach(() => {
-  rimraf.sync(manager.installationPath(langSrvDef));
+  let p = manager.installationPath(langSrvDef);
+  if (p)
+    rimraf.sync(p);
 });
 afterAll(() => {
   nock.cleanAll();
@@ -74,7 +80,8 @@ afterAll(() => {
  
 
 test('it can download a package', async() => {
-  const manager = new InstallManager(options);
+  const manager = new InstallManager(server, options);
+  langSrvDef.installationType = InstallationType.Download
   const p = await manager.downloadFile(langSrvDef);
   console.log('package downloaded at ' + p);
   expect(fs.existsSync(p)).toBeTruthy();
@@ -83,12 +90,32 @@ test('it can download a package', async() => {
 
 test('it can install language server', async() => {
   expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.NOT_INSTALLED);
+  langSrvDef.installationType = InstallationType.Download
   const installPromise =  manager.install(langSrvDef);
   expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.INSTALLING);
   await installPromise;
   expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.READY);
-  const installPath = manager.installationPath(langSrvDef);
+  const installPath = manager.installationPath(langSrvDef)!;
   const fakeFilePath = path.join(installPath, fakeFile);
   expect(fs.existsSync(fakeFilePath)).toBeTruthy();
   expect(fs.readFileSync(fakeFilePath, 'utf8')).toBe(fakeContent);
+});
+
+
+test('install language server by plugin', async() => {
+  langSrvDef.installationType = InstallationType.Plugin
+  expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.NOT_INSTALLED);
+  const testDir = path.join(fakeTestDir, 'test_plugin');
+  fs.mkdirSync(testDir);
+  const pluginName = langSrvDef.installationPluginName as string
+  // @ts-ignore
+  server.plugins = {
+    [pluginName]: {
+      install: {
+        path: testDir
+      }
+    }
+  };
+  expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.READY);
+  expect(manager.installationPath(langSrvDef)).toBe(testDir)
 });

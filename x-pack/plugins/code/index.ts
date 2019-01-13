@@ -112,7 +112,7 @@ export const code = (kibana: any) =>
       const esClient: EsClient = adminCluster.getClient();
 
       const repoConfigController = new RepositoryConfigController(esClient);
-      const installManager = new InstallManager(serverOptions);
+      const installManager = new InstallManager(server, serverOptions);
       const lspService = new LspService(
         '127.0.0.1',
         serverOptions,

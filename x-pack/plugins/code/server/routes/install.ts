@@ -6,6 +6,7 @@
 
 import * as Boom from 'boom';
 import { Request, Server } from 'hapi';
+import { InstallationType } from '../../common/installation';
 import { InstallManager } from '../lsp/install_manager';
 import { LanguageServerDefinition, LanguageServers } from '../lsp/language_servers';
 import { LspService } from '../lsp/lsp_service';
@@ -59,6 +60,11 @@ export function installRoute(
       const name = req.params.name;
       const def = LanguageServers.find(d => d.name === name);
       if (def) {
+        if (def.installationType === InstallationType.Plugin) {
+          return Boom.methodNotAllowed(
+            `${name} language server can only be installed by plugin ${def.installationPluginName}`
+          );
+        }
         await installManager.install(def);
       } else {
         return Boom.notFound(`language server ${name} not found.`);

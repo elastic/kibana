@@ -149,7 +149,7 @@ export class LanguageServerController implements ILanguageServerHandler {
           ls.languageServerHandlers = await ls.launcher.launch(
             true,
             ls.maxWorkspace,
-            this.installManager.installationPath(ls.definition)
+            this.installManager.installationPath(ls.definition)!
           );
         } catch (e) {
           this.log.error(e);

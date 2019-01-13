@@ -7,6 +7,7 @@
 export enum InstallationType {
   Embed,
   Download,
+  Plugin,
 }
 
 export enum InstallEventType {
