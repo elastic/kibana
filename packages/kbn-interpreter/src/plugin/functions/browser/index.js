@@ -19,6 +19,6 @@
 
 import { clog } from './clog';
 
-export const commonFunctions = [
+export const browserFunctions = [
   clog,
 ];
