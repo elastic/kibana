@@ -18,8 +18,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiSelect,
   EuiSpacer,
+  // @ts-ignore
+  EuiSuperSelect,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -36,13 +37,30 @@ const NewProjectButton = styled(EuiButton)`
   margin-top: 1.5rem;
 `;
 
-// TODO(qianliang)
+enum SortOptionsValue {
+  alphabetical_asc = 'alphabetical_asc',
+  alphabetical_desc = 'alphabetical_desc',
+  updated_asc = 'updated_asc',
+  updated_desc = 'updated_desc',
+  recently_added = 'recently_added',
+}
+
+const sortFunctions: { [k: string]: (a: Repository, b: Repository) => number } = {
+  [SortOptionsValue.alphabetical_asc]: (a: Repository, b: Repository) =>
+    a.name!.localeCompare(b.name!),
+  [SortOptionsValue.alphabetical_desc]: (a: Repository, b: Repository) =>
+    b.name!.localeCompare(a.name!),
+  [SortOptionsValue.updated_asc]: () => -1,
+  [SortOptionsValue.updated_desc]: () => -1,
+  [SortOptionsValue.recently_added]: () => -1,
+};
+
 const sortOptions = [
-  { value: 'alpabetical_asc', text: 'A to Z' },
-  { value: 'alpabetical_desc', text: 'Z to A' },
-  { value: 'updated_asc', text: 'Last Updated ASC' },
-  { value: 'updated_desc', text: 'Last Updated DESC' },
-  { value: 'recently_added', text: 'Recently Added' },
+  { value: SortOptionsValue.alphabetical_asc, inputDisplay: 'A to Z' },
+  { value: SortOptionsValue.alphabetical_desc, inputDisplay: 'Z to A' },
+  { value: SortOptionsValue.updated_asc, inputDisplay: 'Last Updated ASC' },
+  { value: SortOptionsValue.updated_desc, inputDisplay: 'Last Updated DESC' },
+  { value: SortOptionsValue.recently_added, inputDisplay: 'Recently Added' },
 ];
 
 interface Props {
@@ -56,6 +74,7 @@ interface State {
   showImportProjectModal: boolean;
   settingModal: { url?: string; uri?: string; show: boolean };
   repoURL: string;
+  sortOption: SortOptionsValue;
 }
 
 class CodeProjectTab extends React.PureComponent<Props, State> {
@@ -65,6 +84,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       showImportProjectModal: false,
       settingModal: { show: false },
       repoURL: '',
+      sortOption: SortOptionsValue.alphabetical_asc,
     };
   }
 
@@ -130,12 +150,18 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     );
   };
 
+  public setSortOption = (value: string) => {
+    this.setState({ sortOption: value as SortOptionsValue });
+  };
+
   public render() {
     const { projects, isAdmin, status } = this.props;
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && this.renderImportModal();
 
-    const repoList = projects.map((repo: any) => (
+    const sortedProjects = projects.sort(sortFunctions[this.state.sortOption]);
+
+    const repoList = sortedProjects.map((repo: Repository) => (
       <ProjectItem
         openSettings={this.openSettingModal}
         key={repo.uri}
@@ -162,16 +188,14 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow label="Sort By">
-              <EuiSelect options={sortOptions} />
+              <EuiSuperSelect
+                options={sortOptions}
+                valueOfSelected={this.state.sortOption}
+                onChange={this.setSortOption}
+              />
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow label="Apply Filters">
-              {/*
-                // @ts-ignore */}
-              <EuiSelect />
-            </EuiFormRow>
-          </EuiFlexItem>
+          <EuiFlexItem grow />
           <EuiFlexItem grow />
           <EuiFlexItem>
             {/*
