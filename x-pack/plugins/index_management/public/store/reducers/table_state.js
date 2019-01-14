@@ -11,9 +11,10 @@ import {
   pageSizeChanged,
   sortChanged,
   showSystemIndicesChanged,
+  toggleChanged,
 } from '../actions';
 
-const defaultState = {
+export const defaultTableState = {
   filter: '',
   pageSize: 10,
   currentPage: 0,
@@ -39,6 +40,15 @@ export const tableState = handleActions({
       showSystemIndices,
     };
   },
+  [toggleChanged](state, action) {
+    const { toggleName, toggleValue } = action.payload;
+    const toggles = { ...state.toggles };
+    toggles[toggleName] = toggleValue;
+    return {
+      ...state,
+      toggles
+    };
+  },
   [sortChanged](state, action) {
     const { sortField, isSortAscending } = action.payload;
 
@@ -62,4 +72,4 @@ export const tableState = handleActions({
       pageSize
     };
   }
-}, defaultState);
+}, defaultTableState);

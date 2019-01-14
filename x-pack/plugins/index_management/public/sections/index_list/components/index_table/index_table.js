@@ -12,7 +12,9 @@ import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
 import '../../../../styles/table.less';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
+import { get } from 'lodash';
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiHealth,
@@ -39,7 +41,12 @@ import {
 } from '@elastic/eui';
 
 import { IndexActionsContextMenu } from '../../components';
-import { getBannerExtensions, getFilterExtensions } from '../../../../index_management_extensions';
+import {
+  getBannerExtensions,
+  getFilterExtensions,
+  getToggleExtensions,
+  getBadgeExtensions,
+} from '../../../../index_management_extensions';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -207,7 +214,26 @@ export class IndexTableUi extends Component {
     });
   }
 
-  buildRowCell(fieldName, value) {
+  renderBadges(index) {
+    const badgeLabels = [];
+    getBadgeExtensions().forEach(({ propertyPath, label }) => {
+      if (get(index, propertyPath)) {
+        badgeLabels.push(label);
+      }
+    });
+    return (
+      <Fragment>
+        {badgeLabels.map((badgeLabel) => {
+          return (
+            <Fragment>
+              <EuiBadge color="primary" key={badgeLabel}>{badgeLabel}</EuiBadge>{' '}
+            </Fragment>
+          );
+        })}
+      </Fragment>
+    );
+  }
+  buildRowCell(fieldName, value, index) {
     const { openDetailPanel } = this.props;
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
@@ -220,7 +246,7 @@ export class IndexTableUi extends Component {
             openDetailPanel(value);
           }}
         >
-          {value}
+          {this.renderBadges(index)}{value}
         </EuiLink>
       );
     }
@@ -237,7 +263,7 @@ export class IndexTableUi extends Component {
           truncateText={false}
           data-test-subj={`indexTableCell-${fieldName}`}
         >
-          {this.buildRowCell(fieldName, value)}
+          {this.buildRowCell(fieldName, value, index)}
         </EuiTableRowCell>
       );
     });
@@ -310,7 +336,25 @@ export class IndexTableUi extends Component {
   onItemSelectionChanged = selectedIndices => {
     this.setState({ selectedIndices });
   };
-
+  renderToggleControl(propertyPath, label) {
+    const { allIndices, toggles, toggleChanged } = this.props;
+    const hasProperty = !!allIndices.find((index) => {
+      return get(index, propertyPath);
+    });
+    if (!hasProperty) {
+      return null;
+    }
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          id={`checkboxToggles{propertyPath}`}
+          checked={toggles[propertyPath]}
+          onChange={event => toggleChanged(propertyPath, event.target.checked)}
+          label={label}
+        />
+      </EuiFlexItem>
+    );
+  }
   render() {
     const {
       filter,
@@ -320,7 +364,7 @@ export class IndexTableUi extends Component {
       intl,
       loadIndices,
       indicesLoading,
-      allIndices
+      allIndices,
     } = this.props;
     const emptyState = indicesLoading ? (
       <EuiFlexGroup justifyContent="spaceAround">
@@ -356,21 +400,26 @@ export class IndexTableUi extends Component {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {indicesLoading && allIndices.length === 0 ? null :
-              (
-                <EuiSwitch
-                  id="checkboxShowSystemIndices"
-                  checked={showSystemIndices}
-                  onChange={event => showSystemIndicesChanged(event.target.checked)}
-                  label={
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                      defaultMessage="Include system indices"
-                    />
-                  }
-                />
-              )
-            }
+            {indicesLoading && allIndices.length === 0 ? null : (
+              <EuiFlexGroup>
+                {getToggleExtensions().map(({ propertyPath, label }) => {
+                  return this.renderToggleControl(propertyPath, label);
+                })}
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    id="checkboxShowSystemIndices"
+                    checked={showSystemIndices}
+                    onChange={event => showSystemIndicesChanged(event.target.checked)}
+                    label={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                        defaultMessage="Include system indices"
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />

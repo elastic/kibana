@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Pager, EuiSearchBar } from '@elastic/eui';
+import { every, get } from 'lodash';
 
 import { createSelector } from 'reselect';
 import { indexStatusLabels } from '../../lib/index_status_labels';
@@ -26,19 +27,30 @@ export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;
 export const getTableState = (state) => state.tableState;
 
-
 export const getIndexStatusByIndexName = (state, indexName) => {
   const indices = getIndices(state);
   const { status } = indices[indexName] || {};
   return status;
 };
 const defaultFilterFields = ['name', 'uuid'];
+
+const filterByToggles = (indices, toggles) => {
+  const togglesOff = Object.keys(toggles).filter((key) => {
+    return !get(toggles, key);
+  });
+  return indices.filter((index) => {
+    return every(togglesOff, (toggleOff) => {
+      return !index[toggleOff];
+    });
+  });
+};
 const getFilteredIndices = createSelector(
   getIndices,
   getRowStatuses,
   getTableState,
   (indices, rowStatuses, tableState) => {
-    const indexArray = Object.keys(indices).map(indexName => indices[indexName]);
+    let indexArray = Object.keys(indices).map(indexName => indices[indexName]);
+    indexArray = filterByToggles(indexArray, tableState.toggles);
     const systemFilteredIndexes = tableState.showSystemIndices
       ? indexArray
       : indexArray.filter(index => !(index.name + '').startsWith('.'));

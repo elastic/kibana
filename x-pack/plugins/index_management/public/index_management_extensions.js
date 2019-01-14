@@ -32,5 +32,19 @@ export const addFilterExtension = (filterExtension)=> {
 export const getFilterExtensions = () => {
   return filterExtensions;
 };
+const toggleExtensions = [];
+export const addToggleExtension = (toggleExtension)=> {
+  toggleExtensions.push(toggleExtension);
+};
+export const getToggleExtensions = () => {
+  return toggleExtensions;
+};
+const badgeExtensions = [];
+export const addBadgeExtension = (badgeExtension)=> {
+  badgeExtensions.push(badgeExtension);
+};
+export const getBadgeExtensions = () => {
+  return badgeExtensions;
+};
 
 

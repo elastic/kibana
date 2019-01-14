@@ -6,10 +6,17 @@
 
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
+import { getToggleExtensions } from '../index_management_extensions';
+import { defaultTableState } from './reducers/table_state';
 
 import { indexManagement } from './reducers/';
 
-export const indexManagementStore = (initialState = {}) => {
+export const indexManagementStore = () => {
+  const toggles = {};
+  getToggleExtensions().forEach((toggleExtension) => {
+    toggles[toggleExtension.propertyPath] = false;
+  });
+  const initialState = { tableState: { ...defaultTableState, toggles: toggles } };
   const enhancers = [ applyMiddleware(thunk) ];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
