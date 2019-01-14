@@ -28,9 +28,16 @@ export const secretstore = (kibana: any) => {
       },
     },
 
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+
     init(server: any) {
       const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
 
+      // const secret = server.config().get('xpack.secretstore.secret');
       if (!keystore.exists()) {
         keystore.reset();
         keystore.save();
@@ -40,15 +47,17 @@ export const secretstore = (kibana: any) => {
       if (!keystore.has('xpack.secretstore.secret')) {
         keystore.add('xpack.secretstore.secret', crypto.randomBytes(128).toString('hex'));
         warn('Missing key - one has been auto-generated for use.');
+        // keystore.save();
       }
+
+      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+      const so = server.savedObjects.getSavedObjectsRepository(callWithInternalUser, [
+        'secretType',
+      ]);
 
       server.expose(
         'secretstore',
-        new SecretStore(
-          server.savedObjects.getScopedSavedObjectsClient(),
-          'secretType',
-          keystore.get('xpack.secretstore.secret')
-        )
+        new SecretStore(so, 'secretType', keystore.get('xpack.secretstore.secret'))
       );
     },
   });
