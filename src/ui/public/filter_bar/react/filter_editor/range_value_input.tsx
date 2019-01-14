@@ -38,6 +38,7 @@ interface Props {
   value?: RangeParams;
   onChange: (params: RangeParamsPartial, isInvalid: boolean) => void;
   intl: InjectedIntl;
+  refCallback: (element: HTMLElement) => void;
 }
 
 interface State {
@@ -78,6 +79,7 @@ class RangeValueInputUI extends Component<Props, State> {
                 id: 'common.ui.filterEditor.rangeStartInputPlaceholder',
                 defaultMessage: 'Start of the range',
               })}
+              refCallback={this.props.refCallback}
             />
           </EuiFormRow>
         </EuiFlexItem>

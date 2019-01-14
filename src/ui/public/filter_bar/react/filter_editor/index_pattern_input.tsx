@@ -27,6 +27,7 @@ interface Props {
   options: IndexPattern[];
   onChange: (value?: IndexPattern) => void;
   intl: InjectedIntl;
+  refCallback: (element: HTMLElement) => void;
 }
 
 class IndexPatternInputUI extends Component<Props> {
@@ -50,6 +51,7 @@ class IndexPatternInputUI extends Component<Props> {
           onChange={this.onChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          inputRef={this.props.refCallback}
         />
       </EuiFormRow>
     );

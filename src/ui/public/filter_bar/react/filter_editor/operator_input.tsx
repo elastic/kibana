@@ -29,6 +29,7 @@ interface Props {
   value?: Operator;
   onChange: (value?: Operator) => void;
   intl: InjectedIntl;
+  refCallback: (element: HTMLElement) => void;
 }
 
 class OperatorInputUI extends Component<Props> {
@@ -53,6 +54,7 @@ class OperatorInputUI extends Component<Props> {
           onChange={this.onChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          inputRef={this.props.refCallback}
         />
       </EuiFormRow>
     );

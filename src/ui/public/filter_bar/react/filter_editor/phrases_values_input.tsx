@@ -27,6 +27,7 @@ interface Props extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[], isInvalid: boolean) => void;
   intl: InjectedIntl;
+  refCallback: (element: HTMLElement) => void;
 }
 
 class PhrasesValuesInputUI extends PhraseSuggestor<Props> {
@@ -50,6 +51,7 @@ class PhrasesValuesInputUI extends PhraseSuggestor<Props> {
           onCreateOption={this.onAdd}
           onChange={this.onChange}
           isClearable={false}
+          inputRef={this.props.refCallback}
         />
       </EuiFormRow>
     );

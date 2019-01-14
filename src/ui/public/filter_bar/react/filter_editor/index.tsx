@@ -79,6 +79,10 @@ interface State {
 }
 
 class FilterEditorUI extends Component<Props, State> {
+  private indexPatternInput?: HTMLElement;
+  private fieldInput?: HTMLElement;
+  private operatorInput?: HTMLElement;
+  private valueInput?: HTMLElement;
   public constructor(props: Props) {
     super(props);
     this.state = {
@@ -178,6 +182,7 @@ class FilterEditorUI extends Component<Props, State> {
             options={this.props.indexPatterns}
             value={this.state.selectedIndexPattern}
             onChange={this.onIndexPatternChange}
+            refCallback={this.setIndexPatternInputRef}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -193,6 +198,7 @@ class FilterEditorUI extends Component<Props, State> {
               options={this.getFieldOptions()}
               value={this.state.selectedField}
               onChange={this.onFieldChange}
+              refCallback={this.setFieldInputRef}
             />
           </EuiFlexItem>
           <EuiFlexItem style={{ maxWidth: '188px' }}>
@@ -200,6 +206,7 @@ class FilterEditorUI extends Component<Props, State> {
               field={this.state.selectedField}
               value={this.state.selectedOperator}
               onChange={this.onOperatorChange}
+              refCallback={this.setOperatorInputRef}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -241,6 +248,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             value={this.state.params}
             onChange={this.onParamsChange}
+            refCallback={this.setValueInputRef}
           />
         );
       case 'phrases':
@@ -250,6 +258,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
+            refCallback={this.setValueInputRef}
           />
         );
       case 'range':
@@ -258,10 +267,27 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             value={this.state.params}
             onChange={this.onParamsChange}
+            refCallback={this.setValueInputRef}
           />
         );
     }
   }
+
+  private setIndexPatternInputRef = (element: HTMLElement) => {
+    this.indexPatternInput = element;
+  };
+
+  private setFieldInputRef = (element: HTMLElement) => {
+    this.fieldInput = element;
+  };
+
+  private setOperatorInputRef = (element: HTMLElement) => {
+    this.operatorInput = element;
+  };
+
+  private setValueInputRef = (element: HTMLElement) => {
+    this.valueInput = element;
+  };
 
   private toggleCustomEditor = () => {
     const isCustomEditorOpen = !this.state.isCustomEditorOpen;
@@ -295,13 +321,21 @@ class FilterEditorUI extends Component<Props, State> {
     const selectedField = undefined;
     const selectedOperator = undefined;
     const params = undefined;
-    this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
+    this.setState({ selectedIndexPattern, selectedField, selectedOperator, params }, () => {
+      if (this.fieldInput) {
+        this.fieldInput.focus();
+      }
+    });
   };
 
   private onFieldChange = (selectedField?: IndexPatternField) => {
     const selectedOperator = undefined;
     const params = undefined;
-    this.setState({ selectedField, selectedOperator, params });
+    this.setState({ selectedField, selectedOperator, params }, () => {
+      if (this.operatorInput) {
+        this.operatorInput.focus();
+      }
+    });
   };
 
   private onOperatorChange = (selectedOperator?: Operator) => {
@@ -310,7 +344,11 @@ class FilterEditorUI extends Component<Props, State> {
       get(this.state.selectedOperator, 'type') === get(selectedOperator, 'type')
         ? this.state.params
         : undefined;
-    this.setState({ selectedOperator, params });
+    this.setState({ selectedOperator, params }, () => {
+      if (this.valueInput) {
+        this.valueInput.focus();
+      }
+    });
   };
 
   private onCustomLabelSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -29,6 +29,7 @@ interface Props {
   onChange: (value: string | number | boolean, isInvalid: boolean) => void;
   placeholder: string;
   intl: InjectedIntl;
+  refCallback: (element: HTMLElement) => void;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -42,6 +43,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
+            inputRef={this.props.refCallback}
           />
         );
         break;
@@ -51,6 +53,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={typeof value === 'string' ? parseFloat(value) : value}
             onChange={this.onChange}
+            inputRef={this.props.refCallback}
           />
         );
         break;
@@ -61,6 +64,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            inputRef={this.props.refCallback}
           />
         );
         break;
@@ -71,6 +75,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            inputRef={this.props.refCallback}
           />
         );
         break;
@@ -96,6 +101,7 @@ class ValueInputTypeUI extends Component<Props> {
             ]}
             value={value}
             onChange={this.onBoolChange}
+            inputRef={this.props.refCallback}
           />
         );
         break;

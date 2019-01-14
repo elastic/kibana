@@ -27,6 +27,7 @@ interface Props {
   options: IndexPatternField[];
   onChange: (value?: IndexPatternField) => void;
   intl: InjectedIntl;
+  refCallback: (element: HTMLElement) => void;
 }
 
 class FieldInputUI extends Component<Props> {
@@ -45,6 +46,7 @@ class FieldInputUI extends Component<Props> {
           onChange={this.onChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          inputRef={this.props.refCallback}
         />
       </EuiFormRow>
     );
