@@ -20,7 +20,7 @@ import { emsServiceSettings } from '../../../kibana_services';
 export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
-  static typeDisplayName = 'Elastic Maps Service region boundaries';
+  static typeDisplayName = 'Elastic Maps Service vector shapes';
 
   static createDescriptor(id) {
     return {
@@ -60,7 +60,9 @@ export class EMSFileSource extends VectorSource {
         <strong>{EMSFileSource.typeDisplayName}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">Political boundry vectors hosted by EMS.</p>
+          <p className="euiTextColor--subdued">
+            Vector shapes of administrative boundaries from Elastic Maps Service
+          </p>
         </EuiText>
       </Fragment>
     );

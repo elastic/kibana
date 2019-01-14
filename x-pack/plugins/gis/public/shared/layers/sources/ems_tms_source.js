@@ -18,7 +18,7 @@ import _ from 'lodash';
 export class EMSTMSSource extends TMSSource {
 
   static type = 'EMS_TMS';
-  static typeDisplayName = 'Elastic Maps Service Tile Service';
+  static typeDisplayName = 'Elastic Maps Service tiles';
 
   static createDescriptor(serviceId) {
     return {
@@ -58,7 +58,9 @@ export class EMSTMSSource extends TMSSource {
         <strong>{EMSTMSSource.typeDisplayName}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">Tile services hosted by EMS.</p>
+          <p className="euiTextColor--subdued">
+            Map tiles from Elastic Maps Service
+          </p>
         </EuiText>
       </Fragment>
     );
