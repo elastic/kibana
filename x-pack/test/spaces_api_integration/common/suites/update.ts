@@ -34,14 +34,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
-    });
-  };
-
   const expectNotFound = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
@@ -134,7 +126,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   updateTest.only = makeUpdateTest(describe.only);
 
   return {
-    createExpectLegacyForbidden,
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectNotFound,

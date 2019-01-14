@@ -16,7 +16,6 @@ export default function({ getService }: TestInvoker) {
 
   const {
     createTest,
-    createExpectLegacyForbidden,
     createExpectSpaceAwareResults,
     expectNotSpaceAwareResults,
     expectNotSpaceAwareRbacForbidden,

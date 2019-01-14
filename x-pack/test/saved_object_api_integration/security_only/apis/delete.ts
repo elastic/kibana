@@ -15,7 +15,6 @@ export default function({ getService }: TestInvoker) {
 
   describe('delete', () => {
     const {
-      createExpectLegacyForbidden,
       createExpectUnknownDocNotFound,
       deleteTest,
       expectEmpty,

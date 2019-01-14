@@ -54,15 +54,6 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
-    });
-  };
-
   const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       page: 1,
@@ -195,7 +186,6 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
 
   return {
     createExpectEmpty,
-    createExpectLegacyForbidden,
     createExpectRbacForbidden,
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,

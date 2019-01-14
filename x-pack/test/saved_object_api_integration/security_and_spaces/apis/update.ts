@@ -16,7 +16,6 @@ export default function({ getService }: TestInvoker) {
 
   describe('update', () => {
     const {
-      createExpectLegacyForbidden,
       createExpectDoesntExistNotFound,
       expectDoesntExistRbacForbidden,
       expectNotSpaceAwareResults,

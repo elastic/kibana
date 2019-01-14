@@ -20,7 +20,6 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectRbacForbidden,
-    createExpectLegacyForbidden,
   } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('update', () => {
