@@ -512,13 +512,7 @@ export class JobCreateUi extends Component {
           <EuiSpacer size="l" />
 
           {this.renderNavigation()}
-          <EuiSpacer />
 
-          {this.renderCurrentStep()}
-
-          <EuiSpacer size="l" />
-
-          {this.renderNavigation()}
         </EuiPageContent>
         {savingFeedback}
       </Fragment>
