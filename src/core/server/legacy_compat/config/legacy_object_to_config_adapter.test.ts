@@ -90,40 +90,8 @@ describe('#get', () => {
       },
     });
 
-    const configAdapterWithCert = new LegacyObjectToConfigAdapter({
-      server: {
-        autoListen: true,
-        basePath: '/abc',
-        cors: false,
-        host: 'host',
-        maxPayloadBytes: 1000,
-        port: 1234,
-        rewriteBasePath: false,
-        ssl: { enabled: true, cert: 'deprecated-cert', key: 'key' },
-        someNotSupportedValue: 'val',
-      },
-    });
-
-    const configAdapterWithoutSSLEnabled = new LegacyObjectToConfigAdapter({
-      server: {
-        autoListen: true,
-        basePath: '/abc',
-        cors: false,
-        host: 'host',
-        maxPayloadBytes: 1000,
-        port: 1234,
-        rewriteBasePath: false,
-        ssl: { certificate: 'cert', key: 'key' },
-        someNotSupportedValue: 'val',
-      },
-    });
-
     expect(configAdapter.get('server')).toMatchSnapshot('default');
     expect(configAdapterWithDisabledSSL.get('server')).toMatchSnapshot('disabled ssl');
-    expect(configAdapterWithCert.get('server')).toMatchSnapshot('deprecated ssl.cert');
-    expect(configAdapterWithoutSSLEnabled.get('server')).toMatchSnapshot(
-      'deprecated missing ssl.enabled'
-    );
   });
 });
 
