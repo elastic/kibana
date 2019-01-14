@@ -26,22 +26,10 @@ interface Aggs {
 
 export type ESResponse = AggregationSearchResponse<void, Aggs>;
 
-const percentSystemMemoryUsedScript = `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`;
-const averageSystemMemoryUsed = {
-  avg: {
-    script: {
-      lang: 'expression',
-      source: percentSystemMemoryUsedScript
-    }
-  }
-};
-
-const maxSystemMemoryUsed = {
-  max: {
-    script: {
-      lang: 'expression',
-      source: percentSystemMemoryUsedScript
-    }
+const percentSystemMemoryUsedScript = {
+  script: {
+    lang: 'expression',
+    source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
   }
 };
 
@@ -49,12 +37,12 @@ export async function fetch(args: MetricsRequestArgs) {
   return fetchMetrics<Aggs>({
     ...args,
     timeseriesBucketAggregations: {
-      averagePercentMemoryUsed: averageSystemMemoryUsed,
-      maximumPercentMemoryUsed: maxSystemMemoryUsed
+      averagePercentMemoryUsed: { avg: percentSystemMemoryUsedScript },
+      maximumPercentMemoryUsed: { max: percentSystemMemoryUsedScript }
     },
     totalAggregations: {
-      averagePercentMemoryUsed: averageSystemMemoryUsed,
-      maximumPercentMemoryUsed: maxSystemMemoryUsed
+      averagePercentMemoryUsed: { avg: percentSystemMemoryUsedScript },
+      maximumPercentMemoryUsed: { max: percentSystemMemoryUsedScript }
     }
   });
 }

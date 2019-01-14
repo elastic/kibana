@@ -42,7 +42,7 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
   };
 
   // using forEach here to avoid looping over the entire dataset
-  // 4 times or doing a complicated, memory-heavy map/reduce
+  // multiple times or doing a complicated, memory-heavy map/reduce
   timeseriesData.buckets.forEach(({ key, ...bucket }) => {
     MEMORY_METRIC_NAMES.forEach(name => {
       series[name].push({ x: key, y: bucket[name].value });

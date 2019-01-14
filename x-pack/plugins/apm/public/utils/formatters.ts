@@ -147,7 +147,3 @@ export function asPercent(
 
   return numeral(decimal).format('0.00%');
 }
-
-export function asGB(bytes: number | null, places = 1) {
-  return ((bytes || 0) / 1e9).toFixed(places) + ' GB';
-}
