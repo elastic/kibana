@@ -139,7 +139,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
                     if (this.props.onSave) {
                       this.props.onSave({
                         ...this.state.configBlock,
-                        configs: [data],
+                        config: data,
                       });
                     }
                     this.props.onClose();

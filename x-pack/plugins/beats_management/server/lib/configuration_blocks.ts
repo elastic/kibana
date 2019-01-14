@@ -65,10 +65,10 @@ export class ConfigurationBlocksLib {
       await this.tags.upsertTag(user, tag);
     }
 
-    const id = await this.adapter.create(user, [block]);
+    const ids = await this.adapter.create(user, [block]);
     return {
       success: true,
-      blockID: id,
+      blockID: ids[0],
     };
   }
 }

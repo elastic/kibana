@@ -34,6 +34,12 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
     }
   }
 
+  public async componentWillMount() {
+    if (!this.props.urlState.createdTag) {
+      return await this.props.libs.tags.upsertTag(this.state.tag);
+    }
+  }
+
   public render() {
     return (
       <React.Fragment>
@@ -46,10 +52,16 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
             }))
           }
           onConfigAddOrEdit={(block: ConfigurationBlock) => {
-            alert('need to add config block');
+            this.props.libs.configBlocks.upsert({ ...block, tag: this.state.tag.id }).catch(e => {
+              // tslint:disable-next-line
+              console.error('Error upseting config block', e);
+            });
           }}
           onConfigRemoved={(id: string) => {
-            alert('need to remove config block');
+            this.props.libs.configBlocks.delete(id).catch(e => {
+              // tslint:disable-next-line
+              console.error(`Error removing block ${id}`, e);
+            });
           }}
         />
         <EuiFlexGroup>

@@ -96,7 +96,13 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
 
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
-      configs.map(config => [{ index: {} }, { ...config, config: JSON.stringify(config.config) }])
+      configs.map(config => [
+        { index: {} },
+        {
+          type: 'configuration_block',
+          configuration_block: { ...config, config: JSON.stringify(config.config) },
+        },
+      ])
     );
 
     const result = await this.database.bulk(user, {
@@ -109,7 +115,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     if (result.errors) {
       throw new Error(result.items[0].result);
     }
-    // console.log(result.items);
-    return result.items.map(item => item._id);
+
+    return result.items.map((item: any) => item.index._id);
   }
 }

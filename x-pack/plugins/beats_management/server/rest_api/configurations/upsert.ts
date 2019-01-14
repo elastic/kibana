@@ -27,7 +27,7 @@ export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
   requiredRoles: ['beats_admin'],
   config: {
     validate: {
-      payload: Joi.array().items(Joi.object({})),
+      payload: Joi.array().items(Joi.object({}).unknown(true)),
     },
   },
   handler: async (request: FrameworkRequest) => {
@@ -50,7 +50,7 @@ export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
 
         return { success, blockID };
       } catch (err) {
-        return { error: err.message };
+        return { error: err };
       }
     });
 

@@ -24,7 +24,7 @@ export const createConfigurationBlockInterface = (
       description: t.union([t.undefined, t.string]),
       tag: t.string,
       config: beatConfigInterface,
-      last_updated: t.number,
+      last_updated: t.union([t.undefined, t.number]),
     },
     'ConfigBlock'
   );

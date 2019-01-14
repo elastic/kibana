@@ -153,7 +153,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     if (user.kind === 'authenticated') {
       return this.es.callWithRequest.bind(null, {
         headers: user[internalAuthData],
-      });
+      } as any);
     } else if (user.kind === 'internal') {
       return this.es.callWithInternalUser;
     } else {
