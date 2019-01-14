@@ -32,13 +32,22 @@ interface Props {
   intl: InjectedIntl;
 }
 
-export class SimplePrivilegeSection extends Component<Props, {}> {
+interface State {
+  isCustomizingGlobalPrivilege: boolean;
+}
+
+export class SimplePrivilegeSection extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    const globalPrivs = this.locateGlobalPrivilege(props.role, true);
+
+    this.state = {
+      isCustomizingGlobalPrivilege: Object.keys(globalPrivs.feature).length > 0,
+    };
+  }
   public render() {
-    const { role } = this.props;
-
-    const form = this.locateGlobalPrivilege(role);
-
-    const kibanaPrivilege = form.base.length > 0 ? form.base[0] : NO_PRIVILEGE_VALUE;
+    const kibanaPrivilege = this.getDisplayedBasePrivilege();
 
     const description = (
       <p>
@@ -122,7 +131,7 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
                 intl={this.props.intl}
                 onChange={this.onFeaturePrivilegeChange}
                 onChangeAll={this.onChangeAllFeaturePrivileges}
-                spacesIndex={-1}
+                spacesIndex={this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))}
               />
             </EuiFormRow>
           )}
@@ -130,6 +139,18 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
       </Fragment>
     );
   }
+
+  public getDisplayedBasePrivilege = () => {
+    if (this.state.isCustomizingGlobalPrivilege) {
+      return 'custom';
+    }
+
+    const { role } = this.props;
+
+    const form = this.locateGlobalPrivilege(role);
+
+    return form.base.length > 0 ? form.base[0] : NO_PRIVILEGE_VALUE;
+  };
 
   public onKibanaPrivilegeChange = (privilege: string) => {
     const role = copyRole(this.props.role);
@@ -139,11 +160,18 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
     // Remove base privilege value
     form.base = [];
 
-    if (privilege !== NO_PRIVILEGE_VALUE) {
+    if (privilege !== NO_PRIVILEGE_VALUE && privilege !== 'custom') {
       form.base = [privilege];
     }
 
+    if (privilege !== 'custom') {
+      form.feature = {};
+    }
+
     this.props.onChange(role);
+    this.setState({
+      isCustomizingGlobalPrivilege: privilege === 'custom',
+    });
   };
 
   public onFeaturePrivilegeChange = (featureId: string, privileges: string[]) => {
