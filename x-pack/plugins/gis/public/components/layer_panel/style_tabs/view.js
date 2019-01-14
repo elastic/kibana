@@ -9,7 +9,8 @@ import React from 'react';
 import {
   EuiTitle,
   EuiPanel,
-  EuiSpacer
+  EuiSpacer,
+  EuiText
 } from '@elastic/eui';
 
 export class StyleTabs extends React.Component {
@@ -55,6 +56,11 @@ export class StyleTabs extends React.Component {
       return (
         <EuiPanel key={index}>
           {editorHeader}
+          {// TODO: Only display if can make styles dynamic
+            <EuiText size="s">
+              <p>Use the dynamic toggle to style regions based on your metrics.</p>
+            </EuiText>
+          }
           <EuiSpacer margin="m"/>
           {styleEditor}
         </EuiPanel>

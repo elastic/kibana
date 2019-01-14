@@ -58,7 +58,7 @@ export class SettingsPanel extends Component {
   renderZoomSliders() {
     return (
       <EuiFormRow
-        helpText="Dislay layer when map is within zoom level range."
+        helpText="Display layer when map is within zoom level range."
       >
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -110,7 +110,7 @@ export class SettingsPanel extends Component {
   renderAlphaSlider() {
     return (
       <EuiFormRow
-        label="Layer opacity"
+        label="Layer transparency"
       >
         <div className="gisAlphaRange">
           <EuiRange

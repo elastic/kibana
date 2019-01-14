@@ -140,7 +140,7 @@ export class StaticDynamicStyleSelector extends React.Component {
   _renderStaticAndDynamicStyles = () => {
     const currentOptions = _.get(this.props, 'styleDescriptor.options');
     const dynamicTooltipContent =
-      this.state.isDynamic ? "Unlink to revert to static styling" : "Link to a property value to create dynamic styling";
+      this.state.isDynamic ? "Disable dynamic styling." : "Enable dynamic styling.";
 
     return (
       <EuiFlexGroup gutterSize="s">
@@ -157,7 +157,7 @@ export class StaticDynamicStyleSelector extends React.Component {
                 delay="long"
               >
                 <EuiButtonToggle
-                  label="Make dynamic"
+                  label={dynamicTooltipContent}
                   iconType="link"
                   onChange={e => this._onTypeToggle(e, currentOptions)}
                   isEmpty={!this.state.isDynamic}
